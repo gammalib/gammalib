@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATLtCube.i  -  Fermi/LAT lifetime cube                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATLtCube.i
  * @brief Fermi/LAT lifetime cube Python interface definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -47,6 +47,11 @@ public:
     // Operators
     double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta fct);
     double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta_phi fct);
+    double operator() (const GSkyDir& dir, const GEnergy& energy,
+                       const GLATAeff& aeff);
+    double operator() (const GSkyDir& dir, const GEnergy& energy,
+                       const double& offset, const GLATPsf& psf,
+                       const GLATAeff& aeff);
 
     // Methods
     void        clear(void);

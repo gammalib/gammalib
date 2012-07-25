@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATPsf.hpp  -  Fermi LAT point spread function             *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATPsf.hpp
- * @brief Fermi LAT point spread function class definition.
- * @author J. Knodlseder
+ * @brief Fermi LAT point spread function class definition
+ * @author J. Knoedlseder
  */
 
 #ifndef GLATPSF_HPP
@@ -31,21 +31,29 @@
 #include <string>
 #include <iostream>
 #include "GLog.hpp"
+#include "GLATPsfBase.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATPointing.hpp"
-#include "GLATResponseTable.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GIntegrand.hpp"
 
 
 /***********************************************************************//**
  * @class GLATPsf
  *
- * @brief Interface for the Fermi LAT point spread function.
+ * @brief Interface for the Fermi LAT point spread function
+ *
+ * This class provides the interface to the Fermi LAT point spread function
+ * (PSF). An instance of the class holds the PSF for a specific detector
+ * section (front or back). The class handles different PSF versions by
+ * holding a pointer to the versioned PSF, which is defined by the abstract
+ * base class GLATPsfBase. On loading (or reading) of the PSF information
+ * from the FITS file, the appropriate versioned PSF will be allocated.
+ *
+ * @todo Implement Phi dependence
  ***************************************************************************/
 class GLATPsf {
 
@@ -56,7 +64,7 @@ class GLATPsf {
 public:
     // Constructors and destructors
     GLATPsf(void);
-    GLATPsf(const std::string filename);
+    GLATPsf(const std::string& filename);
     GLATPsf(const GLATPsf& psf);
     virtual ~GLATPsf(void);
 
@@ -64,79 +72,36 @@ public:
     GLATPsf& operator= (const GLATPsf& psf);
     double   operator() (const double& offset, const double& logE,
                          const double& ctheta);
-    double   operator() (const GLATInstDir& obsDir, const GSkyDir&  srcDir,
+    double   operator() (const GLATInstDir& obsDir, const GSkyDir& srcDir,
                          const GEnergy& srcEng, const GTime& srcTime,
                          const GLATPointing& pnt);
 
     // Methods
     void         clear(void);
     GLATPsf*     clone(void) const;
-    void         load(const std::string filename);
-    void         save(const std::string filename, bool clobber = false);
+    void         load(const std::string& filename);
+    void         save(const std::string& filename, bool clobber = false);
     void         read(const GFits& file);
     void         write(GFits& file) const;
-    int          size(void) const { return nenergies()*ncostheta(); }
-    int          nenergies(void) const { return m_rpsf_bins.nenergies(); }
-    int          ncostheta(void) const { return m_rpsf_bins.ncostheta(); }
-    double       costhetamin(void) const { return m_min_ctheta; }
+    int          size(void) const;
+    int          nenergies(void) const;
+    int          ncostheta(void) const;
+    double       costhetamin(void) const;
     void         costhetamin(const double& ctheta);
-    bool         hasphi(void) const { return false; }
-    bool         isfront(void) const { return m_front; }
-    bool         isback(void) const { return !m_front; }
-    int          version(void) const { return m_version; }
+    bool         hasphi(void) const;
+    bool         isfront(void) const;
+    bool         isback(void) const;
+    int          version(void) const;
     std::string  print(void) const;
 
 private:
     // Methods
-    void   init_members(void);
-    void   copy_members(const GLATPsf& psf);
-    void   free_members(void);
-    void   read_scale(const GFitsTable* hdu);
-    void   write_scale(GFits& file) const;
-    double scale_factor(const double& energy) const;
-
-    // PSF version 1 methods and classes
-    void          read_psf_v1(const GFitsTable* hdu);
-    void          write_psf_v1(GFits& file) const;
-    double        psf_v1(const double& offset, const double& logE,
-                         const double& ctheta);
-    static double base_fct_v1(const double& u, const double& gamma);
-    static double base_int_v1(const double& u, const double& gamma);
-    class base_integrand_v1 : public GIntegrand {
-    public:
-        base_integrand_v1(double ncore, double ntail, double sigma,
-                          double gcore, double gtail) :
-                          m_ncore(ncore), m_ntail(ntail), m_sigma(sigma),
-                          m_gcore(gcore), m_gtail(gtail) { }
-        double eval(double x) {
-            double r = x / m_sigma;
-            double u = 0.5 * r * r;
-            double f = m_ncore * base_fct_v1(u, m_gcore) +
-                       m_ntail * base_fct_v1(u, m_gtail);
-            return (f*sin(x));
-        }
-    private:
-        double m_ncore;
-        double m_ntail;
-        double m_sigma;
-        double m_gcore;
-        double m_gtail;
-    };
+    void         init_members(void);
+    void         copy_members(const GLATPsf& psf);
+    void         free_members(void);
     
-    // Protected members
-    int                 m_version;      //!< PSF version (starting from 1)
-    bool                m_front;        //!< PSF is for front section?
-    GLATResponseTable   m_rpsf_bins;    //!< PSF energy and cos theta binning
-    double              m_scale_par1;   //!< PSF scaling parameter 1
-    double              m_scale_par2;   //!< PSF scaling parameter 2
-    double              m_scale_index;  //!< PSF scaling index
-    double              m_min_ctheta;   //!< Minimum valid cos(theta)
-
-    // PSF version 1 protected members
-    std::vector<double> m_ncore;        //!< PSF ncore parameter
-    std::vector<double> m_sigma;        //!< PSF sigma parameter
-    std::vector<double> m_gcore;        //!< PSF gcore parameter
-    std::vector<double> m_gtail;        //!< PSF gtail parameter
+    // Members
+    GLATPsfBase* m_psf;   //!< Pointer to versioned point spread function
 };
 
 #endif /* GLATPSF_HPP */

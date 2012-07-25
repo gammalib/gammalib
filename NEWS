@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-05-00
+New Features and Important Changes in GammaLib 00-06-00
 
 Author(s) : Juergen Knoedlseder
 
-April, 3rd, 2012
+July, 18th, 2012
 
 
 1. Introduction
@@ -13,16 +13,7 @@ changes made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-License text has been updated throughout the code to GNU GPL v3.
-
-The configure options --enable-universalsdk and --with-universal-archs
-have been added to control building of universal libraries.  This is
-particularily required if the installed Python architecture differs from
-the default architecture created by the compiler.
-
-The gammalib Python extension has been split into modules to reduce the
-memory requirements during compilation and to increase compilation
-speed. 
+None 
 
 
 3. Application module
@@ -42,11 +33,14 @@ None
 
 6. Model module
 ---------------
-Added GModelSpectralNodes model which allows fitting a piecewise power
-law model to the data. The piecewise power law is defined by a number
-of nodes (at least 2), and the intensity of each node can be adjusted
-by the fit (the energy can also be fitted, yet no analytical gradient
-is implemented for this).
+Added GModelSpatialMap model that allow using skymap for the spatial
+component of the model. The Monte Carlo method as well as the function
+evaluation methods have been implemented. The function evaluation
+methods make use of the GSkymap sky direction access operators that
+performs a bi-linear interpolation of the pixels values for a given
+direction. Note that the total flux in the sky map is normalized
+internally to 1 ph/cm2/s. Negative pixels will automatically be set to
+zero.
 
 
 7. Numerics module
@@ -56,9 +50,7 @@ None
 
 8. Observation module
 ---------------------
-Implemented an XML protocol that describes observations. This allows
-for complex combinations of observations in multi-mission analyses
-or for collecting sets of observations, such as runs or exposures.
+None
 
 
 9. Optimization module
@@ -68,7 +60,14 @@ None
 
 10. Sky module
 --------------
-None
+Added sky direction access operator to GSkymap class. This operator
+returns the intensity in the sky map as function of the sky direction,
+performing a bi-linear interpolation between the pixel values of the
+map.
+
+For consistency with other classes, GSkyDir arguments are now passed
+by reference in the GSkymap access operators. Also map indices have
+been declared by reference.
 
 
 11. Support module
@@ -88,31 +87,22 @@ None
 
 14. Fermi-LAT interface
 ----------------------
-None
+Added support for Pass 7 data. In particular, P7SOURCE_V6 response
+functions are now included in the GammaLib distribution, together
+with some test data for the Crab. The LAT response code has also
+been refactored to support more cleanly various PSF versions.
+Efficiency factors, needed by Pass 7, are now also supported. Note
+that we still lack support for the Phi dependence of the IRF, and
+also energy dispersion has not yet been implemented.
 
 
 15. CTA interface
 -----------------
-Comply to CTA event list format v1.0.0.
-
-Add support for 1DC response files. For this purpose, the class
-GCTAResponseTable was implemented to read arbitrary response tables
-in single-row vector column format. GCTAResponse was modified to read
-PSF response tables implementing the energy and offset angle dependencies
-and using a 3-component Gaussian.
-
-Add GCTAModelRadialPolynom class to model the radial acceptance using
-a polynomial.
-
-Add GCTAModelRadialProfile class to model the radial acceptance using
-a 3 parameter profile (width, core, tail).
-
-Correct bug in Npred computation in GCTAModelRadialAcceptance that
-underestimated Npred for pointings that were offset from ROI centre.
-
-Implement observation reading and writing from and to XML files.
-This allows specifying the event list or counts map together with the
-relevant response information in a XML file. This is a placeholder for
-the implementation of the calibration database, and is mainly designed
-for 1DC.
+Added support for diffuse sources to CTA response. FITS sky maps can
+now be used to simulated and to fit CTA event data, both in binned and
+unbinned mode. Specifically, the GCTAResponse::irf_diffuse and
+GCTAResponse::npred_diffuse methods have been implemented to do the
+job. Some optimization has been performed to adjust the precision
+of the integrations that need to be performed for the diffuse response
+computation.
 

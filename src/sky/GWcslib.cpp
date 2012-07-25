@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GWcslib.cpp  -  Virtual base class for wcslib based WCS       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcslib.cpp
  * @brief Implementation of virtual base class for wcslib based WCS
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -284,8 +284,9 @@ void GWcslib::read(const GFitsHDU* hdu)
             m_lat  = 0;
             coords = "SGL";
         }
-        else
+        else {
             throw GException::wcs_bad_coords(G_READ, coordsys());
+        }
 
         // Set standard parameters
         set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
@@ -327,8 +328,9 @@ void GWcslib::write(GFitsHDU* hdu) const
         for (int i = 0; i < m_naxis; ++i) {
             std::string keyname = "CDELT"+str(i+1);
             std::string comment;
-            if (m_cunit.at(i).length() > 0)
+            if (m_cunit.at(i).length() > 0) {
                 comment += "["+strip_whitespace(m_cunit.at(i))+"] ";
+            }
             comment += "Coordinate increment at reference point";
             hdu->card(keyname, m_cdelt.at(i), comment);
         }
@@ -363,8 +365,9 @@ void GWcslib::write(GFitsHDU* hdu) const
         for (int i = 0; i < m_naxis; ++i) {
             std::string keyname = "CRVAL"+str(i+1);
             std::string comment;
-            if (m_cunit.at(i).length() > 0)
+            if (m_cunit.at(i).length() > 0) {
                 comment += "["+strip_whitespace(m_cunit.at(i))+"] ";
+            }
             comment += "Coordinate value at reference point";
             hdu->card(keyname, m_crval.at(i), comment);
         }
@@ -375,22 +378,28 @@ void GWcslib::write(GFitsHDU* hdu) const
         //hdu->card("PV2_2",   0.0,          "Projection parameter 2");
         
         // Celestial and spectral transformation parameters
-        if (!undefined(m_lonpole))
+        if (!undefined(m_lonpole)) {
             hdu->card("LONPOLE", m_lonpole, "[deg] Native longitude of celestial pole");
-        if (!undefined(m_latpole))
+        }
+        if (!undefined(m_latpole)) {
             hdu->card("LATPOLE", m_latpole, "[deg] Native latitude of celestial pole");
-        if (!undefined(m_restfrq))
+        }
+        if (!undefined(m_restfrq)) {
             hdu->card("RESTFRQ", m_restfrq, "[Hz] Line rest frequency");
-        if (!undefined(m_restwav))
+        }
+        if (!undefined(m_restwav)) {
             hdu->card("RESTWAV", m_restwav, "[Hz] Line rest wavelength");
+        }
         
         // Equatorial coordinate system type
-        if (m_radesys.length() > 0)
+        if (m_radesys.length() > 0) {
             hdu->card("RADESYS", m_radesys, "Equatorial coordinate system");
+        }
         
         // Equinox of equatorial coordinate system
-        if (!undefined(m_equinox))
+        if (!undefined(m_equinox)) {
             hdu->card("EQUINOX", m_equinox, "[yr] Equinox of equatorial coordinates");
+        }
         
         //TODO: Reference frame of spectral coordinates
         
@@ -562,10 +571,12 @@ GSkyDir GWcslib::xy2dir(const GSkyPixel& pix) const
 
     // Set sky direction
     GSkyDir dir;
-    if (m_coordsys == 0)
+    if (m_coordsys == 0) {
         dir.radec_deg(world[0], world[1]);
-    else
+    }
+    else {
         dir.lb_deg(world[0], world[1]);
+    }
 
     // Debug: Dump transformation steps
     #if defined(G_XY2DIR_DEBUG)
@@ -901,8 +912,9 @@ void GWcslib::wcs_ini(int naxis)
     // Defaults for alternate linear transformations
     if (naxis > 0) {
         for (int i = 0; i < naxis; ++i) {
-            for (int j = 0; j < naxis; ++j)
+            for (int j = 0; j < naxis; ++j) {
                 m_cd.push_back(0.0);
+            }
             m_crota.push_back(0.0);
         }
     }
@@ -1036,8 +1048,9 @@ void GWcslib::wcs_set_ctype(void) const
             m_ctype.at(m_lng) = "SLON-" + code();
             m_ctype_c.at(m_lng) = "Supergalactic longitude, ";
         }
-        else
+        else {
             throw GException::wcs_bad_coords(G_WCS_SET_CTYPE, coordsys());
+        }
         
         // Add projection name to comment
         m_ctype_c.at(m_lng).append(name());
@@ -1068,8 +1081,9 @@ void GWcslib::wcs_set_ctype(void) const
             m_ctype.at(m_lat) = "SLAT-" + code();
             m_ctype_c.at(m_lat) = "Supergalactic latitude, ";
         }
-        else
+        else {
             throw GException::wcs_bad_coords(G_WCS_SET_CTYPE, coordsys());
+        }
 
         // Add projection name to comment
         m_ctype_c.at(m_lng).append(name());
@@ -1125,10 +1139,12 @@ void GWcslib::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcr
     // Sanity check
     if (ncoord < 1 || (ncoord > 1 && nelem < m_naxis)) {
         std::string message;
-        if (ncoord < 1)
+        if (ncoord < 1) {
             message = "ncoord="+str(ncoord)+", >0 required.";
-        else
+        }
+        else {
             message = "nelem="+str(nelem)+", >="+str(m_naxis)+" required.";
+        }
         throw GException::wcs_invalid_parameter(G_WCS_P2S, message);
     }
     
@@ -1189,10 +1205,12 @@ void GWcslib::wcs_s2p(int ncoord, int nelem, const double* world,
     // Sanity check
     if (ncoord < 1 || (ncoord > 1 && nelem < m_naxis)) {
         std::string message;
-        if (ncoord < 1)
+        if (ncoord < 1) {
             message = "ncoord="+str(ncoord)+", >0 required.";
-        else
+        }
+        else {
             message = "nelem="+str(nelem)+", >="+str(m_naxis)+" required.";
+        }
         throw GException::wcs_invalid_parameter(G_WCS_S2P, message);
     }
 
@@ -1231,28 +1249,33 @@ std::string GWcslib::wcs_print(void) const
     // Append coordinates
     result.append(parformat("Reference coordinate")+"(");
     for (int i = 0; i < m_crval.size(); ++i) {
-        if (i > 0)
+        if (i > 0) {
             result.append(", ");
+        }
         result.append(str(m_crval[i]));
-        if (m_cunit[i].length() > 0)
+        if (m_cunit[i].length() > 0) {
             result.append(" "+m_cunit[i]);
+        }
             
     }
     result.append(")\n");
     result.append(parformat("Reference pixel")+"(");
     for (int i = 0; i < m_crpix.size(); ++i) {
-        if (i > 0)
+        if (i > 0) {
             result.append(", ");
+        }
         result.append(str(m_crpix[i]));
     }
     result.append(")\n");
     result.append(parformat("Increment at reference")+"(");
     for (int i = 0; i < m_cdelt.size(); ++i) {
-        if (i > 0)
+        if (i > 0) {
             result.append(", ");
+        }
         result.append(str(m_cdelt[i]));
-        if (m_cunit[i].length() > 0)
+        if (m_cunit[i].length() > 0) {
             result.append(" "+m_cunit[i]);
+        }
     }
     result.append(")\n");
         
@@ -1288,8 +1311,9 @@ std::string GWcslib::wcs_print(void) const
     // Append celestial transformation parameters
     result.append(parformat("Reference vector (m_ref)")+"(");
     for (int k = 0; k < 4; ++k) {
-        if (k > 0)
+        if (k > 0) {
             result.append(", ");
+        }
         result.append(wcs_print_value(m_ref[k]));
     }
     result.append(") deg\n");
@@ -1297,36 +1321,44 @@ std::string GWcslib::wcs_print(void) const
     // Append Euler angles
     result.append(parformat("Euler angles")+"(");
     for (int k = 0; k < 5; ++k) {
-        if (k > 0)
+        if (k > 0) {
             result.append(", ");
+        }
         result.append(str(m_euler[k]));
-        if (k < 3)
+        if (k < 3) {
             result.append(" deg");
+        }
     }
     result.append(")\n");
     
     // Append latitude preservement flag
-    if (m_isolat)
+    if (m_isolat) {
         result.append(parformat("Latitude preserved")+"True\n");
-    else
+    }
+    else {
         result.append(parformat("Latitude preserved")+"False\n");
+    }
 
     // Append linear transformation parameters
-    if (m_unity)
+    if (m_unity) {
         result.append(parformat("Unity PC matrix")+"True\n");
-    else
+    }
+    else {
         result.append(parformat("Unity PC matrix")+"False\n");
+    }
     result.append(parformat("Pixel-to-image trafo")+"(");
     for (int k = 0; k < m_piximg.size(); ++k) {
-        if (k > 0)
+        if (k > 0) {
             result.append(", ");
+        }
         result.append(str(m_piximg[k]));
     }
     result.append(")\n");
     result.append(parformat("Image-to-pixel trafo")+"(");
     for (int k = 0; k < m_imgpix.size(); ++k) {
-        if (k > 0)
+        if (k > 0) {
             result.append(", ");
+        }
         result.append(str(m_imgpix[k]));
     }
     result.append(")\n");
@@ -1340,16 +1372,20 @@ std::string GWcslib::wcs_print(void) const
     result.append(parformat("Radius of the gen. sphere")+str(m_r0)+" deg\n");
 
     // Append boundary checking information
-    if (m_bounds)
+    if (m_bounds) {
         result.append(parformat("Strict bounds checking")+"True\n");
-    else
+    }
+    else {
         result.append(parformat("Strict bounds checking")+"False\n");
+    }
 
     // Append fiducial offset information
-    if (m_offset)
+    if (m_offset) {
         result.append(parformat("Use fiducial offset")+"True\n");
-    else
+    }
+    else {
         result.append(parformat("Use fiducial offset")+"False\n");
+    }
     result.append(parformat("Fiducial offset")+"("+str(m_x0)+", "+str(m_y0)+")\n");
     
     // Append spectral transformation parameters
@@ -1375,10 +1411,12 @@ std::string GWcslib::wcs_print_value(const double& value) const
     std::string result;
     
     // Depend value dependent string
-    if (undefined(value))
+    if (undefined(value)) {
         result.append("UNDEFINED");
-    else
+    }
+    else {
         result.append(str(value));
+    }
     
     // Return result
     return result;
@@ -1411,8 +1449,9 @@ void GWcslib::cel_ini(void) const
     m_isolat  = false;
     
     // Clear Euler angles
-    for (int k = 0; k < 5; ++k)
+    for (int k = 0; k < 5; ++k) {
         m_euler[k] = 0.0;
+    }
     
     // Initialise projection parameters
     prj_ini();
@@ -1477,10 +1516,12 @@ void GWcslib::cel_set(void) const
     if (undefined(phip) || phip == 999.0) {
         phip  = (lat0 < m_theta0) ? 180.0 : 0.0;
         phip += m_phi0;
-        if (phip < -180.0)
+        if (phip < -180.0) {
             phip += 360.0;
-        else if (phip > 180.0)
+        }
+        else if (phip > 180.0) {
             phip -= 360.0;
+        }
         m_ref[2] = phip;
     }
 
@@ -1538,10 +1579,12 @@ void GWcslib::cel_set(void) const
 
                 // latp determined solely by LATPOLEa in this case
                 m_latpreq = 2;
-                if (latp > 90.0)
+                if (latp > 90.0) {
                     latp = 90.0;
-                else if (latp < -90.0)
+                }
+                else if (latp < -90.0) {
                     latp = -90.0;
+                }
                 
             }
             
@@ -1550,10 +1593,12 @@ void GWcslib::cel_set(void) const
                 double slz = slat0/z;
                 if (std::abs(slz) > 1.0) {
                     if ((std::abs(slz) - 1.0) < tol) {
-                        if (slz > 0.0)
+                        if (slz > 0.0) {
                             slz = 1.0;
-                        else
+                        }
+                        else {
                             slz = -1.0;
+                        }
                     }
                     else {
                         std::string message;
@@ -1568,52 +1613,66 @@ void GWcslib::cel_set(void) const
         } // endelse: ...
 
         // ...
-        double latp1 = u + v;
-        if (latp1 > 180.0)
-            latp1 -= 360.0;
-        else if (latp1 < -180.0)
-            latp1 += 360.0;
+        if (m_latpreq == 0) {
+            double latp1 = u + v;
+            if (latp1 > 180.0) {
+                latp1 -= 360.0;
+            }
+            else if (latp1 < -180.0) {
+                latp1 += 360.0;
+            }
 
-        // ...
-        double latp2 = u - v;
-        if (latp2 > 180.0)
-            latp2 -= 360.0;
-        else if (latp2 < -180.0)
-            latp2 += 360.0;
+            // ...
+            double latp2 = u - v;
+            if (latp2 > 180.0) {
+                latp2 -= 360.0;
+            }
+            else if (latp2 < -180.0) {
+                latp2 += 360.0;
+            }
 
-        // Are there two valid solutions for latp?
-        if (std::abs(latp1) < 90.0+tol && std::abs(latp2) < 90.0+tol)
-            m_latpreq = 1;
+            // Are there two valid solutions for latp?
+            if (std::abs(latp1) < 90.0+tol && std::abs(latp2) < 90.0+tol) {
+                m_latpreq = 1;
+            }
 
-        // Select solution
-        if (std::abs(latp-latp1) < std::abs(latp-latp2))
-            latp = (std::abs(latp1) < 90.0+tol) ? latp1 : latp2;
-        else
-            latp = (std::abs(latp2) < 90.0+tol) ? latp2 : latp1;
+            // Select solution
+            if (std::abs(latp-latp1) < std::abs(latp-latp2)) {
+                latp = (std::abs(latp1) < 90.0+tol) ? latp1 : latp2;
+            }
+            else {
+                latp = (std::abs(latp2) < 90.0+tol) ? latp2 : latp1;
+            }
 
-        // Account for rounding error
-        if (std::abs(latp) < 90.0+tol) {
-            if (latp > 90.0)
-                latp =  90.0;
-            else if (latp < -90.0)
-                latp = -90.0;
-        }
+            // Account for rounding error
+            if (std::abs(latp) < 90.0+tol) {
+                if (latp > 90.0) {
+                    latp =  90.0;
+                }
+                else if (latp < -90.0) {
+                    latp = -90.0;
+                }
+            }
+        } // endif: ...
 
         // ...
         double z = cosd(latp) * clat0;
         if (std::abs(z) < tol) {
         
             // Celestial pole at the fiducial point
-            if (std::abs(clat0) < tol)
+            if (std::abs(clat0) < tol) {
                 lngp = lng0;
+            }
 
             // Celestial north pole at the native pole
-            else if (latp > 0.0)
+            else if (latp > 0.0) {
                 lngp = lng0 + phip - m_phi0 - 180.0;
+            }
 
             // Celestial south pole at the native pole
-            else
+            else {
                 lngp = lng0 - phip + m_phi0;
+            }
 
         }
         
@@ -1633,16 +1692,20 @@ void GWcslib::cel_set(void) const
         // Make celestial longitude at the pole the same sign as at the
         // fiducial point
         if (lng0 >= 0.0) {
-            if (lngp < 0.0)
+            if (lngp < 0.0) {
                 lngp += 360.0;
-            else if (lngp > 360.0)
+            }
+            else if (lngp > 360.0) {
                 lngp -= 360.0;
+            }
         } 
         else {
-            if (lngp > 0.0)
+            if (lngp > 0.0) {
                 lngp -= 360.0;
-            else if (lngp < -360.0)
+            }
+            else if (lngp < -360.0) {
                 lngp += 360.0;
+            }
         }
         
     } // endelse: fiducial point was away from native pole
@@ -1702,8 +1765,9 @@ void GWcslib::cel_x2s(int nx, int ny, int sxy, int sll,
                       double* lng, double* lat, int* stat) const
 {
     // Initialize celestial transformations if required
-    if (!m_celset)
+    if (!m_celset) {
         cel_set();
+    }
 
     // Apply spherical deprojection
     prj_x2s(nx, ny, sxy, 1, x, y, phi, theta, stat);
@@ -1747,8 +1811,9 @@ void GWcslib::cel_s2x(int nlng, int nlat, int sll, int sxy,
                       double* x, double* y, int* stat) const
 {
     // Initialize celestial transformations if required
-    if (!m_celset)
+    if (!m_celset) {
         cel_set();
+    }
 
     // Compute native coordinates
     sph_s2x(nlng, nlat, sll, 1, lng, lat, phi, theta);
@@ -1841,15 +1906,21 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
 
                     // Normalize the celestial longitude
                     if (m_euler[0] >= 0.0) {
-                        if (*lngp < 0.0) *lngp += 360.0;
+                        if (*lngp < 0.0) {
+                            *lngp += 360.0;
+                        }
                     } 
                     else {
-                        if (*lngp > 0.0) *lngp -= 360.0;
+                        if (*lngp > 0.0) {
+                            *lngp -= 360.0;
+                        }
                     }
-                    if (*lngp > 360.0)
+                    if (*lngp > 360.0) {
                         *lngp -= 360.0;
-                    else if (*lngp < -360.0)    
+                    }
+                    else if (*lngp < -360.0) {
                         *lngp += 360.0;
+                    }
                         
                 } // endfor: looped over phi
             } // endfor: looped over theta
@@ -1872,15 +1943,21 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
 
                     // Normalize the celestial longitude
                     if (m_euler[0] >= 0.0) {
-                        if (*lngp < 0.0) *lngp += 360.0;
+                        if (*lngp < 0.0) {
+                            *lngp += 360.0;
+                        }
                     }
                     else {
-                        if (*lngp > 0.0) *lngp -= 360.0;
+                        if (*lngp > 0.0) {
+                            *lngp -= 360.0;
+                        }
                     }
-                    if (*lngp > 360.0)
+                    if (*lngp > 360.0) {
                         *lngp -= 360.0;
-                    else if (*lngp < -360.0)
+                    }
+                    else if (*lngp < -360.0) {
                         *lngp += 360.0;
+                    }
                         
                 } // endfor: looped over phi
             } // endfor: looped over theta
@@ -1898,8 +1975,9 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
         for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sll, phip += spt) {
             double  dphi = *phip - m_euler[2];
             double* lngp = lng + rowoff;
-            for (int itheta = 0; itheta < mtheta; ++itheta, lngp += rowlen)
+            for (int itheta = 0; itheta < mtheta; ++itheta, lngp += rowlen) {
                 *lngp = dphi;
+            }
         }
 
         // Do theta dependency
@@ -1933,30 +2011,39 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
                 double y = -costhe*sinphi;
                 
                 // Rearrange longitude formula to reduce roundoff errors
-                if (std::abs(x) < tol)
+                if (std::abs(x) < tol) {
                     x = -cosd(*thetap + m_euler[1]) + costhe3*(1.0 - cosphi);
+                }
 
                 // Compute longitude shift
                 double dlng;
-                if (x != 0.0 || y != 0.0)
+                if (x != 0.0 || y != 0.0) {
                     dlng = atan2d(y, x);
-                else
+                }
+                else {
                     dlng = (m_euler[1] < 90.0) ? dphi + 180.0 : -dphi;
+                }
                 
                 // Set celestial longitude
                 *lngp = m_euler[0] + dlng;
 
                 // Normalize the celestial longitude
                 if (m_euler[0] >= 0.0) {
-                    if (*lngp < 0.0) *lngp += 360.0;
+                    if (*lngp < 0.0) {
+                        *lngp += 360.0;
+                    }
                 }
                 else {
-                    if (*lngp > 0.0) *lngp -= 360.0;
+                    if (*lngp > 0.0) {
+                        *lngp -= 360.0;
+                    }
                 }
-                if (*lngp > 360.0)
+                if (*lngp > 360.0) {
                     *lngp -= 360.0;
-                else if (*lngp < -360.0)
+                }
+                else if (*lngp < -360.0) {
                     *lngp += 360.0;
+                }
 
                 // Compute the celestial latitude. First handle the case
                 // of longitude shifts by 180 deg 
@@ -1970,12 +2057,15 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
                 else {
                     // Use alternative formulae for greater accuracy
                     double z = sinthe3 + costhe4*cosphi;
-                    if (z > 0.99)
+                    if (z > 0.99) {
                         *latp = acosd(sqrt(x*x+y*y));
-                    else if (z < -0.99)
+                    }
+                    else if (z < -0.99) {
                         *latp = -acosd(sqrt(x*x+y*y));
-                    else
+                    }
+                    else {
                         *latp = asind(z);
+                    }
                 } // endelse: general longitude shift
                 
             } // endfor: looped over phi
@@ -2050,10 +2140,12 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
                     *thetap = *latp;
 
                     // Normalize the native longitude
-                    if (*phip > 180.0)
+                    if (*phip > 180.0) {
                         *phip -= 360.0;
-                    else if (*phip < -180.0)
+                    }
+                    else if (*phip < -180.0) {
                         *phip += 360.0;
+                    }
         
                 } // endfor: looped over longitude
             } // endfor: looped over latitude
@@ -2075,10 +2167,12 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
                     *thetap = -(*latp);
 
                     // Normalize the native longitude
-                    if (*phip > 180.0)
+                    if (*phip > 180.0) {
                         *phip -= 360.0;
-                    else if (*phip < -180.0)
+                    }
+                    else if (*phip < -180.0) {
                         *phip += 360.0;
+                    }
           
                 } // endfor: looped over longitude
             } // endfor: looped over latitude
@@ -2098,8 +2192,9 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
             double  dlng   = *lngp - m_euler[0];
             double* phip   = phi + rowoff;
             double* thetap = theta;
-            for (int ilat = 0; ilat < mlat; ++ilat, phip += rowlen)
+            for (int ilat = 0; ilat < mlat; ++ilat, phip += rowlen) {
                 *phip = dlng;
+            }
         }
 
         // Do lat dependency
@@ -2131,8 +2226,9 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
                 double y = -coslat*sinlng;
                 
                 // Rearrange formula to reduce roundoff errors
-                if (std::abs(x) < tol)
+                if (std::abs(x) < tol) {
                     x = -cosd(*latp+m_euler[1]) + coslat3*(1.0 - coslng);
+                }
 
                 // Compute Phi shift
                 double dphi;
@@ -2140,20 +2236,24 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
                     dphi = atan2d(y, x);
                 } 
                 else { // Change of origin of longitude
-                    if (m_euler[1] < 90.0)
+                    if (m_euler[1] < 90.0) {
                         dphi =  dlng - 180.0;
-                    else
+                    }
+                    else {
                         dphi = -dlng;
+                    }
                 }
                 
                 // Set Phi
                 *phip = fmod(m_euler[2] + dphi, 360.0);
 
                 // Normalize the native longitude
-                if (*phip > 180.0)
+                if (*phip > 180.0) {
                     *phip -= 360.0;
-                else if (*phip < -180.0)
+                }
+                else if (*phip < -180.0) {
                     *phip += 360.0;
+                }
 
                 // Compute the native latitude. First handle the case
                 // of longitude shifts by 180 deg
@@ -2167,12 +2267,15 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
                 else {
                     // Use alternative formulae for greater accuracy
                     double z = sinlat3 + coslat4*coslng;
-                    if (z > 0.99)
+                    if (z > 0.99) {
                         *thetap = acosd(sqrt(x*x+y*y));
-                    else if (z < -0.99)
+                    }
+                    else if (z < -0.99) {
                         *thetap = -acosd(sqrt(x*x+y*y));
-                    else
+                    }
+                    else {
                         *thetap = asind(z);
+                    }
                 }
       
             } // endfor: looped over longitudes
@@ -2241,10 +2344,12 @@ void GWcslib::lin_ini(int naxis)
             
             // PCi_ja defaults to the unit matrix
             for (int j = 0; j < naxis; ++j) {
-                if (j == i)
+                if (j == i) {
                     m_pc.push_back(1.0);
-                else
+                }
+                else {
                     m_pc.push_back(0.0);
+                }
             }
             
             // CDELTia defaults to 1.0
@@ -2288,8 +2393,9 @@ void GWcslib::lin_set(void) const
                 }
             }
         }
-        if (!m_unity)
+        if (!m_unity) {
             break;
+        }
     }
     
     // Debug option: force PC usage for testing purposes
@@ -2303,8 +2409,9 @@ void GWcslib::lin_set(void) const
     
         // Compute the pixel-to-image transformation matrix
         for (int i = 0, index = 0; i < m_naxis; ++i) {
-            for (int j = 0; j < m_naxis; ++j, ++index)
+            for (int j = 0; j < m_naxis; ++j, ++index) {
                 m_piximg.push_back(m_cdelt[i] * m_pc[index]);
+            }
         }
     
         // Compute the image-to-pixel transformation matrix
@@ -2336,8 +2443,9 @@ void GWcslib::lin_set(void) const
 void GWcslib::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcrd) const
 {
     // Initialize linear transformations if required
-    if (!m_linset)
+    if (!m_linset) {
         lin_set();
+    }
     
     // Convert pixel coordinates to intermediate world coordinates
     const double* pix = pixcrd;
@@ -2350,8 +2458,9 @@ void GWcslib::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcr
         for (int k = 0; k < ncoord; ++k) {
             
             // Transform the first m_naxis elements
-            for (int i = 0; i < m_naxis; ++i)
+            for (int i = 0; i < m_naxis; ++i) {
                 *(img++) = m_cdelt[i] * (*(pix++) - m_crpix[i]);
+            }
             
             // Go to next coordinate
             pix += (nelem - m_naxis);
@@ -2368,15 +2477,17 @@ void GWcslib::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcr
         for (int k = 0; k < ncoord; ++k) {
         
             // Clear first m_naxis elements
-            for (int i = 0; i < m_naxis; ++i)
+            for (int i = 0; i < m_naxis; ++i) {
                 img[i] = 0.0;
+            }
 
             // Perform matrix multiplication (column-wise multiplication
             // allows this to be cached)
             for (int j = 0; j < m_naxis; ++j) {
                 double  temp   = *(pix++) - m_crpix[j];
-                for (int i = 0, ji = j; i < m_naxis; ++i, ji += m_naxis)
+                for (int i = 0, ji = j; i < m_naxis; ++i, ji += m_naxis) {
                     img[i] += m_piximg[ji] * temp;
+                }
             }
 
             // Go to next coordinate
@@ -2408,8 +2519,9 @@ void GWcslib::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcr
 void GWcslib::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcrd) const
 {
     // Initialize linear transformations if required
-    if (!m_linset)
+    if (!m_linset) {
         lin_set();
+    }
     
     // Convert pixel coordinates to intermediate world coordinates
     const double* img = imgcrd;
@@ -2422,8 +2534,9 @@ void GWcslib::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcr
         for (int k = 0; k < ncoord; ++k) {
             
             // Transform the first m_naxis elements
-            for (int i = 0; i < m_naxis; ++i)
+            for (int i = 0; i < m_naxis; ++i) {
                 *(pix++) = (*(img++) / m_cdelt[i]) + m_crpix[i];
+            }
             
             // Go to next coordinate
             pix += (nelem - m_naxis);
@@ -2442,8 +2555,9 @@ void GWcslib::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcr
             // Perform matrix multiplication
             for (int j = 0, ji = 0; j < m_naxis; ++j) {
                 *pix = 0.0;
-                for (int i = 0; i < m_naxis; ++i, ++ji)
+                for (int i = 0; i < m_naxis; ++i, ++ji) {
                     *pix += m_imgpix[ji] * img[i];
+                }
                 *(pix++) += m_crpix[j];
             }
 
@@ -2499,13 +2613,15 @@ void GWcslib::lin_matinv(const std::vector<double>& mat, std::vector<double>& in
             rowmax.push_back(0.0);
             for (int j = 0; j < m_naxis; ++j, ++ij) {
                 double dtemp = std::abs(mat[ij]);
-                if (dtemp > rowmax[i])
+                if (dtemp > rowmax[i]) {
                     rowmax[i] = dtemp;
+                }
             }
             
             // Throw exception if matrix is singular
-            if (rowmax[i] == 0.0)
+            if (rowmax[i] == 0.0) {
                 throw GException::wcs_singular_matrix(G_LIN_MATINV, m_naxis, mat);
+            }
         
         } // endfor: initialized array
 
@@ -2560,8 +2676,9 @@ void GWcslib::lin_matinv(const std::vector<double>& mat, std::vector<double>& in
                     lu[ik] /= lu[k*m_naxis+k];
 
                     // Subtract rows
-                    for (int j = k+1; j < m_naxis; ++j)
+                    for (int j = k+1; j < m_naxis; ++j) {
                         lu[i*m_naxis+j] -= lu[ik]*lu[k*m_naxis+j];
+                    }
 
                 } // endif: lu[ik] was not zero
     
@@ -2572,8 +2689,9 @@ void GWcslib::lin_matinv(const std::vector<double>& mat, std::vector<double>& in
 
         // mxl[i] records which row of mat corresponds to row i of lu
         // lxm[i] records which row of lu  corresponds to row i of mat
-        for (int i = 0; i < m_naxis; ++i)
+        for (int i = 0; i < m_naxis; ++i) {
             lxm[mxl[i]] = i;
+        }
 
         // Determine the inverse matrix
         for (int k = 0; k < m_naxis; ++k) {
@@ -2583,14 +2701,16 @@ void GWcslib::lin_matinv(const std::vector<double>& mat, std::vector<double>& in
 
             // Forward substitution
             for (int i = lxm[k]+1; i < m_naxis; ++i) {
-                for (int j = lxm[k]; j < i; ++j)
+                for (int j = lxm[k]; j < i; ++j) {
                     inv[i*m_naxis+k] -= lu[i*m_naxis+j]*inv[j*m_naxis+k];
+                }
             }
 
             // Backward substitution
             for (int i = m_naxis-1; i >= 0; --i) {
-                for (int j = i+1; j < m_naxis; ++j)
+                for (int j = i+1; j < m_naxis; ++j) {
                     inv[i*m_naxis+k] -= lu[i*m_naxis+j]*inv[j*m_naxis+k];
+                }
                 inv[i*m_naxis+k] /= lu[i*m_naxis+i];
             }
             
@@ -2623,8 +2743,9 @@ void GWcslib::prj_ini(void) const
     m_pv[1]  = UNDEFINED;
     m_pv[2]  = UNDEFINED;
     m_pv[3]  = UNDEFINED;
-    for (int k = 4; k < PVN; ++k)
+    for (int k = 4; k < PVN; ++k) {
         m_pv[k] = 0.0;
+    }
     m_bounds = true; // 1 in wcslib
     m_x0     = 0.0;
     m_y0     = 0.0;
@@ -2746,12 +2867,15 @@ double GWcslib::tand(const double& angle) const
 {
     // Check for rounding errors
     double resid = fmod(angle, 360.0);
-    if (resid == 0.0 || std::abs(resid) == 180.0)
+    if (resid == 0.0 || std::abs(resid) == 180.0) {
         return 0.0;
-    else if (resid == 45.0 || resid == 225.0)
+    }
+    else if (resid == 45.0 || resid == 225.0) {
         return 1.0;
-    else if (resid == -135.0 || resid == -315.0)
+    }
+    else if (resid == -135.0 || resid == -315.0) {
         return -1.0;
+    }
 
     // Return tangens
     return std::tan(angle*deg2rad);
@@ -2772,14 +2896,17 @@ double GWcslib::acosd(const double& value) const
     
     // Check for rounding errors
     if (value >= 1.0) {
-        if (value-1.0 <  wcstrig_tol)
+        if (value-1.0 <  wcstrig_tol) {
             return 0.0;
+        }
     } 
-    else if (value == 0.0)
+    else if (value == 0.0) {
         return 90.0;
+    }
     else if (value <= -1.0) {
-        if (value+1.0 > -wcstrig_tol)
+        if (value+1.0 > -wcstrig_tol) {
             return 180.0;
+        }
     }
 
     // Return arc cosine
@@ -2801,14 +2928,17 @@ double GWcslib::asind(const double& value) const
     
     // Check for rounding errors
     if (value <= -1.0) {
-        if (value+1.0 > -wcstrig_tol)
+        if (value+1.0 > -wcstrig_tol) {
             return -90.0;
+        }
     } 
-    else if (value == 0.0)
+    else if (value == 0.0) {
         return 0.0;
+    }
     else if (value >= 1.0) {
-        if (value-1.0 <  wcstrig_tol)
+        if (value-1.0 <  wcstrig_tol) {
             return 90.0;
+        }
     }
 
     // Return arc sine
@@ -2826,12 +2956,15 @@ double GWcslib::asind(const double& value) const
 double GWcslib::atand(const double& value) const
 {
     // Check for rounding errors
-    if (value == -1.0)
+    if (value == -1.0) {
         return -45.0;
-    else if (value == 0.0)
+    }
+    else if (value == 0.0) {
         return 0.0;
-    else if (value == 1.0)
+    }
+    else if (value == 1.0) {
         return 45.0;
+    }
 
     // Return arc sine
     return std::atan(value)*rad2deg;
@@ -2850,16 +2983,20 @@ double GWcslib::atan2d(const double& y, const double& x) const
 {
     // Check for rounding errors
     if (y == 0.0) {
-        if (x >= 0.0)
+        if (x >= 0.0) {
             return 0.0;
-        else if (x < 0.0)
+        }
+        else if (x < 0.0) {
             return 180.0;
+        }
     }
     else if (x == 0.0) {
-        if (y > 0.0)
+        if (y > 0.0) {
             return 90.0;
-        else if (y < 0.0)
+        }
+        else if (y < 0.0) {
             return -90.0;
+        }
     }
 
     // Return arc sine

@@ -526,8 +526,8 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
                             if (m_logger != NULL) {
                                 *m_logger << "  Free parameter \""
                                           << pars->par(ipar).name()
-                                          << "\" after convergence was" \
-                                             " reached with frozen" \
+                                          << "\" after convergence was"
+                                             " reached with frozen"
                                              " parameter." << std::endl;
                             }
                         }
@@ -577,8 +577,8 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
                 if (m_logger != NULL) {
                     *m_logger << "  Free parameter \""
                               << pars->par(ipar).name()
-                              << "\" after convergence was" \
-                                 " reached with frozen" \
+                              << "\" after convergence was"
+                                 " reached with frozen"
                                  " parameter." << std::endl;
                 }
             }

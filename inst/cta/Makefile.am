@@ -16,6 +16,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAEventCube.cpp \
           src/GCTAEventBin.cpp \
           src/GCTAResponse.cpp \
+          src/GCTAResponse_helpers.cpp \
           src/GCTAResponseTable.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \

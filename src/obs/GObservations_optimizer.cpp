@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GObservations_optimizer.cpp  -  Optimizer class of observations class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservations_optimizer.cpp
  * @brief Model parameter optimization class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -187,8 +187,9 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         int npars = pars.npars();
 
         // Fall through if we have no free parameters
-        if (npars < 1)
+        if (npars < 1) {
             continue;
+        }
 
         // Free old memory
         if (m_gradient != NULL) delete m_gradient;
@@ -257,9 +258,12 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                         #if G_EVAL_DEBUG
                         #pragma omp critial single
                         {
-                            std::cout << "Unbinned Poisson";
+                            std::cout << "Unbinned Poisson (" << i << "):";
+               			    std::cout << " Npred=" << npred;
+                            std::cout << " Grad="<< *copy_wrk_grad << std::endl;
+                            std::cout << "Sum:";
                             std::cout << " Npred=" << *cpy_mnpred;
-                            std::cout << " Grad="<< *cpy_mgrad << std::endl;
+                            std::cout << " Grad="<< *cpy_mgrad<< std::endl;
                         }
                         #endif
     
@@ -392,10 +396,9 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
  * This method evaluates the -(log-likelihood) function for parameter
  * optimisation using unbinned analysis and Poisson statistics.
  * The -(log-likelihood) function is given by
- * \f$L=-\sum_i \log e_i + {\rm Npred}\f$
- * where the sum is taken over all events and \f${\rm Npred}\f$ is the
- * total number of events that is predicted by the model.
- * This method also computes the parameter gradients
+ * \f$L=-\sum_i \log e_i\f$
+ * where the sum is taken over all events. This method also computes the
+ * parameter gradients
  * \f$\delta L/dp\f$
  * and the curvature matrix
  * \f$\delta^2 L/dp_1 dp_2\f$.
@@ -440,9 +443,11 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
             continue;
         }
 
-        // Create index array of non-zero derivatives
+        // Create index array of non-zero derivatives and initialise working
+        // array
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
+            values[i] = 0.0;
             if (gradient[i] != 0.0 && !isinfinite(gradient[i])) {
                 inx[ndev] = i;
                 ndev++;
@@ -454,8 +459,9 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
         value -= log(model);
 
         // Skip bin now if there are no non-zero derivatives
-        if (ndev < 1)
+        if (ndev < 1) {
             continue;
+        }
 
         // Update gradient vector and curvature matrix.
         double fb = 1.0 / model;
@@ -472,8 +478,10 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
 
             // Loop over rows
             register int* ipar = inx;
-            for (register int idev = 0; idev < ndev; ++idev, ++ipar)
+
+            for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
                 values[idev] = fa_i * gradient[*ipar];
+            }
 
             // Add column to matrix
             covar.add_col(values, inx, ndev, jpar);
@@ -488,8 +496,6 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
 
     // Optionally dump gradient and covariance matrix
     #if G_EVAL_DEBUG
-    //std::cout << *m_gradient << std::endl;
-    //std::cout << *m_covar << std::endl;
     std::cout << mgrad << std::endl;
     std::cout << covar << std::endl;
     #endif
@@ -603,9 +609,11 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         // Multiply gradient by bin size
         gradient *= bin->size();
 
-        // Create index array of non-zero derivatives
+        // Create index array of non-zero derivatives and initialise working
+        // array
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
+            values[i] = 0.0;
             if (gradient[i] != 0.0 && !isinfinite(gradient[i])) {
                 inx[ndev] = i;
                 ndev++;
@@ -624,8 +632,9 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
             value -= data * log(model) - model;
 
             // Skip bin now if there are no non-zero derivatives
-            if (ndev < 1)
+            if (ndev < 1) {
                 continue;
+            }
 
             // Pre computation
             double fb = data / model;
@@ -645,13 +654,15 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
 
                 // Loop over rows
                 register int* ipar = inx;
-                for (register int idev = 0; idev < ndev; ++idev, ++ipar)
+                for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
                     values[idev] = fa_i * gradient[*ipar];
+                }
 
                 // Add column to matrix
                 covar.add_col(values, inx, ndev, jpar);
 
             } // endfor: looped over columns
+
         } // endif: data was > 0
 
         // ... handle now data=0
@@ -667,13 +678,15 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
             value += model;
 
             // Skip bin now if there are no non-zero derivatives
-            if (ndev < 1)
+            if (ndev < 1) {
                 continue;
+            }
 
             // Update gradient
             register int* ipar = inx;
-            for (register int idev = 0; idev < ndev; ++idev, ++ipar)
+            for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
                 mgrad[*ipar] += gradient[*ipar];
+            }
 
         } // endif: data was 0
 
@@ -771,8 +784,9 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         double sigma = bin->error();
 
         // Skip bin if statistical uncertainty is too small
-        if (sigma <= m_minerr)
+        if (sigma <= m_minerr) {
             continue;
+        }
 
         // Get model and derivative
         double model = obs.model((GModels&)pars, *bin, &gradient);
@@ -781,8 +795,9 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         model *= bin->size();
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
-        if (model <= m_minmod)
+        if (model <= m_minmod) {
             continue;
+        }
 
         // Update Npred
         npred += model;
@@ -790,9 +805,11 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         // Multiply gradient by bin size
         gradient *= bin->size();
 
-        // Create index array of non-zero derivatives
+        // Create index array of non-zero derivatives and initialise working
+        // array
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
+            values[i] = 0.0;
             if (gradient[i] != 0.0 && !isinfinite(gradient[i])) {
                 inx[ndev] = i;
                 ndev++;
@@ -807,8 +824,9 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
         value  += 0.5 * (fa * fa * weight);
             
         // Skip bin now if there are no non-zero derivatives
-        if (ndev < 1)
+        if (ndev < 1) {
             continue;
+        }
 
         // Loop over columns
         for (int jdev = 0; jdev < ndev; ++jdev) {
@@ -822,8 +840,9 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
 
             // Loop over rows
             register int* ipar = inx;
-            for (register int idev = 0; idev < ndev; ++idev, ++ipar)
+            for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
                 values[idev] = fa_i * gradient[*ipar];
+            }
 
             // Add column to matrix
             covar.add_col(values, inx, ndev, jpar);
@@ -893,17 +912,14 @@ void GObservations::optimizer::copy_members(const optimizer& fct)
     m_minmod = fct.m_minmod;
     m_minerr = fct.m_minerr;
 
-    // Copy gradient if it exists
-    if (fct.m_gradient != NULL)
-        m_gradient = new GVector(*fct.m_gradient);
+    // Clone gradient if it exists
+    if (fct.m_gradient != NULL) m_gradient = new GVector(*fct.m_gradient);
 
-    // Copy covariance matrix if it exists
-    if (fct.m_covar != NULL)
-        m_covar = new GSparseMatrix(*fct.m_covar);
+    // Clone covariance matrix if it exists
+    if (fct.m_covar != NULL) m_covar = new GSparseMatrix(*fct.m_covar);
 
-    // Copy working gradient if it exists
-    if (fct.m_wrk_grad != NULL)
-        m_wrk_grad = new GVector(*fct.m_wrk_grad);
+    // Clone working gradient if it exists
+    if (fct.m_wrk_grad != NULL) m_wrk_grad = new GVector(*fct.m_wrk_grad);
 
     // Return
     return;

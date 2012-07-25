@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATObservation.cpp  -  LAT Observation class             *
+ *           GLATObservation.cpp  -  Fermi/LAT Observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.cpp
- * @brief LAT Observation class implementation
+ * @brief Fermi/LAT Observation class implementation
  * @author J. Knoedlseder
  */
 
@@ -538,10 +538,13 @@ std::string GLATObservation::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GLATObservation ===\n");
-    result.append(parformat("Name")+name()+"\n");
-    result.append(parformat("Instrument")+instrument()+"\n");
-    result.append(parformat("Statistics")+statistics()+"\n");
+    result.append("=== GLATObservation ===");
+    result.append("\n"+parformat("Name")+name());
+    result.append("\n"+parformat("Identifier")+id());
+    result.append("\n"+parformat("Instrument")+instrument());
+    result.append("\n"+parformat("Statistics")+statistics());
+    result.append("\n"+parformat("Ontime")+str(ontime()));
+    result.append("\n"+parformat("Livetime")+str(livetime()));
 
     // Append response
     if (m_response != NULL)

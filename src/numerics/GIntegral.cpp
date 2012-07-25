@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GIntegral.cpp  -  Integration class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GIntegral.cpp
  * @brief Integration class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -254,7 +254,7 @@ double GIntegral::romb(double a, double b, int k)
                 std::cout << ", d=" << std::abs(dss);
                 std::cout << " > " << m_eps * std::abs(ss) << ")";
                 std::cout << std::endl;
-                throw;
+                //throw;
             }
         }
     
@@ -304,8 +304,9 @@ double GIntegral::trapzd(double a, double b, int n, double result)
         else {
             // Compute step level 2^(n-1)
             int it = 1;
-            for (int j = 1; j < n-1; ++j)
+            for (int j = 1; j < n-1; ++j) {
                 it <<= 1;
+            }
 
             // Verify that step level is valid
             if (it == 0) {
@@ -367,10 +368,12 @@ std::string GIntegral::print(void) const
     // Append information
     result.append("\n"+parformat("Relative precision")+str(eps()));
     result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
-    if (silent())
+    if (silent()) {
         result.append("\n"+parformat("Warnings")+"suppressed");
-    else
+    }
+    else {
         result.append("\n"+parformat("Warnings")+"in standard output");
+    }
 
     // Return result
     return result;

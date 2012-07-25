@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GPar.cpp - Application parameter                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPar.cpp
  * @brief Application parameter class implementation
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -1014,23 +1014,29 @@ GLog& operator<<(GLog& log, const GPar& par)
  ***************************************************************************/
 std::string gpar_type_string(const std::string& type)
 {
-    // Allocate type string
-    std::string type_string;
+    // Initialize empty type string
+    std::string type_string = "";
 
     // Set type dependent string
-    if (type == "b")
-        type_string = "boolean";
-    else if (type == "i")
-        type_string = "integer";
-    else if (type == "r")
-        type_string = "real";
-    else if (type == "s")
-        type_string = "string";
+    if (type == "b") {
+        type_string.append("boolean");
+    }
+    else if (type == "i") {
+        type_string.append("integer");
+    }
+    else if (type == "r") {
+        type_string.append("real");
+    }
+    else if (type == "s") {
+        type_string.append("string");
+    }
     else if (type == "f"  || type == "fr" || type == "fw" ||
-             type == "fe" || type == "fn")
-        type_string = "filename";
-    else
-        type_string = "unknown";
+             type == "fe" || type == "fn") {
+        type_string.append("filename");
+    }
+    else {
+        type_string.append("unknown");
+    }
 
     // Return type string
     return type_string;

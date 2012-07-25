@@ -37,11 +37,10 @@
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"
-#include "GIntegrand.hpp"
-#include "GVector.hpp"
 #include "GCaldb.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAResponse.hpp"
+#include "GCTAResponse_helpers.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTARoi.hpp"
@@ -62,6 +61,8 @@
          " GTime&, GModelDiffuseSource&, GEnergy&, GTime&, GCTAObservation&)"
 #define G_NPRED_EXTENDED                      "GCTAResponse::npred_extended("\
                        "GModelExtendedSource&,GEnergy&,GTime&,GObservation&)"
+#define G_NPRED_DIFFUSE                        "GCTAResponse::npred_diffuse("\
+                        "GModelDiffuseSource&,GEnergy&,GTime&,GObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -71,10 +72,12 @@
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_READ_ARF                         //!< Debug read_arf method
 //#define G_DEBUG_IRF_EXTENDED                 //!< Debug irf_extended method
-//#define G_DEBUG_NPRED_EXTENDED                    //!< Debug npred_extended
-//#define G_DEBUG_PRINT_AEFF                          //!< Debug print() Aeff
-//#define G_DEBUG_PRINT_PSF                            //!< Debug print() Psf
-//#define G_DEBUG_PSF_DUMMY_SIGMA                  //!< Debug psf_dummy_sigma
+//#define G_DEBUG_IRF_DIFFUSE                  //!< Debug irf_diffuse method
+//#define G_DEBUG_NPRED_EXTENDED             //!< Debug npred_extended method
+//#define G_DEBUG_NPRED_DIFFUSE               //!< Debug npred_diffuse method
+//#define G_DEBUG_PRINT_AEFF                   //!< Debug print() Aeff method
+//#define G_DEBUG_PRINT_PSF                     //!< Debug print() Psf method
+//#define G_DEBUG_PSF_DUMMY_SIGMA           //!< Debug psf_dummy_sigma method
 
 /* __ Constants __________________________________________________________ */
 
@@ -131,7 +134,7 @@ GCTAResponse::GCTAResponse(const GCTAResponse& rsp) : GResponse(rsp)
  * Create instance of a CTA response object by specifying the response file
  * name and the calibration database path.
  *
- * If an empty string is passed as calibration database path the method will
+ * If an empty string is passed as calibration database path, the method will
  * use the CALDB environment variable to determine calibration database path.
  * This is done in the method GCTAResponse::caldb which makes use of a
  * GCaldb object to locate the calibration database.
@@ -774,10 +777,10 @@ void GCTAResponse::read_arf(const GFitsTable* hdu)
             double rmax = m_arf_thetacut * deg2rad;
 
             // Setup integration kernel
-            GCTAResponse::npsf_kern_rad_azsym integrand(this,
-                                                        rmax,
-                                                        0.0,
-                                                        pars);
+            cta_npsf_kern_rad_azsym integrand(this,
+                                              rmax,
+                                              0.0,
+                                              pars);
 
             // Setup integration
             GIntegral integral(&integrand);
@@ -1102,8 +1105,9 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     // Set radial model zenith angle range
     double rho_min = (zeta > delta_max) ? zeta - delta_max : 0.0;
     double rho_max = zeta + delta_max;
-    if (rho_max > src_max)
+    if (rho_max > src_max) {
         rho_max = src_max;
+    }
 
     // Initialise IRF value
     double irf = 0.0;
@@ -1112,17 +1116,17 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     if (rho_max > rho_min) {
 
         // Setup integration kernel
-        GCTAResponse::irf_kern_rho integrand(this,
-                                             model.radial(),
-                                             pnt->zenith(),
-                                             pnt->azimuth(),
-                                             srcLogEng,
-                                             obsLogEng,
-                                             psf_parameters,
-                                             zeta,
-                                             lambda,
-                                             omega0,
-                                             delta_max);
+        cta_irf_radial_kern_rho integrand(this,
+                                          model.radial(),
+                                          pnt->zenith(),
+                                          pnt->azimuth(),
+                                          srcLogEng,
+                                          obsLogEng,
+                                          psf_parameters,
+                                          zeta,
+                                          lambda,
+                                          omega0,
+                                          delta_max);
 
         // Integrate over zenith angle
         GIntegral integral(&integrand);
@@ -1165,12 +1169,25 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
  * @param[in] model Diffuse source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
- * @param[in] obs CTA observation.
+ * @param[in] obs Observation.
  *
- * @exception GException::feature_not_implemented
- *            Diffuse source method is not yet implemented.
+ * Performs integration of the spatial component of the diffuse source model
+ * multiplied by the IRF over the true photon arrival directions for a given
+ * observed arrival direction.
  *
- * @todo Implement method.
+ * The integration is performed in the reference of the observed arrival
+ * direction. Integration is done first over the azimuth angle \f$\phi\f$ and
+ * then over the offset angle \f$\theta\f$. Specifically, the method computes
+ *
+ * \f[irf = \int_{0}^{\theta_{\rm max}}
+ *          \int_{0}^{2\pi}
+ *          M(\theta, \phi) IRF(\theta, \phi) d\phi \sin \theta d\theta\f]
+ *
+ * Here, \f$M(\theta, \phi)\f$ is the spatial component of the diffuse source
+ * model and \f$IRF(\theta, \phi)\f$ is the point spread function.
+ *
+ * The integration kernels for this method are implemented by the response
+ * helper classes cta_irf_diffuse_kern_theta and cta_irf_diffuse_kern_phi.
  ***************************************************************************/
 double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
                                  const GEnergy&             obsEng,
@@ -1180,12 +1197,103 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
                                  const GTime&               srcTime,
                                  const GObservation&        obs) const
 {
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_IRF_DIFFUSE,
-          "Diffuse IRF not yet implemented.");
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL) {
+        throw GCTAException::bad_observation_type(G_IRF_DIFFUSE);
+    }
+
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing();
+    if (pnt == NULL) {
+        throw GCTAException::no_pointing(G_IRF_DIFFUSE);
+    }
+
+    // Get pointer on CTA instrument direction
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    if (dir == NULL) {
+        throw GCTAException::bad_instdir_type(G_IRF_DIFFUSE);
+    }
+
+    // Determine angular distance between measured photon direction and
+    // pointing direction [radians]
+    double eta = pnt->dir().dist(dir->skydir());
+
+    // Get log10(E/TeV) of true and measured photon energies
+    double srcLogEng = srcEng.log10TeV();
+    double obsLogEng = obsEng.log10TeV();
+
+    // Assign the observed theta angle (eta) as the true theta angle
+    // between the source and the pointing directions. This is a (not
+    // too bad) approximation which helps to speed up computations.
+    // If we want to do this correctly, however, we would need to move
+    // the psf_dummy_sigma down to the integration kernel, and we would
+    // need to make sure that psf_delta_max really gives the absolute
+    // maximum (this is certainly less critical)
+    double srcTheta = eta;
+
+    // Get PSF parameters.
+    GCTAPsfPars pars = psf_dummy_sigma(srcLogEng, srcTheta);
+
+    // Get maximum PSF radius in radians
+    double delta_max = psf_delta_max(srcTheta, 0.0, 0.0, 0.0, srcLogEng);
+
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Perform zenith angle integration if interval is valid
+    if (delta_max > 0.0) {
+
+        // Compute rotation matrix to convert from coordinates (theta,phi)
+        // in the reference frame of the observed arrival direction into
+        // celestial coordinates
+        GMatrix ry;
+        GMatrix rz;
+        GMatrix rot;
+        ry.eulery(dir->dec_deg() - 90.0);
+        rz.eulerz(-dir->ra_deg());
+        rot = transpose(ry * rz);
+
+        // Setup integration kernel
+        cta_irf_diffuse_kern_theta integrand(this,
+                                             model.spatial(),
+                                             pnt->zenith(),
+                                             pnt->azimuth(),
+                                             srcLogEng,
+                                             obsLogEng,
+                                             &rot,
+                                             pars,
+                                             eta);
+
+        // Integrate over zenith angle
+        GIntegral integral(&integrand);
+        integral.eps(1.0e-2);
+        irf = integral.romb(0.0, delta_max);
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(irf) || isinfinite(irf)) {
+            std::cout << "*** ERROR: GCTAResponse::irf_diffuse:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", delta_max=" << delta_max << ")";
+            std::cout << std::endl;
+        }
+        #endif
+    }
+
+    // Compile option: Show integration results
+    #if defined(G_DEBUG_IRF_DIFFUSE)
+    std::cout << "GCTAResponse::irf_diffuse:";
+    std::cout << " srcLogEng=" << srcLogEng;
+    std::cout << " obsLogEng=" << obsLogEng;
+    std::cout << " eta=" << eta;
+    std::cout << " delta_max=" << delta_max;
+    std::cout << " irf=" << irf << std::endl;
+    #endif
 
     // Return IRF value
-    return 0.0;
+    return irf;
 }
 
 
@@ -1271,15 +1379,15 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
         double phi = model.radial()->dir().posang(events->roi().centre().skydir());
 
         // Setup integration kernel
-        GCTAResponse::npred_radial_kern_theta integrand(this,
-                                                        model.radial(),
-                                                        &srcEng,
-                                                        &srcTime,
-                                                        ctaobs,
-                                                        &rot,
-                                                        roi_model_distance,
-                                                        roi_psf_radius,
-                                                        phi);
+        cta_npred_radial_kern_theta integrand(this,
+                                              model.radial(),
+                                              &srcEng,
+                                              &srcTime,
+                                              ctaobs,
+                                              &rot,
+                                              roi_model_distance,
+                                              roi_psf_radius,
+                                              phi);
 
         // Integrate over theta
         GIntegral integral(&integrand);
@@ -1303,6 +1411,119 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
         std::cout << " (npred=" << npred;
         std::cout << ", theta_min=" << theta_min;
         std::cout << ", theta_max=" << theta_max;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+    
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of diffuse source model
+ *
+ * @param[in] model Diffuse source model.
+ * @param[in] srcEng True energy of photon.
+ * @param[in] srcTime True photon arrival time.
+ * @param[in] obs Observation.
+ *
+ * This method provides the intergal of the diffuse source model over the
+ * region of interest. The integration is performed in the ROI system.
+ *
+ * Note that the integration precision was adjusted trading-off between
+ * computation time and computation precision. A value of 1e-4 was judged
+ * appropriate.
+ *
+ * Note that we estimate the integration radius based on the size of the
+ * onaxis PSF in this method. This should be fine as long as the offaxis
+ * PSF is not considerably larger than the onaxis PSF. We should verify
+ * this, however.
+ *
+ * @todo Verify that offaxis PSF is not considerably larger than onaxis PSF.
+ ***************************************************************************/
+double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
+                                   const GEnergy&             srcEng,
+                                   const GTime&               srcTime,
+                                   const GObservation&        obs) const
+{
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL) {
+        throw GCTAException::bad_observation_type(G_NPRED_DIFFUSE);
+    }
+
+    // Get pointer on CTA events list
+    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
+    if (events == NULL) {
+        throw GException::no_list(G_NPRED_DIFFUSE);
+    }
+
+    // Get log10(E/TeV) of true photon energy
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
+    // as this allows us doing this computation in the outer loop. This
+    // should be sufficient here, unless the offaxis PSF becomes much worse
+    // than the onaxis PSF. In this case, we may add a safety factor here
+    // to make sure we encompass the entire PSF.
+    GCTAPsfPars psf_parameters = psf_dummy_sigma(srcLogEng, 0.0);
+    double      psf_max_radius = psf_dummy_max(psf_parameters);
+
+    // Extract ROI radius (radians)
+    double roi_radius = events->roi().radius() * deg2rad;
+
+    // Compute the ROI radius plus maximum PSF radius (radians). Any photon
+    // coming from beyond this radius will not make it in the dataspace and
+    // thus can be neglected.
+    double roi_psf_radius = roi_radius + psf_max_radius;
+
+    // Perform offset angle integration only if interval is valid
+    if (roi_psf_radius > 0.0) {
+
+        // Compute rotation matrix to convert from native ROI coordinates,
+        // given by (theta,phi), into celestial coordinates.
+        GMatrix ry;
+        GMatrix rz;
+        GMatrix rot;
+        ry.eulery(events->roi().centre().dec_deg() - 90.0);
+        rz.eulerz(-events->roi().centre().ra_deg());
+        rot = transpose(ry * rz);
+        
+        // Setup integration kernel
+        cta_npred_diffuse_kern_theta integrand(this,
+                                               model.spatial(),
+                                               &srcEng,
+                                               &srcTime,
+                                               ctaobs,
+                                               &rot);
+
+        // Integrate over theta
+        GIntegral integral(&integrand);
+        integral.eps(1.0e-4);
+        npred = integral.romb(0.0, roi_psf_radius);
+
+        // Compile option: Show integration results
+        #if defined(G_DEBUG_NPRED_DIFFUSE)
+        std::cout << "GCTAResponse::npred_diffuse:";
+        std::cout << " srcEng=" << srcEng;
+        std::cout << " srcTime=" << srcTime;
+        std::cout << " roi_psf_radius=" << roi_psf_radius;
+        std::cout << " npred=" << npred << std::endl;
+        #endif
+
+    } // endif: offset angle range was valid
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(npred) || isinfinite(npred)) {
+        std::cout << "*** ERROR: GCTAResponse::npred_diffuse:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", roi_psf_radius=" << roi_psf_radius;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -1510,10 +1731,10 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
         if (rmax > rmin) {
 
             // Setup integration kernel
-            GCTAResponse::npsf_kern_rad_azsym integrand(this,
-                                                        roi_radius,
-                                                        roi_psf_distance,
-                                                        psf_parameters);
+            cta_npsf_kern_rad_azsym integrand(this,
+                                              roi_radius,
+                                              roi_psf_distance,
+                                              psf_parameters);
 
             // Setup integration
             GIntegral integral(&integrand);
@@ -1916,27 +2137,30 @@ void GCTAResponse::read_performance_table(const std::string& filename)
 
     // Open performance table readonly
     FILE* fptr = std::fopen(filename.c_str(), "r");
-    if (fptr == NULL)
+    if (fptr == NULL) {
         throw GCTAException::file_open_error(G_READ, filename);
+    }
 
     // Read lines
     while (std::fgets(line, n, fptr) != NULL) {
 
-        // Split line in elements
+        // Split line in elements. Strip empty elements from vector.
         std::vector<std::string> elements = split(line, " ");
-        for (std::vector<std::string>::iterator it = elements.begin();
-             it != elements.end(); ++it) {
-            if (strip_whitespace(*it).length() == 0)
-                elements.erase(it);
+        for (int i = elements.size()-1; i >= 0; i--) {
+            if (strip_whitespace(elements[i]).length() == 0) {
+                elements.erase(elements.begin()+i);
+            }
         }
 
         // Skip header
-        if (elements[0].find("log(E)") != std::string::npos)
+        if (elements[0].find("log(E)") != std::string::npos) {
             continue;
+        }
 
         // Break loop if end of data table has been reached
-        if (elements[0].find("----------") != std::string::npos)
+        if (elements[0].find("----------") != std::string::npos) {
             break;
+        }
 
         // Push elements in vectors
         m_logE.push_back(todouble(elements[0]));
@@ -1960,321 +2184,6 @@ void GCTAResponse::read_performance_table(const std::string& filename)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for model zenith angle integration of IRF
- *
- * @param[in] rho Zenith angle with respect to model centre [radians].
- *
- * This method evaluates the kernel \f$K(\rho)\f$ for the zenith angle
- * integration
- * \f[\int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho) d\rho\f]
- * of the product between model and IRF, where
- * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}} M(\rho)
- *              IRF(\rho, \omega) d\omega\f],
- * \f$M(\rho)\f$ is azimuthally symmetric the source model, and
- * \f$IRF(\rho, \omega)\f$ is the instrument response function.
- ***************************************************************************/
-double GCTAResponse::irf_kern_rho::eval(double rho)
-{
-    // Compute half length of arc that lies within PSF validity circle
-    // (in radians)
-    double domega = 0.5 * cta_roi_arclength(rho,
-                                            m_zeta,
-                                            m_cos_zeta,
-                                            m_sin_zeta,
-                                            m_delta_max,
-                                            m_cos_delta_max);
-
-    // Initialise result
-    double irf = 0.0;
-
-    // Continue only if arc length is positive
-    if (domega > 0.0) {
-
-        // Compute omega integration range
-        double omega_min = -domega;
-        double omega_max = +domega;
-
-        // Evaluate sky model M(rho)
-        double model = m_radial->eval(rho);
-
-        // Precompute cosine and sine terms for azimuthal integration
-        double cos_rho = std::cos(rho);
-        double sin_rho = std::sin(rho);
-        double cos_psf = cos_rho*m_cos_zeta;
-        double sin_psf = sin_rho*m_sin_zeta;
-        double cos_ph  = cos_rho*m_cos_lambda;
-        double sin_ph  = sin_rho*m_sin_lambda;
-
-        // Setup integration kernel
-        GCTAResponse::irf_kern_omega integrand(m_rsp,
-                                               m_zenith,
-                                               m_azimuth,
-                                               m_srcLogEng,
-                                               m_obsLogEng,
-                                               m_sigma,
-                                               m_zeta,
-                                               m_lambda,
-                                               m_omega0,
-                                               rho,
-                                               cos_psf,
-                                               sin_psf,
-                                               cos_ph,
-                                               sin_ph);
-
-        // Integrate over phi
-        GIntegral integral(&integrand);
-        integral.eps(m_rsp->m_eps);
-        irf = integral.romb(omega_min, omega_max) * model * sin_rho;
-
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (isnotanumber(irf) || isinfinite(irf)) {
-            std::cout << "*** ERROR: GCTAResponse::irf_kern_rho::eval";
-            std::cout << "(rho=" << rho << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (irf=" << irf;
-            std::cout << ", domega=" << domega;
-            std::cout << ", model=" << model;
-            std::cout << ", sin_rho=" << sin_rho << ")";
-            std::cout << std::endl;
-        }
-        #endif
-
-    } // endif: arc length was positive
-
-    // Return result
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for azimuth angle IRF integration
- *
- * @param[in] omega Azimuth angle (radians).
- *
- * This method evaluates the instrument response function
- * \f$IRF(\rho,\omega)\f$ for the azimuth angle integration of the IRF.
- *
- * From the model coordinates \f$(\rho,\omega)\f$ it computes the PSF
- * offset angle \f$\delta\f$, defined as the angle between true 
- * (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) photon arrival direction,
- * using
- * \f[\delta = \arccos(\cos \rho \cos \zeta + 
- *                     \sin \rho \sin \zeta \cos \omega)\f]
- * where
- * \f$\zeta\f$ is the angular distance between the observed photon direction
- * \f$\vec{p}\f$ and the model centre \f$\vec{m}\f$.
- *
- * Furthermore, it computes the observed photon offset angle \f$\theta\f$,
- * defined as the angle between observed photon direction and camera pointing,
- * using
- * \f[\theta = \arccos(\cos \rho \cos \lambda + 
- *                     \sin \rho \sin \lambda \cos \omega_0 - \omega)\f]
- * where
- * \f$\lambda\f$ is the angular distance between the model centre and the
- * camera pointing direction.
- ***************************************************************************/
-double GCTAResponse::irf_kern_omega::eval(double omega)
-{
-    // Compute PSF offset angle [radians]
-    double delta = arccos(m_cos_psf + m_sin_psf * std::cos(omega));
-    
-    // Compute observed photon offset angle in camera system [radians]
-    double theta = arccos(m_cos_ph + m_sin_ph * std::cos(m_omega0 - omega));
-    
-    //TODO: Compute true photon azimuth angle in camera system [radians]
-    double phi = 0.0;
-
-    // Evaluate IRF
-    double irf = m_rsp->aeff(theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
-                 m_rsp->psf_dummy(delta, m_sigma);
-
-    // Optionally take energy dispersion into account
-    if (m_rsp->hasedisp() && irf > 0.0) {
-        irf *= m_rsp->edisp(m_obsLogEng, theta, phi, m_zenith, m_azimuth, m_srcLogEng);
-    }
-    
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(irf) || isinfinite(irf)) {
-        std::cout << "*** ERROR: GCTAResponse::irf_kern_omega::eval";
-        std::cout << "(omega=" << omega << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (irf=" << irf;
-        std::cout << ", delta=" << delta;
-        std::cout << ", theta=" << theta;
-        std::cout << ", phi=" << phi << ")";
-        std::cout << std::endl;
-    }
-    #endif
-
-    // Return
-    return irf;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for zenith angle Npred integration or radial model
- *
- * @param[in] theta Radial model zenith angle (radians).
- *
- * This method integrates a radial model for a given zenith angle theta over
- * all azimuth angles that fall within the ROI+PSF radius. The limitation to
- * an arc assures that the integration converges properly.
- ***************************************************************************/
-double GCTAResponse::npred_radial_kern_theta::eval(double theta)
-{
-    // Initialise Npred value
-    double npred = 0.0;
-
-    // Compute half length of arc that lies within ROI+PSF radius (radians)
-    double dphi = 0.5 * cta_roi_arclength(theta,
-                                          m_dist,
-                                          m_cos_dist,
-                                          m_sin_dist,
-                                          m_radius,
-                                          m_cos_radius);
-
-
-    // Continue only if arc length is positive
-    if (dphi > 0.0) {
-
-        // Compute phi integration range
-        double phi_min = m_phi - dphi;
-        double phi_max = m_phi + dphi;
-
-        // Get radial model value
-        double model = m_radial->eval(theta);
-
-        // Compute sine of offset angle
-        double sin_theta = std::sin(theta);
-
-        // Setup phi integration kernel
-        GCTAResponse::npred_radial_kern_phi integrand(m_rsp,
-                                                      m_srcEng,
-                                                      m_srcTime,
-                                                      m_obs,
-                                                      m_rot,
-                                                      theta,
-                                                      sin_theta);
-
-        // Integrate over phi
-        GIntegral integral(&integrand);
-        npred = integral.romb(phi_min, phi_max) * sin_theta * model;
-
-        // Debug: Check for NaN
-        #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
-            std::cout << "*** ERROR: GCTAResponse::npred_radial_kern_theta::eval";
-            std::cout << "(theta=" << theta << "):";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (npred=" << npred;
-            std::cout << ", model=" << model;
-            std::cout << ", phi=[" << phi_min << "," << phi_max << "]";
-            std::cout << ", sin_theta=" << sin_theta;
-            std::cout << ")" << std::endl;
-        }
-        #endif
-
-    } // endif: arc length was positive
-
-    // Return Npred
-    return npred;
-}
-
-
-/***********************************************************************//**
- * @brief Kernel for azimuth angle Npred integration of radial model
- *
- * @param[in] phi Azimuth angle (radians).
- *
- * @todo Re-consider formula for possible simplification (dumb matrix
- *       multiplication is definitely not the fastest way to do that
- *       computation).
- ***************************************************************************/
-double GCTAResponse::npred_radial_kern_phi::eval(double phi)
-{
-    // Compute sky direction vector in native coordinates
-    double  cos_phi = std::cos(phi);
-    double  sin_phi = std::sin(phi);
-    GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
-
-    // Rotate from native into celestial system
-    GVector cel = *m_rot * native;
-
-    // Set sky direction
-    GSkyDir srcDir;
-    srcDir.celvector(cel);
-
-    // Compute Npred for this sky direction
-    double npred = m_rsp->npred(srcDir, *m_srcEng, *m_srcTime, *m_obs);
-
-    // Debug: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
-        std::cout << "*** ERROR: GCTAResponse::npred_radial_kern_phi::eval";
-        std::cout << "(phi=" << phi << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (npred=" << npred;
-        std::cout << ", cos_phi=" << cos_phi;
-        std::cout << ", sin_phi=" << sin_phi;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-
-    // Return Npred
-    return npred;
-}
-
-
-/***********************************************************************//**
- * @brief Integration kernel for npsf() method
- *
- * @param[in] theta Zenith angle with respect to PSF centre.
- *
- * This method implements the integration kernel needed for the npsf()
- * method.
- ***************************************************************************/
-double GCTAResponse::npsf_kern_rad_azsym::eval(double theta)
-{
-    // Initialise PSF value
-    double value = 0.0;
-    
-    // Get arclength for given radius in radians
-    double phi = cta_roi_arclength(theta,
-                                   m_psf,
-                                   m_cospsf,
-                                   m_sinpsf,
-                                   m_roi,
-                                   m_cosroi);
-
-    // If arclength is positive then compute the PSF value
-    if (phi > 0) {
-    
-        // Compute PSF value
-        value = m_parent->psf_dummy(theta, m_sigma) * phi * std::sin(theta);
-
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (isnotanumber(value) || isinfinite(value)) {
-            std::cout << "*** ERROR: GCTAResponse::npsf_kern_rad_azsym::eval";
-            std::cout << "(theta=" << theta << ").";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (value=" << value;
-            std::cout << ", theta=" << theta;
-            std::cout << ", phi=" << phi << ")";
-            std::cout << std::endl;
-        }
-        #endif
-        
-    } // endif: arclength was positive
-
-    // Return
-    return value;
 }
 
 

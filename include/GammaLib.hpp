@@ -152,6 +152,7 @@
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpatialConst.hpp"
 #include "GModelSpatialCube.hpp"
+#include "GModelSpatialMap.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GModelRadial.hpp"
 #include "GModelRadialRegistry.hpp"

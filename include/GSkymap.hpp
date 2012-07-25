@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GSkymap.hpp  -  Class that implements a sky map              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GSkymap.hpp
- * @brief GSkymap class definition.
- * @author J. Knodlseder
+ * @brief Sky map class definition.
+ * @author J. Knoedlseder
  */
 
 #ifndef GSKYMAP_HPP
@@ -85,33 +85,40 @@ public:
     GSkymap& operator= (const GSkymap& map);
 
     // 1D pixel methods
-    double&       operator() (const int& pixel, const int map = 0);
-    const double& operator() (const int& pixel, const int map = 0) const;
+    double&       operator() (const int& pixel, const int& map = 0);
+    const double& operator() (const int& pixel, const int& map = 0) const;
     GSkyDir       pix2dir(const int& pix) const;
-    int           dir2pix(GSkyDir dir) const;
+    int           dir2pix(const GSkyDir& dir) const;
     double        omega(const int& pix) const;
 
     // 2D pixel methods
-    double&       operator() (const GSkyPixel& pixel, const int map = 0);
-    const double& operator() (const GSkyPixel& pixel, const int map = 0) const;
+    double&       operator() (const GSkyPixel& pixel, const int& map = 0);
+    const double& operator() (const GSkyPixel& pixel, const int& map = 0) const;
     GSkyDir       xy2dir(const GSkyPixel& pix) const;
-    GSkyPixel     dir2xy(GSkyDir dir) const;
+    GSkyPixel     dir2xy(const GSkyDir& dir) const;
     double        omega(const GSkyPixel& pix) const;
 
+    // Sky direction methods
+    double        operator() (const GSkyDir& dir, const int& map = 0) const;
+
     // Methods
-    void        clear(void);
-    GSkymap*    clone(void) const;
-    void        load(const std::string& filename);
-    void        save(const std::string& filename, bool clobber = false) const;
-    void        read(const GFitsHDU* hdu);
-    void        write(GFits* file) const;
-    int         npix(void) const;
-    int         nx(void) const;
-    int         ny(void) const;
-    int         nmaps(void) const;
-    GWcs*       wcs(void) const { return m_wcs; }
-    double*     pixels(void) const { return m_pixels; }
-    std::string print(void) const;
+    void          clear(void);
+    GSkymap*      clone(void) const;
+    void          load(const std::string& filename);
+    void          save(const std::string& filename, bool clobber = false) const;
+    void          read(const GFitsHDU* hdu);
+    void          write(GFits* file) const;
+    int           npix(void) const;
+    int           nx(void) const;
+    int           ny(void) const;
+    int           nmaps(void) const;
+    int           xy2pix(const GSkyPixel& pix) const;
+    GSkyPixel     pix2xy(const int& pix) const;
+    GWcs*         wcs(void) const { return m_wcs; }
+    double*       pixels(void) const { return m_pixels; }
+    bool          isinmap(const GSkyDir& dir) const;
+    bool          isinmap(const GSkyPixel& pixel) const;
+    std::string   print(void) const;
 
 private:
     // Private methods
@@ -124,8 +131,6 @@ private:
                               const double& crpix1, const double& crpix2,
                               const double& cdelt1, const double& cdelt2,
                               const GMatrix& cd, const GVector& pv2);
-    int               xy2pix(const GSkyPixel& pix) const;
-    GSkyPixel         pix2xy(const int& pix) const;
     void              read_healpix(const GFitsTable* hdu);
     void              read_wcs(const GFitsImage* hdu);
     void              alloc_wcs(const GFitsImage* hdu);

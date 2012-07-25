@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  lat - Fermi/LAT support python bindings                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,22 +33,31 @@
 /* __ Inform about base classes __________________________________________ */
 %import(module="obs") "GObservation.i";
 %import(module="obs") "GEvent.i";
+%import(module="obs") "GEventAtom.i";
 %import(module="obs") "GEventBin.i";
 %import(module="obs") "GEvents.i";
+%import(module="obs") "GEventList.i";
 %import(module="obs") "GEventCube.i";
 %import(module="obs") "GResponse.i";
+%import(module="obs") "GPointing.i";
 %import(module="obs") "GInstDir.i";
 %import(module="obs") "GRoi.i";
 
 /* __ LAT ________________________________________________________________ */
-%include "GLATObservation.i"
-%include "GLATEventCube.i"
+%include "GLATAeff.i"
+%include "GLATEdisp.i"
+%include "GLATEventAtom.i"
 %include "GLATEventBin.i"
-%include "GLATResponse.i"
+%include "GLATEventCube.i"
+%include "GLATEventList.i"
 %include "GLATInstDir.i"
-%include "GLATRoi.i"
 %include "GLATLtCube.i"
 %include "GLATMeanPsf.i"
+%include "GLATObservation.i"
+%include "GLATPointing.i"
+%include "GLATPsf.i"
+%include "GLATResponse.i"
+%include "GLATRoi.i"
 
 
 

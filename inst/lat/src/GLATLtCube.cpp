@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATLtCube.cpp  -  Fermi LAT livetime cube               *
+ *                GLATLtCube.cpp  -  Fermi/LAT livetime cube               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GLATLtCube.cpp
+ * @brief Fermi/LAT livetime cube class implementation
+ * @author J. Knodlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -72,8 +77,6 @@ GLATLtCube::GLATLtCube(const std::string& filename)
     // Return
     return;
 }
-
-
 
 
 /***********************************************************************//**
@@ -155,7 +158,10 @@ GLATLtCube& GLATLtCube::operator= (const GLATLtCube& cube)
  * \f$f(\cos \theta)\f$ is a function that depends on the cosine of the
  * zenith angle.
  *
- * @todo Implement computation of efficiency factors
+ * Note that no efficieny correction is implemented for this method as the
+ * efficiency factors are stored together with the effective area. If we
+ * want efficiency correction here, we should think about passing this
+ * information to the method.
  ***************************************************************************/
 double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
                                _ltcube_ctheta fct)
@@ -165,12 +171,12 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
 
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
-    if (m_livetime_correct) {
+    /*
+    if (aeff.hasefficiency()) {
     
         // Compute correction factors
-        double f1 = 1.0;
-        double f2 = 0.0;
-        //m_efficiencyFactor->getLivetimeFactors(energy, f1, f2);
+        double f1 = aeff.efficiency_factor1(energy);
+        double f2 = aeff.efficiency_factor2(energy);
 
         // Compute correction
         double correction = m_weighted_exposure(dir, fct);
@@ -179,6 +185,7 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
         exposure = f1 * exposure + f2 * correction;
 
     } // endif: corrections requested
+    */
 
     // Return exposure
     return exposure;
@@ -203,7 +210,10 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
  * \f$f(\cos \theta, \phi)\f$ is a function that depends on the cosine of
  * the zenith angle and of the azimuth angle.
  *
- * @todo Implement computation of efficiency factors
+ * Note that no efficieny correction is implemented for this method as the
+ * efficiency factors are stored together with the effective area. If we
+ * want efficiency correction here, we should think about passing this
+ * information to the method.
  ***************************************************************************/
 double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
                                _ltcube_ctheta_phi fct)
@@ -213,12 +223,12 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
 
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
-    if (m_livetime_correct) {
+    /*
+    if (aeff.hasefficiency()) {
     
         // Compute correction factors
-        double f1 = 1.0;
-        double f2 = 0.0;
-        //m_efficiencyFactor->getLivetimeFactors(energy, f1, f2);
+        double f1 = aeff.efficiency_factor1(energy);
+        double f2 = aeff.efficiency_factor2(energy);
 
         // Compute correction
         double correction = m_weighted_exposure(dir, fct);
@@ -227,6 +237,7 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
         exposure = f1 * exposure + f2 * correction;
 
     } // endif: corrections requested
+    */
 
     // Return exposure
     return exposure;
@@ -250,8 +261,6 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
  * angle, and
  * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
  * on the cosine of the zenith angle and (optionally) of the azimuth angle.
- *
- * @todo Implement computation of efficiency factors
  ***************************************************************************/
 double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
                                const GLATAeff& aeff)
@@ -261,12 +270,11 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
 
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
-    if (m_livetime_correct) {
+    if (aeff.hasefficiency()) {
     
         // Compute correction factors
-        double f1 = 1.0;
-        double f2 = 0.0;
-        //m_efficiencyFactor->getLivetimeFactors(energy, f1, f2);
+        double f1 = aeff.efficiency_factor1(energy);
+        double f2 = aeff.efficiency_factor2(energy);
 
         // Compute correction
         double correction = m_weighted_exposure(dir, energy, aeff);
@@ -305,8 +313,6 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
  * the cosine of the zenith angle, and
  * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
  * on the cosine of the zenith angle and (optionally) of the azimuth angle.
- *
- * @todo Implement computation of efficiency factors
  ***************************************************************************/
 double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
                                const double& offset, const GLATPsf& psf,
@@ -317,12 +323,11 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
 
     // Optionally compute livetime factors for trigger rate- and
     // energy-dependent efficiency corrections
-    if (m_livetime_correct) {
+    if (aeff.hasefficiency()) {
     
         // Compute correction factors
-        double f1 = 1.0;
-        double f2 = 0.0;
-        //m_efficiencyFactor->getLivetimeFactors(energy, f1, f2);
+        double f1 = aeff.efficiency_factor1(energy);
+        double f2 = aeff.efficiency_factor2(energy);
 
         // Compute correction
         double correction = m_weighted_exposure(dir, energy, offset, psf, aeff);
@@ -376,7 +381,8 @@ GLATLtCube* GLATLtCube::clone(void) const
  * @param[in] filename FITS file name.
  *
  * @todo Loading of cos theta boundaries not yet implemented. This is not
- *       critical since they are not really needed.
+ *       critical since they are not really needed. We just need them once
+ *       we want to implement also saving.
  ***************************************************************************/
 void GLATLtCube::load(const std::string& filename)
 {
@@ -428,8 +434,6 @@ void GLATLtCube::save(const std::string& filename, bool clobber) const
 
 /***********************************************************************//**
  * @brief Print livetime cube information
- *
- * @todo Implement GGti printing
  ***************************************************************************/
 std::string GLATLtCube::print(void) const
 {
@@ -438,14 +442,9 @@ std::string GLATLtCube::print(void) const
 
     // Append header
     result.append("=== GLATLtCube ===");
-    result.append("\n"+parformat("Livetime correction"));
-    if (m_livetime_correct)
-        result.append("yes");
-    else
-        result.append("no");
     result.append("\n"+m_exposure.print());
     result.append("\n"+m_weighted_exposure.print());
-    //result.append("\n"+m_gti.print());
+    result.append("\n"+m_gti.print());
 
     // Return result
     return result;
@@ -467,7 +466,6 @@ void GLATLtCube::init_members(void)
     m_exposure.clear();
     m_weighted_exposure.clear();
     m_gti.clear();
-    m_livetime_correct = false;
 
     // Return
     return;
@@ -485,7 +483,6 @@ void GLATLtCube::copy_members(const GLATLtCube& cube)
     m_exposure          = cube.m_exposure;
     m_weighted_exposure = cube.m_weighted_exposure;
     m_gti               = cube.m_gti;
-    m_livetime_correct  = cube.m_livetime_correct;
 
     // Return
     return;

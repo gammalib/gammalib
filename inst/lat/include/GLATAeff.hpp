@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATAeff.hpp  -  Fermi LAT effective area               *
+ *                 GLATAeff.hpp  -  Fermi/LAT effective area               *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATAeff.hpp
- * @brief Fermi LAT effective area class definition.
- * @author J. Knodlseder
+ * @brief Fermi/LAT effective area class definition
+ * @author J. Knoedlseder
  */
 
 #ifndef GLATAEFF_HPP
@@ -34,6 +34,7 @@
 #include "GLog.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponseTable.hpp"
+#include "GLATEfficiency.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GSkyDir.hpp"
@@ -44,13 +45,17 @@
 /***********************************************************************//**
  * @class GLATAeff
  *
- * @brief Interface for the Fermi LAT effective area.
+ * @brief Interface for the Fermi/LAT effective area
+ *
+ * This class handles the effective area information for Fermi/LAT. It also
+ * handles the IRF efficiency information that has been introduced for
+ * Pass 7 data analysis.
  ***************************************************************************/
 class GLATAeff {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GLATAeff& aeff);
-    friend GLog&         operator<< (GLog& log, const GLATAeff& aeff);
+    friend GLog&         operator<< (GLog& log,        const GLATAeff& aeff);
 
 public:
     // Constructors and destructors
@@ -79,6 +84,9 @@ public:
     double       costhetamin(void) const { return m_min_ctheta; }
     void         costhetamin(const double& ctheta);
     bool         hasphi(void) const { return false; }
+    bool         hasefficiency(void) const;
+    double       efficiency_factor1(const GEnergy& srcEng) const;
+    double       efficiency_factor2(const GEnergy& srcEng) const;
     std::string  print(void) const;
 
 private:
@@ -87,12 +95,18 @@ private:
     void copy_members(const GLATAeff& aeff);
     void free_members(void);
     void read_aeff(const GFitsTable* hdu);
+    void read_efficiency(const GFitsTable* hdu);
     void write_aeff(GFits& file) const;
+    void write_efficiency(GFits& file) const;
     
     // Protected members
     GLATResponseTable   m_aeff_bins;    //!< Aeff energy and cos theta binning
     std::vector<double> m_aeff;         //!< Aeff array
     double              m_min_ctheta;   //!< Minimum valid cos(theta)
+    bool                m_front;        //!< Response is for front section
+    bool                m_back;         //!< Response is for back section
+    GLATEfficiency*     m_eff_func1;    //!< Efficiency functor 1
+    GLATEfficiency*     m_eff_func2;    //!< Efficiency functor 2
 };
 
 #endif /* GLATAEFF_HPP */

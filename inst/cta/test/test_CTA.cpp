@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      test_CTA.cpp  -  test CTA classes                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file test_CTA.cpp
- * @brief Testing of CTA classes.
+ * @brief Testing of CTA classes
  * @author J. Knoedlseder
  */
 
@@ -47,6 +47,7 @@ const std::string cta_cntmap    = datadir+"/crab_cntmap.fits.gz";
 const std::string cta_bin_xml   = datadir+"/obs_binned.xml";
 const std::string cta_unbin_xml = datadir+"/obs_unbinned.xml";
 const std::string cta_model_xml = datadir+"/crab.xml";
+const std::string cta_rsp_xml   = datadir+"/rsp_models.xml";
 
 
 /***********************************************************************//**
@@ -71,10 +72,10 @@ void test_response_aeff(void)
             sum += aeff;
         }
         //printf("%30.5f\n", sum);
-        if (fabs(sum - ref) > 0.1) {
+        if (std::abs(sum - ref) > 0.1) {
             std::cout << std::endl
                       << "TEST ERROR: Effective area differs from expected value"
-                      << " (difference=" << fabs(sum - ref) << ")"
+                      << " (difference=" << std::abs(sum - ref) << ")"
                       << std::endl;
             throw;
         }
@@ -105,7 +106,7 @@ void test_response_psf(void)
         rsp.load(cta_irf);
 
         // Integrate Psf
-        GEnergy      eng;
+        GEnergy eng;
         for (double e = 0.1; e < 10.0; e*=2) {
             eng.TeV(e);
             double r     = 0.0;
@@ -170,10 +171,10 @@ void test_response_npsf(void)
         srcDir.radec_deg(0.0, 0.0);
         double npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
         double ref  = 1.0;
-        if (fabs(npsf - ref) > 1.0e-3) {
+        if (std::abs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
                       << "TEST ERROR: Uncertainty in PSF(0,0) integration >0.1%"
-                      << " (difference=" << fabs(npsf - 1.0) << ")"
+                      << " (difference=" << std::abs(npsf - 1.0) << ")"
                       << std::endl;
             throw;
         }
@@ -183,10 +184,10 @@ void test_response_npsf(void)
         srcDir.radec_deg(1.0, 1.0);
         npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
         ref  = 1.0;
-        if (fabs(npsf - ref) > 1.0e-3) {
+        if (std::abs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
                       << "TEST ERROR: Uncertainty in PS(1,1) integration >0.1%"
-                      << " (difference=" << fabs(npsf - ref) << ")"
+                      << " (difference=" << std::abs(npsf - ref) << ")"
                       << std::endl;
             throw;
         }
@@ -196,10 +197,10 @@ void test_response_npsf(void)
         srcDir.radec_deg(0.0, 2.0);
         npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
         ref  = 0.492373;
-        if (fabs(npsf - ref) > 1.0e-3) {
+        if (std::abs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
                       << "TEST ERROR: Uncertainty in PS(0,2.1) integration >0.1%"
-                      << " (difference=" << fabs(npsf - ref) << ")"
+                      << " (difference=" << std::abs(npsf - ref) << ")"
                       << std::endl;
             throw;
         }
@@ -209,10 +210,10 @@ void test_response_npsf(void)
         srcDir.radec_deg(2.0, 2.0);
         npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
         ref  = 0.0;
-        if (fabs(npsf - ref) > 1.0e-3) {
+        if (std::abs(npsf - ref) > 1.0e-3) {
             std::cout << std::endl
                       << "TEST ERROR: Uncertainty in PS(2,2) integration >0.1%"
-                      << " (difference=" << fabs(npsf - ref) << ")"
+                      << " (difference=" << std::abs(npsf - ref) << ")"
                       << std::endl;
             throw;
         }
@@ -221,6 +222,207 @@ void test_response_npsf(void)
     catch (std::exception &e) {
         std::cout << std::endl
                   << "TEST ERROR: Unable to compute GCTAResponse::npsf."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA IRF computation for diffuse source model
+ *
+ * Tests the IRF computation for the diffuse source model. This is done
+ * by calling the GCTAObservation::model method which in turn calls the
+ * GCTAResponse::irf_diffuse method. The test is done for a small counts
+ * map to keep the test executing reasonably fast.
+ ***************************************************************************/
+void test_response_irf_diffuse(void)
+{
+    // Set reference value
+    double ref = 13803.800313356;
+
+    // Set parameters
+    double src_ra  = 201.3651;
+    double src_dec = -43.0191;
+    int    nebins  = 5;
+
+    // Setup pointing on Cen A
+    GSkyDir skyDir;
+    skyDir.radec_deg(src_ra, src_dec);
+    GCTAPointing pnt;
+    pnt.dir(skyDir);
+
+    // Setup skymap (10 energy layers)
+    GSkymap map("CAR", "CEL", src_ra, src_dec, 0.5, 0.5, 10, 10, nebins);
+
+    // Setup time interval
+    GGti  gti;
+    GTime tstart;
+    GTime tstop;
+    tstart.met(0.0);
+    tstop.met(1800.0);
+    gti.append(tstart, tstop);
+
+    // Setup energy boundaries
+    GEbounds ebounds;
+    GEnergy  emin;
+    GEnergy  emax;
+    emin.TeV(0.1);
+    emax.TeV(100.0);
+    ebounds.setlog(emin, emax, nebins);
+
+    // Setup event cube centered on Cen A
+    GCTAEventCube cube(map, ebounds, gti);
+
+    // Setup dummy CTA observation
+    GCTAObservation obs;
+    obs.ontime(1800.0);
+    obs.livetime(1600.0);
+    obs.deadc(1600.0/1800.0);
+    obs.response(cta_irf, cta_caldb);
+    obs.events(&cube);
+    obs.pointing(pnt);
+
+    // Extract CTA response
+    GResponse* rsp = obs.response();
+
+    // Load model for IRF computation
+    GModels models(cta_rsp_xml);
+
+    // Try block to catch any problems in the computation
+    try {
+
+        // Reset sum
+        double sum = 0.0;
+
+        // Iterate over all bins in event cube
+        for (int i = 0; i < obs.events()->size(); ++i) {
+
+            // Get event pointer
+            const GEventBin* bin = (*((GEventCube*)obs.events()))[i];
+
+            // Get model and add to sum
+            double model = obs.model(models, *bin, NULL) * bin->size();
+            sum += model;
+
+        }
+
+        // Test sum
+        if (std::abs(sum - ref) > 1.0e-5) {
+            std::cout << std::endl
+                      << "TEST ERROR: Diffuse IRF computation value differs"
+                      << " from expectation by "
+                      << sum - ref
+                      << " (result-reference)."
+                      << std::endl;
+            throw;
+        }
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to perform diffuse IRF computation."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA Npred computation
+ *
+ * Tests the Npred computation for the diffuse source model. This is done
+ * by loading the model from the XML file and by calling the
+ * GCTAObservation::npred method which in turn calls the
+ * GCTAResponse::npred_diffuse method. The test takes a few seconds.
+ ***************************************************************************/
+void test_response_npred_diffuse(void)
+{
+    // Set reference value
+    double ref = 11212.26274;
+
+    // Set parameters
+    double src_ra  = 201.3651;
+    double src_dec = -43.0191;
+    double roi_rad =   4.0;
+
+    // Setup ROI centred on Cen A with a radius of 4 deg
+    GCTARoi     roi;
+    GCTAInstDir instDir;
+    instDir.radec_deg(src_ra, src_dec);
+    roi.centre(instDir);
+    roi.radius(roi_rad);
+
+    // Setup pointing on Cen A
+    GSkyDir skyDir;
+    skyDir.radec_deg(src_ra, src_dec);
+    GCTAPointing pnt;
+    pnt.dir(skyDir);
+
+    // Setup dummy event list
+    GGti     gti;
+    GEbounds ebounds;
+    GTime    tstart;
+    GTime    tstop;
+    GEnergy  emin;
+    GEnergy  emax;
+    tstart.met(0.0);
+    tstop.met(1800.0);
+    emin.TeV(0.1);
+    emax.TeV(100.0);
+    gti.append(tstart, tstop);
+    ebounds.append(emin, emax);
+    GCTAEventList events;
+    events.roi(roi);
+    events.gti(gti);
+    events.ebounds(ebounds);
+
+    // Setup dummy CTA observation
+    GCTAObservation obs;
+    obs.ontime(1800.0);
+    obs.livetime(1600.0);
+    obs.deadc(1600.0/1800.0);
+    obs.response(cta_irf, cta_caldb);
+    obs.events(&events);
+    obs.pointing(pnt);
+
+    // Extract CTA response
+    GResponse* rsp = obs.response();
+
+    // Load models for Npred computation
+    GModels models(cta_rsp_xml);
+
+    // Try block to catch any problems in the computation
+    try {
+
+        // Perform Npred computation
+        double npred = obs.npred(models, NULL);
+
+        // Test Npred
+        if (std::abs(npred - ref) > 1.0e-5) {
+            std::cout << std::endl
+                      << "TEST ERROR: Diffuse Npred computation value differs"
+                      << " from expectation by "
+                      << npred - ref
+                      << " (result-reference)."
+                      << std::endl;
+            throw;
+        }
+
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to compute GCTAResponse::npred."
                   << std::endl;
         std::cout << e.what() << std::endl;
         throw;
@@ -264,6 +466,12 @@ void test_response(void)
 
     // Test GCTAResponse::npsf
     test_response_npsf();
+
+    // Test GCTAResponse::irf_diffuse
+    test_response_irf_diffuse();
+    
+    // Test GCTAResponse::npred_diffuse
+    test_response_npred_diffuse();
 
     // Dump final ok
     std::cout << " ok." << std::endl;

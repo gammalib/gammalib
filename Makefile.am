@@ -40,8 +40,61 @@ uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
 
 
 #
-# Additional install rules
+# Additional rules
 #
+
+# Rules
+.PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
+
+# Add static-analysis rule:
+static-analysis: cppcheck sloccount cppncss
+
+# Add dynamic-analysis rule:
+dynamic-analysis: coverage valgrind
+
+# Add cppcheck rule
+cppcheck:
+	@if type cppcheck >/dev/null 2>&1; then \
+		cppcheck -v --enable=all --xml \
+		-Iinclude -Iinst/lat/include -Iinst/cta/include -Iinst/mwl/include \
+		inst/*/src inst/*/test src test 2> cppcheck-result.xml; \
+	else \
+		echo "cppcheck not found in PATH."; \
+	fi
+
+# Add sloccount rule
+sloccount:
+	@if type sloccount >/dev/null 2>&1; then \
+		sloccount --duplicates --wide --details \
+		include src inst test > sloccount.sc; \
+	else \
+		echo "sloccount not found in PATH."; \
+	fi
+
+# Add cppncss rule
+cppncss:
+	@if type cppncss >/dev/null 2>&1; then \
+		cppncss -r -v -x -k -f=cppncss-raw-report.xml \
+		src inst/*/src; \
+	else \
+		echo "cppncss not found in PATH."; \
+	fi
+
+# Add coverage rule
+coverage:
+	@if type gcovr >/dev/null 2>&1; then \
+		gcovr -r . -x -o gcovr-reports-data.xml; \
+	else \
+		echo "gcovr script not found in PATH."; \
+	fi
+
+# Add Valgrind rule
+valgrind:
+	@if type valgrind >/dev/null 2>&1; then \
+		$(MAKE) -C test valgrind; \
+	else \
+		echo "valgrind not found in PATH."; \
+	fi
 
 # Add Doxygen rules
 if DX_COND_doc
@@ -122,7 +175,7 @@ DX_CLEAN_LATEX = @DX_DOCDIR@/latex
 endif #DX_COND_latex
 
 # Rules
-.PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
+#.PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
 .INTERMEDIATE: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 

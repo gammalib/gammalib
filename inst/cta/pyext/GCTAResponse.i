@@ -79,6 +79,10 @@ public:
                                   const GEnergy&              srcEng,
                                   const GTime&                srcTime,
                                   const GObservation&         obs) const;
+    virtual double npred_diffuse(const GModelDiffuseSource& model,
+                                 const GEnergy&             srcEng,
+                                 const GTime&               srcTime,
+                                 const GObservation&        obs) const;
 
     // Other Methods
     GCTAEventAtom* mc(const double& area, const GPhoton& photon,

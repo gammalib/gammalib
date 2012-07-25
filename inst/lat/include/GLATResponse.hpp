@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATResponse.hpp  -  Fermi LAT Response class             *
+ *               GLATResponse.hpp  -  Fermi/LAT Response class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.hpp
- * @brief Fermi LAT Response class definition
- * @author J. Knodlseder
+ * @brief Fermi/LAT Response class definition
+ * @author J. Knoedlseder
  */
 
 #ifndef GLATRESPONSE_HPP

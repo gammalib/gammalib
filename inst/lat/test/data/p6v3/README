@@ -1,0 +1,219 @@
+LAT example data processed by ScienceTools 09-20-00
+
+ROI: Crab region
+Centre: (RA,Dec)=(83.6331, +22.0145)
+Radius: 7.5 deg
+Binned: 10 x 10 deg
+Diffuse events class
+1 week of data
+Energy range: 200 MeV - 20 GeV
+20 logarithmic energy bins in binned data
+Time range: 239557417 - 240368850
+Exposure: 590416.692 sec (integration time in seconds, ~6.8 days)
+
+
+ScienceTools results:
+<===> Crab:
+<===> Integral: 4.08073 +/- 0.584183   
+<===> Index: -1.93683 +/- 0.0946842
+<===> LowerLimit: 100
+<===> UpperLimit: 500000
+<===> TS value: 342.812
+<===> Flux: 2.10606e-07 +/- 2.31219e-08 photons/cm^2/s
+<===> 
+<===> Extragal_diffuse:
+<===> Normalization: 1.11022e-13 +/- 2.92797e-07
+<===> Flux: 9.71729e-18 +/- 2.56277e-11 photons/cm^2/s
+<===>
+<===> Galactic_diffuse:
+<===> Value: 0.294599 +/- 0.0183824
+<===> Flux: 8.45497e-05 +/- 5.276e-06 photons/cm^2/s
+
+
+GammaLib results:
+=== GOptimizerLM ===
+ Optimized function value ..: 7812.99
+ Absolute precision ........: 1e-06
+ Optimization status .......: converged
+ Number of parameters ......: 13
+ Number of free parameters .: 4
+ Number of iterations ......: 9
+ Lambda ....................: 1e-12
+=== GModelDiffuseSource ===
+ Name ......................: Extragal_diffuse
+ Instruments ...............: all
+ Model type ................: "ConstantValue" * "FileFunction" * "Constant"
+ Number of parameters ......: 3
+ Number of spatial par's ...: 1
+  Value ....................: 1 [0,10]  (fixed,scale=1,gradient)
+ Number of spectral par's ..: 1
+  Normalization ............: 3.2144 +/- 0.744781 [0,1000]  (free,scale=1,gradient)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+=== GModelDiffuseSource ===
+ Name ......................: Galactic_diffuse
+ Instruments ...............: all
+ Model type ................: "MapCubeFunction" * "ConstantValue" * "Constant"
+ Number of parameters ......: 3
+ Number of spatial par's ...: 1
+  Normalization ............: 1 [0.001,1000]  (fixed,scale=1,gradient)
+ Number of spectral par's ..: 1
+  Value ....................: 0.806892 +/- 0.0876327 [0,1000]  (free,scale=1,gradient)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+=== GModelPointSource ===
+ Name ......................: Crab
+ Instruments ...............: all
+ Model type ................: "SkyDirFunction" * "PowerLaw2" * "Constant"
+ Number of parameters ......: 7
+ Number of spatial par's ...: 2
+  RA .......................: 83.6331 [-360,360] deg (fixed,scale=1)
+  DEC ......................: 22.0145 [-90,90] deg (fixed,scale=1)
+ Number of spectral par's ..: 4
+  Integral .................: 2.10376e-06 +/- 1.55323e-07 [1e-12,0.0001] ph/cm2/s (free,scale=1e-07,gradient)
+  Index ....................: -2.12683 +/- 0.053618 [-5,-0.1]  (free,scale=1,gradient)
+  LowerLimit ...............: 100 [10,1e+06] MeV (fixed,scale=1)
+  UpperLimit ...............: 500000 [10,1e+06] MeV (fixed,scale=1)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient
+
+
+Log:
+********************************************
+* GLAST Science Analysis Software Log File *
+* ---------------------------------------- *
+* v2r8p0 (17/12/2010)                      *
+********************************************
+<sys> Linux fermi 2.6.31.5 #1 SMP Thu Apr 22 22:26:35 CEST 2010 x86_64 Intel(R) Xeon(R) CPU E5450 @ 3.00GHz GenuineIntel GNU/Linu
+x
+<sys> System runs Mosix
+<sys> ST version : "09-20-00"
+<sys> Add custom IRFs "P6_V11_DIFFUSE,P6_V3_B1_DIFFUSE,P6_V3_B2_DIFFUSE,P6_V3_C1_DIFFUSE,P6_V3_C2_DIFFUSE,P6_V3_F1_DIFFUSE,P6_V3_
+F2_DIFFUSE,P6_V3_I1_DIFFUSE,P6_V3_I2_DIFFUSE,P7_V2_DIFFUSE,P7_V2_SOURCE,P7_V2_TRANSIENT,P7_V4_CLEAN,P7_V4_SOURCE,P7_V4_ULTRACLEAN
+" to list of accessible IRFs
+<par> Default IRF: "P6_V3_DIFFUSE"
+<par> Set default IRF: "P6_V3_DIFFUSE"
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; 
+export HOME=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; mosrun -
+e gtselect rad="7.5" zmax="180.0" evtable="EVENTS" emax="20000.0" outfile="/users-data/knodlseder/glast/analysis/Crab/modelfit/we
+ek_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/ft1.fits" tmax=INDEF evclsmax="10" evclass=INDEF tmin=INDEF convtype="-1" c
+hatter="4" phasemax="1.0" emin="200.0" gui="no" clobber="yes" evclsmin="0" phasemin="0.0" ra="83.6331" debug="no" dec="22.0145" i
+nfile="/project-data/glast/flight/fssc/v6/lightcurve/weekly/bin_00000/diff/ft1.fits" mode="ql"
+<===> /users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab
+<===> This is gtselect version ScienceTools-09-20-00
+<===> Applying filter string: angsep(RA,DEC,83.6331,22.0145) < 7.5 && 200 <= ENERGY && ENERGY <= 20000 && 3 <= EVENT_CLASS && EVE
+NT_CLASS <= 3 && 0 <= ZENITH_ANGLE && ZENITH_ANGLE <= 105 && gtifilter()
+<===> Done.
+<fin> gtselect ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; 
+export HOME=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; mosrun -
+e gtbin sctable="SC_DATA" nypix="100" binsz="0.1" coordsys="GAL" axisrot="0.0" evtable="EVENTS" emax="20000.0" dtime="0.0" snrati
+o="1.0" mode="ql" evfile="/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_
+Crab/ft1.fits" lcemin="30.0" decfield="DEC" ebinfile="NONE" lcemax="200000.0" enumbins="20" scfile="/project-data/glast/flight/fs
+sc/v6/lightcurve/weekly/bin_00000/diff/ft2.fits" tbinalg="LIN" ebinalg="LOG" xref="184.557460101" algorithm="CCUBE" outfile="/use
+rs-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/cntmap.fits" yref="-5.784
+34644902" tbinfile="NONE" gui="no" emin="200.0" nxpix="100" clobber="yes" efield="ENERGY" debug="no" proj="CAR" tstart="0.0" chat
+ter="4" tstop="0.0" tfield="TIME" rafield="RA" denergy="100.0"
+<===> /users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab
+<===> This is gtbin version ScienceTools-09-20-00
+<fin> gtbin ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; 
+export HOME=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; mosrun -
+e gtexpcube2 irfs="P6_V3_DIFFUSE" emax="200000.0" nypix="180" binsz="1.0" table="EXPOSURE" enumbins="20" xref="0.0" thmax="180.0"
+ nxpix="360" proj="CAR" coordsys="GAL" bincalc="EDGE" infile="/project-data/glast/flight/fssc/v6/lightcurve/weekly/bin_00000/diff
+/ltcube.fits" outfile="/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Cra
+b/binned_expmap.fits" chatter="4" axisrot="0.0" emin="30.0" yref="0.0" clobber="yes" cmap="/users-data/knodlseder/glast/analysis/
+Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/cntmap.fits" mode="ql" debug="no" ignorephi="no"
+<===> /users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab
+<===> This is gtexpcube2 version ScienceTools-09-20-00
+<===> Computing binned exposure map....................!
+<fin> gtexpcube2 ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; 
+export HOME=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; mosrun -
+e -m4000 gtsrcmaps irfs="P6_V3_DIFFUSE" sctable="SC_DATA" psfcorr="yes" convol="yes" srcmdl="/users-data/knodlseder/glast/analysi
+s/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/source_model.xml" expcube="/project-data/glast/flight/fss
+c/v6/lightcurve/weekly/bin_00000/diff/ltcube.fits" resample="yes" debug="no" ptsrc="yes" clobber="yes" bexpmap="/users-data/knodl
+seder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/binned_expmap.fits" outfile="/users-da
+ta/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/srcmap.fits" cmap="/users-data
+/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/cntmap.fits" mode="ql" chatter="
+4" rfactor="2" gui="no" scfile="/project-data/glast/flight/fssc/v6/lightcurve/weekly/bin_00000/diff/ft2.fits"
+<===> /users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab
+<===> This is gtsrcmaps version ScienceTools-09-20-00
+<===> Creating source named Extragal_diffuse
+<===> Creating source named Galactic_diffuse
+<===> Creating source named Crab
+<===> Generating SourceMap for Crab....................!
+<===> Generating SourceMap for Extragal_diffuse....................!
+<===> Generating SourceMap for Galactic_diffuse....................!
+<===> Crab
+<===> appending map for Crab
+<===> Extragal_diffuse
+<===> appending map for Extragal_diffuse
+<===> Galactic_diffuse
+<===> appending map for Galactic_diffuse
+<fin> gtsrcmaps ok.
+...
+<cmd> cd /users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; export PFIL
+ES=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; export HOME=/user
+s-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; mosrun -e gtlike irfs="P6
+_V3_DIFFUSE" psfcorr="yes" expcube="/project-data/glast/flight/fssc/v6/lightcurve/weekly/bin_00000/diff/ltcube.fits" results="res
+ults.dat" evfile="none" expmap="none" statistic="BINNED" ftol="1e-08" plot="no" tsmin="yes" gui="no" save="yes" specfile="counts_
+spectra.fits" sctable="SC_DATA" optimizer="NEWMINUIT" evtable="EVENTS" refit="no" sfile="/users-data/knodlseder/glast/analysis/Cr
+ab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/results_like.xml" chatter="4" scfile="none" srcmdl="/users-da
+ta/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/results_like.xml" toltype="ABS
+" clobber="yes" bexpmap="/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_C
+rab/binned_expmap.fits" cmap="/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galprop
+v02_Crab/srcmap.fits" mode="ql" debug="no" check_fit="yes"
+<===> /users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab
+<===> This is gtlike version ScienceTools-09-20-00
+<===> Creating source named Crab
+<===> Creating source named Extragal_diffuse
+<===> Creating source named Galactic_diffuse
+<===> 0  -2875.5  460.129
+...
+<===> Crab:
+<===> Integral: 4.08073 +/- 0.584183
+<===> Index: -1.93683 +/- 0.0946842
+<===> LowerLimit: 100
+<===> UpperLimit: 500000
+<===> TS value: 342.812
+<===> Flux: 2.10606e-07 +/- 2.31219e-08 photons/cm^2/s
+<===> 
+<===> Extragal_diffuse:
+<===> Normalization: 1.11022e-13 +/- 2.92797e-07
+<===> Flux: 9.71729e-18 +/- 2.56277e-11 photons/cm^2/s
+<===> 
+<===> Galactic_diffuse:
+<===> Value: 0.294599 +/- 0.0183824
+<===> Flux: 8.45497e-05 +/- 5.276e-06 photons/cm^2/s
+<===> WARNING: Fit may be bad in range [251.785, 316.979] (MeV)
+<===> WARNING: Fit may be bad in range [502.377, 796.214] (MeV)
+<===> WARNING: Fit may be bad in range [3169.79, 3990.52] (MeV)
+<===> WARNING: Fit may be bad in range [6324.56, 7962.14] (MeV)
+<===> 
+<===> 
+<===> Total number of observed counts: 460
+<===> Total number of model events: 460
+<===> 
+<===> -log(Likelihood): 141  -2875.49542  460.0000224
+<===> 2875.49542
+<===> Writing fitted model to /users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galprop
+v02_Crab/results_like.xml
+<===> Elapsed CPU time: 5.49
+<fin> gtlike ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; 
+export HOME=/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab; mosrun -
+e gtmodel irfs="P6_V3_DIFFUSE" expcube="/project-data/glast/flight/fssc/v6/lightcurve/weekly/bin_00000/diff/ltcube.fits" resample
+="yes" outfile="/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab/modma
+p.fits" chatter="4" srcmaps="/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv
+02_Crab/srcmap.fits" srcmdl="/users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv
+02_Crab/results_like.xml" convol="yes" gui="no" clobber="yes" bexpmap="/users-data/knodlseder/glast/analysis/Crab/modelfit/week_0
+0000_roi05_200_20000_20bin_extmod_galpropv02_Crab/binned_expmap.fits" mode="ql" debug="no" rfactor="2"
+<===> /users-data/knodlseder/glast/analysis/Crab/modelfit/week_00000_roi05_200_20000_20bin_extmod_galpropv02_Crab
+<===> This is gtmodel version ScienceTools-09-20-00
+<===> Creating source named Crab
+<===> Creating source named Extragal_diffuse
+<===> Creating source named Galactic_diffuse
+<fin> gtmodel ok.
+<fin> SAS terminated properly.
+

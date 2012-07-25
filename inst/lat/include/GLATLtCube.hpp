@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATLtCube.hpp  -  Fermi LAT livetime cube               *
+ *                GLATLtCube.hpp  -  Fermi/LAT livetime cube               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATLtCube.hpp
- * @brief Fermi LAT livetime cube class definition.
- * @author J. Knodlseder
+ * @brief Fermi/LAT livetime cube class definition
+ * @author J. Knoedlseder
  */
 
 #ifndef GLATLTCUBE_HPP
@@ -42,7 +42,7 @@
 /***********************************************************************//**
  * @class GLATLtCube
  *
- * @brief Interface for the Fermi LAT livetime cube.
+ * @brief Interface for the Fermi LAT livetime cube
  *
  * The livetime cube holds the livetime as function and zenith and azimuth
  * angles for a given observation. The azimuth dependence is optional. 
@@ -89,7 +89,6 @@ private:
     GLATLtCubeMap m_exposure;
     GLATLtCubeMap m_weighted_exposure;
     GGti          m_gti;
-    bool          m_livetime_correct;
 };
 
 #endif /* GLATLTCUBE_HPP */

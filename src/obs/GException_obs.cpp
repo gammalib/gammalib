@@ -45,8 +45,8 @@ GException::no_response::no_response(std::string origin, std::string message)
     m_origin = origin;
 
     // Set error message
-    m_message = "No valid instrument response found in observation." \
-                " Set instrument response before using this method.";
+    m_message = "No valid instrument response found in observation."
+                " Set event container before using this method.";
     if (message.length() > 0) {
         m_message += " " + message;
     }
@@ -68,7 +68,7 @@ GException::no_events::no_events(std::string origin, std::string message)
     m_origin = origin;
 
     // Set error message
-    m_message = "No valid event container found in observation." \
+    m_message = "No valid event container found in observation."
                 " Set event container before using this method.";
     if (message.length() > 0) {
         m_message += " " + message;
@@ -91,7 +91,7 @@ GException::no_list::no_list(std::string origin, std::string message)
     m_origin = origin;
 
     // Set error message
-    m_message = "No valid event list found in observation." \
+    m_message = "No valid event list found in observation."
                 " Set event list before using this method.";
     if (message.length() > 0) {
         m_message += " " + message;
@@ -114,7 +114,7 @@ GException::no_cube::no_cube(std::string origin, std::string message)
     m_origin = origin;
 
     // Set error message
-    m_message = "No valid event cube found in observation." \
+    m_message = "No valid event cube found in observation."
                 " Set event cube before using this method.";
     if (message.length() > 0) {
         m_message += " " + message;
@@ -137,7 +137,7 @@ GException::no_roi::no_roi(std::string origin, std::string message)
     m_origin = origin;
 
     // Set error message
-    m_message = "No valid region of interest (ROI) found in observation." \
+    m_message = "No valid region of interest (ROI) found in observation."
                 " Set region of interest before using this method.";
     if (message.length() > 0) {
         m_message += " " + message;

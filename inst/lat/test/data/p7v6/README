@@ -1,0 +1,769 @@
+LAT example data processed by ScienceTools 09-29-00
+
+ROI: Crab region
+Centre: (RA,Dec)=(83.6331, +22.0145)
+Radius: 7.5 deg
+Binned: 10 x 10 deg
+Source events class
+1 week of data
+Energy range: 100 MeV - 10 GeV
+20 logarithmic energy bins in binned data
+Time range: 239557446.6 - 240162199.6
+Ontime: 479181.287 sec
+
+
+gtlike results:
+Crab:
+Integral: 24.2369 +/- 1.49572
+Index: -2.12467 +/- 0.0476363
+LowerLimit: 100
+UpperLimit: 500000
+TS value: 1300.37
+Flux: 2.41076e-06 +/- 1.50551e-07 photons/cm^2/s
+
+Extragal_diffuse:
+Normalization: 2.28565 +/- 0.462091
+Flux: 0.000472695 +/- 9.55313e-05 photons/cm^2/s
+
+Galactic_diffuse:
+Value: 0.861504 +/- 0.0652024
+Flux: 0.00041505 +/- 3.14108e-05 photons/cm^2/s
+
+WARNING: Fit may be bad in range [100, 1258.93] (MeV)
+WARNING: Fit may be bad in range [1995.26, 5011.87] (MeV)
+
+Total number of observed counts: 2211
+Total number of model events: 2211
+
+-log(Likelihood): 10794.50987
+
+
+GammaLib Results without efficiency correction:
+=== GOptimizerLM ===
+ Optimized function value ..: 10814.4
+ Absolute precision ........: 1e-06
+ Optimization status .......: converged
+ Number of parameters ......: 13
+ Number of free parameters .: 4
+ Number of iterations ......: 9
+ Lambda ....................: 1e-12
+=== GModels ===
+ Number of models ..........: 3
+ Number of parameters ......: 13
+=== GModelDiffuseSource ===
+ Name ......................: Extragal_diffuse
+ Instruments ...............: all
+ Model type ................: "ConstantValue" * "FileFunction" * "Constant"
+ Number of parameters ......: 3
+ Number of spatial par's ...: 1
+  Value ....................: 1 [0,10]  (fixed,scale=1,gradient)
+ Number of spectral par's ..: 1
+  Normalization ............: 2.89709 +/- 0.441824 [0,1000]  (free,scale=1,gradient)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+=== GModelDiffuseSource ===
+ Name ......................: Galactic_diffuse
+ Instruments ...............: all
+ Model type ................: "MapCubeFunction" * "ConstantValue" * "Constant"
+ Number of parameters ......: 3
+ Number of spatial par's ...: 1
+  Normalization ............: 1 [0.001,1000]  (fixed,scale=1,gradient)
+ Number of spectral par's ..: 1
+  Value ....................: 0.862843 +/- 0.0637907 [0,1000]  (free,scale=1,gradient)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+=== GModelPointSource ===
+ Name ......................: Crab
+ Instruments ...............: all
+ Model type ................: "SkyDirFunction" * "PowerLaw2" * "Constant"
+ Number of parameters ......: 7
+ Number of spatial par's ...: 2
+  RA .......................: 83.6331 [-360,360] deg (fixed,scale=1)
+  DEC ......................: 22.0145 [-90,90] deg (fixed,scale=1)
+ Number of spectral par's ..: 4
+  Integral .................: 1.95868e-06 +/- 1.23463e-07 [1e-14,0.0001] ph/cm2/s (free,scale=1e-07,gradient)
+  Index ....................: -2.0426 +/- 0.0509271 [-5,5]  (free,scale=1,gradient)
+  LowerLimit ...............: 100 [10,1e+06] MeV (fixed,scale=1)
+  UpperLimit ...............: 500000 [10,1e+06] MeV (fixed,scale=1)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+
+
+GammaLib Results with efficiency correction:
+=== GOptimizerLM ===
+ Optimized function value ..: 10814.5
+ Absolute precision ........: 1e-06
+ Optimization status .......: converged
+ Number of parameters ......: 13
+ Number of free parameters .: 4
+ Number of iterations ......: 8
+ Lambda ....................: 1e-11
+=== GObservations ===
+ Number of observations ....: 1
+ Number of predicted events : 2211
+=== GLATEventCube ===
+ Number of elements ........: 200000
+ Number of pixels ..........: 100 x 100
+ Number of energy bins .....: 20
+ Number of events ..........: 2211
+ Time interval .............: 2.39557e+08 - 2.40162e+08
+ Energy range ..............: 100 MeV - 10 GeV
+=== GModels ===
+ Number of models ..........: 3
+ Number of parameters ......: 13
+=== GModelDiffuseSource ===
+ Name ......................: Extragal_diffuse
+ Instruments ...............: all
+ Model type ................: "ConstantValue" * "FileFunction" * "Constant"
+ Number of parameters ......: 3
+ Number of spatial par's ...: 1
+  Value ....................: 1 [0,10]  (fixed,scale=1,gradient)
+ Number of spectral par's ..: 1
+  Normalization ............: 2.8746 +/- 0.442184 [0,1000]  (free,scale=1,gradient)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+=== GModelDiffuseSource ===
+ Name ......................: Galactic_diffuse
+ Instruments ...............: all
+ Model type ................: "MapCubeFunction" * "ConstantValue" * "Constant"
+ Number of parameters ......: 3
+ Number of spatial par's ...: 1
+  Normalization ............: 1 [0.001,1000]  (fixed,scale=1,gradient)
+ Number of spectral par's ..: 1
+  Value ....................: 0.865223 +/- 0.0638436 [0,1000]  (free,scale=1,gradient)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+=== GModelPointSource ===
+ Name ......................: Crab
+ Instruments ...............: all
+ Model type ................: "SkyDirFunction" * "PowerLaw2" * "Constant"
+ Number of parameters ......: 7
+ Number of spatial par's ...: 2
+  RA .......................: 83.6331 [-360,360] deg (fixed,scale=1)
+  DEC ......................: 22.0145 [-90,90] deg (fixed,scale=1)
+ Number of spectral par's ..: 4
+  Integral .................: 1.50751e-06 +/- 9.21769e-08 [1e-14,0.0001] ph/cm2/s (free,scale=1e-07,gradient)
+  Index ....................: -1.98031 +/- 0.0508149 [-5,5]  (free,scale=1,gradient)
+  LowerLimit ...............: 100 [10,1e+06] MeV (fixed,scale=1)
+  UpperLimit ...............: 500000 [10,1e+06] MeV (fixed,scale=1)
+ Number of temporal par's ..: 1
+  Constant .................: 1 (relative value) (fixed,scale=1,gradient)
+
+
+Log:
+********************************************
+* GLAST Science Analysis Software Log File *
+* ---------------------------------------- *
+* v2r9p0 (28/03/2011)                      *
+********************************************
+<sys> Linux kepler.cesr.fr 2.6.31.5 #2 SMP Tue Dec 21 15:34:16 CET 2010 x86_64 x86_64 x86_64 GNU/Linux
+<sys> System runs Mosix
+<sys> ST version : "09-29-00"
+<sys> Add custom IRFs "P6_V11_C1_DIFFUSE,P6_V11_C2_DIFFUSE,P6_V11_DIFFUSE,P6_V11_F1_DIFFUSE,P6_V11_F2_DIFFUSE,P6_V11_I1_DIFFUSE,P6_V
+11_I2_DIFFUSE,P6_V3_B1_DIFFUSE,P6_V3_B2_DIFFUSE,P6_V3_C1_DIFFUSE,P6_V3_C2_DIFFUSE,P6_V3_F1_DIFFUSE,P6_V3_F2_DIFFUSE,P6_V3_I1_DIFFUSE
+,P6_V3_I2_DIFFUSE,P7_V6_MEV" to list of accessible IRFs
+<par> Default IRF: "P6_V11_DIFFUSE"
+<par> Set default IRF: "P7SOURCE_V6"
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_lt
+cube; export HOME=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcu
+be; mosrun -e gtselect rad="7.5" zmax="180.0" evtable="EVENTS" emax="10000.0" outfile="/users-data/knodlseder/glast/analysis/gammali
+b/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/ft1.fits" tmax="0.0" evclsmax="10" evclass=INDEF tmin="0.0" 
+convtype="-1" chatter="4" phasemax="1.0" emin="100.0" gui="no" clobber="yes" evclsmin="0" phasemin="0.0" ra="83.6331" debug="no" dec
+="22.0145" infile="/project-data/glast/flight/fssc/p7v6/lightcurve/weekly/bin_00000/source/ft1.fits" mode="ql"
+<===> This is gtselect version ScienceTools-09-29-00
+<===> Applying filter string: ((EVENT_CLASS/4)%2 == 1) && angsep(RA,DEC,83.6331,22.0145) < 7.5 && 100 <= ENERGY && ENERGY <= 10000 &
+& 0 <= ZENITH_ANGLE && ZENITH_ANGLE <= 100 && gtifilter()
+<===> Done.
+<fin> gtselect ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_lt
+cube; export HOME=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcu
+be; mosrun -e gtltcube sctable="SC_DATA" tmin="0.0" evtable="EVENTS" evfile="/users-data/knodlseder/glast/analysis/gammalib/modelfit
+/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/ft1.fits" binsz="4.0" zmax="180.0" chatter="4" scfile="/project-data/g
+last/flight/fssc/p7v6/lightcurve/weekly/bin_00000/source/ft2.fits" dcostheta="0.05" phibins="0" outfile="/users-data/knodlseder/glas
+t/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/ltcube.fits" tmax="0.0" file_version="1" c
+lobber="yes" mode="ql" debug="no" gui="no"
+<===> This is gtltcube version ScienceTools-09-29-00
+<===> applying filter: (START >= 239557386.59999999404) && (STOP <= 240162259.59999999404)
+<===> Working on file /project-data/glast/flight/fssc/p7v6/lightcurve/weekly/bin_00000/source/ft2.fits
+<===> read 16988 rows
+<===> .....................!
+<fin> gtltcube ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_lt
+cube; export HOME=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcu
+be; mosrun -e gtbin sctable="SC_DATA" nypix="100" binsz="0.1" coordsys="GAL" axisrot="0.0" evtable="EVENTS" emax="10000.0" dtime="0.
+0" snratio="1.0" mode="ql" evfile="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmo
+d_galpropv02_ltcube/ft1.fits" lcemin="30.0" decfield="DEC" ebinfile="NONE" lcemax="200000.0" enumbins="20" scfile="/project-data/gla
+st/flight/fssc/p7v6/lightcurve/weekly/bin_00000/source/ft2.fits" tbinalg="LIN" ebinalg="LOG" xref="184.557460101" algorithm="CCUBE" 
+outfile="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/cntmap
+.fits" yref="-5.78434644902" tbinfile="NONE" gui="no" emin="100.0" nxpix="100" clobber="yes" efield="ENERGY" debug="no" proj="CAR" t
+start="0.0" chatter="4" tstop="0.0" tfield="TIME" rafield="RA" denergy="100.0"
+<===> This is gtbin version ScienceTools-09-29-00
+<fin> gtbin ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_lt
+cube; export HOME=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcu
+be; mosrun -e gtexpcube2 irfs="P7SOURCE_V6" thmin="0.0" emax="10000.0" nypix="360" binsz="0.5" table="EXPOSURE" enumbins="20" xref="
+0.0" thmax="180.0" nxpix="720" proj="CAR" coordsys="GAL" bincalc="EDGE" infile="/users-data/knodlseder/glast/analysis/gammalib/model
+fit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/ltcube.fits" outfile="/users-data/knodlseder/glast/analysis/gammali
+b/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/binned_expmap.fits" chatter="4" axisrot="0.0" emin="100.0" y
+ref="0.0" clobber="yes" cmap="none" mode="ql" debug="no" ignorephi="no"
+<===> This is gtexpcube2 version ScienceTools-09-29-00
+<===> Computing binned exposure map....................!
+<fin> gtexpcube2 ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_lt
+cube; export HOME=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcu
+be; mosrun -e -m4000 gtsrcmaps irfs="P7SOURCE_V6" sctable="SC_DATA" psfcorr="yes" convol="yes" srcmdl="/users-data/knodlseder/glast/
+analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/source_model.xml" emapbnds="yes" expcube="/u
+sers-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/ltcube.fits" resa
+mple="yes" debug="no" ptsrc="no" minbinsz="0.1" clobber="yes" bexpmap="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_
+00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/binned_expmap.fits" outfile="/users-data/knodlseder/glast/analysis/gammalib/
+modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/srcmap.fits" cmap="/users-data/knodlseder/glast/analysis/gamma
+lib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/cntmap.fits" mode="ql" chatter="4" rfactor="2" gui="no" sc
+file="/project-data/glast/flight/fssc/p7v6/lightcurve/weekly/bin_00000/source/ft2.fits"
+<===> This is gtsrcmaps version ScienceTools-09-29-00
+<===> Creating source named Extragal_diffuse
+<===> Creating source named Galactic_diffuse
+<===> Creating source named Crab
+<===> Generating SourceMap for Extragal_diffuse
+<===> resampling factor: 2
+<===> mapsize: 678
+<===> ....................MapBase object not found for this diffuse source: Extragal_diffuse
+<===> !
+<===> Generating SourceMap for Galactic_diffuseMapBase::readFitsFile: creating WcsMap2 object
+<===> 
+<===> resampling factor: 2
+<===> mapsize: 678
+<===> ....................MapBased::deleteMap: /project-data/glast/skymaps/galprop/ring_2year_P76_v0.fits
+<===> SourceMap::makeDiffuseSource: called mapBaseObj->deleteMap()
+<===> !
+<===> Extragal_diffuse
+<===> appending map for Extragal_diffuse
+<===> Galactic_diffuse
+<===> appending map for Galactic_diffuse
+<fin> gtsrcmaps ok.
+<cmd> cd /users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube; expor
+t PFILES=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube; expor
+t HOME=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube; mosrun 
+-e gtlike irfs="P7SOURCE_V6" psfcorr="yes" expcube="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_
+10000_20bin_extmod_galpropv02_ltcube/ltcube.fits" results="results.dat" evfile="none" expmap="none" statistic="BINNED" ftol="0.001" 
+plot="no" tsmin="yes" gui="no" save="yes" specfile="counts_spectra.fits" sctable="SC_DATA" optimizer="NEWMINUIT" evtable="EVENTS" re
+fit="no" sfile="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube
+/results_like.xml" chatter="4" scfile="none" srcmdl="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100
+_10000_20bin_extmod_galpropv02_ltcube/source_model.xml" toltype="ABS" clobber="yes" bexpmap="/users-data/knodlseder/glast/analysis/g
+ammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/binned_expmap.fits" cmap="/users-data/knodlseder/glast
+/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/srcmap.fits" mode="ql" debug="no" check_fit
+="yes"
+<===> This is gtlike version ScienceTools-09-29-00
+<===> Creating source named Extragal_diffuse
+<===> Creating source named Galactic_diffuse
+<===> Creating source named Crab
+<===> Generating SourceMap for Crab....................!
+<===> 0  -11463.1  1363.47
+<===> 1  -1.20502e+06  1.20978e+06
+<===> 2  -116379  115880
+<===> 3  -787677  791386
+<===> 4  -13895.8  7466.62
+<===> 5  -11283  2288.05
+<===> 6  -284453  285976
+<===> 7  -11648.6  1647.75
+<===> 8  -11595.5  1480.76
+<===> 9  -11441.1  1827.08
+<===> 10  -11157.4  2156.05
+<===> 11  -185199  185759
+<===> 12  -10952  3029.56
+<===> 13  -143880  143883
+<===> 14  -10949.7  2717.33
+<===> 15  -10797.9  2283.64
+<===> 16  -10795.3  2221.8
+<===> 17  -10795  2199.44
+<===> 18  -10794.7  2205.37
+<===> 19  -10794.7  2204.35
+<===> 20  -10794.6  2205.89
+<===> 21  -10794.5  2208.84
+<===> 22  -10794.5  2208.54
+<===> 23  -10794.5  2210.5
+<===> 24  -10794.5  2211
+<===> 25  -10794.5  2211
+<===> 26  -10794.5  2213.41
+<===> 27  -10794.5  2208.59
+<===> 28  -10796.5  2237.43
+<===> 29  -10796.4  2186.15
+<===> 30  -10794.5  2213.57
+<===> 31  -10794.5  2208.44
+<===> 32  -10794.5  2211.94
+<===> 33  -10794.5  2210.06
+<===> 34  -10794.6  2224.13
+<===> 35  -10794.6  2198.08
+<===> 36  -10794.5  2213.89
+<===> 37  -10794.5  2208.11
+<===> 38  -10797.7  2315.83
+<===> 39  -10797.7  2111.43
+<===> 40  -10794.5  2221.24
+<===> 41  -10794.5  2200.81
+<===> 42  -10794.5  2213.92
+<===> 43  -10794.5  2208.08
+<===> 44  -10794.5  2213.41
+<===> 45  -10794.5  2208.59
+<===> 46  -10794.5  2211.94
+<===> 47  -10794.5  2210.06
+<===> 48  -10794.5  2213.89
+<===> 49  -10794.5  2208.11
+<===> 50  -10794.5  2213.92
+<===> 51  -10794.5  2208.08
+<===> 52  -10794.5  2211.48
+<===> 53  -10794.5  2210.52
+<===> 54  -10794.5  2211.19
+<===> 55  -10794.5  2210.81
+<===> 56  -10794.5  2211.04
+<===> 57  -10794.5  2210.96
+<===> 58  -10794.5  2211.58
+<===> 59  -10794.5  2210.42
+<===> 60  -10794.5  2211.11
+<===> 61  -10794.5  2210.88
+<===> 62  -10794.5  2211.58
+<===> 63  -10794.5  2210.42
+<===> 64  -10794.5  2214.35
+<===> 65  -10794.5  2216.31
+<===> 66  -10794.5  2216.33
+<===> 67  -10794.5  2214.83
+<===> 68  -10794.5  2214.86
+<===> 69  -10794.5  2216.81
+<===> 
+<===> Minuit did successfully converge.
+<===> # of function calls: 70
+<===> minimum function Value: 10794.50987356
+<===> minimum edm: 2.391413580263e-06
+<===> minimum internal state vector: LAVector parameters:
+<===>      -1.258160629229
+<===>     -0.4388898757198
+<===>      -1.475142833798
+<===>      -1.512085114137
+<===> 
+<===> minimum internal covariance matrix: LASymMatrix parameters:
+<===>   0.00018976536 -0.00012607195 -8.4251046e-05  7.3227204e-06
+<===>  -0.00012607195  0.00022220204  7.9706762e-05 -1.1154607e-05
+<===>  -8.4251046e-05  7.9706762e-05  0.00018679445  -3.476547e-05
+<===>   7.3227204e-06 -1.1154607e-05  -3.476547e-05  9.8436269e-06
+<===> 
+<===> 
+<===> # ext. ||   Name    ||   type  ||     Value     ||  Error +/- 
+<===> 
+<===>    0   ||0_Integral || limited ||      24.23688978298 ||1.497949741566
+<===>    1   ||   1_Index || limited ||     -2.124674080123 ||0.04770644133028
+<===>    2   ||2_Normalization || limited ||      2.285654149747 ||0.4614966922948
+<===>    3   ||   3_Value || limited ||      0.861504112758 ||0.06508842202302
+<===> 
+<===> 
+<===> 
+<===> 
+<===> 70  -10794.50987356  2210.99882017
+<===> 71  -10794.50998146  2211.481493525
+<===> 72  -10794.50994821  2210.516286156
+<===> 73  -10794.50987997  2211.036316131
+<===> 74  -10794.5098754  2210.961327595
+<===> 75  -10794.50987477  2211.114419328
+<===> 76  -10794.5098806  2210.883237494
+<===> 77  -10794.5099653  2211.582467377
+<===> 78  -10794.50998773  2210.41534453
+<===> 79  -10794.50988054  2211.095343694
+<===> 80  -10794.50987389  2210.90230222
+<===> 81  -10794.50987419  2211.006319092
+<===> 82  -10794.50987327  2210.991321384
+<===> 83  -10794.50987315  2211.021938683
+<===> 84  -10794.50987431  2210.975702316
+<===> 85  -10794.50987544  2211.115535886
+<===> 86  -10794.50987993  2210.882111317
+<===> 87  -10794.51000802  2211.519011692
+<===> 88  -10794.50999967  2211.597092683
+<===> 89  -10794.51014077  2212.065140731
+<===> 90  -10794.50988086  2211.151915288
+<===> 91  -10794.50997438  2211.619963337
+<===> 92  -10794.51000067  2211.698066534
+<===> 
+<===> # of function calls: 23
+<===> function Value: 10794.50987356
+<===> expected distance to the Minimum (edm): 2.39029776067e-06
+<===> external parameters: 
+<===> # ext. ||   Name    ||   type  ||     Value     ||  Error +/- 
+<===> 
+<===>    0   ||0_Integral || limited ||      24.23688978298 ||1.495696803561
+<===>    1   ||   1_Index || limited ||     -2.124674080123 ||0.04763545178407
+<===>    2   ||2_Normalization || limited ||      2.285654149747 ||0.4620838710964
+<===>    3   ||   3_Value || limited ||      0.861504112758 ||0.06520236694343
+<===> 
+<===> 
+<===> 
+<===> covariance matrix: 
+<===> MnUserCovariance: 
+<===> 
+<===>       2.23718   -0.0436313     -0.30874    0.0165253
+<===>    -0.0436313   0.00226922   0.00859574 -0.000741793
+<===>      -0.30874   0.00859574     0.213528   -0.0244502
+<===>     0.0165253 -0.000741793   -0.0244502   0.00425136
+<===> 
+<===> MnUserCovariance Parameter correlations: 
+<===> 
+<===>             1    -0.612364    -0.446698     0.169448
+<===>     -0.612364            1     0.390497    -0.238825
+<===>     -0.446698     0.390497            1    -0.811506
+<===>      0.169448    -0.238825    -0.811506            1
+<===> 
+<===> global correlation coefficients : 
+<===> MnGlobalCorrelationCoeff: 
+<===> 
+<===>      0.703986
+<===>      0.628213
+<===>      0.870241
+<===>      0.840446
+<===> 
+<===> 
+<===> 93  -10794.5  2211
+<===> .Computing TS values for each source (3 total)
+<===> 94  -11646.4  1396.01
+<===> 95  -11646.4  1396.01
+<===> 96  -1.21248e+06  1.21717e+06
+<===> 97  -29147.7  25307.6
+<===> 98  -1.08809e+06  1.09251e+06
+<===> 99  -16559.9  10781.9
+<===> 100  -11461.4  2304.75
+<===> 101  -15569.5  9394.41
+<===> 102  -11448.7  2273.95
+<===> 103  -11441.5  2315.69
+<===> 104  -11440.6  2294.01
+<===> 105  -11439.1  2228.75
+<===> 106  -11439  2209.58
+<===> 107  -11438.9  2211.63
+<===> 108  -11438.9  2211
+<===> 109  -11438.9  2211
+<===> 110  -11439  2224.18
+<===> 111  -11439  2197.92
+<===> 112  -11438.9  2214.29
+<===> 113  -11438.9  2207.72
+<===> 114  -11441.3  2312.39
+<===> 115  -11441.3  2113.42
+<===> 116  -11439  2220.97
+<===> 117  -11439  2201.07
+<===> 118  -11438.9  2214.38
+<===> 119  -11438.9  2207.63
+<===> 120  -11438.9  2214.29
+<===> 121  -11438.9  2207.72
+<===> 122  -11438.9  2214.38
+<===> 123  -11438.9  2207.63
+<===> 124  -11438.9  2211.66
+<===> 125  -11438.9  2210.34
+<===> 126  -11438.9  2211.13
+<===> 127  -11438.9  2210.87
+<===> 128  -11438.9  2211.68
+<===> 129  -11438.9  2210.32
+<===> 130  -11438.9  2211.14
+<===> 131  -11438.9  2210.87
+<===> 132  -11438.9  2217.67
+<===> 133  -11438.9  2211
+<===> ..!
+<===> 
+<===> Photon fluxes are computed for the energy range 100 to 10000 MeV
+<===> 
+<===> Crab:
+<===> Integral: 24.2369 +/- 1.49572
+<===> Index: -2.12467 +/- 0.0476363
+<===> LowerLimit: 100
+<===> UpperLimit: 500000
+<===> TS value: 1288.84
+<===> Flux: 2.41076e-06 +/- 1.50551e-07 photons/cm^2/s
+<===> 
+<===> Extragal_diffuse:
+<===> Normalization: 2.28565 +/- 0.462091
+<===> Flux: 0.000472695 +/- 9.55313e-05 photons/cm^2/s
+<===> 
+<===> Galactic_diffuse:
+<===> Value: 0.861504 +/- 0.0652024
+<===> MapBase::readFitsFile: creating WcsMap2 object
+<===> Flux: 0.00041505 +/- 3.14108e-05 photons/cm^2/s
+<===> WARNING: Fit may be bad in range [100, 1258.93] (MeV)
+<===> WARNING: Fit may be bad in range [2511.89, 5011.87] (MeV)
+<===> 
+<===> 
+<===> Total number of observed counts: 2211
+<===> Total number of model events: 2211
+<===> 134  -10794.50987  2210.99882
+<===> 
+<===> -log(Likelihood): 10794.50987
+<===> 
+<===> Writing fitted model to /users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_gal
+propv02_ltcube/results_like.xml
+<===> Elapsed CPU time: 45.11
+<fin> gtlike ok.
+<log> gtlike refit requested! Restart.
+<cmd> cd /users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube; expor
+t PFILES=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube; expor
+t HOME=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube; mosrun 
+-e gtlike irfs="P7SOURCE_V6" psfcorr="yes" expcube="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_
+10000_20bin_extmod_galpropv02_ltcube/ltcube.fits" results="results.dat" evfile="none" expmap="none" statistic="BINNED" ftol="0.001" 
+plot="no" tsmin="yes" gui="no" save="yes" specfile="counts_spectra.fits" sctable="SC_DATA" optimizer="NEWMINUIT" evtable="EVENTS" re
+fit="no" sfile="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube
+/results_like.xml" chatter="4" scfile="none" srcmdl="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100
+_10000_20bin_extmod_galpropv02_ltcube/results_like.xml" toltype="ABS" clobber="yes" bexpmap="/users-data/knodlseder/glast/analysis/g
+ammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/binned_expmap.fits" cmap="/users-data/knodlseder/glast
+/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/srcmap.fits" mode="ql" debug="no" check_fit
+="yes"
+<===> This is gtlike version ScienceTools-09-29-00
+<===> Creating source named Crab
+<===> Creating source named Extragal_diffuse
+<===> Creating source named Galactic_diffuse
+<===> Generating SourceMap for Crab....................!
+<===> 0  -10794.5  2211
+<===> 1  -10795.1  2243.47
+<===> 2  -10794.5  2212.6
+<===> 3  -10794.5  2211.08
+<===> 4  -10794.5  2211.03
+<===> 5  -10794.5  2203.14
+<===> 6  -10794.5  2210.64
+<===> 7  -10794.5  2211.01
+<===> 8  -10794.5  2211.02
+<===> 9  -10794.5  2211.05
+<===> 10  -10794.5  2211.03
+<===> 11  -10794.5  2211.03
+<===> 12  -10794.5  2213.45
+<===> 13  -10794.5  2208.62
+<===> 14  -10796.5  2237.46
+<===> 15  -10796.4  2186.18
+<===> 16  -10794.6  2224.16
+<===> 17  -10794.6  2198.11
+<===> 18  -10794.5  2213.93
+<===> 19  -10794.5  2208.15
+<===> 20  -10797.7  2315.86
+<===> 21  -10797.6  2111.46
+<===> 22  -10794.5  2221.28
+<===> 23  -10794.5  2200.84
+<===> 24  -10794.5  2213.95
+<===> 25  -10794.5  2208.11
+<===> 26  -10794.5  2213.45
+<===> 27  -10794.5  2208.62
+<===> 28  -10796.5  2237.46
+<===> 29  -10796.4  2186.18
+<===> 30  -10794.5  2213.93
+<===> 31  -10794.5  2208.15
+<===> 32  -10794.5  2213.95
+<===> 33  -10794.5  2208.11
+<===> 34  -10794.5  2211.51
+<===> 35  -10794.5  2210.55
+<===> 36  -10794.5  2211.69
+<===> 37  -10794.5  2210.37
+<===> 38  -10794.5  2211.16
+<===> 39  -10794.5  2210.9
+<===> 40  -10794.5  2211.61
+<===> 41  -10794.5  2210.45
+<===> 42  -10794.5  2211.15
+<===> 43  -10794.5  2210.91
+<===> 44  -10794.5  2211.61
+<===> 45  -10794.5  2210.45
+<===> 46  -10794.5  2211.15
+<===> 47  -10794.5  2210.91
+<===> 48  -10796.6  2239.95
+<===> 49  -10794.5  2216.34
+<===> 50  -10794.5  2216.37
+<===> 51  -10796.5  2240.35
+<===> 52  -10796.5  2240.38
+<===> 53  -10794.5  2216.85
+<===> 
+<===> Minuit did successfully converge.
+<===> # of function calls: 54
+<===> minimum function Value: 10794.50987246
+<===> minimum edm: 1.386037868895e-06
+<===> minimum internal state vector: LAVector parameters:
+<===>      -1.258162798516
+<===>     -0.4388941538546
+<===>      -1.475134003275
+<===>      -1.512085854681
+<===> 
+<===> minimum internal covariance matrix: LASymMatrix parameters:
+<===>   0.00020581678 -0.00014540481  -9.390677e-05  8.3982709e-06
+<===>  -0.00014540481  0.00024140265  9.1128217e-05 -1.2295306e-05
+<===>   -9.390677e-05  9.1128217e-05  0.00019254672 -3.5396602e-05
+<===>   8.3982709e-06 -1.2295306e-05 -3.5396602e-05  9.9086522e-06
+<===> 
+<===> 
+<===> # ext. ||   Name    ||   type  ||     Value     ||  Error +/- 
+<===> 
+<===>    0   ||0_Integral || limited ||       24.2365561828 ||1.560003830368
+<===>    1   ||   1_Index || limited ||     -2.124693443454 ||0.04972473203899
+<===>    2   ||2_Normalization || limited ||      2.286075860607 ||0.4685915302882
+<===>    3   ||   3_Value || limited ||     0.8614823862704 ||0.06530222634957
+<===> 
+<===> 
+<===> 
+<===> 
+<===> 54  -10794.50987246  2211.030384996
+<===> 55  -10794.50998052  2211.513054312
+<===> 56  -10794.50994694  2210.547855022
+<===> 57  -10794.50992395  2211.16297469
+<===> 58  -10794.50992394  2210.89783762
+<===> 59  -10794.50987718  2211.145985138
+<===> 60  -10794.50987598  2210.914801334
+<===> 61  -10794.50987657  2211.147101762
+<===> 62  -10794.50987659  2210.913675094
+<===> 63  -10794.50987947  2211.126907712
+<===> 64  -10794.50987276  2210.933867854
+<===> 65  -10794.50987452  2211.05689955
+<===> 66  -10794.50987452  2211.003872136
+<===> 67  -10794.50987255  2211.035687772
+<===> 68  -10794.50987255  2211.025082289
+<===> 69  -10794.50987275  2211.053503707
+<===> 70  -10794.50987251  2211.007266946
+<===> 71  -10794.50987263  2211.053727801
+<===> 72  -10794.50987263  2211.007042467
+<===> 73  -10794.51010331  2211.645722533
+<===> 74  -10794.51000224  2211.628654454
+<===> 75  -10794.50999815  2211.629771078
+<===> 76  -10794.50992756  2211.278574832
+<===> 77  -10794.50992996  2211.279691456
+<===> 78  -10794.50988813  2211.262701904
+<===> 
+<===> # of function calls: 25
+<===> function Value: 10794.50987246
+<===> expected distance to the Minimum (edm): 1.289942205563e-06
+<===> external parameters: 
+<===> # ext. ||   Name    ||   type  ||     Value     ||  Error +/- 
+<===> 
+<===>    0   ||0_Integral || limited ||       24.2365561828 ||1.495899713553
+<===>    1   ||   1_Index || limited ||     -2.124693443454 ||0.04764410528616
+<===>    2   ||2_Normalization || limited ||      2.286075860607 ||0.4622305314758
+<===>    3   ||   3_Value || limited ||     0.8614823862704 ||0.06522209562898
+<===> 
+<===> 
+<===> 
+<===> covariance matrix: 
+<===> MnUserCovariance: 
+<===> 
+<===>       2.23779   -0.0436555    -0.308928     0.016547
+<===>    -0.0436555   0.00227004   0.00860326 -0.000742614
+<===>     -0.308928   0.00860326     0.213664   -0.0244689
+<===>      0.016547 -0.000742614   -0.0244689   0.00425393
+<===> 
+<===> MnUserCovariance Parameter correlations: 
+<===> 
+<===>             1    -0.612509    -0.446769     0.169596
+<===>     -0.612509            1     0.390644    -0.238974
+<===>     -0.446769     0.390644            1    -0.811622
+<===>      0.169596    -0.238974    -0.811622            1
+<===> 
+<===> global correlation coefficients : 
+<===> MnGlobalCorrelationCoeff: 
+<===> 
+<===>      0.704082
+<===>      0.628364
+<===>      0.870327
+<===>      0.840548
+<===> 
+<===> 
+<===> 79  -10794.5  2211.03
+<===> .Computing TS values for each source (3 total)
+<===> 80  -11646.3  1396.06
+<===> 81  -11646.3  1396.06
+<===> 82  -1.2112e+06  1.21589e+06
+<===> 83  -28867.7  25000.3
+<===> 84  -1.08982e+06  1.09425e+06
+<===> 85  -16589  10818.4
+<===> 86  -11461.4  2305.08
+<===> 87  -15571.5  9396.92
+<===> 88  -11448.7  2274.27
+<===> 89  -11441.5  2315.49
+<===> 90  -11440.6  2294.09
+<===> 91  -11439.1  2228.68
+<===> 92  -11439  2209.61
+<===> 93  -11438.9  2211.62
+<===> 94  -11438.9  2211
+<===> 95  -11438.9  2211
+<===> 96  -11439  2224.18
+<===> 97  -11439  2197.92
+<===> 98  -11438.9  2214.29
+<===> 99  -11438.9  2207.72
+<===> 100  -11441.3  2312.39
+<===> 101  -11441.3  2113.42
+<===> 102  -11439  2220.97
+<===> 103  -11439  2201.07
+<===> 104  -11438.9  2214.38
+<===> 105  -11438.9  2207.63
+<===> 106  -11438.9  2214.29
+<===> 107  -11438.9  2207.72
+<===> 108  -11438.9  2214.38
+<===> 109  -11438.9  2207.63
+<===> 110  -11438.9  2211.66
+<===> 111  -11438.9  2210.34
+<===> 112  -11438.9  2211.13
+<===> 113  -11438.9  2210.87
+<===> 114  -11438.9  2211.68
+<===> 115  -11438.9  2210.32
+<===> 116  -11438.9  2211.14
+<===> 117  -11438.9  2210.86
+<===> 118  -11438.9  2217.67
+<===> 119  -11438.9  2211
+<===> ..!
+<===> 
+<===> Photon fluxes are computed for the energy range 100 to 10000 MeV
+<===> 
+<===> Crab:
+<===> Integral: 24.2366 +/- 1.49592
+<===> Index: -2.12469 +/- 0.047645
+<===> LowerLimit: 100
+<===> UpperLimit: 500000
+<===> TS value: 1288.84
+<===> Flux: 2.41072e-06 +/- 1.50572e-07 photons/cm^2/s
+<===> 
+<===> Extragal_diffuse:
+<===> Normalization: 2.28608 +/- 0.462238
+<===> 114  -11438.9  2211.68
+<===> 115  -11438.9  2210.32
+<===> 116  -11438.9  2211.14
+<===> 117  -11438.9  2210.86
+<===> 118  -11438.9  2217.67
+<===> 119  -11438.9  2211
+<===> ..!
+<===> 
+<===> Photon fluxes are computed for the energy range 100 to 10000 MeV
+<===> 
+<===> Crab:
+<===> Integral: 24.2366 +/- 1.49592
+<===> Index: -2.12469 +/- 0.047645
+<===> LowerLimit: 100
+<===> UpperLimit: 500000
+<===> TS value: 1288.84
+<===> Flux: 2.41072e-06 +/- 1.50572e-07 photons/cm^2/s
+<===> 
+<===> Extragal_diffuse:
+<===> Normalization: 2.28608 +/- 0.462238
+<===> Flux: 0.000472782 +/- 9.55616e-05 photons/cm^2/s
+<===> 
+<===> Galactic_diffuse:
+<===> Value: 0.861482 +/- 0.0652221
+<===> MapBase::readFitsFile: creating WcsMap2 object
+<===> Flux: 0.000415039 +/- 3.14203e-05 photons/cm^2/s
+<===> WARNING: Fit may be bad in range [100, 1258.93] (MeV)
+<===> WARNING: Fit may be bad in range [2511.89, 5011.87] (MeV)
+<===> 
+<===> 
+<===> Total number of observed counts: 2211
+<===> Total number of model events: 2211.03
+<===> 120  -10794.50987  2211.030385
+<===> 
+<===> -log(Likelihood): 10794.50987
+<===> 
+<===> Writing fitted model to /users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_gal
+propv02_ltcube/results_like.xml
+<===> Elapsed CPU time: 56.03
+<fin> gtlike ok.
+<cmd> export PFILES=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_lt
+cube; export HOME=/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcu
+be; mosrun -e gtmodel irfs="P7SOURCE_V6" expcube="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10
+000_20bin_extmod_galpropv02_ltcube/ltcube.fits" resample="yes" outfile="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week
+_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/modmap.fits" outtype="CMAP" chatter="4" srcmaps="/users-data/knodlseder/gla
+st/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/srcmap.fits" srcmdl="/users-data/knodlsed
+er/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpropv02_ltcube/results_like.xml" convol="yes" gui=
+"no" clobber="yes" bexpmap="/users-data/knodlseder/glast/analysis/gammalib/modelfit/week_00000_P7_roi05_100_10000_20bin_extmod_galpr
+opv02_ltcube/binned_expmap.fits" mode="ql" debug="no" rfactor="2"
+<===> This is gtmodel version ScienceTools-09-29-00
+<===> Creating source named Crab
+<===> Creating source named Extragal_diffuse
+<===> Creating source named Galactic_diffuse
+<===> Generating SourceMap for Crab....................!
+<fin> gtmodel ok.
+<fin> SAS terminated properly.
