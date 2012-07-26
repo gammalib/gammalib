@@ -1,7 +1,7 @@
 #############################################################################
 # Makefile for gammalib Python extension module                             #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011 Jurgen Knodlseder                                      #
+# Copyright (C) 2011-2012 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -39,7 +39,12 @@ endif
 if WITH_INST_LAT
   LAT_SWIG_TARGETS = gammalib/lat_wrap.cpp gammalib/lat.py
 endif
-INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) $(CTA_SWIG_TARGETS) $(LAT_SWIG_TARGETS)
+if WITH_INST_COM
+  COM_SWIG_TARGETS = gammalib/com_wrap.cpp gammalib/com.py
+endif
+INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
+                    $(CTA_SWIG_TARGETS) \
+                    $(COM_SWIG_TARGETS)
 
 # Sources that are required for the build. All targets in the list will be built
 # before anything. These are honored by 'make all', 'make check' and 'make install'.
@@ -116,6 +121,12 @@ endif
 if WITH_INST_LAT
 gammalib/lat_wrap.cpp gammalib/lat.py: $(top_srcdir)/inst/lat/pyext/lat.i
 	$(SWIG) -c++ -python -Wall -o gammalib/lat_wrap.cpp -outdir gammalib $<
+endif
+
+# Rule for COM module
+if WITH_INST_COM
+gammalib/com_wrap.cpp gammalib/com.py: $(top_srcdir)/inst/com/pyext/com.i
+	$(SWIG) -c++ -python -Wall -o gammalib/com_wrap.cpp -outdir gammalib $<
 endif
 
 endif # HAVE_SWIG

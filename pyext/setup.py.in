@@ -1,7 +1,7 @@
 #############################################################################
 # Disutils setup file for gammalib Python extension module                  #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011 Jurgen Knodlseder                                      #
+# Copyright (C) 2011-2012 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -144,6 +144,9 @@ if '@WITH_INST_CTA_TRUE@' != '#':
 if '@WITH_INST_LAT_TRUE@' != '#':
 	print "Include Fermi/LAT instrument interface in gammalib Python bindings."
 	inst_modules.append('lat')
+if '@WITH_INST_COM_TRUE@' != '#':
+	print "Include COMPTEL instrument interface in gammalib Python bindings."
+	inst_modules.append('com')
 
 # Set extension definition for core modules
 ext_modules = []
