@@ -41,11 +41,59 @@
 /* __ Constants __________________________________________________________ */
 const std::string datadir       = "../inst/com/test/data";
 const std::string com_caldb     = "../inst/com/caldb";
-const std::string com_dre       = datadir+"/m50439_dre.fits";
+const std::string com_iaq       = "u47569_iaq.fits";          // 1-3 MeV
+const std::string com_dre       = datadir+"/m50439_dre.fits"; // 1-3 MeV
 const std::string com_drb       = datadir+"/m34997_drg.fits";
 const std::string com_drg       = datadir+"/m34997_drg.fits";
 const std::string com_drx       = datadir+"/m32171_drx.fits";
 const std::string com_obs       = datadir+"obs.xml";
+
+
+/***********************************************************************//**
+ * @brief Checks handling of IAQ response files
+ *
+ * This function checks the handling of IAQ response files. IAQ response
+ * files are 2D images that show the instrument response as function of
+ * geometrical (Phi_geo) and measured (Phi_bar) Compton scatter angle.
+ ***************************************************************************/
+void test_iaq_response(void)
+{
+    // Test response loading
+    try {
+        // Construct observation from datasets
+        GCOMResponse rsp(com_caldb, com_iaq);
+    }
+    catch (std::exception &e) {
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to construct IAQ response."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
+    }
+    std::cout << ".";
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks handling of COMPTEL response files
+ ***************************************************************************/
+void test_response(void)
+{
+    // Dump header
+    std::cout << "Test COMPTEL response: ";
+
+    // Test IAQ
+    test_iaq_response();
+
+    // Dump final ok
+    std::cout << " ok." << std::endl;
+
+    // Return
+    return;
+}
 
 
 /***********************************************************************//**
@@ -121,6 +169,9 @@ int main(void)
     // Check if data directory exists
     bool has_data = (access(datadir.c_str(), R_OK) == 0);
 
+    // Execute tests not needing data
+    test_response();
+    
     // Execute tests requiring data
     if (has_data) {
 
