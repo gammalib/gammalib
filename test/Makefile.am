@@ -60,6 +60,7 @@ check_PROGRAMS = test_GSupport \
                  test_GApplication \
                  test_GModel \
                  test_GSky \
+		 test_GObservations \
                  $(INST_MWL) $(INST_CTA) $(INST_LAT)
 
 # Set test environment (needed for linking with cfitsio and readline)
@@ -78,6 +79,7 @@ TESTS = test_GSupport \
         test_GApplication \
         test_GModel \
         test_GSky \
+	test_GObservations \
         $(INST_MWL) $(INST_CTA) $(INST_LAT) \
         $(TEST_PYTHON_SCRIPT)
 
@@ -136,6 +138,11 @@ test_GSky_SOURCES = test_GSky.cpp
 test_GSky_LDFLAGS = @LDFLAGS@
 test_GSky_CPPFLAGS = @CPPFLAGS@
 test_GSky_LDADD = $(top_srcdir)/src/libgamma.la
+#
+test_GObservations_SOURCES = test_GObservations.cpp
+test_GObservations_LDFLAGS = @LDFLAGS@
+test_GObservations_CPPFLAGS = @CPPFLAGS@
+test_GObservations_LDADD = $(top_srcdir)/src/libgamma.la
 
 # Add Valgrind rule
 valgrind:
