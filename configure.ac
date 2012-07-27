@@ -1012,6 +1012,19 @@ if test "x$with_lat" = "xyes"; then
 fi
 AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
 
+# Checks for COMPTEL interface
+AC_ARG_WITH([com],
+            [AS_HELP_STRING([--with-com],
+                            [compile in COMPTEL specific interface [default=yes]])],
+            [],
+            [with_com=yes])
+if test "x$with_com" = "xyes"; then
+  AC_CHECK_FILE([inst/com/Makefile.am],
+                [with_com=yes],
+                [with_com=no])
+fi
+AM_CONDITIONAL(WITH_INST_COM, test "x$with_com" = "xyes")
+
 
 #############################################################################
 # Checks for Doxygen                                                        #
@@ -1055,6 +1068,9 @@ if test "x$with_cta" = "xyes"; then
 fi
 if test "x$with_lat" = "xyes"; then
   AC_CONFIG_FILES([inst/lat/Makefile])
+fi
+if test "x$with_com" = "xyes"; then
+  AC_CONFIG_FILES([inst/com/Makefile])
 fi
 AC_OUTPUT
 
@@ -1126,6 +1142,11 @@ if test "x$with_cta" = "xyes"; then
   echo "  * CTA interface                (yes)"
 else
   echo "  - CTA interface                (no)"
+fi
+if test "x$with_com" = "xyes"; then
+  echo "  * COMPTEL interface            (yes)"
+else
+  echo "  - COMPTEL interface            (no)"
 fi
 
 # Dump Doxygen information
