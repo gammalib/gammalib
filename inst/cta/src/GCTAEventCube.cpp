@@ -293,7 +293,7 @@ int GCTAEventCube::naxis(int axis) const
         naxis = m_map.ny();
         break;
     case 2:
-        naxis = m_map.npix();
+        naxis = m_map.nmaps();
         break;
     }
 
