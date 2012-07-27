@@ -44,6 +44,7 @@ if WITH_INST_COM
 endif
 INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
                     $(CTA_SWIG_TARGETS) \
+                    $(LAT_SWIG_TARGETS) \
                     $(COM_SWIG_TARGETS)
 
 # Sources that are required for the build. All targets in the list will be built
