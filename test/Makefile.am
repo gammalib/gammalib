@@ -90,7 +90,10 @@ TESTS = test_GSupport \
         test_GApplication \
         test_GModel \
         test_GSky \
-        $(INST_MWL) $(INST_CTA) $(INST_LAT) \
+        $(INST_MWL) \
+        $(INST_CTA) \
+        $(INST_LAT) \
+        $(INST_COM) \
         $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links
