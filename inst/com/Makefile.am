@@ -9,26 +9,26 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = src/GCOMException.cpp \
-          src/GCOMObservation.cpp \
           src/GCOMEventCube.cpp \
           src/GCOMEventBin.cpp \
-          src/GCOMResponse.cpp \
-          src/GCOMInstDir.cpp \
-          src/GCOMPointing.cpp
+          src/GCOMInstDir.cpp
+#          src/GCOMObservation.cpp \
+#          src/GCOMResponse.cpp \
+#          src/GCOMPointing.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCOMException.hpp \
-                     include/GCOMObservation.hpp \
                      include/GCOMEventCube.hpp \
                      include/GCOMEventBin.hpp \
-                     include/GCOMPointing.hpp \
                      include/GCOMInstDir.hpp \
-                     include/GCOMResponse.hpp \
                      include/GCOMLib.hpp
+#                     include/GCOMObservation.hpp \
+#                     include/GCOMPointing.hpp \
+#                     include/GCOMResponse.hpp
 
 # Calibration files to distribute
-irfs = u47569_iaq.fits.gz \
-       u47741_iaq.fits.gz
+irfs = caldb/u47569_iaq.fits.gz \
+       caldb/u47741_iaq.fits.gz
 
 # Build libtool library
 noinst_LTLIBRARIES = libcom.la

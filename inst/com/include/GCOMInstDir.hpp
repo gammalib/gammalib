@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GCOMLib.hpp  -  COMPTEL Support Header files             *
+ *         GCOMInstDir.hpp  -  COMPTEL instrument direction class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,24 +19,56 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCOMLib.hpp
- * @brief Collection of COMPTEL support header files
- * @author <author>
+ * @file GCOMInstDir.hpp
+ * @brief COMPTEL instrument direction class definition
+ * @author J. Knoedlseder
  */
 
-#ifndef GCOMLIB_HPP
-#define GCOMLIB_HPP
+#ifndef GCOMINSTDIR_HPP
+#define GCOMINSTDIR_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
+#include <string>
+#include "GInstDir.hpp"
+#include "GSkyDir.hpp"
 
-/* __ COMPTEL specific headers ___________________________________________ */
-#include "GCOMException.hpp"
-//#include "GCOMObservation.hpp"
-#include "GCOMEventCube.hpp"
-#include "GCOMEventBin.hpp"
-#include "GCOMInstDir.hpp"
-//#include "GCOMPointing.hpp"
-//#include "GCOMResponse.hpp"
 
-#endif /* GCOMLIB_HPP */
+/***********************************************************************//**
+ * @class GCOMInstDir
+ *
+ * @brief Interface for the COMPTEL instrument direction class
+ ***************************************************************************/
+class GCOMInstDir : public GInstDir {
+
+public:
+    // Constructors and destructors
+    GCOMInstDir(void);
+    GCOMInstDir(const GCOMInstDir& dir);
+    virtual ~GCOMInstDir(void);
+
+    // Operators
+    GCOMInstDir& operator= (const GCOMInstDir& dir);
+
+    // Methods
+    virtual void         clear(void);
+    virtual GCOMInstDir* clone(void) const;
+    virtual std::string  print(void) const;
+
+    // Other methods
+    void    skydir(const GSkyDir& dir) { m_dir=dir; }
+    void    phi(const double& phi) { m_phi=phi; }
+    GSkyDir skydir(void) const { return m_dir; }
+    double  phi(void) const { return m_phi; }
+
+protected:
+    // Protected methods
+    void init_members(void);
+    void copy_members(const GCOMInstDir& dir);
+    void free_members(void);
+
+    // Protected members
+    GSkyDir   m_dir;   //!< Observed scatter direction of event
+    double    m_phi;   //!< Observed scatter angle of event
+};
+
+#endif /* GCOMINSTDIR_HPP */

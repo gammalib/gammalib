@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  com - COMPTEL support python bindings                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by <author>                                         *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -41,10 +41,10 @@
 %import(module="obs") "GInstDir.i";
 
 /* __ COMPTEL _____________________________________________________________ */
-%include "GCOMObservation.i"
-%include "GCOMEventCube.i"
-%include "GCOMEventBin.i"
-%include "GCOMPointing.i"
-%include "GCOMResponse.i"
-%include "GCOMInstDir.i"
+//%include "GCOMObservation.i"
+//%include "GCOMEventCube.i"
+//%include "GCOMEventBin.i"
+//%include "GCOMPointing.i"
+//%include "GCOMResponse.i"
+//%include "GCOMInstDir.i"
 
