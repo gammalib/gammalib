@@ -140,8 +140,11 @@ public:
         // Methods
         void           eval(const GOptimizerPars& pars);
         void           poisson_unbinned(const GObservation& obs, const GOptimizerPars& pars);
+        void           poisson_unbinned(const GObservation& obs, const GOptimizerPars& pars, GSparseMatrix& covar, GVector& mgrad, double& value, GVector& gradient);
         void           poisson_binned(const GObservation& obs, const GOptimizerPars& pars);
+        void           poisson_binned(const GObservation& obs, const GOptimizerPars& pars, GSparseMatrix& covar, GVector& mgrad, double& value, double& npred, GVector& gradient);
         void           gaussian_binned(const GObservation& obs, const GOptimizerPars& pars);
+        void           gaussian_binned(const GObservation& obs, const GOptimizerPars& pars, GSparseMatrix& covar, GVector& mgrad, double& value, double& npred, GVector& gradient);
         double*        value(void) { return &m_value; }
         double         npred(void) const { return m_npred; }
         GVector*       gradient(void) { return m_gradient; }

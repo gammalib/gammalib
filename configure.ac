@@ -569,6 +569,36 @@ else
   AC_MSG_RESULT(no)
 fi
 
+#############################################################################
+# Checks for OpenMP checking option (G_OPENMP)                              #
+#############################################################################
+openmp_ok=no
+
+# Check if openMP is available
+m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
+if test "x$ac_cv_prog_cxx_openmp" != "xunsupported" && test "x$ac_cv_prog_cxx_openmp" != "x"; then
+   openmp_ok=yes
+fi
+
+if test "x$openmp_ok" = "xyes" ; then
+
+   AC_MSG_CHECKING(whether to enable openMP)
+   AC_ARG_ENABLE([openmp],
+	          AS_HELP_STRING([--enable-openmp],
+                                 [To active multi-threading [default=yes]]),
+			         [enable_openmp_="$enableval"],
+				 [enable_openmp="yes"])
+
+   if test "x$enable_openmp" = "xyes"; then
+        CXXFLAGS="$CXXFLAGS $OPENMP_CFLAGS"
+        AC_MSG_RESULT(yes)
+   else
+        enable_openmp=no
+	AC_MSG_RESULT(no)
+   fi
+fi
+
+AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 
 #############################################################################
 # Checks if Python bindings are to be build                                 #
@@ -678,6 +708,7 @@ if test "x$enable_python" = "xyes"; then
   AC_SUBST(PYTHON_EXTRA_LIBS)
 
 fi
+
 
 
 #############################################################################
@@ -1150,6 +1181,11 @@ if test "x$SMALL_MEMORY" = "xyes"; then
   echo "  * Optimize memory usage        (yes)   (default)"
 else
   echo "  - Optimize memory usage        (no)"
+fi
+if test "x$enable_openmp" = "xyes"; then
+  echo "  * Enable openMP                (yes)   (default)"
+else
+  echo "  - Enable openMP                (no)"
 fi
 if test "x$enable_debug" = "xyes"; then
   echo "  * Compile in debug code        (yes)"
