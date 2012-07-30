@@ -574,11 +574,11 @@ fi
 #############################################################################
 openmp_ok=no
 
-m4_ifdef([AC_OPENMP],m4_pattern_allow([AC_OPENMP]), [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
+# Check if openMP is available
+m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
 if test "x$ac_cv_prog_cxx_openmp" != "xunsupported" && test "x$ac_cv_prog_cxx_openmp" != "x"; then
    openmp_ok=yes
 fi
-
 
 if test "x$openmp_ok" = "xyes" ; then
 

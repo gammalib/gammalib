@@ -204,7 +204,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_wrk_grad = new GVector(npars);
         m_covar->stack_init(npars,10000);
         
-        //vector to save working variables.
+        //vector to save working variables of each thread.
         std::vector<GVector* > vect_cpy_mgrad;
         std::vector<GSparseMatrix* > vect_cpy_mcovar;
         std::vector<double* > vect_cpy_mvalue;
@@ -226,6 +226,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             double* cpy_mnpred = new double;
             double* cpy_mvalue = new double;
             
+            //Critical zone
             #pragma omp critical
             {
                 vect_cpy_mgrad.push_back(cpy_mgrad);
@@ -259,7 +260,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                         #pragma omp critial single
                         {
                             std::cout << "Unbinned Poisson (" << i << "):";
-               			    std::cout << " Npred=" << npred;
+                            std::cout << " Npred=" << npred;
                             std::cout << " Grad="<< *copy_wrk_grad << std::endl;
                             std::cout << "Sum:";
                             std::cout << " Npred=" << *cpy_mnpred;
@@ -312,7 +313,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             
         } // end pragma omp parallel
         
-        //Now the computation is finished, update attributes.
+        // Now the computation is finished, update attributes.
         // For each omp section, a thread will be created.
         #pragma omp sections
         {
