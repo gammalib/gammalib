@@ -204,6 +204,22 @@ void GTestSuites::name(const std::string& name)
 }
 
 /***********************************************************************//**
+ * @brief Enables/disables logging into standard output stream
+ *
+ * @param[in] flag Enable/disable logging (true/false).
+ *
+ * Enables or disables logging into the standard output stream.
+ ***************************************************************************/
+void GTestSuites::cout(bool cout)
+{
+    // Enables or disables logging into the standard output stream
+    m_log.cout(cout);
+    
+    //Return
+    return;
+}
+
+/***********************************************************************//**
  * @brief Append test suite to container
  *
  * @param[in] testsuite Test suite.
@@ -212,6 +228,11 @@ void GTestSuites::name(const std::string& name)
  ***************************************************************************/
 void GTestSuites::append(GTestSuite& testsuite)
 {
+    // If it is the first test, print test suites name
+    if(m_testsuites.size()==0)
+    {
+        m_log.header1(name());
+    }
     //Add testsuite to container
     m_testsuites.push_back(&testsuite);
 
@@ -412,6 +433,8 @@ void GTestSuites::init_members(){
 
     //Set default name
     m_name="Unamed Test Suites";
+    m_log.max_size(1);
+    m_log.cout(true);
 
     //Return
     return;

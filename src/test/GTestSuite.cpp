@@ -234,7 +234,7 @@ void GTestSuite::cout(bool cout)
  *          testsuite.test_assert(x>3,"Test if x > 3");
  *          testsuite.test_assert(x>3&&x<10,"Test if  3 < x < 10 ");
  ***************************************************************************/
-void GTestSuite::test_assert(bool assert, const std::string& name)
+void GTestSuite::test_assert(bool assert, const std::string& name,const std::string& message)
 {
     // If it is the first test, print test suite name
     if(tests()==0){
@@ -253,6 +253,9 @@ void GTestSuite::test_assert(bool assert, const std::string& name)
         //increment number of failures
         m_failures++;
     }
+    
+    //Set message
+    testcase->message(message);
     
     // Show the result ( ".","F" or, "E")
     m_log<<testcase->print_result();

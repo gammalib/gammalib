@@ -60,6 +60,7 @@ class GTestSuites{
         // Methods
         std::string name() const;
         void        name(const std::string& name);
+        void        cout(bool cout);
         void        append(GTestSuite& testsuite);
         int         test_suites() const;
         int         errors(void) const;
@@ -80,6 +81,7 @@ class GTestSuites{
         std::string              m_name; //!< Test suites name
         std::vector<GTestSuite*> m_testsuites; //!< Test suite container
         std::time_t             m_timestamp;//!< Timestamp
+        GLog                    m_log;      //!< Log
 };
 
 #endif
