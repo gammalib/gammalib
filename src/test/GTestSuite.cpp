@@ -560,6 +560,9 @@ void GTestSuite::copy_members(const GTestSuite& testsuite)
  ***************************************************************************/
 void GTestSuite::free_members(void)
 {
+    //Add a new line
+    m_log<<"\n";
+    
     // Delete test cases
     for(int i=0;i<m_tests.size();++i)
     {
