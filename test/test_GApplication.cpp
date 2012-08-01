@@ -39,26 +39,23 @@
 /***************************************************************************
  * Test: GLog                                                              *
  ***************************************************************************/
-void test_GLog(void)
+void test_GLog(GTestSuite& testsuite)
 {
-    // Dump header
-    std::cout << "Test GLog: ";
-
     // Test constructor
+    testsuite.test_try("Test GLog constructor");
     try {
         GLog log1;
         GLog log2 = log1;
+        
+        // Test success
+        testsuite.test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct GLog object."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        testsuite.test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test stream logger
+    testsuite.test_try("Test stream logger");
     try {
         GLog log;
         log.date(true);
@@ -71,17 +68,15 @@ void test_GLog(void)
         log << "5. This is a character: " << 'a' << std::endl;
         log << "6. This is a C string: " << "a" << std::endl;
         log << "7. This is a Boolean: " << true << std::endl;
+        
+        testsuite.test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to stream into GLog object."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        testsuite.test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test C logger
+    testsuite.test_try("Test C logger");
     try {
         GLog log;
         log.date(true);
@@ -91,19 +86,13 @@ void test_GLog(void)
         log("%s %d", "9. This is an integer:", int(1));
         log("%s %f", "10. This is a single precision:", float(1.23456789));
         log("%s %f", "11. This is a double precision:", double(1.23456789));
+        
+        testsuite.test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to write into GLog object."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        testsuite.test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Signal final test success
-    std::cout << " ok." << std::endl;
-
+    
     // Exit test
     return;
 
@@ -115,15 +104,22 @@ void test_GLog(void)
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "********************************" << std::endl;
-    std::cout << "* GApplication classes testing *" << std::endl;
-    std::cout << "********************************" << std::endl;
-
+    // Create a test suite container
+    GTestSuites testsuites("GApplication classes testing");
+    
+    // Create a test suite
+    GTestSuite testsuite("Test GLog");
+    
+    // Append testsuite
+    testsuites.append(testsuite);
+    
     // Execute tests
-    test_GLog();
-
+    test_GLog(testsuite);
+    testsuite.end_test();
+    
+    //save xml report
+    testsuites.save("reports/GApplication.xml");
+    
     // Return
     return 0;
 }
