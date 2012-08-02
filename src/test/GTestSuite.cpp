@@ -34,6 +34,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                         "GTestSuite::operator[](int&)"
+#define G_TRY_SUCCESS                       "GTestSuite::test_try_success()"
+#define G_TRY_FAILURE                       "GTestSuite::test_try_failure(std::string&,std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -299,7 +301,7 @@ void GTestSuite::test_try(const std::string& name)
     GTestCase* testcase = new GTestCase(GTestCase::ERROR_TEST,name);
     
     //Add test case to container
-    m_tests.push_back(testcase);
+    m_stack_try.push_back(testcase);
     
     // Return
     return;
@@ -326,6 +328,16 @@ void GTestSuite::test_try(const std::string& name)
  *
  ***************************************************************************/
 void GTestSuite::test_try_success(){
+    // If the stack is empty
+    if(m_stack_try.size()==0)
+        throw GException::test_nested_try_error(G_TRY_SUCCESS, "Error : test_try_success() without test_try()");
+    
+    // Add the test in the container
+    m_tests.push_back(m_stack_try.back());
+    
+    // Delete the test case of the stack
+    m_stack_try.pop_back();
+    
     // The try block test is ok
     m_log<<m_tests.back()->print_result();
     
@@ -358,21 +370,30 @@ void GTestSuite::test_try_success(){
  *
  ***************************************************************************/
 void GTestSuite::test_try_failure(const std::string& message, const std::string& type){
+    // If the stack is empty
+    if(m_stack_try.size()==0)
+        throw GException::test_nested_try_error(G_TRY_FAILURE,"test_try_success() call without test_try()");
+
     // Test is not ok
-    m_tests.back()->m_passed=false;
-    
+    m_stack_try.back()->m_passed=false;
+
     // Increment the number of errors
     m_errors++;
-    
+
     // Set a message
-    m_tests.back()->message(message);
- 
+    m_stack_try.back()->message(message);
+
     // Set a type of message
-    m_tests.back()->message_type(type);
+    m_stack_try.back()->message_type(type);
+
+    // Add the test in the container
+    m_tests.push_back(m_stack_try.back());
     
+    // Delete the test case of the stack
+    m_stack_try.pop_back();
+
     // Show the result ( ".","F" or, "E")
     m_log<<m_tests.back()->print_result();
-    
     //Return
     return;
 }

@@ -88,6 +88,7 @@ class GTestSuite{
     // Private members
     private:
         std::vector<GTestCase*> m_tests;    //!< Nomber of tests
+        std::vector<GTestCase*> m_stack_try; //!< Stack for nested try blocks
         int                     m_failures; //!< Nomber of failures
         int                     m_errors;   //!< Nomber of errors
         std::string             m_name;     //!< Name of the test suite

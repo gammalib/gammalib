@@ -8,7 +8,8 @@ INCLUDES = -I$(top_srcdir)/include \
 # Define sources for this directory
 sources = GTestCase.cpp \
 	  GTestSuite.cpp \
-	  GTestSuites.cpp
+	  GTestSuites.cpp \
+	  GException_test.cpp
 	
 # Build libtool library
 noinst_LTLIBRARIES = libtest.la

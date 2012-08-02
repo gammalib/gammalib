@@ -367,7 +367,7 @@ void GTestSuites::write(GXml& xml)
         element_testsuite->attribute("skipped","");  // not used
         element_testsuite->attribute("tests",str(testsuite->tests()));
         element_testsuite->attribute("time","0");  // not used
-        element_testsuite->attribute("timestamp",str(testsuite->timestamp()));
+        element_testsuite->attribute("timestamp",str(testsuite->timestamp())); //FIXME timestamp does not work
 
         //Loop over all test cases contains in the test suite
         for (int j=0; j<testsuite->tests(); ++j)
