@@ -574,6 +574,9 @@ fi
 #############################################################################
 openmp_ok=no
 
+# Make tests for C++
+AC_LANG(C++)
+
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
 if test "x$ac_cv_prog_cxx_openmp" != "xunsupported" && test "x$ac_cv_prog_cxx_openmp" != "x"; then
@@ -590,7 +593,7 @@ if test "x$openmp_ok" = "xyes" ; then
 				 [enable_openmp="yes"])
 
    if test "x$enable_openmp" = "xyes"; then
-        CXXFLAGS="$CXXFLAGS $OPENMP_CFLAGS"
+        CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
         AC_MSG_RESULT(yes)
    else
         enable_openmp=no
