@@ -419,7 +419,6 @@ void GTestSuites::write(GXml& xml)
     return;
 }
 
-
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
@@ -435,6 +434,7 @@ void GTestSuites::init_members(){
     m_name="Unamed Test Suites";
     m_log.max_size(1);
     m_log.cout(true);
+    m_timestamp = time(NULL);
 
     //Return
     return;
@@ -459,5 +459,9 @@ void GTestSuites::copy_members(const GTestSuites& testsuites){
  ***************************************************************************/
 void GTestSuites::free_members(){
 
+    for(int i=0;i<m_testsuites.size();++i)
+    {
+        //delete m_testsuites[i]; 
+    }
     return;
 }

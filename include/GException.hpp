@@ -665,7 +665,16 @@ public:
         public:
             test_nested_try_error(std::string origin, std::string message = "");
     };
-
+    
+    class test_failure : public GExceptionHandler {
+        public:
+            test_failure(std::string origin, std::string message = "");
+    };
+    
+    class test_error : public GExceptionHandler {
+        public:
+            test_error(std::string origin, std::string message = "");
+    };
 };
 
 #endif /* GEXCEPTION_HPP */

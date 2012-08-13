@@ -46,7 +46,7 @@ void test_GLog(GTestSuite& testsuite)
     try {
         GLog log1;
         GLog log2 = log1;
-        
+
         // Test success
         testsuite.test_try_success();
     }
@@ -68,7 +68,7 @@ void test_GLog(GTestSuite& testsuite)
         log << "5. This is a character: " << 'a' << std::endl;
         log << "6. This is a C string: " << "a" << std::endl;
         log << "7. This is a Boolean: " << true << std::endl;
-        
+
         testsuite.test_try_success();
     }
     catch (std::exception &e) {
@@ -86,13 +86,13 @@ void test_GLog(GTestSuite& testsuite)
         log("%s %d", "9. This is an integer:", int(1));
         log("%s %f", "10. This is a single precision:", float(1.23456789));
         log("%s %f", "11. This is a double precision:", double(1.23456789));
-        
+
         testsuite.test_try_success();
     }
     catch (std::exception &e) {
         testsuite.test_try_failure(e);
     }
-    
+
     // Exit test
     return;
 
@@ -106,20 +106,22 @@ int main(void)
 {
     // Create a test suite container
     GTestSuites testsuites("GApplication classes testing");
-    
+
     // Create a test suite
     GTestSuite testsuite("Test GLog");
-    
+
     // Append testsuite
     testsuites.append(testsuite);
-    
+
     // Execute tests
     test_GLog(testsuite);
+
+    // This test suite is finished
     testsuite.end_test();
-    
+
     //save xml report
     testsuites.save("reports/GApplication.xml");
-    
+
     // Return
     return 0;
 }

@@ -45,3 +45,33 @@ GException::test_nested_try_error::test_nested_try_error(std::string origin, std
     // Return
     return;
 }
+
+/***********************************************************************//**
+ * @brief Failure test
+ * @param[in] message Optional error message.
+ * Use in unit tests to notice a fail in a try block
+ ***************************************************************************/
+GException::test_failure::test_failure(std::string origin, std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Failure Test ("+message+")";
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Failure test
+ * @param[in] message Optional error message.
+ * Use in unit tests to notice a fail in a try block
+ ***************************************************************************/
+GException::test_error::test_error(std::string origin, std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Error Test ("+message+")";
+
+    // Return
+    return;
+}

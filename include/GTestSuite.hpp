@@ -63,27 +63,33 @@ class GTestSuite{
         GTestCase& operator[](const int& index);
         const GTestCase& operator[](const int& index) const;
         // Methods
-        std::string name(void) const;
-        void        name(const std::string& name);
-        void        cout(bool cout);
-        void        test_assert(bool result, const std::string& name,const std::string& message="");
-        void        test_try(const std::string& name);
-        void        test_try_success();
-        void        test_try_failure(const std::string& message="",const std::string& type="");
-        void        test_try_failure(const std::exception& e);
-        void        test_function(pfunction function, const std::string& name);
-        void        end_test();
-        int         tests() const;
-        int         errors() const;
-        int         failures() const;
-        int         success() const;
-        std::time_t timestamp() const;
+        std::string                 name(void) const;
+        void                        name(const std::string& name);
+        void                        cout(bool cout);
+        void                        test_assert(bool result,
+                                                const std::string& name,
+                                                const std::string& message="");
+        void                        test_try(const std::string& name);
+        void                        test_try_success();
+        void                        test_try_failure(const std::string& message="",
+                                                 const std::string& type="",
+                                                 GTestCase::ErrorType type = GTestCase::ERROR_TEST);
+        void                        test_try_failure(const std::exception& e);
+        GException::test_failure&   exception_failure(const std::string& message);
+        GException::test_error&     exception_error(const std::string& message);
+        void                        test_function(pfunction function, const std::string& name);
+        void                        end_test();
+        int                         tests() const;
+        int                         errors() const;
+        int                         failures() const;
+        int                         success() const;
+        std::time_t                 timestamp() const;
     
     // Protected methods
     protected:
-        void        init_members(void);
-        void        copy_members(const GTestSuite& testsuite);
-        void        free_members(void);
+        void                        init_members(void);
+        void                        copy_members(const GTestSuite& testsuite);
+        void                        free_members(void);
     
     // Private members
     private:

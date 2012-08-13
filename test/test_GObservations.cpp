@@ -37,34 +37,34 @@
 
 // Test observations optimizer.
 // Mode : 0 = unbinned and 1= binned
-GModelPar& test_observations_optimizer(int mode=0) {
-    
+GModelPar& test_observations_optimizer(int mode, GTestSuite& testsuite) {
+
     //Create Test Model
     GTestModelData model;
-    
+
     //Create Models conteners
     GModels models;
     models.append(model);
-    
+
     //Time iterval
     GTime tmin(0,0,"sec");
     GTime tmax(1800,0,"sec");
 
     //Rate : events/sec
     double rate = RATE;
-    
+
     //Create observations
     GObservations obs;
-    
+
      //Add some observation
     for(int i=0;i<6;i++)
     {
         //Random Generator
         GRan ran;
         ran.seed(i);
-        
+
         GEvents *events;
-        
+
         if(mode==UN_BINNED){
             //Create a list of events
             events = model.generateList(rate,tmin,tmax,ran);
@@ -76,49 +76,58 @@ GModelPar& test_observations_optimizer(int mode=0) {
         }
         //Create an observation
         GTestObservation ob;
-        
+
         //Add events to the observation
         ob.events(events);
         ob.ontime(tmax.met()-tmin.met());
         obs.append(ob);
     }
-   
-
 
     //Add the model to the observation
     obs.models(models);
-    
+
     //Create a GLog for show the interations of optimizer.
     GLog log;
-  
+
     //Show in shell
     //log.cout(true);
-    
+
     //Create an optimizer.
     GOptimizerLM opt(log);
-    
-    opt.max_stalls(50);
-    
+
+    opt.max_stalls(60);
+
     //Optimize
     obs.optimize(opt);
-    
-    std::cout<<opt<<std::endl;
-   
-    std::cout<<(obs.models())[0]<<std::endl;
-    
-    if(opt.status()!=0){ //check if converged
-        std::cout<<"ERROR : optimizer did not converged"<<std::endl;
-        throw;
+
+    testsuite.test_try("Convergence Test");
+    try{
+        if(opt.status()!=0){ //check if converged
+            throw testsuite.exception_failure("Optimizer did not convered");
+        }
+
+        testsuite.test_try_success();
     }
-    
+    catch(std::exception& e)
+    {
+        testsuite.test_try_failure(e); 
+    }
+
     GModelPar& result = ((obs.models())[0])[0];
-        
-    
-    if(fabs(result.value()-RATE)>result.error()*3){
-        std::cout<<"ERROR : Value is not enought correct."<<std::endl;
-        throw;
+
+    testsuite.test_try("Result Test");
+    try{
+        if(fabs(result.value()-RATE)>result.error()*3){
+            throw testsuite.exception_failure("Value is not enought correct");
+        }
+
+        testsuite.test_try_success();
     }
-    
+    catch(std::exception& e)
+    {
+        testsuite.test_try_failure(e); 
+    }
+
     return (((obs.models())[0])[0]);
 }
 
@@ -126,63 +135,80 @@ GModelPar& test_observations_optimizer(int mode=0) {
 /**
  * Test optimizer with unbinned events.
  */
-void test_observations_optimizer_unbinned(){
-    std::cout << "**** Unbinned Test ****" << std::endl<<std::endl;
-    
+void test_observations_optimizer_unbinned(GTestSuite &testsuite){
+
     // Test with one thread
     double t_start = omp_get_wtime();
-    
-    std::cout<<"* Unbinned : Test with 1 thread"<<std::endl;
-    omp_set_num_threads(1);
-    GModelPar& result1 = test_observations_optimizer(UN_BINNED);
-    
-    double t_elapsed1 = omp_get_wtime()-t_start;
-    
+    testsuite.test_try("Test with 1 thread");
+    try{
+        omp_set_num_threads(1);
+        GModelPar& result1 = test_observations_optimizer(UN_BINNED,testsuite);
+        double t_elapsed1 = omp_get_wtime()-t_start;
+        testsuite.test_try_success();
+    }
+    catch(std::exception& e)
+    {
+        testsuite.test_try_failure(e); 
+    }
+
     // Test with 10 threads
-    
     t_start = omp_get_wtime();
-    
-    std::cout<<"* Unbinned : Test with 10 threads"<<std::endl;
-    omp_set_num_threads(10);
-    GModelPar& result2 = test_observations_optimizer(UN_BINNED);
-    
-    double t_elapsed2 = omp_get_wtime()-t_start;
+    testsuite.test_try("Test with 10 threads");
+    try{
+        omp_set_num_threads(10);
+        GModelPar& result2 = test_observations_optimizer(UN_BINNED,testsuite);
+        double t_elapsed2 = omp_get_wtime()-t_start;
+
+        testsuite.test_try_success();
+    }
+    catch(std::exception& e)
+    {
+        testsuite.test_try_failure(e); 
+    }
 
     //Compare times.
-    std::cout<<"Time with 1 thread : "<<t_elapsed1<<" s"<<std::endl;
-    std::cout<<"Time with 10 thread : "<<t_elapsed2<<" s"<<std::endl;
-    
-    std::cout<<std::endl;
+    //std::cout<<"Time with 1 thread : "<<t_elapsed1<<" s"<<std::endl;
+    //std::cout<<"Time with 10 thread : "<<t_elapsed2<<" s"<<std::endl;
+
 }
 
 /**
  * Test optimizer with binned events.
  */
-void test_observations_optimizer_binned(){
-    
-    std::cout << "**** Binned Test ****" << std::endl<<std::endl;
-    
+void test_observations_optimizer_binned(GTestSuite &testsuite){
+
     // Test with one thread
     double t_start = omp_get_wtime();
-    
-    std::cout<<"* Binned : Test with 1 thread"<<std::endl;
-    omp_set_num_threads(1);
-    GModelPar& result1 = test_observations_optimizer(BINNED);
-    
-    double t_elapsed1 = omp_get_wtime()-t_start;
-    
+    testsuite.test_try("Test with 1 thread");
+    try{
+        omp_set_num_threads(1);
+        GModelPar& result1 = test_observations_optimizer(BINNED,testsuite);
+        double t_elapsed1 = omp_get_wtime()-t_start;
+
+        testsuite.test_try_success();
+    }
+    catch(std::exception& e)
+    {
+        testsuite.test_try_failure(e); 
+    }
     // Test with 10 threads
-    
     t_start = omp_get_wtime();
-    std::cout<<"* Binned : Test with 10 threads"<<std::endl;
-    omp_set_num_threads(10);
-    GModelPar& result2 = test_observations_optimizer(BINNED);
-    
-    double t_elapsed2 = omp_get_wtime()-t_start;
+    testsuite.test_try("Test with 10 threads");
+    try{
+        omp_set_num_threads(10);
+        GModelPar& result2 = test_observations_optimizer(BINNED,testsuite);
+        double t_elapsed2 = omp_get_wtime()-t_start;
+
+        testsuite.test_try_success();
+    }
+    catch(std::exception& e)
+    {
+        testsuite.test_try_failure(e); 
+    }
 
     //Compare times.
-    std::cout<<"Time with 1 thread : "<<t_elapsed1<<" s"<<std::endl;
-    std::cout<<"Time with 10 threads : "<<t_elapsed2<<" s"<<std::endl;
+    //std::cout<<"Time with 1 thread : "<<t_elapsed1<<" s"<<std::endl;
+    //std::cout<<"Time with 10 threads : "<<t_elapsed2<<" s"<<std::endl;
 }
 
 /**
@@ -190,23 +216,34 @@ void test_observations_optimizer_binned(){
  */
 int main(void)
 {
-       // Dump header
-    std::cout << std::endl;
-    std::cout << "*****************************************" << std::endl;
-    std::cout << "*            GObservations Test         *" << std::endl; 
-    std::cout << "*****************************************" << std::endl;
-    
-    std::cout<<"Test openMP results:"<<std::endl;
+    //Create a test suites
+    GTestSuites testsuites("GOptimizer class testing");
 
     //TODO: test gaussian.
     #ifdef _OPENMP
-        test_observations_optimizer_unbinned();
-        test_observations_optimizer_binned();
-    
+
+        // Create a test suite
+        GTestSuite * testsuite = NULL;
+
+        // Unbinned
+        testsuite = new GTestSuite("Test OpenMP: Unbinned");
+        testsuites.append(*testsuite);
+        test_observations_optimizer_unbinned(*testsuite);
+        testsuite->end_test();
+
+        // Binned
+        testsuite = new GTestSuite("Test OpenMP: Binned");
+        testsuites.append(*testsuite);
+        test_observations_optimizer_binned(*testsuite);
+        testsuite->end_test();
+
     #else
         std::cout<<"GammaLib is not compiled with openmp option."<<std::endl;
     #endif
-    
+
+    //save xml report
+    testsuites.save("reports/GObservations.xml");
+
     return 0;
-    
+
 }

@@ -48,7 +48,7 @@ class GTestCase{
     public:
         
         // public enumerators
-        enum errorType{
+        enum ErrorType{
             FAIL_TEST,
             ERROR_TEST
         };
@@ -56,9 +56,9 @@ class GTestCase{
         // Constructors and destructors
         GTestCase(void);
         GTestCase(const GTestCase& testcase);
-        GTestCase(errorType type);
+        GTestCase(ErrorType type);
         GTestCase(const pfunction ptr_function, const std::string& name);
-        GTestCase(errorType type, const std::string& name);
+        GTestCase(ErrorType type, const std::string& name);
         ~GTestCase(void);
     
         // Operators
@@ -73,8 +73,8 @@ class GTestCase{
         void        message_type( const std::string& message_type);
         pfunction   ptr_function(void) const;
         void        ptr_function(const pfunction);
-        errorType   type(void) const;
-        void        type(errorType type);
+        ErrorType   type(void) const;
+        void        type(ErrorType type);
         bool        is_passed() const;
         std::string print_result(void) const;
         void run();
@@ -92,7 +92,7 @@ class GTestCase{
         std::string m_message_type; //!< type fo the message
         pfunction   m_ptr_function; //!< function pointer
         bool        m_passed; //!< boolean to check test success
-        errorType   m_type; //!< type of the test case : failure or error test
+        ErrorType   m_type; //!< type of the test case : failure or error test
 };
 
 #endif
