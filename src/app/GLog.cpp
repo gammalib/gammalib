@@ -35,9 +35,9 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include "GLog.hpp"
 #include "GTools.hpp"
-
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
@@ -176,12 +176,10 @@ void GLog::operator()(const char *msgFormat, ...)
     std::vsprintf(buffer, msgFormat, vl);
     va_end(vl);
 
+    std::string string = buffer;
     // Append message to string buffer
-    m_buffer.append(buffer);
-    m_buffer.append("\n");
-
-    // Flush buffer
-    flush(true);
+    append(string);
+    append("\n");
 
     // Return
     return;
@@ -194,10 +192,38 @@ void GLog::operator()(const char *msgFormat, ...)
  *
  * @param[in] log Logger to be inserted.
  ***************************************************************************/
-GLog& GLog::operator<<(const GLog& log)
+GLog& GLog::operator<<(GLog& log)
 {
-    // Flush buffer
-    flush();
+    // If log does not write in a file
+    if (log.m_file == NULL)
+    {
+        // Add log buffer to this buffer
+        m_buffer.append(log.m_buffer);
+    }
+    else
+    {
+        //Get the filename
+        std::string filename = log.filename();
+
+        //Close file
+        log.close();
+
+        // Open file in read mode
+        std::ifstream file(log.filename().c_str(), std::ios::in );
+        if (file)
+        {
+            std::string line;
+            while(std::getline(file,line)){
+                m_buffer.append(line);
+                m_buffer.append("\n");
+            }
+
+            file.close();
+        }
+
+        // Open the file
+        log.open(filename,false);
+    }
 
     // Return logger
     return *this;
@@ -212,10 +238,7 @@ GLog& GLog::operator<<(const GLog& log)
 GLog& GLog::operator<<(const std::string& str)
 {
     // Add string to buffer
-    m_buffer.append(str);
-
-    // Flush buffer
-    flush();
+    append(str);
 
     // Return logger
     return *this;
@@ -229,11 +252,11 @@ GLog& GLog::operator<<(const std::string& str)
  ***************************************************************************/
 GLog& GLog::operator<<(const char* str)
 {
-    // Add string to buffer
-    m_buffer.append(str);
+    // Convert in string
+    std::string string = str;
 
-    // Flush buffer
-    flush();
+    // Add string to buffer
+    append(string);
 
     // Return logger
     return *this;
@@ -254,10 +277,7 @@ GLog& GLog::operator<<(const char& value)
     oss << value;
 
     // Append stream to buffer
-    m_buffer.append(oss.str());
-
-    // Flush buffer
-    flush();
+    append(oss.str());
 
     // Return logger
     return *this;
@@ -278,10 +298,7 @@ GLog& GLog::operator<<(const unsigned char& value)
     oss << value;
 
     // Append stream to buffer
-    m_buffer.append(oss.str());
-
-    // Flush buffer
-    flush();
+    append(oss.str());
 
     // Return logger
     return *this;
@@ -297,12 +314,9 @@ GLog& GLog::operator<<(const bool& value)
 {
     // Add boolean to buffer
     if (value)
-        m_buffer.append("true");
+        append("true");
     else
-        m_buffer.append("false");
-
-    // Flush buffer
-    flush();
+        append("false");
 
     // Return logger
     return *this;
@@ -323,10 +337,7 @@ GLog& GLog::operator<<(const int& value)
     oss << value;
 
     // Append stream to buffer
-    m_buffer.append(oss.str());
-
-    // Flush buffer
-    flush();
+    append(oss.str());
 
     // Return logger
     return *this;
@@ -347,10 +358,7 @@ GLog& GLog::operator<<(const unsigned int& value)
     oss << value;
 
     // Append stream to buffer
-    m_buffer.append(oss.str());
-
-    // Flush buffer
-    flush();
+    append(oss.str());
 
     // Return logger
     return *this;
@@ -371,10 +379,7 @@ GLog& GLog::operator<<(const double& value)
     oss << value;
 
     // Append stream to buffer
-    m_buffer.append(oss.str());
-
-    // Flush buffer
-    flush();
+    append(oss.str());
 
     // Return logger
     return *this;
@@ -395,10 +400,7 @@ GLog& GLog::operator<<(const double& value)
 GLog& GLog::operator<<(std::ostream& (*fn)(std::ostream&))
 {
     // Append CR to buffer
-    m_buffer.append("\n");
-
-    // Flush buffer
-    flush(true);
+    append("\n");
 
     // Return logger
     return *this;
@@ -448,6 +450,8 @@ int GLog::size(void) const
  ***************************************************************************/
 void GLog::open(const std::string& filename, bool clobber)
 {
+    m_filename = filename;
+
     // Close any existing file
     close();
 
@@ -697,18 +701,6 @@ void GLog::flush(bool force)
                 newline  = true;
             }
 
-            // Prepend prefix if we are at the beginning of a new line
-            if (m_newline) {
-                std::string prefix = "";
-                if (m_use_date)
-                    prefix.append(strdate());
-                if (m_name.length() > 0)
-                    prefix.append(" "+m_name);
-                if (prefix.length() > 0)
-                    prefix.append(": ");
-                line = prefix + fill(" ", m_indent) + line;
-            }
-
             // Put line into requested streams
             if (m_stdout)
                 std::cout << line;
@@ -766,18 +758,17 @@ void GLog::header(const std::string& arg, int level)
 
     // Write header into logger
     if (frame.length() > 0) {
-        m_buffer.append(frame);
-        m_buffer.append("\n");
+        append(frame);
+        append("\n");
     }
     if (text.length() > 0) {
-        m_buffer.append(text);
-        m_buffer.append("\n");
+        append(text);
+        append("\n");
     }
     if (frame.length() > 0) {
-        m_buffer.append(frame);
-        m_buffer.append("\n");
+        append(frame);
+        append("\n");
     }
-    flush(true);
 
     // Return
     return;
@@ -820,7 +811,60 @@ std::string GLog::strdate(void)
     return date;
 }
 
+/***********************************************************************//**
+ * @brief Append a string in the buffer
+ * @param[in] arg The string to append
+ ***************************************************************************/
+void GLog::append(const std::string& arg)
+{
 
+    std::string result(arg);
+
+    // If the buffer is empty or if the last charatere is a \n, start with the prefix
+    if(m_buffer.size()==0 || m_buffer.size()>1&&m_buffer[m_buffer.size()-1]=='\n')
+    {
+        // Prepend prefix if we are at the beginning of a new line
+        std::string prefix = "";
+        if (m_use_date){
+            prefix.append(strdate());
+        }
+        if (m_name.length() > 0){
+            prefix.append(" "+m_name);
+        }
+        if (prefix.length() > 0){
+            prefix.append(": ");
+            result.insert(0,prefix);
+        }
+    }
+
+    //Search the first CR
+    std::size_t pos= pos = result.find_first_of("\n",0);
+
+    // Search all \n characters. Ignore the last CR
+    while(pos!=std::string::npos&&pos<result.size()-1)
+    {
+        // Prepend prefix if we are at the beginning of a new line
+        std::string prefix = "";
+        if (m_use_date){
+            prefix.append(strdate());
+        }
+        if (m_name.length() > 0){
+            prefix.append(" "+m_name);
+        }
+        if (prefix.length() > 0){
+            prefix.append(": ");
+            result.insert(pos+1,prefix);
+        }
+
+        pos = result.find_first_of("\n",pos+1+prefix.size());
+    }
+
+    // Add string to buffer
+    m_buffer.append(result);
+
+    //Flush Buffer
+    flush();
+}
 /*==========================================================================
  =                                                                         =
  =                                 Friends                                 =
