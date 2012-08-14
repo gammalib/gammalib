@@ -70,7 +70,7 @@ public:
     // Operators
     GLog& operator= (const GLog& log);
     void  operator()(const char *msgFormat, ...);
-    GLog& operator<<(const GLog& log);
+    GLog& operator<<(GLog& log);
     GLog& operator<<(const std::string& str);
     GLog& operator<<(const char* str);
     GLog& operator<<(const char& value);
@@ -102,6 +102,7 @@ public:
     std::string name(void) const { return m_name; }
     int         max_size(void) const { return m_max_length; }
     int         indent(void) const { return m_indent; }
+    std::string filename(void) const { return m_filename; }
 
 protected:
     // Protected methods
@@ -111,6 +112,7 @@ protected:
     void        flush(bool force = false);
     void        header(const std::string& arg, int level);
     std::string strdate(void);
+    void        append(const std::string& arg);
 
     // Protected data members
     int         m_max_length;    //!< Maximum buffer length
@@ -120,6 +122,7 @@ protected:
     bool        m_use_date;      //!< Dump date in prefix
     bool        m_newline;       //!< Signal beginning of new line
     FILE*       m_file;          //!< Log file pointer
+    std::string m_filename;       //!< Log file name
     std::string m_name;          //!< Name for prefix
     std::string m_buffer;        //!< Output string buffer
 };
