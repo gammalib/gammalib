@@ -601,8 +601,8 @@ if test "x$openmp_ok" = "xyes" ; then
 	AC_MSG_RESULT(no)
    fi
 fi
+AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 
-#AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 
 #############################################################################
 # Checks if Python bindings are to be build                                 #
