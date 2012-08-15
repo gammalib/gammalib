@@ -78,7 +78,7 @@ AC_CANONICAL_HOST
 # Determine the C and C++ compilers.  This has to come before the check for #
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
 #############################################################################
-AC_PROG_CC
+#AC_PROG_CC
 AC_PROG_CXX
 
 
