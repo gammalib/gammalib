@@ -102,6 +102,7 @@ GModelPar& test_observations_optimizer(int mode=0) {
     //Optimize
     obs.optimize(opt);
     
+    std::cout << obs << std::endl;
     std::cout<<opt<<std::endl;
    
     std::cout<<(obs.models())[0]<<std::endl;
