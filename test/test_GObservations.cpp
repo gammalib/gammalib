@@ -1,7 +1,7 @@
 /***************************************************************************
  *             test_GObservations.cpp  -  Test GObersations class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,70 +39,68 @@
 // Mode : 0 = unbinned and 1= binned
 GModelPar& test_observations_optimizer(int mode=0) {
     
-    //Create Test Model
+    // Create Test Model
     GTestModelData model;
     
-    //Create Models conteners
+    // Create Models conteners
     GModels models;
     models.append(model);
     
-    //Time iterval
+    // Time iterval
     GTime tmin(0,0,"sec");
     GTime tmax(1800,0,"sec");
 
-    //Rate : events/sec
+    // Rate : events/sec
     double rate = RATE;
     
-    //Create observations
+    // Create observations
     GObservations obs;
     
-     //Add some observation
-    for(int i=0;i<6;i++)
-    {
-        //Random Generator
+    // Add some observation
+    for (int i=0; i<6; ++i) {
+
+        // Random Generator
         GRan ran;
         ran.seed(i);
         
         GEvents *events;
         
-        if(mode==UN_BINNED){
-            //Create a list of events
+        if (mode==UN_BINNED) {
+            // Create a list of events
             events = model.generateList(rate,tmin,tmax,ran);
         }
-        else
-        {
-            //Create a cube of events
+        else {
+            // Create a cube of events
             events = model.generateCube(rate,tmin,tmax,ran);
         }
-        //Create an observation
+
+        // Create an observation
         GTestObservation ob;
         
-        //Add events to the observation
+        // Add events to the observation
         ob.events(events);
         ob.ontime(tmax.met()-tmin.met());
         obs.append(ob);
     }
-   
 
-
-    //Add the model to the observation
+    // Add the model to the observation
     obs.models(models);
     
-    //Create a GLog for show the interations of optimizer.
+    // Create a GLog for show the interations of optimizer.
     GLog log;
   
     //Show in shell
     //log.cout(true);
     
-    //Create an optimizer.
+    // Create an optimizer.
     GOptimizerLM opt(log);
     
     opt.max_stalls(50);
     
-    //Optimize
+    // Optimize
     obs.optimize(opt);
     
-    std::cout << obs << std::endl;
+    //std::cout << obs << std::endl;
     std::cout<<opt<<std::endl;
    
     std::cout<<(obs.models())[0]<<std::endl;
