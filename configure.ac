@@ -75,10 +75,10 @@ AC_CANONICAL_HOST
 
 
 #############################################################################
-# Determine the C and C++ compilers.  This has to come before the check for #
+# Check for valid C++ compiler.  This has to come before the check for      #
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
 #############################################################################
-#AC_PROG_CC
+AC_LANG(C++)
 AC_PROG_CXX
 
 
@@ -575,7 +575,7 @@ fi
 openmp_ok=no
 
 # Make tests for C++
-AC_LANG(C++)
+#AC_LANG(C++)
 
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
@@ -652,7 +652,8 @@ if test "x$has_python" = "xyes"; then
            		             print distutils.sysconfig.get_python_inc();"`
     if test -n "${python_path}"; then
       python_path="-I$python_path"
-      has_python_h="yes"
+      AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
+      #has_python_h="yes"
     fi
     PYTHON_CPPFLAGS=$python_path
     CPPFLAGS="${CPPFLAGS} ${python_path}"
@@ -670,10 +671,11 @@ if test "x$has_python" = "xyes"; then
     # Check if we have Python.h
     AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
   
-    # Signal any problem
-    if test "x$has_python_h" = "xno"; then
-      AC_MSG_WARN([No Python header file "$PY_INCLUDE/Python.h" found. Please install appropriate Python development package.])
-    fi
+  fi
+
+  # Signal missing Python headers
+  if test "x$has_python_h" = "xno"; then
+    AC_MSG_WARN([No Python header file "Python.h" found. Please install appropriate Python development package.])
   fi
   
 fi
