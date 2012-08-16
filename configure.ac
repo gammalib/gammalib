@@ -78,7 +78,7 @@ AC_CANONICAL_HOST
 # Determine the C and C++ compilers.  This has to come before the check for #
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
 #############################################################################
-AC_PROG_CC
+#AC_PROG_CC
 AC_PROG_CXX
 
 
@@ -601,8 +601,8 @@ if test "x$openmp_ok" = "xyes" ; then
 	AC_MSG_RESULT(no)
    fi
 fi
+AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 
-#AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 
 #############################################################################
 # Checks if Python bindings are to be build                                 #
