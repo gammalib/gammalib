@@ -202,6 +202,9 @@ GLog& GLog::operator<<(GLog& log)
     }
     else
     {
+        //Force flush
+        log.flush(true);
+
         //Get the filename
         std::string filename = log.filename();
 
@@ -224,6 +227,9 @@ GLog& GLog::operator<<(GLog& log)
         // Open the file
         log.open(filename,false);
     }
+
+    //Flush
+    flush();
 
     // Return logger
     return *this;
@@ -821,7 +827,7 @@ void GLog::append(const std::string& arg)
     std::string result(arg);
 
     // If the buffer is empty or if the last charatere is a \n, start with the prefix
-    if(m_buffer.size()==0 || m_buffer.size()>1&&m_buffer[m_buffer.size()-1]=='\n')
+    if(m_buffer.size()==0 || m_buffer[m_buffer.size()-1]=='\n')
     {
         // Prepend prefix if we are at the beginning of a new line
         std::string prefix = "";
