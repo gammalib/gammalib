@@ -395,7 +395,7 @@ void GLATLtCube::load(const std::string& filename)
     // Get HDUs
     GFitsTable* hdu_exposure          = file.table("EXPOSURE");
     GFitsTable* hdu_weighted_exposure = file.table("WEIGHTED_EXPOSURE");
-    GFitsTable* hdu_cthetabounds      = file.table("CTHETABOUNDS");
+    //GFitsTable* hdu_cthetabounds      = file.table("CTHETABOUNDS");
     GFitsTable* hdu_gti               = file.table("GTI");
 
     // Load exposure
