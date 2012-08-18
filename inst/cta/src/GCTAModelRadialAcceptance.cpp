@@ -552,13 +552,16 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
                                               obs.events()->gti().tstart(itime),
                                               obs.events()->gti().tstop(itime), ran);
 
+                // Get number of events
+                int n_events = times.size();
+
                 // Reserve space for events
-                if (times.size() > 0) {
-                    list->reserve(times.size());
+                if (n_events > 0) {
+                    list->reserve(n_events);
                 }
 
                 // Loop over events
-                for (int i = 0; i < times.size(); ++i) {
+                for (int i = 0; i < n_events; ++i) {
 
                     // Apply deadtime correction
                     double deadc = obs.deadc(times[i]);
