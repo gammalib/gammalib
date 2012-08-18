@@ -18,26 +18,45 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GTestEventList.hpp
+ * @brief Event list test class
+ * @author J.-B. Cayrou
+ */
 
 #ifndef GTESTEVENTLIST_HPP
 #define GTESTEVENTLIST_HPP
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <string>
 #include <vector>
 #include "GEventList.hpp"
 #include "GTestEventAtom.hpp"
 #include "GTestRoi.hpp"
 
+/* __ Method name definitions ____________________________________________ */
+#define G_OPERATOR                         "GTestEventAtom* operator[](int&)"
+
+
+/***********************************************************************//**
+ * @class GTestEventList
+ *
+ * @brief Event list test class
+ *
+ * This class implements an event list for unit testing.
+ ***************************************************************************/
 class GTestEventList : public GEventList {
 
 public:
     // Constructors and destructors
-    GTestEventList(void): GEventList() {
+    GTestEventList(void) : GEventList() {
         init_members();
         return;
     }
-    GTestEventList(const GTestEventList& list) : GEventList(list){
+    GTestEventList(const GTestEventList& list) : GEventList(list) {
         init_members();
         copy_members(list);
         return;
@@ -48,51 +67,34 @@ public:
     }
 
     // Operators
-    virtual GTestEventList&       operator=(const GTestEventList& list){
-        // Execute only if object is not identical
+    virtual GTestEventList& operator=(const GTestEventList& list) {
         if (this != &list) {
-
-             // Copy base class members
             this->GEventList::operator=(list);
-
-            // Free members
             free_members();
-
-             // Initialise members
             init_members();
-
-            // Copy members
             copy_members(list);
-
         } // endif: object was not identical
-
-        // Return this object
         return *this;
     }
-    
     virtual GTestEventAtom* operator[](const int& index){
-            // Optionally check if the index is valid
         #if defined(G_RANGE_CHECK)
-            if (index < 0 || index >= size())
-                throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+        }
         #endif
-    
-        // Return pointer
         return (&(m_events[index]));
     }
     virtual const GTestEventAtom* operator[](const int& index) const {
-        // Optionally check if the index is valid
         #if defined(G_RANGE_CHECK)
-            if (index < 0 || index >= size())
-                throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+        }
         #endif
-        
-            // Return pointer
-            return (&(m_events[index]));
+        return (&(m_events[index]));
     }
 
     // Implemented pure virtual base class methods
-    virtual void           clear(void){
+    virtual void clear(void){
         free_members();
         this->GEventList::free_members();
         this->GEvents::free_members();
@@ -107,47 +109,39 @@ public:
     virtual GTestEventList* clone(void) const{
         return new GTestEventList(*this);
     }
-    virtual int            size(void) const { return m_events.size(); }
-    virtual void           load(const std::string& filename){};
-    virtual void           save(const std::string& filename, bool clobber = false) const{};
-    virtual void           read(const GFits& file){}
-    virtual void           write(GFits& file) const{}
-    virtual int            number(void) const { return m_events.size(); }
-    virtual void           roi(const GRoi& roi){
-            // Cast ROI dynamically
-            const GTestRoi* ptr = dynamic_cast<const GTestRoi*>(&roi);
+    virtual int  size(void) const { return m_events.size(); }
+    virtual void load(const std::string& filename) {}
+    virtual void save(const std::string& filename, bool clobber = false) const {}
+    virtual void read(const GFits& file) {}
+    virtual void write(GFits& file) const {}
+    virtual int  number(void) const { return m_events.size(); }
+    virtual void roi(const GRoi& roi) {
+        // Cast ROI dynamically
+        const GTestRoi* ptr = dynamic_cast<const GTestRoi*>(&roi);
     
-             // Throw exception if ROI is not of correct type
-            if (ptr == NULL)
-                throw;
+        // Throw exception if ROI is not of correct type
+        if (ptr == NULL) {
+            throw;
+        }
     
-             // Set ROI
-            m_roi = *ptr;
-            
-            return;
+        // Set ROI
+        m_roi = *ptr;
+        
+        return;
     }
-    
     virtual const GTestRoi& roi(void) const { return m_roi; }
-    
-    std::string print(void) const{
-        
-          // Initialise result string
+    virtual std::string print(void) const{
         std::string result;
-        
-        // Append header
         result.append("=== GTestEventList ===");
         result.append("\n"+parformat("Number of events")+str(number()));
-        
         return result;
-    
     }
 
-        // Implement other methods
+    // Implement other methods
     void append(const GTestEventAtom& event){
         m_events.push_back(event);
         return;
     }
-    
 
 protected:
     // Protected methods
@@ -156,17 +150,16 @@ protected:
         m_events.clear();
         return;
     }
-    
     void copy_members(const GTestEventList& list){
-            m_roi = list.m_roi;
-            m_events = list.m_events;
-            return;
+        m_roi    = list.m_roi;
+        m_events = list.m_events;
+        return;
     }
-    void free_members(void){ return; }
-    
+    void free_members(void) { return; }
     virtual void set_energies(void) { return; }
     virtual void set_times(void) { return; }
-    
+
+    // Protected members
     GTestRoi                    m_roi;     //!< Region of interest
     std::vector<GTestEventAtom> m_events;  //!< Events
 };
