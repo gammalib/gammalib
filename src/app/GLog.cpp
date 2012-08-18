@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.cpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLog.cpp
  * @brief Information logger class implementation
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -38,6 +38,7 @@
 #include <fstream>
 #include "GLog.hpp"
 #include "GTools.hpp"
+
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
@@ -176,10 +177,8 @@ void GLog::operator()(const char *msgFormat, ...)
     std::vsprintf(buffer, msgFormat, vl);
     va_end(vl);
 
-    std::string string = buffer;
     // Append message to string buffer
-    append(string);
-    append("\n");
+    append(std::string(buffer)+"\n");
 
     // Return
     return;
@@ -191,44 +190,52 @@ void GLog::operator()(const char *msgFormat, ...)
  * @brief Insert logger into logger
  *
  * @param[in] log Logger to be inserted.
+ *
+ * Insert a logger object into another logger object. This method handles
+ * information that has either been written into a file, or that is still
+ * present in the logger buffer.
  ***************************************************************************/
 GLog& GLog::operator<<(GLog& log)
 {
-    // If log does not write in a file
-    if (log.m_file == NULL)
-    {
-        // Add log buffer to this buffer
+    // If log object has an open file then append the log buffer to this
+    // buffer
+    if (log.m_file == NULL) {
         m_buffer.append(log.m_buffer);
     }
-    else
-    {
-        //Force flush
+
+    // ... otherwise read all information from file and append it to the
+    // buffer
+    else {
+
+        // Force flush so that the log object writes the entire buffer
+        // into the file
         log.flush(true);
 
-        //Get the filename
+        // Get the filename
         std::string filename = log.filename();
 
-        //Close file
+        // Close log's file
         log.close();
 
-        // Open file in read mode
-        std::ifstream file(log.filename().c_str(), std::ios::in );
-        if (file)
-        {
+        // Open log's file in read mode
+        std::ifstream file(filename.c_str(), std::ios::in);
+        if (file) {
+
+            // Append all lines from file to this buffer
             std::string line;
             while(std::getline(file,line)){
-                m_buffer.append(line);
-                m_buffer.append("\n");
+                m_buffer.append(line+"\n");
             }
 
+            // Close log's file
             file.close();
         }
 
-        // Open the file
+        // Open log's file in append mode
         log.open(filename,false);
     }
 
-    //Flush
+    // Flush
     flush();
 
     // Return logger
@@ -240,6 +247,8 @@ GLog& GLog::operator<<(GLog& log)
  * @brief Insert C++ string into logger
  *
  * @param[in] str C++ string to be inserted.
+ *
+ * This method insert a C++ string into the logger.
  ***************************************************************************/
 GLog& GLog::operator<<(const std::string& str)
 {
@@ -255,14 +264,13 @@ GLog& GLog::operator<<(const std::string& str)
  * @brief Insert C string into logger
  *
  * @param[in] str C string to be inserted.
+ *
+ * This method insert a C string into the logger.
  ***************************************************************************/
 GLog& GLog::operator<<(const char* str)
 {
-    // Convert in string
-    std::string string = str;
-
     // Add string to buffer
-    append(string);
+    append(std::string(str));
 
     // Return logger
     return *this;
@@ -273,6 +281,8 @@ GLog& GLog::operator<<(const char* str)
  * @brief Insert character value into logger
  *
  * @param[in] value Character value to be inserted.
+ *
+ * This method inserts a character value into the logger.
  ***************************************************************************/
 GLog& GLog::operator<<(const char& value)
 {
@@ -294,6 +304,8 @@ GLog& GLog::operator<<(const char& value)
  * @brief Insert unsigned character value into logger
  *
  * @param[in] value Unsigned character value to be inserted.
+ *
+ * This method inserts an unsigned character value into the logger.
  ***************************************************************************/
 GLog& GLog::operator<<(const unsigned char& value)
 {
@@ -315,14 +327,19 @@ GLog& GLog::operator<<(const unsigned char& value)
  * @brief Insert bool into logger
  *
  * @param[in] value Boolean to be inserted.
+ *
+ * Depending on the argument, this method inserts either the character string
+ * "true" or "false" into the logger.
  ***************************************************************************/
 GLog& GLog::operator<<(const bool& value)
 {
     // Add boolean to buffer
-    if (value)
+    if (value) {
         append("true");
-    else
+    }
+    else {
         append("false");
+    }
 
     // Return logger
     return *this;
@@ -333,6 +350,8 @@ GLog& GLog::operator<<(const bool& value)
  * @brief Insert integer into logger
  *
  * @param[in] value Integer to be inserted.
+ *
+ * This method inserts an integer into the logger.
  ***************************************************************************/
 GLog& GLog::operator<<(const int& value)
 {
@@ -354,6 +373,8 @@ GLog& GLog::operator<<(const int& value)
  * @brief Insert unsigned integer into logger
  *
  * @param[in] value Unsigned integer to be inserted.
+ *
+ * This method inserts an unsigned integer into the logger.
  ***************************************************************************/
 GLog& GLog::operator<<(const unsigned int& value)
 {
@@ -375,6 +396,8 @@ GLog& GLog::operator<<(const unsigned int& value)
  * @brief Insert double precision value into logger
  *
  * @param[in] value Double precision value to be inserted.
+ *
+ * This method inserts a double precision value into the logger.
  ***************************************************************************/
 GLog& GLog::operator<<(const double& value)
 {
@@ -456,16 +479,19 @@ int GLog::size(void) const
  ***************************************************************************/
 void GLog::open(const std::string& filename, bool clobber)
 {
+    // Store the filename
     m_filename = filename;
 
     // Close any existing file
     close();
 
     // Open file
-    if (clobber)
+    if (clobber) {
         m_file = std::fopen(filename.c_str(), "w");
-    else
+    }
+    else {
         m_file = std::fopen(filename.c_str(), "a");
+    }
 
     // Return
     return;
@@ -498,6 +524,9 @@ void GLog::close(void)
  * @brief Set data flag that controls date prefixing
  *
  * @param[in] flag Enable/disable date flag (true/false). 
+ *
+ * If the data flag is set to true, each new line will be prepended by the
+ * actual date when the writing of the line was started.
  ***************************************************************************/
 void GLog::date(bool flag)
 {
@@ -547,6 +576,13 @@ void GLog::cerr(bool flag)
  * @brief Set name to put into prefix
  *
  * @param[in] name Name to put into prefix. 
+ *
+ * If the name is set to a non-zero string, each new line will be prepended
+ * by the specified name. If also the date should be prepended, the name
+ * will be inserted after the date.
+ *
+ * Specifying an empty string will suppress the insertion of the name into
+ * the logger.
  ***************************************************************************/
 void GLog::name(const std::string& name)
 {
@@ -616,8 +652,8 @@ void GLog::init_members(void)
     m_stdout     = false;
     m_stderr     = false;
     m_use_date   = false;
-    m_newline    = true;
     m_file       = NULL;
+    m_filename.clear();
     m_name.clear();
     m_buffer.clear();
 
@@ -639,10 +675,10 @@ void GLog::copy_members(const GLog& log)
     m_stdout     = log.m_stdout;
     m_stderr     = log.m_stderr;
     m_use_date   = log.m_use_date;
-    m_newline    = log.m_newline;
+    m_file       = log.m_file;
+    m_filename   = log.m_filename;
     m_name       = log.m_name;
     m_buffer     = log.m_buffer;
-    m_file       = log.m_file;
 
     // Return
     return;
@@ -674,10 +710,9 @@ void GLog::free_members(void)
  *
  * Flush string buffer if it is full or if flushing is enforced. This method
  * writes the output string in the relevant streams. It decomposes the
- * buffer in lines that a separated by a '\n' character and preprends, if
- * requested, the current date and name. The following streams are currently
- * implemented (and will be filled in parallel): stdout, stderr, and an ASCII
- * file.
+ * buffer in lines that a separated by a '\n' character. The following
+ * streams are currently implemented (and will be filled in parallel):
+ * stdout, stderr, and an ASCII file.
  ***************************************************************************/
 void GLog::flush(bool force)
 {
@@ -690,33 +725,28 @@ void GLog::flush(bool force)
         // Flush buffer until it is empty
         while (m_buffer.size() > 0) {
 
-            // Initialise newline for next line
-            bool newline = m_newline;
-
             // Find next CR
             std::string line;
             std::size_t pos = m_buffer.find_first_of("\n", 0);
             if (pos == std::string::npos) {
                 line    = m_buffer;
-                newline = false;
                 m_buffer.clear();
             }
             else {
                 line     = m_buffer.substr(0, pos) + "\n";
                 m_buffer = m_buffer.substr(pos+1, m_buffer.size()-pos);
-                newline  = true;
             }
 
             // Put line into requested streams
-            if (m_stdout)
+            if (m_stdout) {
                 std::cout << line;
-            if (m_stderr)
+            }
+            if (m_stderr) {
                 std::cerr << line;
-            if (m_file != NULL)
+            }
+            if (m_file != NULL) {
                 std::fprintf(m_file, "%s", line.c_str());
-
-            // Set newline flag for next line
-            m_newline = newline;
+            }
 
         } // endwhile: flush until empty
 
@@ -786,7 +816,7 @@ void GLog::header(const std::string& arg, int level)
  *
  * Returns the current date as string in the format yyyy-mm-ddThh:mm:ss.
  ***************************************************************************/
-std::string GLog::strdate(void)
+std::string GLog::strdate(void) const
 {
     // Allocate variables
     struct std::tm timeStruct;
@@ -817,60 +847,84 @@ std::string GLog::strdate(void)
     return date;
 }
 
+
 /***********************************************************************//**
- * @brief Append a string in the buffer
- * @param[in] arg The string to append
+ * @brief Return prefix
+ *
+ * Returns the prefix for each line.
  ***************************************************************************/
-void GLog::append(const std::string& arg)
+std::string GLog::prefix(void) const
 {
+    // Initialize prefix to empty string
+    std::string prefix = "";
 
-    std::string result(arg);
-
-    // If the buffer is empty or if the last charatere is a \n, start with the prefix
-    if(m_buffer.size()==0 || m_buffer[m_buffer.size()-1]=='\n')
-    {
-        // Prepend prefix if we are at the beginning of a new line
-        std::string prefix = "";
-        if (m_use_date){
-            prefix.append(strdate());
-        }
-        if (m_name.length() > 0){
-            prefix.append(" "+m_name);
-        }
-        if (prefix.length() > 0){
-            prefix.append(": ");
-            result.insert(0,prefix);
-        }
+    // Add date if requested
+    if (m_use_date){
+        prefix.append(strdate());
     }
 
-    //Search the first CR
-    std::size_t pos= pos = result.find_first_of("\n",0);
-
-    // Search all \n characters. Ignore the last CR
-    while(pos!=std::string::npos&&pos<result.size()-1)
-    {
-        // Prepend prefix if we are at the beginning of a new line
-        std::string prefix = "";
-        if (m_use_date){
-            prefix.append(strdate());
-        }
-        if (m_name.length() > 0){
-            prefix.append(" "+m_name);
-        }
-        if (prefix.length() > 0){
-            prefix.append(": ");
-            result.insert(pos+1,prefix);
-        }
-
-        pos = result.find_first_of("\n",pos+1+prefix.size());
+    // Add name if requested
+    if (m_name.length() > 0){
+        prefix.append(" "+m_name);
     }
+
+    // If there is a prefix then add separator
+    if (prefix.length() > 0){
+        prefix.append(": ");
+    }
+
+    // Add any indent
+    prefix.append(fill(" ", m_indent));
+
+    // Return prefix
+    return prefix;
+}
+
+
+/***********************************************************************//**
+ * @brief Append string to the buffer
+ *
+ * @param[in] arg String to append
+ *
+ * This method appends a string to the buffer and prepends, if required, the
+ * current date and name at the beginning of each line.
+ ***************************************************************************/
+void GLog::append(std::string arg)
+{
+    // If the buffer is empty or if the last charater is a \n, prepend a
+    // prefix at the beginning of the string to be inserted.
+    if (m_buffer.size() == 0 || m_buffer[m_buffer.size()-1] == '\n') {
+
+        // Prepend prefix
+        arg.insert(0, prefix());
+    }
+
+    // Search the first CR (\n)
+    std::size_t pos = arg.find_first_of("\n",0);
+
+    // Search all \n characters. Ignore the last CR.
+    while (pos != std::string::npos && pos < arg.size()-1) {
+
+        // Prepend prefix
+        std::string pre = prefix();
+        arg.insert(pos+1, pre);
+
+        // Search next CR
+        pos = arg.find_first_of("\n",pos+1+pre.size());
+
+    } // endwhile
 
     // Add string to buffer
-    m_buffer.append(result);
+    m_buffer.append(arg);
 
-    //Flush Buffer
+    // Flush Buffer
     flush();
+
+    // Return
+    return;
 }
+
+
 /*==========================================================================
  =                                                                         =
  =                                 Friends                                 =

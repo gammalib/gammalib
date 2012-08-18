@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.hpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLog.hpp
  * @brief Information logger class definition
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLOG_HPP
@@ -50,13 +50,8 @@
  * The logger interface implements an internal character buffer that is
  * flushed once a maximum size parameter is exceeded. The buffer limit can
  * be modified using the max_size() method; by default it is set to 8192
- * characters. Note that the buffer is flushed each time a carriage return
- * occurs, irrespectively of the buffer size.
- * The logger allows prepending of the current date and the task name. Note
- * that the current date is the one that applies when the buffer is actually
- * flushed, hence when a good precision in the date is required the maximum
- * buffer length should be set to 0 (i.e. the buffer is flushed after each
- * logging).
+ * characters. The logger allows prepending of the current date and the task
+ * name.
  ***************************************************************************/
 class GLog {
 
@@ -111,8 +106,9 @@ protected:
     void        free_members(void);
     void        flush(bool force = false);
     void        header(const std::string& arg, int level);
-    std::string strdate(void);
-    void        append(const std::string& arg);
+    std::string strdate(void) const;
+    std::string prefix(void) const;
+    void        append(std::string arg);
 
     // Protected data members
     int         m_max_length;    //!< Maximum buffer length
@@ -120,9 +116,8 @@ protected:
     bool        m_stdout;        //!< Dump in standard output
     bool        m_stderr;        //!< Dump in standard error
     bool        m_use_date;      //!< Dump date in prefix
-    bool        m_newline;       //!< Signal beginning of new line
     FILE*       m_file;          //!< Log file pointer
-    std::string m_filename;       //!< Log file name
+    std::string m_filename;      //!< Log file name
     std::string m_name;          //!< Name for prefix
     std::string m_buffer;        //!< Output string buffer
 };
