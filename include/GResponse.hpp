@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GResponse.hpp  -  Abstract response base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GResponse.hpp
  * @brief Abstract response base class definition
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GRESPONSE_HPP
@@ -189,7 +189,6 @@ protected:
         double eval(double phi);
     protected:
         const GResponse*    m_rsp;           //!< Pointer to response
-        const GModelRadial* m_radial;        //!< Pointer to radial spatial model
         const GEnergy*      m_srcEng;        //!< Pointer to true photon energy
         const GTime*        m_srcTime;       //!< Pointer to true photon arrival time
         const GObservation* m_obs;           //!< Pointer to observation
