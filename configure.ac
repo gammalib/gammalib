@@ -572,10 +572,8 @@ fi
 #############################################################################
 # Checks for OpenMP checking option (G_OPENMP)                              #
 #############################################################################
+# Initialise flags
 openmp_ok=no
-
-# Make tests for C++
-#AC_LANG(C++)
 
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
@@ -594,7 +592,7 @@ if test "x$openmp_ok" = "xyes" ; then
 
    if test "x$enable_openmp" = "xyes"; then
         CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
-        AC_DEFINE([G_OPENMP], [1], [Parallel computing enabled])
+        AC_DEFINE([HAVE_OPENMP], [1], [Define if OpenMP is enabled])
         AC_MSG_RESULT(yes)
    else
         enable_openmp=no
