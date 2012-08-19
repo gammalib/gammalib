@@ -289,7 +289,7 @@ void test_response_irf_diffuse(void)
     obs.pointing(pnt);
 
     // Extract CTA response
-    GResponse* rsp = obs.response();
+    //GResponse* rsp = obs.response();
 
     // Load model for IRF computation
     GModels models(cta_rsp_xml);
@@ -304,7 +304,7 @@ void test_response_irf_diffuse(void)
         for (int i = 0; i < obs.events()->size(); ++i) {
 
             // Get event pointer
-            const GEventBin* bin = (*((GEventCube*)obs.events()))[i];
+            const GEventBin* bin = (*(static_cast<const GEventCube*>(obs.events())))[i];
 
             // Get model and add to sum
             double model = obs.model(models, *bin, NULL) * bin->size();
@@ -397,7 +397,7 @@ void test_response_npred_diffuse(void)
     obs.pointing(pnt);
 
     // Extract CTA response
-    GResponse* rsp = obs.response();
+    //GResponse* rsp = obs.response();
 
     // Load models for Npred computation
     GModels models(cta_rsp_xml);
@@ -549,7 +549,7 @@ void test_unbinned_obs(void)
     // Loop over all events using iterator
     try {
         int num = 0;
-        GCTAEventList *ptr = (GCTAEventList*)run.events();
+        GCTAEventList *ptr = static_cast<GCTAEventList*>(const_cast<GEvents*>(run.events()));
         for (GCTAEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
             //std::cout << *event->energy() << std::endl;
             num++;
@@ -604,7 +604,7 @@ void test_unbinned_optimizer(void)
     std::cout << "Test CTA unbinned optimizer: ";
 
     // Number of observations in data
-    int nobs = 1;
+    //int nobs = 1;
 
     // Declare observations
     GObservations   obs;
@@ -719,7 +719,7 @@ void test_binned_optimizer(void)
     std::cout << "Test CTA binned optimizer: ";
 
     // Number of observations in data
-    int nobs = 1;
+    //int nobs = 1;
 
     // Declare observations
     GObservations   obs;
