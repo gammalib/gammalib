@@ -587,7 +587,7 @@ if test "x$openmp_ok" = "xyes" ; then
    AC_MSG_CHECKING(whether to enable OpenMP)
    AC_ARG_ENABLE([openmp],
 	          AS_HELP_STRING([--enable-openmp],
-                                 [To active multi-threading [default=yes]]),
+                                 [turn on OpenMP support [default=yes]]),
 			         [enable_openmp_="$enableval"],
 				 [enable_openmp="yes"])
 
