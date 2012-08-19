@@ -29,11 +29,17 @@
 #include <config.h>
 #endif
 #include <iostream>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 #include "GammaLib.hpp"
 #include "testinst/GTestLib.hpp"
+
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#ifdef __APPLE__ & __MACH__
+#include <pthread.h>
+pthread_attr_t gomp_thread_attr;
+#endif
+#endif
 
 /* __ Coding definitions _________________________________________________ */
 #define RATE      13.0        //!< Events per seconde. For events generation.

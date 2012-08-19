@@ -584,13 +584,17 @@ fi
 # If OpenMP is available
 if test "x$openmp_ok" = "xyes" ; then
 
+   # Signal actual test
    AC_MSG_CHECKING(whether to enable OpenMP)
-   AC_ARG_ENABLE([openmp],
-	          AS_HELP_STRING([--enable-openmp],
-                                 [turn on OpenMP support [default=yes]]),
-			         [enable_openmp_="$enableval"],
-				 [enable_openmp="yes"])
 
+   # Check whether OpenMP should be enabled
+   AC_ARG_ENABLE([openmp],
+	             AS_HELP_STRING([--enable-openmp],
+                                [turn on OpenMP support [default=yes]]),
+			                    [enable_openmp="$enableval"],
+				                [enable_openmp="yes"])
+
+   # Set compiler flags accordingly
    if test "x$enable_openmp" = "xyes"; then
         CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
         AC_DEFINE([HAVE_OPENMP], [1], [Define if OpenMP is enabled])
@@ -601,6 +605,19 @@ if test "x$openmp_ok" = "xyes" ; then
    fi
 fi
 AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
+
+# Set system specific settings
+OPENMP_LIB_LDFLAGS=
+if test "x$enable_openmp" = "xyes"; then
+    case $ac_sys_system/$ac_sys_release in
+    Darwin/*)
+        #
+        #
+        OPENMP_LIB_LDFLAGS=-lgomp
+        ;;
+    esac
+fi
+AC_SUBST(OPENMP_LIB_LDFLAGS)
 
 
 #############################################################################
