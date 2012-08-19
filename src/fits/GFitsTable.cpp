@@ -746,7 +746,6 @@ void GFitsTable::data_open(void* vptr)
             std::ostringstream colname;
             colname << value;
             throw GException::fits_unknown_coltype(G_DATA_OPEN, colname.str(), typecode);
-            break;
         }
 
         // Store column definition
