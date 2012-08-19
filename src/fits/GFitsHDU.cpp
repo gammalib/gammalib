@@ -204,7 +204,7 @@ GFitsHeaderCard* GFitsHDU::card(const int& cardno)
 std::string GFitsHDU::string(const std::string& keyname) const
 {
     // Get pointer on card
-    GFitsHeaderCard* card = ((GFitsHDU*)this)->card(keyname);
+    GFitsHeaderCard* card = const_cast<GFitsHDU*>(this)->card(keyname);
 
     // Return card value
     return (card->string());
@@ -219,7 +219,7 @@ std::string GFitsHDU::string(const std::string& keyname) const
 double GFitsHDU::real(const std::string& keyname) const
 {
     // Get pointer on card
-    GFitsHeaderCard* card = ((GFitsHDU*)this)->card(keyname);
+    GFitsHeaderCard* card = const_cast<GFitsHDU*>(this)->card(keyname);
 
     // Return card value
     return (card->real());
@@ -234,7 +234,7 @@ double GFitsHDU::real(const std::string& keyname) const
 int GFitsHDU::integer(const std::string& keyname) const
 {
     // Get pointer on card
-    GFitsHeaderCard* card = ((GFitsHDU*)this)->card(keyname);
+    GFitsHeaderCard* card = const_cast<GFitsHDU*>(this)->card(keyname);
 
     // Return card value
     return (card->integer());

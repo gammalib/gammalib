@@ -367,7 +367,7 @@ void GCTAObservation::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle EventList
         if (par->attribute("name") == "EventList") {
@@ -534,7 +534,7 @@ void GCTAObservation::write(GXmlElement& xml) const
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Eventlist
         if (par->attribute("name") == "EventList") {
@@ -894,8 +894,8 @@ void GCTAObservation::read_attributes(const GFitsHDU* hdu)
         m_ra_obj   = (hdu->hascard("RA_OBJ"))   ? hdu->real("RA_OBJ") : 0.0;
         m_dec_obj  = (hdu->hascard("DEC_OBJ"))  ? hdu->real("DEC_OBJ") : 0.0;
         m_obs_id   = (hdu->hascard("OBS_ID"))   ? hdu->integer("OBS_ID") : 0;
-        double alt = (hdu->hascard("ALT_PNT"))  ? hdu->real("ALT_PNT") : 0.0;
-        double az  = (hdu->hascard("AZ_PNT"))   ? hdu->real("AZ_PNT") : 0.0;
+        //double alt = (hdu->hascard("ALT_PNT"))  ? hdu->real("ALT_PNT") : 0.0;
+        //double az  = (hdu->hascard("AZ_PNT"))   ? hdu->real("AZ_PNT") : 0.0;
 
         // Kluge: compute DEADC from livetime and ontime instead of using the
         // keyword value as the original event lists had this values badly
