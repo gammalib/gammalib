@@ -100,7 +100,7 @@ GObservations::iterator& GObservations::iterator::operator++(void)
     if (m_this != NULL) {
         
         // Increment event iterator
-        m_event++;
+        ++m_event;
 
         // If end of observation is reached then set iterator to first event of
         // next valid observation
@@ -127,7 +127,7 @@ GObservations::iterator& GObservations::iterator::operator++(void)
                     
                     // Set iterator to first event of current observation. Exit
                     // only if we have events in that observation
-                    GEvents* events = (GEvents*)(m_obs->events());
+                    GEvents* events = const_cast<GEvents*>(m_obs->events());
                     m_event         = events->begin();
                     m_end           = events->end();
                     if (m_event != m_end)
