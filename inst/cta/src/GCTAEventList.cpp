@@ -944,7 +944,7 @@ void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
         // Loop over all data selection keys
         for (int i = 1; i <= ndskeys; ++i) {
             std::string type_key  = "DSTYP"+str(i);
-            std::string unit_key  = "DSUNI"+str(i);
+            //std::string unit_key  = "DSUNI"+str(i);
             std::string value_key = "DSVAL"+str(i);
             try {
                 if (hdu->string(type_key) == "POS(RA,DEC)") {
