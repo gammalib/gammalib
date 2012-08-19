@@ -149,15 +149,13 @@ if '@WITH_INST_LAT_TRUE@' != '#':
 ext_modules = []
 py_modules  = []
 
-# extra args
-extra_compile_args = []
-extra_link_args = []
-
-# enable OPENMP
+# Optionally enable OpenMP
 if '@OPENMP_TRUE@' != '#':
-		extra_compile_args=['-fopenmp']
-		extra_link_args=['-fopenmp']
-	
+	extra_compile_args = ['-fopenmp']
+	extra_link_args    = ['-fopenmp']
+else:
+	extra_compile_args = []
+	extra_link_args    = []
 
 for module in core_modules:
 	
