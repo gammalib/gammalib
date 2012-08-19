@@ -574,7 +574,6 @@ fi
 #############################################################################
 # Initialise flags
 openmp_ok=no
-enable_openmp=no
 
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
@@ -1187,9 +1186,9 @@ else
   echo "  - Optimize memory usage        (no)"
 fi
 if test "x$enable_openmp" = "xyes"; then
-  echo "  * Enable openMP                (yes)   (default)"
+  echo "  * Enable OpenMP                (yes)   (default)"
 else
-  echo "  - Enable openMP                (no)"
+  echo "  - Enable OpenMP                (no)"
 fi
 if test "x$enable_debug" = "xyes"; then
   echo "  * Compile in debug code        (yes)"
