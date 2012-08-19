@@ -577,13 +577,9 @@ openmp_ok=no
 enable_openmp=no
 
 # Check if openMP is available
-AC_MSG_CHECKING(whether OpenMP is supported)
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
 if test "x$ac_cv_prog_cxx_openmp" != "xunsupported" && test "x$ac_cv_prog_cxx_openmp" != "x"; then
    openmp_ok=yes
-   AC_MSG_RESULT(yes)
-else
-   AC_MSG_RESULT(no)
 fi
 
 # If OpenMP is available
