@@ -476,11 +476,11 @@ case $ac_sys_system/$ac_sys_release in
 Darwin/*)
     # Use -undefined dynamic_lookup whenever possible (10.3 and later).
     # This allows an extension to be used in any Python
-    if test ${MACOSX_DEPLOYMENT_TARGET} '>' 10.2; then
+    #if test ${MACOSX_DEPLOYMENT_TARGET} '>' 10.2; then
         if test "${enable_universalsdk}"; then
             LDFLAGS="${UNIVERSAL_ARCH_FLAGS} -isysroot ${UNIVERSALSDK} ${LDFLAGS}"
         fi
-    fi
+    #fi
     ;;
 esac
 
@@ -651,11 +651,9 @@ if test "x$has_python" = "xyes"; then
     if test -n "${python_path}"; then
       AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
       python_path="-I$python_path"
-      #has_python_h="yes"
     fi
     PYTHON_CPPFLAGS=$python_path
     CPPFLAGS="${CPPFLAGS} ${python_path}"
-	AC_MSG_RESULT([$python_path])
 	AC_SUBST([PYTHON_CPPFLAGS])
 
   # ... otherwise check for includes relative to exectuable (obsolete?)
