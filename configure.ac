@@ -574,6 +574,7 @@ fi
 #############################################################################
 # Initialise flags
 openmp_ok=no
+enable_openmp=no
 
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
