@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GFitsImageUShort.cpp  - FITS unsigned short integer image class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageUShort.cpp
  * @brief FITS unsigned short integer image class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -177,23 +177,8 @@ GFitsImageUShort::GFitsImageUShort(int naxis, const int* naxes,
     // Initialise class members for clean destruction
     init_members();
 
-    // If there are pixels then allocate array
-    if (m_num_pixels > 0) {
-
-        // Allocate data
-        alloc_data();
-
-        // If no pixel array has been specified then simply initialise data
-        if (pixels == NULL)
-            init_data();
-
-        // ... otherwise copy pixels
-        else {
-            for (int i = 0; i < m_num_pixels; ++i)
-                m_pixels[i] = pixels[i];
-        }
-
-    } // endif: there are pixels in image
+    // Construct data
+    construct_data(pixels);
 
     // Return
     return;
@@ -277,8 +262,8 @@ GFitsImageUShort& GFitsImageUShort::operator= (const GFitsImageUShort& image)
  ***************************************************************************/
 unsigned short& GFitsImageUShort::operator() (const int& ix)
 {
-    // If image pixels are not available then fetch them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return m_pixels[ix];
@@ -297,8 +282,8 @@ unsigned short& GFitsImageUShort::operator() (const int& ix)
  ***************************************************************************/
 unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy)
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Calculate pixel offset
     int offset = ix + iy * m_naxes[0];
@@ -322,8 +307,8 @@ unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy)
 unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
                                               const int& iz)
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + iz * m_naxes[1]);
@@ -348,8 +333,8 @@ unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
 unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
                                               const int& iz, const int& it)
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2]));
@@ -369,8 +354,8 @@ unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
  ***************************************************************************/
 const unsigned short& GFitsImageUShort::operator() (const int& ix) const
 {
-    // If image pixels are not available then fetch them now
-    if (m_pixels == NULL) ((GFitsImageUShort*)this)->fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return m_pixels[ix];
@@ -389,8 +374,8 @@ const unsigned short& GFitsImageUShort::operator() (const int& ix) const
  ***************************************************************************/
 const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy) const
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageUShort*)this)->fetch_data();
+    // Load data
+    load_data();
 
     // Calculate pixel offset
     int offset = ix + iy * m_naxes[0];
@@ -414,8 +399,8 @@ const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy
 const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
                                                     const int& iz) const
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageUShort*)this)->fetch_data();
+    // Load data
+    load_data();
 
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + iz * m_naxes[1]);
@@ -440,8 +425,8 @@ const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy
 const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
                                                     const int& iz, const int& it) const
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageUShort*)this)->fetch_data();
+    // Load data
+    load_data();
 
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2]));
@@ -468,8 +453,8 @@ const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy
  ***************************************************************************/
 unsigned short& GFitsImageUShort::at(const int& ix)
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return (m_pixels[offset(ix)]);
@@ -486,8 +471,8 @@ unsigned short& GFitsImageUShort::at(const int& ix)
  ***************************************************************************/
 unsigned short& GFitsImageUShort::at(const int& ix, const int& iy)
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy)]);
@@ -505,8 +490,8 @@ unsigned short& GFitsImageUShort::at(const int& ix, const int& iy)
  ***************************************************************************/
 unsigned short& GFitsImageUShort::at(const int& ix, const int& iy, const int& iz)
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy,iz)]);
@@ -526,8 +511,8 @@ unsigned short& GFitsImageUShort::at(const int& ix, const int& iy, const int& iz
 unsigned short& GFitsImageUShort::at(const int& ix, const int& iy, const int& iz,
                                      const int& it)
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy,iz,it)]);
@@ -543,8 +528,8 @@ unsigned short& GFitsImageUShort::at(const int& ix, const int& iy, const int& iz
  ***************************************************************************/
 const unsigned short& GFitsImageUShort::at(const int& ix) const
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageUShort*)this)->fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return (m_pixels[offset(ix)]);
@@ -561,8 +546,8 @@ const unsigned short& GFitsImageUShort::at(const int& ix) const
  ***************************************************************************/
 const unsigned short& GFitsImageUShort::at(const int& ix, const int& iy) const
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageUShort*)this)->fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy)]);
@@ -581,8 +566,8 @@ const unsigned short& GFitsImageUShort::at(const int& ix, const int& iy) const
 const unsigned short& GFitsImageUShort::at(const int& ix, const int& iy,
                                            const int& iz) const
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageUShort*)this)->fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy,iz)]);
@@ -602,8 +587,8 @@ const unsigned short& GFitsImageUShort::at(const int& ix, const int& iy,
 const unsigned short& GFitsImageUShort::at(const int& ix, const int& iy,
                                            const int& iz, const int& it) const
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageUShort*)this)->fetch_data();
+    // Load data
+    load_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy,iz,it)]);
@@ -682,8 +667,8 @@ double GFitsImageUShort::pixel(const int& ix, const int& iy, const int& iz,
  ***************************************************************************/
 void* GFitsImageUShort::pixels(void)
 {
-    // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    // Load data
+    load_data();
 
     // Return
     return m_pixels;
@@ -747,13 +732,16 @@ void GFitsImageUShort::copy_members(const GFitsImageUShort& image)
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (image.m_pixels == NULL);
-    if (not_loaded) ((GFitsImageUShort*)(&image))->fetch_data();
+    if (not_loaded) {
+        const_cast<GFitsImageUShort*>(&image)->fetch_data();
+    }
 
     // Copy pixels
     if (m_num_pixels > 0 && image.m_pixels != NULL) {
         m_pixels = new unsigned short[m_num_pixels];
-        for (int i = 0; i < m_num_pixels; ++i)
+        for (int i = 0; i < m_num_pixels; ++i) {
             m_pixels[i] = image.m_pixels[i];
+        }
     }
 
     // Copy NULL value
@@ -761,7 +749,9 @@ void GFitsImageUShort::copy_members(const GFitsImageUShort& image)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsImageUShort*)(&image))->release_data();
+    if (not_loaded) {
+        const_cast<GFitsImageUShort*>(&image)->release_data();
+    }
     #endif
 
     // Return
@@ -796,8 +786,9 @@ void GFitsImageUShort::alloc_data(void)
     release_data();
 
     // Allocate new data
-    if (m_num_pixels > 0)
+    if (m_num_pixels > 0) {
         m_pixels = new unsigned short[m_num_pixels];
+    }
 
     // Return
     return;
@@ -811,8 +802,9 @@ void GFitsImageUShort::init_data(void)
 {
     // Initialise data if they exist
     if (m_pixels != NULL) {
-        for (int i = 0; i < m_num_pixels; ++i)
+        for (int i = 0; i < m_num_pixels; ++i) {
             m_pixels[i] = 0;
+        }
     }
 
     // Return
@@ -854,13 +846,15 @@ void GFitsImageUShort::construct_data(const unsigned short* pixels)
         alloc_data();
 
         // If no pixel array has been specified then simply initialise data
-        if (pixels == NULL)
+        if (pixels == NULL) {
             init_data();
+        }
 
         // ... otherwise copy pixels
         else {
-            for (int i = 0; i < m_num_pixels; ++i)
+            for (int i = 0; i < m_num_pixels; ++i) {
                 m_pixels[i] = pixels[i];
+            }
         }
 
     } // endif: there are pixels in image
@@ -871,7 +865,26 @@ void GFitsImageUShort::construct_data(const unsigned short* pixels)
 
 
 /***********************************************************************//**
+ * @brief Load data
+ *
+ * Load the image data if no pixels have been allocated.
+ ***************************************************************************/
+void GFitsImageUShort::load_data(void) const
+{
+    // If image pixels are not available then fetch them now.
+    if (m_pixels == NULL) {
+        const_cast<GFitsImageUShort*>(this)->fetch_data();
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Allocates nul value
+ *
+ * @param[in] value Nul value.
  ***************************************************************************/
 void GFitsImageUShort::alloc_nulval(const void* value)
 {
