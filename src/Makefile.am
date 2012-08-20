@@ -61,7 +61,7 @@ libgamma_la_LIBADD = support/libsupport.la \
                      $(INST_MWL) \
                      $(INST_CTA) \
                      $(INST_LAT)
-libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION) @OPENMP_LIB_LDFLAGS@
 
 # Distribute scripts
 EXTRA_DIST   = $(scripts)

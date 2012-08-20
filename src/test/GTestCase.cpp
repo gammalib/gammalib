@@ -80,7 +80,7 @@ GTestCase::GTestCase(const GTestCase& testcase)
  *
  * @param[in] type Type of the Test case ( GTestCase::FAIL_TEST or GTestCase::ERROR_TEST )
  ***************************************************************************/
-GTestCase::GTestCase(ErrorType type)
+GTestCase::GTestCase(errorType type)
 {
     //Initialise members
     init_members();
@@ -122,7 +122,7 @@ GTestCase::GTestCase(const pfunction ptr_function, const std::string& name)
  * @param[in] type Type of the Test case (GTestCase::FAIL_TEST or GTestCase::ERROR_TEST)
  * @param[in] name Name of the Test case
  ***************************************************************************/
-GTestCase::GTestCase(ErrorType type, const std::string& name)
+GTestCase::GTestCase(errorType type, const std::string& name)
 {
     //Initialise members
     init_members();
@@ -253,7 +253,7 @@ pfunction GTestCase::ptr_function(void) const{
 /***********************************************************************//**
  * @brief Return Test Case type
  ***************************************************************************/
-GTestCase::ErrorType GTestCase::type(void) const{
+GTestCase::errorType GTestCase::type(void) const{
     return m_type; 
 }
 
@@ -261,7 +261,7 @@ GTestCase::ErrorType GTestCase::type(void) const{
  * @brief Set Test Case type
  * @param[in] type Type of the test case
  ***************************************************************************/
-void GTestCase::type(ErrorType type){
+void GTestCase::type(errorType type){
     m_type=type;
     return;
 }

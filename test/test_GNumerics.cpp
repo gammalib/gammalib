@@ -36,46 +36,68 @@
 /***********************************************************************//**
  * @brief Test model parameter handling.
  ***************************************************************************/
-void test_GIntegral(GTestSuite& testsuite)
+void test_GIntegral(void)
 {
+    // Write header
+    std::cout << "Test GIntegral: ";
+
     // Set sigma
     double sigma = 2.5;
 
     // Test integral and integrand allocation
-    testsuite.test_try("Test integral and integrand allocation");
     try {
         Gauss     integrand(sigma);
         GIntegral integral(&integrand);
-        
-        testsuite.success();
     }
     catch (std::exception &e) {
-        testsuite.test_try_failure(e);
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to allocated integral and integrand."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
     }
+    std::cout << ".";
 
     // Test Romberg integration
-    testsuite.test_try("Test Romberg integration");
     try {
         Gauss     integrand(sigma);
         GIntegral integral(&integrand);
         double    result = integral.romb(-10.0*sigma, 10.0*sigma);
         if (fabs(result-1.0) > 1.0e-6) {
-            throw testsuite.exception_failure("Gaussian integral is not 1.0 (integral="+str(result)+")");
+            std::cout << std::endl
+                      << "TEST ERROR: Gaussian integral is not 1.0 "
+                      << " (integral=" << result << ")"
+                      << std::endl;
+            throw;
         }
         result = integral.romb(-sigma, sigma);
         if (fabs(result-0.68268948130801355) > 1.0e-6) {
-            throw testsuite.exception_failure("Gaussian integral is not 0.682689 (difference="+str((result-0.68268948130801355))+")");
+            std::cout << std::endl
+                      << "TEST ERROR: Gaussian integral is not 0.682689 "
+                      << " (difference=" << (result-0.68268948130801355) << ")"
+                      << std::endl;
+            throw;
         }
         result = integral.romb(0.0, sigma);
         if (fabs(result-0.3413447460687748) > 1.0e-6) {
-            throw testsuite.exception_failure("Gaussian integral is not 0.341345 (difference="+str((result-0.3413447460687748))+")");
+            std::cout << std::endl
+                      << "TEST ERROR: Gaussian integral is not 0.341345 "
+                      << " (difference=" << (result-0.3413447460687748) << ")"
+                      << std::endl;
+            throw;
         }
-
-        testsuite.test_try_success();
     }
     catch (std::exception &e) {
-        testsuite.test_try_failure(e);
+        std::cout << std::endl
+                  << "TEST ERROR: Unable to allocated integral and integrand."
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
     }
+    std::cout << ".";
+
+    // Plot final test success
+    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -87,23 +109,14 @@ void test_GIntegral(GTestSuite& testsuite)
  ***************************************************************************/
 int main(void)
 {
-    //Create a test suites container
-    GTestSuites testsuites("GNumerics testing");
-
-    // Create a test suite
-    GTestSuite testsuite("Test GIntegral");
-
-    // Append it
-    testsuites.append(testsuite);
+    // Dump header
+    std::cout << std::endl;
+    std::cout << "********************" << std::endl;
+    std::cout << "* Numerics testing *" << std::endl;
+    std::cout << "********************" << std::endl;
 
     // Execute Healpix tests
-    test_GIntegral(testsuite);
-
-    //End of the tests
-    testsuite.end_test();
-
-    //save xml report
-    testsuites.save("reports/GNumerics.xml");
+    test_GIntegral();
 
     // Return
     return 0;

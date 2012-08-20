@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialProfile.cpp  -  Radial Profile CTA model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialProfile.cpp
  * @brief Radial Profile model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -413,7 +413,7 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
     for (int i = 0; i < 3; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Width
         if (par->attribute("name") == "Width") {
@@ -516,7 +516,7 @@ void GCTAModelRadialProfile::write(GXmlElement& xml) const
     for (int i = 0; i < 3; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle prefactor
         if (par->attribute("name") == "Width") {

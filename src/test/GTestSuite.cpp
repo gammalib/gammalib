@@ -104,7 +104,7 @@ GTestSuite::~GTestSuite(void)
 {
     //For make check
     if(m_errors+m_failures>0){
-        throw;
+        exit(1);
     }
     
     //Free members
@@ -239,7 +239,7 @@ void GTestSuite::cout(bool cout)
 void GTestSuite::test_assert(bool assert, const std::string& name,const std::string& message)
 {
     // If it is the first test, print test suite name
-    if(tests()==0&&m_stack_try.size()==0){
+    if(tests()==0){
         m_log<<this->name()<<": ";
     }
     
@@ -293,7 +293,7 @@ void GTestSuite::test_assert(bool assert, const std::string& name,const std::str
 void GTestSuite::test_try(const std::string& name)
 { 
     // If it is the first test, print test suite name
-    if(tests()==0&&m_stack_try.size()==0){
+    if(tests()==0){
         m_log<<this->name()<<": ";
     }
     
@@ -349,8 +349,7 @@ void GTestSuite::test_try_success(){
 /***********************************************************************//**
  * @brief Notice when a try block failed
  * @param[in] message Message to explain why it failed (defaults to "")
- * @param[in] message_type Type of message (defaults to "")
- * @param[in] type Type of case (GTestCase::ERROR_TEST or GTestCase::FAIL_TEST)
+ * @param[in] type Type of message (defaults to "")
  * @see test_try_sucess()
  * @see test_try(const std::string& name)
  * @see test_try_failure(const std::exception& e)
@@ -370,7 +369,7 @@ void GTestSuite::test_try_success(){
  *      }
  *
  ***************************************************************************/
-void GTestSuite::test_try_failure(const std::string& message, const std::string& message_type,GTestCase::ErrorType type){
+void GTestSuite::test_try_failure(const std::string& message, const std::string& type){
     // If the stack is empty
     if(m_stack_try.size()==0)
         throw GException::test_nested_try_error(G_TRY_FAILURE,"test_try_success() call without test_try()");
@@ -378,22 +377,14 @@ void GTestSuite::test_try_failure(const std::string& message, const std::string&
     // Test is not ok
     m_stack_try.back()->m_passed=false;
 
-    // Increment the number of errors/failures
-    if(type==GTestCase::ERROR_TEST){
-        m_errors++;
-    }
-    else{
-        m_failures++;
-    }
+    // Increment the number of errors
+    m_errors++;
 
-    //Set type
-    m_stack_try.back()->type(type);
-    
     // Set a message
     m_stack_try.back()->message(message);
 
     // Set a type of message
-    m_stack_try.back()->message_type(message_type);
+    m_stack_try.back()->message_type(type);
 
     // Add the test in the container
     m_tests.push_back(m_stack_try.back());
@@ -430,71 +421,13 @@ void GTestSuite::test_try_failure(const std::string& message, const std::string&
  *
  ***************************************************************************/
 void GTestSuite::test_try_failure(const std::exception& e){
-    // By default the type is ERROR
-    GTestCase::ErrorType type = GTestCase::ERROR_TEST;
     
-    // If it is a GExecption::test_failure
-    if(dynamic_cast<const GException::test_failure*>(&e))
-        type = GTestCase::FAIL_TEST;
-
     // Extract message of exception and class name
-    test_try_failure(e.what(),typeid(e).name(),type);
+    test_try_failure(e.what(),typeid(e).name());
     
     //Return
     return;
     
-}
-
-/***********************************************************************//**
- * @brief Return a failure exception
- * @param[in] message Message of the exception
- * @see test_try()
- * @see test_error(const std::string& message)
- *
- * It can be use in a try test
- *
- * Example: 
- *       GTestSuite testsuite;
- *       testsuite.test_try("Test a try block");
- *       try{
- *          throw testsuite.exception_failure("a failure");
-            testsuite.test_try_success();
- *       }
- *      catch(exception& e)
- *      {
- *          testsuite.test_try_failure(e);
- *      }
- *
- ***************************************************************************/
-GException::test_failure& GTestSuite::exception_failure(const std::string& message)
-{
-    return *(new GException::test_failure(m_stack_try.back()->name(),message));
-}
-
-/***********************************************************************//**
- * @brief Return an error exception
- * @param[in] message Message of the exception
- * @see test_try()
- * @see test_failure(const std::string& message)
- *
- * It can be use in a try test
- *
- * Example: 
- *       GTestSuite testsuite;
- *       testsuite.test_try("Test a try block");
- *       try{
- *          throw testsuite.exception_error("an error");
-            testsuite.test_try_success();
- *       }
- *      catch(exception& e)
- *      {
- *          testsuite.test_try_failure(e);
- *      }
- *
- ***************************************************************************/
-GException::test_error& GTestSuite::exception_error(const std::string& message)
-{
-    return *(new GException::test_error(m_stack_try.back()->name(),message));
 }
 
 /***********************************************************************//**
@@ -553,7 +486,7 @@ void GTestSuite::test_function(const pfunction function,const std::string& name)
 void GTestSuite::end_test()
 {
     if((m_errors+m_failures)==0){
-        m_log<<" ok\n";
+        m_log<<" ok";
     }
     else{
         m_log<<" NOK\n";
@@ -648,6 +581,9 @@ void GTestSuite::copy_members(const GTestSuite& testsuite)
  ***************************************************************************/
 void GTestSuite::free_members(void)
 {
+    //Add a new line
+    m_log<<"\n";
+    
     // Delete test cases
     for(int i=0;i<m_tests.size();++i)
     {

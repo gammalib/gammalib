@@ -75,10 +75,10 @@ AC_CANONICAL_HOST
 
 
 #############################################################################
-# Determine the C and C++ compilers.  This has to come before the check for #
+# Check for valid C++ compiler.  This has to come before the check for      #
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
 #############################################################################
-AC_PROG_CC
+AC_LANG(C++)
 AC_PROG_CXX
 
 
@@ -476,11 +476,11 @@ case $ac_sys_system/$ac_sys_release in
 Darwin/*)
     # Use -undefined dynamic_lookup whenever possible (10.3 and later).
     # This allows an extension to be used in any Python
-    if test ${MACOSX_DEPLOYMENT_TARGET} '>' 10.2; then
+    #if test ${MACOSX_DEPLOYMENT_TARGET} '>' 10.2; then
         if test "${enable_universalsdk}"; then
             LDFLAGS="${UNIVERSAL_ARCH_FLAGS} -isysroot ${UNIVERSALSDK} ${LDFLAGS}"
         fi
-    fi
+    #fi
     ;;
 esac
 
@@ -572,6 +572,7 @@ fi
 #############################################################################
 # Checks for OpenMP checking option (G_OPENMP)                              #
 #############################################################################
+# Initialise flags
 openmp_ok=no
 
 # Check if openMP is available
@@ -580,25 +581,44 @@ if test "x$ac_cv_prog_cxx_openmp" != "xunsupported" && test "x$ac_cv_prog_cxx_op
    openmp_ok=yes
 fi
 
+# If OpenMP is available
 if test "x$openmp_ok" = "xyes" ; then
 
-   AC_MSG_CHECKING(whether to enable openMP)
-   AC_ARG_ENABLE([openmp],
-	          AS_HELP_STRING([--enable-openmp],
-                                 [To active multi-threading [default=yes]]),
-			         [enable_openmp_="$enableval"],
-				 [enable_openmp="yes"])
+   # Signal actual test
+   AC_MSG_CHECKING(whether to enable OpenMP)
 
+   # Check whether OpenMP should be enabled
+   AC_ARG_ENABLE([openmp],
+	             AS_HELP_STRING([--enable-openmp],
+                                [turn on OpenMP support [default=yes]]),
+			                    [enable_openmp="$enableval"],
+				                [enable_openmp="yes"])
+
+   # Set compiler flags accordingly
    if test "x$enable_openmp" = "xyes"; then
-        CXXFLAGS="$CXXFLAGS $OPENMP_CFLAGS"
+        CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+        AC_DEFINE([HAVE_OPENMP], [1], [Define if OpenMP is enabled])
         AC_MSG_RESULT(yes)
    else
         enable_openmp=no
-	AC_MSG_RESULT(no)
+        AC_MSG_RESULT(no)
    fi
 fi
-
 AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
+
+# Set system specific settings
+OPENMP_LIB_LDFLAGS=
+if test "x$enable_openmp" = "xyes"; then
+    case $ac_sys_system/$ac_sys_release in
+    Darwin/*)
+        #
+        #
+        OPENMP_LIB_LDFLAGS=-lgomp
+        ;;
+    esac
+fi
+AC_SUBST(OPENMP_LIB_LDFLAGS)
+
 
 #############################################################################
 # Checks if Python bindings are to be build                                 #
@@ -647,12 +667,11 @@ if test "x$has_python" = "xyes"; then
     python_path=`$PYTHON -c "import distutils.sysconfig; \
            		             print distutils.sysconfig.get_python_inc();"`
     if test -n "${python_path}"; then
+      AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
       python_path="-I$python_path"
-      has_python_h="yes"
     fi
     PYTHON_CPPFLAGS=$python_path
     CPPFLAGS="${CPPFLAGS} ${python_path}"
-	AC_MSG_RESULT([$python_path])
 	AC_SUBST([PYTHON_CPPFLAGS])
 
   # ... otherwise check for includes relative to exectuable (obsolete?)
@@ -666,10 +685,11 @@ if test "x$has_python" = "xyes"; then
     # Check if we have Python.h
     AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
   
-    # Signal any problem
-    if test "x$has_python_h" = "xno"; then
-      AC_MSG_WARN([No Python header file "$PY_INCLUDE/Python.h" found. Please install appropriate Python development package.])
-    fi
+  fi
+
+  # Signal missing Python headers
+  if test "x$has_python_h" = "xno"; then
+    AC_MSG_WARN([No Python header file "Python.h" found. Please install appropriate Python development package.])
   fi
   
 fi
@@ -1184,9 +1204,9 @@ else
   echo "  - Optimize memory usage        (no)"
 fi
 if test "x$enable_openmp" = "xyes"; then
-  echo "  * Enable openMP                (yes)   (default)"
+  echo "  * Enable OpenMP                (yes)   (default)"
 else
-  echo "  - Enable openMP                (no)"
+  echo "  - Enable OpenMP                (no)"
 fi
 if test "x$enable_debug" = "xyes"; then
   echo "  * Compile in debug code        (yes)"

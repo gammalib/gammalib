@@ -31,35 +31,37 @@
 /***************************************************************************
  *  Test: Optimizer                                                        *
  ***************************************************************************/
-void test_optimizer(GTestSuite& testsuite)
+void test_optimizer(void)
 {
-
+    // Write header
+    std::cout << "Test GOptimizer: ";
+    
     // Number of observations in data
     int nobs = 1;
 
     // Setup GData for optimizing
     GData           data;
     GLATObservation obs;
-    testsuite.test_try("Setup GData for optimizing");
     try {
         obs.load_binned("data/lat/cntmap.fits.gz", "", "");
         for (int i = 0; i < nobs; ++i)
             data.add(obs);
-
-        testsuite.test_try_success();
     }
     catch (std::exception &e) {
-        testsuite.test_try_failure(e);
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable setup GData for optimizing." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
     }
-
-    //std::cout << data << std::endl;
+    std::cout << ".";
+//std::cout << data << std::endl;
 
     // Setup GModels for optimizing
     GModelSpatialPtsrc point_source;
     GModelSpectralPlaw power_law;
     GModel             crab;
     GModels            models;
-    testsuite.test_try("Setup GModels for optimizing");
     try {
         GSkyDir dir;
         dir.radec_deg(83.6331, +22.0145);
@@ -69,32 +71,34 @@ void test_optimizer(GTestSuite& testsuite)
         crab.name("Crab");
         models.add(crab);
         data.models(models);
-
-        testsuite.test_try_success();
     }
     catch (std::exception &e) {
-        testsuite.test_try_failure(e);
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable setup GModels for optimizing." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
     }
-
-    //std::cout << models << std::endl;
+    std::cout << ".";
+//std::cout << models << std::endl;
 
     // Setup parameters for optimizing
-    testsuite.test_try("Setup parameters for optimizing");
     GOptimizerPars pars;
     try {
         pars = GOptimizerPars(models);
-
-        testsuite.test_try_success();
     }
     catch (std::exception &e) {
-        testsuite.test_try_failure(e);
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable setup GOptimizerPars for optimizing." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
     }
-
-    //std::cout << pars << std::endl;
+    std::cout << ".";
+//std::cout << pars << std::endl;
 
     // Time simple GData iterator
     double  t_elapse;
-    testsuite.test_try("Time simple GData iterator");
     try {
         clock_t t_start = clock();
         int num = 0;
@@ -104,27 +108,35 @@ void test_optimizer(GTestSuite& testsuite)
             sum += (int)event->counts();
         }
         t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-
-        testsuite.test_try_success();
     }
     catch (std::exception &e) {
-        testsuite.test_try_failure(e);
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable to iterate GData." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
     }
-
-    //std::cout << " - Reference time for GData::iterator: " << t_elapse << std::endl;
+    std::cout << "." << std::endl;
+    std::cout << " - Reference time for GData::iterator: " << t_elapse << std::endl;
 
     // Setup LM optimizer
     GOptimizerLM opt;
-    testsuite.test_try("Setup LM optimizer");
     try {
         data.optimize(opt);
     }
     catch (std::exception &e) {
-        testsuite.test_try_failure(e);
+        std::cout << std::endl 
+                  << "TEST ERROR: Unable setup optimizer." 
+                  << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
     }
+    std::cout << ".";
+//std::cout << opt << std::endl;
+std::cout << data << std::endl;
 
-    //std::cout << opt << std::endl;
-    //std::cout << data << std::endl;
+    // Plot final test success
+    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -137,24 +149,15 @@ void test_optimizer(GTestSuite& testsuite)
  ***************************************************************************/
 int main(void)
 {
-    //Create a test suites
-    GTestSuites testsuites("GOptimizer class testing");
-
-    // Create a test suite
-    GTestSuite testsuite("Test GOptimizer");
-
-    // Append it
-    testsuites.append(testsuite);
+    // Dump header
+    std::cout << std::endl;
+    std::cout << "****************************" << std::endl;
+    std::cout << "* GOptimizer class testing *" << std::endl;
+    std::cout << "****************************" << std::endl;
 
     // Execute the tests
-    test_optimizer(testsuite);
+    test_optimizer();
 
-    //End of the tests
-    testsuite.end_test();
-
-    //save xml report
-    testsuites.save("reports/GOptimizer.xml");
-    
     // Return
     return 0;
 }

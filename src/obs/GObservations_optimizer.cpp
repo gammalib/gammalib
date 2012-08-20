@@ -161,7 +161,7 @@ GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& 
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Evaluate log-likelihood function
+ * @brief   Evaluate log-likelihood function
  *
  * @param[in] pars Optimizer parameters.
  *
@@ -225,6 +225,8 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         
             double* cpy_mnpred = new double;
             double* cpy_mvalue = new double;
+            *cpy_mnpred=0;
+            *cpy_mvalue=0;
             
             //Critical zone
             #pragma omp critical

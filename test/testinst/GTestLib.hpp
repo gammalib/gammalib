@@ -1,5 +1,5 @@
 /***************************************************************************
- *          TESTLib.hpp  -  Test instrument Header files                   *
+ *           GTestLib.hpp  -  Test instrument Header files                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GTestLib.hpp
+ * @brief Header files for test instrument
+ * @author J.-B. Cayrou
+ */
 
 #ifndef TESTLIB_HPP
 #define TESTLIB_HPP
@@ -27,7 +32,6 @@
 
 /* __ TEST specific headers _______________________________________________ */
 #include "GTestObservation.hpp"
-#include "GTestDatum.hpp"
 #include "GTestEventAtom.hpp"
 #include "GTestEventList.hpp"
 #include "GTestModelData.hpp"

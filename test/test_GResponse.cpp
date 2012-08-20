@@ -32,12 +32,12 @@
 /***************************************************************************
  *                          Test: LAT Response                             *
  ***************************************************************************/
-void test_lat_response(GTestSuite& testsuite)
+void test_lat_response(void)
 {
     // Remove FITS file
     system("rm -rf test_rsp.fits");
 
-    testsuite.test_try("Open PSF FITS file");
+    std::cout << "Test GLATResponse: Open PSF FITS file: ";
     try {
         // Get HANDOFF Response
         GLATResponse rsp;
@@ -46,14 +46,13 @@ void test_lat_response(GTestSuite& testsuite)
 
         // Save response
         rsp.save("test_rsp.fits");
-
-        // All is ok
-        testsuit.test_try_success();
     }
     catch (std::exception &e) {
-        //There is a problem with the test
-        testsuit.test_try_failure(e);
+        std::cout << std::endl << "TEST ERROR: Unable to open FITS file." << std::endl;
+        std::cout << e.what() << std::endl;
+        throw;
     }
+    std::cout << ". ok." << std::endl;
 }
 
 
@@ -62,20 +61,15 @@ void test_lat_response(GTestSuite& testsuite)
  ***************************************************************************/
 int main(void)
 {
-    //Create a test suites container
-    GTestSuites testsuites("GResponse class testing");
-
-    // Create a test suite
-    GTestSuite testsuite("Test GLATResponse");
-
-    // Append it
-    testsuites.append(testsuite);
+    // Dump header
+    std::cout << std::endl;
+    std::cout << "***************************" << std::endl;
+    std::cout << "* GResponse class testing *" << std::endl;
+    std::cout << "***************************" << std::endl;
 
     // Execute the tests
-    test_lat_response(testsuite);
+    test_lat_response();
 
-    //End of the tests
-    testsuite.test_end();
     // Return
     return 0;
 }

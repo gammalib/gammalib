@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GFitsTable.cpp  - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,8 +57,8 @@
 #define G_INSERT_COLUMN      "GFitsTable::insert_column(int, GFitsTableCol*)"
 #define G_INSERT_ROWS                   "GFitsTable::insert_rows(int&, int&)"
 #define G_REMOVE_ROWS                   "GFitsTable::remove_rows(int&, int&)"
-#define G_OPEN_DATA                            "GFitsTable::open_data(void*)"
-#define G_SAVE_DATA                                 "GFitsTable::save_data()"
+#define G_DATA_OPEN                            "GFitsTable::data_open(void*)"
+#define G_DATA_SAVE                                 "GFitsTable::data_save()"
 #define G_GET_TFORM                             "GFitsTable::get_tform(int&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -636,7 +636,7 @@ void GFitsTable::data_open(void* vptr)
     int status = 0;
     status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
     if (status != 0)
-        throw GException::fits_hdu_not_found(G_OPEN_DATA, (FPTR(vptr)->HDUposition)+1,
+        throw GException::fits_hdu_not_found(G_DATA_OPEN, (FPTR(vptr)->HDUposition)+1,
                                              status);
 
     // Save FITS file pointer
@@ -646,14 +646,14 @@ void GFitsTable::data_open(void* vptr)
     long nrows  = 0;
     status      = __ffgnrw(FPTR(m_fitsfile), &nrows, &status);
     if (status != 0)
-        throw GException::fits_error(G_OPEN_DATA, status);
+        throw GException::fits_error(G_DATA_OPEN, status);
     else
         m_rows = (int)nrows;
 
     // Determine number of columns in table
     status = __ffgncl(FPTR(m_fitsfile), &m_cols, &status);
     if (status != 0)
-        throw GException::fits_error(G_OPEN_DATA, status);
+        throw GException::fits_error(G_DATA_OPEN, status);
 
     // Allocate and initialise memory for column pointers. Note that this
     // initialisation is needed to allow for a clean free_members() call
@@ -675,14 +675,14 @@ void GFitsTable::data_open(void* vptr)
         sprintf(keyname, "TTYPE%d", i+1);
         status = __ffgkey(FPTR(m_fitsfile), keyname, value, NULL, &status);
         if (status != 0)
-            throw GException::fits_error(G_OPEN_DATA, status);
+            throw GException::fits_error(G_DATA_OPEN, status);
         value[strlen(value)-1] = '\0';
 
         // Get column definition
         status = __ffgtcl(FPTR(m_fitsfile), i+1, &typecode, &repeat, &width,
                           &status);
         if (status != 0)
-            throw GException::fits_error(G_OPEN_DATA, status);
+            throw GException::fits_error(G_DATA_OPEN, status);
 
         // Check for unsigned columns
         unsigned long offset = 0;
@@ -699,7 +699,7 @@ void GFitsTable::data_open(void* vptr)
                 std::ostringstream message;
                 message << ", but column " << value << " has typecode " << typecode
                         << " and unexpected associated TZERO=" << offset << ".";
-                throw GException::fits_error(G_OPEN_DATA, 0, message.str());
+                throw GException::fits_error(G_DATA_OPEN, 0, message.str());
             }
         }
         else
@@ -745,8 +745,7 @@ void GFitsTable::data_open(void* vptr)
         if (m_columns[i] == NULL) {
             std::ostringstream colname;
             colname << value;
-            throw GException::fits_unknown_coltype(G_OPEN_DATA, colname.str(), typecode);
-            break;
+            throw GException::fits_unknown_coltype(G_DATA_OPEN, colname.str(), typecode);
         }
 
         // Store column definition
@@ -785,7 +784,7 @@ void GFitsTable::data_open(void* vptr)
                 
             // Compare with real size
             if (num != m_columns[i]->m_number) {
-                throw GException::fits_inconsistent_tdim(G_OPEN_DATA,
+                throw GException::fits_inconsistent_tdim(G_DATA_OPEN,
                                                          vdim,
                                                          m_columns[i]->m_number);
             }
@@ -837,7 +836,7 @@ void GFitsTable::data_save(void)
     for (int i = 0; i < m_cols; ++i) {
         if (m_columns[i] != NULL && m_columns[i]->length() > 0) {
             if (m_columns[i]->length() != m_rows) {
-                throw GException::fits_bad_col_length(G_SAVE_DATA,
+                throw GException::fits_bad_col_length(G_DATA_SAVE,
                                                       m_columns[i]->length(),
                                                       m_rows);
             }
@@ -884,7 +883,7 @@ void GFitsTable::data_save(void)
         status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields, ttype, tform,
                           tunit, NULL, &status);
         if (status != 0)
-            throw GException::fits_error(G_SAVE_DATA, status);
+            throw GException::fits_error(G_DATA_SAVE, status);
 
         // De-allocate column definition arrays
         if (m_cols > 0) {
@@ -917,14 +916,14 @@ void GFitsTable::data_save(void)
     
     // ... otherwise we signal a FITS error
     else if (status != 0) {
-        throw GException::fits_error(G_SAVE_DATA, status);
+        throw GException::fits_error(G_DATA_SAVE, status);
     }
 
     // Determine number of columns in table
     int num_cols = 0;
     status = __ffgncl(FPTR(m_fitsfile), &num_cols, &status);
     if (status != 0) {
-        throw GException::fits_error(G_SAVE_DATA, status);
+        throw GException::fits_error(G_DATA_SAVE, status);
     }
     
     // Debug option: Log number of columns in FITS table
@@ -939,7 +938,7 @@ void GFitsTable::data_save(void)
         for (int i = 0; i < num_cols; ++i) {
             status = __ffdcol(FPTR(m_fitsfile), i, &status);
             if (status != 0) {
-                throw GException::fits_error(G_SAVE_DATA, status);
+                throw GException::fits_error(G_DATA_SAVE, status);
             }
         }
     }
@@ -951,7 +950,7 @@ void GFitsTable::data_save(void)
         long num_rows = 0;
         status        = __ffgnrw(FPTR(m_fitsfile), &num_rows, &status);
         if (status != 0) {
-            throw GException::fits_error(G_SAVE_DATA, status);
+            throw GException::fits_error(G_DATA_SAVE, status);
         }
 
         // Debug option: Log number of rows in FITS table
@@ -971,7 +970,7 @@ void GFitsTable::data_save(void)
             long long nrows    = m_rows - num_rows;
             status = __ffirow(FPTR(m_fitsfile), firstrow, nrows, &status);
             if (status != 0) {
-                throw GException::fits_error(G_SAVE_DATA, status);
+                throw GException::fits_error(G_DATA_SAVE, status);
             }
             
             // Debug option: Log row adding
@@ -988,7 +987,7 @@ void GFitsTable::data_save(void)
             long long nrows    = num_rows - m_rows;
             status = __ffdrow(FPTR(m_fitsfile), firstrow, nrows, &status);
             if (status != 0) {
-                throw GException::fits_error(G_SAVE_DATA, status);
+                throw GException::fits_error(G_DATA_SAVE, status);
             }
             
             // Debug option: Log row adding
@@ -1019,7 +1018,7 @@ void GFitsTable::data_save(void)
                     status = __fficol(FPTR(m_fitsfile), num_cols, get_ttype(i),
                                       get_tform(i), &status);
                     if (status != 0) {
-                        throw GException::fits_error(G_SAVE_DATA, status);
+                        throw GException::fits_error(G_DATA_SAVE, status);
                     }
 
                     // Connect all column to FITS table by copying over the
@@ -1048,7 +1047,7 @@ void GFitsTable::data_save(void)
             sprintf(keyname, "TTYPE%d", colnum);
             status = __ffgkey(FPTR(m_fitsfile), keyname, value, NULL, &status);
             if (status != 0) {
-                throw GException::fits_error(G_SAVE_DATA, status);
+                throw GException::fits_error(G_DATA_SAVE, status);
             }
             value[strlen(value)-1] = '\0';
             std::string colname = strip_whitespace(&(value[1]));
@@ -1070,7 +1069,7 @@ void GFitsTable::data_save(void)
                 // Delete column
                 status = __ffdcol(FPTR(m_fitsfile), colnum, &status);
                 if (status != 0) {
-                    throw GException::fits_error(G_SAVE_DATA, status);
+                    throw GException::fits_error(G_DATA_SAVE, status);
                 }
 
                 // Debug option: Log column deletion

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialGauss.cpp  -  Radial Gaussian CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialGauss.cpp
  * @brief Radial Gaussian model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -284,7 +284,7 @@ double GCTAModelRadialGauss::eval_gradients(const double& offset) const
     double g_sigma = value * arg2 / sigma() * m_sigma.scale();
 
     // Set gradients (circumvent const correctness)
-    ((GCTAModelRadialGauss*)this)->m_sigma.gradient(g_sigma);
+    const_cast<GCTAModelRadialGauss*>(this)->m_sigma.gradient(g_sigma);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -423,7 +423,7 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
     for (int i = 0; i < 1; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Sigma
         if (par->attribute("name") == "Sigma") {
@@ -498,7 +498,7 @@ void GCTAModelRadialGauss::write(GXmlElement& xml) const
     for (int i = 0; i < 1; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle sigma
         if (par->attribute("name") == "Sigma") {

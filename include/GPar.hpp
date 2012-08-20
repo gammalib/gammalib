@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPar.hpp - Application parameter class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPar.hpp
  * @brief Application parameter class definition
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GPAR_HPP
@@ -90,20 +90,21 @@ public:
   
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GPar& par);
-    void free_members(void);
-    void check_type(const std::string& type) const;
-    void check_mode(const std::string& mode) const;
-    void check_value(const std::string& value) const;
-    void check_value_bool(const std::string& value) const;
-    void check_value_int(const std::string& value) const;
-    void check_value_real(const std::string& value) const;
-    void check_value_string(const std::string& value) const;
-    void check_value_filename(const std::string& value) const;
-    void set_value(const std::string& value);
-    void query(void);
-    void stop_query(void);
+    void        init_members(void);
+    void        copy_members(const GPar& par);
+    void        free_members(void);
+    void        check_type(const std::string& type) const;
+    void        check_mode(const std::string& mode) const;
+    void        check_value(const std::string& value) const;
+    void        check_value_bool(const std::string& value) const;
+    void        check_value_int(const std::string& value) const;
+    void        check_value_real(const std::string& value) const;
+    void        check_value_string(const std::string& value) const;
+    void        check_value_filename(const std::string& value) const;
+    void        set_value(const std::string& value);
+    void        query(void);
+    void        stop_query(void);
+    std::string par_type_string(const std::string& type) const;
 
     // Protected data members
     bool        m_update;  //!< Signal value updating
