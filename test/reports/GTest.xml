@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<testsuites name="GObservations class testing" test="12" errors="0" failures="0" time="0" timestamp="1345472083">
+  <testsuite disabled="" errors="0" failures="0" hostname="" id="0" name="Test OpenMP" package="obs" skipped="" tests="12" time="0" timestamp="1345472083">
+    <testcase assertions="" classname="GObservation" name="Unbinned 1 thread" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Unbinned 1 thread: Check if converged" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Unbinned 1 thread: check if value is correct" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Unbinned 10 threads" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Unbinned 10 threads: Check if converged" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Unbinned 10 threads: check if value is correct" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Binned 1 thread" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Binned 1 thread: Check if converged" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Binned 1 thread: check if value is correct" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Binned 10 thread" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Binned 10 thread: Check if converged" status="" time="0" />
+    <testcase assertions="" classname="GObservation" name="Binned 10 thread: check if value is correct" status="" time="0" />
+  </testsuite>
+</testsuites>
