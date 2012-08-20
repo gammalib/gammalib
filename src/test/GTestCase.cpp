@@ -80,7 +80,7 @@ GTestCase::GTestCase(const GTestCase& testcase)
  *
  * @param[in] type Type of the Test case ( GTestCase::FAIL_TEST or GTestCase::ERROR_TEST )
  ***************************************************************************/
-GTestCase::GTestCase(errorType type)
+GTestCase::GTestCase(ErrorType type)
 {
     //Initialise members
     init_members();
@@ -98,7 +98,7 @@ GTestCase::GTestCase(errorType type)
  * @param[in] ptr_function Pointer to function (void)(*)(void)
  * @param[in] name Name of the Test case
  ***************************************************************************/
-GTestCase::GTestCase(const pfunction ptr_function, const std::string& name)
+GTestCase::GTestCase(const pfunction ptr_function, const std::string& name, GTestSuite* testsuite)
 {
     // Initialise members
     init_members();
@@ -112,6 +112,8 @@ GTestCase::GTestCase(const pfunction ptr_function, const std::string& name)
     // Set name
     m_name=name;
 
+    // Set testsuite
+    m_testsuite = testsuite;
     // Return
     return;
 }
@@ -122,7 +124,7 @@ GTestCase::GTestCase(const pfunction ptr_function, const std::string& name)
  * @param[in] type Type of the Test case (GTestCase::FAIL_TEST or GTestCase::ERROR_TEST)
  * @param[in] name Name of the Test case
  ***************************************************************************/
-GTestCase::GTestCase(errorType type, const std::string& name)
+GTestCase::GTestCase(ErrorType type, const std::string& name)
 {
     //Initialise members
     init_members();
@@ -246,6 +248,22 @@ void GTestCase::ptr_function(const pfunction function){
 /***********************************************************************//**
  * @brief Return Test Case pointer to function
  ***************************************************************************/
+GTestSuite& GTestCase::testsuite(void) const{
+    return *m_testsuite;
+}
+
+/***********************************************************************//**
+ * @brief Set Test Case pointer to function
+ * @param[in] function Pointer to function (void)(*)(void)
+ ***************************************************************************/
+void GTestCase::testsuite(GTestSuite* testsuite){
+    m_testsuite = testsuite;
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Return Test Case pointer to function
+ ***************************************************************************/
 pfunction GTestCase::ptr_function(void) const{
     return m_ptr_function;
 }
@@ -253,7 +271,7 @@ pfunction GTestCase::ptr_function(void) const{
 /***********************************************************************//**
  * @brief Return Test Case type
  ***************************************************************************/
-GTestCase::errorType GTestCase::type(void) const{
+GTestCase::ErrorType GTestCase::type(void) const{
     return m_type; 
 }
 
@@ -261,7 +279,7 @@ GTestCase::errorType GTestCase::type(void) const{
  * @brief Set Test Case type
  * @param[in] type Type of the test case
  ***************************************************************************/
-void GTestCase::type(errorType type){
+void GTestCase::type(ErrorType type){
     m_type=type;
     return;
 }
@@ -302,7 +320,7 @@ void GTestCase::run(void)
         // If they are a function
         if(m_ptr_function!=NULL){
             // Call it
-            (m_ptr_function)();
+            (*m_testsuite.*(m_ptr_function))();
         }
     }
     catch(std::exception& e)

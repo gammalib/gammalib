@@ -300,6 +300,24 @@ int GTestSuites::tests(void) const
 }
 
 /***********************************************************************//**
+ * @brief Run all tests
+ ***************************************************************************/
+bool GTestSuites::run()
+{
+    bool was_successful;
+      //Loop over all test suite
+    for(int i=0;i<m_testsuites.size();++i)
+    {
+        if(!m_testsuites[i]->run()){
+            was_successful=false;
+        }
+    }
+
+    return was_successful;
+
+}
+
+/***********************************************************************//**
  * @brief Save test repport into XML file.
  *
  * @param[in] filename Name of XML file.
@@ -367,7 +385,7 @@ void GTestSuites::write(GXml& xml)
         element_testsuite->attribute("skipped","");  // not used
         element_testsuite->attribute("tests",str(testsuite->tests()));
         element_testsuite->attribute("time","0");  // not used
-        element_testsuite->attribute("timestamp",str(testsuite->timestamp())); //FIXME timestamp does not work
+        element_testsuite->attribute("timestamp",str(testsuite->timestamp()));
 
         //Loop over all test cases contains in the test suite
         for (int j=0; j<testsuite->tests(); ++j)
@@ -390,7 +408,7 @@ void GTestSuites::write(GXml& xml)
 
                 //Set attributes
                 element_testcase_problem->attribute("message",testcase.message());
-                element_testcase_problem->attribute("type",testcase.message_type());//TODO not implemented
+                element_testcase_problem->attribute("type",testcase.message_type());
 
                 //If it is an error
                 if(testcase.type()==GTestCase::ERROR_TEST){
@@ -419,7 +437,6 @@ void GTestSuites::write(GXml& xml)
     return;
 }
 
-
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
@@ -435,6 +452,7 @@ void GTestSuites::init_members(){
     m_name="Unamed Test Suites";
     m_log.max_size(1);
     m_log.cout(true);
+    m_timestamp = time(NULL);
 
     //Return
     return;
@@ -459,5 +477,4 @@ void GTestSuites::copy_members(const GTestSuites& testsuites){
  ***************************************************************************/
 void GTestSuites::free_members(){
 
-    return;
 }

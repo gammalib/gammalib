@@ -67,7 +67,9 @@ class GTestSuites{
         int         failures(void) const;
         int         tests(void) const;
         std::time_t timestamp() const;
+        bool        run();
         void        save(std::string filename);
+
     
     // Protected methods
     protected:

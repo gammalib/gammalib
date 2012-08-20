@@ -31,8 +31,11 @@
 #include <iostream>
 #include <string>
 
+#include "GTestSuite.hpp"
+
 /* __ Forward declarations _______________________________________________ */
-typedef void (*pfunction)(void);
+class GTestSuite;
+typedef void (GTestSuite::*pfunction)(void);
 
 /***********************************************************************//**
  * @class GTestCase
@@ -46,9 +49,9 @@ class GTestCase{
     friend class GTestSuite;
     
     public:
-        
+
         // public enumerators
-        enum errorType{
+        enum ErrorType{
             FAIL_TEST,
             ERROR_TEST
         };
@@ -56,9 +59,9 @@ class GTestCase{
         // Constructors and destructors
         GTestCase(void);
         GTestCase(const GTestCase& testcase);
-        GTestCase(errorType type);
-        GTestCase(const pfunction ptr_function, const std::string& name);
-        GTestCase(errorType type, const std::string& name);
+        GTestCase(ErrorType type);
+        GTestCase(const pfunction ptr_function, const std::string& name,GTestSuite* testsuite);
+        GTestCase(ErrorType type, const std::string& name);
         ~GTestCase(void);
     
         // Operators
@@ -73,8 +76,10 @@ class GTestCase{
         void        message_type( const std::string& message_type);
         pfunction   ptr_function(void) const;
         void        ptr_function(const pfunction);
-        errorType   type(void) const;
-        void        type(errorType type);
+        GTestSuite& testsuite(void) const;
+        void        testsuite(GTestSuite* testsuite);
+        ErrorType   type(void) const;
+        void        type(ErrorType type);
         bool        is_passed() const;
         std::string print_result(void) const;
         void run();
@@ -89,10 +94,11 @@ class GTestCase{
     private:
         std::string m_name; //!< name of the test
         std::string m_message; //!< message of the test
-        std::string m_message_type; //!< type fo the message
+        std::string m_message_type; //!< type for the message
         pfunction   m_ptr_function; //!< function pointer
+        GTestSuite* m_testsuite; //!< pointer to the test suite
         bool        m_passed; //!< boolean to check test success
-        errorType   m_type; //!< type of the test case : failure or error test
+        ErrorType   m_type; //!< type of the test case : failure or error test
 };
 
 #endif

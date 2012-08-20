@@ -39,15 +39,15 @@
 #include "GTestCase.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-typedef void (*pfunction)(void);
 class GTestSuite;
+class GTestCase;
+typedef void (GTestSuite::*pfunction)(void);
 
 /***********************************************************************//**
  * @class GTestSuite
  *
- * @brief Test Suite class in order to perfom unit tests on GammaLib fixtures.
+ * @brief Abstract Test Suite class in order to perfom unit tests on GammaLib fixtures.
  *
- * TODO : explainations
  ***************************************************************************/
 class GTestSuite{
     
@@ -56,44 +56,54 @@ class GTestSuite{
         GTestSuite(void);
         GTestSuite(const GTestSuite& testsuite);
         GTestSuite(const std::string& name);
-        ~GTestSuite(void);
+        virtual ~GTestSuite(void);
 
         // Operators
         GTestSuite& operator=(const GTestSuite& testsuite);
         GTestCase& operator[](const int& index);
         const GTestCase& operator[](const int& index) const;
+
         // Methods
-        std::string name(void) const;
-        void        name(const std::string& name);
-        void        cout(bool cout);
-        void        test_assert(bool result, const std::string& name,const std::string& message="");
-        void        test_try(const std::string& name);
-        void        test_try_success();
-        void        test_try_failure(const std::string& message="",const std::string& type="");
-        void        test_try_failure(const std::exception& e);
-        void        test_function(pfunction function, const std::string& name);
-        void        end_test();
-        int         tests() const;
-        int         errors() const;
-        int         failures() const;
-        int         success() const;
-        std::time_t timestamp() const;
+        virtual void                set() = 0;
+        bool                        run();
+        std::string                 name(void) const;
+        void                        name(const std::string& name);
+        void                        cout(bool cout);
+        void                        test_assert(bool result,
+                                                const std::string& name,
+                                                const std::string& message="");
+        void                        test_try(const std::string& name);
+        void                        test_try_success();
+        void                        test_try_failure(const std::string& message="",
+                                                 const std::string& type="");
+        void                        test_try_failure(const std::exception& e);
+        GException::test_failure&   exception_failure(const std::string& message);
+        GException::test_error&     exception_error(const std::string& message);
+        void                        add_test(pfunction function, const std::string& name);
+        int                         tests() const;
+        int                         errors() const;
+        int                         failures() const;
+        int                         success() const;
+        std::time_t                 timestamp() const;
     
     // Protected methods
     protected:
-        void        init_members(void);
-        void        copy_members(const GTestSuite& testsuite);
-        void        free_members(void);
+        void                        init_members(void);
+        void                        copy_members(const GTestSuite& testsuite);
+        void                        free_members(void);
+
+        std::string                 format_name(const std::string& name);
     
     // Private members
     private:
-        std::vector<GTestCase*> m_tests;    //!< Nomber of tests
+        std::vector<GTestCase*> m_tests;     //!< Number of tests
         std::vector<GTestCase*> m_stack_try; //!< Stack for nested try blocks
-        int                     m_failures; //!< Nomber of failures
-        int                     m_errors;   //!< Nomber of errors
-        std::string             m_name;     //!< Name of the test suite
-        GLog                    m_log;      //!< Log
-        std::time_t             m_timestamp;//!< Timestamp
+        std::vector<GTestCase*>  m_stack_test;//!< Stack for test
+        int                     m_failures;  //!< Number of failures
+        int                     m_errors;    //!< Number of errors
+        std::string             m_name;      //!< Name of the test suite
+        GLog                    m_log;       //!< Log
+        std::time_t             m_timestamp; //!< Timestamp
 
 };
 
