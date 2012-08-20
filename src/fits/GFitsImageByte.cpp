@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsImageByte.cpp  - FITS Byte image class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -263,7 +263,7 @@ GFitsImageByte& GFitsImageByte::operator= (const GFitsImageByte& image)
 unsigned char& GFitsImageByte::operator() (const int& ix)
 {
     // If image pixels are not available then fetch them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Return image pixel
     return m_pixels[ix];
@@ -283,7 +283,7 @@ unsigned char& GFitsImageByte::operator() (const int& ix)
 unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy)
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Calculate pixel offset
     int offset = ix + iy * m_naxes[0];
@@ -308,7 +308,7 @@ unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
                                            const int& iz)
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + iz * m_naxes[1]);
@@ -334,7 +334,7 @@ unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
                                            const int& iz, const int& it)
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2]));
@@ -355,7 +355,7 @@ unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
 const unsigned char& GFitsImageByte::operator() (const int& ix) const
 {
     // If image pixels are not available then fetch them now
-    if (m_pixels == NULL) ((GFitsImageByte*)this)->fetch_data();
+    fetch_data();
 
     // Return image pixel
     return m_pixels[ix];
@@ -375,7 +375,7 @@ const unsigned char& GFitsImageByte::operator() (const int& ix) const
 const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy) const
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageByte*)this)->fetch_data();
+    fetch_data();
 
     // Calculate pixel offset
     int offset = ix + iy * m_naxes[0];
@@ -400,7 +400,7 @@ const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
                                                  const int& iz) const
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageByte*)this)->fetch_data();
+    fetch_data();
 
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + iz * m_naxes[1]);
@@ -426,7 +426,7 @@ const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
                                                  const int& iz, const int& it) const
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageByte*)this)->fetch_data();
+    fetch_data();
 
     // Calculate pixel offset
     int offset = ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2]));
@@ -454,7 +454,7 @@ const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
 unsigned char& GFitsImageByte::at(const int& ix)
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Return image pixel
     return (m_pixels[offset(ix)]);
@@ -472,7 +472,7 @@ unsigned char& GFitsImageByte::at(const int& ix)
 unsigned char& GFitsImageByte::at(const int& ix, const int& iy)
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy)]);
@@ -491,7 +491,7 @@ unsigned char& GFitsImageByte::at(const int& ix, const int& iy)
 unsigned char& GFitsImageByte::at(const int& ix, const int& iy, const int& iz)
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy,iz)]);
@@ -512,7 +512,7 @@ unsigned char& GFitsImageByte::at(const int& ix, const int& iy, const int& iz,
                                   const int& it)
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy,iz,it)]);
@@ -529,7 +529,7 @@ unsigned char& GFitsImageByte::at(const int& ix, const int& iy, const int& iz,
 const unsigned char& GFitsImageByte::at(const int& ix) const
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageByte*)this)->fetch_data();
+    fetch_data();
 
     // Return image pixel
     return (m_pixels[offset(ix)]);
@@ -547,7 +547,7 @@ const unsigned char& GFitsImageByte::at(const int& ix) const
 const unsigned char& GFitsImageByte::at(const int& ix, const int& iy) const
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageByte*)this)->fetch_data();
+    fetch_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy)]);
@@ -567,7 +567,7 @@ const unsigned char& GFitsImageByte::at(const int& ix, const int& iy,
                                         const int& iz) const
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageByte*)this)->fetch_data();
+    fetch_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy,iz)]);
@@ -588,7 +588,7 @@ const unsigned char& GFitsImageByte::at(const int& ix, const int& iy,
                                         const int& iz, const int& it) const
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) ((GFitsImageByte*)this)->fetch_data();
+    fetch_data();
 
     // Return image pixel
     return (m_pixels[offset(ix,iy,iz,it)]);
@@ -668,7 +668,7 @@ double GFitsImageByte::pixel(const int& ix, const int& iy, const int& iz,
 void* GFitsImageByte::pixels(void)
 {
     // If image pixels are not available then allocate them now
-    if (m_pixels == NULL) fetch_data();
+    fetch_data();
 
     // Return
     return m_pixels;
@@ -732,13 +732,16 @@ void GFitsImageByte::copy_members(const GFitsImageByte& image)
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (image.m_pixels == NULL);
-    if (not_loaded) ((GFitsImageByte*)(&image))->fetch_data();
+    if (not_loaded) {
+        const_cast<GFitsImageByte*>(&image)->fetch_data();
+    }
 
     // Copy pixels
     if (m_num_pixels > 0 && image.m_pixels != NULL) {
         m_pixels = new unsigned char[m_num_pixels];
-        for (int i = 0; i < m_num_pixels; ++i)
+        for (int i = 0; i < m_num_pixels; ++i) {
             m_pixels[i] = image.m_pixels[i];
+        }
     }
 
     // Copy NULL value
@@ -746,7 +749,9 @@ void GFitsImageByte::copy_members(const GFitsImageByte& image)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsImageByte*)(&image))->release_data();
+    if (not_loaded) {
+        const_cast<GFitsImageByte*>(&image)->release_data();
+    }
     #endif
 
     // Return
@@ -781,8 +786,9 @@ void GFitsImageByte::alloc_data(void)
     release_data();
 
     // Allocate new data
-    if (m_num_pixels > 0)
+    if (m_num_pixels > 0) {
         m_pixels = new unsigned char[m_num_pixels];
+    }
 
     // Return
     return;
@@ -796,8 +802,9 @@ void GFitsImageByte::init_data(void)
 {
     // Initialise data if they exist
     if (m_pixels != NULL) {
-        for (int i = 0; i < m_num_pixels; ++i)
+        for (int i = 0; i < m_num_pixels; ++i) {
             m_pixels[i] = 0;
+        }
     }
 
     // Return
@@ -839,16 +846,35 @@ void GFitsImageByte::construct_data(const unsigned char* pixels)
         alloc_data();
 
         // If no pixel array has been specified then simply initialise data
-        if (pixels == NULL)
+        if (pixels == NULL) {
             init_data();
+        }
 
         // ... otherwise copy pixels
         else {
-            for (int i = 0; i < m_num_pixels; ++i)
+            for (int i = 0; i < m_num_pixels; ++i) {
                 m_pixels[i] = pixels[i];
+            }
         }
 
     } // endif: there are pixels in image
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch data
+ *
+ * Fetch the image data if no pixels have been allocated.
+ ***************************************************************************/
+void GFitsImageByte::fetch_data(void) const
+{
+    // If image pixels are not available then fetch them now.
+    if (m_pixels == NULL) {
+        const_cast<GFitsImageByte*>(this)->fetch_data();
+    }
 
     // Return
     return;
