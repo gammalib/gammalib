@@ -303,7 +303,7 @@ bool GTestSuites::run(void)
     m_log.header1(name());
     m_log<<"\n";
 
-    bool was_successful;
+    bool was_successful=true;
       //Loop over all test suite
     for(int i=0;i<m_testsuites.size();++i)
     {
