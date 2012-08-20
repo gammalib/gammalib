@@ -566,7 +566,7 @@ int GTestSuite::success(void) const
 /***********************************************************************//**
  * @brief Return the timestamp. Set at the creation of the object
  ***************************************************************************/
-std::time_t GTestSuite::timestamp(void) const
+time_t GTestSuite::timestamp(void) const
 {
     return m_timestamp;
 }
