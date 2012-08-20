@@ -82,7 +82,7 @@ class GTestCase{
         void        type(ErrorType type);
         bool        is_passed() const;
         std::string print_result(void) const;
-        void run();
+        void run(void);
 
      // Protected methods
     protected:

@@ -58,7 +58,7 @@ class GTestSuites{
         const GTestSuite& operator[](const int& index) const;
         
         // Methods
-        std::string name() const;
+        std::string name(void) const;
         void        name(const std::string& name);
         void        cout(bool cout);
         void        append(GTestSuite& testsuite);
@@ -66,24 +66,24 @@ class GTestSuites{
         int         errors(void) const;
         int         failures(void) const;
         int         tests(void) const;
-        std::time_t timestamp() const;
-        bool        run();
+        time_t      timestamp(void) const;
+        bool        run(void);
         void        save(std::string filename);
 
     
     // Protected methods
     protected:
-        void init_members();
+        void init_members(void);
         void copy_members(const GTestSuites& testsuites);
-        void free_members();
+        void free_members(void);
         void write(GXml& xml);
         
     // Private members    
     private:
         std::string              m_name; //!< Test suites name
         std::vector<GTestSuite*> m_testsuites; //!< Test suite container
-        std::time_t             m_timestamp;//!< Timestamp
-        GLog                    m_log;      //!< Log
+        time_t                   m_timestamp;//!< Timestamp
+        GLog                     m_log;      //!< Log
 };
 
 #endif

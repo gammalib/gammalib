@@ -188,7 +188,7 @@ const GTestCase& GTestSuite::operator[](const int& index) const
 /***********************************************************************//**
  * @brief Run tests
  ***************************************************************************/
-bool GTestSuite::run()
+bool GTestSuite::run(void)
 {
     // Set
     set();
@@ -359,7 +359,7 @@ void GTestSuite::test_try(const std::string& name)
  *      }
  *
  ***************************************************************************/
-void GTestSuite::test_try_success(){
+void GTestSuite::test_try_success(void){
 
     // If the stack is empty
     if(m_stack_try.size()==0)
@@ -534,7 +534,7 @@ void GTestSuite::add_test(const pfunction function,const std::string& name)
 /***********************************************************************//**
  * @brief Return the number of tests
  ***************************************************************************/
-int GTestSuite::tests() const
+int GTestSuite::tests(void) const
 {
     return m_tests.size(); 
 }
@@ -542,7 +542,7 @@ int GTestSuite::tests() const
 /***********************************************************************//**
  * @brief Return the number of errors
  ***************************************************************************/
-int GTestSuite::errors() const
+int GTestSuite::errors(void) const
 {
     return m_errors; 
 }
@@ -550,7 +550,7 @@ int GTestSuite::errors() const
 /***********************************************************************//**
  * @brief Return the number of failures
  ***************************************************************************/
-int GTestSuite::failures() const
+int GTestSuite::failures(void) const
 {
     return m_failures; 
 }
@@ -558,7 +558,7 @@ int GTestSuite::failures() const
 /***********************************************************************//**
  * @brief Return the number of success
  ***************************************************************************/
-int GTestSuite::success() const
+int GTestSuite::success(void) const
 {
     return tests()-(m_errors+m_failures);
 }
@@ -566,7 +566,7 @@ int GTestSuite::success() const
 /***********************************************************************//**
  * @brief Return the timestamp. Set at the creation of the object
  ***************************************************************************/
-std::time_t GTestSuite::timestamp() const
+std::time_t GTestSuite::timestamp(void) const
 {
     return m_timestamp;
 }

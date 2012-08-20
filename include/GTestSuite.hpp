@@ -64,8 +64,8 @@ class GTestSuite{
         const GTestCase& operator[](const int& index) const;
 
         // Methods
-        virtual void                set() = 0;
-        bool                        run();
+        virtual void                set(void) = 0;
+        bool                        run(void);
         std::string                 name(void) const;
         void                        name(const std::string& name);
         void                        cout(bool cout);
@@ -80,11 +80,11 @@ class GTestSuite{
         GException::test_failure&   exception_failure(const std::string& message);
         GException::test_error&     exception_error(const std::string& message);
         void                        add_test(pfunction function, const std::string& name);
-        int                         tests() const;
-        int                         errors() const;
-        int                         failures() const;
-        int                         success() const;
-        std::time_t                 timestamp() const;
+        int                         tests(void) const;
+        int                         errors(void) const;
+        int                         failures(void) const;
+        int                         success(void) const;
+        std::time_t                 timestamp(void) const;
     
     // Protected methods
     protected:
@@ -98,7 +98,7 @@ class GTestSuite{
     private:
         std::vector<GTestCase*> m_tests;     //!< Number of tests
         std::vector<GTestCase*> m_stack_try; //!< Stack for nested try blocks
-        std::vector<GTestCase*>  m_stack_test;//!< Stack for test
+        std::vector<GTestCase*> m_stack_test;//!< Stack for test
         int                     m_failures;  //!< Number of failures
         int                     m_errors;    //!< Number of errors
         std::string             m_name;      //!< Name of the test suite

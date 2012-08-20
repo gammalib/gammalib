@@ -184,7 +184,7 @@ const GTestSuite& GTestSuites::operator[](const int& index) const
 /***********************************************************************//**
  * @brief Return Test Suites name
  ***************************************************************************/
-std::string GTestSuites::name() const
+std::string GTestSuites::name(void) const
 {
     //return Test Suites name
     return m_name;
@@ -228,11 +228,6 @@ void GTestSuites::cout(bool cout)
  ***************************************************************************/
 void GTestSuites::append(GTestSuite& testsuite)
 {
-    // If it is the first test, print test suites name
-    if(m_testsuites.size()==0)
-    {
-        m_log.header1(name());
-    }
     //Add testsuite to container
     m_testsuites.push_back(&testsuite);
 
@@ -302,8 +297,12 @@ int GTestSuites::tests(void) const
 /***********************************************************************//**
  * @brief Run all tests
  ***************************************************************************/
-bool GTestSuites::run()
+bool GTestSuites::run(void)
 {
+    // print test suites name
+    m_log.header1(name());
+    m_log<<"\n";
+
     bool was_successful;
       //Loop over all test suite
     for(int i=0;i<m_testsuites.size();++i)
@@ -340,7 +339,7 @@ void GTestSuites::save(std::string filename)
 /***********************************************************************//**
  * @brief Return the timestamp. Set at the creation of the object
  ***************************************************************************/
-std::time_t GTestSuites::timestamp() const
+time_t GTestSuites::timestamp(void) const
 {
     return m_timestamp;
 }
@@ -446,7 +445,7 @@ void GTestSuites::write(GXml& xml)
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GTestSuites::init_members(){
+void GTestSuites::init_members(void){
 
     //Set default name
     m_name="Unamed Test Suites";
@@ -475,6 +474,6 @@ void GTestSuites::copy_members(const GTestSuites& testsuites){
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GTestSuites::free_members(){
-
+void GTestSuites::free_members(void){
+    return;
 }
