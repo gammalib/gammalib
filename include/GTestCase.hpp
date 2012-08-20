@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include <string>
+#include <typeinfo>
 
 #include "GTestSuite.hpp"
 

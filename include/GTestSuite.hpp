@@ -84,7 +84,7 @@ class GTestSuite{
         int                         errors(void) const;
         int                         failures(void) const;
         int                         success(void) const;
-        std::time_t                 timestamp(void) const;
+        time_t                      timestamp(void) const;
     
     // Protected methods
     protected:
@@ -103,7 +103,7 @@ class GTestSuite{
         int                     m_errors;    //!< Number of errors
         std::string             m_name;      //!< Name of the test suite
         GLog                    m_log;       //!< Log
-        std::time_t             m_timestamp; //!< Timestamp
+        time_t                  m_timestamp; //!< Timestamp
 
 };
 
