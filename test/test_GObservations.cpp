@@ -229,5 +229,5 @@ int main(void)
     testsuites.save("reports/GObservations.xml");
 
     // Return
-    return was_successful;
+    return was_successful ? 0:1;
 }
