@@ -79,7 +79,8 @@ AC_CANONICAL_HOST
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
 #############################################################################
 AC_LANG(C++)
-AC_PROG_CXX
+AC_PROG_CXX([g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++])
+AC_PROG_CC
 
 
 #############################################################################
