@@ -31,7 +31,6 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
-//#include "GCsv.hpp"
 #include "GModelSpectralNodes.hpp"
 #include "GModelSpectralRegistry.hpp"
 
@@ -47,7 +46,6 @@ const GModelSpectralRegistry g_spectral_func_registry(&g_spectral_func_seed);
 #define G_MC             "GModelSpectralNodes::mc(GEnergy&, GEnergy&, GRan&)"
 #define G_READ                      "GModelSpectralNodes::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralNodes::write(GXmlElement&)"
-//#define G_LOAD_NODES          "GModelSpectralNodes::load_nodes(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -84,8 +82,8 @@ GModelSpectralNodes::GModelSpectralNodes(void) : GModelSpectral()
  * an XML element. See GModelSpectralNodes::read() for more information about
  * the expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralNodes::GModelSpectralNodes(const GXmlElement& xml) :
-                     GModelSpectral()
+GModelSpectralNodes::GModelSpectralNodes(const GXmlElement& xml)
+                                         : GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -103,8 +101,8 @@ GModelSpectralNodes::GModelSpectralNodes(const GXmlElement& xml) :
  *
  * @param[in] model Spectral nodes model.
  ***************************************************************************/
-GModelSpectralNodes::GModelSpectralNodes(const GModelSpectralNodes& model) :
-                     GModelSpectral(model)
+GModelSpectralNodes::GModelSpectralNodes(const GModelSpectralNodes& model)
+                                         : GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -300,19 +298,19 @@ double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng) const
 
     // Initialise gradients
     for (int i = 0; i < m_values.size(); ++i) {
-        ((GModelSpectralNodes*)this)->m_values[i].gradient(0.0);
+        const_cast<GModelSpectralNodes*>(this)->m_values[i].gradient(0.0);
     }
 
     // Gradient for left node
     if (m_values[inx_left].isfree()) {
         double grad = value * wgt_left / m_values[inx_left].value();
-        ((GModelSpectralNodes*)this)->m_values[inx_left].gradient(grad);
+        const_cast<GModelSpectralNodes*>(this)->m_values[inx_left].gradient(grad);
     }
 
     // Gradient for right node
     if (m_values[inx_right].isfree()) {
         double grad = value * wgt_right / m_values[inx_right].value();
-        ((GModelSpectralNodes*)this)->m_values[inx_right].gradient(grad);
+        const_cast<GModelSpectralNodes*>(this)->m_values[inx_right].gradient(grad);
     }
 
     // Compile option: Check for NaN/Inf
@@ -596,7 +594,7 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
         GModelPar intensity;
             
         // Get node
-        GXmlElement* node = (GXmlElement*)xml.element("node", i);
+        GXmlElement* node = static_cast<GXmlElement*>(xml.element("node", i));
 
         // Verify that node XML element has exactly 2 parameters
         if (node->elements() != 2 || node->elements("parameter") != 2) {
@@ -609,7 +607,7 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
         for (int k = 0; k < 2; ++k) {
 
             // Get parameter element
-            GXmlElement* par = (GXmlElement*)node->element("parameter", k);
+            GXmlElement* par = static_cast<GXmlElement*>(node->element("parameter", k));
 
             // Handle energy
             if (par->attribute("name") == "Energy") {
@@ -712,7 +710,7 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
     for (int i = 0; i < nodes; ++i) {
 
         // Get node
-        GXmlElement* node = (GXmlElement*)xml.element("node", i);
+        GXmlElement* node = static_cast<GXmlElement*>(xml.element("node", i));
 
         // If XML element has 0 leafes then append energy and intensity
         // element
@@ -732,7 +730,7 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
         for (int k = 0; k < 2; ++k) {
 
             // Get parameter element
-            GXmlElement* par = (GXmlElement*)node->element("parameter", k);
+            GXmlElement* par = static_cast<GXmlElement*>(node->element("parameter", k));
 
             // Handle prefactor
             if (par->attribute("name") == "Energy") {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSparseMatrix.cpp  -  sparse matrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,7 +34,7 @@
 /**
  * @file GSparseMatrix.cpp
  * @brief Sparse matrix class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -696,56 +696,59 @@ void GSparseMatrix::add_col(const double* values, const int* rows,
  ***************************************************************************/
 void GSparseMatrix::cholesky_decompose(int compress)
 {
-  // Save original matrix size
-  int matrix_rows = m_rows;
-  int matrix_cols = m_cols;
+    // Save original matrix size
+    int matrix_rows = m_rows;
+    int matrix_cols = m_cols;
 
-  // Delete any existing symbolic and numeric analysis object and reset
-  // pointers
-  if (m_symbolic != NULL) delete (GSparseSymbolic*)m_symbolic;
-  if (m_numeric  != NULL) delete (GSparseNumeric*)m_numeric;
-  m_symbolic = NULL;
-  m_numeric  = NULL;
+    // Delete any existing symbolic and numeric analysis object and reset
+    // pointers
+    if (m_symbolic != NULL) delete m_symbolic;
+    if (m_numeric  != NULL) delete m_numeric;
+    m_symbolic = NULL;
+    m_numeric  = NULL;
 
-  // Allocate symbolic analysis object
-  GSparseSymbolic* symbolic = new GSparseSymbolic();
+    // Allocate symbolic analysis object
+    GSparseSymbolic* symbolic = new GSparseSymbolic();
 
-  // Declare numeric analysis object. We don't allocate one since we'll
-  // throw it away at the end of the function (the L matrix will be copied
-  // in this object)
-  GSparseNumeric numeric;
+    // Declare numeric analysis object. We don't allocate one since we'll
+    // throw it away at the end of the function (the L matrix will be copied
+    // in this object)
+    GSparseNumeric numeric;
 
-  // Fill pending element into matrix
-  fill_pending();
+    // Fill pending element into matrix
+    fill_pending();
 
-  // Remove rows and columns containing only zeros if matrix compression
-  // has been selected
-  if (compress)
-    remove_zero_row_col();
+    // Remove rows and columns containing only zeros if matrix compression
+    // has been selected
+    if (compress) {
+        remove_zero_row_col();
+    }
 
-  // Ordering an symbolic analysis of matrix. This sets up an array 'pinv'
-  // which contains the fill-in reducing permutations
-  symbolic->cholesky_symbolic_analysis(1, *this);
+    // Ordering an symbolic analysis of matrix. This sets up an array 'pinv'
+    // which contains the fill-in reducing permutations
+    symbolic->cholesky_symbolic_analysis(1, *this);
 
-  // Store symbolic pointer in sparse matrix object
-  m_symbolic = (void*)symbolic;
+    // Store symbolic pointer in sparse matrix object
+    m_symbolic = symbolic;
 
-  // Perform numeric Cholesky decomposition
-  numeric.cholesky_numeric_analysis(*this, *symbolic);
+    // Perform numeric Cholesky decomposition
+    numeric.cholesky_numeric_analysis(*this, *symbolic);
 
-  // Copy L matrix into this object
-  free_elements(0, m_elements);
-  alloc_elements(0, numeric.m_L->m_elements);
-  for (int i = 0; i < m_elements; ++i) {
-    m_data[i]   = numeric.m_L->m_data[i];
-    m_rowinx[i] = numeric.m_L->m_rowinx[i];
-  }
-  for (int col = 0; col <= m_cols; ++col)
-    m_colstart[col] = numeric.m_L->m_colstart[col];
+    // Copy L matrix into this object
+    free_elements(0, m_elements);
+    alloc_elements(0, numeric.m_L->m_elements);
+    for (int i = 0; i < m_elements; ++i) {
+        m_data[i]   = numeric.m_L->m_data[i];
+        m_rowinx[i] = numeric.m_L->m_rowinx[i];
+    }
+    for (int col = 0; col <= m_cols; ++col) {
+        m_colstart[col] = numeric.m_L->m_colstart[col];
+    }
 
-  // Insert zero rows and columns if they have been removed previously.
-  if (compress)
-    insert_zero_row_col(matrix_rows, matrix_cols);
+    // Insert zero rows and columns if they have been removed previously.
+    if (compress) {
+        insert_zero_row_col(matrix_rows, matrix_cols);
+    }
 
   // Return
   return;
@@ -777,21 +780,22 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
     #endif
 
     // Raise an exception if the matrix and vector dimensions are incompatible
-    if (m_rows != v.size())
+    if (m_rows != v.size()) {
         throw GException::matrix_vector_mismatch(G_CHOL_SOLVE, v.size(),
                                                  m_rows, m_cols);
+    }
+    
     // Raise an exception if there is no symbolic pointer
-    if (!m_symbolic)
+    if (!m_symbolic) {
         throw GException::matrix_not_factorised(G_CHOL_SOLVE, 
                                                 "Cholesky decomposition");
-
-    // Get symbolic pointer
-    GSparseSymbolic* symbolic = (GSparseSymbolic*)m_symbolic;
+    }
 
     // Raise an exception if there is no permutation
-    if (!symbolic->m_pinv)
+    if (!m_symbolic->m_pinv) {
         throw GException::matrix_not_factorised(G_CHOL_SOLVE, 
                                                 "Cholesky decomposition");
+    }
 
     // Flag row and column compression
     int row_compressed = (m_rowsel != NULL && m_num_rowsel < m_rows);
@@ -815,8 +819,9 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         GVector x(m_rows);
 
         // Perform inverse vector permutation
-        for (int i = 0; i < v.size(); ++i)
-            x[symbolic->m_pinv[i]] = v[i];  
+        for (int i = 0; i < v.size(); ++i) {
+            x[m_symbolic->m_pinv[i]] = v[i];
+        }
 
         // Inplace solve L\x=x
         for (int col = 0; col < m_cols; ++col) {            // loop over columns
@@ -833,8 +838,9 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         }
 
         // Perform vector permutation
-        for (int i = 0; i < m_cols; ++i)
-            result[i] = x[symbolic->m_pinv[i]];
+        for (int i = 0; i < m_cols; ++i) {
+            result[i] = x[m_symbolic->m_pinv[i]];
+        }
 
     } // endif: Case A
 
@@ -849,19 +855,23 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         // matrix rows. An entry of -1 indicates that the row should be dropped.
         // If no selection exists then setup an identity map.
         if (row_compressed) {
-            for (int row = 0; row < m_rows; ++row)
+            for (int row = 0; row < m_rows; ++row) {
                 row_map[row] = -1;
-            for (int c_row = 0; c_row < m_num_rowsel; ++c_row)
+            }
+            for (int c_row = 0; c_row < m_num_rowsel; ++c_row) {
                 row_map[m_rowsel[c_row]] = c_row;
+            }
         }
         else {
-            for (int row = 0; row < m_rows; ++row)
+            for (int row = 0; row < m_rows; ++row) {
                 row_map[row] = row;
+            }
         }
         #if defined(G_DEBUG_SPARSE_COMPRESSION)
         std::cout << " Row mapping ......:";
-        for (int row = 0; row < m_rows; ++row)
+        for (int row = 0; row < m_rows; ++row) {
             std::cout << " " << row_map[row];
+        }
         std::cout << std::endl;
         #endif
 
@@ -869,19 +879,23 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         // matrix columns. An entry of -1 indicates that the column should be dropped
         // If no selection exists then setup an identity map.
         if (col_compressed) {
-            for (int col = 0; col < m_cols; ++col)
+            for (int col = 0; col < m_cols; ++col) {
                 col_map[col] = -1;
-            for (int c_col = 0; c_col < m_num_colsel; ++c_col)
+            }
+            for (int c_col = 0; c_col < m_num_colsel; ++c_col) {
                 col_map[m_colsel[c_col]] = c_col;
+            }
         }
         else {
-            for (int col = 0; col < m_cols; ++col)
+            for (int col = 0; col < m_cols; ++col) {
                 col_map[col] = col;
+            }
         }
         #if defined(G_DEBUG_SPARSE_COMPRESSION)
         std::cout << " Column mapping ...:";
-        for (int col = 0; col < m_cols; ++col)
+        for (int col = 0; col < m_cols; ++col) {
             std::cout << " " << col_map[col];
+        }
         std::cout << std::endl;
         #endif
 
@@ -890,8 +904,9 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
 
         // Compress input vector v -> c_v if required
         if (m_rowsel != NULL && m_num_rowsel < m_rows) {
-            for (int c_row = 0; c_row < m_num_rowsel; ++c_row)
+            for (int c_row = 0; c_row < m_num_rowsel; ++c_row) {
                 x[c_row] = v[m_rowsel[c_row]];
+            }
         }
         else
             x = v;
@@ -900,7 +915,7 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         #endif
 
         // Perform inverse permutation
-        x = iperm(x, symbolic->m_pinv);
+        x = iperm(x, m_symbolic->m_pinv);
         #if defined(G_DEBUG_SPARSE_COMPRESSION)
         std::cout << " Permutated vector : " << x << std::endl;
         #endif
@@ -913,8 +928,9 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
                 x[c_col] /= Lx[Lp[col]];                      // divide by diag.
                 for (int p = Lp[col]+1; p < Lp[col+1]; p++) { // loop over elements
                     int c_row = row_map[Li[p]];
-                    if (c_row >= 0)                           // use only non-zero rows
+                    if (c_row >= 0) {                         // use only non-zero rows
                         x[c_row] -= Lx[p] * x[c_col];
+                    }
                 }
             }
         }
@@ -929,8 +945,9 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
             if (c_col >= 0) {                                 // use only non-zero cols
                 for (int p = Lp[col]+1; p < Lp[col+1]; p++) { // loop over elements
                     int c_row = row_map[Li[p]];
-                    if (c_row >= 0)                           // use only non-zero rows
+                    if (c_row >= 0) {                         // use only non-zero rows
                         x[c_col] -= Lx[p] * x[c_row];
+                    }
                 }
                 x[c_col] /= Lx[Lp[col]];
             }
@@ -940,7 +957,7 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         #endif
 
         // Perform vector permutation
-        x = perm(x, symbolic->m_pinv);
+        x = perm(x, m_symbolic->m_pinv);
         #if defined(G_DEBUG_SPARSE_COMPRESSION)
         std::cout << " Permutated vector : " << x << std::endl;
         #endif
@@ -948,11 +965,13 @@ GVector GSparseMatrix::cholesky_solver(const GVector& v, int compress)
         // If column compression has been performed the expand the result vector
         // accordingly
         if (m_colsel != NULL && m_num_colsel < m_cols) {
-            for (int c_col = 0; c_col < m_num_colsel; ++c_col)
+            for (int c_col = 0; c_col < m_num_colsel; ++c_col) {
                 result[m_colsel[c_col]] = x[c_col];
+            }
         }
-        else
+        else {
             result = x;
+        }
         #if defined(G_DEBUG_SPARSE_COMPRESSION)
         std::cout << " Restored vector ..: " << result << std::endl;
         #endif
@@ -1961,36 +1980,35 @@ void GSparseMatrix::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] m Matrix to be copied.
+ * @param[in] matrix Matrix to be copied.
  ***************************************************************************/
-void GSparseMatrix::copy_members(const GSparseMatrix& m)
+void GSparseMatrix::copy_members(const GSparseMatrix& matrix)
 {
     // Copy GSparseMatrix members
-    m_mem_block = m.m_mem_block;
-    m_zero      = m.m_zero;
-    m_fill_val  = m.m_fill_val;
-    m_fill_row  = m.m_fill_row;
-    m_fill_col  = m.m_fill_col;
+    m_mem_block = matrix.m_mem_block;
+    m_zero      = matrix.m_zero;
+    m_fill_val  = matrix.m_fill_val;
+    m_fill_row  = matrix.m_fill_row;
+    m_fill_col  = matrix.m_fill_col;
 
     // Copy row indices if they exist
-    if (m.m_rowinx != NULL && m.m_alloc > 0) {
-        m_rowinx = new int[m.m_alloc];
-        for (int i = 0; i < m.m_elements; ++i)
-            m_rowinx[i] = m.m_rowinx[i];
+    if (matrix.m_rowinx != NULL && matrix.m_alloc > 0) {
+        m_rowinx = new int[matrix.m_alloc];
+        for (int i = 0; i < matrix.m_elements; ++i) {
+            m_rowinx[i] = matrix.m_rowinx[i];
+        }
     }
 
-    // Copy symbolic decomposition if it exists
-    if (m.m_symbolic != NULL) {
-        GSparseSymbolic* symbolic = new GSparseSymbolic();
-        *symbolic  = *((GSparseSymbolic*)m.m_symbolic);
-        m_symbolic = (void*)symbolic;
+    // Clone symbolic decomposition if it exists
+    if (matrix.m_symbolic != NULL) {
+        m_symbolic  = new GSparseSymbolic();
+        *m_symbolic = *matrix.m_symbolic;
     }
 
     // Copy numeric decomposition if it exists
-    if (m.m_numeric != NULL) {
-        GSparseNumeric* numeric = new GSparseNumeric();
-        *numeric  = *((GSparseNumeric*)m.m_numeric);
-        m_numeric = (void*)numeric;
+    if (matrix.m_numeric != NULL) {
+        m_numeric  = new GSparseNumeric();
+        *m_numeric = *matrix.m_numeric;
     }
 
     // Return
@@ -2004,8 +2022,8 @@ void GSparseMatrix::copy_members(const GSparseMatrix& m)
 void GSparseMatrix::free_members(void)
 {
     // De-allocate only if memory has indeed been allocated
-    if (m_numeric  != NULL) delete (GSparseNumeric*)m_numeric;
-    if (m_symbolic != NULL) delete (GSparseSymbolic*)m_symbolic;
+    if (m_numeric  != NULL) delete m_numeric;
+    if (m_symbolic != NULL) delete m_symbolic;
     if (m_rowinx   != NULL) delete [] m_rowinx;
 
     // Properly mark members as free
@@ -2784,8 +2802,9 @@ std::ostream& operator<< (std::ostream& os, const GSparseMatrix& m)
         os << " Number of columns .........: " << m.m_cols
            << " (compressed " << m.m_num_colsel << ")" << std::endl;
     }
-    else
+    else {
         os << " Number of columns .........: " << m.m_cols << std::endl;
+    }
     os << " Number of non-zero elements: " << nonzero
        << " (" << elements << ")" << std::endl;
     if (m.m_fill_val != 0.0) {
@@ -2797,12 +2816,14 @@ std::ostream& operator<< (std::ostream& os, const GSparseMatrix& m)
     os << " Sparse matrix fill ........: " << m.fill() << std::endl;
 
     // If there is a symbolic decomposition then put it also in the stream
-    if (m.m_symbolic != NULL)
-        os << std::endl << *((GSparseSymbolic*)m.m_symbolic);
+    if (m.m_symbolic != NULL) {
+        os << std::endl << *m.m_symbolic;
+    }
 
     // If there is a numeric decomposition then put it also in the stream
-    if (m.m_numeric != NULL)
-        os << std::endl << *((GSparseNumeric*)m.m_numeric);
+    if (m.m_numeric != NULL) {
+        os << std::endl << *m.m_numeric;
+    }
 
     // Return output stream
     return os;

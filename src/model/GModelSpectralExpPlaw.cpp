@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralExpPlaw.cpp  -  Exponential cut off power law model    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralExpPlaw.cpp
  * @brief Exponential cut off power law spectral class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -128,8 +128,8 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(const GXmlElement& xml) : GModelSpe
  *
  * @param[in] model Exponential cut off power law model.
  ***************************************************************************/
-GModelSpectralExpPlaw::GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model) :
-                                                        GModelSpectral(model)
+GModelSpectralExpPlaw::GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model)
+                                             : GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -316,10 +316,10 @@ double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng) const
     double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.value() : 0.0;
 
     // Set gradients (circumvent const correctness)
-    ((GModelSpectralExpPlaw*)this)->m_norm.gradient(g_norm);
-    ((GModelSpectralExpPlaw*)this)->m_index.gradient(g_index);
-    ((GModelSpectralExpPlaw*)this)->m_ecut.gradient(g_ecut);
-    ((GModelSpectralExpPlaw*)this)->m_pivot.gradient(g_pivot);
+    const_cast<GModelSpectralExpPlaw*>(this)->m_norm.gradient(g_norm);
+    const_cast<GModelSpectralExpPlaw*>(this)->m_index.gradient(g_index);
+    const_cast<GModelSpectralExpPlaw*>(this)->m_ecut.gradient(g_ecut);
+    const_cast<GModelSpectralExpPlaw*>(this)->m_pivot.gradient(g_pivot);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -448,10 +448,12 @@ void GModelSpectralExpPlaw::autoscale(void)
         // Set values, error, min and max
         m_norm.value(m_norm.value() * invscale);
         m_norm.error(m_norm.error() * invscale);
-        if (m_norm.hasmin())
+        if (m_norm.hasmin()) {
             m_norm.min(m_norm.min() * invscale);
-        if (m_norm.hasmax())
+        }
+        if (m_norm.hasmax()) {
             m_norm.max(m_norm.max() * invscale);
+        }
 
         // Set scale
         m_norm.scale(1.0 / invscale);
@@ -480,16 +482,17 @@ void GModelSpectralExpPlaw::autoscale(void)
 void GModelSpectralExpPlaw::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4)
+    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Power law model requires exactly 4 parameters.");
+    }
 
     // Extract model parameters
     int npar[] = {0, 0, 0, 0};
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor") {
@@ -518,10 +521,11 @@ void GModelSpectralExpPlaw::read(const GXmlElement& xml)
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1)
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Require \"Prefactor\", \"Index\", \"Cutoff\" and \"Scale\""
               " parameters.");
+    }
 
     // Return
     return;
@@ -547,13 +551,15 @@ void GModelSpectralExpPlaw::read(const GXmlElement& xml)
 void GModelSpectralExpPlaw::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", "ExpCutoff");
+    }
 
     // Verify model type
-    if (xml.attribute("type") != "ExpCutoff")
+    if (xml.attribute("type") != "ExpCutoff") {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
               "Spectral model is not of type \"ExpCutoff\".");
+    }
 
     // If XML element has 0 nodes then append 4 parameter nodes
     if (xml.elements() == 0) {
@@ -564,16 +570,17 @@ void GModelSpectralExpPlaw::write(GXmlElement& xml) const
     }
 
     // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4)
+    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Power law model requires exactly 4 parameters.");
+    }
 
     // Set or update model parameter attributes
     int npar[] = {0, 0, 0, 0};
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor") {
@@ -602,10 +609,11 @@ void GModelSpectralExpPlaw::write(GXmlElement& xml) const
     } // endfor: looped over all parameters
 
     // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1)
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Require \"Prefactor\", \"Index\", \"Cutoff\" and \"Scale\""
               " parameters.");
+    }
 
     // Return
     return;
@@ -623,8 +631,9 @@ std::string GModelSpectralExpPlaw::print(void) const
     // Append header
     result.append("=== GModelSpectralExpPlaw ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

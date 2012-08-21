@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralPlaw.cpp  -  Spectral power law model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralPlaw.cpp
  * @brief Power law spectral model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -121,8 +121,8 @@ GModelSpectralPlaw::GModelSpectralPlaw(const GXmlElement& xml) : GModelSpectral(
  *
  * @param[in] model Spectral power law model.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const GModelSpectralPlaw& model) :
-                                                        GModelSpectral(model)
+GModelSpectralPlaw::GModelSpectralPlaw(const GModelSpectralPlaw& model)
+                                       : GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -298,9 +298,9 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng) const
     double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.value() : 0.0;
 
     // Set gradients (circumvent const correctness)
-    ((GModelSpectralPlaw*)this)->m_norm.gradient(g_norm);
-    ((GModelSpectralPlaw*)this)->m_index.gradient(g_index);
-    ((GModelSpectralPlaw*)this)->m_pivot.gradient(g_pivot);
+    const_cast<GModelSpectralPlaw*>(this)->m_norm.gradient(g_norm);
+    const_cast<GModelSpectralPlaw*>(this)->m_index.gradient(g_index);
+    const_cast<GModelSpectralPlaw*>(this)->m_pivot.gradient(g_pivot);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -437,10 +437,12 @@ void GModelSpectralPlaw::autoscale(void)
         // Set values, error, min and max
         m_norm.value(m_norm.value() * invscale);
         m_norm.error(m_norm.error() * invscale);
-        if (m_norm.hasmin())
+        if (m_norm.hasmin()) {
             m_norm.min(m_norm.min() * invscale);
-        if (m_norm.hasmax())
+        }
+        if (m_norm.hasmax()) {
             m_norm.max(m_norm.max() * invscale);
+        }
 
         // Set scale
         m_norm.scale(1.0 / invscale);
@@ -471,16 +473,17 @@ void GModelSpectralPlaw::autoscale(void)
 void GModelSpectralPlaw::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3)
+    if (xml.elements() != 3 || xml.elements("parameter") != 3) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Power law model requires exactly 3 parameters.");
+    }
 
     // Extract model parameters
     int npar[] = {0, 0, 0};
     for (int i = 0; i < 3; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor") {
@@ -503,9 +506,10 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1)
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Require \"Prefactor\", \"Index\" and \"Scale\" parameters.");
+    }
 
     // Return
     return;
@@ -531,13 +535,15 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
 void GModelSpectralPlaw::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", "PowerLaw");
+    }
 
     // Verify model type
-    if (xml.attribute("type") != "PowerLaw")
+    if (xml.attribute("type") != "PowerLaw") {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
               "Spectral model is not of type \"PowerLaw\".");
+    }
 
     // If XML element has 0 nodes then append 3 parameter nodes
     if (xml.elements() == 0) {
@@ -547,16 +553,17 @@ void GModelSpectralPlaw::write(GXmlElement& xml) const
     }
 
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || xml.elements("parameter") != 3)
+    if (xml.elements() != 3 || xml.elements("parameter") != 3) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Power law model requires exactly 3 parameters.");
+    }
 
     // Set or update model parameter attributes
     int npar[] = {0, 0, 0};
     for (int i = 0; i < 3; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor") {
@@ -579,9 +586,10 @@ void GModelSpectralPlaw::write(GXmlElement& xml) const
     } // endfor: looped over all parameters
 
     // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1)
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Require \"Prefactor\", \"Index\" and \"Scale\" parameters.");
+    }
 
     // Return
     return;
@@ -599,8 +607,9 @@ std::string GModelSpectralPlaw::print(void) const
     // Append header
     result.append("=== GModelSpectralPlaw ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

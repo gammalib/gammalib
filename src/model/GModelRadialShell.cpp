@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelRadialShell.cpp  -  Radial shell source model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Christoph Deil                                   *
+ *  copyright (C) 2011-2012 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -127,8 +127,8 @@ GModelRadialShell::GModelRadialShell(const GXmlElement& xml) : GModelRadial()
  *
  * @param[in] model Radial shell source model.
  ***************************************************************************/
-GModelRadialShell::GModelRadialShell(const GModelRadialShell& model) :
-                                                         GModelRadial(model)
+GModelRadialShell::GModelRadialShell(const GModelRadialShell& model)
+                                     : GModelRadial(model)
 {
     // Initialise members
     init_members();
@@ -283,8 +283,9 @@ double GModelRadialShell::eval(const double& theta) const
 
     // Set x appropriately for the small angle approximation or not
     double x;
-    if (m_small_angle)
+    if (m_small_angle) {
         x = theta * theta;
+    }
     else {
         x  = std::sin(theta);
         x *= x;
@@ -294,8 +295,9 @@ double GModelRadialShell::eval(const double& theta) const
     double value = 0.0;
     if (x < m_x_out) {
         value = sqrt(m_x_out - x);
-        if (x < m_x_in)
+        if (x < m_x_in) {
             value -= sqrt(m_x_in - x);
+        }
     }
     
     // Normalise value
@@ -420,9 +422,10 @@ void GModelRadialShell::read(const GXmlElement& xml)
     int npars = xml.elements("parameter");
 
     // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4)
+    if (xml.elements() != 4 || npars != 4) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Shell model requires exactly 4 parameters.");
+    }
 
     // Read shell location
     GModelRadial::read(xml);
@@ -435,7 +438,7 @@ void GModelRadialShell::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Radius
         if (par->attribute("name") == "Radius") {
@@ -464,9 +467,10 @@ void GModelRadialShell::read(const GXmlElement& xml)
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1)
+    if (npar[0] != 1 || npar[1] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Require \"Radius\" and \"Width\" parameters.");
+    }
 
     // Return
     return;
@@ -505,16 +509,17 @@ void GModelRadialShell::write(GXmlElement& xml) const
     int npars = xml.elements("parameter");
 
     // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4)
+    if (xml.elements() != 4 || npars != 4) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Shell source model requires exactly 4 parameters.");
+    }
 
     // Set or update model parameter attributes
     int npar[2] = {0, 0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Radius
         if (par->attribute("name") == "Radius") {
@@ -531,9 +536,10 @@ void GModelRadialShell::write(GXmlElement& xml) const
     } // endfor: looped over all parameters
 
     // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1)
+    if (npar[0] != 1 || npar[1] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Require \"Radius\" and \"Width\" parameters.");
+    }
 
     // Return
     return;
@@ -551,8 +557,9 @@ std::string GModelRadialShell::print(void) const
     // Append header
     result.append("=== GModelRadialShell ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;
@@ -705,7 +712,8 @@ void GModelRadialShell::update() const
             m_x_out      = m_theta_out * m_theta_out;
             double denom = c1 * (m_x_out*m_theta_out - m_x_in*m_theta_in);
             m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
-        } else {
+        } 
+        else {
             double sin_theta_in  = std::sin(m_theta_in);
             double sin_theta_out = std::sin(m_theta_out);
             double term1         = (f1(m_theta_out) - f1(m_theta_in)) * c2;

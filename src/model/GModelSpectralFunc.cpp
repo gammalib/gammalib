@@ -84,8 +84,8 @@ GModelSpectralFunc::GModelSpectralFunc(void) : GModelSpectral()
  * found in the specified file. See GModelSpectralFunc::load_nodes() for more
  * information about the expected structure of the file.
  ***************************************************************************/
-GModelSpectralFunc::GModelSpectralFunc(const std::string& filename) :
-                    GModelSpectral()
+GModelSpectralFunc::GModelSpectralFunc(const std::string& filename)
+                                       : GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -107,8 +107,8 @@ GModelSpectralFunc::GModelSpectralFunc(const std::string& filename) :
  * from an XML element. See GModelSpectralFunc::read() for more information
  * about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml) :
-                    GModelSpectral()
+GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml)
+                                       : GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -126,8 +126,8 @@ GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml) :
  *
  * @param[in] model Spectral function model.
  ***************************************************************************/
-GModelSpectralFunc::GModelSpectralFunc(const GModelSpectralFunc& model) :
-                    GModelSpectral(model)
+GModelSpectralFunc::GModelSpectralFunc(const GModelSpectralFunc& model)
+                                       : GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -291,7 +291,7 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng) const
     double g_norm  = (m_norm.isfree())  ? m_norm.scale() * func : 0.0;
 
     // Set gradients (circumvent const correctness)
-    ((GModelSpectralFunc*)this)->m_norm.gradient(g_norm);
+    const_cast<GModelSpectralFunc*>(this)->m_norm.gradient(g_norm);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -504,8 +504,9 @@ GEnergy GModelSpectralFunc::mc(const GEnergy& emin, const GEnergy& emax,
         if (m_mc_cum.size() > 1) {
             double u = ran.uniform();
             for (inx = m_mc_cum.size()-1; inx > 0; --inx) {
-                if (m_mc_cum[inx-1] <= u)
+                if (m_mc_cum[inx-1] <= u) {
                     break;
+                }
             }
         }
 
@@ -552,20 +553,22 @@ GEnergy GModelSpectralFunc::mc(const GEnergy& emin, const GEnergy& emax,
 void GModelSpectralFunc::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Spectral function requires exactly 1 parameter.");
+    }
 
     // Get parameter element
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Get value
     if (par->attribute("name") == "Normalization") {
         m_norm.read(*par);
     }
-    else
+    else {
         throw GException::model_invalid_parnames(G_READ, xml,
                           "Require \"Normalization\" parameter.");
+    }
 
     // Load nodes from file
     load_nodes(xml.attribute("file"));
@@ -595,13 +598,15 @@ void GModelSpectralFunc::read(const GXmlElement& xml)
 void GModelSpectralFunc::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", "FileFunction");
+    }
 
     // Verify model type
-    if (xml.attribute("type") != "FileFunction")
+    if (xml.attribute("type") != "FileFunction") {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
               "Spectral model is not of type \"FileFunction\".");
+    }
 
     // If XML element has 0 nodes then append 1 parameter node
     if (xml.elements() == 0) {
@@ -609,20 +614,22 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
     }
 
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Spectral function requires exactly 1 parameter.");
+    }
 
     // Get parameter element
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Set parameyter
     if (par->attribute("name") == "Normalization") {
         m_norm.write(*par);
     }
-    else
+    else {
         throw GException::model_invalid_parnames(G_WRITE, xml,
                           "Require \"Normalization\" parameter.");
+    }
 
     // Return
     return;
@@ -642,8 +649,9 @@ std::string GModelSpectralFunc::print(void) const
     result.append("\n"+parformat("Function file")+m_filename);
     result.append("\n"+parformat("Number of nodes")+str(m_lin_nodes.size()));
     result.append("\n"+parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Append node information
     for (int i = 0; i < m_prefactor.size(); ++i) {
