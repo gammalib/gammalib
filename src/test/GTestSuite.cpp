@@ -601,7 +601,7 @@ void GTestSuite::init_members(void)
     m_tests.clear();
     m_errors=0;
     m_failures=0;
-    m_timestamp=std::time(NULL);
+    m_timestamp=time(NULL);
 
     // Return
     return;
