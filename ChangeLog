@@ -1,4 +1,4 @@
-2012-07-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2012-08-21  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.6.0 released
         ========================
@@ -7,6 +7,8 @@
         Add GModelSpatialMap model
         Add sky direction access operator to GSkymap class
         Add support for diffuse source models to CTA response
+        Add OpenMP support and parallelize likelihood optimizer
+        Enhance code quality
 
 2012-04-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
