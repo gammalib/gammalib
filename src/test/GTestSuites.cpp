@@ -357,13 +357,14 @@ void GTestSuites::write(GXml& xml)
     GXmlElement *element_testsuites = new GXmlElement("testsuites");
 
     //Set attributes
-    element_testsuites->attribute("name",name());
+    element_testsuites->attribute("name","GammaLib");
+    /*
     element_testsuites->attribute("test",str(tests()));
     element_testsuites->attribute("errors",str(errors()));
     element_testsuites->attribute("failures",str(failures()));
     element_testsuites->attribute("time","0"); // not used
     element_testsuites->attribute("timestamp",str(timestamp()));
-
+    */
     //Loop over all test suites in the container
     for (int i=0; i<m_testsuites.size(); ++i)
     {
@@ -394,7 +395,7 @@ void GTestSuites::write(GXml& xml)
 
             GXmlElement *element_testcase = new GXmlElement("testcase");
             element_testcase->attribute("assertions",""); // not used
-            element_testcase->attribute("classname","");  // not used
+            element_testcase->attribute("classname",name());
             element_testcase->attribute("name",testcase.name());
             element_testcase->attribute("status","");  // not used
             element_testcase->attribute("time",str(testcase.time()));

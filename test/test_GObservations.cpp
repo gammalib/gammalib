@@ -209,7 +209,7 @@ class TestGObservation : public GTestSuite
  ***************************************************************************/
 int main(void)
 {
-    GTestSuites testsuites("GObservations class testing");
+    GTestSuites testsuites("GObservations");
 
     //TODO: test gaussian.
     #ifdef _OPENMP
