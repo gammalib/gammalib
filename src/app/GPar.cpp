@@ -833,7 +833,7 @@ void GPar::check_value_bool(const std::string& value) const
 void GPar::check_value_int(const std::string& value) const
 {
     // Convert value to integer
-    int ivalue = toint(value);
+    //int ivalue = toint(value);
 
     // Return
     return;
