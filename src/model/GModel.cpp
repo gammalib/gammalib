@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.cpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModel.cpp
  * @brief Abstract model base class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -158,8 +158,9 @@ GModelPar& GModel::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    }
     #endif
 
     // Return reference
@@ -179,8 +180,9 @@ const GModelPar& GModel::operator[](const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    }
     #endif
 
     // Return reference
@@ -201,13 +203,15 @@ GModelPar& GModel::operator[](const std::string& name)
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
+        if (m_pars[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
+    if (index >= size()) {
         throw GException::par_not_found(G_ACCESS2, name);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -227,13 +231,15 @@ const GModelPar& GModel::operator[](const std::string& name) const
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
+        if (m_pars[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
+    if (index >= size()) {
         throw GException::par_not_found(G_ACCESS2, name);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -264,8 +270,9 @@ void GModel::instruments(const std::string& instruments)
     std::vector<std::string> inst = split(instruments, ",");
 
     // Attach all instruments
-    for (int i = 0; i < inst.size(); ++i)
+    for (int i = 0; i < inst.size(); ++i) {
         m_instruments.push_back(toupper(strip_whitespace(inst[i])));
+    }
 
     // Return
     return;
@@ -285,8 +292,9 @@ std::string GModel::instruments(void) const
 
     // Attach all instruments
     for (int i = 0; i < m_instruments.size(); ++i) {
-        if (i > 0)
+        if (i > 0) {
             result += ",";
+        }
         result += m_instruments[i];
     }
 
@@ -310,7 +318,7 @@ bool GModel::isvalid(const std::string& name) const
     bool valid = true;
 
     // Check if model applies to instrument
-    if (m_instruments.size() > 0) {
+    if (!m_instruments.empty()) {
 
         // Convert instrument name to upper case
         std::string uname = toupper(name);
@@ -392,15 +400,17 @@ std::string GModel::print_name_instrument(void) const
     // Append model
     result.append(parformat("Name")+name());
     result.append("\n"+parformat("Instruments"));
-    if (m_instruments.size() > 0) {
+    if (!m_instruments.empty()) {
         for (int i = 0; i < m_instruments.size(); ++i) {
-            if (i > 0)
+            if (i > 0) {
                 result.append(", ");
+            }
             result.append(m_instruments[i]);
         }
     }
-    else
+    else {
         result.append("all");
+    }
 
     // Return result
     return result;

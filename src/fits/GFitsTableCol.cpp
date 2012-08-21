@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.cpp  - FITS table column abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableCol.cpp
  * @brief Abstract FITS table column class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -355,22 +355,26 @@ std::string GFitsTableCol::print(void) const
 
     // Append column number. This will be "-" if the column does not exist
     // in the FITS file.
-    if (m_colnum > 0)
+    if (m_colnum > 0) {
         result.append(right(str(m_colnum),4)+" ");
-    else
+    }
+    else {
         result.append(right("[-]",4)+" ");
+    }
 
     // Append loading information
-    if (m_size == 0)
+    if (m_size == 0) {
         result.append("[not loaded] ");
-    else
+    }
+    else {
         result.append("[loaded]     ");
+    }
 
     // Append format information
     result.append("["+binary_format()+","+ascii_format()+"]");
 
     // Append dimensions (if available)
-    if (m_dim.size() > 0) {
+    if (!m_dim.empty()) {
     
         // Build TDIM string
         std::string value = "("+str(m_dim[0]);
@@ -609,14 +613,16 @@ int GFitsTableCol::offset(const int& row, const int& inx) const
 {
     // Check row value
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_length)
+    if (row < 0 || row >= m_length) {
         throw GException::out_of_range(G_OFFSET, row, 0, m_length-1);
+    }
     #endif
 
     // Check inx value
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_number)
+    if (inx < 0 || inx >= m_number) {
         throw GException::out_of_range(G_OFFSET, inx, 0, m_number-1);
+    }
     #endif
 
     // Calculate pixel offset
