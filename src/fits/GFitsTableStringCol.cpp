@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableStringCol.cpp  - FITS table string column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableStringCol.cpp
  * @brief FITS table string column class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -77,7 +77,7 @@ GFitsTableStringCol::GFitsTableStringCol(const std::string& name,
                                          const int&         length,
                                          const int&         width,
                                          const int&         size)
-                                   : GFitsTableCol(name, length, size, width)
+                                         : GFitsTableCol(name, length, size, width)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -90,10 +90,10 @@ GFitsTableStringCol::GFitsTableStringCol(const std::string& name,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] column Column from which class instance should be built.
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableStringCol::GFitsTableStringCol(const GFitsTableStringCol& column) 
-                                                      : GFitsTableCol(column)
+                                         : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -128,7 +128,7 @@ GFitsTableStringCol::~GFitsTableStringCol(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] column Column which should be assigned
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableStringCol& GFitsTableStringCol::operator= (const GFitsTableStringCol& column)
 {
@@ -158,7 +158,7 @@ GFitsTableStringCol& GFitsTableStringCol::operator= (const GFitsTableStringCol& 
  * @brief Column data access operator
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
@@ -176,7 +176,7 @@ std::string& GFitsTableStringCol::operator() (const int& row, const int& inx)
  * @brief Column data access operator (const variant)
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
@@ -271,8 +271,9 @@ int GFitsTableStringCol::integer(const int& row, const int& inx) const
 void GFitsTableStringCol::insert(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length)
+    if (rownum < 0 || rownum > m_length) {
         throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    }
 
     // Continue only if there are rows to be inserted
     if (nrows > 0) {
@@ -309,14 +310,16 @@ void GFitsTableStringCol::insert(const int& rownum, const int& nrows)
             // Copy and initialise data
             std::string* src = m_data;
             std::string* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
+            }
             for (int i = 0; i < n_insert; ++i) {
                 dst->clear();
                 dst++;
             }
-            for (int i = 0; i < n_after; ++i)
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -351,12 +354,14 @@ void GFitsTableStringCol::insert(const int& rownum, const int& nrows)
 void GFitsTableStringCol::remove(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length)
+    if (rownum < 0 || rownum >= m_length) {
         throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum)
+    if (nrows < 0 || nrows > m_length-rownum) {
         throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    }
 
     // Continue only if there are rows to be removed
     if (nrows > 0) {
@@ -387,11 +392,13 @@ void GFitsTableStringCol::remove(const int& rownum, const int& nrows)
             // Copy data
             std::string* src = m_data;
             std::string* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
+            }
             src += n_remove;
-            for (int i = 0; i < n_after; ++i)
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -479,7 +486,7 @@ void GFitsTableStringCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Column for which members should be copied.
+ * @param[in] column Table column.
  *
  * Sets the content of the vector column by copying from another column.
  * If the code is compiled with the small memory option, and if the source
@@ -491,7 +498,9 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
-    if (not_loaded) ((GFitsTableStringCol*)(&column))->fetch_data();
+    if (not_loaded) {
+        const_cast<GFitsTableStringCol*>(&column)->fetch_data();
+    }
 
     // Copy attributes
     m_type = column.m_type;
@@ -500,8 +509,9 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
         alloc_data();
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = column.m_data[i];
+        }
     }
 
     // Copy NULL value
@@ -512,7 +522,9 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsTableStringCol*)(&column))->release_data();
+    if (not_loaded) {
+        const_cast<GFitsTableStringCol*>(&column)->release_data();
+    }
     #endif
 
     // Return
@@ -567,8 +579,9 @@ void GFitsTableStringCol::save(void)
 
     // Transfer string into buffer
     for (int i = 0; i < m_size; ++i) {
-        if (m_data[i].length() > 0)
+        if (m_data[i].length() > 0) {
             std::strncpy(m_buffer[i], m_data[i].c_str(), m_width);
+        }
     }
 
     // Save column
@@ -625,8 +638,9 @@ std::string GFitsTableStringCol::binary_format(void) const
     format.append("A");
 
     // If there are substrings then add width of substring
-    if (m_repeat > m_width)
+    if (m_repeat > m_width) {
         format.append(str(m_width));
+    }
 
     // Return format
     return format;
@@ -645,8 +659,9 @@ void GFitsTableStringCol::alloc_data(void)
     m_data = NULL;
 
     // Allocate new data
-    if (m_size > 0)
+    if (m_size > 0) {
         m_data = new std::string[m_size];
+    }
 
     // Return
     return;
@@ -672,6 +687,8 @@ void GFitsTableStringCol::release_data(void)
 
 /***********************************************************************//**
  * @brief Allocate nul value
+ *
+ * @param[in] value Nul value string.
  ***************************************************************************/
 void GFitsTableStringCol::alloc_nulval(const std::string& value)
 {
@@ -683,8 +700,9 @@ void GFitsTableStringCol::alloc_nulval(const std::string& value)
 
     // Allocate and initialise nul value
     m_nulval = new char[m_width+1];
-    for (int j = 0; j <= m_width; ++j)
+    for (int j = 0; j <= m_width; ++j) {
         m_nulval[j] = '\0';
+    }
 
     // Set nul value
     std::strncpy(m_nulval, value.c_str(), m_width);
@@ -701,8 +719,9 @@ void GFitsTableStringCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i].clear();
+        }
     }
 
     // Return
@@ -735,8 +754,9 @@ void GFitsTableStringCol::fetch_data(void) const
 
     // Extract string from buffer
     for (int i = 0; i < m_size; ++i) {
-       if (m_buffer[i] != NULL)
-           m_data[i].assign(m_buffer[i]);
+        if (m_buffer[i] != NULL) {
+            m_data[i].assign(m_buffer[i]);
+        }
     }
 
     // Free buffer memory
@@ -758,15 +778,17 @@ void GFitsTableStringCol::alloc_buffer(void) const
     // Allocate buffer memory
     if (m_size > 0) {
         m_buffer = new char*[m_size];
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_buffer[i] = new char[m_width+1];
+        }
     }
 
     // Initialise buffer
     if (m_buffer != NULL) {
         for (int i = 0; i < m_size; ++i) {
-            for (int j = 0; j <= m_width; ++j)
+            for (int j = 0; j <= m_width; ++j) {
                 (m_buffer[i])[j] = '\0';
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsTableBitCol.cpp  - FITS table Bit column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableBitCol.cpp
  * @brief FITS table bit column class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -90,10 +90,10 @@ GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] column Column from which class instance should be built.
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column) 
-                                                      : GFitsTableCol(column)
+                                   : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -128,7 +128,7 @@ GFitsTableBitCol::~GFitsTableBitCol(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] column Column which should be assigned
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
 {
@@ -158,7 +158,7 @@ GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
  * @brief Column data access operator
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
@@ -194,15 +194,17 @@ bool& GFitsTableBitCol::operator() (const int& row, const int& inx)
  ***************************************************************************/
 const bool& GFitsTableBitCol::operator() (const int& row, const int& inx) const
 {
-    // If data are not available then load them now (circumvent const
-    // correctness)
-    if (m_data == NULL) ((GFitsTableBitCol*)this)->fetch_data();
+    // Circumvent const correctness
+    GFitsTableBitCol* ptr = const_cast<GFitsTableBitCol*>(this);
+    
+    // If data are not available then load them now
+    if (m_data == NULL) ptr->fetch_data();
 
-    // Set any pending Bit (circumvent const correctness)
-    ((GFitsTableBitCol*)this)->set_pending();
+    // Set any pending Bit
+    ptr->set_pending();
 
-    // Get Bit (circumvent const correctness)
-    ((GFitsTableBitCol*)this)->get_bit(row, inx);
+    // Get Bit
+    ptr->get_bit(row, inx);
 
     // Return data bin
     return m_bit_value;
@@ -293,8 +295,9 @@ int GFitsTableBitCol::integer(const int& row, const int& inx) const
 void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length)
+    if (rownum < 0 || rownum > m_length) {
         throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    }
     
     // Continue only if there are rows to be inserted
     if (nrows > 0) {
@@ -341,12 +344,15 @@ void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
             // Copy and initialise data
             unsigned char* src = m_data;
             unsigned char* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
-            for (int i = 0; i < n_insert; ++i)
+            }
+            for (int i = 0; i < n_insert; ++i) {
                 *dst++ = 0;
-            for (int i = 0; i < n_after; ++i)
+            }
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -381,12 +387,14 @@ void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
 void GFitsTableBitCol::remove(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length)
+    if (rownum < 0 || rownum >= m_length) {
         throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum)
+    if (nrows < 0 || nrows > m_length-rownum) {
         throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    }
     
     // Continue only if there are rows to be removed
     if (nrows > 0) {
@@ -427,11 +435,13 @@ void GFitsTableBitCol::remove(const int& rownum, const int& nrows)
             // Copy data
             unsigned char* src = m_data;
             unsigned char* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
+            }
             src += n_remove;
-            for (int i = 0; i < n_after; ++i)
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -525,7 +535,9 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
-    if (not_loaded) ((GFitsTableBitCol*)(&column))->fetch_data();
+    if (not_loaded) {
+        const_cast<GFitsTableBitCol*>(&column)->fetch_data();
+    }
 
     // Copy attributes
     m_type          = column.m_type;
@@ -550,7 +562,9 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsTableBitCol*)(&column))->release_data();
+    if (not_loaded) {
+        const_cast<GFitsTableBitCol*>(&column)->release_data();
+    }
     #endif
 
     // Return
@@ -638,8 +652,9 @@ void GFitsTableBitCol::alloc_data(void)
     m_data = NULL;
 
     // Allocate new data
-    if (m_size > 0)
+    if (m_size > 0) {
         m_data = new unsigned char[m_size];
+    }
 
     // Return
     return;
@@ -692,8 +707,9 @@ void GFitsTableBitCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = 0;
+        }
     }
 
     // Return
@@ -739,17 +755,19 @@ void GFitsTableBitCol::load_column(void)
             status     = __ffmahd(FPTR(m_fitsfile),
                                   (FPTR(m_fitsfile)->HDUposition)+1,
                                   NULL, &status);
-            if (status != 0)
+            if (status != 0) {
                 throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
                                   (FPTR(m_fitsfile)->HDUposition)+1,
                                   status);
+            }
 
             // Load data 8 Bits at once
             status = __ffgcv(FPTR(m_fitsfile), __TBYTE, m_colnum, 1, 1, m_size,
                              m_nulval, m_data, &m_anynul, &status);
-            if (status != 0)
+            if (status != 0) {
                 throw GException::fits_error(G_LOAD_COLUMN, status,
                                   "for column \""+m_name+"\".");
+            }
         }
 
     } // endif: column has a positive size
@@ -782,16 +800,18 @@ void GFitsTableBitCol::save_column(void)
         status     = __ffmahd(FPTR(m_fitsfile),
                               (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
                               (FPTR(m_fitsfile)->HDUposition)+1,
                               status);
+        }
 
         // Save data 8 Bits at once
         status = __ffpcn(FPTR(m_fitsfile), __TBYTE, m_colnum, 1, 1,
                          m_size, m_data, m_nulval, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_SAVE_COLUMN, status);
+        }
 
     } // endif: FITS file was connected
 
@@ -818,14 +838,16 @@ void GFitsTableBitCol::get_bit(const int& row, const int& inx)
 {
     // Check row value
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_length)
+    if (row < 0 || row >= m_length) {
         throw GException::fits_invalid_row(G_GET_BIT, row, m_length-1);
+    }
     #endif
 
     // Check inx value
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_number)
+    if (inx < 0 || inx >= m_number) {
         throw GException::out_of_range(G_GET_BIT, inx, 0, m_number-1);
+    }
     #endif
 
     // Compute Byte and Bit mask
@@ -852,10 +874,12 @@ void GFitsTableBitCol::set_pending(void)
     if (m_bit_pending) {
 
         // Set or unset Bit
-        if (m_bit_value)
+        if (m_bit_value) {
             m_data[m_bit_byte] = m_data[m_bit_byte] | m_bit_mask;
-        else
+        }
+        else {
             m_data[m_bit_byte] = m_data[m_bit_byte] & ~m_bit_mask;
+        }
 
         // Signal that no more Bit is pending
         m_bit_pending = false;
