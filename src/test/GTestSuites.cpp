@@ -383,7 +383,7 @@ void GTestSuites::write(GXml& xml)
         element_testsuite->attribute("package","");  // not used
         element_testsuite->attribute("skipped","");  // not used
         element_testsuite->attribute("tests",str(testsuite->tests()));
-        element_testsuite->attribute("time","0");  // not used
+        element_testsuite->attribute("time",str(testsuite->duration()));
         element_testsuite->attribute("timestamp",str(testsuite->timestamp()));
 
         //Loop over all test cases contains in the test suite
@@ -397,7 +397,7 @@ void GTestSuites::write(GXml& xml)
             element_testcase->attribute("classname","");  // not used
             element_testcase->attribute("name",testcase.name());
             element_testcase->attribute("status","");  // not used
-            element_testcase->attribute("time","0");  // not used
+            element_testcase->attribute("time",str(testcase.time()));
 
             //If test case is not OK
             if(!testcase.is_passed())

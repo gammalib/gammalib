@@ -85,7 +85,8 @@ class GTestSuite{
         int                         failures(void) const;
         int                         success(void) const;
         time_t                      timestamp(void) const;
-    
+        double                      duration(void) const;
+
     // Protected methods
     protected:
         void                        init_members(void);
@@ -93,7 +94,7 @@ class GTestSuite{
         void                        free_members(void);
 
         std::string                 format_name(const std::string& name);
-    
+
     // Private members
     private:
         std::vector<GTestCase*> m_tests;     //!< Number of tests

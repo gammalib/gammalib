@@ -31,6 +31,15 @@
 #endif
 #include "GTestCase.hpp"
 
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#ifdef __APPLE__ & __MACH__
+#include <pthread.h>
+pthread_attr_t gomp_thread_attr;
+#endif
+#endif
+
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
@@ -291,7 +300,13 @@ bool GTestCase::is_passed(void) const
 {
     return m_passed;
 }
-
+/***********************************************************************//**
+ * @brief Return the duration of the test case
+ ***************************************************************************/
+double GTestCase::time(void) const
+{
+    return m_time;
+}
 /***********************************************************************//**
  * @brief Print test case result
  * Return a string : ".", "F" or "E"
@@ -316,6 +331,12 @@ std::string GTestCase::print_result(void) const{
  ***************************************************************************/
 void GTestCase::run(void)
 {
+    #ifdef _OPENMP
+        double t_start = omp_get_wtime();
+    #else
+        clock_t t_start = clock();
+    #endif
+
     try{
         // If they are a function
         if(m_ptr_function!=NULL){
@@ -340,6 +361,15 @@ void GTestCase::run(void)
         m_passed=false;
     }
 
+    #ifdef _OPENMP
+        double t_elapse = omp_get_wtime()-t_start;
+    #else
+        double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #endif
+
+    //Set duration
+    m_time=t_elapse;
+
     return;
 }
 
@@ -358,6 +388,7 @@ void GTestCase::init_members(void)
     m_type=ERROR_TEST;
     m_ptr_function=NULL;
     m_passed=true;
+    m_time=0;
 
     return;
 }

@@ -82,6 +82,7 @@ class GTestCase{
         ErrorType   type(void) const;
         void        type(ErrorType type);
         bool        is_passed() const;
+        double      time() const;
         std::string print_result(void) const;
         void run(void);
 
@@ -100,6 +101,7 @@ class GTestCase{
         GTestSuite* m_testsuite; //!< pointer to the test suite
         bool        m_passed; //!< boolean to check test success
         ErrorType   m_type; //!< type of the test case : failure or error test
+        double      m_time; //!< duration of the test
 };
 
 #endif

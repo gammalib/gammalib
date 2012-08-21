@@ -571,6 +571,18 @@ time_t GTestSuite::timestamp(void) const
     return m_timestamp;
 }
 
+/***********************************************************************//**
+ * @brief Return the total duration of the tests
+ ***************************************************************************/
+double GTestSuite::duration(void) const
+{
+    double time=0;
+    for(int i=0;i<m_tests.size();i++){
+        time+=m_tests[i]->time();
+    }
+
+    return time;
+}
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
@@ -589,8 +601,8 @@ void GTestSuite::init_members(void)
     m_tests.clear();
     m_errors=0;
     m_failures=0;
-    m_timestamp=time(NULL);
-    
+    m_timestamp=std::time(NULL);
+
     // Return
     return;
 }
