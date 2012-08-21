@@ -80,7 +80,7 @@ AC_CANONICAL_HOST
 #############################################################################
 AC_LANG(C++)
 AC_PROG_CXX([g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++])
-AC_PROG_CC
+AC_PROG_CC([gcc cc cl.exe clang])
 
 
 #############################################################################
