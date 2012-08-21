@@ -144,7 +144,7 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
     m_wcs = new GWcsHPX(nside, order, coords);
 
     // Set number of pixels and number of maps
-    m_num_pixels = ((GWcsHPX*)m_wcs)->npix();
+    m_num_pixels = static_cast<GWcsHPX*>(m_wcs)->npix();
     m_num_maps   = nmaps;
 
     // Allocate pixels
