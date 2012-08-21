@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GXml.cpp - XML class implementation                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXml.cpp
  * @brief XML class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -310,7 +310,7 @@ int GXml::elements(const std::string& name) const
 GXmlElement* GXml::element(int index) const
 {
     // Return pointer
-    return (GXmlElement*)m_root.element(index);
+    return (static_cast<GXmlElement*>(m_root.element(index)));
 }
 
 
@@ -323,7 +323,7 @@ GXmlElement* GXml::element(int index) const
 GXmlElement* GXml::element(const std::string& name, int index) const
 {
     // Return pointer
-    return (GXmlElement*)m_root.element(name, index);
+    return (static_cast<GXmlElement*>(m_root.element(name, index)));
 }
 
 

@@ -204,31 +204,34 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_wrk_grad = new GVector(npars);
         m_covar->stack_init(npars,10000);
         
-        //vector to save working variables of each thread.
-        std::vector<GVector* > vect_cpy_mgrad;
-        std::vector<GSparseMatrix* > vect_cpy_mcovar;
-        std::vector<double* > vect_cpy_mvalue;
-        std::vector<double* > vect_cpy_mnpred;
+        // Allocate vectors to save working variables of each thread
+        std::vector<GVector*>       vect_cpy_mgrad;
+        std::vector<GSparseMatrix*> vect_cpy_mcovar;
+        std::vector<double*>        vect_cpy_mvalue;
+        std::vector<double*>        vect_cpy_mnpred;
         
-        // Here OpenMP will paralellize the execution. The following code will be executed by the differents threads.
-        // In order to avoid protecting attributes ( m_value,m_npred, m_gradient and m_covar), each thread works with its own working variables (cpy_*)
-        // When a thread starts, we add working variables in a vector (vect_cpy_*). When computation is finished we just add all elements contain in the vector to the attributes value.
+        // Here OpenMP will paralellize the execution. The following code will
+        // be executed by the differents threads. In order to avoid protecting
+        // attributes ( m_value,m_npred, m_gradient and m_covar), each thread
+        // works with its own working variables (cpy_*). When a thread starts,
+        // we add working variables in a vector (vect_cpy_*). When computation
+        // is finished we just add all elements contain in the vector to the
+        // attributes value.
         #pragma omp parallel
         {
-            // Copy variables for multi-threading
-            GModels cpy_model((GModels&)pars);
-            
-            GVector cpy_wrk_grad(npars);
-            GVector* cpy_mgrad = new GVector(npars);
+            // Allocate and initialize variable copies for multi-threading
+            GModels        cpy_model((GModels&)pars);
+            GVector        cpy_wrk_grad(npars);
+            GVector*       cpy_mgrad  = new GVector(npars);
             GSparseMatrix* cpy_mcovar = new GSparseMatrix(npars,npars);
             cpy_mcovar->stack_init(npars,10000);
-        
-            double* cpy_mnpred = new double;
-            double* cpy_mvalue = new double;
-            *cpy_mnpred=0;
-            *cpy_mvalue=0;
+            double*        cpy_mnpred = new double;
+            double*        cpy_mvalue = new double;
+            *cpy_mnpred = 0.0;
+            *cpy_mvalue = 0.0;
             
-            //Critical zone
+            // Push variable copies into vector. This is a critical zone to
+            // avoid multiple thread pushing simultaneously.
             #pragma omp critical
             {
                 vect_cpy_mgrad.push_back(cpy_mgrad);
@@ -237,7 +240,8 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                 vect_cpy_mnpred.push_back(cpy_mnpred);
             }
 
-            // The omp for directive will deal the iterations on the differents threads.
+            // The omp for directive will deal the iterations on the differents
+            // threads.
             #pragma omp for
             // Loop over all observations
             for (int i = 0; i < m_this->size(); ++i) {
@@ -258,6 +262,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                         *cpy_mnpred += npred;
                         *cpy_mgrad+=cpy_wrk_grad;
 
+                        // Optionally show debug information
                         #if G_EVAL_DEBUG
                         #pragma omp critial single
                         {
@@ -271,7 +276,12 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                         #endif
     
                         // Update the log-likelihood
-                        poisson_unbinned(*(m_this->m_obs[i]), cpy_model,*cpy_mcovar,*cpy_mgrad,*cpy_mvalue,cpy_wrk_grad);
+                        poisson_unbinned(*(m_this->m_obs[i]), 
+                                          cpy_model,
+                                         *cpy_mcovar,
+                                         *cpy_mgrad,
+                                         *cpy_mvalue,
+                                          cpy_wrk_grad);
     
                         // Add the Npred value to the log-likelihood
                         *cpy_mvalue += npred;
@@ -279,9 +289,10 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                     } // endif: Poisson statistics
     
                     // ... otherwise throw an exception
-                    else
+                    else {
                         throw GException::invalid_statistics(G_EVAL, statistics,
                             "Unbinned optimization requires Poisson statistics.");
+                    }
     
                 } // endif: unbinned analysis
     
@@ -293,7 +304,13 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                         #if G_EVAL_DEBUG
                         std::cout << "Binned Poisson" << std::endl;
                         #endif
-                        poisson_binned(*(m_this->m_obs[i]), cpy_model,*cpy_mcovar,*cpy_mgrad,*cpy_mvalue,*cpy_mnpred,cpy_wrk_grad);
+                        poisson_binned(*(m_this->m_obs[i]), 
+                                        cpy_model,
+                                       *cpy_mcovar,
+                                       *cpy_mgrad,
+                                       *cpy_mvalue,
+                                       *cpy_mnpred,
+                                        cpy_wrk_grad);
                     }
     
                     // ... or Gaussian statistics
@@ -305,9 +322,10 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                     }
     
                     // ... or unsupported
-                    else
+                    else {
                         throw GException::invalid_statistics(G_EVAL, statistics,
                             "Binned optimization requires Poisson or Gaussian statistics.");
+                    }
     
                 } // endelse: binned analysis
     
@@ -350,7 +368,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                     delete vect_cpy_mvalue.at(i);
                 }
             }
-    }
+        } // end of pragma omp sections
 
         // Release stack
         m_covar->stack_destroy();
@@ -409,15 +427,31 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
                                                 const GOptimizerPars& pars)
 {
-    poisson_unbinned(obs,pars,*m_covar,*m_gradient,m_value,*m_wrk_grad); 
+    // Perform computations using the global members
+    poisson_unbinned(obs, pars, *m_covar, *m_gradient, m_value, *m_wrk_grad);
+
+    // Return
+    return;
 }
 
-void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
+
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for Poisson statistics and
+ *        unbinned analysis (version with working arrays)
+ *
+ * @param[in] obs Observation.
+ * @param[in] pars Optimizer parameters.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] mgrad Gradient working array.
+ * @param[in,out] value Likelihood value.
+ * @param[in,out] gradient Gradient.
+ ***************************************************************************/
+void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
                                                 const GOptimizerPars& pars,
-                                                GSparseMatrix& covar,
-                                                GVector& mgrad,
-                                                double& value,
-                                                GVector& gradient)
+                                                GSparseMatrix&        covar,
+                                                GVector&              mgrad,
+                                                double&               value,
+                                                GVector&              gradient)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -537,16 +571,33 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
 void GObservations::optimizer::poisson_binned(const GObservation& obs,
                                               const GOptimizerPars& pars) 
 {
-    poisson_binned(obs,pars,*m_covar,*m_gradient,m_value,m_npred,*m_wrk_grad); 
+    // Perform computations using the global members
+    poisson_binned(obs, pars, *m_covar, *m_gradient, m_value, m_npred, *m_wrk_grad); 
+
+    // Return
+    return;
 }
 
-void GObservations::optimizer::poisson_binned(const GObservation& obs,
-                                                const GOptimizerPars& pars,
-                                                GSparseMatrix& covar,
-                                                GVector& mgrad,
-                                                double& value,
-                                                double& npred,
-                                                GVector& gradient)
+
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for Poisson statistics and
+ *        binned analysis (version with working arrays)
+ *
+ * @param[in] obs Observation.
+ * @param[in] pars Optimizer parameters.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] mgrad Gradient working array.
+ * @param[in,out] value Likelihood value.
+ * @param[in,out] npred Number of predicted events.
+ * @param[in,out] gradient Gradient.
+ ***************************************************************************/
+void GObservations::optimizer::poisson_binned(const GObservation&   obs,
+                                              const GOptimizerPars& pars,
+                                              GSparseMatrix&        covar,
+                                              GVector&              mgrad,
+                                              double&               value,
+                                              double&               npred,
+                                              GVector&              gradient)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -580,7 +631,8 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
         #endif
 
         // Get event pointer
-        const GEventBin* bin = (*((GEventCube*)obs.events()))[i];
+        const GEventBin* bin =
+            (*(static_cast<GEventCube*>(const_cast<GEvents*>(obs.events()))))[i];
 
         // Get number of counts in bin
         double data = bin->counts();
@@ -653,7 +705,7 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
                 double       fa_i    = fa * g;
 
                 // Update gradient
-                (*m_gradient)[jpar] += fc * g;
+                mgrad[jpar] += fc * g;
 
                 // Loop over rows
                 register int* ipar = inx;
@@ -752,15 +804,33 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
 void GObservations::optimizer::gaussian_binned(const GObservation& obs,
                                                const GOptimizerPars& pars) 
 {
-    gaussian_binned(obs,pars,*m_covar,*m_gradient,m_value,m_npred,*m_wrk_grad); 
+    // Perform computations using the global members
+    gaussian_binned(obs, pars, *m_covar, *m_gradient, m_value, m_npred, *m_wrk_grad); 
+
+    // Return
+    return;
 }
-void GObservations::optimizer::gaussian_binned(const GObservation& obs,
-                                              const GOptimizerPars& pars,
-                                              GSparseMatrix& covar,
-                                              GVector& mgrad,
-                                              double& value,
-                                              double& npred,
-                                              GVector& gradient)
+
+
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for Gaussian statistics and
+ *        binned analysis (version with working arrays)
+ *
+ * @param[in] obs Observation.
+ * @param[in] pars Optimizer parameters.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] mgrad Gradient working array.
+ * @param[in,out] npred Number of predicted events.
+ * @param[in,out] value Likelihood value.
+ * @param[in,out] gradient Gradient.
+ ***************************************************************************/
+void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
+                                               const GOptimizerPars& pars,
+                                               GSparseMatrix&        covar,
+                                               GVector&              mgrad,
+                                               double&               value,
+                                               double&               npred,
+                                               GVector&              gradient)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -778,7 +848,8 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
     for (int i = 0; i < obs.events()->size(); ++i) {
 
         // Get event pointer
-        const GEventBin* bin = (*((GEventCube*)obs.events()))[i];
+        const GEventBin* bin =
+            (*(static_cast<GEventCube*>(const_cast<GEvents*>(obs.events()))))[i];
 
         // Get number of counts in bin
         double data = bin->counts();
@@ -888,14 +959,14 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
 void GObservations::optimizer::init_members(void)
 {
     // Initialise members
-    m_value      = 0.0;
-    m_npred      = 0.0;
-    m_minmod     = 1.0e-100;
-    m_minerr     = 1.0e-100;
-    m_gradient   = NULL;
-    m_covar      = NULL;
-    m_this       = NULL;
-    m_wrk_grad   = NULL;
+    m_value     = 0.0;
+    m_npred     = 0.0;
+    m_minmod    = 1.0e-100;
+    m_minerr    = 1.0e-100;
+    m_gradient  = NULL;
+    m_covar     = NULL;
+    m_this      = NULL;
+    m_wrk_grad  = NULL;
 
     // Return
     return;
