@@ -480,8 +480,8 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
                 *m_logger << "func=" << m_value << ", ";
                 *m_logger << "Lambda=" << m_lambda << ", ";
                 *m_logger << "delta=" << delta;
-                //*m_logger << ", " << "max(grad)=" << grad_max;
-                //*m_logger << " [" << grad_imax << "]";
+                *m_logger << ", " << "max(grad)=" << grad_max;
+                *m_logger << " [" << grad_imax << "]";
                 if (m_lambda > lambda_old)
                     *m_logger << " (stalled)";
                 *m_logger << std::endl;
