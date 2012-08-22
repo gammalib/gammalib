@@ -180,10 +180,11 @@ double GObservation::model(const GModels& models, const GEvent& event,
     // Verify that gradient vector and models have the same dimension
     #if defined(G_RANGE_CHECK)
     if (gradient != NULL) {
-        if (models.npars() != gradient->size())
+        if (models.npars() != gradient->size()) {
             throw GException::gradient_par_mismatch(G_MODEL, 
                                                     gradient->size(),
                                                     models.npars());
+        }
     }
     #endif
 
@@ -192,8 +193,9 @@ double GObservation::model(const GModels& models, const GEvent& event,
     int    igrad = 0;      // Reset gradient counter
 
     // If gradient is available then reset gradient vector elements to 0
-    if (gradient != NULL)
+    if (gradient != NULL) {
         (*gradient) = 0.0;
+    }
 
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
@@ -206,8 +208,9 @@ double GObservation::model(const GModels& models, const GEvent& event,
 
             // Optionally determine model gradients
             if (gradient != NULL) {
-                for (int k = 0; k < models[i].size(); ++k)
+                for (int k = 0; k < models[i].size(); ++k) {
                     (*gradient)[igrad+k] = model_grad(models[i], event, k);
+                }
             }
 
         } // endif: model component was valid for instrument
@@ -241,10 +244,11 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     // Verify that gradient vector and models have the same dimension
     #if defined(G_RANGE_CHECK)
     if (gradient != NULL) {
-        if (models.npars() != gradient->size())
+        if (models.npars() != gradient->size()) {
             throw GException::gradient_par_mismatch(G_MODEL, 
                                                     gradient->size(),
                                                     models.npars());
+        }
     }
     #endif
 
@@ -253,8 +257,9 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     int    igrad = 0;      // Reset gradient counter
 
     // If gradient is available then reset gradient vector elements to 0
-    if (gradient != NULL)
+    if (gradient != NULL) {
         (*gradient) = 0.0;
+    }
 
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
@@ -268,8 +273,9 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
             // Optionally determine Npred gradients
             if (gradient != NULL) {
-                for (int k = 0; k < models[i].size(); ++k)
+                for (int k = 0; k < models[i].size(); ++k) {
                     (*gradient)[igrad+k] = npred_grad(models[i], k);
+                }
             }
 
         } // endif: model component was valid for instrument
@@ -336,8 +342,9 @@ void GObservation::events(const GEvents* events)
     m_events = NULL;
 
     // Set event container if the input pointer is valid
-    if (events != NULL)
+    if (events != NULL) {
         m_events = events->clone();
+    }
 
     // Return
     return;
@@ -372,8 +379,9 @@ void GObservation::statistics(const std::string& statistics)
 const GEvents* GObservation::events(void) const
 {
     // Throw an exception if the event container is not valid
-    if (m_events == NULL)
+    if (m_events == NULL) {
         throw GException::no_events(G_EVENTS);
+    }
 
     // Return pointer to event container
     return m_events;
@@ -487,8 +495,9 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
     if (model[ipar].isfree()) {
 
         // If model has a gradient then use it
-        if (model[ipar].hasgrad())
+        if (model[ipar].hasgrad()) {
             grad = model[ipar].gradient();
+        }
 
         // ... otherwise compute it numerically
         else {
@@ -573,7 +582,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
 double GObservation::model_func::eval(double x)
 {
     // Get non-const model pointer (circumvent const correctness)
-    GModel* model = (GModel*)m_model;
+    GModel* model = const_cast<GModel*>(m_model);
 
     // Set value
     (*model)[m_ipar].value(x);
@@ -649,7 +658,7 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
     if (model[ipar].isfree()) {
 
         // Get non-const model pointer (circumvent const correctness)
-        GModel* ptr = (GModel*)&model;
+        GModel* ptr = const_cast<GModel*>(&model);
 
         // Save current model parameter
         GModelPar current = (*ptr)[ipar];
@@ -725,7 +734,7 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
 double GObservation::npred_func::eval(double x)
 {
     // Get non-const model pointer (circumvent const correctness)
-    GModel* model = (GModel*)m_model;
+    GModel* model = const_cast<GModel*>(m_model);
 
     // Set value
     (*model)[m_ipar].value(x);
@@ -783,9 +792,10 @@ double GObservation::npred_temp(const GModel& model) const
         double tstop  = events()->gti().tstop(i).met();
 
         // Throw exception if time interval is not valid
-        if (tstop <= tstart)
+        if (tstop <= tstart) {
             throw GException::gti_invalid(G_NPRED_TEMP, events()->gti().tstart(i),
                                           events()->gti().tstop(i));
+        }
 
         // Setup integration function
         GObservation::npred_temp_kern integrand(this, &model);
@@ -859,8 +869,9 @@ double GObservation::npred_spec(const GModel& model,
     double emax = events()->ebounds().emax().MeV();
 
     // Throw exception if energy range is not valid
-    if (emax <= emin)
+    if (emax <= emin) {
         throw GException::erange_invalid(G_NPRED_SPEC, emin, emax);
+    }
 
     // Setup integration function
     GObservation::npred_spec_kern integrand(this, &model, &obsTime);

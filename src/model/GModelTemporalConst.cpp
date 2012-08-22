@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporalConst.cpp  -  Temporal constant model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelTemporalConst.cpp
  * @brief Constant temporal model class interface implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -72,8 +72,8 @@ GModelTemporalConst::GModelTemporalConst(void) : GModelTemporal()
  *
  * @param[in] model Constant temporal model
  ***************************************************************************/
-GModelTemporalConst::GModelTemporalConst(const GModelTemporalConst& model) :
-    GModelTemporal(model)
+GModelTemporalConst::GModelTemporalConst(const GModelTemporalConst& model) 
+                                         : GModelTemporal(model)
 {
     // Initialise members
     init_members();
@@ -210,7 +210,7 @@ double GModelTemporalConst::eval_gradients(const GTime& srcTime) const
     double g_norm = (m_norm.isfree()) ? m_norm.scale() : 0.0;
 
     // Set gradients (circumvent const correctness)
-    ((GModelTemporalConst*)this)->m_norm.gradient(g_norm);
+    const_cast<GModelTemporalConst*>(this)->m_norm.gradient(g_norm);
 
     // Return
     return value;
@@ -300,8 +300,9 @@ std::string GModelTemporalConst::print(void) const
     // Append header
     result.append("=== GModelTemporalConst ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

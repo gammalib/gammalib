@@ -348,7 +348,7 @@ void test_one_unbinned_obs(const std::string& datadir)
     // Loop over all events using iterator
     try {
         int num = 0;
-        GLATEventList *ptr = (GLATEventList*)run.events();
+        GLATEventList *ptr = static_cast<GLATEventList*>(const_cast<GEvents*>(run.events()));
         for (GLATEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
             //std::cout << *event->energy() << std::endl;
             num++;
@@ -504,7 +504,7 @@ void test_one_binned_obs(const std::string& datadir, const std::string& irf)
     try {
         int num = 0;
         int sum = 0;
-        GLATEventCube *ptr = (GLATEventCube*)run.events();
+        GLATEventCube *ptr = static_cast<GLATEventCube*>(const_cast<GEvents*>(run.events()));
         for (GLATEventCube::iterator event = ptr->begin(); event != ptr->end(); ++event) {
             num++;
             sum += (int)event->counts();

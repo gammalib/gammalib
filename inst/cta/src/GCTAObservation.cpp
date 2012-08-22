@@ -344,9 +344,9 @@ void GCTAObservation::read(const GXmlElement& xml)
     clear();
 
     // Initialise response parameters
-    std::string arf      = "";
-    std::string rmf      = "";
-    std::string psf      = "";
+    std::string arf;
+    std::string rmf;
+    std::string psf;
     double      thetacut = 0.0;
     double      scale    = 1.0;
 

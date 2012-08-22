@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp  - FITS file access class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -265,13 +265,15 @@ void GFits::open(const std::string& filename, bool create)
 
 	// Throw special exception if status=202 (keyword not found). This error
 	// may occur if the file is opened with an expression
-	if (status == 202)
+	if (status == 202) {
         throw GException::fits_open_error(G_OPEN, fname, status,
 		                  "Keyword not found when opening file.");
+    }
 
     // Throw any other error
-    else if (status != 0)
+    else if (status != 0) {
         throw GException::fits_open_error(G_OPEN, fname, status);
+    }
 
     // Store FITS file attributes
     m_filename = fname;
@@ -279,22 +281,25 @@ void GFits::open(const std::string& filename, bool create)
     // Determine number of HDUs
     int num_hdu = 0;
     status = __ffthdu(FPTR(m_fitsfile), &num_hdu, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_OPEN, status);
+    }
 
     // Open and append all HDUs
     for (int i = 0; i < num_hdu; ++i) {
 
         // Move to HDU
         status = __ffmahd(FPTR(m_fitsfile), i+1, NULL, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_hdu_not_found(G_OPEN, i+1, status);
+        }
 
         // Get HDU type
         int type;
         status = __ffghdt(FPTR(m_fitsfile), &type, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_OPEN, status);
+        }
 
         // Perform type dependent HDU allocation
         GFitsHDU* hdu = NULL;
@@ -351,16 +356,18 @@ void GFits::save(bool clobber)
 
     // If we attempt to save an existing file without overwriting permission
     // then throw an error
-    if (!m_created && !clobber)
+    if (!m_created && !clobber) {
         throw GException::fits_file_exist(G_SAVE, m_filename);
+    }
 
     // If no HDUs exist then save an empty primary image.
     if (size() == 0) {
         int status = 0;
         status     = __ffmahd(FPTR(m_fitsfile), 1, NULL, &status);
         status     = __ffcrim(FPTR(m_fitsfile), 8, 0, NULL, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_SAVE, status);
+        }
     }
 
     // ... otherwise save all HDUs
@@ -406,20 +413,23 @@ void GFits::saveto(const std::string& filename, bool clobber)
     #endif
 
     // If overwriting has been specified then remove any existing file ...
-    if (clobber)
+    if (clobber) {
         remove(fname.c_str());
+    }
 
     // ... otherwise, if file exists then throw an exception
-    else if (file_exists(fname))
+    else if (file_exists(fname)) {
         throw GException::fits_file_exist(G_SAVETO, fname);
+    }
 
     // Create or open FITS file
     GFits new_fits;
     new_fits.open(fname, true);
 
     // Append all headers
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         new_fits.append(*m_hdu[i]);
+    }
 
     // Save new FITS file
     new_fits.save();
@@ -525,8 +535,9 @@ void GFits::append(const GFitsHDU& hdu)
         fptr.HDUposition = n_hdu;
         ptr->connect(&fptr);
     }
-    else
+    else {
         ptr->extno(n_hdu);
+    }
 
     // Debug information
     #if DEBUG
@@ -616,8 +627,9 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
 
     // Return primary HDU if requested ...
     if (toupper(extname) == "PRIMARY") {
-        if (size() > 0)
+        if (size() > 0) {
             ptr = m_hdu[0];
+        }
     }
 
     // ... otherwise search for specified extension
@@ -655,8 +667,9 @@ GFitsHDU* GFits::hdu(int extno) const
 {
     // Verify that extension number is in valid range
     #if defined(G_RANGE_CHECK)
-    if (extno < 0 || extno >= size())
+    if (extno < 0 || extno >= size()) {
         throw GException::out_of_range("GFits::hdu(int)", extno, 0, size()-1);
+    }
     #endif
 
     // Get HDU pointer
@@ -696,7 +709,7 @@ GFitsImage* GFits::image(const std::string& extname) const
     }
 
     // Return pointer
-    return ((GFitsImage*)ptr);
+    return (static_cast<GFitsImage*>(ptr));
 }
 
 
@@ -723,7 +736,7 @@ GFitsImage* GFits::image(int extno) const
     }
 
     // Return pointer
-    return ((GFitsImage*)ptr);
+    return (static_cast<GFitsImage*>(ptr));
 }
 
 
@@ -749,7 +762,7 @@ GFitsTable* GFits::table(const std::string& extname) const
     }
 
     // Return pointer
-    return ((GFitsTable*)ptr);
+    return (static_cast<GFitsTable*>(ptr));
 }
 
 
@@ -777,7 +790,7 @@ GFitsTable* GFits::table(int extno) const
     }
 
     // Return pointer
-    return ((GFitsTable*)ptr);
+    return (static_cast<GFitsTable*>(ptr));
 }
 
 
@@ -795,15 +808,19 @@ std::string GFits::print(void) const
     // Append file information
     result.append(parformat("Filename")+m_filename+"\n");
     result.append(parformat("History"));
-    if (m_created)
+    if (m_created) {
         result.append("new file\n");
-    else
+    }
+    else {
         result.append("existing file\n");
+    }
     result.append(parformat("Mode"));
-    if (m_readwrite)
+    if (m_readwrite) {
         result.append("read/write\n");
-    else
+    }
+    else {
         result.append("read only\n");
+    }
     result.append(parformat("Number of HDUs")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n");
@@ -859,8 +876,9 @@ void GFits::copy_members(const GFits& fits)
 
     // Clone HDUs
     m_hdu.clear();
-    for (int i = 0; i < fits.m_hdu.size(); ++i)
+    for (int i = 0; i < fits.m_hdu.size(); ++i) {
         m_hdu.push_back((fits.m_hdu[i]->clone()));
+    }
 
     // Return
     return;
@@ -950,25 +968,31 @@ GFitsImage* GFits::new_image(void)
     int status =   0;
     int bitpix = -64;
     status     = __ffgipr(FPTR(m_fitsfile), 0, &bitpix, NULL, NULL, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_NEW_IMAGE, status);
+    }
 
     // Check for unsigned image
     char      keyname[10];
     long long bzero;
     long long bscale;
     std::sprintf(keyname, "BZERO");
-    if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bzero, NULL, &status) != 0)
+    if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bzero, NULL, &status) != 0) {
         bzero = 0;
+    }
     std::sprintf(keyname, "BSCALE");
-    if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bscale, NULL, &status) != 0)
+    if (__ffgky(FPTR(m_fitsfile), __TLONGLONG, keyname, &bscale, NULL, &status) != 0) {
         bscale = 0;
-    if (bitpix == 8 && bzero == -128 && bscale == 1)
+    }
+    if (bitpix == 8 && bzero == -128 && bscale == 1) {
         bitpix = 10;
-    else if (bitpix == 16 && bzero == 32768u && bscale == 1)
+    }
+    else if (bitpix == 16 && bzero == 32768u && bscale == 1) {
         bitpix = 20;
-    else if (bitpix == 32 && bzero == 2147483648u && bscale == 1)
+    }
+    else if (bitpix == 32 && bzero == 2147483648u && bscale == 1) {
         bitpix = 40;
+    }
 
     // Allocate bitpix dependent image
     switch (bitpix) {

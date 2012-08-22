@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 00-06-00 (July, 11, 2012)
+Version: 00-06-00 (August, 21, 2012)
 Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 
@@ -174,7 +174,7 @@ extensive unit test by typing:
 If everything works successfully you should see
 
     ===================
-    All 15 tests passed
+    All 16 tests passed
     ===================
 
 at the end of the test. If no Python support was compiled in, the

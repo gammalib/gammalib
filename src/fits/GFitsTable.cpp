@@ -774,7 +774,7 @@ void GFitsTable::data_open(void* vptr)
         }
         
         // If TDIM information was set then check its consistency
-        if (vdim.size() > 0) {
+        if (!vdim.empty()) {
             
             // Compute expectation
             int num = vdim[0];

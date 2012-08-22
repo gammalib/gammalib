@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GModels.cpp  -  Model container class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModels.cpp
  * @brief Model container class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -165,8 +165,9 @@ GModel& GModels::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    }
     #endif
 
     // Return reference
@@ -186,8 +187,9 @@ const GModel& GModels::operator[](const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    }
     #endif
 
     // Return reference
@@ -208,13 +210,15 @@ GModel& GModels::operator[](const std::string& name)
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_models[index]->name() == name)
+        if (m_models[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
+    if (index >= size()) {
         throw GException::model_not_found(G_ACCESS2, name);
+    }
 
     // Return reference
     return *(m_models[index]);
@@ -234,13 +238,15 @@ const GModel& GModels::operator[](const std::string& name) const
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_models[index]->name() == name)
+        if (m_models[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
+    if (index >= size()) {
         throw GException::model_not_found(G_ACCESS2, name);
+    }
 
     // Return reference
     return *(m_models[index]);
@@ -374,7 +380,7 @@ void GModels::read(const GXml& xml)
     for (int i = 0; i < n; ++i) {
 
         // Get pointer on source
-        GXmlElement* src = (GXmlElement*)lib->element("source", i);
+        GXmlElement* src = static_cast<GXmlElement*>(lib->element("source", i));
 
         // Get model type
         std::string type = src->attribute("type");
@@ -384,12 +390,14 @@ void GModels::read(const GXml& xml)
         GModel*        ptr = registry.alloc(type);
 
         // If model if valid then read model from XML file
-        if (ptr != NULL)
+        if (ptr != NULL) {
             ptr->read(*src);
+        }
 
         // ... otherwise throw an exception
-        else
+        else {
             throw GException::model_invalid(G_READ, type);
+        }
 
         // Append model
         append(*ptr);
@@ -424,8 +432,9 @@ void GModels::write(GXml& xml) const
     GXmlElement* lib = xml.element("source_library", 0);
 
     // Write all sources into library
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         m_models[i]->write(*lib);
+    }
 
     // Return
     return;
@@ -444,8 +453,9 @@ double GModels::eval(const GEvent& event, const GObservation& obs) const
     double value = 0.0;
 
     // Evaluate function for all models
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         value += m_models[i]->eval(event, obs);
+    }
 
     // Return
     return value;
@@ -465,8 +475,9 @@ double GModels::eval_gradients(const GEvent& event,
     double value = 0.0;
 
     // Evaluate function for all models
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         value += m_models[i]->eval_gradients(event, obs);
+    }
 
     // Return
     return value;
@@ -487,8 +498,9 @@ std::string GModels::print(void) const
     result.append("\n"+parformat("Number of parameters")+str(npars()));
 
     // Append models
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_models[i]->print());
+    }
 
     // Return result
     return result;
@@ -525,8 +537,9 @@ void GModels::copy_members(const GModels& models)
 {
     // Copy models
     m_models.clear();
-    for (int i = 0; i < models.m_models.size(); ++i)
+    for (int i = 0; i < models.m_models.size(); ++i) {
         m_models.push_back((models.m_models[i]->clone()));
+    }
 
     // Set parameter pointers
     set_pointers();
@@ -570,8 +583,9 @@ void GModels::set_pointers(void)
 
     // Gather all pointers
     for (int i = 0; i < size(); ++i) {
-        for (int k = 0; k < m_models[i]->size(); ++k)
+        for (int k = 0; k < m_models[i]->size(); ++k) {
             m_pars.push_back(&(*m_models[i])[k]);
+        }
     }
 
     // Return

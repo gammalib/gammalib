@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableByteCol.cpp  - FITS table Byte column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableByteCol.cpp
  * @brief FITS table byte column class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -73,8 +73,8 @@ GFitsTableByteCol::GFitsTableByteCol(void) : GFitsTableCol()
  ***************************************************************************/
 GFitsTableByteCol::GFitsTableByteCol(const std::string& name,
                                      const int&         length,
-                                     const int&         size) :
-                   GFitsTableCol(name, length, size, 2)
+                                     const int&         size)
+                                     : GFitsTableCol(name, length, size, 2)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -87,10 +87,10 @@ GFitsTableByteCol::GFitsTableByteCol(const std::string& name,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] column Column from which class instance should be built.
+ * @param[in] column Table column.
  ***************************************************************************/
-GFitsTableByteCol::GFitsTableByteCol(const GFitsTableByteCol& column) :
-                   GFitsTableCol(column)
+GFitsTableByteCol::GFitsTableByteCol(const GFitsTableByteCol& column)
+                                     : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -125,7 +125,7 @@ GFitsTableByteCol::~GFitsTableByteCol(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] column Column which should be assigned
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableByteCol& GFitsTableByteCol::operator= (const GFitsTableByteCol& column)
 {
@@ -155,7 +155,7 @@ GFitsTableByteCol& GFitsTableByteCol::operator= (const GFitsTableByteCol& column
  * @brief Column data access operator
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
@@ -173,14 +173,16 @@ unsigned char& GFitsTableByteCol::operator() (const int& row, const int& inx)
  * @brief Column data access operator (const variant)
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
 const unsigned char& GFitsTableByteCol::operator() (const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) ((GFitsTableByteCol*)this)->fetch_data();
+    if (m_data == NULL) {
+        const_cast<GFitsTableByteCol*>(this)->fetch_data();
+    }
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -272,8 +274,9 @@ int GFitsTableByteCol::integer(const int& row, const int& inx) const
 void GFitsTableByteCol::insert(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length)
+    if (rownum < 0 || rownum > m_length) {
         throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    }
     
     // Continue only if there are rows to be inserted
     if (nrows > 0) {
@@ -310,12 +313,15 @@ void GFitsTableByteCol::insert(const int& rownum, const int& nrows)
             // Copy and initialise data
             unsigned char* src = m_data;
             unsigned char* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
-            for (int i = 0; i < n_insert; ++i)
+            }
+            for (int i = 0; i < n_insert; ++i) {
                 *dst++ = 0;
-            for (int i = 0; i < n_after; ++i)
+            }
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -350,12 +356,14 @@ void GFitsTableByteCol::insert(const int& rownum, const int& nrows)
 void GFitsTableByteCol::remove(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length)
+    if (rownum < 0 || rownum >= m_length) {
         throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum)
+    if (nrows < 0 || nrows > m_length-rownum) {
         throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    }
     
     // Continue only if there are rows to be removed
     if (nrows > 0) {
@@ -386,11 +394,13 @@ void GFitsTableByteCol::remove(const int& rownum, const int& nrows)
             // Copy data
             unsigned char* src = m_data;
             unsigned char* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
+            }
             src += n_remove;
-            for (int i = 0; i < n_after; ++i)
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -482,7 +492,9 @@ void GFitsTableByteCol::copy_members(const GFitsTableByteCol& column)
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
-    if (not_loaded) ((GFitsTableByteCol*)(&column))->fetch_data();
+    if (not_loaded) {
+        const_cast<GFitsTableByteCol*>(&column)->fetch_data();
+    }
 
     // Copy attributes
     m_type = column.m_type;
@@ -491,8 +503,9 @@ void GFitsTableByteCol::copy_members(const GFitsTableByteCol& column)
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
         alloc_data();
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = column.m_data[i];
+        }
     }
 
     // Copy NULL value
@@ -500,7 +513,9 @@ void GFitsTableByteCol::copy_members(const GFitsTableByteCol& column)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsTableByteCol*)(&column))->release_data();
+    if (not_loaded) {
+        const_cast<GFitsTableByteCol*>(&column)->release_data();
+    }
     #endif
 
     // Return
@@ -585,8 +600,9 @@ void GFitsTableByteCol::alloc_data(void)
     m_data = NULL;
 
     // Allocate new data
-    if (m_size > 0)
+    if (m_size > 0) {
         m_data = new unsigned char[m_size];
+    }
 
     // Return
     return;
@@ -639,8 +655,9 @@ void GFitsTableByteCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = 0;
+        }
     }
 
     // Return

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GFitsImageLongLong.hpp  - FITS long long integer image class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageLongLong.hpp
  * @brief GFitsImageLongLong class definition.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GFITSIMAGELONGLONG_HPP
@@ -86,6 +86,7 @@ private:
     void  init_data(void);
     void  release_data(void);
     void  construct_data(const long long* pixels);
+    void  load_data(void) const;
     void  alloc_nulval(const void* value);
     void* ptr_data(void) { return m_pixels; }
     void* ptr_nulval(void) { return m_nulval; }
