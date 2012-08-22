@@ -35,6 +35,15 @@
 #include "GEventCube.hpp"
 #include "GEventBin.hpp"
 
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#ifdef __APPLE__ & __MACH__
+#include <pthread.h>
+pthread_attr_t gomp_thread_attr;
+#endif
+#endif
+
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL              "GObservations::optimizer::eval(GOptimizerPars&)"
 
@@ -178,9 +187,13 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 {
     // Timing measurement
     #if G_EVAL_TIMING
-    clock_t t_start = clock();
+    #ifdef _OPENMP
+            double t_start = omp_get_wtime();
+    #else
+            clock_t t_start = clock();
     #endif
-    
+    #endif
+
     // Single loop for common exit point
     do {
         // Get number of parameters
@@ -379,7 +392,11 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
     // Timing measurement
     #if G_EVAL_TIMING
-    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #ifdef _OPENMP
+        double t_elapse = omp_get_wtime()-t_start;
+    #else
+        double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #endif
     std::cout << "GObservations::optimizer::eval: CPU usage = "
               << t_elapse << " sec" << std::endl;
     #endif
@@ -421,7 +438,11 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
 {
     // Timing measurement
     #if G_EVAL_TIMING
-    clock_t t_start = clock();
+    #ifdef _OPENMP
+        double t_start = omp_get_wtime();
+    #else
+                clock_t t_start = clock();
+    #endif
     #endif
 
     // Get number of parameters
@@ -502,10 +523,14 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
     std::cout << mgrad << std::endl;
     std::cout << covar << std::endl;
     #endif
-    
+
     // Timing measurement
     #if G_EVAL_TIMING
-    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #ifdef _OPENMP
+        double t_elapse = omp_get_wtime()-t_start;
+    #else
+        double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #endif
     std::cout << "GObservations::optimizer::poisson_unbinned: CPU usage = "
               << t_elapse << " sec" << std::endl;
     #endif
@@ -550,7 +575,11 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
 {
     // Timing measurement
     #if G_EVAL_TIMING
-    clock_t t_start = clock();
+    #ifdef _OPENMP
+        double t_start = omp_get_wtime();
+    #else
+                clock_t t_start = clock();
+    #endif
     #endif
 
     // Initialise statistics
@@ -719,7 +748,11 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
 
     // Timing measurement
     #if G_EVAL_TIMING
-    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #ifdef _OPENMP
+        double t_elapse = omp_get_wtime()-t_start;
+    #else
+            double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #endif
     std::cout << "GObservations::optimizer::poisson_binned: CPU usage = "
               << t_elapse << " sec" << std::endl;
     #endif
@@ -764,7 +797,11 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
 {
     // Timing measurement
     #if G_EVAL_TIMING
-    clock_t t_start = clock();
+    #ifdef _OPENMP
+        double t_start = omp_get_wtime();
+    #else
+                clock_t t_start = clock();
+    #endif
     #endif
 
     // Get number of parameters
@@ -866,7 +903,11 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
 
     // Timing measurement
     #if G_EVAL_TIMING
-    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #ifdef _OPENMP
+        double t_elapse = omp_get_wtime()-t_start;
+    #else
+        double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    #endif
     std::cout << "GObservations::optimizer::gaussian_binned: CPU usage = "
               << t_elapse << " sec" << std::endl;
     #endif
