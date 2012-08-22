@@ -665,8 +665,13 @@ if test "x$has_python" = "xyes"; then
   # If we have distutils then get python path from distutils ...
   if test -z "$ac_distutils_result"; then
     AC_MSG_CHECKING([for Python include path])
-    python_path=`$PYTHON -c "import distutils.sysconfig; \
-           		             print distutils.sysconfig.get_python_inc();"`
+    if test ${PYTHON_VERSION} '<' 3; then
+      python_path=`$PYTHON -c "import distutils.sysconfig; \
+                               print distutils.sysconfig.get_python_inc();"`
+    else
+      python_path=`$PYTHON -c "import distutils.sysconfig; \
+                               print(distutils.sysconfig.get_python_inc());"`
+    fi                                         
     if test -n "${python_path}"; then
       AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
       python_path="-I$python_path"
