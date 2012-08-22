@@ -33,7 +33,7 @@ endif
 # Optional python bindings
 if WITH_PYTHON
   TEST_PYTHON_SCRIPT = test_python.py
-  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/gammalib:$(PYTHONPATH)
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(PYTHONPATH)
 endif
 
 # Darwin support
@@ -60,7 +60,7 @@ check_PROGRAMS = test_GSupport \
                  test_GApplication \
                  test_GModel \
                  test_GSky \
-		 test_GObservations \
+                 test_GObservations \
                  $(INST_MWL) $(INST_CTA) $(INST_LAT)
 
 # Set test environment (needed for linking with cfitsio and readline)
@@ -79,7 +79,7 @@ TESTS = test_GSupport \
         test_GApplication \
         test_GModel \
         test_GSky \
-	test_GObservations \
+        test_GObservations \
         $(INST_MWL) $(INST_CTA) $(INST_LAT) \
         $(TEST_PYTHON_SCRIPT)
 
