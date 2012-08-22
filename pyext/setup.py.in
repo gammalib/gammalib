@@ -163,11 +163,11 @@ for module in core_modules:
 	# Define module
 	ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
 	                       include_dirs=include_dirs, \
-						   libraries=libraries,
-						   library_dirs=library_dirs,
-						   runtime_library_dirs=runtime_library_dirs,
-						   extra_compile_args=extra_compile_args,
-						   extra_link_args=extra_link_args)
+                           libraries=libraries,
+                           library_dirs=library_dirs,
+                           runtime_library_dirs=runtime_library_dirs,
+                           extra_compile_args=extra_compile_args,
+                           extra_link_args=extra_link_args)
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
@@ -187,12 +187,12 @@ for module in inst_modules:
 	
 	# Define module
 	ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
-	                       include_dirs=include_dirs, \
-						   libraries=libraries,
-						   library_dirs=library_dirs,
-						   runtime_library_dirs=runtime_library_dirs,
-						   extra_compile_args=extra_compile_args,
-                                                   extra_link_args=extra_link_args)
+                           include_dirs=include_dirs, \
+                           libraries=libraries,
+                           library_dirs=library_dirs,
+                           runtime_library_dirs=runtime_library_dirs,
+                           extra_compile_args=extra_compile_args,
+                           extra_link_args=extra_link_args)
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
@@ -223,10 +223,10 @@ setup(name='@PACKAGE_NAME@',
       ext_package=pkg_name,
       ext_modules=ext_modules,
       py_modules=py_modules,
-	  data_files=data_files,
-	  license="GNU GPL v3",
-	  long_description="Versatile toolbox for the analysis of astronomical gamma-ray data",
-	  platforms=["Linux", "Solaris", "Mac OS-X", "Unix", "BSD"],
+      data_files=data_files,
+      license="GNU GPL v3",
+      long_description="Versatile toolbox for the analysis of astronomical gamma-ray data",
+      platforms=["Linux", "Solaris", "Mac OS-X", "Unix", "BSD"],
 	  )
 
 # Post-processing
