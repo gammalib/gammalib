@@ -151,8 +151,8 @@ py_modules  = []
 
 # Optionally enable OpenMP
 if '@OPENMP_TRUE@' != '#':
-	extra_compile_args = ['-fopenmp']
-	extra_link_args    = ['-fopenmp']
+	extra_compile_args = ['@OPENMP_CXXFLAGS@']
+	extra_link_args    = ['@OPENMP_CXXFLAGS@']
 else:
 	extra_compile_args = []
 	extra_link_args    = []
