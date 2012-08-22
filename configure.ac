@@ -727,25 +727,26 @@ AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
 # Set Python environment
 if test "x$enable_python" = "xyes"; then
 
-  # Set host specific build prefix (needed for Solaris pycc bug)
+  # Initialise Python environment
   PYTHON_BUILD_PREFIX=
-  case $host in
-    sparc*-sun-solaris*)  PYTHON_BUILD_PREFIX="CC=CC" ;;
-    *)                    PYTHON_BUILD_PREFIX="" ;;
-  esac
-  AC_SUBST(PYTHON_BUILD_PREFIX)
-
-  # Set host specific extra libraries. Add all host specific libraries here that
-  # need to be linked in the python module
   PYTHON_EXTRA_LIBS=
+
+  # Solaris Sun Studio compiler kluge (to prevent from using pycc for swig
+  # compilation)
   case $host in
-    sparc*-sun-solaris*)  PYTHON_EXTRA_LIBS="Cstd" ;;
-    *)                    PYTHON_EXTRA_LIBS="" ;;
+    *-*-solaris*)
+      if test "${CC}" = cc; then
+        PYTHON_BUILD_PREFIX="CC=CC"
+        PYTHON_EXTRA_LIBS="Cstd"
+      fi
+      ;;
   esac
+
+  # Set Python environment
+  AC_SUBST(PYTHON_BUILD_PREFIX)
   AC_SUBST(PYTHON_EXTRA_LIBS)
 
 fi
-
 
 
 #############################################################################
