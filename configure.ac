@@ -653,6 +653,17 @@ AM_PATH_PYTHON([2.2],
                [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
 if test "x$has_python" = "xyes"; then
 
+  # Set opening and closing symbols to make setup.py compatible for versions 2 and 3
+  if test ${PYTHON_VERSION} '<' 3; then
+    PYTHON_OPEN=" "
+    PYTHON_CLOSE=""
+  else
+    PYTHON_OPEN="("
+    PYTHON_CLOSE=")"
+  fi
+  AC_SUBST(PYTHON_OPEN)  
+  AC_SUBST(PYTHON_CLOSE)
+
   # Do we have distutils?
   AC_MSG_CHECKING([for the distutils Python package])
   ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
@@ -678,7 +689,7 @@ if test "x$has_python" = "xyes"; then
     fi
     PYTHON_CPPFLAGS=$python_path
     CPPFLAGS="${CPPFLAGS} ${python_path}"
-	AC_SUBST([PYTHON_CPPFLAGS])
+    AC_SUBST([PYTHON_CPPFLAGS])
 
   # ... otherwise check for includes relative to exectuable (obsolete?)
   else                             
