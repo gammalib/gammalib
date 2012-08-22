@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     fits module  -  Python bindings                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,7 +28,7 @@
 %include stl.i
 
 /* __ Make sure that exceptions are catched ______________________________ */
-%import(module="support") "GException.i";
+%import(module="gammalib.support") "GException.i";
 
 /* __ FITS module ________________________________________________________ */
 %include "GFits.i"

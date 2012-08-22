@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  support module  -  Python bindings                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,9 +26,6 @@
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
-
-/* __ Make sure that exceptions are catched ______________________________ */
-%import(module="support") "GException.i";
 
 /* __ Support module _____________________________________________________ */
 %include "GException.i"

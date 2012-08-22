@@ -157,6 +157,7 @@ else:
 	extra_compile_args = []
 	extra_link_args    = []
 
+# Loop over all core modules
 for module in core_modules:
 	
 	# Define module
@@ -198,9 +199,9 @@ for module in inst_modules:
 # Create gammalib/__init__.py file
 file = open(pkg_name+'/__init__.py', 'w')
 for module in core_modules:
-	file.write('from '+module+' import *\n')
+	file.write('from gammalib.'+module+' import *\n')
 for module in inst_modules:
-	file.write('from '+module+' import *\n')
+	file.write('from gammalib.'+module+' import *\n')
 file.close()
 
 # Set data files to install. Do not install data files in unit testing mode.

@@ -28,22 +28,22 @@
 %include stl.i
 
 /* __ Make sure that exceptions are catched ______________________________ */
-%import(module="support") "GException.i";
+%import(module="gammalib.support") "GException.i";
 
 /* __ Inform about base classes __________________________________________ */
-%import(module="obs") "GObservation.i";
-%import(module="obs") "GEvent.i";
-%import(module="obs") "GEventBin.i";
-%import(module="obs") "GEventAtom.i";
-%import(module="obs") "GEvents.i";
-%import(module="obs") "GEventCube.i";
-%import(module="obs") "GEventList.i";
-%import(module="obs") "GPointing.i";
-%import(module="obs") "GResponse.i";
-%import(module="obs") "GInstDir.i";
-%import(module="obs") "GRoi.i";
-%import(module="model") "GModel.i";
-%import(module="model") "GModelData.i";
+%import(module="gammalib.obs") "GObservation.i";
+%import(module="gammalib.obs") "GEvent.i";
+%import(module="gammalib.obs") "GEventBin.i";
+%import(module="gammalib.obs") "GEventAtom.i";
+%import(module="gammalib.obs") "GEvents.i";
+%import(module="gammalib.obs") "GEventCube.i";
+%import(module="gammalib.obs") "GEventList.i";
+%import(module="gammalib.obs") "GPointing.i";
+%import(module="gammalib.obs") "GResponse.i";
+%import(module="gammalib.obs") "GInstDir.i";
+%import(module="gammalib.obs") "GRoi.i";
+%import(module="gammalib.model") "GModel.i";
+%import(module="gammalib.model") "GModelData.i";
 
 /* __ CTA ________________________________________________________________ */
 %include "GCTAObservation.i"

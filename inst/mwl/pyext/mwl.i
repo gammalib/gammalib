@@ -1,7 +1,7 @@
 /***************************************************************************
  *            mwl  -  Multi-wavelength support python bindings             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,14 +28,14 @@
 %include stl.i
 
 /* __ Make sure that exceptions are catched ______________________________ */
-%import(module="support") "GException.i";
+%import(module="gammalib.support") "GException.i";
 
 /* __ Inform about base classes __________________________________________ */
-%import(module="obs") "GObservation.i";
-%import(module="obs") "GEvent.i";
-%import(module="obs") "GEventBin.i";
-%import(module="obs") "GEvents.i";
-%import(module="obs") "GEventCube.i";
+%import(module="gammalib.obs") "GObservation.i";
+%import(module="gammalib.obs") "GEvent.i";
+%import(module="gammalib.obs") "GEventBin.i";
+%import(module="gammalib.obs") "GEvents.i";
+%import(module="gammalib.obs") "GEventCube.i";
 
 /* __ MWL ________________________________________________________________ */
 %include "GMWLObservation.i"
