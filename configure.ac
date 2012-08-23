@@ -579,44 +579,58 @@ openmp_ok=no
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
 if test "x$ac_cv_prog_cxx_openmp" != "xunsupported" && test "x$ac_cv_prog_cxx_openmp" != "x"; then
-   openmp_ok=yes
+  openmp_ok=yes
 fi
 
 # If OpenMP is available
 if test "x$openmp_ok" = "xyes" ; then
 
-   # Signal actual test
-   AC_MSG_CHECKING(whether to enable OpenMP)
+  # Special Linux test to detect shared libgomp libraries that can not be loaded
+  # dynamically
+  if test "$OPENMP_CXXFLAGS" = "-fopenmp" -a "$ac_sys_system" = "Linux"; then
+    AC_MSG_CHECKING(whether we can dynamically load libgomp)
+    SAVED_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS -ldl"
+    AC_TRY_RUN(AC_LANG_PROGRAM([#include <dlfcn.h>],
+                               [if (dlopen("libgomp.so.1", RTLD_NOW) == 0) return 1;]),
+               [AC_MSG_RESULT(yes)],
+               [enable_openmp="no"
+                AC_MSG_RESULT(no)
+                AC_MSG_WARN([OpenMP detected but shared libgomp.so.1 library cannot be dlopen()ed.])
+                AC_MSG_WARN([If you use a gcc 4.2.x compiler, this is a known feature. Try to use gcc >= 4.3.])])
+    LDFLAGS=$SAVED_LDFLAGS
+  fi
 
-   # Check whether OpenMP should be enabled
-   AC_ARG_ENABLE([openmp],
-	             AS_HELP_STRING([--enable-openmp],
-                                [turn on OpenMP support [default=yes]]),
-			                    [enable_openmp="$enableval"],
-				                [enable_openmp="yes"])
+  # Signal actual test
+  AC_MSG_CHECKING(whether to enable OpenMP)
 
-   # Set compiler flags accordingly
-   if test "x$enable_openmp" = "xyes"; then
-        CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
-        AC_DEFINE([HAVE_OPENMP], [1], [Define if OpenMP is enabled])
-        AC_MSG_RESULT(yes)
-   else
-        enable_openmp=no
-        AC_MSG_RESULT(no)
-   fi
+  # Check whether OpenMP should be enabled
+  AC_ARG_ENABLE([openmp],
+                AS_HELP_STRING([--enable-openmp],
+                               [turn on OpenMP support [default=yes]]),
+                               [enable_openmp="$enableval"],
+                               [enable_openmp="yes"])
+
+  # Set compiler flags accordingly
+  if test "x$enable_openmp" = "xyes"; then
+    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+    AC_DEFINE([HAVE_OPENMP], [1], [Define if OpenMP is enabled])
+    AC_MSG_RESULT(yes)
+  else
+    enable_openmp=no
+    AC_MSG_RESULT(no)
+  fi
 fi
 AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 
 # Set system specific settings
 OPENMP_LIB_LDFLAGS=
 if test "x$enable_openmp" = "xyes"; then
-    case $ac_sys_system/$ac_sys_release in
-    Darwin/*)
-        #
-        #
-        OPENMP_LIB_LDFLAGS=-lgomp
-        ;;
-    esac
+  case $ac_sys_system/$ac_sys_release in
+  Darwin/*)
+    OPENMP_LIB_LDFLAGS=-lgomp
+    ;;
+  esac
 fi
 AC_SUBST(OPENMP_LIB_LDFLAGS)
 
