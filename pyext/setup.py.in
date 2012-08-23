@@ -24,6 +24,7 @@ from distutils import sysconfig
 import glob
 import os
 import sys
+import re
 
 # Define package name
 pkg_name = 'gammalib'
@@ -146,6 +147,7 @@ if '@WITH_INST_LAT_TRUE@' != '#':
 	inst_modules.append('lat')
 
 # Set extension definition for core modules
+all_modules = []
 ext_modules = []
 py_modules  = []
 
@@ -168,6 +170,7 @@ for module in core_modules:
                            runtime_library_dirs=runtime_library_dirs,
                            extra_compile_args=extra_compile_args,
                            extra_link_args=extra_link_args)
+	all_modules.append(module)
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
@@ -193,16 +196,69 @@ for module in inst_modules:
                            runtime_library_dirs=runtime_library_dirs,
                            extra_compile_args=extra_compile_args,
                            extra_link_args=extra_link_args)
+	all_modules.append(module)
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
 # Create gammalib/__init__.py file
 file = open(pkg_name+'/__init__.py', 'w')
-for module in core_modules:
-	file.write('from gammalib.'+module+' import *\n')
-for module in inst_modules:
+file.write('# This file is created automatically by setup.py\n')
+file.write('# Please do not modify, unless you exactly know what you do.\n')
+for module in all_modules:
 	file.write('from gammalib.'+module+' import *\n')
 file.close()
+
+# Post-process swig files. This post-processing is needed to transform
+# "import XXX" statements into "from XXX import *" statements. Furthermore,
+# the module information is stripped from all base classes, e.g.
+# "gammalib.obs.GRoi" becomes "GRoi".
+for module in all_modules:
+
+	# Set file names
+	filename = pkg_name+"/"+module+".py"
+	origname = pkg_name+"/"+module+".py.orig"
+
+	# Rename original file (for safety)
+	os.rename(filename,origname)
+
+	# Open files
+	infile  = open(origname, 'r')
+	outfile = open(filename, 'w')
+
+	# Initialize reformulation statistics
+	n_import = 0
+	n_class  = 0
+
+	# Loop over all lines of input file
+	for line in infile:
+
+		# Reformulate import statements
+		if line.find("import gammalib.") != -1:
+			pos      = line.find("gammalib.")
+			name     = line[pos:].rstrip('\n').strip(' ')
+			line     = "from "+name+" import *\n"
+			n_import = n_import + 1
+
+		# Reformulate base class declarations
+		elif re.search("gammalib.+.G+", line):
+			start   = line.find("gammalib.")
+			pos     = line[start:].find("G")+start
+			pre     = line[0:start]
+			post    = line[pos:]
+			line    = pre+post
+			n_class = n_class + 1
+
+		# Write line
+		outfile.write(line)
+
+	# Close files
+	infile.close()
+	outfile.close()
+
+	# Dump reformulation statistics for actual module
+	if n_import > 0 or n_class > 0:
+		print@PYTHON_OPEN@module+".py reformulation: "+str(n_import)+ \
+		      " imports, "+str(n_class)+" base class declarations."@PYTHON_CLOSE@
 
 # Set data files to install. Do not install data files in unit testing mode.
 if is_unit_test:
