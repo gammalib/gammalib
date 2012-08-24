@@ -666,6 +666,20 @@ fi
 AM_PATH_PYTHON([2.2],
                [has_python="yes"],
                [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
+
+# It would really be weired if Python has not been found, as barely every system has Python. Maybe
+# it was not found because the autoconf is so old, and in an early version of the AM_PATH_PYTHON
+# there were no [Action-if-found] and [Action-if-not-found] arguments, hence $has_python is possibly
+# badly set. However, the Python executable and version should be set correctly, and we can test
+# for this to see whether Python is really there or not.
+if test "x$has_python" = "xno"; then
+  AM_PYTHON_CHECK_VERSION([$PYTHON], [${PYTHON_VERSION}],
+                          [has_python="yes"
+                           AC_MSG_NOTICE([Wow! You're running a pretty old system. Found Python nevertheless:-)])],
+                          [AC_MSG_WARN([Python not found.])])
+fi
+
+# If we have Python then verify the presence of the header and set some flags
 if test "x$has_python" = "xyes"; then
 
   # Set opening and closing symbols to make setup.py compatible for versions 2 and 3
