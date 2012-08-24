@@ -519,7 +519,7 @@ a4wide|a4|letter|legal|executive)
 ;;
 esac
 
-#For debugging:
+# For debugging:
 #echo DX_FLAG_doc=$DX_FLAG_doc
 #echo DX_FLAG_dot=$DX_FLAG_dot
 #echo DX_FLAG_man=$DX_FLAG_man
@@ -531,5 +531,18 @@ esac
 #echo DX_FLAG_pdf=$DX_FLAG_pdf
 #echo DX_FLAG_ps=$DX_FLAG_ps
 #echo DX_ENV=$DX_ENV
+
+# Conditionals kluge for old automake versions
+if test "x$DX_FLAG_doc" = "x1"; then
+  AM_CONDITIONAL(DX_COND_doc,  test "x$DX_FLAG_doc" = "x1")
+  AM_CONDITIONAL(DX_COND_html, test "x$DX_FLAG_html" = "x1")
+  AM_CONDITIONAL(DX_COND_chm,  test "x$DX_FLAG_chm" = "x1")
+  AM_CONDITIONAL(DX_COND_chi,  test "x$DX_FLAG_chi" = "x1")
+  AM_CONDITIONAL(DX_COND_man,  test "x$DX_FLAG_man" = "x1")
+  AM_CONDITIONAL(DX_COND_rtf,  test "x$DX_FLAG_rtf" = "x1")
+  AM_CONDITIONAL(DX_COND_xml,  test "x$DX_FLAG_xml" = "x1")
+  AM_CONDITIONAL(DX_COND_ps,   test "x$DX_FLAG_ps"  = "x1")
+  AM_CONDITIONAL(DX_COND_pdf,  test "x$DX_FLAG_pdf" = "x1")
+fi
 ])
 
