@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialPtsrc.cpp  -  Spatial point source model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpatialPtsrc.cpp
  * @brief Point source spatial model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -117,8 +117,8 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GXmlElement& xml) : GModelSpatial()
  *
  * @param[in] model Point source spatial model.
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model) :
-   GModelSpatial(model)
+GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model) 
+                                       : GModelSpatial(model)
 {
     // Initialise members
     init_members();
@@ -286,9 +286,10 @@ GSkyDir GModelSpatialPtsrc::mc(GRan& ran) const
 void GModelSpatialPtsrc::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || xml.elements("parameter") != 2)
+    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Point source model requires exactly 2 parameters.");
+    }
 
     // Extract model parameters
     bool has_glon = false;
@@ -297,7 +298,7 @@ void GModelSpatialPtsrc::read(const GXmlElement& xml)
     for (int i = 0; i < 2; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle RA/GLON
         if (par->attribute("name") == "RA") {
@@ -362,13 +363,15 @@ void GModelSpatialPtsrc::read(const GXmlElement& xml)
 void GModelSpatialPtsrc::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", type());
+    }
 
     // Verify model type
-    if (xml.attribute("type") != type())
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
               "Spatial model is not of type \""+type()+"\".");
+    }
 
     // If XML element has 0 nodes then append 2 parameter nodes
     if (xml.elements() == 0) {
@@ -377,13 +380,14 @@ void GModelSpatialPtsrc::write(GXmlElement& xml) const
     }
 
     // Verify that XML element has exactly 2 parameters
-    if (xml.elements() != 2 || xml.elements("parameter") != 2)
+    if (xml.elements() != 2 || xml.elements("parameter") != 2) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Point source model requires exactly 2 parameters.");
+    }
 
     // Get pointers on both model parameters
-    GXmlElement* par1 = (GXmlElement*)xml.element("parameter", 0);
-    GXmlElement* par2 = (GXmlElement*)xml.element("parameter", 1);
+    GXmlElement* par1 = static_cast<GXmlElement*>(xml.element("parameter", 0));
+    GXmlElement* par2 = static_cast<GXmlElement*>(xml.element("parameter", 1));
 
     // Set or update sky direction
     if (par1->attribute("name") == "RA" && par2->attribute("name") == "DEC") {
@@ -394,9 +398,10 @@ void GModelSpatialPtsrc::write(GXmlElement& xml) const
         m_ra.write(*par2);
         m_dec.write(*par1);
     }
-    else
+    else {
         throw GException::model_invalid_parnames(G_WRITE, xml,
                           "Require RA and DEC parameters.");
+    }
 
     // Return
     return;
@@ -414,8 +419,9 @@ std::string GModelSpatialPtsrc::print(void) const
     // Append header
     result.append("=== GModelSpatialPtsrc ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

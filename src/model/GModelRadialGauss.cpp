@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelRadialGauss.cpp  -  Radial Gaussian source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialGauss.cpp
  * @brief Radial Gaussian model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -121,7 +121,7 @@ GModelRadialGauss::GModelRadialGauss(const GXmlElement& xml) : GModelRadial()
  * @param[in] model Radial Gaussian model.
  ***************************************************************************/
 GModelRadialGauss::GModelRadialGauss(const GModelRadialGauss& model)
-                                                        : GModelRadial(model)
+                                     : GModelRadial(model)
 {
     // Initialise members
     init_members();
@@ -337,9 +337,10 @@ void GModelRadialGauss::read(const GXmlElement& xml)
     int npars = xml.elements("parameter");
 
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || npars != 3)
+    if (xml.elements() != 3 || npars != 3) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Gaussian source model requires exactly 3 parameters.");
+    }
 
     // Read Gaussian location
     GModelRadial::read(xml);
@@ -349,7 +350,7 @@ void GModelRadialGauss::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Gaussian width
         if (par->attribute("name") == "Sigma") {
@@ -366,9 +367,10 @@ void GModelRadialGauss::read(const GXmlElement& xml)
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1)
+    if (npar[0] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Require \"Sigma\" parameters.");
+    }
 
     // Return
     return;
@@ -406,16 +408,17 @@ void GModelRadialGauss::write(GXmlElement& xml) const
     int npars = xml.elements("parameter");
 
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || npars != 3)
+    if (xml.elements() != 3 || npars != 3) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Point source model requires exactly 3 parameters.");
+    }
 
     // Set or update model parameter attributes
     int npar[1] = {0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Sigma
         if (par->attribute("name") == "Sigma") {
@@ -426,9 +429,10 @@ void GModelRadialGauss::write(GXmlElement& xml) const
     } // endfor: looped over all parameters
 
     // Check of all required parameters are present
-    if (npar[0] != 1)
+    if (npar[0] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Require \"Sigma\" parameter.");
+    }
 
     // Return
     return;
@@ -446,8 +450,9 @@ std::string GModelRadialGauss::print(void) const
     // Append header
     result.append("=== GModelRadialGauss ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

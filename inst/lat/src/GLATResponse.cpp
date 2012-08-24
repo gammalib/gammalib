@@ -265,7 +265,7 @@ double GLATResponse::irf(const GInstDir&     obsDir,
         psf->name(name);
 
         // Push mean PSF on stack
-        ((GLATResponse*)this)->m_ptsrc.push_back(psf);
+        const_cast<GLATResponse*>(this)->m_ptsrc.push_back(psf);
 
         // Set index of mean PSF
         ipsf = m_ptsrc.size()-1;
@@ -438,7 +438,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
             psf->name(model.name());
 
             // Push mean PSF on stack
-            ((GLATResponse*)this)->m_ptsrc.push_back(psf);
+            const_cast<GLATResponse*>(this)->m_ptsrc.push_back(psf);
 
             // Set index of mean PSF
             ipsf = m_ptsrc.size()-1;

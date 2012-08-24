@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSparseMatrix.hpp  -  sparse matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GSparseMatrix.hpp
  * @brief GSparseMatrix class definition.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 #ifndef GSPARSEMATRIX_HPP
@@ -36,6 +36,10 @@
 #define G_SPARSE_MATRIX_DEFAULT_MEM_BLOCK      512  // Default Memory block size
 #define G_SPARSE_MATRIX_DEFAULT_STACK_ENTRIES 1000  // Max # of stack entries
 #define G_SPARSE_MATRIX_DEFAULT_STACK_SIZE     512  // Max # of stack elements
+
+/* __ Forward declarations _______________________________________________ */
+class GSparseSymbolic;
+class GSparseNumeric;
 
 
 /***********************************************************************//**
@@ -142,14 +146,14 @@ private:
                     double* dst_data, int* dst_row, int* dst_num);
 
     // Private data members
-    int*    m_rowinx;             //!< Row-indices of all elements
-    double  m_zero;               //!< The zero element (needed for data access)
-    double  m_fill_val;           //!< Element to be filled
-    int     m_fill_row;           //!< Row into which element needs to be filled
-    int     m_fill_col;           //!< Column into which element needs to be filled
-    int     m_mem_block;          //!< Memory block to be allocated at once
-    void*   m_symbolic;           //!< Holds GSparseSymbolic object after decomposition
-    void*   m_numeric;            //!< Holds GSparseNumeric object after decomposition
+    int*             m_rowinx;       //!< Row-indices of all elements
+    double           m_zero;         //!< The zero element (needed for data access)
+    double           m_fill_val;     //!< Element to be filled
+    int              m_fill_row;     //!< Row into which element needs to be filled
+    int              m_fill_col;     //!< Column into which element needs to be filled
+    int              m_mem_block;    //!< Memory block to be allocated at once
+    GSparseSymbolic* m_symbolic;     //!< Holds GSparseSymbolic object after decomposition
+    GSparseNumeric*  m_numeric;      //!< Holds GSparseNumeric object after decomposition
 
     // Fill-stack
     int     m_stack_max_entries;  //!< Maximum number of entries in the stack

@@ -13,7 +13,7 @@ def test_fits():
     Test GFits interface.
     """
     # Dump testing
-    print "Test GFits: ",
+    sys.stdout.write("Test GFits: ")
 
     # Set filenames
     file1 = "test_python_fits_v1.fits"
@@ -145,7 +145,7 @@ def test_fits():
     sys.stdout.write(".")
 
     # Save FITS file
-    #print fits
+    #sys.stdout.write(fits+"\n")
     fits.save()
     sys.stdout.write(".")
 
@@ -175,7 +175,7 @@ def test_fits():
     sys.stdout.write(".")
 
     # Print final success
-    print " ok."
+    sys.stdout.write(" ok.\n")
 
     # Return
     return
@@ -189,7 +189,7 @@ def test_skymap():
     Test GSkymap interface.
     """
     # Dump testing
-    print "Test GSkymap: ",
+    sys.stdout.write("Test GSkymap: ")
 
     # Set filenames
     file1 = "test_python_skymap_hpx_v1.fits"
@@ -338,13 +338,13 @@ def test_skymap():
     #for i in range(pixels.npix()):
     #    dir = pixels.pix2dir(i)
     #    pix = pixels.dir2xy(dir)
-    #    print pixels[pix]
+    #    sys.stdout.write(pixels[pix]+"\n")
 
     # Dump skymap
-    #print pixels
+    #sys.stdout.write(pixels+"\n")
 
     # Print final success
-    print " ok."
+    sys.stdout.write(" ok.\n")
 
     # Return
     return
@@ -425,9 +425,8 @@ def test_lat_observation():
     # Allocate LAT Observation
     obs = GLATObservation("data/FT1_253582800.fits.gz", "data/FT2_253582800.fits.gz")
 
-    #
-    #print obs.ft1()
-    #print obs.ft2()
+    #sys.stdout.write(obs.ft1()+"\n")
+    #sys.stdout.write(obs.ft2()+"\n")
 
     # Return
     return
@@ -464,8 +463,8 @@ def test_optimise():
     opt = GOptimizerLM()
     opt.max_iter(1000)
     obs.optimize(opt)
-    print opt
-    print obs
+    sys.stdout.write(opt+"\n")
+    sys.stdout.write(obs+"\n")
 
     # Return
     return
@@ -479,10 +478,10 @@ if __name__ == '__main__':
 	Perform testing.
 	"""
 	# Dump result
-	print
-	print "****************************"
-	print "* Python interface testing *"
-	print "****************************"
+	sys.stdout.write("\n")
+	sys.stdout.write("****************************\n")
+	sys.stdout.write("* Python interface testing *\n")
+	sys.stdout.write("****************************\n")
 	
 	# Initialise success counter
 	tests   = 0

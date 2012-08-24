@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableFloatCol.cpp  - FITS table float column class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableFloatCol.cpp
  * @brief FITS table single precision column class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -72,8 +72,8 @@ GFitsTableFloatCol::GFitsTableFloatCol(void) : GFitsTableCol()
  * @param[in] size Vector size of column.
  ***************************************************************************/
 GFitsTableFloatCol::GFitsTableFloatCol(const std::string& name,
-                                         const int&         length,
-                                         const int&         size)
+                                       const int&         length,
+                                       const int&         size)
                                        : GFitsTableCol(name, length, size, 4)
 {
     // Initialise class members for clean destruction
@@ -87,10 +87,10 @@ GFitsTableFloatCol::GFitsTableFloatCol(const std::string& name,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] column Column from which class instance should be built.
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableFloatCol::GFitsTableFloatCol(const GFitsTableFloatCol& column)
-                                                      : GFitsTableCol(column)
+                                       : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -125,7 +125,7 @@ GFitsTableFloatCol::~GFitsTableFloatCol(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] column Column which should be assigned
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableFloatCol& GFitsTableFloatCol::operator= (const GFitsTableFloatCol& column)
 {
@@ -155,7 +155,7 @@ GFitsTableFloatCol& GFitsTableFloatCol::operator= (const GFitsTableFloatCol& col
  * @brief Column data access operator
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
@@ -173,14 +173,16 @@ float& GFitsTableFloatCol::operator() (const int& row, const int& inx)
  * @brief Column data access operator (const variant)
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
 const float& GFitsTableFloatCol::operator() (const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) ((GFitsTableFloatCol*)this)->fetch_data();
+    if (m_data == NULL) {
+        const_cast<GFitsTableFloatCol*>(this)->fetch_data();
+    }
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -272,8 +274,9 @@ int GFitsTableFloatCol::integer(const int& row, const int& inx) const
 void GFitsTableFloatCol::insert(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length)
+    if (rownum < 0 || rownum > m_length) {
         throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    }
     
     // Continue only if there are rows to be inserted
     if (nrows > 0) {
@@ -310,12 +313,15 @@ void GFitsTableFloatCol::insert(const int& rownum, const int& nrows)
             // Copy and initialise data
             float* src = m_data;
             float* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
-            for (int i = 0; i < n_insert; ++i)
+            }
+            for (int i = 0; i < n_insert; ++i) {
                 *dst++ = 0.0;
-            for (int i = 0; i < n_after; ++i)
+            }
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -350,12 +356,14 @@ void GFitsTableFloatCol::insert(const int& rownum, const int& nrows)
 void GFitsTableFloatCol::remove(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length)
+    if (rownum < 0 || rownum >= m_length) {
         throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum)
+    if (nrows < 0 || nrows > m_length-rownum) {
         throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    }
     
     // Continue only if there are rows to be removed
     if (nrows > 0) {
@@ -386,11 +394,13 @@ void GFitsTableFloatCol::remove(const int& rownum, const int& nrows)
             // Copy data
             float* src = m_data;
             float* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
+            }
             src += n_remove;
-            for (int i = 0; i < n_after; ++i)
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -470,7 +480,7 @@ void GFitsTableFloatCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Column for which members should be copied.
+ * @param[in] column Table column.
  *
  * Sets the content of the vector column by copying from another column.
  * If the code is compiled with the small memory option, and if the source
@@ -482,7 +492,9 @@ void GFitsTableFloatCol::copy_members(const GFitsTableFloatCol& column)
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
-    if (not_loaded) ((GFitsTableFloatCol*)(&column))->fetch_data();
+    if (not_loaded) {
+        const_cast<GFitsTableFloatCol*>(&column)->fetch_data();
+    }
 
     // Copy attributes
     m_type = column.m_type;
@@ -491,8 +503,9 @@ void GFitsTableFloatCol::copy_members(const GFitsTableFloatCol& column)
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
         alloc_data();
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = column.m_data[i];
+        }
     }
 
     // Copy NULL value
@@ -500,7 +513,9 @@ void GFitsTableFloatCol::copy_members(const GFitsTableFloatCol& column)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsTableFloatCol*)(&column))->release_data();
+    if (not_loaded) {
+        const_cast<GFitsTableFloatCol*>(&column)->release_data();
+    }
     #endif
 
     // Return
@@ -588,8 +603,9 @@ void GFitsTableFloatCol::alloc_data(void)
     m_data = NULL;
 
     // Allocate new data
-    if (m_size > 0)
+    if (m_size > 0) {
         m_data = new float[m_size];
+    }
 
     // Return
     return;
@@ -642,8 +658,9 @@ void GFitsTableFloatCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = 0.0;
+        }
     }
 
     // Return

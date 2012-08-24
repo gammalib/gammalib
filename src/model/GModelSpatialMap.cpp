@@ -118,8 +118,8 @@ GModelSpatialMap::GModelSpatialMap(const std::string& filename) : GModelSpatial(
  *
  * @param[in] model Spatial map model.
  ***************************************************************************/
-GModelSpatialMap::GModelSpatialMap(const GModelSpatialMap& model) :
-                  GModelSpatial(model)
+GModelSpatialMap::GModelSpatialMap(const GModelSpatialMap& model)
+                                   : GModelSpatial(model)
 {
     // Initialise members
     init_members();
@@ -251,7 +251,7 @@ double GModelSpatialMap::eval_gradients(const GSkyDir& srcDir) const
     double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
 
     // Set gradient to 0 (circumvent const correctness)
-    ((GModelSpatialMap*)this)->m_value.gradient(g_value);
+    const_cast<GModelSpatialMap*>(this)->m_value.gradient(g_value);
 
     // Return intensity times normalization factor
     return (intensity * m_value.real_value());
@@ -343,7 +343,7 @@ void GModelSpatialMap::read(const GXmlElement& xml)
     }
 
     // Get pointer on model parameter
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Get value
     if (par->attribute("name") == "Normalization" ||
@@ -411,7 +411,7 @@ void GModelSpatialMap::write(GXmlElement& xml) const
     }
 
     // Get pointer on model parameter
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Set or update parameter
     if (par->attribute("name") == "Normalization" ||

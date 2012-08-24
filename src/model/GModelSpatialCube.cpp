@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GModelSpatialCube.cpp  -  Spatial map cube model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpatialCube.cpp
  * @brief Spatial map cube model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -82,8 +82,8 @@ GModelSpatialCube::GModelSpatialCube(void) : GModelSpatial()
  * an XML element. See GModelSpatialCube::read() for more information about
  * the expected structure of the XML element.
  ***************************************************************************/
-GModelSpatialCube::GModelSpatialCube(const GXmlElement& xml) :
-                   GModelSpatial()
+GModelSpatialCube::GModelSpatialCube(const GXmlElement& xml)
+                                     : GModelSpatial()
 {
     // Initialise members
     init_members();
@@ -101,8 +101,8 @@ GModelSpatialCube::GModelSpatialCube(const GXmlElement& xml) :
  *
  * @param[in] model Spatial map cube model.
  ***************************************************************************/
-GModelSpatialCube::GModelSpatialCube(const GModelSpatialCube& model) :
-                   GModelSpatial(model)
+GModelSpatialCube::GModelSpatialCube(const GModelSpatialCube& model)
+                                     : GModelSpatial(model)
 {
     // Initialise members
     init_members();
@@ -229,7 +229,7 @@ double GModelSpatialCube::eval_gradients(const GSkyDir& srcDir) const
     throw GException::feature_not_implemented(G_EVAL_GRADIENTS);
 
     // Set gradient to 0 (circumvent const correctness)
-    ((GModelSpatialCube*)this)->m_value.gradient(0.0);
+    const_cast<GModelSpatialCube*>(this)->m_value.gradient(0.0);
 
     // Return value
     return 1.0;
@@ -275,21 +275,24 @@ GSkyDir GModelSpatialCube::mc(GRan& ran) const
 void GModelSpatialCube::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameters
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Map cube spatial model requires exactly 1 parameter.");
+    }
 
     // Get pointer on model parameter
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Get value
     if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value")
+        par->attribute("name") == "Value") {
         m_value.read(*par);
-    else
+    }
+    else {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Map cube spatial model requires either \"Value\" or"
               " \"Normalization\" parameter.");
+    }
 
     // Load map cube from file
     load_cube(xml.attribute("file"));
@@ -318,37 +321,43 @@ void GModelSpatialCube::read(const GXmlElement& xml)
 void GModelSpatialCube::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", "MapCubeFunction");
+    }
 
     // Verify model type
-    if (xml.attribute("type") != "MapCubeFunction")
+    if (xml.attribute("type") != "MapCubeFunction") {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
               "Spatial model is not of type \"MapCubeFunction\".");
+    }
 
     // If XML element has 0 nodes then append parameter node. The name
     // of the node is "Normalization" as this is the Fermi-LAT standard.
     // We thus assure that the XML files will be compatible with
     // Fermi-LAT.
-    if (xml.elements() == 0)
+    if (xml.elements() == 0) {
         xml.append(new GXmlElement("parameter name=\"Normalization\""));
+    }
 
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Map cube spatial model requires exactly 1 parameter.");
+    }
 
     // Get pointers on model parameter
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Set or update parameter
     if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value")
+        par->attribute("name") == "Value") {
         m_value.write(*par);
-    else
+    }
+    else {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Map cube spatial model requires either \"Value\" or"
               " \"Normalization\" parameter.");
+    }
 
     // Return
     return;
@@ -367,8 +376,9 @@ std::string GModelSpatialCube::print(void) const
     result.append("=== GModelSpatialCube ===\n");
     result.append(parformat("Map cube file")+m_filename);
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

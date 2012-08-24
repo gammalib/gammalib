@@ -79,7 +79,8 @@ AC_CANONICAL_HOST
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
 #############################################################################
 AC_LANG(C++)
-AC_PROG_CXX
+AC_PROG_CXX([g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++])
+AC_PROG_CC([gcc cc cl.exe clang])
 
 
 #############################################################################
@@ -578,44 +579,58 @@ openmp_ok=no
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
 if test "x$ac_cv_prog_cxx_openmp" != "xunsupported" && test "x$ac_cv_prog_cxx_openmp" != "x"; then
-   openmp_ok=yes
+  openmp_ok=yes
 fi
 
 # If OpenMP is available
 if test "x$openmp_ok" = "xyes" ; then
 
-   # Signal actual test
-   AC_MSG_CHECKING(whether to enable OpenMP)
+  # Special Linux test to detect shared libgomp libraries that can not be loaded
+  # dynamically
+  if test "$OPENMP_CXXFLAGS" = "-fopenmp" -a "$ac_sys_system" = "Linux"; then
+    AC_MSG_CHECKING(whether we can dynamically load libgomp)
+    SAVED_LDFLAGS=$LDFLAGS
+    LDFLAGS="$LDFLAGS -ldl"
+    AC_TRY_RUN(AC_LANG_PROGRAM([#include <dlfcn.h>],
+                               [if (dlopen("libgomp.so.1", RTLD_NOW) == 0) return 1;]),
+               [AC_MSG_RESULT(yes)],
+               [enable_openmp="no"
+                AC_MSG_RESULT(no)
+                AC_MSG_WARN([OpenMP detected but shared libgomp.so.1 library cannot be dlopen()ed.])
+                AC_MSG_WARN([If you use a gcc 4.2.x compiler, this is a known feature. Try to use gcc >= 4.3.])])
+    LDFLAGS=$SAVED_LDFLAGS
+  fi
 
-   # Check whether OpenMP should be enabled
-   AC_ARG_ENABLE([openmp],
-	             AS_HELP_STRING([--enable-openmp],
-                                [turn on OpenMP support [default=yes]]),
-			                    [enable_openmp="$enableval"],
-				                [enable_openmp="yes"])
+  # Signal actual test
+  AC_MSG_CHECKING(whether to enable OpenMP)
 
-   # Set compiler flags accordingly
-   if test "x$enable_openmp" = "xyes"; then
-        CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
-        AC_DEFINE([HAVE_OPENMP], [1], [Define if OpenMP is enabled])
-        AC_MSG_RESULT(yes)
-   else
-        enable_openmp=no
-        AC_MSG_RESULT(no)
-   fi
+  # Check whether OpenMP should be enabled
+  AC_ARG_ENABLE([openmp],
+                AS_HELP_STRING([--enable-openmp],
+                               [turn on OpenMP support [default=yes]]),
+                               [enable_openmp="$enableval"],
+                               [enable_openmp="yes"])
+
+  # Set compiler flags accordingly
+  if test "x$enable_openmp" = "xyes"; then
+    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+    AC_DEFINE([HAVE_OPENMP], [1], [Define if OpenMP is enabled])
+    AC_MSG_RESULT(yes)
+  else
+    enable_openmp=no
+    AC_MSG_RESULT(no)
+  fi
 fi
 AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 
 # Set system specific settings
 OPENMP_LIB_LDFLAGS=
 if test "x$enable_openmp" = "xyes"; then
-    case $ac_sys_system/$ac_sys_release in
-    Darwin/*)
-        #
-        #
-        OPENMP_LIB_LDFLAGS=-lgomp
-        ;;
-    esac
+  case $ac_sys_system/$ac_sys_release in
+  Darwin/*)
+    OPENMP_LIB_LDFLAGS=-lgomp
+    ;;
+  esac
 fi
 AC_SUBST(OPENMP_LIB_LDFLAGS)
 
@@ -652,6 +667,17 @@ AM_PATH_PYTHON([2.2],
                [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
 if test "x$has_python" = "xyes"; then
 
+  # Set opening and closing symbols to make setup.py compatible for versions 2 and 3
+  if test ${PYTHON_VERSION} '<' 3; then
+    PYTHON_OPEN=" "
+    PYTHON_CLOSE=""
+  else
+    PYTHON_OPEN="("
+    PYTHON_CLOSE=")"
+  fi
+  AC_SUBST(PYTHON_OPEN)  
+  AC_SUBST(PYTHON_CLOSE)
+
   # Do we have distutils?
   AC_MSG_CHECKING([for the distutils Python package])
   ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
@@ -664,15 +690,20 @@ if test "x$has_python" = "xyes"; then
   # If we have distutils then get python path from distutils ...
   if test -z "$ac_distutils_result"; then
     AC_MSG_CHECKING([for Python include path])
-    python_path=`$PYTHON -c "import distutils.sysconfig; \
-           		             print distutils.sysconfig.get_python_inc();"`
+    if test ${PYTHON_VERSION} '<' 3; then
+      python_path=`$PYTHON -c "import distutils.sysconfig; \
+                               print distutils.sysconfig.get_python_inc();"`
+    else
+      python_path=`$PYTHON -c "import distutils.sysconfig; \
+                               print(distutils.sysconfig.get_python_inc());"`
+    fi                                         
     if test -n "${python_path}"; then
       AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
       python_path="-I$python_path"
     fi
     PYTHON_CPPFLAGS=$python_path
     CPPFLAGS="${CPPFLAGS} ${python_path}"
-	AC_SUBST([PYTHON_CPPFLAGS])
+    AC_SUBST([PYTHON_CPPFLAGS])
 
   # ... otherwise check for includes relative to exectuable (obsolete?)
   else                             
@@ -710,25 +741,26 @@ AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
 # Set Python environment
 if test "x$enable_python" = "xyes"; then
 
-  # Set host specific build prefix (needed for Solaris pycc bug)
+  # Initialise Python environment
   PYTHON_BUILD_PREFIX=
-  case $host in
-    sparc*-sun-solaris*)  PYTHON_BUILD_PREFIX="CC=CC" ;;
-    *)                    PYTHON_BUILD_PREFIX="" ;;
-  esac
-  AC_SUBST(PYTHON_BUILD_PREFIX)
-
-  # Set host specific extra libraries. Add all host specific libraries here that
-  # need to be linked in the python module
   PYTHON_EXTRA_LIBS=
+
+  # Solaris Sun Studio compiler kluge (to prevent from using pycc for swig
+  # compilation)
   case $host in
-    sparc*-sun-solaris*)  PYTHON_EXTRA_LIBS="Cstd" ;;
-    *)                    PYTHON_EXTRA_LIBS="" ;;
+    *-*-solaris*)
+      if test "${CC}" = cc; then
+        PYTHON_BUILD_PREFIX="CC=CC"
+        PYTHON_EXTRA_LIBS="Cstd"
+      fi
+      ;;
   esac
+
+  # Set Python environment
+  AC_SUBST(PYTHON_BUILD_PREFIX)
   AC_SUBST(PYTHON_EXTRA_LIBS)
 
 fi
-
 
 
 #############################################################################

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventCube.cpp  -  LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventCube.cpp
  * @brief LAT event cube class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -163,7 +163,7 @@ GLATEventBin* GLATEventCube::operator[](const int& index)
 const GLATEventBin* GLATEventCube::operator[](const int& index) const
 {
     // Set event bin (circumvent const correctness)
-    ((GLATEventCube*)this)->set_bin(index);
+    const_cast<GLATEventCube*>(this)->set_bin(index);
 
     // Return pointer
     return (&m_bin);
@@ -703,7 +703,7 @@ void GLATEventCube::read_ebds(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Read energy boundaries
-        m_ebounds.read((GFitsTable*)hdu);
+        m_ebounds.read(const_cast<GFitsTable*>(hdu));
 
         // Set log mean energies and energy widths
         set_energies();
@@ -730,7 +730,7 @@ void GLATEventCube::read_gti(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Read Good Time Intervals
-        m_gti.read((GFitsTable*)hdu);
+        m_gti.read(const_cast<GFitsTable*>(hdu));
 
         // Set time
         set_times();

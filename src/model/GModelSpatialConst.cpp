@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpatialConst.cpp  -  Spatial isotropic model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpatialConst.cpp
  * @brief Isotropic spatial model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -79,8 +79,8 @@ GModelSpatialConst::GModelSpatialConst(void) : GModelSpatial()
  * an XML element. See GModelSpatialConst::read() for more information about
  * the expected structure of the XML element.
  ***************************************************************************/
-GModelSpatialConst::GModelSpatialConst(const GXmlElement& xml) :
-                    GModelSpatial()
+GModelSpatialConst::GModelSpatialConst(const GXmlElement& xml)
+                                       : GModelSpatial()
 {
     // Initialise members
     init_members();
@@ -98,8 +98,8 @@ GModelSpatialConst::GModelSpatialConst(const GXmlElement& xml) :
  *
  * @param[in] model Isotropic spatial model.
  ***************************************************************************/
-GModelSpatialConst::GModelSpatialConst(const GModelSpatialConst& model) :
-                    GModelSpatial(model)
+GModelSpatialConst::GModelSpatialConst(const GModelSpatialConst& model)
+                                       : GModelSpatial(model)
 {
     // Initialise members
     init_members();
@@ -220,7 +220,7 @@ double GModelSpatialConst::eval(const GSkyDir& srcDir) const
 double GModelSpatialConst::eval_gradients(const GSkyDir& srcDir) const
 {
     // Set gradient to 0 (circumvent const correctness)
-    ((GModelSpatialConst*)this)->m_value.gradient(0.0);
+    const_cast<GModelSpatialConst*>(this)->m_value.gradient(0.0);
 
     // Return value
     return 1.0;
@@ -266,19 +266,22 @@ GSkyDir GModelSpatialConst::mc(GRan& ran) const
 void GModelSpatialConst::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameters
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Isotropic source model requires exactly 1 parameter.");
+    }
 
     // Get pointer on model parameter
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Get value
-    if (par->attribute("name") == "Value")
+    if (par->attribute("name") == "Value") {
         m_value.read(*par);
-    else
+    }
+    else {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Isotropic source model requires \"Value\" parameter.");
+    }
 
     // Return
     return;
@@ -304,13 +307,15 @@ void GModelSpatialConst::read(const GXmlElement& xml)
 void GModelSpatialConst::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", "ConstantValue");
+    }
 
     // Verify model type
-    if (xml.attribute("type") != "ConstantValue")
+    if (xml.attribute("type") != "ConstantValue") {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
               "Spatial model is not of type \"ConstantValue\".");
+    }
 
     // If XML element has 0 nodes then append 1 parameter node
     if (xml.elements() == 0) {
@@ -318,19 +323,22 @@ void GModelSpatialConst::write(GXmlElement& xml) const
     }
 
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Isotropic source model requires exactly 1 parameter.");
+    }
 
     // Get pointers on both model parameters
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Set or update parameter
-    if (par->attribute("name") == "Value")
+    if (par->attribute("name") == "Value") {
         m_value.write(*par);
-    else
+    }
+    else {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Isotropic source model requires \"Value\" parameter.");
+    }
 
     // Return
     return;
@@ -348,8 +356,9 @@ std::string GModelSpatialConst::print(void) const
     // Append header
     result.append("=== GModelSpatialConst ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

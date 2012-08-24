@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GMWLObservation.cpp  -  Multi-wavelength observation class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -335,7 +335,7 @@ void GMWLObservation::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Instrument name
         if (par->attribute("name") == "Instrument") {
@@ -423,7 +423,7 @@ void GMWLObservation::write(GXmlElement& xml) const
     for (int i = 0; i < 2; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Instrument
         if (par->attribute("name") == "Instrument") {
@@ -559,7 +559,7 @@ std::string GMWLObservation::print(void) const
 
     // Append events
     if (m_events != NULL) {
-        result.append("\n"+((GMWLSpectrum*)m_events)->print());
+        result.append("\n"+(static_cast<GMWLSpectrum*>(m_events))->print());
     }
 
     // Return result

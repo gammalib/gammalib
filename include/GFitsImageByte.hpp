@@ -86,6 +86,7 @@ private:
     void  init_data(void);
     void  release_data(void);
     void  construct_data(const unsigned char* pixels);
+    void  load_data(void) const;
     void  alloc_nulval(const void* value);
     void* ptr_data(void) { return m_pixels; }
     void* ptr_nulval(void) { return m_nulval; }

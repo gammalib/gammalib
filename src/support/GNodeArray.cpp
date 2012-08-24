@@ -382,7 +382,7 @@ double GNodeArray::interpolate(const double& value,
                                           vector.size());
     
     // Set interpolation value (circumvent const correctness)
-    ((GNodeArray*)this)->set_value(value);
+    const_cast<GNodeArray*>(this)->set_value(value);
 
     // Interpolate
     double y = vector[inx_left()]  * wgt_left() +

@@ -90,8 +90,8 @@ GModelSky::GModelSky(const GXmlElement& xml) : GModel(xml)
     init_members();
 
     // Get pointers on spectrum and spatial model
-    GXmlElement* spec = (GXmlElement*)xml.element("spectrum", 0);
-    GXmlElement* spat = (GXmlElement*)xml.element("spatialModel", 0);
+    GXmlElement* spec = static_cast<GXmlElement*>(xml.element("spectrum", 0));
+    GXmlElement* spat = static_cast<GXmlElement*>(xml.element("spatialModel", 0));
 
     // Allocate constant
     GModelTemporalConst temporal;
@@ -134,7 +134,7 @@ GModelSky::GModelSky(const GModelSky& model) : GModel(model)
  * @param[in] spectral Spectral XML element.
  ***************************************************************************/
 GModelSky::GModelSky(const GXmlElement& spatial, const GXmlElement& spectral)
-                                                                   : GModel()
+                     : GModel()
 {
     // Initialise private members for clean destruction
     init_members();
@@ -407,8 +407,8 @@ void GModelSky::read(const GXmlElement& xml)
     clear();
 
     // Get pointers on spectrum and spatial model
-    GXmlElement* spec = (GXmlElement*)xml.element("spectrum", 0);
-    GXmlElement* spat = (GXmlElement*)xml.element("spatialModel", 0);
+    GXmlElement* spec = static_cast<GXmlElement*>(xml.element("spectrum", 0));
+    GXmlElement* spat = static_cast<GXmlElement*>(xml.element("spatialModel", 0));
 
     // Allocate constant
     GModelTemporalConst temporal;
@@ -445,7 +445,7 @@ void GModelSky::write(GXmlElement& xml) const
     // Search corresponding source
     int n = xml.elements("source");
     for (int k = 0; k < n; ++k) {
-        GXmlElement* element = (GXmlElement*)xml.element("source", k);
+        GXmlElement* element = static_cast<GXmlElement*>(xml.element("source", k));
         if (element->attribute("name") == name()) {
             src = element;
             break;
@@ -471,13 +471,13 @@ void GModelSky::write(GXmlElement& xml) const
 
     // Write spectral model
     if (spectral() != NULL) {
-        GXmlElement* spec = (GXmlElement*)src->element("spectrum", 0);
+        GXmlElement* spec = static_cast<GXmlElement*>(src->element("spectrum", 0));
         spectral()->write(*spec);
     }
 
     // Write spatial model
     if (spatial() != NULL) {
-        GXmlElement* spat = (GXmlElement*)src->element("spatialModel", 0);
+        GXmlElement* spat = static_cast<GXmlElement*>(src->element("spatialModel", 0));
         spatial()->write(*spat);
     }
 
@@ -534,8 +534,9 @@ GPhotons GModelSky::mc(const double& area,
         // code
         bool use_model = true;
         if (ptsrc != NULL) {
-            if (dir.dist(ptsrc->dir()) > radius)
+            if (dir.dist(ptsrc->dir()) > radius) {
                 use_model = false;
+            }
         }
         else {
             //TODO

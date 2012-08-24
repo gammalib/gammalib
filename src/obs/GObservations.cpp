@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GObservations.cpp  -  Observation container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -294,7 +294,7 @@ void GObservations::read(const GXml& xml)
     for (int i = 0; i < n; ++i) {
 
         // Get pointer on observation
-        GXmlElement* obs = (GXmlElement*)lib->element("observation", i);
+        GXmlElement* obs = static_cast<GXmlElement*>(lib->element("observation", i));
 
         // Get attributes
         std::string name       = obs->attribute("name");
@@ -363,7 +363,7 @@ void GObservations::write(GXml& xml) const
         // Search corresponding observation
         int n = xml.elements("observation");
         for (int k = 0; k < n; ++k) {
-            GXmlElement* element = (GXmlElement*)xml.element("observation", k);
+            GXmlElement* element = static_cast<GXmlElement*>(xml.element("observation", k));
             if (element->attribute("name")       == m_obs[i]->name() &&
                 element->attribute("id")         == m_obs[i]->id()   &&
                 element->attribute("instrument") == m_obs[i]->instrument()) {
@@ -478,7 +478,7 @@ GObservations::iterator GObservations::begin(void)
 
     // Initialise event iterator (circumvent const correctness)
     if (iter.m_obs != NULL) {
-        GEvents* events = (GEvents*)(iter.m_obs->events());
+        GEvents* events = const_cast<GEvents*>(iter.m_obs->events());
         iter.m_event    = events->begin();
         iter.m_end      = events->end();
     }

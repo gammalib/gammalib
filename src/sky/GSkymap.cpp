@@ -144,7 +144,7 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
     m_wcs = new GWcsHPX(nside, order, coords);
 
     // Set number of pixels and number of maps
-    m_num_pixels = ((GWcsHPX*)m_wcs)->npix();
+    m_num_pixels = static_cast<GWcsHPX*>(m_wcs)->npix();
     m_num_maps   = nmaps;
 
     // Allocate pixels
@@ -569,7 +569,7 @@ void GSkymap::load(const std::string& filename)
         // If PIXTYPE keyword equals "HEALPIX" then load map
         try {
             if (hdu->string("PIXTYPE") == "HEALPIX") {
-                read_healpix((const GFitsBinTable*)hdu);
+                read_healpix(static_cast<const GFitsBinTable*>(hdu));
                 loaded = true;
                 break;
             }
@@ -594,7 +594,7 @@ void GSkymap::load(const std::string& filename)
             }
 
             // Load WCS map
-            read_wcs((const GFitsImageDouble*)hdu);
+            read_wcs(static_cast<const GFitsImageDouble*>(hdu));
             loaded = true;
             break;
 
@@ -674,7 +674,7 @@ void GSkymap::read(const GFitsHDU* hdu)
         // Try load as HEALPix map
         try {
             if (hdu->string("PIXTYPE") == "HEALPIX") {
-                read_healpix((const GFitsBinTable*)hdu);
+                read_healpix(static_cast<const GFitsBinTable*>(hdu));
                 loaded = true;
             }
         }
@@ -686,7 +686,7 @@ void GSkymap::read(const GFitsHDU* hdu)
 
             // Load only if HDU contains an image
             if (hdu->exttype() == 0) {
-                read_wcs((const GFitsImageDouble*)hdu);
+                read_wcs(static_cast<const GFitsImageDouble*>(hdu));
                 loaded = true;
             }
 
@@ -1230,8 +1230,8 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
         }
 
         // Setup WCS
-        ((GWcslib*)m_wcs)->set(coords, crval1, crval2, crpix1, crpix2,
-                               cdelt1, cdelt2);
+        static_cast<GWcslib*>(m_wcs)->set(coords, crval1, crval2, crpix1, crpix2,
+                                          cdelt1, cdelt2);
     
     } // endelse: got projection from registry
 
@@ -1271,7 +1271,7 @@ void GSkymap::read_healpix(const GFitsTable* hdu)
         m_wcs->read(hdu);
 
         // Set number of pixels based on NSIDE parameter
-        m_num_pixels = ((GWcsHPX*)m_wcs)->npix();
+        m_num_pixels = static_cast<GWcsHPX*>(m_wcs)->npix();
         #if defined(G_READ_HEALPIX_DEBUG)
         std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
         #endif

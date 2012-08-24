@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.cpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlNode.cpp
  * @brief Abstract XML node base class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -145,9 +145,10 @@ void GXmlNode::append(GXmlNode* node)
 {
     // Make sure that node is not a document (only the root document is
     // allowed to exist in a XML document
-    if (node->type() == NT_DOCUMENT)
+    if (node->type() == NT_DOCUMENT) {
         throw GException::xml_bad_node_type(G_APPEND, "GXmlDocument",
                           "Only the root node is of type GXmlDocument.");
+    }
 
     // Append node
     m_nodes.push_back(node);
@@ -178,8 +179,9 @@ int GXmlNode::children(void) const
 GXmlNode* GXmlNode::child(int index) const
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= children())
+    if (index < 0 || index >= children()) {
         throw GException::out_of_range(G_CHILD1, index, 0, children()-1);
+    }
 
     // Return node
     return m_nodes[index];
@@ -196,8 +198,9 @@ int GXmlNode::elements(void) const
     // Compute number of child elements in node
     int elements = 0;
     for (int i = 0; i < children(); ++i) {
-        if (child(i)->type() == NT_ELEMENT)
+        if (child(i)->type() == NT_ELEMENT) {
             elements++;
+        }
     }
 
     // Return number of child elements
@@ -219,8 +222,9 @@ int GXmlNode::elements(const std::string& name) const
     int elements = 0;
     for (int i = 0; i < children(); ++i) {
         if (child(i)->type() == NT_ELEMENT) {
-            if (((GXmlElement*)child(i))->name() == name)
+            if (static_cast<GXmlElement*>(child(i))->name() == name) {
                 elements++;
+            }
         }
     }
 
@@ -240,8 +244,9 @@ int GXmlNode::elements(const std::string& name) const
 GXmlNode* GXmlNode::element(int index) const
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= elements())
+    if (index < 0 || index >= elements()) {
         throw GException::out_of_range(G_ELEMENT1, index, 0, elements()-1);
+    }
 
     // Compute number of child elements in node
     GXmlNode* element  = NULL;
@@ -278,19 +283,21 @@ GXmlNode* GXmlNode::element(const std::string& name, int index) const
     int n = elements(name);
 
     // Signal if no children exist
-    if (n < 1)
+    if (n < 1) {
         throw GException::xml_name_not_found(G_ELEMENT2, name);
+    }
 
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= n)
+    if (index < 0 || index >= n) {
         throw GException::out_of_range(G_ELEMENT2, index, 0, n-1);
+    }
 
     // Compute number of child elements in node
     GXmlNode* element  = NULL;
     int       elements = 0;
     for (int i = 0; i < children(); ++i) {
         if (child(i)->type() == NT_ELEMENT) {
-            if (((GXmlElement*)child(i))->name() == name) {
+            if (static_cast<GXmlElement*>(child(i))->name() == name) {
                 if (elements == index) {
                     element = child(i);
                     break;
@@ -333,8 +340,9 @@ void GXmlNode::copy_members(const GXmlNode& node)
 {
     // Copy nodes
     m_nodes.clear();
-    for (int i = 0; i < node.m_nodes.size(); ++i)
+    for (int i = 0; i < node.m_nodes.size(); ++i) {
         m_nodes.push_back((node.m_nodes[i]->clone()));
+    }
 
     // Return
     return;

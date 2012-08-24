@@ -1,7 +1,7 @@
 /***************************************************************************
  * GFitsTableLongLongCol.cpp  - FITS table long long integer column class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,9 +72,9 @@ GFitsTableLongLongCol::GFitsTableLongLongCol(void) : GFitsTableCol()
  * @param[in] size Vector size of column.
  ***************************************************************************/
 GFitsTableLongLongCol::GFitsTableLongLongCol(const std::string& name,
-                                         const int&         length,
-                                         const int&         size)
-                                       : GFitsTableCol(name, length, size, 8)
+                                             const int&         length,
+                                             const int&         size)
+                                             : GFitsTableCol(name, length, size, 8)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -87,10 +87,10 @@ GFitsTableLongLongCol::GFitsTableLongLongCol(const std::string& name,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] column Column from which class instance should be built.
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableLongLongCol::GFitsTableLongLongCol(const GFitsTableLongLongCol& column)
-                                                      : GFitsTableCol(column)
+                                             : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -125,7 +125,7 @@ GFitsTableLongLongCol::~GFitsTableLongLongCol(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] column Column which should be assigned
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableLongLongCol& GFitsTableLongLongCol::operator= (const GFitsTableLongLongCol& column)
 {
@@ -155,7 +155,7 @@ GFitsTableLongLongCol& GFitsTableLongLongCol::operator= (const GFitsTableLongLon
  * @brief Column data access operator
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
@@ -173,14 +173,16 @@ long long& GFitsTableLongLongCol::operator() (const int& row, const int& inx)
  * @brief Column data access operator (const variant)
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
 const long long& GFitsTableLongLongCol::operator() (const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) ((GFitsTableLongLongCol*)this)->fetch_data();
+    if (m_data == NULL) {
+        const_cast<GFitsTableLongLongCol*>(this)->fetch_data();
+    }
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -272,8 +274,9 @@ int GFitsTableLongLongCol::integer(const int& row, const int& inx) const
 void GFitsTableLongLongCol::insert(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length)
+    if (rownum < 0 || rownum > m_length) {
         throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    }
     
     // Continue only if there are rows to be inserted
     if (nrows > 0) {
@@ -310,12 +313,15 @@ void GFitsTableLongLongCol::insert(const int& rownum, const int& nrows)
             // Copy and initialise data
             long long* src = m_data;
             long long* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
-            for (int i = 0; i < n_insert; ++i)
+            }
+            for (int i = 0; i < n_insert; ++i) {
                 *dst++ = 0;
-            for (int i = 0; i < n_after; ++i)
+            }
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -350,12 +356,14 @@ void GFitsTableLongLongCol::insert(const int& rownum, const int& nrows)
 void GFitsTableLongLongCol::remove(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length)
+    if (rownum < 0 || rownum >= m_length) {
         throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum)
+    if (nrows < 0 || nrows > m_length-rownum) {
         throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    }
     
     // Continue only if there are rows to be removed
     if (nrows > 0) {
@@ -386,11 +394,13 @@ void GFitsTableLongLongCol::remove(const int& rownum, const int& nrows)
             // Copy data
             long long* src = m_data;
             long long* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
+            }
             src += n_remove;
-            for (int i = 0; i < n_after; ++i)
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -470,7 +480,7 @@ void GFitsTableLongLongCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Column for which members should be copied.
+ * @param[in] column Table column.
  *
  * Sets the content of the vector column by copying from another column.
  * If the code is compiled with the small memory option, and if the source
@@ -482,7 +492,9 @@ void GFitsTableLongLongCol::copy_members(const GFitsTableLongLongCol& column)
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
-    if (not_loaded) ((GFitsTableLongLongCol*)(&column))->fetch_data();
+    if (not_loaded) {
+        const_cast<GFitsTableLongLongCol*>(&column)->fetch_data();
+    }
 
     // Copy attributes
     m_type = column.m_type;
@@ -491,8 +503,9 @@ void GFitsTableLongLongCol::copy_members(const GFitsTableLongLongCol& column)
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
         alloc_data();
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = column.m_data[i];
+        }
     }
 
     // Copy NULL value
@@ -500,7 +513,9 @@ void GFitsTableLongLongCol::copy_members(const GFitsTableLongLongCol& column)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsTableLongLongCol*)(&column))->release_data();
+    if (not_loaded) {
+        const_cast<GFitsTableLongLongCol*>(&column)->release_data();
+    }
     #endif
 
     // Return
@@ -588,8 +603,9 @@ void GFitsTableLongLongCol::alloc_data(void)
     m_data = NULL;
 
     // Allocate new data
-    if (m_size > 0)
+    if (m_size > 0) {
         m_data = new long long[m_size];
+    }
 
     // Return
     return;
@@ -615,6 +631,8 @@ void GFitsTableLongLongCol::release_data(void)
 
 /***********************************************************************//**
  * @brief Allocates null value
+ *
+ * @param[in] value Nul value.
  ***************************************************************************/
 void GFitsTableLongLongCol::alloc_nulval(const long long* value)
 {
@@ -642,8 +660,9 @@ void GFitsTableLongLongCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = 0;
+        }
     }
 
     // Return

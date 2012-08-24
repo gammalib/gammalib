@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-06-00
 
 Author(s) : Juergen Knoedlseder
 
-July, 18th, 2012
+August, 21th, 2012
 
 
 1. Introduction
@@ -10,10 +10,19 @@ July, 18th, 2012
 This document briefly summarizes module by module the most important
 changes made since the last release of GammaLib.
 
+The code quality was enhanced in this release by resolving errors and
+warnings issued by the cppcheck code quality check utility. A few real
+errors were detected, the remaining modifications concerned mainly the
+coding style and the translation of C-style casts into C++ style casts.
+
 
 2. Configuration
 -----------------
-None 
+Added OpenMP support to allow for code parallelization. If available,
+OpenMP is enabled by default. OpenMP support may be disabled using
+the --disable-openmp flag.
+
+Check for the presence of the Python.h header file.
 
 
 3. Application module
@@ -50,7 +59,10 @@ None
 
 8. Observation module
 ---------------------
-None
+The optimization of model parameters makes now use of OpenMP (if 
+available) for parallelization of the likelihood computation. This
+allows the increase of the code execution speed in the presence of
+multiple processor cores.
 
 
 9. Optimization module
