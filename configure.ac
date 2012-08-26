@@ -827,8 +827,14 @@ if test "x$has_wrappers" = "xno"; then
   AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
 fi
 
+# Do we have wrappers or can we created wrappers?
+can_wrappers="no"
+if [test "x$has_wrappers" = "xyes" -o "x$has_swig" = "xyes"]; then
+  can_wrappers="yes"
+fi
+
 # Signal if Python is enabled
-if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes"]; then
+if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
   enable_python="yes"
 fi
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
