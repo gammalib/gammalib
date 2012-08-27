@@ -1,10 +1,9 @@
 #!/bin/sh
 
-#aclocal -I m4
-if which libtoolize >/dev/null; then
+if command -v libtoolize >/dev/null 2>&1; then
   libtoolize --copy
 else
-  if which glibtoolize >/dev/null; then
+  if command -v glibtoolize >/dev/null 2>&1; then
     glibtoolize --copy
   fi
 fi
