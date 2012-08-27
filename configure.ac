@@ -672,6 +672,7 @@ if test "x$openmp_ok" = "xyes" ; then
   fi
 fi
 AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
+AC_SUBST(OPENMP_CXXFLAGS)
 
 # Set system specific settings
 OPENMP_LIB_LDFLAGS=
