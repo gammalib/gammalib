@@ -44,8 +44,6 @@ void TestGMatrix::set(void){
     m_g_cols = 4;
 
     //add tests
-    //TODO: slipt tests
-
     add_test(static_cast<pfunction>(&TestGMatrix::set_matrix),"Set matrix");
     add_test(static_cast<pfunction>(&TestGMatrix::set_vector),"Set Vector");
     add_test(static_cast<pfunction>(&TestGMatrix::set_bigger),"Set matrix bigger");
