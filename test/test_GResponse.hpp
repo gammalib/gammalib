@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GResponse.hpp  -  test Response classes             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,6 +26,20 @@
 #include "GammaLib.hpp"
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
-//#include <math.h>
 
+class TestGResponse : public GTestSuite
+{
+    public:
+        // Constructors and destructors
+        TestGResponse(void) : GTestSuite(){ return; }
+        virtual ~TestGResponse(void){ return; }
+
+        // Methods
+        virtual void set(void);
+        void test_lat_response(void);
+
+    // Private members
+    private:
+
+};
 #endif /* TEST_GRESPONSE_HPP */

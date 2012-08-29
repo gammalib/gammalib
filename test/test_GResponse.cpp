@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GResponse.cpp  -  test Response classes               *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -24,35 +24,34 @@
 #include <iostream>
 #include "test_GResponse.hpp"
 
-/* __ Namespaces _________________________________________________________ */
+void TestGResponse::set(void){
+    // Test name
+    name("GReponse);
 
-/* __ Globals ____________________________________________________________ */
+    //add tests
+    add_test(static_cast<pfunction>(&TestGResponse::test_lat_response),"Test LAT Response");
 
-
+    return;
+}
 /***************************************************************************
  *                          Test: LAT Response                             *
  ***************************************************************************/
-void test_lat_response(void)
+void TestGResponse::test_lat_response(void)
 {
     // Remove FITS file
     system("rm -rf test_rsp.fits");
 
-    std::cout << "Test GLATResponse: Open PSF FITS file: ";
-    try {
-        // Get HANDOFF Response
-        GLATResponse rsp;
-        rsp.set_caldb("irf/lat");
-        rsp.load("Pass5_v0", "front");
+    // Open PSF FITS file
 
-        // Save response
-        rsp.save("test_rsp.fits");
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to open FITS file." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ". ok." << std::endl;
+    // Get HANDOFF Response
+    GLATResponse rsp;
+    rsp.set_caldb("irf/lat");
+    rsp.load("Pass5_v0", "front");
+
+    // Save response
+    rsp.save("test_rsp.fits");
+
+    return;
 }
 
 
@@ -61,15 +60,22 @@ void test_lat_response(void)
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "***************************" << std::endl;
-    std::cout << "* GResponse class testing *" << std::endl;
-    std::cout << "***************************" << std::endl;
+    GTestSuites testsuites("GResponse");
 
-    // Execute the tests
-    test_lat_response();
+    bool was_successful=true;
+
+    //Create a test suite
+    TestGReponse test;
+
+    //Append to the container
+    testsuites.append(test);
+
+    //Run
+    was_successful=testsuites.run();
+
+    //save xml report
+    testsuites.save("reports/GResponse.xml");
 
     // Return
-    return 0;
+    return was_successful ? 0:1;
 }
