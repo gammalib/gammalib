@@ -139,7 +139,7 @@ GModelPar& TestGObservation::test_observations_optimizer(int mode)
     test_assert(opt.status()==0,"Check if converged","Optimizer did not convered"); 
 
     //check if value is correct
-    test_assert(fabs(result.value()-RATE) < result.error()*3,"check if value is correct","Value is not precise enough."); 
+    test_value(result.value(),RATE,result.error()*3); 
 
     return (((obs.models())[0])[0]);
 }

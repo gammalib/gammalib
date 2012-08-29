@@ -56,6 +56,11 @@ class GTestSuite{
         void                        test_assert(bool result,
                                                 const std::string& name,
                                                 const std::string& message="");
+        void                        test_value( double value,
+                                                double value_expected,
+                                                double eps = 0,
+                                                const std::string& name="",
+                                                const std::string& message="");
         void                        test_try(const std::string& name);
         void                        test_try_success();
         void                        test_try_failure(const std::string& message="",

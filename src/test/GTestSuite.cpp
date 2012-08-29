@@ -30,6 +30,7 @@
 #include <config.h>
 #endif
 #include "GTestSuite.hpp"
+#include "GTools.hpp"
 #include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -306,9 +307,51 @@ void GTestSuite::test_assert(bool assert, const std::string& name,const std::str
 
     // Return
     return;
-    
+
 }
 
+/***********************************************************************//**
+ * @brief Test a value
+ * @param[in] value Value to test
+ * @param[in] value_expected Value expected
+ * @param[in] eps Precision of the test (default 0)
+ * @param[in] name Test case name. (defaults to "")
+ * @param[in] message Test case message. (defaults to "")
+ * Test if the value is between [ value_excepted-eps, value_excepted+eps ]
+ ***************************************************************************/
+void GTestSuite::test_value(double value, double value_expected, double eps, const std::string& name, const std::string& message){
+
+    std::string formated_name;
+    if(name!=""){
+        formated_name = format_name(name);
+    }
+    else{
+        formated_name = format_name("Test "+str(value)+" is between ["+str(value_expected-eps)+","+str(value_expected+eps)+"]");
+    }
+    // Create a test case of failure type
+    GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST,formated_name);
+
+    // If value is not between [ value_excepted-eps, value_excepted+eps ]
+    if(value > value_expected + eps || value < value_expected - eps)
+    {
+        // test case is not ok
+        testcase->m_passed=false;
+
+        //increment number of failures
+        m_failures++;
+    }
+    //Set message
+    testcase->message(message);
+
+    // Show the result ( ".","F" or, "E")
+    m_log<<testcase->print_result();
+
+    // Add the test in the container
+    m_tests.push_back(testcase);
+
+    // Return
+    return;
+}
 /***********************************************************************//**
  * @brief Test an try block
  * @param[in] name Test case name. (defaults to "")
