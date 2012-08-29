@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GSky.cpp  -  test GSky classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,6 +30,7 @@
 #endif
 #include <stdlib.h>
 #include "GammaLib.hpp"
+#include "test_GSky.hpp"
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
 
@@ -40,7 +41,23 @@
 /* __ Debug definitions __________________________________________________ */
 #define G_WCS_FORTH_BACK_PIXEL_DEBUG
 #define G_WCS_COPY_DEBUG
+/***********************************************************************//**
+* @brief Set parameters and tests
+***************************************************************************/    
+void TestGSky::set(void){
 
+    // Test name
+    name("GSky");
+
+    //add tests
+    add_test(static_cast<pfunction>(&TestGSky::test_GWcslib),"Test GWcslib");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_construct),"Test Healpix GSkymap constructors");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
+
+    return;
+}
 
 /***********************************************************************//**
  * @brief Test consistency of forward and background transformations
@@ -50,47 +67,47 @@
  * @param[in] crpix1 Reference pixel in X
  * @param[in] crpix2 Reference pixel in Y
  ***************************************************************************/
-double wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
+double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
 {
     // Initialise maximal distance
     double dist_max = 0.0;
-    
+
     // Loop over x pixels
     for (int ix = -nx; ix <= nx; ++ix) {
-    
+
         // Set x value
         double x = double(ix) + crpix1;
-        
+
         // Skip pixels outside valid range (they are not expected to
         // transform bijectively)
         if (x < 0 || x >= nx)
             continue;
-        
+
         // Loop over y pixels
         for (int iy = -ny; iy <= ny; ++iy) {
-        
+
             // Set y value
             double    y = double(iy) + crpix2;
-            
+
             // Skip pixels outside valid range (they are not expected to
             // transform bijectively)
             if (y < 0 || y >= ny)
                 continue;
-            
+
             // Set sky pixel
             GSkyPixel pix_in(x,y);
-            
+
             // Forth: Transform to world
             GSkyDir dir = wcs->xy2dir(pix_in);
-            
+
             // Back: Transform to pixel
             GSkyPixel pix_out = wcs->dir2xy(dir);
-            
+
             // Compute distance
             double dx      = pix_in.x()-pix_out.x();
             double dy      = pix_in.y()-pix_out.y();
             double dist    = sqrt(dx*dx+dy*dy);
-            
+
             // Debug option: Dump discrepancies
             #if defined(G_WCS_FORTH_BACK_PIXEL_DEBUG)
             if (dist > 0.001) {
@@ -104,11 +121,11 @@ double wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double
                 std::cout << " dir=" << dir;
             }
             #endif
-            
+
             // Store maximum distance
             if (dist > dist_max)
                 dist_max = dist;
-                
+
         } // endfor: y pixels
     } // endfor: x pixels
 
@@ -125,40 +142,40 @@ double wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double
  * @param[in] crpix1 Reference pixel in X
  * @param[in] crpix2 Reference pixel in Y
  ***************************************************************************/
-double wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
+double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
 {
     // Make a copy using clone
     GWcslib* cpy = wcs->clone();
-    
+
     // Initialise maximal angle and distance
     double angle_max = 0.0;
     double dist_max  = 0.0;
-    
+
     // Loop over x pixels
     for (int ix = -nx; ix <= nx; ++ix) {
-    
+
         // Set x value
         double x = double(ix) + crpix1;
-        
+
         // Skip pixels outside valid range (they are not expected to
         // transform bijectively)
         if (x < 0 || x >= nx)
             continue;
-        
+
         // Loop over y pixels
         for (int iy = -ny; iy <= ny; ++iy) {
-        
+
             // Set y value
             double    y = double(iy) + crpix2;
-            
+
             // Skip pixels outside valid range (they are not expected to
             // transform bijectively)
             if (y < 0 || y >= ny)
                 continue;
-            
+
             // Set sky pixel
             GSkyPixel pix_in(x,y);
-            
+
             // Transform to world
             GSkyDir dir1 = wcs->xy2dir(pix_in);
             GSkyDir dir2 = cpy->xy2dir(pix_in);
@@ -175,18 +192,18 @@ double wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
                 std::cout << " dir2=" << dir2;
             }
             #endif
-            
+
             // Transform to pixel
             GSkyPixel pix_out1 = wcs->dir2xy(dir1);
             GSkyPixel pix_out2 = cpy->dir2xy(dir2);
-            
+
             // Compute distance
             double dx   = pix_out1.x()-pix_out2.x();
             double dy   = pix_out1.y()-pix_out2.y();
             double dist = sqrt(dx*dx+dy*dy);
             if (dist > dist_max)
                 dist_max = dist;
-            
+
             // Debug option: Dump discrepancies
             #if defined(G_WCS_COPY_DEBUG)
             if (dist > 0.001) {
@@ -200,7 +217,7 @@ double wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
                 std::cout << " dir2=" << dir2;
             }
             #endif
-                
+
         } // endfor: y pixels
     } // endfor: x pixels
 
@@ -214,7 +231,7 @@ double wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
  *
  * This function test all non-HealPix projections that have been registered.
  ***************************************************************************/
-void test_GWcslib(void)
+void TestGSky::test_GWcslib(void)
 {
     // Allocate parameters for testing
     double crval1 = 83.63;
@@ -226,150 +243,108 @@ void test_GWcslib(void)
     int    nx     =   200;
     int    ny     =   200;
 
-    // Main test protection
-    try {
-    
-        // Loop over all non-HealPix projections
-        GWcsRegistry registry;
-        for (int i = 0; i < registry.size(); ++i) {
-    
-            // Skip HealPix
-            if (registry.code(i) == "HPX")
-                continue;
-        
-            // Dump header
-            std::string test_class = "GWcs" + registry.code(i);
-            std::cout << "Test "+test_class+": ";
+    // Loop over all non-HealPix projections
+    GWcsRegistry registry;
+    for (int i = 0; i < registry.size(); ++i) {
 
-            // Perform tests
-            try {
-        
-                // Allocate projection CEL and GAL
-                GWcslib *cel = (GWcslib*)registry.alloc(registry.code(i));
-                GWcslib *gal = (GWcslib*)registry.alloc(registry.code(i));
-                
-                // Throw an error if allocation failed
-                if (cel == NULL || gal == NULL) {
-                    std::cout << std::endl 
-                              << "TEST ERROR: Could not allocate "+test_class+"."
-                              << std::endl;
-                    throw;
-                }
-                
-                // Set projections
-                try {
-                    cel->set("CEL", crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
-                    gal->set("GAL", crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
-                }
-                catch (std::exception &e) {
-                    std::cout << std::endl 
-                              << "TEST ERROR: Error occured while setting up "+test_class+"."
-                              << std::endl;
-                    std::cout << e.what() << std::endl;
-                    throw;
-                }
-                std::cout << ".";
-                
-                // Test forth-back CEL conversion
-                try {
-                    double tol = 0.0;
-                    if ((tol = wcs_forth_back_pixel(cel, nx, ny, crpix1, crpix2)) > 1.0e-10) {
-                        std::cout << std::endl 
-                                  << "TEST ERROR: CEL forth-back transformation tolerance 1.0e-10 exceeded: "
-                                  << tol << std::endl;
-                        throw;
-                    }
-                }
-                catch (std::exception &e) {
-                    std::cout << std::endl 
-                              << "TEST ERROR: Error while testing CEL forth-back transformations."
-                              << std::endl;
-                    std::cout << e.what() << std::endl;
-                    throw;
-                }
-                std::cout << ".";
+        // Skip HealPix
+        if (registry.code(i) == "HPX")
+            continue;
 
-                // Test forth-back GAL conversion
-                try {
-                    double tol = 0.0;
-                    if ((tol = wcs_forth_back_pixel(gal, nx, ny, crpix1, crpix2)) > 1.0e-10) {
-                        std::cout << std::endl 
-                                  << "TEST ERROR: GAL forth-back transformation tolerance 1.0e-10 exceeded: "
-                                  << tol << std::endl;
-                        throw;
-                    }
-                }
-                catch (std::exception &e) {
-                    std::cout << std::endl 
-                              << "TEST ERROR: Error while testing GAL forth-back transformations."
-                              << std::endl;
-                    std::cout << e.what() << std::endl;
-                    throw;
-                }
-                std::cout << ".";
+        std::string test_class = "GWcs" + registry.code(i);
 
-                // Test CEL copy
-                try {
-                    double tol = 0.0;
-                    if ((tol = wcs_copy(cel, nx, ny, crpix1, crpix2)) > 1.0e-4) {
-                        std::cout << std::endl 
-                                  << "TEST ERROR: CEL copy tolerance 1.0e-4 exceeded: "
-                                  << tol << std::endl;
-                        throw;
-                    }
-                }
-                catch (std::exception &e) {
-                    std::cout << std::endl 
-                              << "TEST ERROR: Error while testing CEL copy."
-                              << std::endl;
-                    std::cout << e.what() << std::endl;
-                    throw;
-                }
-                std::cout << ".";
+        // Perform tests
+        test_try("Test "+test_class);
+        try {
 
-                // Test GAL copy
-                try {
-                    double tol = 0.0;
-                    if ((tol = wcs_copy(gal, nx, ny, crpix1, crpix2)) > 1.0e-4) {
-                        std::cout << std::endl 
-                                  << "TEST ERROR: GAL copy tolerance 1.0e-4 exceeded: "
-                                  << tol << std::endl;
-                        throw;
-                    }
-                }
-                catch (std::exception &e) {
-                    std::cout << std::endl 
-                              << "TEST ERROR: Error while testing GAL copy."
-                              << std::endl;
-                    std::cout << e.what() << std::endl;
-                    throw;
-                }
-                std::cout << ".";
-                    
-            } // endtry: main test block
-            catch (std::exception &e) {
+            // Allocate projection CEL and GAL
+            GWcslib *cel = (GWcslib*)registry.alloc(registry.code(i));
+            GWcslib *gal = (GWcslib*)registry.alloc(registry.code(i));
+
+            // Throw an error if allocation failed
+            if (cel == NULL || gal == NULL) {
                 std::cout << std::endl 
-                          << "TEST ERROR: Error occured while testing "+test_class+"."
-                          << std::endl;
-                std::cout << e.what() << std::endl;
-                throw;
+                        << "TEST ERROR: Could not allocate "+test_class+"."
+                        << std::endl;
+                throw exception_error("Could not allocate"+test_class);
             }
-            std::cout << ".";
-            
-            // Signal final test success
-            std::cout << " ok." << std::endl;
 
-        } // endfor: looped over all non-HealPix projections
+            // Set projections
+            test_try("Set projections");
+            try {
+                cel->set("CEL", crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
+                gal->set("GAL", crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
 
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Error occured while testing GWcslib projections."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    
+                test_try_success();
+            }
+            catch (std::exception &e) {
+                test_try_failure(e);
+            }
+
+            // Test forth-back CEL conversion
+            test_try("Test forth-back CEL conversion");
+            try {
+                double tol = 0.0;
+                if ((tol = wcs_forth_back_pixel(cel, nx, ny, crpix1, crpix2)) > 1.0e-10) {
+                    throw exception_failure("CEL forth-back transformation tolerance 1.0e-10 exceeded: "+str(tol));
+                }
+
+                test_try_success(); 
+            }
+            catch (std::exception &e) {
+                test_try_failure(e);
+            }
+
+            // Test forth-back GAL conversion
+            test_try("Test forth-back GAL conversion");
+            try {
+                double tol = 0.0;
+                if ((tol = wcs_forth_back_pixel(gal, nx, ny, crpix1, crpix2)) > 1.0e-10) {
+                    throw exception_failure("GAL forth-back transformation tolerance 1.0e-10 exceeded: "+str(tol));
+                }
+
+                test_try_success();
+            }
+            catch (std::exception &e) {
+                test_try_failure(e);
+            }
+
+            // Test CEL copy
+            test_try("Test CEL copy");
+            try {
+                double tol = 0.0;
+                if ((tol = wcs_copy(cel, nx, ny, crpix1, crpix2)) > 1.0e-4) {
+                    throw exception_failure("CEL copy tolerance 1.0e-4 exceeded: "+str(tol));
+                }
+
+                test_try_success();
+            }
+            catch (std::exception &e) {
+                test_try_failure(e);
+            }
+
+            // Test GAL copy
+            test_try("Test GAL copy");
+            try {
+                double tol = 0.0;
+                if ((tol = wcs_copy(gal, nx, ny, crpix1, crpix2)) > 1.0e-4) {
+                    throw exception_failure("GAL copy tolerance 1.0e-4 exceeded: "+str(tol));
+                }
+
+                test_try_success();
+            }
+            catch (std::exception &e) {
+                test_try_failure(e);
+            }
+
+            test_try_success();
+        }
+        catch (std::exception &e) {
+            test_try_failure(e);
+        }
+
+    } // endfor: looped over all non-HealPix projections
+
     // Exit test
     return;
 }
@@ -378,25 +353,21 @@ void test_GWcslib(void)
 /***************************************************************************
  *  Test: GSkymap_healpix_construct                                        *
  ***************************************************************************/
-void test_GSkymap_healpix_construct(void)
+void TestGSky::test_GSkymap_healpix_construct(void)
 {
-    // Dump header
-    std::cout << "Test Healpix GSkymap constructors: ";
 
     // Test void constructor
+    test_try("Test void constructor");
     try {
         GSkymap map;
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to construct empty map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test correct Healpix constructors
+    test_try("Test correct Healpix constructors");
     try {
         GSkymap ring1("HPX", "GAL", 1, "RING", 1);
         GSkymap ring2("HPX", "GAL", 2, "RING", 1);
@@ -434,107 +405,90 @@ void test_GSkymap_healpix_construct(void)
         GSkymap map2("HPX", "CEL", 1, "RING", 2);
         GSkymap map3("HPX", "EQU", 1, "RING", 1);
         GSkymap map4("HPX", "EQU", 1, "NESTED", 1);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to construct Healpix map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test Healpix copy constructor
+    test_try("Test Healpix copy constructor");
     try {
         GSkymap ring1("HPX", "GAL", 1, "RING", 1);
         GSkymap ring2 = ring1;
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to copy construct Healpix map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test invalid wcs in constructor
+    test_try("Test invalid wcs in constructor");
     try {
         GSkymap map("CAR", "GAL", 1, "RING", 1);
+        test_try_failure();
     }
     catch (GException::wcs_invalid &e) {
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Did not detect invalid WCS."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test invalid coordsys in constructor
+    test_try("Test invalid coordsys in constructor");
     try {
         GSkymap map("HPX", "HOR", 1, "RING", 1);
+        test_try_failure();
     }
     catch (GException::wcs_bad_coords &e) {
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Did not detect invalid coordinate system."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test invalid nside in constructor
+    test_try("Test invalid nside in constructor");
     try {
         GSkymap map("HPX", "GAL", 3, "RING", 1);
+        test_try_failure();
     }
     catch (GException::wcs_hpx_bad_nside &e) {
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Did not detect invalid nside parameter."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test invalid ordering in constructor
+    test_try("Test invalid ordering in constructor");
     try {
         GSkymap map("HPX", "GAL", 2, "SPHERICAL", 1);
+        test_try_failure();
     }
     catch (GException::wcs_hpx_bad_ordering &e) {
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Did not detect invalid ordering parameter."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
+
 
     // Test invalid nmaps in constructor
+    test_try("Test invalid nmaps in constructor");
     try {
         GSkymap map("HPX", "GAL", 2, "NEST", 0);
+        test_try_failure();
     }
     catch (GException::skymap_bad_par &e) {
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Did not detect invalid ordering parameter."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Signal final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -545,34 +499,30 @@ void test_GSkymap_healpix_construct(void)
 /***************************************************************************
  *  Test: GSkymap_healpix_io                                               *
  ***************************************************************************/
-void test_GSkymap_healpix_io(void)
+void TestGSky::test_GSkymap_healpix_io(void)
 {
     // Set filenames
     const std::string file1 = "test_skymap_hpx_1.fits";
     const std::string file2 = "test_skymap_hpx_2.fits";
 
-    // Dump header
-    std::cout << "Test Healpix GSkymap I/O: ";
-
     // Define Healpix map for comparison
     GSkymap refmap("HPX", "GAL", 4, "RING", 1);
 
     // Test Healpix map saving
+    test_try("Test Healpix map saving");
     try {
         for (int pix = 0; pix < refmap.npix(); ++pix)
             refmap(pix) = pix+1;
         refmap.save(file1, true);
+
+        test_try_success(); 
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to save Healpix map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test Healpix map loading
+    test_try("Test Healpix map loading");
     try {
         GSkymap map;
         map.load(file1);
@@ -582,22 +532,17 @@ void test_GSkymap_healpix_io(void)
                 diff++;
         }
         if (diff > 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: Loaded file differs from saved file ."
-                      << std::endl;
-            throw;
+            throw exception_error("Loaded file differs from saved file.");
         }
+
+        test_try_success(); 
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to load Healpix map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test Healpix map instantiation
+    test_try("Test Healpix map instantiation");
     try {
         GSkymap map(file1);
         int diff = 0;
@@ -606,68 +551,51 @@ void test_GSkymap_healpix_io(void)
                 diff++;
         }
         if (diff > 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: Loaded file differs from saved file ."
-                      << std::endl;
-            throw;
+            throw exception_error("Loaded file differs from saved file.");
         }
+        test_try_success(); 
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to create Healpix instance"
-                     " from FITS file." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Signal final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
-
 }
 
 
 /***************************************************************************
  *  Test: GSkymap_wcs_construct                                            *
  ***************************************************************************/
-void test_GSkymap_wcs_construct(void)
+void TestGSky::test_GSkymap_wcs_construct(void)
 {
     // Set precision
     double eps = 1.0e-5;
 
-    // Dump header
-    std::cout << "Test WCS GSkymap constructors: ";
-
     // Test void constructor
+    test_try("Test void constructor");
     try {
         GSkymap map;
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to construct empty map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test non-Healpix constructors
+    test_try("Test non-Healpix constructors");
     try {
         GSkymap map1("CAR", "GAL", 0.0, 0.0, 1.0, 1.0, 100, 100);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct sky map(s)."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test CAR projection
+    test_try("Test CAR projection");
     try {
         GSkymap map1("CAR", "GAL", 138.817, 37.293, 0.521, 0.931, 100, 100);
         GSkyDir dir;
@@ -678,29 +606,16 @@ void test_GSkymap_wcs_construct(void)
                 GSkyDir   dir_back = map1.xy2dir(pixel);
                 double    dist     = dir.dist_deg(dir_back);
                 if (dist > eps) {
-                    std::cout << std::endl
-                      << "TEST ERROR: Sky direction differs:"
-                      << " dir=" << dir
-                      << " pixel=" << pixel
-                      << " dir_back=" << dir_back
-                      << " dist=" << dist << " deg" << std::endl;
-                    throw;
+                    throw exception_failure("Sky direction differs: dir="+dir.print()+" pixel="+pixel.print()+" dir_back"+ dir_back.print()+" dist="+str(dist)+" deg");
                 }
             }
         }
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct sky map(s)."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-
-    // Signal final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -711,20 +626,18 @@ void test_GSkymap_wcs_construct(void)
 /***************************************************************************
  *  Test: GSkymap_wcs_io                                                   *
  ***************************************************************************/
-void test_GSkymap_wcs_io(void)
+void TestGSky::test_GSkymap_wcs_io(void)
 {
     // Set filenames
     const std::string file1 = "test_skymap_wcs_1.fits";
     const std::string file2 = "test_skymap_wcs_2.fits";
-
-    // Dump header
-    std::cout << "Test WCS GSkymap I/O: ";
 
     // Define WCS map for comparison
     GSkymap refmap1("CAR", "GAL", 0.0, 0.0, -1.0, 1.0, 100, 100);
     GSkymap refmap2("CAR", "CEL", 0.0, 0.0, -0.3, 0.3, 200, 200);
 
     // Test WCS map saving
+    test_try("Test WCS map saving");
     try {
         for (int pix = 0; pix < refmap1.npix(); ++pix)
             refmap1(pix) = pix+1;
@@ -732,17 +645,15 @@ void test_GSkymap_wcs_io(void)
         for (int pix = 0; pix < refmap2.npix(); ++pix)
             refmap2(pix) = pix+1;
         refmap2.save(file2, 1);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to save WCS map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test WCS map loading (1)
+    test_try("Test WCS map loading (1)");
     try {
         GSkymap map;
         map.load(file1);
@@ -752,23 +663,17 @@ void test_GSkymap_wcs_io(void)
                 diff++;
         }
         if (diff > 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: Loaded file "+file1+
-                         " differs from saved file ."
-                      << std::endl;
-            throw;
+            throw exception_error("Loaded file "+file1+" differs from saved file .");
         }
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to load WCS map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test WCS map loading (2)
+    test_try("Test WCS map loading (2)");
     try {
         GSkymap map;
         map.load(file2);
@@ -778,28 +683,17 @@ void test_GSkymap_wcs_io(void)
                 diff++;
         }
         if (diff > 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: Loaded file "+file2+
-                         " differs from saved file ."
-                      << std::endl;
-            throw;
+            throw exception_error("Loaded file "+file2+" differs from saved file .");
         }
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to load WCS map."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Signal final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
-
 }
 
 
@@ -808,19 +702,22 @@ void test_GSkymap_wcs_io(void)
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "************************" << std::endl;
-    std::cout << "* GSky classes testing *" << std::endl;
-    std::cout << "************************" << std::endl;
+    GTestSuites testsuites("GSky");
 
-    // Execute Healpix tests
-    test_GWcslib();
-    test_GSkymap_healpix_construct();
-    test_GSkymap_healpix_io();
-    test_GSkymap_wcs_construct();
-    test_GSkymap_wcs_io();
+    bool was_successful=true;
+
+    //Create a test suite
+    TestGSky test;
+
+    //Append to the container
+    testsuites.append(test);
+
+    //Run
+    was_successful=testsuites.run();
+
+    //save xml report
+    testsuites.save("reports/GSky.xml");
 
     // Return
-    return 0;
+    return was_successful ? 0:1;
 }
