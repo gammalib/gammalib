@@ -23,45 +23,51 @@
 #include <stdlib.h>
 #include "test_GOptimizer.hpp"
 
-/* __ Namespaces _________________________________________________________ */
+/***************************************************************************
+ *  Set                                                                    *
+ ***************************************************************************/
+void TestGOptimizer::set(void){
+    // Test name
+    name("GOptimizer");
 
-/* __ Globals ____________________________________________________________ */
+    //add tests
+    add_test(static_cast<pfunction>(&TestGOptimizer::test_optimizer),"Test LAT Response");
 
+    return;
+}
 
 /***************************************************************************
  *  Test: Optimizer                                                        *
  ***************************************************************************/
-void test_optimizer(void)
+void TestGOptimizer::test_optimizer(void)
 {
-    // Write header
-    std::cout << "Test GOptimizer: ";
-    
+
     // Number of observations in data
     int nobs = 1;
 
     // Setup GData for optimizing
     GData           data;
     GLATObservation obs;
+    test_try("Setup GData for optimizing");
     try {
         obs.load_binned("data/lat/cntmap.fits.gz", "", "");
         for (int i = 0; i < nobs; ++i)
             data.add(obs);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GData for optimizing." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-//std::cout << data << std::endl;
+
+    //std::cout << data << std::endl;
 
     // Setup GModels for optimizing
     GModelSpatialPtsrc point_source;
     GModelSpectralPlaw power_law;
     GModel             crab;
     GModels            models;
+    test_try("Setup GModels for optimizing");
     try {
         GSkyDir dir;
         dir.radec_deg(83.6331, +22.0145);
@@ -71,34 +77,32 @@ void test_optimizer(void)
         crab.name("Crab");
         models.add(crab);
         data.models(models);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GModels for optimizing." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-//std::cout << models << std::endl;
+
+    //std::cout << models << std::endl;
 
     // Setup parameters for optimizing
+    test_try("Setup parameters for optimizing");
     GOptimizerPars pars;
     try {
         pars = GOptimizerPars(models);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GOptimizerPars for optimizing." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-//std::cout << pars << std::endl;
+
+    //std::cout << pars << std::endl;
 
     // Time simple GData iterator
     double  t_elapse;
+    test_try("Time simple GData iterator");
     try {
         clock_t t_start = clock();
         int num = 0;
@@ -108,35 +112,27 @@ void test_optimizer(void)
             sum += (int)event->counts();
         }
         t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to iterate GData." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << "." << std::endl;
-    std::cout << " - Reference time for GData::iterator: " << t_elapse << std::endl;
+
+    //std::cout << " - Reference time for GData::iterator: " << t_elapse << std::endl;
 
     // Setup LM optimizer
     GOptimizerLM opt;
+    test_try("Setup LM optimizer");
     try {
         data.optimize(opt);
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup optimizer." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-//std::cout << opt << std::endl;
-std::cout << data << std::endl;
 
-    // Plot final test success
-    std::cout << " ok." << std::endl;
+    //std::cout << opt << std::endl;
+    //std::cout << data << std::endl;
 
     // Exit test
     return;
@@ -149,15 +145,22 @@ std::cout << data << std::endl;
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "****************************" << std::endl;
-    std::cout << "* GOptimizer class testing *" << std::endl;
-    std::cout << "****************************" << std::endl;
+    GTestSuites testsuites("GOptimizer");
 
-    // Execute the tests
-    test_optimizer();
+    bool was_successful=true;
+
+    //Create a test suite
+    TestGOptimizer test;
+
+    //Append to the container
+    testsuites.append(test);
+
+    //Run
+    was_successful=testsuites.run();
+
+    //save xml report
+    testsuites.save("reports/GOptimizer.xml");
 
     // Return
-    return 0;
+    return was_successful ? 0:1;
 }
