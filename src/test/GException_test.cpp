@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GResponse.cpp  -  test Response classes               *
+ *               GException_test.cpp  -  Unit Test exception handlers      *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,64 +18,60 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException_test.cpp
+ * @brief Implement exceptions for unit test module
+ * @author Jean-Baptiste Cayrou
+ */
 
 /* __ Includes ___________________________________________________________ */
-#include <stdlib.h>
-#include <iostream>
-#include "test_GResponse.hpp"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include "GException.hpp"
+#include "GTools.hpp"
 
-void TestGResponse::set(void){
-    // Test name
-    name("GReponse);
 
-    //add tests
-    add_test(static_cast<pfunction>(&TestGResponse::test_lat_response),"Test LAT Response");
-
-    return;
-}
-/***************************************************************************
- *                          Test: LAT Response                             *
+/***********************************************************************//**
+ * @brief Test nested try error
+ * @param[in] message Optional error message.
  ***************************************************************************/
-void TestGResponse::test_lat_response(void)
+GException::test_nested_try_error::test_nested_try_error(std::string origin, std::string message)
 {
-    // Remove FITS file
-    system("rm -rf test_rsp.fits");
-
-    // Open PSF FITS file
-
-    // Get HANDOFF Response
-    GLATResponse rsp;
-    rsp.set_caldb("irf/lat");
-    rsp.load("Pass5_v0", "front");
-
-    // Save response
-    rsp.save("test_rsp.fits");
-
-    return;
-}
-
-
-/***************************************************************************
- *                            Main test function                           *
- ***************************************************************************/
-int main(void)
-{
-    GTestSuites testsuites("GResponse");
-
-    bool was_successful=true;
-
-    //Create a test suite
-    TestGReponse test;
-
-    //Append to the container
-    testsuites.append(test);
-
-    //Run
-    was_successful=testsuites.run();
-
-    //save xml report
-    testsuites.save("reports/GResponse.xml");
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Nested try error ("+message+")";
 
     // Return
-    return was_successful ? 0:1;
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Failure test
+ * @param[in] message Optional error message.
+ * Use in unit tests to notice a fail in a try block
+ ***************************************************************************/
+GException::test_failure::test_failure(std::string origin, std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Failure Test ("+message+")";
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Failure test
+ * @param[in] message Optional error message.
+ * Use in unit tests to notice a fail in a try block
+ ***************************************************************************/
+GException::test_error::test_error(std::string origin, std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Error Test ("+message+")";
+
+    // Return
+    return;
 }

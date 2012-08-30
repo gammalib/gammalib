@@ -101,6 +101,10 @@
 #include "GOptimizerPars.hpp"
 #include "GOptimizerFunction.hpp"
 
+/* __ Unit Test class___________________________________________________ */
+#include "GTestCase.hpp"
+#include "GTestSuite.hpp"
+#include "GTestSuites.hpp"
 
 /***************************************************************************
  *                        Analysis support services                        *

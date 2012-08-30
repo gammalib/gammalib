@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GResponse.hpp  -  test Response classes             *
+ *                    test module  -  Python bindings                      *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -17,29 +17,20 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
+ * ----------------------------------------------------------------------- *
+ * Usage:                                                                  *
+ * swig -c++ -python -Wall test.i                                          *
  ***************************************************************************/
+%module test
+%feature("autodoc", "1");
 
-#ifndef TEST_GRESPONSE_HPP
-#define TEST_GRESPONSE_HPP
+/* __ Include standard typemaps for vectors and strings __________________ */
+%include stl.i
 
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
+/* __ Make sure that exceptions are catched ______________________________ */
+%import(module="support") "GException.i";
 
-class TestGResponse : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGResponse(void) : GTestSuite(){ return; }
-        virtual ~TestGResponse(void){ return; }
-
-        // Methods
-        virtual void set(void);
-        void test_lat_response(void);
-
-    // Private members
-    private:
-
-};
-#endif /* TEST_GRESPONSE_HPP */
+/* __ XML module _________________________________________________________ */
+%include "GTestSuites.i"
+%include "GTestSuite.i"
+%include "GTestCase.i"

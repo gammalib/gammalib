@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GResponse.hpp  -  test Response classes             *
+ *                test_GModel.hpp  -  test model class                     *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,27 +19,37 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEST_GRESPONSE_HPP
-#define TEST_GRESPONSE_HPP
+#ifndef TEST_GMODEL_HPP
+#define TEST_GMODEL_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
+#include "GTools.hpp"
 
-class TestGResponse : public GTestSuite
+class TestGModel : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGResponse(void) : GTestSuite(){ return; }
-        virtual ~TestGResponse(void){ return; }
+        TestGModel(void) : GTestSuite(){ return; }
+        virtual ~TestGModel(void){ return; }
 
         // Methods
         virtual void set(void);
-        void test_lat_response(void);
 
-    // Private members
+        void test_model_par(void);
+        void test_model(void);
+        void test_models(void);
+        void test_spectral_model(void);
+        void test_spacial_model(void);
+    // Private attributes
     private:
+        std::string m_xml_file;
+        std::string m_xml_model_point_nodes;
+        std::string m_xml_model_spatial_map;
+        
+    //private methods
+        void test_xml_model(const std::string &name, const std::string &filename);
 
 };
-#endif /* TEST_GRESPONSE_HPP */
+
+#endif /* TEST_GMODEL_HPP */

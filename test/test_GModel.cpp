@@ -33,50 +33,54 @@
 #include <stdexcept>
 #include <stdlib.h>
 #include "GammaLib.hpp"
+#include "test_GModel.hpp"
 
-/* __ Globals ____________________________________________________________ */
-const std::string xml_file              = "data/crab.xml";
-const std::string xml_model_point_nodes = "data/model_point_nodes.xml";
-const std::string xml_model_spatial_map = "data/model_spatial_map.xml";
+/***********************************************************************//**
+ * @brief Set tests
+ ***************************************************************************/
+void TestGModel::set(void)
+{
+    // Set name
+    name("GModel");
 
+    // Set attributes
+    m_xml_file              = "data/crab.xml";
+    m_xml_model_point_nodes = "data/model_point_nodes.xml";
+    m_xml_model_spatial_map = "data/model_spatial_map.xml";
+
+    //Unbinned
+    add_test(static_cast<pfunction>(&TestGModel::test_model_par),"Test model parameter handling");
+    add_test(static_cast<pfunction>(&TestGModel::test_model),"Test model handling");
+    add_test(static_cast<pfunction>(&TestGModel::test_models),"Test models");
+    add_test(static_cast<pfunction>(&TestGModel::test_spectral_model),"Test spectral model");
+    add_test(static_cast<pfunction>(&TestGModel::test_spacial_model),"Test spacial model");
+
+    return;
+}
 
 /***********************************************************************//**
  * @brief Test model parameter handling.
  ***************************************************************************/
-void test_model_par(void)
+void TestGModel::test_model_par(void)
 {
-    // Write header
-    std::cout << "Test GModelPar: ";
-
     // Load unbinned LAT observation
-    try {
-        GModelPar par;
-        par.value(47.01);
-        par.error(2.003);
-        par.name("Test parameter");
-        par.unit("MeV");
-//        std::cout << par << std::endl;
-        par.fix();
-//        std::cout << par << std::endl;
-        par.min(2.0);
-//        std::cout << par << std::endl;
-        par.max(200.0);
-//        std::cout << par << std::endl;
-        par.remove_min();
-//        std::cout << par << std::endl;
-        par.remove_max();
-//        std::cout << par << std::endl;
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to handle model parameter." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    GModelPar par;
+    par.value(47.01);
+    par.error(2.003);
+    par.name("Test parameter");
+    par.unit("MeV");
+//  std::cout << par << std::endl;
+    par.fix();
+//  std::cout << par << std::endl;
+    par.min(2.0);
+//  std::cout << par << std::endl;
+    par.max(200.0);
+//  std::cout << par << std::endl;
+    par.remove_min();
+//  std::cout << par << std::endl;
+    par.remove_max();
+//  std::cout << par << std::endl;
 
-    // Plot final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -87,82 +91,73 @@ void test_model_par(void)
 /***********************************************************************//**
  * @brief Test model handling.
  ***************************************************************************/
-void test_model(void)
+void TestGModel::test_model(void)
 {
-    // Write header
-    std::cout << "Test GModelPointSource: ";
-
     // Setup spatial model
     GModelSpatialPtsrc point_source;
+    test_try("Setup spatial model");
     try {
         GSkyDir dir;
         dir.radec_deg(83.6331, +22.0145);
         point_source = GModelSpatialPtsrc(dir);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable setup GModelSpatialPtsrc." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-    if (point_source.ra() != 83.6331 || point_source.dec() != +22.0145) {
-        std::cout << std::endl << "TEST ERROR: Bad values in GModelSpatialPtsrc."
-                  << std::endl;
-        throw;
-    }
-    std::cout << ".";
+
+    test_assert((point_source.ra() == 83.6331 && point_source.dec() == +22.0145),
+                           "Test if ra=83.6331 and dec=22.0145",
+                           "Bad values in GModelSpatialPtsrc");
+
     //std::cout << point_source << std::endl;
 
     // Setup spectral model
     GModelSpectralPlaw power_law;
+    test_try("Setup spectral model");
     try {
         power_law = GModelSpectralPlaw(1.0e-7, -2.1);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable setup GModelSpectralPlaw." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-    if (power_law.norm() != 1.0e-7 || power_law.index() != -2.1) {
-        std::cout << std::endl << "TEST ERROR: Bad values in GModelSpectralPlaw."
-                  << std::endl;
-        throw;
-    }
-    std::cout << ".";
+
+    test_assert((power_law.norm() == 1.0e-7 && power_law.index() == -2.1),
+                           "Test if norm=1.0e-7 and index=-2.1","Bad values in GModelSpectralPlaw");
+
     //std::cout << power_law << std::endl;
 
     // Setup Crab model
     GModelPointSource crab;
+    test_try("Setup Crab model");
     try {
         crab = GModelPointSource(point_source, power_law);
         crab.name("Crab");
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable setup GModel." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
+
     //std::cout << crab << std::endl;
 
     // Put model in container
     GModels models;
+    test_try("Put model in container");
     try {
         models.append(crab);
         models.append(crab);
         models.append(crab);
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable setup GModels." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
+
     //std::cout << models << std::endl;
 
     // Put container in data
@@ -185,8 +180,6 @@ void test_model(void)
     std::cout << ".";
     //std::cout << data << std::endl;
 */
-    // Plot final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -197,103 +190,95 @@ void test_model(void)
 /***********************************************************************//**
  * @brief Test XML model.
  ***************************************************************************/
-void test_xml_model(const std::string &name, const std::string &filename)
+void TestGModel::test_xml_model(const std::string &name, const std::string &filename)
 {
-    // Write header
-    std::cout << "Test " << name << ": ";
-
     // Test load constructor
+    test_try("Test load constructor");
     try {
         GModels models(filename);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to load model from XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test save constructor
+    test_try("Test load constructor");
     try {
         GModels models(filename);
         models.save("test.xml");
         models.load("test.xml");
         models.save("test.xml");
         models.load("test.xml");
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to save and load model from XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Plot final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
 
 }
 
+/***********************************************************************//**
+ * @brief Test spectral model
+ ***************************************************************************/
+void TestGModel::test_spectral_model(void)
+{
+    test_xml_model("GModelSpectralNodes", m_xml_model_point_nodes);
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Test spacial model
+ ***************************************************************************/
+void TestGModel::test_spacial_model(void)
+{
+    test_xml_model("GModelSpatialMap", m_xml_model_spatial_map);
+    return;
+}
 
 /***********************************************************************//**
  * @brief Test models.
  ***************************************************************************/
-void test_models(void)
+void TestGModel::test_models(void)
 {
-    // Write header
-    std::cout << "Test GModels: ";
-
     // Test void constructor
+    test_try("Test void constructor");
     try {
         GModels models;
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct empty model container."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test load constructor
+    test_try("Test load constructor");
     try {
-        GModels models(xml_file);
+        GModels models(m_xml_file);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct model container from XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test saving and loading
+    test_try("Test saving and loading");
     try {
-        GModels models(xml_file);
+        GModels models(m_xml_file);
         models.save("test.xml");
         models.load("test.xml");
         models.save("test.xml");
         models.load("test.xml");
+
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to save model container in XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Plot final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -306,21 +291,22 @@ void test_models(void)
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "************************" << std::endl;
-    std::cout << "* GModel class testing *" << std::endl;
-    std::cout << "************************" << std::endl;
+    GTestSuites testsuite("GModel");
 
-    // Execute the tests
-    test_model_par();
-    test_model();
-    test_models();
+    bool was_successful=true;
 
-    // Test spectral models
-    test_xml_model("GModelSpectralNodes", xml_model_point_nodes);
-    test_xml_model("GModelSpatialMap", xml_model_spatial_map);
+    //Create a test suite
+    TestGModel test;
+
+    //Append to the container
+    testsuite.append(test);
+
+    //Run
+    was_successful=testsuite.run();
+
+    //save xml report
+    testsuite.save("reports/GModel.xml");
 
     // Return
-    return 0;
+    return was_successful ? 0:1;
 }

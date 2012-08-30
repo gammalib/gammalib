@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GResponse.hpp  -  test Response classes             *
+ *              test_GFits.hpp  -   test fits class                        *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,27 +19,49 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEST_GRESPONSE_HPP
-#define TEST_GRESPONSE_HPP
+#ifndef TEST_GFITS_HPP
+#define TEST_GFITS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 #include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
 
-class TestGResponse : public GTestSuite
+class TestGFits : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGResponse(void) : GTestSuite(){ return; }
-        virtual ~TestGResponse(void){ return; }
+        TestGFits(void) : GTestSuite(){ return; }
+        virtual ~TestGFits(void){ return; }
 
         // Methods
         virtual void set(void);
-        void test_lat_response(void);
+        void         test_create(void);
+        void         test_image_byte(void);
+        void         test_image_ushort(void);
+        void         test_image_short(void);
+        void         test_image_ulong(void);
+        void         test_image_long(void);
+        void         test_image_longlong(void);
+        void         test_image_float(void);
+        void         test_image_double(void);
+        void         test_bintable_bit(void);
+        void         test_bintable_logical(void);
+        void         test_bintable_string(void);
+        void         test_bintable_double(void);
+        void         test_bintable_float(void);
+        void         test_bintable_ushort(void);
+        void         test_bintable_short(void);
+        void         test_bintable_ulong(void);
+        void         test_bintable_long(void);
+        void         test_bintable_longlong(void);
 
-    // Private members
+    // Private methods
     private:
+        int equal(double val, double ref, double eps);
+        int fequal(double val, double ref);
+        int dequal(double val, double ref);
+
 
 };
-#endif /* TEST_GRESPONSE_HPP */
+
+#endif /* TEST_GFITS_HPP */

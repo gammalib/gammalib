@@ -18,7 +18,8 @@ SUBDIRS = support \
           opt \
           obs \
           model \
-          app
+          app \
+          test
 
 # Define sources for this directory
 sources =
@@ -56,6 +57,7 @@ libgamma_la_LIBADD = support/libsupport.la \
                      obs/libobs.la \
                      model/libmodel.la \
                      app/libapp.la \
+                     test/libtest.la \
                      $(INST_MWL) \
                      $(INST_CTA) \
                      $(INST_LAT)

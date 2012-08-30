@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GResponse.hpp  -  test Response classes             *
+ *              test_GSupport.hpp  -   test support class                  *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,27 +19,26 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEST_GRESPONSE_HPP
-#define TEST_GRESPONSE_HPP
+#ifndef TEST_GSUPPORT_HPP
+#define TEST_GSUPPORT_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 #include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
 
-class TestGResponse : public GTestSuite
+class TestGSupport : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGResponse(void) : GTestSuite(){ return; }
-        virtual ~TestGResponse(void){ return; }
+        TestGSupport(void) : GTestSuite(){ return; }
+        virtual ~TestGSupport(void){ return; }
 
         // Methods
         virtual void set(void);
-        void test_lat_response(void);
+        void test_expand_env(void);
 
     // Private members
     private:
-
 };
-#endif /* TEST_GRESPONSE_HPP */
+
+#endif /* TEST_GSUPPORT_HPP */

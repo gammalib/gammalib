@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GResponse.hpp  -  test Response classes             *
+ *              test_GXml.hpp  -   test xml class                          *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,27 +19,31 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEST_GRESPONSE_HPP
-#define TEST_GRESPONSE_HPP
+#ifndef TEST_GXML_HPP
+#define TEST_GXML_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 #include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
 
-class TestGResponse : public GTestSuite
+class TestGXml : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGResponse(void) : GTestSuite(){ return; }
-        virtual ~TestGResponse(void){ return; }
+        TestGXml(void) : GTestSuite(){ return; }
+        virtual ~TestGXml(void){ return; }
 
         // Methods
         virtual void set(void);
-        void test_lat_response(void);
+        void test_GXml_attributes(void);
+        void test_GXml_elements();
+        void test_GXml_construct();
+        void test_GXml_load();
+        void test_GXml_access();
 
     // Private members
     private:
-
+        std::string m_xml_file;
 };
-#endif /* TEST_GRESPONSE_HPP */
+
+#endif /* TEST_GXML_HPP */

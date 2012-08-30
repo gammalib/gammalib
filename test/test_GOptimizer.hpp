@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GOptimizer.hpp  -  test GOptimizer class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2012 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -26,5 +26,21 @@
 #include "GammaLib.hpp"
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
+
+class TestGOptimizer : public GTestSuite
+{
+    public:
+        // Constructors and destructors
+        TestGOptimizer(void) : GTestSuite(){ return; }
+        virtual ~TestGOptimizer(void){ return; }
+
+        // Methods
+        virtual void set(void);
+        void test_optimizer(void);
+
+    // Private members
+    private:
+};
+
 
 #endif /* TEST_GOPTIMIZER_HPP */

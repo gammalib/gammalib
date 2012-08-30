@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GResponse.hpp  -  test Response classes             *
+ *              test_GVector.hpp  -   test vector class                    *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008-2012 by Jurgen Knodlseder              *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,27 +19,39 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEST_GRESPONSE_HPP
-#define TEST_GRESPONSE_HPP
+#ifndef TEST_GVECTOR_HPP
+#define TEST_GVECTOR_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 #include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
 
-class TestGResponse : public GTestSuite
+class TestGVector : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGResponse(void) : GTestSuite(){ return; }
-        virtual ~TestGResponse(void){ return; }
+        TestGVector(void) : GTestSuite(){ return; }
+        virtual ~TestGVector(void){ return; }
 
         // Methods
         virtual void set(void);
-        void test_lat_response(void);
+        void define_vectors(void);
+        void test1(void);
+        void test2(void);
+        void test3(void);
+        void test4(void);
+        void test5(void);
+        void test6(void);
+        void test7(void);
+
 
     // Private members
     private:
-
+        int m_num;
+        GVector m_test;
+        GVector m_result;
+        GVector m_smaller;
+        GVector m_bigger;
 };
-#endif /* TEST_GRESPONSE_HPP */
+
+#endif /* TEST_GVECTOR_HPP */
