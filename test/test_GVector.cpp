@@ -129,11 +129,11 @@ void TestGVector::test6(void){
     // GVector += 2.0
     m_result  = m_test;
     m_result += 2.0;
-    test_assert(m_result[0]==m_test[0]+2&&
-                m_result[1]==m_test[1]+2&&
-                m_result[2]==m_test[2]+2&&
-                m_result[3]==m_test[3]+2&&
-                m_result[4]==m_test[4]+2,"GVector += 2.0");
+    test_assert(m_result[0]==m_test[0]+2.0&&
+                m_result[1]==m_test[1]+2.0&&
+                m_result[2]==m_test[2]+2.0&&
+                m_result[3]==m_test[3]+2.0&&
+                m_result[4]==m_test[4]+2.0,"GVector += 2.0");
 
     // GVector -= GVector
     m_result  = m_test;
@@ -194,11 +194,11 @@ void TestGVector::test6(void){
 
     // GVector + 2.0
     m_result = m_test + 2.0;
-    test_assert(m_result[0]==m_test[0]+2&&
-                m_result[1]==m_test[1]+2&&
-                m_result[2]==m_test[2]+2&&
-                m_result[3]==m_test[3]+2&&
-                m_result[4]==m_test[4]+2,"GVector + 2.0");
+    test_assert(m_result[0]==m_test[0]+2.0&&
+                m_result[1]==m_test[1]+2.0&&
+                m_result[2]==m_test[2]+2.0&&
+                m_result[3]==m_test[3]+2.0&&
+                m_result[4]==m_test[4]+2.0,"GVector + 2.0");
 
     // GVector + 2
     m_result = m_test + 2;
@@ -252,7 +252,9 @@ void TestGVector::test6(void){
                 m_test[1]*m_test[1]+
                 m_test[2]*m_test[2]+
                 m_test[3]*m_test[3]+
-                m_test[4]*m_test[4]== m_test * m_test,"Scalar (or dot) product GVector * GVector");
+                m_test[4]*m_test[4]== m_test * m_test,
+                "Scalar (or dot) product GVector * GVector",
+                str(m_test[0]*m_test[0]+m_test[1]*m_test[1]+m_test[2]*m_test[2]+m_test[3]*m_test[3]+m_test[4]*m_test[4])+" not equal to "+str(m_test*m_test));
 
     // GVector * 2.0
     m_result = m_test * 2.0;
@@ -275,7 +277,14 @@ void TestGVector::test6(void){
                         m_test[1]*m_test[1]+
                         m_test[2]*m_test[2]+
                         m_test[3]*m_test[3]+
-                        m_test[4]*m_test[4])==norm(m_test),"|GVector| (vector norm))");
+                        m_test[4]*m_test[4])==norm(m_test),
+                        "|GVector| (vector norm))",
+                        str(sqrt(   m_test[0]*m_test[0]+
+                        m_test[1]*m_test[1]+
+                        m_test[2]*m_test[2]+
+                        m_test[3]*m_test[3]+
+                                m_test[4]*m_test[4]))+" not equal to "+str(norm(m_test))
+                        );
 
     // min(GVector)
     test_assert(min(m_test)==1.1,"min(GVector)");
