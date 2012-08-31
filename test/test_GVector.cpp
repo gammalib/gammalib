@@ -181,7 +181,7 @@ void TestGVector::test6(void){
     // Devide by zero
     m_result  = m_test;
     m_result /= 0.0;
-    test_assert(m_result.print()=="(inf, inf, inf, inf, inf)","Devide by zero",m_result.print());
+    test_assert(m_result.print()=="(inf, inf, inf, inf, inf)"||m_result.print()=="(Inf, Inf, Inf, Inf, Inf)","Devide by zero",m_result.print());
 
     // GVector + GVector
     m_result = m_test + m_test;
@@ -285,7 +285,7 @@ void TestGVector::test6(void){
     test_assert(max(m_test)==5.5,"max(GVector)");
 
     // sum(GVector)
-    test_assert(m_test[0]+m_test[1]+m_test[2]+m_test[3]+m_test[4]==sum(m_test),"sum(GVector)");
+    test_value(m_test[0]+m_test[1]+m_test[2]+m_test[3]+m_test[4],sum(m_test),1e-6,"sum(GVector)");
 
     // acos(GVector/10.0)
     test_assert(acos(m_test/10.0).print()=="(1.46057, 1.34898, 1.23449, 1.1152, 0.988432)","acos(GVector/10.0)");
