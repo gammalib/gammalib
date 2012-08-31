@@ -195,7 +195,7 @@ bool GTestSuite::run(void)
     set();
 
     //Show the TestSuite name
-    m_log<<this->name()<<": ";
+    m_log.header3(this->name());
 
     bool was_successful = true;
 
@@ -205,6 +205,13 @@ bool GTestSuite::run(void)
 
             // Add the test in the m_tests container
             m_tests.push_back(m_stack_test.front());
+
+            // Save the number of errors and failures
+            int old_errors = errors();
+            int old_failures = failures();
+
+            // Show the name of the test
+            m_log<<m_stack_test.front()->name()<<": ";
 
             // Run the test
             m_stack_test.front()->run();
@@ -217,19 +224,21 @@ bool GTestSuite::run(void)
             // Show the result ( ".","F" or, "E")
             m_log<<m_stack_test.front()->print_result();
 
+
+                // If they are errors or failures
+            if((m_errors!=old_errors||m_failures!=old_failures)==0){
+                m_log<<" ok\n";
+                was_successful=true;
+            }
+            else{
+                m_log<<" NOK\n";
+                was_successful=false;
+            }
+
+
             // Erase the test case
             m_stack_test.erase(m_stack_test.begin());
         }
-    }
-
-    // If they are errors or failures
-    if((m_errors+m_failures)==0){
-        m_log<<" ok\n";
-        was_successful=true;
-    }
-    else{
-        m_log<<" NOK\n";
-        was_successful=false;
     }
 
     return was_successful;
