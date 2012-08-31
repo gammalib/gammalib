@@ -77,7 +77,7 @@ void TestGVector::test3(void){
     GVector test3(3);
     test3[1] = acos(-1.0);
 
-    test_assert(test3[0]==0&&test3[1]==acos(-1.0)&&test3[2]==0,"test3 == (0, pi, 0)");
+    test_value(test3[1],acos(-1.0),1e-6,"test3 == (0, pi, 0)");
     test_assert(test3.size()==3,"test3.size()==3");
 
     #if defined(G_RANGE_CHECK)
@@ -129,11 +129,10 @@ void TestGVector::test6(void){
     // GVector += 2.0
     m_result  = m_test;
     m_result += 2.0;
-    test_assert(m_result[0]==m_test[0]+2&&
-                m_result[1]==m_test[1]+2&&
-                m_result[2]==m_test[2]+2&&
-                m_result[3]==m_test[3]+2&&
-                m_result[4]==m_test[4]+2,"GVector += 2.0");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector += 2.0 (1)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector += 2.0 (2)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector += 2.0 (3)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector += 2.0 (4)");
 
     // GVector -= GVector
     m_result  = m_test;
@@ -182,7 +181,7 @@ void TestGVector::test6(void){
     // Devide by zero
     m_result  = m_test;
     m_result /= 0.0;
-    test_assert(m_result.print()=="(inf, inf, inf, inf, inf)","Devide by zero");
+    test_assert(m_result.print()=="(inf, inf, inf, inf, inf)"||m_result.print()=="(Inf, Inf, Inf, Inf, Inf)","Devide by zero",m_result.print());
 
     // GVector + GVector
     m_result = m_test + m_test;
@@ -194,34 +193,31 @@ void TestGVector::test6(void){
 
     // GVector + 2.0
     m_result = m_test + 2.0;
-    test_assert(m_result[0]==m_test[0]+2&&
-                m_result[1]==m_test[1]+2&&
-                m_result[2]==m_test[2]+2&&
-                m_result[3]==m_test[3]+2&&
-                m_result[4]==m_test[4]+2,"GVector + 2.0");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector + 2.0 (1)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector + 2.0 (2)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector + 2.0 (3)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector + 2.0 (4)");
 
     // GVector + 2
     m_result = m_test + 2;
-    test_assert(m_result[0]==m_test[0]+2&&
-                m_result[1]==m_test[1]+2&&
-                m_result[2]==m_test[2]+2&&
-                m_result[3]==m_test[3]+2&&
-                m_result[4]==m_test[4]+2,"GVector + 2");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector + 2 (1)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector + 2 (2)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector + 2 (3)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"GVector + 2 (4)");
+
     //
     m_result = 2.0 + m_test;
-    test_assert(m_result[0]==m_test[0]+2&&
-                m_result[1]==m_test[1]+2&&
-                m_result[2]==m_test[2]+2&&
-                m_result[3]==m_test[3]+2&&
-                m_result[4]==m_test[4]+2,"2.0 + GVector");
+    test_value(m_result[0],m_test[0]+2,1e-6,"2.0 + GVector (1)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"2.0 + GVector (2)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"2.0 + GVector (3)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"2.0 + GVector (4)");
 
     // 2 + GVector
     m_result = 2 + m_test;
-    test_assert(m_result[0]==m_test[0]+2&&
-                m_result[1]==m_test[1]+2&&
-                m_result[2]==m_test[2]+2&&
-                m_result[3]==m_test[3]+2&&
-                m_result[4]==m_test[4]+2,"2 + GVector");
+    test_value(m_result[0],m_test[0]+2,1e-6,"2 + GVector (1)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"2 + GVector (2)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"2 + GVector (3)");
+    test_value(m_result[0],m_test[0]+2,1e-6,"2 + GVector (4)");
 
     // GVector - GVector
     m_result = m_test - m_test;
@@ -248,11 +244,13 @@ void TestGVector::test6(void){
                 m_result[4]==2-m_test[4],"2.0 - GVector");
 
     // Scalar (or dot) product GVector * GVector
-    test_assert(m_test[0]*m_test[0]+
+    test_value( m_test[0]*m_test[0]+
                 m_test[1]*m_test[1]+
                 m_test[2]*m_test[2]+
                 m_test[3]*m_test[3]+
-                m_test[4]*m_test[4]== m_test * m_test,"Scalar (or dot) product GVector * GVector");
+                m_test[4]*m_test[4],
+                m_test * m_test,
+                1e-6,"Scalar (or dot) product GVector * GVector");
 
     // GVector * 2.0
     m_result = m_test * 2.0;
@@ -271,11 +269,14 @@ void TestGVector::test6(void){
                 m_result[4]==m_test[4]*2,"2.0 * GVector");
 
     // |GVector| (vector norm))
-    test_assert(sqrt(   m_test[0]*m_test[0]+
+    test_value(sqrt(    m_test[0]*m_test[0]+
                         m_test[1]*m_test[1]+
                         m_test[2]*m_test[2]+
                         m_test[3]*m_test[3]+
-                        m_test[4]*m_test[4])==norm(m_test),"|GVector| (vector norm))");
+                        m_test[4]*m_test[4]),
+                        norm(m_test),
+                        1e-6,
+                        "|GVector| (vector norm)");
 
     // min(GVector)
     test_assert(min(m_test)==1.1,"min(GVector)");
@@ -284,7 +285,7 @@ void TestGVector::test6(void){
     test_assert(max(m_test)==5.5,"max(GVector)");
 
     // sum(GVector)
-    test_assert(m_test[0]+m_test[1]+m_test[2]+m_test[3]+m_test[4]==sum(m_test),"sum(GVector)");
+    test_value(m_test[0]+m_test[1]+m_test[2]+m_test[3]+m_test[4],sum(m_test),1e-6,"sum(GVector)");
 
     // acos(GVector/10.0)
     test_assert(acos(m_test/10.0).print()=="(1.46057, 1.34898, 1.23449, 1.1152, 0.988432)","acos(GVector/10.0)");
