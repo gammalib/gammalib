@@ -28,7 +28,7 @@
 %include stl.i
 
 /* __ Make sure that exceptions are catched ______________________________ */
-%import(module="support") "GException.i";
+%import(module="gammalib.support") "GException.i";
 
 /* __ XML module _________________________________________________________ */
 %include "GTestSuites.i"
