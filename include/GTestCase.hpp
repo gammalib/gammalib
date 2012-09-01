@@ -1,5 +1,5 @@
 /***************************************************************************
- *                           TestCase.hpp - Test Case Class                *
+ *                    GTestCase.hpp  - Test case class                     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -30,78 +30,66 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include <string>
-#include <typeinfo>
 
-#include "GTestSuite.hpp"
-
-/* __ Forward declarations _______________________________________________ */
-class GTestSuite;
-typedef void (GTestSuite::*pfunction)(void);
 
 /***********************************************************************//**
  * @class GTestCase
  *
- * @brief GTestCase class
+ * @brief Test class
  *
- * This class implements an test case object.
+ * This class implements a single test case result. It contains information
+ * about the test name, an optional message that is created in case on an
+ * error or a failure, a type information (containing usually the name of
+ * the class that as failing), and some information about the test duration.
+ * Furthermore, the test case knows whether the test succeeded or failed,
+ * and whether the test was an error or a failure test.
  ***************************************************************************/
 class GTestCase{
-    // Friend classes
-    friend class GTestSuite;
     
-    public:
+public:
+    // public enumerators
+    enum ErrorKind {
+        FAIL_TEST,
+        ERROR_TEST
+    };
 
-        // public enumerators
-        enum ErrorType{
-            FAIL_TEST,
-            ERROR_TEST
-        };
+    // Constructors and destructors
+    GTestCase(void);
+    GTestCase(const GTestCase& test);
+    GTestCase(ErrorKind kind, const std::string& name = "");
+    virtual ~GTestCase(void);
 
-        // Constructors and destructors
-        GTestCase(void);
-        GTestCase(const GTestCase& testcase);
-        GTestCase(ErrorType type);
-        GTestCase(const pfunction ptr_function, const std::string& name,GTestSuite* testsuite);
-        GTestCase(ErrorType type, const std::string& name);
-        ~GTestCase(void);
-    
-        // Operators
-        GTestCase&  operator= (const GTestCase& testcase);
-        
-        // Methods
-        std::string name(void) const;
-        void        name(const std::string& name);
-        std::string message(void) const;
-        void        message( const std::string& message);
-        std::string message_type(void) const;
-        void        message_type( const std::string& message_type);
-        pfunction   ptr_function(void) const;
-        void        ptr_function(const pfunction);
-        GTestSuite& testsuite(void) const;
-        void        testsuite(GTestSuite* testsuite);
-        ErrorType   type(void) const;
-        void        type(ErrorType type);
-        bool        is_passed() const;
-        double      time() const;
-        std::string print_result(void) const;
-        void run(void);
+    // Operators
+    GTestCase&  operator= (const GTestCase& test);
 
+    // Methods
+    std::string name(void) const;
+    void        name(const std::string& name);
+    std::string message(void) const;
+    void        message( const std::string& message);
+    std::string type(void) const;
+    void        type( const std::string& type);
+    ErrorKind   kind(void) const;
+    void        kind(ErrorKind kind);
+    bool        passed(void) const;
+    void        passed(const bool& passed);
+    double      duration(void) const;
+    void        duration(const double& duration);
+    std::string print(void) const;
+
+protected:
      // Protected methods
-    protected:
-        void        init_members(void);
-        void        copy_members(const GTestCase& testcase);
-        void        free_members(void);
+    void init_members(void);
+    void copy_members(const GTestCase& test);
+    void free_members(void);
         
     // Private members
-    private:
-        std::string m_name; //!< name of the test
-        std::string m_message; //!< message of the test
-        std::string m_message_type; //!< type for the message
-        pfunction   m_ptr_function; //!< function pointer
-        GTestSuite* m_testsuite; //!< pointer to the test suite
-        bool        m_passed; //!< boolean to check test success
-        ErrorType   m_type; //!< type of the test case : failure or error test
-        double      m_time; //!< duration of the test
+    std::string m_name;        //!< Test name
+    std::string m_message;     //!< Test message
+    std::string m_type;        //!< Test type
+    bool        m_passed;      //!< Boolean to check test success
+    ErrorKind   m_kind;        //!< Kind of test case (failure or error test)
+    double      m_duration;    //!< Test duration
 };
 
-#endif
+#endif /* GTESTCASE_H */

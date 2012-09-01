@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GTestSuite.i - Test suite class Python interface                      *
+ *            GTestSuite.i - Test suite class Python interface             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 Jean-Baptiste Cayrou                                *
  * ----------------------------------------------------------------------- *
@@ -29,54 +29,56 @@
 #include "GTools.hpp"
 %}
 
-// Include (int ARGC, char **ARGV) typemap to allow passing command line
-// arguments to GApplication constructor
-%include "argcargv.i"
 
 /***********************************************************************//**
  * @class GTestSuite
  *
- * @brief Test suite Python interface defintion.
+ * @brief Test suite Python interface defintion
  ***************************************************************************/
-class GTestSuite{
+class GTestSuite {
 
-    public:
-        // Constructors and destructors
-                GTestSuite(void);
-        GTestSuite(const GTestSuite& testsuite);
-        GTestSuite(const std::string& name);
-        virtual ~GTestSuite(void);
+public:
+        
+    // Constructors and destructors
+    GTestSuite(void);
+    GTestSuite(const GTestSuite& testsuite);
+    GTestSuite(const std::string& name);
+    virtual ~GTestSuite(void);
 
-        // Methods
-        virtual void                set(void) = 0;
-        bool                        run(void);
-        std::string                 name(void) const;
-        void                        name(const std::string& name);
-        void                        cout(bool cout);
-        void                        test_assert(bool result,
-                                                const std::string& name,
-                                                const std::string& message="");
-        void                        test_value( double value,
-                                                double value_expected,
-                                                double eps = 0,
-                                                const std::string& name="",
-                                                const std::string& message="");
-        void                        test_try(const std::string& name);
-        void                        test_try_success();
-        void                        test_try_failure(const std::string& message="",
-                                                     const std::string& type="");
-        void                        test_try_failure(const std::exception& e);
-        GException::test_failure&   exception_failure(const std::string& message);
-        GException::test_error&     exception_error(const std::string& message);
-        void                        add_test(pfunction function, const std::string& name);
-        int                         tests(void) const;
-        int                         errors(void) const;
-        int                         failures(void) const;
-        int                         success(void) const;
-        time_t                      timestamp(void) const;
-        double                      duration(void) const;
+    // Methods
+    void                      clear(void);
+    int                       size(void) const;
+    void                      append(pfunction function, const std::string& name);
+    virtual void              set(void) = 0;
+    bool                      run(void);
+    std::string               name(void) const;
+    void                      name(const std::string& name);
+    void                      cout(bool cout);
+    void                      test_assert(bool result,
+                                          const std::string& name,
+                                          const std::string& message = "");
+    void                      test_value(double value,
+                                         double value_expected,
+                                         double eps = 0,
+                                         const std::string& name = "",
+                                         const std::string& message = "");
+    void                      test_try(const std::string& name);
+    void                      test_try_success(void);
+    void                      test_try_failure(const std::string& message = "",
+                                               const std::string& type = "");
+    void                      test_try_failure(const std::exception& e);
+    GException::test_failure& exception_failure(const std::string& message);
+    GException::test_error&   exception_error(const std::string& message);
+    int                       errors(void) const;
+    int                       failures(void) const;
+    int                       success(void) const;
+    time_t                    timestamp(void) const;
+    double                    duration(void) const;
 
+    // Old methods (will become obsolete)
+    void                      add_test(pfunction function, const std::string& name);
 };
+
 
 /***********************************************************************//**
  * @brief GTestSuite class extension
@@ -85,28 +87,21 @@ class GTestSuite{
     char *__str__() {
         return tochar(self->name());
     }
-
-    GTestSuite& __getitem__(const int& index) {
-        if (index >= 0 && index < self->tests()) {
+    GTestCase& __getitem__(const int& index) {
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->tests());
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
     }
-
-    void __setitem__(const int& index, const GTestSuite& val) {
-        if (index>=0 && index < self->test_suites()) {
+    void __setitem__(const int& index, const GTestCase& val) {
+        if (index>=0 && index < self->size()) {
             (*self)[index] = val;
             return;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->tests());
+            throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
     }
-
-    GTestSuite copy() {
-        return (*self);
-    }
-
 };

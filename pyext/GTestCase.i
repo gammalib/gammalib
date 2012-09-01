@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GTestCase.i - Test case class Python interface                        *
+ *              GTestCase.i - Test case class Python interface             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 Jean-Baptiste Cayrou                                *
  * ----------------------------------------------------------------------- *
@@ -29,65 +29,51 @@
 #include "GTools.hpp"
 %}
 
-// Include (int ARGC, char **ARGV) typemap to allow passing command line
-// arguments to GApplication constructor
-%include "argcargv.i"
 
 /***********************************************************************//**
  * @class GTestCase
  *
- * @brief Test case Python interface defintion.
+ * @brief Test case Python interface defintion
  ***************************************************************************/
-class GTestCase{
-    // Friend classes
-    friend class GTestSuite;
+class GTestCase {
 
-    public:
+public:
+    // public enumerators
+    enum ErrorKind {
+        FAIL_TEST,
+        ERROR_TEST
+    };
 
-        // public enumerators
-        enum ErrorType{
-            FAIL_TEST,
-            ERROR_TEST
-        };
+    // Constructors and destructors
+    GTestCase(void);
+    GTestCase(const GTestCase& test);
+    GTestCase(ErrorKind kind, const std::string& name = "");
+    virtual ~GTestCase(void);
 
-        // Constructors and destructors
-        GTestCase(void);
-        GTestCase(const GTestCase& testcase);
-        GTestCase(ErrorType type);
-        GTestCase(const pfunction ptr_function, const std::string& name,GTestSuite* testsuite);
-        GTestCase(ErrorType type, const std::string& name);
-        ~GTestCase(void);
-
-
-        // Methods
-        std::string name(void) const;
-        void        name(const std::string& name);
-        std::string message(void) const;
-        void        message( const std::string& message);
-        std::string message_type(void) const;
-        void        message_type( const std::string& message_type);
-        pfunction   ptr_function(void) const;
-        void        ptr_function(const pfunction);
-        GTestSuite& testsuite(void) const;
-        void        testsuite(GTestSuite* testsuite);
-        ErrorType   type(void) const;
-        void        type(ErrorType type);
-        bool        is_passed() const;
-        double      time() const;
-        std::string print_result(void) const;
-        void run(void);
+    // Methods
+    std::string name(void) const;
+    void        name(const std::string& name);
+    std::string message(void) const;
+    void        message(const std::string& message);
+    std::string type(void) const;
+    void        type(const std::string& type);
+    ErrorKind   kind(void) const;
+    void        kind(ErrorKind kind);
+    bool        passed(void) const;
+    void        passed(const bool& passed);
+    double      duration(void) const;
+    void        duration(const double& duration);
 };
+
 
 /***********************************************************************//**
  * @brief GTestCase class extension
  ***************************************************************************/
 %extend GTestCase {
     char *__str__() {
-        return tochar(self->name());
+        return tochar(self->print());
     }
-
     GTestCase copy() {
         return (*self);
     }
-
 };

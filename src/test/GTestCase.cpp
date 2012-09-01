@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GTestCase.cpp  - Test case class for GammaLib                 *
+ *                    GTestCase.cpp  - Test case class                     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,7 +18,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
-
 /**
  * @file GTestCase.cpp
  * @brief Test Case class implementation
@@ -30,15 +29,6 @@
 #include <config.h>
 #endif
 #include "GTestCase.hpp"
-
-/* __ OpenMP section _____________________________________________________ */
-#ifdef _OPENMP
-#include <omp.h>
-#ifdef __APPLE__ & __MACH__
-#include <pthread.h>
-pthread_attr_t gomp_thread_attr;
-#endif
-#endif
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -58,7 +48,7 @@ pthread_attr_t gomp_thread_attr;
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
- GTestCase::GTestCase(void)
+GTestCase::GTestCase(void)
 {
     // Initialise members
     init_members();
@@ -67,86 +57,46 @@ pthread_attr_t gomp_thread_attr;
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] testsuite Test Suite.
+ * @param[in] test Test case.
  ***************************************************************************/
-GTestCase::GTestCase(const GTestCase& testcase)
+GTestCase::GTestCase(const GTestCase& test)
 {
     // Initialise members
     init_members();
     
     // Copy members
-    copy_members(testcase);
+    copy_members(test);
 
     // Return
     return;
 }
 
-/***********************************************************************//**
- * @brief Type constructor
- *
- * @param[in] type Type of the Test case ( GTestCase::FAIL_TEST or GTestCase::ERROR_TEST )
- ***************************************************************************/
-GTestCase::GTestCase(ErrorType type)
-{
-    //Initialise members
-    init_members();
-
-    // Set type
-    m_type = type;
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Function and name constructor
- *
- * @param[in] ptr_function Pointer to function (void)(*)(void)
- * @param[in] name Name of the Test case
- ***************************************************************************/
-GTestCase::GTestCase(const pfunction ptr_function, const std::string& name, GTestSuite* testsuite)
-{
-    // Initialise members
-    init_members();
-    
-    // Set type as ERROR (test a function)
-    m_type = ERROR_TEST;
-    
-    // Set the pointer function
-    m_ptr_function=ptr_function;
-    
-    // Set name
-    m_name=name;
-
-    // Set testsuite
-    m_testsuite = testsuite;
-    // Return
-    return;
-}
 
 /***********************************************************************//**
  * @brief Type and name constructor
  *
- * @param[in] type Type of the Test case (GTestCase::FAIL_TEST or GTestCase::ERROR_TEST)
- * @param[in] name Name of the Test case
+ * @param[in] kind Test kind (FAIL_TEST or ERROR_TEST)
+ * @param[in] name Test case name (default: "")
  ***************************************************************************/
-GTestCase::GTestCase(ErrorType type, const std::string& name)
+GTestCase::GTestCase(ErrorKind kind, const std::string& name)
 {
-    //Initialise members
+    // Initialise members
     init_members();
     
-    // Set type
-    m_type = type;
+    // Set kind
+    m_kind = kind;
     
     // Set name
-    m_name=name;
+    m_name = name;
 
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Destructor
@@ -160,6 +110,7 @@ GTestCase::~GTestCase(void)
     return;
 }
 
+
 /*==========================================================================
  =                                                                         =
  =                               Operators                                 =
@@ -169,12 +120,12 @@ GTestCase::~GTestCase(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] testcase Test Case.
+ * @param[in] test Test Case.
  ***************************************************************************/
- GTestCase&  GTestCase::operator= (const GTestCase& testcase)
+GTestCase&  GTestCase::operator= (const GTestCase& test)
 {
     // Execute only if object is not identical
-    if (this != &testcase) {
+    if (this != &test) {
         
         // Free members
         free_members();
@@ -183,13 +134,14 @@ GTestCase::~GTestCase(void)
         init_members();
 
         // Copy members
-        copy_members(testcase);
+        copy_members(test);
 
     } // endif: object was not identical
 
     // Return
     return *this;
 }
+
 
 /*==========================================================================
  =                                                                         =
@@ -198,180 +150,188 @@ GTestCase::~GTestCase(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return Test Case name
+ * @brief Return test case name
  ***************************************************************************/
-std::string GTestCase::name(void) const{
+std::string GTestCase::name(void) const
+{
+    // Return name
     return m_name;
 }
 
+
 /***********************************************************************//**
- * @brief Set Test Case name
- * @param[in] name Parameter name.
+ * @brief Set test case name
+ *
+ * @param[in] name Test case name.
  ***************************************************************************/
-void GTestCase::name(const std::string& name){
-    m_name=name;
+void GTestCase::name(const std::string& name)
+{
+    // Set name
+    m_name = name;
+
+    // Return
     return;
 }
 
+
 /***********************************************************************//**
- * @brief Return Test Case message
+ * @brief Return test case message
  ***************************************************************************/
-std::string GTestCase::message(void) const{
+std::string GTestCase::message(void) const
+{
+    // Return message
     return m_message;
 }
 
-/***********************************************************************//**
- * @brief Set Test Case mesage
- * @param[in] message Parameter message.
- ***************************************************************************/
-void GTestCase::message( const std::string& message){
-    m_message=message;
-    return;
-}
 
 /***********************************************************************//**
- * @brief Return Test Case type of message
+ * @brief Set test case message
+ *
+ * @param[in] message Test case message.
  ***************************************************************************/
-std::string GTestCase::message_type(void) const{
-    return m_message_type;
-}
-
-/***********************************************************************//**
- * @brief Set Test Case type of message
- * @param[in] message_type Parameter type of message.
- ***************************************************************************/
-void GTestCase::message_type( const std::string& message_type){
-    m_message_type=message_type;
-    return;
-}
-
-/***********************************************************************//**
- * @brief Set Test Case pointer to function
- * @param[in] function Pointer to function (void)(*)(void)
- ***************************************************************************/
-void GTestCase::ptr_function(const pfunction function){
-    m_ptr_function=function;
-    return;
-}
-
-/***********************************************************************//**
- * @brief Return Test Case pointer to function
- ***************************************************************************/
-GTestSuite& GTestCase::testsuite(void) const{
-    return *m_testsuite;
-}
-
-/***********************************************************************//**
- * @brief Set Test Case pointer to function
- * @param[in] function Pointer to function (void)(*)(void)
- ***************************************************************************/
-void GTestCase::testsuite(GTestSuite* testsuite){
-    m_testsuite = testsuite;
-    return;
-}
-
-/***********************************************************************//**
- * @brief Return Test Case pointer to function
- ***************************************************************************/
-pfunction GTestCase::ptr_function(void) const{
-    return m_ptr_function;
-}
-
-/***********************************************************************//**
- * @brief Return Test Case type
- ***************************************************************************/
-GTestCase::ErrorType GTestCase::type(void) const{
-    return m_type; 
-}
-
-/***********************************************************************//**
- * @brief Set Test Case type
- * @param[in] type Type of the test case
- ***************************************************************************/
-void GTestCase::type(ErrorType type){
-    m_type=type;
-    return;
-}
-
-/***********************************************************************//**
- * @brief Return True if the test passed
- ***************************************************************************/
-bool GTestCase::is_passed(void) const
+void GTestCase::message(const std::string& message)
 {
+    // Set message
+    m_message = message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return test case type
+ ***************************************************************************/
+std::string GTestCase::type(void) const
+{
+    // Return test case type
+    return m_type;
+}
+
+
+/***********************************************************************//**
+ * @brief Set type of test case
+ *
+ * @param[in] type Type of test case.
+ ***************************************************************************/
+void GTestCase::type(const std::string& type)
+{
+    // Set type of test case
+    m_type = type;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return kind of test case
+ *
+ * Returns whether this test case is for failure testing (FAIL_TEST) or
+ * error testing (ERROR_TEST).
+ ***************************************************************************/
+GTestCase::ErrorKind GTestCase::kind(void) const
+{
+    // Return kind
+    return m_kind; 
+}
+
+
+/***********************************************************************//**
+ * @brief Set kind of test case
+ *
+ * @param[in] kind Kind of test case (FAIL_TEST or ERROR_TEST)
+ *
+ * Specifies whether this test case is for failure testing (FAIL_TEST) or
+ * error testing (ERROR_TEST).
+ ***************************************************************************/
+void GTestCase::kind(ErrorKind kind)
+{
+    // Set kind
+    m_kind = kind;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return whether the test passed
+ *
+ * This method returns true if the test has passed, false otherwise.
+ ***************************************************************************/
+bool GTestCase::passed(void) const
+{
+    // Return
     return m_passed;
 }
+
+
 /***********************************************************************//**
- * @brief Return the duration of the test case
+ * @brief Set if test passed
+ *
+ * @param[in] passed Test passed (true or false)
  ***************************************************************************/
-double GTestCase::time(void) const
+void GTestCase::passed(const bool& passed)
 {
-    return m_time;
+    // Set passed flag
+    m_passed = passed;
+
+    // Return
+    return;
 }
+
+
+/***********************************************************************//**
+ * @brief Return test case duration
+ ***************************************************************************/
+double GTestCase::duration(void) const
+{
+    // Return duration
+    return m_duration;
+}
+
+
+/***********************************************************************//**
+ * @brief Set test duration
+ *
+ * @param[in] duration Test duration.
+ ***************************************************************************/
+void GTestCase::duration(const double& duration)
+{
+    // Set duration
+    m_duration = duration;
+
+    // Return
+    return;
+}
+
+
 /***********************************************************************//**
  * @brief Print test case result
- * Return a string : ".", "F" or "E"
+ *
+ * Returns either ".", "F" or "E", dependent on the test result.
  ***************************************************************************/
-std::string GTestCase::print_result(void) const{
+std::string GTestCase::print(void) const
+{
+    // Initialize string
     std::string result;
-    if(m_passed){
+
+    // Set string dependent on test result
+    if (m_passed) {
         result.append(".");
     }
-    else if (m_type==ERROR_TEST){
+    else if (m_kind == ERROR_TEST) {
         result.append("E");
     }
-    else{
+    else {
         result.append("F");
     }
 
+    // Return result
     return result;
 }
 
-/***********************************************************************//**
- * @brief Call the function m_ptr_function and catch exception.
- ***************************************************************************/
-void GTestCase::run(void)
-{
-    #ifdef _OPENMP
-        double t_start = omp_get_wtime();
-    #else
-        clock_t t_start = clock();
-    #endif
-
-    try{
-        // If they are a function
-        if(m_ptr_function!=NULL){
-            // Call it
-            (*m_testsuite.*(m_ptr_function))();
-        }
-    }
-    catch(std::exception& e)
-    {
-        // Test not success
-        m_passed=false;
-
-        //Set message
-        m_message=e.what();
-
-        //Set type as class name
-        m_message_type=typeid(e).name();
-    }
-    catch(...)
-    {
-        //For other exceptions
-        m_passed=false;
-    }
-
-    #ifdef _OPENMP
-        double t_elapse = omp_get_wtime()-t_start;
-    #else
-        double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
-    #endif
-
-    //Set duration
-    m_time=t_elapse;
-
-    return;
-}
 
 /*==========================================================================
  =                                                                         =
@@ -384,26 +344,37 @@ void GTestCase::run(void)
  ***************************************************************************/
 void GTestCase::init_members(void)
 {
-    m_name="Unamed Test Case";
-    m_type=ERROR_TEST;
-    m_ptr_function=NULL;
-    m_passed=true;
-    m_time=0;
+    // Initialise members
+    m_name     = "Unnamed Error Test Case";
+    m_message  = "";
+    m_type     = "";
+    m_passed   = true;
+    m_kind     = ERROR_TEST;
+    m_duration = 0.0;
 
+    // Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Copy class members
- * @param[in] testcase Test case to copy.
+ *
+ * @param[in] test Test case.
+ *
+ * Copies all members from the test case class.
  ***************************************************************************/
-void GTestCase::copy_members(const GTestCase& testcase)
+void GTestCase::copy_members(const GTestCase& test)
 {
-    m_name = testcase.name();
-    m_ptr_function = testcase.ptr_function();
-    m_message = testcase.m_message;
-    m_message_type = testcase.m_message_type;
+    // Copy members
+    m_name     = test.m_name;
+    m_message  = test.m_message;
+    m_type     = test.m_type;
+    m_passed   = test.m_passed;
+    m_kind     = test.m_kind;
+    m_duration = test.m_duration;
 
+    // Return
     return;
 }
 
@@ -412,5 +383,6 @@ void GTestCase::copy_members(const GTestCase& testcase)
  ***************************************************************************/
 void GTestCase::free_members(void)
 {
+    // Return
     return;
 }

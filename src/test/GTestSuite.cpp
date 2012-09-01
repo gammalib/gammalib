@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GTestSuite.cpp  - Test Suite class for GammaLib                 *
+ *             GTestSuite.cpp  - Test Suite class for GammaLib             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,7 +18,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
-
 /**
  * @file GTestSuite.cpp
  * @brief Test Suite class implementation
@@ -29,14 +28,27 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <typeinfo>
 #include "GTestSuite.hpp"
 #include "GTools.hpp"
 #include "GLog.hpp"
 
+/* __ OpenMP section _____________________________________________________ */
+#ifdef _OPENMP
+#include <omp.h>
+#ifdef __APPLE__
+#ifdef __MACH__
+#include <pthread.h>
+pthread_attr_t gomp_thread_attr;
+#endif
+#endif
+#endif
+
 /* __ Method name definitions ____________________________________________ */
-#define G_OP_ACCESS                         "GTestSuite::operator[](int&)"
-#define G_TRY_SUCCESS                       "GTestSuite::test_try_success()"
-#define G_TRY_FAILURE                       "GTestSuite::test_try_failure(std::string&,std::string&)"
+#define G_OP_ACCESS                            "GTestSuite::operator[](int&)"
+#define G_TRY_SUCCESS                        "GTestSuite::test_try_success()"
+#define G_TRY_FAILURE            "GTestSuite::test_try_failure(std::string&,"\
+                                                              "std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -63,52 +75,55 @@ GTestSuite::GTestSuite(void)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] testsuite Test Suite.
+ * @param[in] suite Test Suite.
  ***************************************************************************/
-GTestSuite::GTestSuite(const GTestSuite& testsuite)
+GTestSuite::GTestSuite(const GTestSuite& suite)
 {
     // Initialise members
     init_members();
     
     // Copy members
-    copy_members(testsuite);
+    copy_members(suite);
     
     //Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Name constructor
  *
- * @param[in] name Name of the Test Suite
+ * @param[in] name Test suite name.
  ***************************************************************************/
 GTestSuite::GTestSuite(const std::string& name)
 {
     // Initialise members
     init_members();
     
-    //Set name
-    m_name=name;
+    // Set name
+    m_name = name;
     
     //Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Destructor
- * Exit(1) if they are failures or errors for compatibility with make check
  ***************************************************************************/
 GTestSuite::~GTestSuite(void)
 {
-    //Free members
+    // Free members
     free_members();
 
-    //Return
+    // Return
     return;
 }
+
 
 /*==========================================================================
  =                                                                         =
@@ -119,12 +134,12 @@ GTestSuite::~GTestSuite(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] testsuite Test Suite.
+ * @param[in] suite Test suite.
  ***************************************************************************/
- GTestSuite&  GTestSuite::operator= (const GTestSuite& testsuite)
+GTestSuite&  GTestSuite::operator= (const GTestSuite& suite)
 {
     // Execute only if object is not identical
-    if (this != &testsuite) {
+    if (this != &suite) {
         
         // Free members
         free_members();
@@ -133,7 +148,7 @@ GTestSuite::~GTestSuite(void)
         init_members();
 
         // Copy members
-        copy_members(testsuite);
+        copy_members(suite);
 
     } // endif: object was not identical
 
@@ -141,10 +156,11 @@ GTestSuite::~GTestSuite(void)
     return *this;
 }
 
+
 /***********************************************************************//**
  * @brief Returns reference to test case
  *
- * @param[in] index Test case index [0,...,tests()-1].
+ * @param[in] index Test case index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Test case index is out of range.
@@ -152,8 +168,8 @@ GTestSuite::~GTestSuite(void)
 GTestCase& GTestSuite::operator[](const int& index)
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= tests()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, tests()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
     }
 
     // Return reference
@@ -163,7 +179,7 @@ GTestCase& GTestSuite::operator[](const int& index)
 /***********************************************************************//**
  * @brief Returns reference to test case
  *
- * @param[in] index Test case index [0,...,tests()-1].
+ * @param[in] index Test case index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Test case index is out of range.
@@ -171,8 +187,8 @@ GTestCase& GTestSuite::operator[](const int& index)
 const GTestCase& GTestSuite::operator[](const int& index) const
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= tests()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, tests()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
     }
 
     // Return reference
@@ -187,83 +203,197 @@ const GTestCase& GTestSuite::operator[](const int& index) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Run tests
+ * @brief Clear test suite
+ ***************************************************************************/
+void GTestSuite::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of tests in test suite
+ ***************************************************************************/
+int GTestSuite::size(void) const
+{
+    // Return size
+    return m_tests.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Append test functions to test suite
+ *
+ * @param[in] function Test function pointer.
+ * @param[in] name Test name.
+ *
+ * This method adds test functions to the test suite. The test functions will
+ * be executed when the run method is called.
+ ***************************************************************************/
+void GTestSuite::append(const pfunction function, const std::string& name)
+{
+    // Add test function pointer and name to suite
+    m_functions.push_back(function);
+    m_names.push_back(name);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Run all tests in test suite
+ *
+ * Executes all test functions that have been appended to the test suite.
+ * For each test function a test case is added to the test suite.
  ***************************************************************************/
 bool GTestSuite::run(void)
 {
-    // Set
+    // Setup the test functions. This is a pure virtual function that needs
+    // to be implemented in the derived class. It sets the function
+    // pointers and function names for all test functions that should be
+    // executed.
     set();
 
-    //Show the TestSuite name
+    // Log name of test suite
+    m_log << std::endl;
     m_log.header3(this->name());
 
-    bool was_successful = true;
+    // Initialise success flag
+    bool success = true;
 
-    while(m_stack_test.size()>0)
-    {
-        if(m_stack_test.front()->ptr_function()!=NULL){
+    // Initialise test suite counter
+    int num_suites = 0;
 
-            // Add the test in the m_tests container
-            m_tests.push_back(m_stack_test.front());
+    // Loop over all functions in suite
+    for (m_index = 0; m_index < m_functions.size(); ++m_index) {
 
-            // Save the number of errors and failures
-            int old_errors = errors();
+        // Continue only if function is valid
+        if (m_functions[m_index] != NULL) {
+
+            // Save the number of errors and failures before test
+            // execution. We use this after the test to see if
+            // any failures occured.
+            int old_errors   = errors();
             int old_failures = failures();
 
-            // Show the name of the test
-            m_log<<m_stack_test.front()->name()<<": ";
+            // Insert newline after first test suite. That's just for
+            // cosmetics.
+            if (num_suites > 0) {
+                m_log << std::endl;
+            }
 
-            // Run the test
-            m_stack_test.front()->run();
+            // Log the name of the test
+            m_log << m_names[m_index] << ": ";
 
-            // Imcrement number of errors if the test is not passed
-            if(!m_stack_test.front()->is_passed()){
+            // Create a test of error type for function testing
+            GTestCase* test = new GTestCase(GTestCase::ERROR_TEST, m_names[m_index]);
+
+            // Set start time
+            #ifdef _OPENMP
+            double t_start = omp_get_wtime();
+            #else
+            clock_t t_start = clock();
+            #endif
+
+            // Execute test function
+            try {
+                (this->*(m_functions[m_index]))();
+            }
+            catch(std::exception& e) {
+
+                // Signal that test did not succeed
+                test->passed(false);
+
+                // Set test message to exception message
+                test->message(e.what());
+
+                // Set type as class name
+                test->type(typeid(e).name());
+
+            }
+            catch(...)
+            {
+                // For other exceptions
+                test->passed(false);
+            }
+
+            // Compute elapsed time
+            #ifdef _OPENMP
+            double t_elapse = omp_get_wtime()-t_start;
+            #else
+            double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+            #endif
+
+            // Set test duration
+            test->duration(t_elapse);
+
+            // Increment number of errors if the test did not pass
+            if (!test->passed()) {
                 m_errors++;
             }
 
-            // Show the result ( ".","F" or, "E")
-            m_log<<m_stack_test.front()->print_result();
+            // Log the result (".","F" or, "E")
+            m_log << test->print();
 
-
-                // If they are errors or failures
-            if((m_errors!=old_errors||m_failures!=old_failures)==0){
-                m_log<<" ok\n";
-                was_successful=true;
+            // Log if there are errors or failures
+            if ((m_errors == old_errors && m_failures == old_failures)) {
+                m_log << " ok";
             }
-            else{
-                m_log<<" NOK\n";
-                was_successful=false;
+            else {
+                m_log << " NOK";
+                success = false;
             }
 
+            // Add test case to test suite
+            m_tests.push_back(test);
 
-            // Erase the test case
-            m_stack_test.erase(m_stack_test.begin());
-        }
-    }
+            // Increment test suite counter
+            num_suites++;
+            
+        } // endif: test case has a function pointer
 
-    return was_successful;
+    } // endwhile: there were tests on the stack
+
+    // Reset index
+    m_index = 0;
+
+    // Return success flag
+    return success;
 }
 
+
 /***********************************************************************//**
- * @brief Return Test Suite name
+ * @brief Return test suite name
  ***************************************************************************/
 std::string GTestSuite::name(void) const
 {
+    // Return name
     return m_name;
 }
 
+
 /***********************************************************************//**
  * @brief Set Test Suite name
- * @param[in] name Parameter name.
+ *
+ * @param[in] name Test suite name.
  ***************************************************************************/
 void GTestSuite::name(const std::string& name)
 {
     // Set name
-    m_name=name;
+    m_name = name;
     
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Enables/disables logging into standard output stream
@@ -277,41 +407,46 @@ void GTestSuite::cout(bool cout)
     // Enables or disables logging into the standard output stream
     m_log.cout(cout);
     
-    //Return
+    // Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Test an assert
+ *
  * @param[in] assert Assert (true/false).
- * @param[in] name Test case name. (defaults to "")
- * Examples :
- *          test_assert(x>3,"Test if x > 3");
- *          test_assert(x>3&&x<10,"Test if  3 < x < 10 ");
+ * @param[in] name Test case name (defaults to "").
+ * @param[in] message Test case name (defaults to "").
+ *
+ * Tests if a condition is true or false. This method adds a test case of
+ * type "failure" to the test suite.
+ *
+ * Examples:
+ *   test_assert(x>3, "Test if x > 3");
+ *   test_assert(x>3 && x<10, "Test if  3 < x < 10 ");
  ***************************************************************************/
-void GTestSuite::test_assert(bool assert, const std::string& name,const std::string& message)
+void GTestSuite::test_assert(bool               assert,
+                             const std::string& name,
+                             const std::string& message)
 {
-
     // Create a test case of failure type
-    GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST,format_name(name));
+    GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST, format_name(name));
 
-    // If assert is false 
-    if(!assert)
-    {
-        // test case is not ok
-        testcase->m_passed=false;
-
-        //increment number of failures
+    // If assert is false then signal that the test is not passed and
+    // increement the number of failures in this test suite 
+    if (!assert) {
+        testcase->passed(false);
         m_failures++;
     }
 
-    //Set message
+    // Set message
     testcase->message(message);
 
-    // Show the result ( ".","F" or, "E")
-    m_log<<testcase->print_result();
+    // Log the result (".","F" or, "E")
+    m_log << testcase->print();
 
-    // Add the test in the container
+    // Add test case to test suite
     m_tests.push_back(testcase);
 
     // Return
@@ -321,110 +456,131 @@ void GTestSuite::test_assert(bool assert, const std::string& name,const std::str
 
 /***********************************************************************//**
  * @brief Test a value
- * @param[in] value Value to test
- * @param[in] value_expected Value expected
- * @param[in] eps Precision of the test (default 0)
- * @param[in] name Test case name. (defaults to "")
- * @param[in] message Test case message. (defaults to "")
- * Test if the value is between [ value_excepted-eps, value_excepted+eps ]
+ *
+ * @param[in] value Value to test.
+ * @param[in] expected Expected value.
+ * @param[in] eps Precision of the test (default 0).
+ * @param[in] name Test case name (defaults to "").
+ * @param[in] message Test case message (defaults to "").
+ *
+ * Test if the value is comprised in the interval
+ * [expected-eps, expected+eps].
  ***************************************************************************/
-void GTestSuite::test_value(double value, double value_expected, double eps, const std::string& name, const std::string& message){
-
+void GTestSuite::test_value(const double&      value,
+                            const double&      expected,
+                            const double&      eps,
+                            const std::string& name,
+                            const std::string& message)
+{
+    // Set test case name. If no name is specify the build the name from
+    // the actual test parameters.
     std::string formated_name;
-    if(name!=""){
+    if (name != "") {
         formated_name = format_name(name);
     }
-    else{
-        formated_name = format_name("Test "+str(value)+" is between ["+str(value_expected-eps)+","+str(value_expected+eps)+"]");
+    else {
+        formated_name = format_name("Test if " + str(value) +
+                                    " is between [" +
+                                    str(expected-eps) + "," +
+                                    str(expected+eps) + "]");
     }
+
     // Create a test case of failure type
-    GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST,formated_name);
+    GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST, formated_name);
 
-    // If value is not between [ value_excepted-eps, value_excepted+eps ]
-    if(value > value_expected + eps || value < value_expected - eps)
-    {
-        // test case is not ok
-        testcase->m_passed=false;
-
-        //increment number of failures
+    // If value is not between in interval [expected-eps, expected+eps]
+    // then signal test as failed and increment the number of failures
+    if(value > expected + eps || value < expected - eps) {
+        testcase->passed(false);
         m_failures++;
     }
-    //Set message
+
+    // Set message
     testcase->message(message);
 
-    // Show the result ( ".","F" or, "E")
-    m_log<<testcase->print_result();
+    // Log the result (".","F" or, "E")
+    m_log << testcase->print();
 
-    // Add the test in the container
+    // Add test case to test suite
     m_tests.push_back(testcase);
 
     // Return
     return;
 }
+
+
 /***********************************************************************//**
  * @brief Test an try block
- * @param[in] name Test case name. (defaults to "")
+ *
+ * @param[in] name Test case name (defaults to "").
+ *
  * @see test_try_sucess() 
  * @see test_try_failure(const std::string& message,const std::string& type)
  * @see test_try_failure(const std::exception& e)
+ *
  * Call before testing a try/catch block.
+ *
  * Example: 
  *       test_try("Test a try block");
- *       try{
+ *       try {
  *          ... //someting to test
-            test_try_success();
+ *          test_try_success();
  *       }
- *      catch(...)
- *      {
+ *       catch(...) {
  *          test_try_failure();
- *      }
- *
+ *       }
  ***************************************************************************/
 void GTestSuite::test_try(const std::string& name)
 {
     // Create a test case of error type
-    GTestCase* testcase = new GTestCase(GTestCase::ERROR_TEST,format_name(name));
+    GTestCase* testcase = new GTestCase(GTestCase::ERROR_TEST, format_name(name));
 
-    //Add test case to container
+    // Add test case to try stack of test suite
     m_stack_try.push_back(testcase);
 
     // Return
     return;
 }
 
+
 /***********************************************************************//**
- * @brief Notice when a try block successed
+ * @brief Notice when a try block succeeded
+ *
+ * @exception GException::test_nested_try_error
+ *            Test case index is out of range.
+ *
  * @see test_try(const std::string& name)
- * @see test_try_failure(const std::string& message, const std::string& message)
+ * @see test_try_failure(const std::string& message, const std::string& type)
  * @see test_try_failure(const std::exception& e)
  *
  * Call this method at the last line of a try
+ *
  * Example: 
  *       test_try("Test a try block");
- *       try{
+ *       try {
  *          ... //someting to test
-            test_try_success();
+ *          test_try_success();
  *       }
- *      catch(...)
- *      {
+ *       catch(...) {
  *          test_try_failure();
- *      }
- *
+ *       }
  ***************************************************************************/
-void GTestSuite::test_try_success(void){
-
+void GTestSuite::test_try_success(void)
+{
     // If the stack is empty
-    if(m_stack_try.size()==0)
-        throw GException::test_nested_try_error(G_TRY_SUCCESS, "Error : test_try_success() without test_try()");
+    if (m_stack_try.size() == 0) {
+        throw GException::test_nested_try_error(G_TRY_SUCCESS, 
+              "Called test_try_success() without a previous call to test_try()");
+    }
 
-    // Add the test in the container
+    // Add test case to test suite
     m_tests.push_back(m_stack_try.back());
 
-    // Delete the test case of the stack
+    // Delete the test case from the try stack
     m_stack_try.pop_back();
 
-    // The try block test is ok
-    m_log<<m_tests.back()->print_result();
+    // Log the result (".","F" or, "E")
+    m_log << m_tests.back()->print();
 
     // Return
     return;
@@ -433,9 +589,13 @@ void GTestSuite::test_try_success(void){
 
 /***********************************************************************//**
  * @brief Notice when a try block failed
- * @param[in] message Message to explain why it failed (defaults to "")
- * @param[in] message_type Type of message (defaults to "")
- * @param[in] type Type of case (GTestCase::ERROR_TEST or GTestCase::FAIL_TEST)
+ *
+ * @param[in] message Message to explain why test failed (defaults to "").
+ * @param[in] type Type of message (defaults to "").
+ *
+ * @exception GException::test_nested_try_error
+ *            Test case index is out of range.
+ *
  * @see test_try_sucess()
  * @see test_try(const std::string& name)
  * @see test_try_failure(const std::exception& e)
@@ -444,197 +604,219 @@ void GTestSuite::test_try_success(void){
  *
  * Example: 
  *       test_try("Test a try block");
- *       try{
+ *       try {
  *          ... //someting to test
-            test_try_success();
+ *          test_try_success();
  *       }
- *      catch(...)
- *      {
- *          test_try_failure("Problem with ...");
- *      }
- *
+ *       catch(...) {
+ *          test_try_failure();
+ *       }
  ***************************************************************************/
-void GTestSuite::test_try_failure(const std::string& message, const std::string& message_type){
-
+void GTestSuite::test_try_failure(const std::string& message,
+                                  const std::string& type)
+{
     // If the stack is empty
-    if(m_stack_try.size()==0)
-        throw GException::test_nested_try_error(G_TRY_FAILURE,"test_try_success() call without test_try()");
+    if (m_stack_try.size() == 0) {
+        throw GException::test_nested_try_error(G_TRY_FAILURE,
+              "Called test_try_failure() without a previous call to test_try()");
+    }
 
-    // Test is not ok
-    m_stack_try.back()->m_passed=false;
+    // Signal that test is not ok
+    m_stack_try.back()->passed(false);
 
     // Increment the number of errors
     m_errors++;
 
-    //Set type
-    m_stack_try.back()->type(GTestCase::ERROR_TEST);
+    // Set test type
+    m_stack_try.back()->kind(GTestCase::ERROR_TEST);
     
-    // Set a message
+    // Set message
     m_stack_try.back()->message(message);
 
-    // Set a type of message
-    m_stack_try.back()->message_type(message_type);
+    // Set type of message
+    m_stack_try.back()->type(type);
 
-    // Add the test in the container
+    // Add test case to test suite
     m_tests.push_back(m_stack_try.back());
     
-    // Delete the test case of the stack
+    // Delete the test case from the stack
     m_stack_try.pop_back();
 
-    // Show the result ( ".","F" or, "E")
-    m_log<<m_tests.back()->print_result();
+    // Log the result ( ".","F" or, "E")
+    m_log << m_tests.back()->print();
+
     //Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Notice when a try block failed
- * @param[in] exception Exception caught
+ *
+ * @param[in] exception Exception.
+ *
  * @see test_try_sucess()
  * @see test_try(const std::string& name)
- * @see test_try_failure(const std::string& message)
+ * @see test_try_failure(const std::string& message, const std::string& type)
  *
  * Call this method in a catch block.
  *
  * Example: 
- *       GTestSuite testsuite;
- *       testsuite.test_try("Test a try block");
- *       try{
+ *       test_try("Test a try block");
+ *       try {
  *          ... //someting to test
-            testsuite.test_try_success();
+ *          test_try_success();
  *       }
- *      catch(exception& e)
- *      {
- *          testsuite.test_try_failure(e);
- *      }
- *
+ *       catch(exception& e) {
+ *          test_try_failure(e);
+ *       }
  ***************************************************************************/
-void GTestSuite::test_try_failure(const std::exception& e){
-
+void GTestSuite::test_try_failure(const std::exception& e)
+{
     // Extract message of exception and class name
-    test_try_failure(e.what(),typeid(e).name());
+    test_try_failure(e.what(), typeid(e).name());
 
-    //Return
+    // Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Return a failure exception
- * @param[in] message Message of the exception
+ *
+ * @param[in] message Message.
+ *
  * @see test_try()
  * @see test_error(const std::string& message)
  *
  * It can be use in a try test
  *
  * Example: 
- *       GTestSuite testsuite;
- *       testsuite.test_try("Test a try block");
- *       try{
- *          throw testsuite.exception_failure("a failure");
-            testsuite.test_try_success();
+ *       test_try("Test a try block");
+ *       try {
+ *          throw exception_failure("a failure");
+ *          test_try_success();
  *       }
- *      catch(exception& e)
- *      {
- *          testsuite.test_try_failure(e);
- *      }
- *
+ *       catch(exception& e) {
+ *          test_try_failure(e);
+ *       }
  ***************************************************************************/
-
 GException::test_failure& GTestSuite::exception_failure(const std::string& message)
 {
-    return *(new GException::test_failure(m_stack_try.back()->name(),message));
+    // Return exception
+    return *(new GException::test_failure(m_stack_try.back()->name(), message));
 }
+
 
 /***********************************************************************//**
  * @brief Return an error exception
- * @param[in] message Message of the exception
+ *
+ * @param[in] message Message.
+ *
  * @see test_try()
  * @see test_failure(const std::string& message)
  *
  * It can be use in a try test
  *
  * Example: 
- *       testsuite;
- *       ttest_try("Test a try block");
- *       try{
+ *       test_try("Test a try block");
+ *       try {
  *          throw exception_error("an error");
-            test_try_success();
+ *          test_try_success();
  *       }
- *      catch(exception& e)
- *      {
+ *       catch(exception& e) {
  *          test_try_failure(e);
- *      }
- *
+ *       }
  ***************************************************************************/
- 
 GException::test_error& GTestSuite::exception_error(const std::string& message)
 {
+    // Return exception
     return *(new GException::test_error(m_stack_try.back()->name(),message));
 }
 
-void GTestSuite::add_test(const pfunction function,const std::string& name)
-{
-    GTestCase * testcase = new GTestCase(function,name,this);
 
-    // Add test case to container
-    m_stack_test.push_back(testcase);
+/***********************************************************************//**
+ * @brief Add test functions to test suite
+ *
+ * @param[in] function Test function pointer.
+ * @param[in] name Test name.
+ *
+ * This method adds test functions to the test suite. For each test function
+ * a test case is allocated. The function pointer is stored as a member of
+ * the test case class.
+ ***************************************************************************/
+void GTestSuite::add_test(const pfunction function, const std::string& name)
+{
+    // Append function
+    append(function, name);
 
     // Return
     return;
 }
 
-/***********************************************************************//**
- * @brief Return the number of tests
- ***************************************************************************/
-int GTestSuite::tests(void) const
-{
-    return m_tests.size(); 
-}
 
 /***********************************************************************//**
  * @brief Return the number of errors
  ***************************************************************************/
 int GTestSuite::errors(void) const
 {
+    // Return errors
     return m_errors; 
 }
+
 
 /***********************************************************************//**
  * @brief Return the number of failures
  ***************************************************************************/
 int GTestSuite::failures(void) const
 {
+    // Return failures
     return m_failures; 
 }
 
+
 /***********************************************************************//**
- * @brief Return the number of success
+ * @brief Return the number of successful tests
  ***************************************************************************/
 int GTestSuite::success(void) const
 {
-    return tests()-(m_errors+m_failures);
+    // Return successes
+    return size()-(m_errors+m_failures);
 }
 
+
 /***********************************************************************//**
- * @brief Return the timestamp. Set at the creation of the object
+ * @brief Return the timestamp
+ *
+ * The timestamp is set at the construction of the object.
  ***************************************************************************/
 time_t GTestSuite::timestamp(void) const
 {
+    // Return timestamp
     return m_timestamp;
 }
 
+
 /***********************************************************************//**
- * @brief Return the total duration of the tests
+ * @brief Return the total duration of all tests
+ *
+ * This method sums up all test durations and returns the result.
  ***************************************************************************/
 double GTestSuite::duration(void) const
 {
-    double time=0;
-    for(int i=0;i<m_tests.size();i++){
-        time+=m_tests[i]->time();
+    // Initialise duration
+    double duration = 0.0;
+
+    // Add up the durations of all tests
+    for (int i = 0; i < m_tests.size(); ++i) {
+        duration += m_tests[i]->duration();
     }
 
-    return time;
+    // Return duration
+    return duration;
 }
+
+
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
@@ -646,14 +828,21 @@ double GTestSuite::duration(void) const
  ***************************************************************************/
 void GTestSuite::init_members(void)
 {
-    m_name="Unamed Test Suite";;
+    // Initialise members
+    m_name      = "Unnamed Test Suite";
+    m_functions.clear();
+    m_names.clear();
+    m_tests.clear();
+    m_stack_try.clear();
+    m_index     = 0;
+    m_failures  = 0;
+    m_errors    = 0;
     m_log.clear();
+    m_timestamp = time(NULL);
+
+    // Set logger parameters
     cout(true);
     m_log.max_size(1);
-    m_tests.clear();
-    m_errors=0;
-    m_failures=0;
-    m_timestamp=time(NULL);
 
     // Return
     return;
@@ -662,21 +851,28 @@ void GTestSuite::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] testsuite Test suite.
+ * @param[in] suite Test suite.
  *
  * This method just clone the container not the test case.
  ***************************************************************************/
-void GTestSuite::copy_members(const GTestSuite& testsuite)
+void GTestSuite::copy_members(const GTestSuite& suite)
 {
-    m_name=testsuite.m_name;
-    m_tests=testsuite.m_tests;
-    m_log=testsuite.m_log;
-    m_errors=testsuite.m_errors;
-    m_failures=testsuite.m_failures;
+    // Copy members
+    m_name       = suite.m_name;
+    m_functions  = suite.m_functions;
+    m_names      = suite.m_names;
+    m_tests      = suite.m_tests;
+    m_stack_try  = suite.m_stack_try;
+    m_index      = suite.m_index;
+    m_failures   = suite.m_failures;
+    m_errors     = suite.m_errors;
+    m_log        = suite.m_log;
+    m_timestamp  = suite.m_timestamp;
     
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Delete class members
@@ -684,36 +880,38 @@ void GTestSuite::copy_members(const GTestSuite& testsuite)
 void GTestSuite::free_members(void)
 {
     // Delete test cases
-    for(int i=0;i<m_tests.size();++i)
-    {
+    for (int i = 0; i < m_tests.size(); ++i) {
         delete m_tests[i]; 
     }
+
     // Return
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Format Name
- * Return a string with the format: "TestFunctionName:TestTryname1:TestTryName2: name"
+ *
+ * Return a string with the format
+ * "TestFunctionName:TestTryname1:TestTryName2: name"
  ***************************************************************************/
 std::string GTestSuite::format_name(const std::string& name)
 {
+    // Initialise format name
     std::string format_name;
 
-    // Add the names of the try blocks
-    if(m_stack_try.size()>0){
-        format_name+=m_stack_try.back()->name();
+    // Set name of the try blocks
+    if (m_stack_try.size() > 0) {
+        format_name += m_stack_try.back()->name();
     }
-    else
-    {
-         // Add the name of the test before
-        if(m_stack_test.size()>0){
-            format_name=(m_stack_test.front())->name();
-        }
-
+    else {
+        // Set name of the test
+        format_name = m_names[m_index];
     }
 
-    format_name+=": "+name;
+    // Append test suite name
+    format_name += ": " + name;
 
+    // Return format
     return format_name;
 }
