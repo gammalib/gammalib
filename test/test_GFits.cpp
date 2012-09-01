@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GFits.cpp  -  test FITS classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GFits.cpp
+ * @brief Implementation of unit tests for FITS classes
+ * @author J. Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>                           // std::cout, cerr
@@ -33,35 +38,37 @@
 
 /* __ Globals ____________________________________________________________ */
 
+
 /***********************************************************************//**
  * @brief Set parameters and tests
  **************************************************************************/
 void TestGFits::set(void){
 
-    // Test name
+    // Set test name
     name("GFits");
 
-    //add tests
-    add_test(static_cast<pfunction>(&TestGFits::test_create),"Test create");
-    add_test(static_cast<pfunction>(&TestGFits::test_image_byte),"Test image byte");
-    add_test(static_cast<pfunction>(&TestGFits::test_image_ushort),"Test image ushort");
-    add_test(static_cast<pfunction>(&TestGFits::test_image_short),"Test image short");
-    add_test(static_cast<pfunction>(&TestGFits::test_image_ulong),"Test image ulong");
-    add_test(static_cast<pfunction>(&TestGFits::test_image_long),"Test image long");
-    add_test(static_cast<pfunction>(&TestGFits::test_image_longlong),"Test image longlong");
-    add_test(static_cast<pfunction>(&TestGFits::test_image_float),"Test image float");
-    add_test(static_cast<pfunction>(&TestGFits::test_image_double),"Test image double");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_bit),"Test bintable bit");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_logical),"Test bintable logical");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_string),"Test bintable string");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_double),"Test bintable double");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_float),"Test bintable float");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_ushort),"Test bintable ushort");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_short),"Test bintable short");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_ulong),"Test bintable ulong");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_long),"Test bintable long");
-    add_test(static_cast<pfunction>(&TestGFits::test_bintable_longlong),"Test bintable longlong");
+    // Add tests
+    append(static_cast<pfunction>(&TestGFits::test_create), "Test create");
+    append(static_cast<pfunction>(&TestGFits::test_image_byte), "Test image byte");
+    append(static_cast<pfunction>(&TestGFits::test_image_ushort), "Test image ushort");
+    append(static_cast<pfunction>(&TestGFits::test_image_short), "Test image short");
+    append(static_cast<pfunction>(&TestGFits::test_image_ulong), "Test image ulong");
+    append(static_cast<pfunction>(&TestGFits::test_image_long), "Test image long");
+    append(static_cast<pfunction>(&TestGFits::test_image_longlong), "Test image longlong");
+    append(static_cast<pfunction>(&TestGFits::test_image_float), "Test image float");
+    append(static_cast<pfunction>(&TestGFits::test_image_double), "Test image double");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_bit), "Test bintable bit");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_logical), "Test bintable logical");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_string), "Test bintable string");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_double), "Test bintable double");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_float), "Test bintable float");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_ushort), "Test bintable ushort");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_short), "Test bintable short");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_ulong), "Test bintable ulong");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_long), "Test bintable long");
+    append(static_cast<pfunction>(&TestGFits::test_bintable_longlong), "Test bintable longlong");
 
+    // Return
     return;
 }
 
@@ -6233,26 +6240,28 @@ void TestGFits::test_bintable_bit(void)
 
 
 /***************************************************************************
- *                            Main test function                           *
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
+    // Allocate test suit container
     GTestSuites testsuites("GFits");
 
-    bool was_successful=true;
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    //Create a test suite
+    // Create a test suite
     TestGFits test;
 
-    //Append to the container
+    // Append test suite to the container
     testsuites.append(test);
 
-    //Run
-    was_successful=testsuites.run();
+    // Run the testsuites
+    success = testsuites.run();
 
-    //save xml report
+    // Save test report
     testsuites.save("reports/GFits.xml");
 
-    // Return
-    return was_successful ? 0:1;
+    // Return success status
+    return (success ? 0 : 1);
 }
