@@ -2,14 +2,14 @@
 
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src
 
 # Define sources for this directory
 sources = GTestCase.cpp \
-	  GTestSuite.cpp \
-	  GTestSuites.cpp \
-	  GException_test.cpp
+          GTestSuite.cpp \
+          GTestSuites.cpp \
+          GException_test.cpp
 	
 # Build libtool library
 noinst_LTLIBRARIES = libtest.la

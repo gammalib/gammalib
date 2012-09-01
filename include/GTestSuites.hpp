@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GTestSuites.hpp  - Test Suites class for GammaLib               *
+ *           GTestSuites.hpp  - Test Suites class for GammaLib             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,72 +18,73 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
-
 /**
  * @file GTestSuites.hpp
- * @brief Test Suites class definition
+ * @brief Test suites class definition
  * @author Jean-Baptiste Cayrou
  */
 
 #ifndef GTESTSUITES_HPP
 #define GTESTSUITES_HPP
 
+/* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-
 #include "GXml.hpp"
 #include "GTools.hpp"
 #include "GTestSuite.hpp"
 #include "GTestCase.hpp"
 
+
 /***********************************************************************//**
  * @class GTestSuites
  *
- * @brief Test Suites class 
+ * @brief Interface for the test suites class
+ *
  * This is a Test Suite container class.
- * TODO : Explainations
+ *
+ * @todo Detailed description
  ***************************************************************************/
-class GTestSuites{
+class GTestSuites {
     
-    public:
-        // Constructors and destructors
-        GTestSuites();
-        GTestSuites(const GTestSuites& testsuites);
-        GTestSuites(const std::string& name);
-        ~GTestSuites();
+public:
+    // Constructors and destructors
+    GTestSuites(void);
+    GTestSuites(const GTestSuites& suites);
+    GTestSuites(const std::string& name);
+    virtual ~GTestSuites(void);
     
-        // Operators
-        GTestSuites& operator=(const GTestSuites& testsuites);
-        GTestSuite& operator[](const int& index);
-        const GTestSuite& operator[](const int& index) const;
+    // Operators
+    GTestSuites&      operator=(const GTestSuites& suites);
+    GTestSuite&       operator[](const int& index);
+    const GTestSuite& operator[](const int& index) const;
         
-        // Methods
-        std::string name(void) const;
-        void        name(const std::string& name);
-        void        cout(bool cout);
-        void        append(GTestSuite& testsuite);
-        int         test_suites() const;
-        int         errors(void) const;
-        int         failures(void) const;
-        int         tests(void) const;
-        time_t      timestamp(void) const;
-        bool        run(void);
-        void        save(std::string filename);
-
+    // Methods
+    void        clear(void);
+    int         size(void) const;
+    void        append(GTestSuite& suite);
+    bool        run(void);
+    void        save(const std::string& filename) const;
+    std::string name(void) const;
+    void        name(const std::string& name);
+    void        cout(bool cout);
+    int         errors(void) const;
+    int         failures(void) const;
+    int         tests(void) const;
+    time_t      timestamp(void) const;
     
+protected:
     // Protected methods
-    protected:
-        void init_members(void);
-        void copy_members(const GTestSuites& testsuites);
-        void free_members(void);
-        void write(GXml& xml);
+    void init_members(void);
+    void copy_members(const GTestSuites& suites);
+    void free_members(void);
+    void write(GXml& xml) const;
         
-    // Private members    
-    private:
-        std::string              m_name; //!< Test suites name
-        std::vector<GTestSuite*> m_testsuites; //!< Test suite container
-        time_t                   m_timestamp;//!< Timestamp
-        GLog                     m_log;      //!< Log
+    // Protected members    
+    std::string              m_name;       //!< Name of test suites
+    std::vector<GTestSuite*> m_testsuites; //!< Vector of test suites
+    time_t                   m_timestamp;  //!< Timestamp
+    GLog                     m_log;        //!< Log
 };
 
-#endif
+#endif /* GTESTSUITES_HPP */

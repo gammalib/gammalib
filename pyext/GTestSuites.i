@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GTestSuites.i - Test suites class Python interface                    *
+ *          GTestSuites.i - Test suites class Python interface             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 Jean-Baptiste Cayrou                                *
  * ----------------------------------------------------------------------- *
@@ -29,38 +29,37 @@
 #include "GTools.hpp"
 %}
 
-// Include (int ARGC, char **ARGV) typemap to allow passing command line
-// arguments to GApplication constructor
-%include "argcargv.i"
 
 /***********************************************************************//**
  * @class GTestSuites
  *
- * @brief Test suites Python interface defintion.
+ * @brief Test suites Python interface defintion
  ***************************************************************************/
-class GTestSuites{
+class GTestSuites {
     
-    public:
-        // Constructors and destructors
-        GTestSuites();
-        GTestSuites(const GTestSuites& testsuites);
-        GTestSuites(const std::string& name);
-        ~GTestSuites();
+public:
 
-        // Methods
-        std::string name(void) const;
-        void        name(const std::string& name);
-        void        cout(bool cout);
-        void        append(GTestSuite& testsuite);
-        int         test_suites() const;
-        int         errors(void) const;
-        int         failures(void) const;
-        int         tests(void) const;
-        time_t      timestamp(void) const;
-        bool        run(void);
-        void        save(std::string filename);
+    // Constructors and destructors
+    GTestSuites(void);
+    GTestSuites(const GTestSuites& suites);
+    GTestSuites(const std::string& name);
+    virtual ~GTestSuites(void);
 
+    // Methods
+    void        clear(void);
+    int         size(void) const;
+    void        append(GTestSuite& suite);
+    bool        run(void);
+    void        save(std::string filename);
+    std::string name(void) const;
+    void        name(const std::string& name);
+    void        cout(bool cout);
+    int         errors(void) const;
+    int         failures(void) const;
+    int         tests(void) const;
+    time_t      timestamp(void) const;
 };
+
 
 /***********************************************************************//**
  * @brief GTestSuites class extension
@@ -69,26 +68,23 @@ class GTestSuites{
     char *__str__() {
         return tochar(self->name());
     }
-
-    GTestSuites& __getitem__(const int& index) {
-        if (index >= 0 && index < self->test_suites()) {
+    GTestSuite& __getitem__(const int& index) {
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->test_suites());
+            throw GException::out_of_range("__getitem__(int)", index, self->size());
         }
     }
-
-    void __setitem__(const int& index, const GTestSuites& val) {
-        if (index>=0 && index < self->test_suites()) {
-            (*self)[index] = val;
+    void __setitem__(const int& index, const GTestSuite& suite) {
+        if (index>=0 && index < self->size()) {
+            (*self)[index] = suite;
             return;
         }
         else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
     }
-
     GTestSuites copy() {
         return (*self);
     }

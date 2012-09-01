@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GTestSuites.cpp  - Test Suites class for GammaLib               *
+ *            GTestSuites.cpp  - Test Suites class for GammaLib            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,7 +18,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
-
 /**
  * @file GTestSuites.cpp
  * @brief Test Suites class implementation
@@ -33,7 +32,7 @@
 #include "GTestSuites.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OP_ACCESS                         "GTestSuites::operator[](int&)"
+#define G_OP_ACCESS                           "GTestSuites::operator[](int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -44,7 +43,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                         Constructors/destructors                        =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -60,39 +59,42 @@ GTestSuites::GTestSuites(void)
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] testsuites Test Suites container.
+ * @param[in] suites Test suite container.
  ***************************************************************************/
-GTestSuites::GTestSuites(const GTestSuites& testsuites)
+GTestSuites::GTestSuites(const GTestSuites& suites)
 {
     // Initialise members
     init_members();
     
     // Copy members
-    copy_members(testsuites);
+    copy_members(suites);
     
     //Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Name constructor
  *
- * @param[in] name Name of the Test Suites
+ * @param[in] name Name of the test suites.
  ***************************************************************************/
 GTestSuites::GTestSuites(const std::string& name)
 {
-    //Initialise members
+    // Initialise members
     init_members();
     
-    //Set name
-    m_name=name;
+    // Set name
+    m_name = name;
 
     //Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Destructor
@@ -106,6 +108,7 @@ GTestSuites::~GTestSuites()
     return;
 }
 
+
 /*==========================================================================
  =                                                                         =
  =                               Operators                                 =
@@ -115,12 +118,12 @@ GTestSuites::~GTestSuites()
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] testsuites Test Suites container.
+ * @param[in] suites Test suite container.
  ***************************************************************************/
-GTestSuites&  GTestSuites::operator= (const GTestSuites& testsuites)
+GTestSuites&  GTestSuites::operator= (const GTestSuites& suites)
 {
     // Execute only if object is not identical
-    if (this != &testsuites) {
+    if (this != &suites) {
         
         // Free members
         free_members();
@@ -129,7 +132,7 @@ GTestSuites&  GTestSuites::operator= (const GTestSuites& testsuites)
         init_members();
 
         // Copy members
-        copy_members(testsuites);
+        copy_members(suites);
 
     } // endif: object was not identical
 
@@ -137,10 +140,11 @@ GTestSuites&  GTestSuites::operator= (const GTestSuites& testsuites)
     return *this;
 }
 
+
 /***********************************************************************//**
  * @brief Returns reference to test suite
  *
- * @param[in] index Test suites index [0,...,test_suites()-1].
+ * @param[in] index Test suites index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Test suites index is out of range.
@@ -148,16 +152,17 @@ GTestSuites&  GTestSuites::operator= (const GTestSuites& testsuites)
 GTestSuite& GTestSuites::operator[](const int& index)
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= test_suites()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, test_suites()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
     }
 
     // Return reference
     return *(m_testsuites[index]);
 }
 
+
 /***********************************************************************//**
- * @brief Returns reference to test suite
+ * @brief Returns reference to test suite (const version)
  *
  * @param[in] index Test Suites index [0,...,size()-1].
  *
@@ -167,13 +172,14 @@ GTestSuite& GTestSuites::operator[](const int& index)
 const GTestSuite& GTestSuites::operator[](const int& index) const
 {
     // If index is outside boundary then throw an error
-    if (index < 0 || index >= test_suites()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, test_suites()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
     }
 
     // Return reference
     return *(m_testsuites[index]);
 }
+
 
 /*==========================================================================
  =                                                                         =
@@ -182,7 +188,101 @@ const GTestSuite& GTestSuites::operator[](const int& index) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return Test Suites name
+ * @brief Clear container
+ ***************************************************************************/
+void GTestSuites::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of test suite in container
+ ***************************************************************************/
+int GTestSuites::size(void) const
+{
+    // Return size
+    return m_testsuites.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Append test suite to container
+ *
+ * @param[in] suite Test suite.
+ *
+ * This method appends one test suite to the container.
+ ***************************************************************************/
+void GTestSuites::append(GTestSuite& suite)
+{
+    //Add testsuite to container
+    m_testsuites.push_back(&suite);
+
+    //Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Run all tests
+ *
+ * Runs all tests that are in the test suite container. The method returns
+ * true if all test suites succeeded. If one test suite failed, false is
+ * returned.
+ ***************************************************************************/
+bool GTestSuites::run(void)
+{
+    // Log name of test suites
+    m_log << std::endl;
+    m_log.header1(name());
+
+    // Initialise success flag
+    bool success = true;
+    
+    // Run all test suites
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+        if (!m_testsuites[i]->run()) {
+            success = false;
+        }
+    }
+
+    // Return success flag
+    return success;
+}
+
+
+/***********************************************************************//**
+ * @brief Save test report into XML file.
+ *
+ * @param[in] filename Name of XML file.
+ *
+ * Saves the test results in a JUnit compliant format into an XML file.
+ ***************************************************************************/
+void GTestSuites::save(const std::string& filename) const
+{
+    // Declare empty XML document
+    GXml xml;
+
+    // Write observations into XML file
+    write(xml);
+
+    // Save XML document
+    xml.save(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return test suites name
  ***************************************************************************/
 std::string GTestSuites::name(void) const
 {
@@ -190,18 +290,21 @@ std::string GTestSuites::name(void) const
     return m_name;
 }
 
+
 /***********************************************************************//**
- * @brief Set Test Suites name
- * @param[in] name Parameter name.
+ * @brief Set test suites name
+ *
+ * @param[in] name Test suites name.
  ***************************************************************************/
 void GTestSuites::name(const std::string& name)
 {
-    //Set name
-    m_name=name;
+    // Set name
+    m_name = name;
     
     //Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Enables/disables logging into standard output stream
@@ -219,223 +322,73 @@ void GTestSuites::cout(bool cout)
     return;
 }
 
-/***********************************************************************//**
- * @brief Append test suite to container
- *
- * @param[in] testsuite Test suite.
- *
- * This method appends one test suite to the container.
- ***************************************************************************/
-void GTestSuites::append(GTestSuite& testsuite)
-{
-    //Add testsuite to container
-    m_testsuites.push_back(&testsuite);
-
-    //Return
-    return;
-}
 
 /***********************************************************************//**
- * @brief Return the number of test suite that are actually in the container
- ***************************************************************************/
-int GTestSuites::test_suites(void) const
-{
-    return m_testsuites.size();
-}
-
-/***********************************************************************//**
- * @brief Return the total number of errors they are in all test suites
+ * @brief Return the total number of errors in all test suites
  ***************************************************************************/
 int GTestSuites::errors(void) const
 {
-    int errors=0;
+    // Initialise number of errors
+    int errors = 0;
     
-    //Loop over all test suite
-    for(int i=0;i<m_testsuites.size();++i)
-    {
-        //Add the number of errors
-        errors+=m_testsuites[i]->errors(); 
+    // Add up the errors from all test suites
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+        errors += m_testsuites[i]->errors(); 
     }
-    
+
+    // Return errors
     return errors;
 }
 
+
 /***********************************************************************//**
- * @brief Return the total number of failures they are in all test suites
+ * @brief Return the total number of failures in all test suites
  ***************************************************************************/
 int GTestSuites::failures(void) const
 {
+    // Initialise number of failures
     int failures=0;
     
-    //Loop over all test suite
-    for(int i=0;i<m_testsuites.size();++i)
-    {
-         //Add the number of failures
-        failures+=m_testsuites[i]->failures(); 
+    // Add up the failures from all test suites
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+        failures += m_testsuites[i]->failures(); 
     }
-    
+
+    // Return failures
     return failures;
 }
+
 
 /***********************************************************************//**
  * @brief Return the total number of tests they are in all test suites
  ***************************************************************************/
 int GTestSuites::tests(void) const
 {
-    int tests=0;
+    // Initialise number of tests
+    int tests = 0;
     
-    //Loop over all test suite
-    for(int i=0;i<m_testsuites.size();++i)
-    {
-         //Add the number of tests
-        tests+=m_testsuites[i]->tests(); 
+    // Add up the number of tests from all test suites
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+        tests += m_testsuites[i]->size(); 
     }
-    
+
+    // Return number of tests
     return tests; 
 }
 
-/***********************************************************************//**
- * @brief Run all tests
- ***************************************************************************/
-bool GTestSuites::run(void)
-{
-    // print test suites name
-    m_log.header1(name());
-    m_log<<"\n";
-
-    bool was_successful=true;
-      //Loop over all test suite
-    for(int i=0;i<m_testsuites.size();++i)
-    {
-        if(!m_testsuites[i]->run()){
-            was_successful=false;
-        }
-    }
-
-    return was_successful;
-
-}
 
 /***********************************************************************//**
- * @brief Save test repport into XML file.
+ * @brief Return the timestamp
  *
- * @param[in] filename Name of XML file.
- ***************************************************************************/
-void GTestSuites::save(std::string filename)
-{
-    // Declare empty XML document
-    GXml xml;
-
-    // Write observations into XML file
-    write(xml);
-
-    // Save XML document
-    xml.save(filename);
-
-    // Return
-    return;
-}
-
-/***********************************************************************//**
- * @brief Return the timestamp. Set at the creation of the object
+ * The time step is set at the moment of construction of the test suites
+ * container.
  ***************************************************************************/
 time_t GTestSuites::timestamp(void) const
 {
+    // Return the timestamp
     return m_timestamp;
 }
 
-/***********************************************************************//**
- * @brief Write Test Suites into XML document
- *
- * @param[in] xml XML document.
- *
- * Write test suites into the XML document.
- ***************************************************************************/
-void GTestSuites::write(GXml& xml)
-{
-    //Create a xml element for Test Suites
-    GXmlElement *element_testsuites = new GXmlElement("testsuites");
-
-    //Set attributes
-    element_testsuites->attribute("name","GammaLib");
-    /*
-    element_testsuites->attribute("test",str(tests()));
-    element_testsuites->attribute("errors",str(errors()));
-    element_testsuites->attribute("failures",str(failures()));
-    element_testsuites->attribute("time","0"); // not used
-    element_testsuites->attribute("timestamp",str(timestamp()));
-    */
-    //Loop over all test suites in the container
-    for (int i=0; i<m_testsuites.size(); ++i)
-    {
-        //A pointer on the current GTestSuite
-        GTestSuite * testsuite = m_testsuites[i];
-
-        //Create a xml element for this test suite
-        GXmlElement *element_testsuite = new GXmlElement("testsuite");
-
-        //Set attributes
-        element_testsuite->attribute("disabled","");  // not used
-        element_testsuite->attribute("errors",str(testsuite->errors()));
-        element_testsuite->attribute("failures",str(testsuite->failures()));
-        element_testsuite->attribute("hostname","");  // not used
-        element_testsuite->attribute("id",str(i));
-        element_testsuite->attribute("name",testsuite->name()); 
-        element_testsuite->attribute("package","");  // not used
-        element_testsuite->attribute("skipped","");  // not used
-        element_testsuite->attribute("tests",str(testsuite->tests()));
-        element_testsuite->attribute("time",str(testsuite->duration()));
-        element_testsuite->attribute("timestamp",str(testsuite->timestamp()));
-
-        //Loop over all test cases contains in the test suite
-        for (int j=0; j<testsuite->tests(); ++j)
-        {
-            //Reference to the current test case
-            GTestCase& testcase=(*testsuite)[j];
-
-            GXmlElement *element_testcase = new GXmlElement("testcase");
-            element_testcase->attribute("assertions",""); // not used
-            element_testcase->attribute("classname",name());
-            element_testcase->attribute("name",testcase.name());
-            element_testcase->attribute("status","");  // not used
-            element_testcase->attribute("time",str(testcase.time()));
-
-            //If test case is not OK
-            if(!testcase.is_passed())
-            {
-                //Create a xml element for the test case problem.
-                GXmlElement* element_testcase_problem = new GXmlElement();
-
-                //Set attributes
-                element_testcase_problem->attribute("message",testcase.message());
-                element_testcase_problem->attribute("type",testcase.message_type());
-
-                //If it is an error
-                if(testcase.type()==GTestCase::ERROR_TEST){
-                    element_testcase_problem->name("error");
-                }
-                else{ // else, it is a failure
-                    element_testcase_problem->name("failure");
-                }
- 
-                //Append problem to test case element
-                element_testcase->append(element_testcase_problem);
-            }
-
-            //Append test case to testsuite element.
-            element_testsuite->append(element_testcase);
-        }
-
-        //Append test suite to test suites element
-        element_testsuites->append(element_testsuite);
-    }
-
-    //Append test suites to xml document.
-    xml.append(element_testsuites);
-
-    //Return
-    return;
-}
 
 /*==========================================================================
  =                                                                         =
@@ -446,15 +399,19 @@ void GTestSuites::write(GXml& xml)
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GTestSuites::init_members(void){
+void GTestSuites::init_members(void)
+{
+    // Initialise members
+    m_name      = "Unnamed Test Suites";
+    m_testsuites.clear();
+    m_timestamp = time(NULL);
+    m_log.clear();
 
-    //Set default name
-    m_name="Unamed Test Suites";
+    // Set logger parameters
     m_log.max_size(1);
     m_log.cout(true);
-    m_timestamp = time(NULL);
 
-    //Return
+    // Return
     return;
 }
 
@@ -465,16 +422,126 @@ void GTestSuites::init_members(void){
  *
  * This method just clone the container not the test suite.
  ***************************************************************************/
-void GTestSuites::copy_members(const GTestSuites& testsuites){
-    m_name = testsuites.m_name;
-    m_testsuites = testsuites.m_testsuites;
+void GTestSuites::copy_members(const GTestSuites& suites)
+{
+    // Copy members
+    m_name       = suites.m_name;
+    m_testsuites = suites.m_testsuites;
+    m_timestamp  = suites.m_timestamp;
+    m_log        = suites.m_log;
 
+    // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GTestSuites::free_members(void){
+void GTestSuites::free_members(void)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write Test Suites into XML document
+ *
+ * @param[in] xml XML document.
+ *
+ * Write test suites into the XML document.
+ ***************************************************************************/
+void GTestSuites::write(GXml& xml) const
+{
+    // Create XML element for Test Suites
+    GXmlElement *element_testsuites = new GXmlElement("testsuites");
+
+    // Set attributes
+    element_testsuites->attribute("name", "GammaLib");
+    /*
+    element_testsuites->attribute("test",str(tests()));
+    element_testsuites->attribute("errors",str(errors()));
+    element_testsuites->attribute("failures",str(failures()));
+    element_testsuites->attribute("time","0"); // not used
+    element_testsuites->attribute("timestamp",str(timestamp()));
+    */
+
+    // Loop over all test suites in the container
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+
+        // Get a pointer on the current test suite
+        GTestSuite *testsuite = m_testsuites[i];
+
+        // Create XML element for this test suite
+        GXmlElement *element_testsuite = new GXmlElement("testsuite");
+
+        // Set attributes
+        element_testsuite->attribute("disabled","");  // not used
+        element_testsuite->attribute("errors",str(testsuite->errors()));
+        element_testsuite->attribute("failures",str(testsuite->failures()));
+        element_testsuite->attribute("hostname","");  // not used
+        element_testsuite->attribute("id",str(i));
+        element_testsuite->attribute("name",testsuite->name()); 
+        element_testsuite->attribute("package","");  // not used
+        element_testsuite->attribute("skipped","");  // not used
+        element_testsuite->attribute("tests",str(testsuite->size()));
+        element_testsuite->attribute("time",str(testsuite->duration()));
+        element_testsuite->attribute("timestamp",str(testsuite->timestamp()));
+
+        // Loop over all test cases in the test suite
+        for (int j = 0; j < testsuite->size(); ++j) {
+
+            // Reference to the current test case
+            GTestCase& testcase = (*testsuite)[j];
+
+            // Create XML element for this test case
+            GXmlElement *element_testcase = new GXmlElement("testcase");
+
+            // Set attributes
+            element_testcase->attribute("assertions",""); // not used
+            element_testcase->attribute("classname",name());
+            element_testcase->attribute("name",testcase.name());
+            element_testcase->attribute("status","");  // not used
+            element_testcase->attribute("time",str(testcase.duration()));
+
+            // If a failure or error occured then append the message to the
+            // XML element.
+            if (!testcase.passed()) {
+
+                // Create XML element for the test case problem
+                GXmlElement* element_testcase_problem = new GXmlElement();
+
+                // Set attributes
+                element_testcase_problem->attribute("message",testcase.message());
+                element_testcase_problem->attribute("type",testcase.type());
+
+                // Set tag name dependent on the type of problem
+                if (testcase.kind() == GTestCase::ERROR_TEST) {
+                    element_testcase_problem->name("error");
+                }
+                else {
+                    element_testcase_problem->name("failure");
+                }
+ 
+                // Append problem to test case element
+                element_testcase->append(element_testcase_problem);
+
+            } // endif: failure or error occured
+
+            // Append test case to testsuite element.
+            element_testsuite->append(element_testcase);
+
+        } // endfor: looped over all test cases
+
+        // Append test suite to test suites element
+        element_testsuites->append(element_testsuite);
+
+    } // endfor: looped over all test suites
+
+    // Append test suites to XML document
+    xml.append(element_testsuites);
+
+    // Return
     return;
 }
