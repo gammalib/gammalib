@@ -72,6 +72,7 @@ public:
     int         failures(void) const;
     int         tests(void) const;
     time_t      timestamp(void) const;
+    std::string print(void) const;
     
 protected:
     // Protected methods

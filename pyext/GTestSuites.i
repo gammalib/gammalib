@@ -66,7 +66,7 @@ public:
  ***************************************************************************/
 %extend GTestSuites {
     char *__str__() {
-        return tochar(self->name());
+        return tochar(self->print());
     }
     GTestSuite& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
