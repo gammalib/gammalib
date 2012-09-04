@@ -9,7 +9,7 @@ import sys
 # =========================== #
 # Test class for FITS support #
 # =========================== #
-class TestGFits(GTestSuite):
+class TestGFits(GPythonTestSuite):
 	"""
 	Test class for FITS support.
 	"""
@@ -18,7 +18,7 @@ class TestGFits(GTestSuite):
 		Constructor.
 		"""
 		# Call base class constructor
-		GTestSuite.__init__(self)
+		GPythonTestSuite.__init__(self)
 
 	def set(self):
 		"""
@@ -200,7 +200,7 @@ class TestGFits(GTestSuite):
 # ============================== #
 # Test class for GSkymap support #
 # ============================== #
-class TestGSkymap(GTestSuite):
+class TestGSkymap(GPythonTestSuite):
 	"""
 	Test class for GSkymap support.
 	"""
@@ -209,7 +209,7 @@ class TestGSkymap(GTestSuite):
 		Constructor.
 		"""
 		# Call base class constructor
-		GTestSuite.__init__(self)
+		GPythonTestSuite.__init__(self)
 	
 	def set(self):
 		"""
