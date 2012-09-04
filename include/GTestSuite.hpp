@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestSuite.hpp
- * @brief Test suite class definition
+ * @brief Abstract test suite class definition
  * @author Jean-Baptiste Cayrou
  */
 
@@ -45,7 +45,7 @@ typedef void (GTestSuite::*pfunction)(void);
 /***********************************************************************//**
  * @class GTestSuite
  *
- * @brief Test suite base class for unit testing on GammaLib fixtures
+ * @brief Abstract test suite class for unit testing on GammaLib fixtures
  *
  * @todo Detailed explanation.
  ***************************************************************************/
@@ -63,11 +63,13 @@ public:
     GTestCase&       operator[](const int& index);
     const GTestCase& operator[](const int& index) const;
 
+    // Pure virtual methods
+    virtual void              set(void) = 0;
+
     // Other methods
     void                      clear(void);
     int                       size(void) const;
     void                      append(pfunction function, const std::string& name);
-    virtual void              set(void);
     virtual bool              run(void);
     std::string               name(void) const;
     void                      name(const std::string& name);
@@ -106,6 +108,8 @@ protected:
 
     // Protected members
     std::string              m_name;       //!< Name of the test suite
+    std::vector<std::string> m_names;      //!< Names of test functions
+    std::vector<pfunction>   m_functions;  //!< Test functions of this suite
     std::vector<GTestCase*>  m_tests;      //!< List of test results
     std::vector<GTestCase*>  m_stack_try;  //!< Stack for nested try blocks
     int                      m_index;      //!< Index of actual test function
@@ -113,12 +117,6 @@ protected:
     int                      m_errors;     //!< Number of errors
     GLog                     m_log;        //!< Log
     time_t                   m_timestamp;  //!< Timestamp
-
-    // Public members so that the the swig extension can access them
-public:
-    std::vector<std::string> m_names;      //!< Names of test functions
-    std::vector<pfunction>   m_functions;  //!< Test functions of this suite
-    std::vector<void*>       m_py_object;  //!< Test Python functions of this suite
 };
 
 #endif /* GTESTSUITE_HPP */
