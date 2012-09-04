@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GMatrix.i  -  Matrix class SWIG file                  *
+ *                  GMatrix.i  -  General Matrix class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -24,13 +24,15 @@
 #include "GTools.hpp"
 %}
 
-%feature("notabstract") GMatrix;
+//%feature("notabstract") GMatrix;
 
-/***************************************************************************
- *                         GMatrix class definition                        *
- * ----------------------------------------------------------------------- *
- * GMatrix implements a full matrix storage class. It derives from the     *
- * abstract base class GMatrixBase.                                        *
+/***********************************************************************//**
+ * @class GMatrix
+ *
+ * @brief General matrix class definition
+ *
+ * GMatrix implements a general matrix storage class. It derives from the
+ * abstract base class GMatrixBase.
  ***************************************************************************/
 class GMatrix : public GMatrixBase {
 public:
@@ -72,15 +74,14 @@ public:
 };
 
 
-/***************************************************************************
- *                      GMatrix class SWIG extension                       *
+/***********************************************************************//**
+ * @brief GMatrix class extension
+ *
+ * @todo Use typemap to allow for a [row,col] matrix access
  ***************************************************************************/
 %extend GMatrix {
     char *__str__() {
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        return tochar(str);
+        return tochar(self->print());
     }
     double __getslice__(int row, int col) {
         if (row >=0 && row < (int)self->rows() && col >= 0 && col < (int)self->cols())
