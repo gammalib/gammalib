@@ -27,13 +27,62 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GTestSuite.hpp"
 #include "GTools.hpp"
+
+/***********************************************************************//**
+ * @class GPythonTestSuite
+ *
+ * @brief Test suite for Python tests
+ *
+ * This is the test suite that should be used for Python tests. It derives
+ * from the abstract GTestSuite base class and implements a generic test
+ * method that is used as callback for Python testing. The class keeps an
+ * array of PyObject pointers that is used to call the Python callbacks.
+ * The generic test method profits from the fact that the function index is
+ * a class member, hence the test method knows which Python callback function
+ * it should execute.
+ ***************************************************************************/
+class GPythonTestSuite : public GTestSuite {
+public:
+    // Constructor
+    GPythonTestSuite(void) {
+        m_py_objects.clear();
+    }
+
+    // Destructor
+    virtual ~GPythonTestSuite(void) {
+        for (size_t i = 0; i < m_py_objects.size(); ++i) {
+            Py_DECREF(m_py_objects[i]);
+        }
+    }
+
+    // Dummy set method (implementation makes this class non-abstract)
+    void set(void) {
+    }
+
+    // Generic test function for Python callback
+    void test(void) {
+        PyObject* args = Py_BuildValue("()");
+        PyObject* func = static_cast<PyObject*>(m_py_objects[m_index]);
+        PyEval_CallObject(func, args);
+        Py_DECREF(args);
+        return;
+    }
+
+    // Append Python callback to function lists
+    void append(PyObject* function, const std::string& name) {
+        m_py_objects.push_back(function);
+        Py_INCREF(function);
+        add_test(static_cast<pfunction>(&GPythonTestSuite::test), name);
+    }
+    std::vector<PyObject*> m_py_objects; //!< Python callback function list
+};
 %}
 
 
 /***********************************************************************//**
  * @class GTestSuite
  *
- * @brief Test suite Python interface defintion
+ * @brief Abstract test suite Python interface defintion
  ***************************************************************************/
 class GTestSuite {
 
@@ -48,8 +97,7 @@ public:
     // Methods
     void                      clear(void);
     int                       size(void) const;
-    void                      append(pfunction function, const std::string& name);
-    virtual void              set(void);
+    virtual void              set(void) = 0;
     virtual bool              run(void);
     std::string               name(void) const;
     void                      name(const std::string& name);
@@ -74,9 +122,6 @@ public:
     int                       success(void) const;
     time_t                    timestamp(void) const;
     double                    duration(void) const;
-
-    // Old methods (will become obsolete)
-    void                      add_test(pfunction function, const std::string& name);
 };
 
 
@@ -104,14 +149,23 @@ public:
             throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
     }
-    void append(PyObject* function, const std::string& name) {
-        // Push back the function pointer and the name
-        self->m_functions.push_back(NULL);
-        self->m_py_object.push_back(function);
-        self->m_names.push_back(name);
+};
 
-        // Now register the function. We need this, otherwise we get
-        // a Segmentation fault
-        Py_INCREF(function);
-    }
+
+/***********************************************************************//**
+ * @class GTestSuite
+ *
+ * @brief Test suite Python interface defintion
+ ***************************************************************************/
+class GPythonTestSuite  : public GTestSuite {
+
+public:
+        
+    // Constructors and destructors
+    GPythonTestSuite(void);
+    virtual ~GPythonTestSuite(void);
+
+    // Methods
+    void set(void);
+    void append(PyObject* function, const std::string& name);
 };
