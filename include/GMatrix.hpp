@@ -30,6 +30,10 @@
 /* __ Includes ___________________________________________________________ */
 #include "GMatrixBase.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GSymMatrix;
+class GSparseMatrix;
+
 
 /***********************************************************************//**
  * @class GMatrix
@@ -55,7 +59,9 @@ public:
     // Constructors and destructors
     GMatrix(void);
     GMatrix(int rows, int cols);
-    GMatrix(const GMatrix& m);
+    GMatrix(const GMatrix& matrix);
+    GMatrix(const GSymMatrix& matrix);
+    GMatrix(const GSparseMatrix& matrix);
     virtual ~GMatrix(void);
 
     // Operators

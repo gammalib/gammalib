@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GMatrix.cpp  -  Matrix class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GMatrix.cpp
- * @brief Matrix class implementation
- * @author J. Knodlseder
+ * @brief General matrix class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -32,6 +32,8 @@
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
+#include "GSymMatrix.hpp"
+#include "GSparseMatrix.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -52,7 +54,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                      GMatrix constructors/destructors                   =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -95,18 +97,68 @@ GMatrix::GMatrix(int rows, int cols) : GMatrixBase()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] m Matrix from which class should be instantiated.
+ * @param[in] matrix General matrix (GMatrix).
  *
  * First calls the void base class copy constructor that copys all base
  * class members, then call the GMatrix member copy method.
  ***************************************************************************/
-GMatrix::GMatrix(const GMatrix& m) : GMatrixBase(m)
+GMatrix::GMatrix(const GMatrix& matrix) : GMatrixBase(matrix)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(m);
+    copy_members(matrix);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief GSymMatrix to GMatrix storage class convertor
+ *
+ * @param[in] matrix Symmetric matrix (GSymMatrix).
+ ***************************************************************************/
+GMatrix::GMatrix(const GSymMatrix& matrix) : GMatrixBase(matrix)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Construct matrix
+    constructor(matrix.rows(), matrix.cols());
+
+    // Fill matrix
+    for (int col = 0; col < matrix.cols(); ++col) {
+        for (int row = col; row < matrix.rows(); ++row) {
+            (*this)(row, col) = matrix(row, col);
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief GSparseMatrix to GMatrix storage class convertor
+ *
+ * @param[in] matrix Sparse matrix (GSparseMatrix).
+ ***************************************************************************/
+GMatrix::GMatrix(const GSparseMatrix& matrix) : GMatrixBase(matrix)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Construct matrix
+    constructor(matrix.rows(), matrix.cols());
+
+    // Fill matrix
+    for (int col = 0; col < matrix.cols(); ++col) {
+        for (int row = col; row < matrix.rows(); ++row) {
+            (*this)(row, col) = matrix(row, col);
+        }
+    }
 
     // Return
     return;
