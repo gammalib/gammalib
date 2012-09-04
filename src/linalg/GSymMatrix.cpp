@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSymMatrix.cpp  -  Symmetric matrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,6 +62,23 @@
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Void constructor
+ *
+ * Initialises an empty matrix with no rows and columns
+ *
+ * @todo Check the entire matrix class to see whether handling with an
+ *       empty matrix may lead to some conflicts.
+ ***************************************************************************/
+GSymMatrix::GSymMatrix(void) : GMatrixBase()
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
  * @brief Matrix constructor
  *
  * @param[in] rows Number of rows in matrix.
@@ -83,28 +100,33 @@ GSymMatrix::GSymMatrix(int rows, int cols) : GMatrixBase()
 /***********************************************************************//**
  * @brief GMatrix to GSymMatrix storage class convertor
  *
- * @param[in] m GMatrix to be converted
+ * @param[in] matrix General matrix (GMatrix).
  *
  * @exception GException::matrix_not_symmetric
- *            Sparse matrix is not symmetric.
+ *            Matrix is not symmetric.
+ *
+ * Converts a general matrix into the symmetric storage class. If the input
+ * matrix is not symmetric, an exception is thrown.
  ***************************************************************************/
-GSymMatrix::GSymMatrix(const GMatrix& m)
+GSymMatrix::GSymMatrix(const GMatrix& matrix)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Construct full matrix
-    constructor(m.rows(), m.cols());
+    constructor(matrix.rows(), matrix.cols());
 
     // Fill matrix
-    for (int col = 0; col < m.cols(); ++col) {
-        for (int row = col; row < m.rows(); ++row) {
-            double value_ll = m(row,col);
-            double value_ur = m(col,row);
-            if (value_ll != value_ur)
+    for (int col = 0; col < matrix.cols(); ++col) {
+        for (int row = col; row < matrix.rows(); ++row) {
+            double value_ll = matrix(row,col);
+            double value_ur = matrix(col,row);
+            if (value_ll != value_ur) {
                 throw GException::matrix_not_symmetric(G_CAST_MATRIX,
-                                                       m.rows(), m.cols());
-            (*this)(row, col) = m(row, col);
+                                                       matrix.rows(),
+                                                       matrix.cols());
+            }
+            (*this)(row, col) = matrix(row, col);
         }
     }
 
@@ -116,15 +138,15 @@ GSymMatrix::GSymMatrix(const GMatrix& m)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] m Matrix from which class should be instantiated.
+ * @param[in] matrix Matrix.
  ***************************************************************************/
-GSymMatrix::GSymMatrix(const GSymMatrix& m) : GMatrixBase(m)
+GSymMatrix::GSymMatrix(const GSymMatrix& matrix) : GMatrixBase(matrix)
 {
     // Initialise private members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(m);
+    copy_members(matrix);
 
     // Return
     return;
@@ -134,28 +156,33 @@ GSymMatrix::GSymMatrix(const GSymMatrix& m) : GMatrixBase(m)
 /***********************************************************************//**
  * @brief GSparseMatrix to GSymMatrix storage class convertor
  *
- * @param[in] m GSparseMatrix to be converted
+ * @param[in] matrix Sparse matrix (GSparseMatrix).
  *
  * @exception GException::matrix_not_symmetric
  *            Sparse matrix is not symmetric.
+ *
+ * Converts a sparse matrix into the symmetric storage class. If the input
+ * matrix is not symmetric, an exception is thrown.
  ***************************************************************************/
-GSymMatrix::GSymMatrix(const GSparseMatrix& m)
+GSymMatrix::GSymMatrix(const GSparseMatrix& matrix)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Construct full matrix
-    constructor(m.rows(), m.cols());
+    constructor(matrix.rows(), matrix.cols());
 
     // Fill matrix
-    for (int col = 0; col < m.cols(); ++col) {
-        for (int row = col; row < m.rows(); ++row) {
-            double value_ll = m(row,col);
-            double value_ur = m(col,row);
-            if (value_ll != value_ur)
+    for (int col = 0; col < matrix.cols(); ++col) {
+        for (int row = col; row < matrix.rows(); ++row) {
+            double value_ll = matrix(row,col);
+            double value_ur = matrix(col,row);
+            if (value_ll != value_ur) {
                 throw GException::matrix_not_symmetric(G_CAST_SPARSEMATRIX,
-                                                       m.rows(), m.cols());
-            (*this)(row, col) = m(row, col);
+                                                       matrix.rows(),
+                                                       matrix.cols());
+            }
+            (*this)(row, col) = matrix(row, col);
         }
     }
 
@@ -167,7 +194,7 @@ GSymMatrix::GSymMatrix(const GSparseMatrix& m)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GSymMatrix::~GSymMatrix()
+GSymMatrix::~GSymMatrix(void)
 {
     // Free members
     free_members();
@@ -188,13 +215,13 @@ GSymMatrix::~GSymMatrix()
  *
  * @param[in] m Matrix to be assigned.
  ***************************************************************************/
-GSymMatrix& GSymMatrix::operator= (const GSymMatrix& m)
+GSymMatrix& GSymMatrix::operator= (const GSymMatrix& matrix)
 {
     // Execute only if object is not identical
-    if (this != &m) {
+    if (this != &matrix) {
 
         // Copy base class members
-        this->GMatrixBase::operator=(m);
+        this->GMatrixBase::operator=(matrix);
 
         // Free members
         free_members();
@@ -203,7 +230,7 @@ GSymMatrix& GSymMatrix::operator= (const GSymMatrix& m)
         init_members();
 
         // Copy members
-        copy_members(m);
+        copy_members(matrix);
 
     } // endif: object was not identical
 

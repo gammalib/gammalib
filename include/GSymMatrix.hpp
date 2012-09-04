@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GSymMatrix.hpp  -  symmetric matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GSymMatrix.hpp
- * @brief GSymMatrix class definition.
- * @author J. Knodlseder
+ * @brief Symetric matrix class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GSYMMATRIX_HPP
@@ -40,9 +40,9 @@ class GSparseMatrix;
 /***********************************************************************//**
  * @class GSymMatrix
  *
- * @brief GSymMatrix class interface defintion
+ * @brief Symmetric matrix class interface defintion
  *
- * Implements a sparse matrix storage class. It derives from the abstract
+ * Implements a symmetric matrix storage class. It derives from the abstract
  * base class GMatrixBase.
  ***************************************************************************/
 class GSymMatrix : public GMatrixBase {
@@ -63,14 +63,15 @@ class GSymMatrix : public GMatrixBase {
 
 public:
     // Constructors and destructors (not inherited)
+    GSymMatrix(void);
     GSymMatrix(int rows, int cols);
-    GSymMatrix(const GMatrix& m);
-    GSymMatrix(const GSymMatrix& m);
-    GSymMatrix(const GSparseMatrix& m);
-    virtual ~GSymMatrix();
+    GSymMatrix(const GMatrix& matrix);
+    GSymMatrix(const GSymMatrix& matrix);
+    GSymMatrix(const GSparseMatrix& matrix);
+    virtual ~GSymMatrix(void);
 
     // Operators
-    virtual GSymMatrix&   operator= (const GSymMatrix& m);
+    virtual GSymMatrix&   operator= (const GSymMatrix& matrix);
     virtual double&       operator() (int row, int col);
     virtual const double& operator() (int row, int col) const;
     virtual GSymMatrix    operator+ (const GSymMatrix& m) const;
