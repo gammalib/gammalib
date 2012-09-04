@@ -49,7 +49,7 @@ public:
     void                      clear(void);
     int                       size(void) const;
     void                      append(pfunction function, const std::string& name);
-    virtual void              set(void) = 0;
+    virtual void              set(void);
     bool                      run(void);
     std::string               name(void) const;
     void                      name(const std::string& name);
@@ -85,7 +85,7 @@ public:
  ***************************************************************************/
 %extend GTestSuite {
     char *__str__() {
-        return tochar(self->name());
+        return tochar(self->print());
     }
     GTestCase& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
@@ -103,5 +103,15 @@ public:
         else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
+    }
+    void append(PyObject* function, const std::string& name) {
+        // Push back the function pointer and the name
+        self->m_functions.push_back(NULL);
+        self->m_py_object.push_back(function);
+        self->m_names.push_back(name);
+
+        // Now register the function. We need this, otherwise we get
+        // a Segmentation fault
+        Py_INCREF(function);
     }
 };
