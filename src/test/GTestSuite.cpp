@@ -264,7 +264,7 @@ bool GTestSuite::run(void)
 
     // Log name of test suite
     m_log << std::endl;
-    m_log.header3(this->name());
+    //m_log.header3(this->name());
 
     // Initialise success flag
     bool success = true;
