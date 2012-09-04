@@ -28,6 +28,9 @@
 #define GMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
 #include "GMatrixBase.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -48,7 +51,8 @@ class GMatrix : public GMatrixBase {
     friend GMatrix operator/ (const GMatrix& a, const double& b);
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GMatrix& m);
+    friend std::ostream& operator<<(std::ostream& os, const GMatrix& matrix);
+    friend GLog&         operator<<(GLog& log,        const GMatrix& matrix);
 
     // Friend functions
     friend GMatrix transpose(const GMatrix& m);
@@ -80,22 +84,23 @@ public:
     GMatrix&      operator/= (const double& s);
 
     // Methods
-    void    clear(void);
-    void    transpose(void);
-    void    invert(void);
-    void    add_col(const GVector& v, int col);
-    void    insert_col(const GVector& v, int col);
-    GVector extract_row(int row) const;
-    GVector extract_col(int col) const;
-    GMatrix extract_lower_triangle(void) const;
-    GMatrix extract_upper_triangle(void) const;
-    double  fill(void) const;
-    double  min(void) const;
-    double  max(void) const;
-    double  sum(void) const;
-    void    eulerx(const double& angle);
-    void    eulery(const double& angle);
-    void    eulerz(const double& angle);
+    void        clear(void);
+    void        transpose(void);
+    void        invert(void);
+    void        add_col(const GVector& v, int col);
+    void        insert_col(const GVector& v, int col);
+    GVector     extract_row(int row) const;
+    GVector     extract_col(int col) const;
+    GMatrix     extract_lower_triangle(void) const;
+    GMatrix     extract_upper_triangle(void) const;
+    double      fill(void) const;
+    double      min(void) const;
+    double      max(void) const;
+    double      sum(void) const;
+    void        eulerx(const double& angle);
+    void        eulery(const double& angle);
+    void        eulerz(const double& angle);
+    std::string print(void) const;
 
 private:
     // Private methods

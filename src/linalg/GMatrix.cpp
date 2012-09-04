@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       GMatrix.cpp  -  Matrix class                      *
+ *                   GMatrix.cpp  -  General matrix class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -763,9 +763,40 @@ void GMatrix::eulerz(const double& angle)
 }
 
 
+/***********************************************************************//**
+ * @brief Print matrix
+ ***************************************************************************/
+std::string GMatrix::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GMatrix ===");
+    result.append("\n"+parformat("Number of rows")+str(m_rows));
+    if (m_rowsel != NULL) {
+        result.append(" (compressed "+str(m_num_rowsel)+")");
+    }
+    result.append("\n"+parformat("Number of columns")+str(m_cols));
+    if (m_colsel != NULL) {
+        result.append(" (compressed "+str(m_num_colsel)+")");
+    }
+    result.append("\n"+parformat("Number of elements")+str(m_elements));
+    result.append("\n"+parformat("Number of allocated cells")+str(m_alloc));
+
+    // Append elements and compression schemes
+    result.append(print_elements());
+    result.append(print_row_compression());
+    result.append(print_col_compression());
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                          GMatrix private methods                        =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -814,7 +845,7 @@ void GMatrix::constructor(int rows, int cols)
 
 /*==========================================================================
  =                                                                         =
- =                             GMatrix friends                             =
+ =                           Friend functions                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -822,29 +853,12 @@ void GMatrix::constructor(int rows, int cols)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] m Matrix to put in output stream.
+ * @param[in] matrix Matrix.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GMatrix& m)
+std::ostream& operator<< (std::ostream& os, const GMatrix& matrix)
 {
-    // Put header in stream
-    os << "=== GMatrix ===" << std::endl;
-    if (m.m_rowsel != NULL)
-        os << " Number of rows ............: " << m.m_rows
-           << " (compressed " << m.m_num_rowsel << ")" << std::endl;
-    else
-        os << " Number of rows ............: " << m.m_rows << std::endl;
-    if (m.m_colsel != NULL)
-        os << " Number of columns .........: " << m.m_cols
-           << " (compressed " << m.m_num_colsel << ")" << std::endl;
-    else
-        os << " Number of columns .........: " << m.m_cols << std::endl;
-    os << " Number of elements ........: " << m.m_elements << std::endl;
-    os << " Number of allocated cells .: " << m.m_alloc << std::endl;
-
-    // Dump elements and compression schemes
-    m.dump_elements(os);
-    m.dump_row_comp(os);
-    m.dump_col_comp(os);
+     // Write matrix in output stream
+    os << matrix.print();
 
     // Return output stream
     return os;
@@ -852,18 +866,35 @@ std::ostream& operator<< (std::ostream& os, const GMatrix& m)
 
 
 /***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] matrix Matrix.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GMatrix& matrix)
+{
+    // Write matrix into logger
+    log << matrix.print();
+
+    // Return logger
+    return log;
+}
+
+
+/***********************************************************************//**
  * @brief Return matrix with absolute values of all elements
  *
- * @param[in] m Matrix for which absolute values are to be returned.
+ * @param[in] matrix Matrix.
  ***************************************************************************/
-GMatrix abs(const GMatrix& m)
+GMatrix abs(const GMatrix& matrix)
 {
     // Define result matrix
-    GMatrix result = m;
+    GMatrix result = matrix;
 
     // Convert all elements to absolute values  
-    for (int i = 0; i < result.m_elements; ++i)
+    for (int i = 0; i < result.m_elements; ++i) {
         result.m_data[i] = std::abs(result.m_data[i]);
+    }
 
     // Return result
     return result;
