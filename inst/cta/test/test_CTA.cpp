@@ -99,7 +99,7 @@ void TestGCTAOptimize::set(void)
 
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGCTAOptimize::test_unbinned_optimizer), "Test unbinned optimizer");
-    append(static_cast<pfunction>(&TestGCTAOptimize::test_binned_optimizer), "Test binned optimizer PSF");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_binned_optimizer), "Test binned optimizer");
 
     // Return
     return;
