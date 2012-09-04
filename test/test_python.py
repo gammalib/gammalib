@@ -454,20 +454,13 @@ def test_optimise():
 # ======================== #
 if __name__ == '__main__':
 	"""
-	Perform testing.
+	Perform unit testing for Python interface.
 	"""
-	# Dump result
-	sys.stdout.write("\n")
-	sys.stdout.write("****************************\n")
-	sys.stdout.write("* Python interface testing *\n")
-	sys.stdout.write("****************************\n")
-	
 	# Initialise success counter
-	tests   = 0
 	success = 0
 
 	# Allocate test suites
-	suites = GTestSuites("Python suites")
+	suites = GTestSuites("Python interface testing")
 
 	# Allocate test suites and append them to the container
 	suite1 = TestGFits()
@@ -484,9 +477,10 @@ if __name__ == '__main__':
 	# Save test results
 	suites.save("reports/GPython.xml")
 
-	# Perform tests
-#	test_node_array()
-#	test_lat_response()
-#	test_lat_observation()
-#	test_optimise()
+	# Exit with return code
+	if success:
+		rc = 0
+	else:
+		rc = 1
+	sys.exit(rc)
 	
