@@ -50,7 +50,7 @@ public:
     int                       size(void) const;
     void                      append(pfunction function, const std::string& name);
     virtual void              set(void);
-    bool                      run(void);
+    virtual bool              run(void);
     std::string               name(void) const;
     void                      name(const std::string& name);
     void                      cout(bool cout);
