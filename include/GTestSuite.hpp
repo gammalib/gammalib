@@ -79,7 +79,7 @@ public:
                                           const std::string& message="");
     void                      test_value(const double&      value,
                                          const double&      expected,
-                                         const double&      eps = 0.0,
+                                         const double&      eps = 1.0e-30,
                                          const std::string& name="",
                                          const std::string& message="");
     void                      test_try(const std::string& name);
