@@ -21,7 +21,7 @@
 /**
  * @file GSymMatrix.cpp
  * @brief Symmetric matrix class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <cmath>
+#include "GTools.hpp"
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
@@ -895,9 +896,41 @@ double GSymMatrix::sum() const
 }
 
 
+/***********************************************************************//**
+ * @brief Print matrix
+ ***************************************************************************/
+std::string GSymMatrix::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GSymMatrix ===");
+    result.append("\n"+parformat("Number of rows")+str(m_rows));
+    if (m_rowsel != NULL) {
+        result.append(" (compressed "+str(m_num_rowsel)+")");
+    }
+    result.append("\n"+parformat("Number of columns")+str(m_cols));
+    if (m_colsel != NULL) {
+        result.append(" (compressed "+str(m_num_colsel)+")");
+    }
+    result.append("\n"+parformat("Number of elements")+str(m_elements));
+    result.append("\n"+parformat("Number of allocated cells")+str(m_alloc));
+
+    // Append elements and compression schemes
+    result.append(print_elements());
+    result.append(print_row_compression());
+    result.append(print_col_compression());
+
+    // Return result
+    return result;
+}
+
+
+
 /*==========================================================================
  =                                                                         =
- =                      GSymMatrix private functions                       =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -1058,32 +1091,31 @@ void GSymMatrix::set_inx(void)
  * @brief Output operator
  *
  * @param[in] os Output stream.
- * @param[in] m Matrix to put in output stream.
+ * @param[in] matrix Matrix.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GSymMatrix& m)
+std::ostream& operator<< (std::ostream& os, const GSymMatrix& matrix)
 {
-    // Put header in stream
-    os << "=== GSymMatrix ===" << std::endl;
-    if (m.m_rowsel != NULL)
-        os << " Number of rows ............: " << m.m_rows << " (compressed " <<
-              m.m_num_rowsel << ")" << std::endl;
-    else
-        os << " Number of rows ............: " << m.m_rows << std::endl;
-    if (m.m_colsel != NULL)
-        os << " Number of columns .........: " << m.m_cols << " (compressed " <<
-              m.m_num_colsel << ")" << std::endl;
-    else
-        os << " Number of columns .........: " << m.m_cols << std::endl;
-    os << " Number of elements ........: " << m.m_elements << std::endl;
-    os << " Number of allocated cells .: " << m.m_alloc << std::endl;
-
-    // Dump elements and compression schemes
-    m.dump_elements(os);
-    m.dump_row_comp(os);
-    m.dump_col_comp(os);
+     // Write matrix in output stream
+    os << matrix.print();
 
     // Return output stream
     return os;
+}
+
+
+/***********************************************************************//**
+ * @brief Log operator
+ *
+ * @param[in] log Logger.
+ * @param[in] matrix Matrix.
+ ***************************************************************************/
+GLog& operator<< (GLog& log, const GSymMatrix& matrix)
+{
+    // Write matrix into logger
+    log << matrix.print();
+
+    // Return logger
+    return log;
 }
 
 
@@ -1098,8 +1130,9 @@ GSymMatrix abs(const GSymMatrix& m)
     GSymMatrix result(m.m_rows,m.m_cols);
 
     // Convert all elements to absolute values
-    for (int i = 0; i < m.m_elements; ++i)
+    for (int i = 0; i < m.m_elements; ++i) {
         result.m_data[i] = std::abs(m.m_data[i]);
+    }
 
     // Return result
     return result;

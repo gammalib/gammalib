@@ -28,7 +28,9 @@
 #define GSYMMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
+#include "GLog.hpp"
 #include "GException.hpp"
 #include "GMatrixBase.hpp"
 
@@ -53,7 +55,8 @@ class GSymMatrix : public GMatrixBase {
     friend GSymMatrix operator/ (const GSymMatrix& a, const double& b);
 
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GSymMatrix& m);
+    friend std::ostream& operator<<(std::ostream& os, const GSymMatrix& matrix);
+    friend GLog&         operator<<(GLog& log,        const GSymMatrix& matrix);
 
     // Friend functions
     friend GSymMatrix transpose(const GSymMatrix& m);
@@ -78,8 +81,6 @@ public:
     virtual GSymMatrix    operator- (const GSymMatrix& m) const;
     virtual GSymMatrix    operator* (const GSymMatrix& m) const;
     virtual GVector       operator* (const GVector& v) const;
-    //_USE_BASE virtual int           operator== (const GSymMatrix& m) const;
-    //_USE_BASE virtual int           operator!= (const GSymMatrix& m) const;
     virtual GSymMatrix    operator- () const;
     virtual GSymMatrix&   operator+= (const GSymMatrix& m);
     virtual GSymMatrix&   operator-= (const GSymMatrix& m);
@@ -88,21 +89,22 @@ public:
     virtual GSymMatrix&   operator/= (const double& d);
 
     // Methods
-    virtual void    add_col(const GVector& v, int col);
-    virtual void    cholesky_decompose(int compress = 1);
-    virtual GVector cholesky_solver(const GVector& v, int compress = 1);
-    virtual void    cholesky_invert(int compress = 1);
-    virtual void    clear();
-    virtual GVector extract_row(int row) const;
-    virtual GVector extract_col(int col) const;
-    virtual GMatrix extract_lower_triangle() const;
-    virtual GMatrix extract_upper_triangle() const;
-    virtual void    insert_col(const GVector& v, int col);
-    virtual double  fill() const;
-    virtual double  min() const;
-    virtual double  max() const;
-    virtual double  sum() const;
-    virtual void    transpose() { return; }
+    virtual void        add_col(const GVector& v, int col);
+    virtual void        cholesky_decompose(int compress = 1);
+    virtual GVector     cholesky_solver(const GVector& v, int compress = 1);
+    virtual void        cholesky_invert(int compress = 1);
+    virtual void        clear(void);
+    virtual GVector     extract_row(int row) const;
+    virtual GVector     extract_col(int col) const;
+    virtual GMatrix     extract_lower_triangle() const;
+    virtual GMatrix     extract_upper_triangle() const;
+    virtual void        insert_col(const GVector& v, int col);
+    virtual double      fill(void) const;
+    virtual double      min(void) const;
+    virtual double      max(void) const;
+    virtual double      sum(void) const;
+    virtual void        transpose(void) { return; }
+    virtual std::string print(void) const;
 
 private:
     // Private methods
@@ -123,28 +125,28 @@ private:
  ***************************************************************************/
 // Binary matrix addition
 inline
-GSymMatrix GSymMatrix::operator+ (const GSymMatrix& m) const
+GSymMatrix GSymMatrix::operator+ (const GSymMatrix& matrix) const
 {
     GSymMatrix result = *this;
-    result += m;
+    result += matrix;
     return result;
 }
 
 // Binary matrix subtraction
 inline
-GSymMatrix GSymMatrix::operator- (const GSymMatrix& m) const
+GSymMatrix GSymMatrix::operator- (const GSymMatrix& matrix) const
 {
     GSymMatrix result = *this;
-    result -= m;
+    result -= matrix;
     return result;
 }
 
 // Binary matrix multiplication
 inline
-GSymMatrix GSymMatrix::operator* (const GSymMatrix& m) const
+GSymMatrix GSymMatrix::operator* (const GSymMatrix& matrix) const
 {
     GSymMatrix result = *this;
-    result *= m;
+    result *= matrix;
     return result;
 }
 
@@ -215,25 +217,25 @@ GSymMatrix operator/ (const GSymMatrix& a, const double& b)
 
 // Matrix transpose function
 inline
-GSymMatrix transpose(const GSymMatrix& m)
+GSymMatrix transpose(const GSymMatrix& matrix)
 {
-    return m;
+    return matrix;
 }
 
 // Cholesky decomposition
 inline
-GSymMatrix cholesky_decompose(const GSymMatrix& m, int compress)
+GSymMatrix cholesky_decompose(const GSymMatrix& matrix, int compress)
 {
-    GSymMatrix result = m;
+    GSymMatrix result = matrix;
     result.cholesky_decompose(compress);
     return result;
 }
 
 // Matrix inversion using Cholesky decomposition
 inline
-GSymMatrix cholesky_invert(const GSymMatrix& m, int compress)
+GSymMatrix cholesky_invert(const GSymMatrix& matrix, int compress)
 {
-    GSymMatrix result = m;
+    GSymMatrix result = matrix;
     result.cholesky_invert(compress);
     return result;
 }
