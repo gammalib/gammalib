@@ -222,10 +222,10 @@ int GTestSuites::size(void) const
  ***************************************************************************/
 void GTestSuites::append(GTestSuite& suite)
 {
-    //Add testsuite to container
+    // Add testsuite to container
     m_testsuites.push_back(&suite);
 
-    //Return
+    // Return
     return;
 }
 
@@ -244,9 +244,10 @@ bool GTestSuites::run(void)
     std::string frame = fill("*", text.length());
     
     // Log name of test suites
-    m_log << std::endl << frame;
-    m_log << std::endl << text;
-    m_log << std::endl << frame;
+    std::cout << std::endl;
+    std::cout << frame << std::endl;
+    std::cout << text  << std::endl;
+    std::cout << frame << std::endl;
 
     // Initialise success flag
     bool success = true;
@@ -472,6 +473,9 @@ void GTestSuites::copy_members(const GTestSuites& suites)
  ***************************************************************************/
 void GTestSuites::free_members(void)
 {
+    // Close logger
+    m_log.close();
+    
     // Return
     return;
 }

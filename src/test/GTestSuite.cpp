@@ -262,9 +262,6 @@ bool GTestSuite::run(void)
     // executed.
     set();
 
-    // Log name of test suite
-    m_log << std::endl;
-
     // Initialise success flag
     bool success = true;
 
@@ -281,7 +278,7 @@ bool GTestSuite::run(void)
             int old_failures = failures();
 
             // Log the name of the test
-            m_log << m_names[m_index] << ": ";
+            std::cout << m_names[m_index] << ": ";
 
             // Create a test of error type for function testing
             GTestCase* test = new GTestCase(GTestCase::ERROR_TEST, m_names[m_index]);
@@ -331,14 +328,14 @@ bool GTestSuite::run(void)
             }
 
             // Log the result (".","F" or, "E")
-            m_log << test->print();
+            std::cout << test->print();
 
             // Log if there are errors or failures
             if ((m_errors == old_errors && m_failures == old_failures)) {
-                m_log << " ok" << std::endl;
+                std::cout << " ok" << std::endl;
             }
             else {
-                m_log << " NOK" << std::endl;
+                std::cout << " NOK" << std::endl;
                 success = false;
             }
 
@@ -431,7 +428,7 @@ void GTestSuite::test_assert(bool               assert,
     testcase->message(message);
 
     // Log the result (".","F" or, "E")
-    m_log << testcase->print();
+    std::cout << testcase->print();
 
     // Add test case to test suite
     m_tests.push_back(testcase);
@@ -495,7 +492,7 @@ void GTestSuite::test_value(const double&      value,
     testcase->message(formated_message);
 
     // Log the result (".","F" or, "E")
-    m_log << testcase->print();
+    std::cout << testcase->print();
 
     // Add test case to test suite
     m_tests.push_back(testcase);
@@ -576,7 +573,7 @@ void GTestSuite::test_try_success(void)
     m_stack_try.pop_back();
 
     // Log the result (".","F" or, "E")
-    m_log << m_tests.back()->print();
+    std::cout << m_tests.back()->print();
 
     // Return
     return;
@@ -639,7 +636,7 @@ void GTestSuite::test_try_failure(const std::string& message,
     m_stack_try.pop_back();
 
     // Log the result ( ".","F" or, "E")
-    m_log << m_tests.back()->print();
+    std::cout << m_tests.back()->print();
 
     //Return
     return;
@@ -900,6 +897,9 @@ void GTestSuite::free_members(void)
     for (int i = 0; i < m_tests.size(); ++i) {
         delete m_tests[i]; 
     }
+
+    // Close logger
+    m_log.close();
 
     // Return
     return;
