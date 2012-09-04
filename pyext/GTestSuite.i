@@ -62,13 +62,11 @@ public:
                 // Extract message strings
                 PyObject *py_type  = PyObject_Str(type);
                 PyObject *py_value = PyObject_Str(value);
-                char     *c_type   = SWIG_Python_str_AsChar(py_type);
-                char     *c_value  = SWIG_Python_str_AsChar(py_value);
+                char     *c_type   = PyString_AsString(py_type);
+                char     *c_value  = PyString_AsString(py_value);
                 m_message += std::string(c_type);
                 m_message += "\n";
                 m_message += std::string(c_value);
-                SWIG_Python_str_DelForPy3(c_type);
-                SWIG_Python_str_DelForPy3(c_value);
                 Py_DECREF(py_type);
                 Py_DECREF(py_value);
             }
