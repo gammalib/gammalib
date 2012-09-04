@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_MWL.cpp  -  test multi-wavelength classes             *
+ *              test_MWL.cpp  -  Test multi-wavelength classes             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file test_MWL.cpp
- * @brief Testing of MWL classes.
- * @author J. Knoedlseder
+ * @brief Implementation of multi-wavelength classes unit tests
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include "GMWLLib.hpp"
+#include "test_GMWL.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -46,47 +47,55 @@ const std::string mwl_xml        = datadir+"/obs_mwl.xml";
 
 
 /***********************************************************************//**
+ * @brief Set test methods
+ ***************************************************************************/
+void TestGMWL::set(void)
+{
+    // Set test name
+    name("GMWL");
+
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGMWL::test_obs),       "Test observation handling");
+    append(static_cast<pfunction>(&TestGMWL::test_optimizer), "Test optimizer");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test observation handling
  ***************************************************************************/
-void test_obs(void)
+void TestGMWL::test_obs(void)
 {
     // Set filenames
     const std::string file1 = "test_mwl_obs.xml";
 
-    // Write header
-    std::cout << "Test observation handling: ";
-
     // Construct observation
+    test_try("Construct observation");
     try {
         GMWLObservation run1;
         GMWLObservation run2(lat_crab_fits);
         GMWLObservation run3 = run2;
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct GMWLObservation."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Load observation
+    test_try("Load observation");
     try {
         GMWLObservation run;
         run.load(lat_crab_fits);
-        //std::cout << run << std::endl;
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to load GMWLObservation."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Add observation to container
+    test_try("Add observation to container");
     try {
         GMWLObservation run;
         run.load(lat_crab_fits);
@@ -94,35 +103,22 @@ void test_obs(void)
         obs.append(run);
         obs.append(run);
         obs.append(run);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to append GMWLObservation to GObservations."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test XML loading
+    test_try("Test XML loading");
     try {
-        // Load observations
         GObservations obs = GObservations(mwl_xml);
-        
-        // Save observations
         obs.save(file1);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to load MWL observation from XML file."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Notify final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -131,66 +127,55 @@ void test_obs(void)
 
 
 /***********************************************************************//**
- * @brief Test binned optimizer.
+ * @brief Test optimizer
  ***************************************************************************/
-void test_optimizer(void)
+void TestGMWL::test_optimizer(void)
 {
-    // Write header
-    std::cout << "Test optimizer: ";
-
     // Declare observations
     GObservations   obs;
 
     // Load multi-wavelength observations
+    test_try("Load multi-wavelength observations");
     try {
         GMWLObservation lat(lat_crab_fits);
         obs.append(lat);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to append MWL observation(s) to container."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Setup model
+    test_try("Setup model");
     try {
         GModels models;
         models.load(lat_crab_model);
         obs.models(models);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to setup model from XML file for fitting."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Perform LM optimization
+    test_try("Perform LM optimization");
     try {
         GLog log;
         log.cout(false);
         GOptimizerLM opt(log);
         opt.max_iter(1000);
         obs.optimize(opt);
+        test_try_success();
         //std::cout << obs << std::endl;
         //std::cout << std::endl << opt << std::endl;
         //std::cout << *(obs.models()) << std::endl;
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to perform LM optimization."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Load multi-wavelength observations
+    test_try("Load multi-wavelength observations");
     try {
         obs.clear();
         GMWLObservation comptel(crab_fits, "COMPTEL");
@@ -199,53 +184,57 @@ void test_optimizer(void)
         obs.append(comptel);
         obs.append(lat);
         obs.append(hess);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to append MWL observation(s) to container."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Setup model
+    test_try("Setup model");
     try {
         GModels models;
         models.load(crab_model);
         obs.models(models);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to setup model from XML file for fitting."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Perform LM optimization
+    double fit_results[] = {83.6331,             0,
+                            22.0145,             0,
+                            0.00231438040883405, 0.000191759607698647,
+                            -3.1111154491587,    0.127038860468962,
+                            1,                   0,
+                            1,                   0,
+                            83.6331,             0,
+                            22.0145,             0,
+                            4.5050091460345e-11, 1.95885803229878e-12,
+                            -2.13740092737976,   0.00577184857411904,
+                            1000,                0,
+                            1,                   0};
+    test_try("Perform LM optimization");
     try {
         GLog log;
         log.cout(false);
         GOptimizerLM opt(log);
         opt.max_iter(1000);
         obs.optimize(opt);
-        std::cout << std::endl << obs << std::endl;
-        std::cout << opt << std::endl;
-        std::cout << obs.models() << std::endl;
+        test_try_success();
+        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+            GModel& model = obs.models()[i];
+            for (int k = 0; k < model.size(); ++k) {
+                std::string msg = "Verify optimization result for " + model[k].print();
+                test_value(model[k].real_value(), fit_results[j++], 1.0e-6, msg);
+                test_value(model[k].real_error(), fit_results[j++], 1.0e-6, msg);
+            }
+        }
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to perform LM optimization."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Notify final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -253,21 +242,29 @@ void test_optimizer(void)
 }
 
 
-/***********************************************************************//**
- * @brief Main test function .
+/***************************************************************************
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "**********************************" << std::endl;
-    std::cout << "* Multi-wavelength class testing *" << std::endl;
-    std::cout << "**********************************" << std::endl;
+    // Allocate test suit container
+    GTestSuites testsuites("GMWL");
 
-    // Execute the tests
-    test_obs();
-    test_optimizer();
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    // Return
-    return 0;
+    // Create a test suite
+    TestGMWL test;
+
+    // Append test suite to the container
+    testsuites.append(test);
+
+    // Run the testsuites
+    success = testsuites.run();
+
+    // Save test report
+    testsuites.save("reports/GMWL.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }

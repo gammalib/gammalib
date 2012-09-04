@@ -1,5 +1,5 @@
 /***************************************************************************
- *                      test_CTA.cpp  -  test CTA classes                  *
+ *                      test_CTA.cpp  -  Test CTA classes                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file test_CTA.cpp
- * @brief Testing of CTA classes
- * @author J. Knoedlseder
+ * @brief Implementation of CTA classes unit tests
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -33,6 +33,7 @@
 #include <unistd.h>
 #include "GCTALib.hpp"
 #include "GTools.hpp"
+#include "test_GCTA.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -51,42 +52,20 @@ const std::string cta_rsp_xml   = datadir+"/rsp_models.xml";
 
 
 /***********************************************************************//**
- * @brief Test CTA Aeff computation.
+ * @brief Set CTA response test methods
  ***************************************************************************/
-void test_response_aeff(void)
+void TestGCTAResponse::set(void)
 {
-    try {
-        // Load response
-        GCTAResponse rsp;
-        rsp.caldb(cta_caldb);
-        rsp.load(cta_irf);
+    // Set test name
+    name("GCTAResponse");
 
-        // Sum over effective area for control
-        GEnergy      eng;
-        double sum = 0.0;
-        double ref = 154124059000.00006; //!< Adjust to actual value
-        for (int i = 0; i < 30; ++i) {
-            eng.TeV(pow(10.0, -1.7 + 0.1*double(i)));
-            double aeff = rsp.aeff(0.0, 0.0, 0.0, 0.0, eng.log10TeV());
-            //std::cout << eng << " " << eng.log10TeV() << " " << aeff << std::endl;
-            sum += aeff;
-        }
-        //printf("%30.5f\n", sum);
-        if (std::abs(sum - ref) > 0.1) {
-            std::cout << std::endl
-                      << "TEST ERROR: Effective area differs from expected value"
-                      << " (difference=" << std::abs(sum - ref) << ")"
-                      << std::endl;
-            throw;
-        }
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Error occured in CTA Aeff response." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response), "Test response");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_aeff), "Test effective area");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf), "Test PSF");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
 
     // Return
     return;
@@ -94,48 +73,16 @@ void test_response_aeff(void)
 
 
 /***********************************************************************//**
- * @brief Test CTA psf computation.
+ * @brief Set CTA observation test methods
  ***************************************************************************/
-void test_response_psf(void)
+void TestGCTAObservation::set(void)
 {
-    // Test CTA Psf response
-    try {
-        // Load response
-        GCTAResponse rsp;
-        rsp.caldb(cta_caldb);
-        rsp.load(cta_irf);
+    // Set test name
+    name("GCTAObservation");
 
-        // Integrate Psf
-        GEnergy eng;
-        for (double e = 0.1; e < 10.0; e*=2) {
-            eng.TeV(e);
-            double r     = 0.0;
-            double dr    = 0.001;
-            int    steps = int(1.0/dr);
-            double sum   = 0.0;
-            for (int i = 0; i < steps; ++i) {
-                r   += dr;
-                //obsDir.radec(0.0, r);
-                sum += rsp.psf(r, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
-                       twopi * std::sin(r*deg2rad) * dr;
-            }
-            if ((sum - 1.0) > 0.001) {
-                std::cout << std::endl
-                        << "TEST ERROR: Psf integral differs from expected value"
-                        << " (difference=" << (sum - 1.0) << ")"
-                        << std::endl;
-                throw;
-            }
-        }
-
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Error occured in CTA Psf response." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAObservation::test_unbinned_obs), "Test unbinned observations");
+    append(static_cast<pfunction>(&TestGCTAObservation::test_binned_obs), "Test binned observation");
 
     // Return
     return;
@@ -143,9 +90,89 @@ void test_response_psf(void)
 
 
 /***********************************************************************//**
- * @brief Test CTA npsf computation.
+ * @brief Set CTA optimizer test methods
  ***************************************************************************/
-void test_response_npsf(void)
+void TestGCTAOptimize::set(void)
+{
+    // Set test name
+    name("CTA optimizers");
+
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_unbinned_optimizer), "Test unbinned optimizer");
+    append(static_cast<pfunction>(&TestGCTAOptimize::test_binned_optimizer), "Test binned optimizer PSF");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA Aeff computation
+ ***************************************************************************/
+void TestGCTAResponse::test_response_aeff(void)
+{
+    // Load response
+    GCTAResponse rsp;
+    rsp.caldb(cta_caldb);
+    rsp.load(cta_irf);
+
+    // Sum over effective area for control
+    GEnergy      eng;
+    double sum = 0.0;
+    double ref = 154124059000.00006; //!< Adjust to actual value
+    for (int i = 0; i < 30; ++i) {
+        eng.TeV(pow(10.0, -1.7 + 0.1*double(i)));
+        double aeff = rsp.aeff(0.0, 0.0, 0.0, 0.0, eng.log10TeV());
+        //std::cout << eng << " " << eng.log10TeV() << " " << aeff << std::endl;
+        sum += aeff;
+    }
+    test_value(sum, ref, 0.1, "Effective area verification");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA psf computation
+ *
+ * The Psf computation is tested by integrating numerically the Psf
+ * function. Integration is done in a rather simplistic way, by stepping
+ * radially away from the centre. The integration is done for a set of
+ * energies from 0.1-10 TeV.
+ ***************************************************************************/
+void TestGCTAResponse::test_response_psf(void)
+{
+    // Load response
+    GCTAResponse rsp;
+    rsp.caldb(cta_caldb);
+    rsp.load(cta_irf);
+
+    // Integrate Psf
+    GEnergy eng;
+    for (double e = 0.1; e < 10.0; e *= 2.0) {
+        eng.TeV(e);
+        double r     = 0.0;
+        double dr    = 0.001;
+        int    steps = int(1.0/dr);
+        double sum   = 0.0;
+        for (int i = 0; i < steps; ++i) {
+            r   += dr;
+            sum += rsp.psf(r*deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
+                   twopi * std::sin(r*deg2rad) * dr*deg2rad;
+        }
+        test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA npsf computation
+ ***************************************************************************/
+void TestGCTAResponse::test_response_npsf(void)
 {
     // Setup CTA response
     GCTAResponse rsp;
@@ -164,69 +191,25 @@ void test_response_npsf(void)
     roi.radius(2.0);
     srcEng.TeV(0.1);
 
-    // Try block to catch any problems in the computation
-    try {
+    // Test PSF centred on ROI
+    srcDir.radec_deg(0.0, 0.0);
+    double npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
+    test_value(npsf, 1.0, 1.0e-3, "PSF(0,0) integration");
 
-        // Test PSF centred on ROI
-        srcDir.radec_deg(0.0, 0.0);
-        double npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
-        double ref  = 1.0;
-        if (std::abs(npsf - ref) > 1.0e-3) {
-            std::cout << std::endl
-                      << "TEST ERROR: Uncertainty in PSF(0,0) integration >0.1%"
-                      << " (difference=" << std::abs(npsf - 1.0) << ")"
-                      << std::endl;
-            throw;
-        }
-        std::cout << ".";
+    // Test PSF offset but inside ROI
+    srcDir.radec_deg(1.0, 1.0);
+    npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
+    test_value(npsf, 1.0, 1.0e-3, "PSF(1,1) integration");
 
-        // Test PSF offset but inside ROI
-        srcDir.radec_deg(1.0, 1.0);
-        npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
-        ref  = 1.0;
-        if (std::abs(npsf - ref) > 1.0e-3) {
-            std::cout << std::endl
-                      << "TEST ERROR: Uncertainty in PS(1,1) integration >0.1%"
-                      << " (difference=" << std::abs(npsf - ref) << ")"
-                      << std::endl;
-            throw;
-        }
-        std::cout << ".";
+    // Test PSF outside and overlapping ROI
+    srcDir.radec_deg(0.0, 2.0);
+    npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
+    test_value(npsf, 0.492373, 1.0e-3, "PSF(0,2) integration");
 
-        // Test PSF outside and overlapping ROI
-        srcDir.radec_deg(0.0, 2.0);
-        npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
-        ref  = 0.492373;
-        if (std::abs(npsf - ref) > 1.0e-3) {
-            std::cout << std::endl
-                      << "TEST ERROR: Uncertainty in PS(0,2.1) integration >0.1%"
-                      << " (difference=" << std::abs(npsf - ref) << ")"
-                      << std::endl;
-            throw;
-        }
-        std::cout << ".";
-
-        // Test PSF outside ROI
-        srcDir.radec_deg(2.0, 2.0);
-        npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
-        ref  = 0.0;
-        if (std::abs(npsf - ref) > 1.0e-3) {
-            std::cout << std::endl
-                      << "TEST ERROR: Uncertainty in PS(2,2) integration >0.1%"
-                      << " (difference=" << std::abs(npsf - ref) << ")"
-                      << std::endl;
-            throw;
-        }
-        std::cout << ".";
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to compute GCTAResponse::npsf."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    // Test PSF outside ROI
+    srcDir.radec_deg(2.0, 2.0);
+    npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi);
+    test_value(npsf, 0.0, 1.0e-3, "PSF(2,2) integration");
 
     // Return
     return;
@@ -241,7 +224,7 @@ void test_response_npsf(void)
  * GCTAResponse::irf_diffuse method. The test is done for a small counts
  * map to keep the test executing reasonably fast.
  ***************************************************************************/
-void test_response_irf_diffuse(void)
+void TestGCTAResponse::test_response_irf_diffuse(void)
 {
     // Set reference value
     double ref = 13803.800313356;
@@ -288,50 +271,26 @@ void test_response_irf_diffuse(void)
     obs.events(&cube);
     obs.pointing(pnt);
 
-    // Extract CTA response
-    //GResponse* rsp = obs.response();
-
     // Load model for IRF computation
     GModels models(cta_rsp_xml);
 
-    // Try block to catch any problems in the computation
-    try {
+    // Reset sum
+    double sum = 0.0;
 
-        // Reset sum
-        double sum = 0.0;
+    // Iterate over all bins in event cube
+    for (int i = 0; i < obs.events()->size(); ++i) {
 
-        // Iterate over all bins in event cube
-        for (int i = 0; i < obs.events()->size(); ++i) {
+        // Get event pointer
+        const GEventBin* bin = (*(static_cast<const GEventCube*>(obs.events())))[i];
 
-            // Get event pointer
-            const GEventBin* bin = (*(static_cast<const GEventCube*>(obs.events())))[i];
-
-            // Get model and add to sum
-            double model = obs.model(models, *bin, NULL) * bin->size();
-            sum += model;
-
-        }
-
-        // Test sum
-        if (std::abs(sum - ref) > 1.0e-5) {
-            std::cout << std::endl
-                      << "TEST ERROR: Diffuse IRF computation value differs"
-                      << " from expectation by "
-                      << sum - ref
-                      << " (result-reference)."
-                      << std::endl;
-            throw;
-        }
+        // Get model and add to sum
+        double model = obs.model(models, *bin, NULL) * bin->size();
+        sum += model;
 
     }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to perform diffuse IRF computation."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+
+    // Test sum
+    test_value(sum, ref, 1.0e-5, "Diffuse IRF computation");
 
     // Return
     return;
@@ -346,7 +305,7 @@ void test_response_irf_diffuse(void)
  * GCTAObservation::npred method which in turn calls the
  * GCTAResponse::npred_diffuse method. The test takes a few seconds.
  ***************************************************************************/
-void test_response_npred_diffuse(void)
+void TestGCTAResponse::test_response_npred_diffuse(void)
 {
     // Set reference value
     double ref = 11212.26274;
@@ -396,38 +355,14 @@ void test_response_npred_diffuse(void)
     obs.events(&events);
     obs.pointing(pnt);
 
-    // Extract CTA response
-    //GResponse* rsp = obs.response();
-
     // Load models for Npred computation
     GModels models(cta_rsp_xml);
 
-    // Try block to catch any problems in the computation
-    try {
+    // Perform Npred computation
+    double npred = obs.npred(models, NULL);
 
-        // Perform Npred computation
-        double npred = obs.npred(models, NULL);
-
-        // Test Npred
-        if (std::abs(npred - ref) > 1.0e-5) {
-            std::cout << std::endl
-                      << "TEST ERROR: Diffuse Npred computation value differs"
-                      << " from expectation by "
-                      << npred - ref
-                      << " (result-reference)."
-                      << std::endl;
-            throw;
-        }
-
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to compute GCTAResponse::npred."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    // Test Npred
+    test_value(npred, ref, 1.0e-5, "Diffuse Npred computation");
 
     // Return
     return;
@@ -435,46 +370,22 @@ void test_response_npred_diffuse(void)
 
 
 /***********************************************************************//**
- * @brief Test CTA response handling.
+ * @brief Test CTA response handling
  ***************************************************************************/
-void test_response(void)
+void TestGCTAResponse::test_response(void)
 {
-    // Dump header
-    std::cout << "Test CTA response: ";
-
     // Test CTA response loading
+    test_try("Test CTA response loading");
     try {
         // Load response
         GCTAResponse rsp;
         rsp.caldb(cta_caldb);
         rsp.load(cta_irf);
-        //std::cout << rsp << std::endl;
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to load CTA response." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Test CTA Aeff response
-    test_response_aeff();
-
-    // Test CTA Psf response
-    test_response_psf();
-
-    // Test GCTAResponse::npsf
-    test_response_npsf();
-
-    // Test GCTAResponse::irf_diffuse
-    test_response_irf_diffuse();
-    
-    // Test GCTAResponse::npred_diffuse
-    test_response_npred_diffuse();
-
-    // Dump final ok
-    std::cout << " ok." << std::endl;
 
     // Return
     return;
@@ -482,112 +393,64 @@ void test_response(void)
 
 
 /***********************************************************************//**
- * @brief Test unbinned observation handling.
+ * @brief Test unbinned observation handling
  ***************************************************************************/
-void test_unbinned_obs(void)
+void TestGCTAObservation::test_unbinned_obs(void)
 {
     // Set filenames
     const std::string file1 = "test_cta_obs_unbinned.xml";
 
-    // Write header
-    std::cout << "Test CTA unbinned observation handling: ";
-
     // Declare observations
     GObservations   obs;
     GCTAObservation run;
 
     // Load unbinned CTA observation
+    test_try("Load unbinned CTA observation");
     try {
         run.load_unbinned(cta_events);
         run.response(cta_irf,cta_caldb);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Add observation (twice) to data
+    test_try("Load unbinned CTA observation");
     try {
         obs.append(run);
         obs.append(run);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to append CTA run to observations." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Loop over all events using iterators
-    try {
-        int num = 0;
-        for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
-            //std::cout << *event->energy() << std::endl;
-            //std::cout << event->test() << std::endl;
-            num++;
-        }
-        if (num != 8794) {
-            std::cout << std::endl
-                      << "TEST ERROR: Wrong number of iterations in GObservations::iterator."
-                      << " (excepted 8794, found " << num << ")" << std::endl;
-            throw;
-        }
+    int num = 0;
+    for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
+        num++;
     }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to iterate GObservations." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    test_value(num, 8794, 1.0e-20, "Test observation iterator");
 
     // Loop over all events using iterator
-    try {
-        int num = 0;
-        GCTAEventList *ptr = static_cast<GCTAEventList*>(const_cast<GEvents*>(run.events()));
-        for (GCTAEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
-            //std::cout << *event->energy() << std::endl;
-            num++;
-        }
-        if (num != 4397) {
-            std::cout << std::endl
-                      << "TEST ERROR: Wrong number of iterations in GCTAEventList::iterator."
-                      << " (excepted 4397, found " << num << ")" << std::endl;
-            throw;
-        }
+    num = 0;
+    GCTAEventList *ptr = static_cast<GCTAEventList*>(const_cast<GEvents*>(run.events()));
+    for (GCTAEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
+        num++;
     }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to iterate GCTAEventList." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    test_value(num, 4397, 1.0e-20, "Test event iterator");
 
     // Test XML loading
+    test_try("Test XML loading");
     try {
-        // Load observations
         obs = GObservations(cta_unbin_xml);
-        
-        // Save observations
         obs.save(file1);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to load unbinned observation from XML file."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Plot final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -596,113 +459,38 @@ void test_unbinned_obs(void)
 
 
 /***********************************************************************//**
- * @brief Test unbinned optimizer.
+ * @brief Test binned observation handling
  ***************************************************************************/
-void test_unbinned_optimizer(void)
-{
-    // Write header
-    std::cout << "Test CTA unbinned optimizer: ";
-
-    // Number of observations in data
-    //int nobs = 1;
-
-    // Declare observations
-    GObservations   obs;
-    GCTAObservation run;
-
-    // Load unbinned CTA observation
-    try {
-        // Load data and response and set ROI, energy range and time range
-        // for analysis
-        run.load_unbinned(cta_events);
-        run.response(cta_irf,cta_caldb);
-        obs.append(run);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Load models from XML file
-    obs.models(cta_model_xml);
-
-    // Perform LM optimization
-    GOptimizerLM opt;
-    try {
-        opt.max_iter(100);
-        obs.optimize(opt);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to perform LM optimization."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-    std::cout << std::endl << opt << std::endl;
-    std::cout << obs.models() << std::endl;
-
-    // Plot final test success
-    std::cout << " ok." << std::endl;
-
-    // Exit test
-    return;
-
-}
-
-
-/***********************************************************************//**
- * @brief Test unbinned observation handling.
- ***************************************************************************/
-void test_binned_obs(void)
+void TestGCTAObservation::test_binned_obs(void)
 {
     // Set filenames
     const std::string file1 = "test_cta_obs_binned.xml";
 
-    // Write header
-    std::cout << "Test CTA binned observation handling: ";
-
     // Declare observations
     GObservations   obs;
     GCTAObservation run;
 
     // Load binned CTA observation
+    test_try("Load unbinned CTA observation");
     try {
         run.load_binned(cta_cntmap);
         run.response(cta_irf,cta_caldb);
-        //std::cout << run << std::endl;
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test XML loading
+    test_try("Test XML loading");
     try {
-        // Load observations
         obs = GObservations(cta_bin_xml);
-        
-        // Save observations
         obs.save(file1);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to load binned observation from XML file."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-
-    // Notify final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -711,56 +499,59 @@ void test_binned_obs(void)
 
 
 /***********************************************************************//**
- * @brief Test binned optimizer.
+ * @brief Test unbinned optimizer
  ***************************************************************************/
-void test_binned_optimizer(void)
+void TestGCTAOptimize::test_unbinned_optimizer(void)
 {
-    // Write header
-    std::cout << "Test CTA binned optimizer: ";
-
-    // Number of observations in data
-    //int nobs = 1;
-
     // Declare observations
     GObservations   obs;
     GCTAObservation run;
 
-    // Load binned CTA observation
+    // Load unbinned CTA observation
+    test_try("Load unbinned CTA observation");
     try {
-        run.load_binned(cta_cntmap);
+        run.load_unbinned(cta_events);
         run.response(cta_irf,cta_caldb);
         obs.append(run);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to load CTA run."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Load models from XML file
     obs.models(cta_model_xml);
 
     // Perform LM optimization
-    GOptimizerLM opt;
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.656246512e-16, 1.91458426e-17,
+                            -2.484100472, -0.02573396361,
+                            300000, 0,
+                            1, 0,
+                            2.993705325, 0.03572658413,
+                            6.490832107e-05, 1.749021094e-06,
+                            -1.833584022, -0.01512223495,
+                            1000000, 0,
+                            1, 0};
+    test_try("Perform LM optimization");
     try {
+        GOptimizerLM opt;
         opt.max_iter(100);
         obs.optimize(opt);
+        test_try_success();
+        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+            GModel& model = obs.models()[i];
+            for (int k = 0; k < model.size(); ++k) {
+                std::string msg = "Verify optimization result for " + model[k].print();
+                test_value(model[k].real_value(), fit_results[j++], 1.0e-6, msg);
+                test_value(model[k].real_error(), fit_results[j++], 1.0e-6, msg);
+            }
+        }
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to perform LM optimization."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-    std::cout << std::endl << opt << std::endl;
-    std::cout << obs.models() << std::endl;
-
-    // Plot final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -769,39 +560,100 @@ void test_binned_optimizer(void)
 
 
 /***********************************************************************//**
- * @brief Main test function .
+ * @brief Test binned optimizer
+ ***************************************************************************/
+void TestGCTAOptimize::test_binned_optimizer(void)
+{
+    // Declare observations
+    GObservations   obs;
+    GCTAObservation run;
+
+    // Load binned CTA observation
+    test_try("Load binned CTA observation");
+    try {
+        run.load_binned(cta_cntmap);
+        run.response(cta_irf,cta_caldb);
+        obs.append(run);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Load models from XML file
+    obs.models(cta_model_xml);
+
+    // Perform LM optimization
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.616410411e-16, 1.904730785e-17,
+                            -2.481781246, -0.02580905077,
+                            300000, 0,
+                            1, 0,
+                            2.933677595, 0.06639644824,
+                            6.550723074e-05, 1.945714239e-06,
+                            -1.833781187, -0.0161464076,
+                            1000000, 0,
+                            1, 0};
+    test_try("Perform LM optimization");
+    try {
+        GOptimizerLM opt;
+        opt.max_iter(100);
+        obs.optimize(opt);
+        test_try_success();
+        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+            GModel& model = obs.models()[i];
+            for (int k = 0; k < model.size(); ++k) {
+                std::string msg = "Verify optimization result for " + model[k].print();
+                test_value(model[k].real_value(), fit_results[j++], 1.0e-6, msg);
+                test_value(model[k].real_error(), fit_results[j++], 1.0e-6, msg);
+            }
+        }
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+
+}
+
+
+/***************************************************************************
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "*****************************************" << std::endl;
-    std::cout << "* CTA instrument specific class testing *" << std::endl;
-    std::cout << "*****************************************" << std::endl;
+    // Allocate test suit container
+    GTestSuites testsuites("CTA instrument specific class testing");
 
     // Check if data directory exists
     bool has_data = (access(datadir.c_str(), R_OK) == 0);
-
-    // Execute the tests
-    test_response();
-
-    // Execute tests requiring data
     if (has_data) {
-
-        // Set CALDB environment variable
         std::string caldb = "CALDB="+cta_caldb;
         putenv((char*)caldb.c_str());
-
-        // Execute tests
-        test_unbinned_obs();
-        test_binned_obs();
-        test_unbinned_optimizer();
-        test_binned_optimizer();
-    }
-    else {
-        std::cout << "Skipped several tests since no test data have been found." << std::endl;
     }
 
-    // Return
-    return 0;
+    // Initially assume that we pass all tests
+    bool success = true;
+
+    // Create test suites and append them to the container
+    TestGCTAResponse    rsp;
+    TestGCTAObservation obs;
+    TestGCTAOptimize    opt;
+    testsuites.append(rsp);
+    if (has_data) {
+        testsuites.append(obs);
+        testsuites.append(opt);
+    }
+
+    // Run the testsuites
+    success = testsuites.run();
+
+    // Save test report
+    testsuites.save("reports/GCTA.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }
