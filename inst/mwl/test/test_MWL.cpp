@@ -248,7 +248,7 @@ void TestGMWL::test_optimizer(void)
 int main(void)
 {
     // Allocate test suit container
-    GTestSuites testsuites("GMWL");
+    GTestSuites testsuites("Multi-wavelength instrument specific class testing");
 
     // Initially assume that we pass all tests
     bool success = true;
