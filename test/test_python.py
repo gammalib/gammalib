@@ -96,6 +96,9 @@ if __name__ == '__main__':
 	else:
 		rc = 1
 
+	# Print a linefeed
+	sys.stdout.write("\n")
+
 	# Exit with return code
 	sys.exit(rc)
 	
