@@ -81,6 +81,7 @@ public:
     int         size(void) const;
     void        open(const std::string& filename, bool clobber = false);
     void        close(void);
+    void        flush(bool force = false);
     void        date(bool flag);
     void        cout(bool flag);
     void        cerr(bool flag);
@@ -104,7 +105,6 @@ protected:
     void        init_members(void);
     void        copy_members(const GLog& log);
     void        free_members(void);
-    void        flush(bool force = false);
     void        header(const std::string& arg, int level);
     std::string strdate(void) const;
     std::string prefix(void) const;
