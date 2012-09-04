@@ -131,7 +131,9 @@ GMatrix::GMatrix(const GSymMatrix& matrix) : GMatrixBase(matrix)
     // Fill matrix
     for (int col = 0; col < matrix.cols(); ++col) {
         for (int row = col; row < matrix.rows(); ++row) {
-            (*this)(row, col) = matrix(row, col);
+            double value      = matrix(row, col);
+            (*this)(row, col) = value;
+            (*this)(col, row) = value;
         }
     }
 
@@ -155,7 +157,7 @@ GMatrix::GMatrix(const GSparseMatrix& matrix) : GMatrixBase(matrix)
 
     // Fill matrix
     for (int col = 0; col < matrix.cols(); ++col) {
-        for (int row = col; row < matrix.rows(); ++row) {
+        for (int row = 0; row < matrix.rows(); ++row) {
             (*this)(row, col) = matrix(row, col);
         }
     }
