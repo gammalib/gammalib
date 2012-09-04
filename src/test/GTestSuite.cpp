@@ -44,6 +44,11 @@ pthread_attr_t gomp_thread_attr;
 #endif
 #endif
 
+/* __ Python section ____________________________________________________ */
+#ifdef HAVE_PYTHON
+#include "Python.h"
+#endif
+
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                            "GTestSuite::operator[](int&)"
 #define G_TRY_SUCCESS                        "GTestSuite::test_try_success()"
@@ -241,8 +246,24 @@ void GTestSuite::append(const pfunction function, const std::string& name)
 {
     // Add test function pointer and name to suite
     m_functions.push_back(function);
+    m_py_object.push_back(NULL);
     m_names.push_back(name);
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set test functions
+ *
+ * Dummy set method that does not set any test function. This method does
+ * only exist since Python version < 3 does not know abstract classes, but
+ * we want to use GTestSuite to derive Python test classes. Thus, GTestSuite
+ * is not abstract.
+ ***************************************************************************/
+void GTestSuite::set(void)
+{
     // Return
     return;
 }
@@ -276,7 +297,11 @@ bool GTestSuite::run(void)
     for (m_index = 0; m_index < m_functions.size(); ++m_index) {
 
         // Continue only if function is valid
+        #ifdef HAVE_PYTHON
+        if (m_functions[m_index] != NULL || m_py_object[m_index] != NULL) {
+        #else
         if (m_functions[m_index] != NULL) {
+        #endif
 
             // Save the number of errors and failures before test
             // execution. We use this after the test to see if
@@ -303,9 +328,22 @@ bool GTestSuite::run(void)
             clock_t t_start = clock();
             #endif
 
-            // Execute test function
+            // Execute test function. If Python bindings are enabled we check
+            // if we have a C++ function or a Python object.
             try {
+                #ifdef HAVE_PYTHON
+                if (m_functions[m_index] != NULL) {
+                    (this->*(m_functions[m_index]))();
+                }
+                else if (m_py_object[m_index] != NULL) {
+                    PyObject* args = Py_BuildValue("()");
+                    PyObject* func = static_cast<PyObject*>(m_py_object[m_index]);
+                    PyEval_CallObject(func, args);
+                    Py_DECREF(args);
+                }
+                #else
                 (this->*(m_functions[m_index]))();
+                #endif
             }
             catch(std::exception& e) {
 
@@ -817,6 +855,27 @@ double GTestSuite::duration(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print test suite information
+ ***************************************************************************/
+std::string GTestSuite::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GTestSuite ===");
+    result.append("\n"+parformat("Name")+m_name);
+    result.append("\n"+parformat("Number of functions")+str(m_names.size()));
+    result.append("\n"+parformat("Number of executed tests")+str(size()));
+    result.append("\n"+parformat("Number of errors")+str(errors()));
+    result.append("\n"+parformat("Number of failures")+str(failures()));
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                              Private methods                            =
@@ -831,6 +890,7 @@ void GTestSuite::init_members(void)
     // Initialise members
     m_name      = "Unnamed Test Suite";
     m_functions.clear();
+    m_py_object.clear();
     m_names.clear();
     m_tests.clear();
     m_stack_try.clear();
@@ -860,6 +920,7 @@ void GTestSuite::copy_members(const GTestSuite& suite)
     // Copy members
     m_name       = suite.m_name;
     m_functions  = suite.m_functions;
+    m_py_object  = suite.m_py_object;
     m_names      = suite.m_names;
     m_tests      = suite.m_tests;
     m_stack_try  = suite.m_stack_try;
