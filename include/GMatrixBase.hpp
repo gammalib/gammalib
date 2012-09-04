@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GMatrixBase.hpp  -  matrix abstract base class            *
+ *               GMatrixBase.hpp  -  Abstract matrix base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,21 +20,22 @@
  ***************************************************************************/
 /**
  * @file GMatrixBase.hpp
- * @brief GMatrixBase class definition.
- * @author J. Knodlseder
+ * @brief Abstract matrix base class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMATRIXBASE_HPP
 #define GMATRIXBASE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GVector.hpp"
 
 
 /***********************************************************************//**
  * @class GMatrixBase
  *
- * @brief GMatrixBase class interface defintion
+ * @brief Abstract matrix base class interface defintion
  *
  * GMatrixBase is an abstract base class for all matrix classes. It defines
  * the common interfaces of the matrix objects and provides some common
@@ -71,18 +72,23 @@ public:
 
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GMatrixBase& m);
-    void   free_members(void);
-    void   select_non_zero(void);
-    void   negation(void);
-    void   addition(const GMatrixBase& m);
-    void   subtraction(const GMatrixBase& m);
-    void   multiplication(const double& s);
-    void   set_all_elements(const double& s);
-    double get_min_element(void) const;
-    double get_max_element(void) const;
-    double get_element_sum(void) const;
+    void        init_members(void);
+    void        copy_members(const GMatrixBase& m);
+    void        free_members(void);
+    void        select_non_zero(void);
+    void        negation(void);
+    void        addition(const GMatrixBase& m);
+    void        subtraction(const GMatrixBase& m);
+    void        multiplication(const double& s);
+    void        set_all_elements(const double& s);
+    double      get_min_element(void) const;
+    double      get_max_element(void) const;
+    double      get_element_sum(void) const;
+    std::string print_elements(void) const;
+    std::string print_row_compression(void) const;
+    std::string print_col_compression(void) const;
+
+    // Obsolete protected methods
     void   dump_elements(std::ostream& os) const;
     void   dump_row_comp(std::ostream& os) const;
     void   dump_col_comp(std::ostream& os) const;

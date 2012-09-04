@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GMatrixBase.cpp  -  Abstract matrix base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,15 +20,16 @@
  ***************************************************************************/
 /**
  * @file GMatrixBase.cpp
- * @brief GMatrixBase class implementation.
- * @author J. Knodlseder
+ * @brief Abstract matrix base class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #include <cmath>
-#include "GMatrixBase.hpp"
+#include "GTools.hpp"
 #include "GException.hpp"
 #include "GVector.hpp"
+#include "GMatrixBase.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COPY_MEMBERS               "GMatrixBase::copy_members(GMatrixBase)"
@@ -517,6 +518,74 @@ void GMatrixBase::dump_col_comp(std::ostream& os) const
   
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print all matrix elements
+ ***************************************************************************/
+std::string GMatrixBase::print_elements(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Print matrix elements row by row using the access function
+    for (int row = 0; row < m_rows; ++row) {
+        result += "\n ";
+        for (int col = 0; col < m_cols; ++col) {
+            result += str((*this)(row,col));
+            if (col != m_cols-1) {
+                result += ", ";
+            }
+        }
+    }
+  
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Print row compression scheme if it exists
+ ***************************************************************************/
+std::string GMatrixBase::print_row_compression(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // If there is a row compression the print the scheme
+    if (m_rowsel != NULL) {
+        result.append("\n"+parformat("Row selection"));
+        for (int row = 0; row < m_num_rowsel; ++row) {
+            result.append(" ");
+            result.append(str(m_rowsel[row]));
+        }
+    }
+  
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Print column compression scheme if it exists
+ ***************************************************************************/
+std::string GMatrixBase::print_col_compression(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // If there is a row compression the print the scheme
+    if (m_colsel != NULL) {
+        result.append("\n"+parformat("Column selection"));
+        for (int col = 0; col < m_num_colsel; ++col) {
+            result.append(" ");
+            result.append(str(m_colsel[col]));
+        }
+    }
+  
+    // Return result
+    return result;
 }
 
 
