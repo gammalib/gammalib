@@ -264,13 +264,9 @@ bool GTestSuite::run(void)
 
     // Log name of test suite
     m_log << std::endl;
-    //m_log.header3(this->name());
 
     // Initialise success flag
     bool success = true;
-
-    // Initialise test suite counter
-    int num_suites = 0;
 
     // Loop over all functions in suite
     for (m_index = 0; m_index < m_functions.size(); ++m_index) {
@@ -283,12 +279,6 @@ bool GTestSuite::run(void)
             // any failures occured.
             int old_errors   = errors();
             int old_failures = failures();
-
-            // Insert newline after first test suite. That's just for
-            // cosmetics.
-            if (num_suites > 0) {
-                m_log << std::endl;
-            }
 
             // Log the name of the test
             m_log << m_names[m_index] << ": ";
@@ -345,19 +335,16 @@ bool GTestSuite::run(void)
 
             // Log if there are errors or failures
             if ((m_errors == old_errors && m_failures == old_failures)) {
-                m_log << " ok";
+                m_log << " ok" << std::endl;
             }
             else {
-                m_log << " NOK";
+                m_log << " NOK" << std::endl;
                 success = false;
             }
 
             // Add test case to test suite
             m_tests.push_back(test);
 
-            // Increment test suite counter
-            num_suites++;
-            
         } // endif: test case has a function pointer
 
     } // endwhile: there were tests on the stack

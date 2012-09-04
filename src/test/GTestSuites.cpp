@@ -239,9 +239,14 @@ void GTestSuites::append(GTestSuite& suite)
  ***************************************************************************/
 bool GTestSuites::run(void)
 {
+    // Set header
+    std::string text  = "* " + name() + " *";
+    std::string frame = fill("*", text.length());
+    
     // Log name of test suites
-    m_log << std::endl;
-    m_log.header1(name());
+    m_log << std::endl << frame;
+    m_log << std::endl << text;
+    m_log << std::endl << frame;
 
     // Initialise success flag
     bool success = true;
