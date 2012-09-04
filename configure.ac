@@ -838,6 +838,7 @@ fi
 # Signal if Python is enabled
 if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
   enable_python="yes"
+  AC_DEFINE([HAVE_PYTHON], [1], [Define if Python bindings are built])
 fi
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
 
