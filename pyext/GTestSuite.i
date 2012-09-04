@@ -27,6 +27,55 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GTestSuite.hpp"
 #include "GTools.hpp"
+#include "GException.hpp"
+
+/***********************************************************************//**
+ * @class GPythonException
+ *
+ * @brief Exception for Python tests
+ *
+ * This class implements an exception for the Python tests. It allows to
+ * catch any error message that occurs during Python unit testing.
+ ***************************************************************************/
+class GPythonException : public GExceptionHandler {
+public:
+    class test_error : public GExceptionHandler {
+    public:
+        test_error(const std::string& origin) {
+            
+            // Set origin and default message
+            m_origin  = origin;
+            m_message = "";
+
+            // Set message
+            if (PyErr_Occurred()) {
+
+                // Fetch error type, value and traceback
+                PyObject *type      = 0;
+                PyObject *value     = 0;
+                PyObject *traceback = 0;
+                PyErr_Fetch(&type, &value, &traceback);
+
+                // Clear error message
+                PyErr_Clear();
+
+                // Extract message strings
+                PyObject *py_type  = PyObject_Str(type);
+                PyObject *py_value = PyObject_Str(value);
+                char     *c_type   = SWIG_Python_str_AsChar(py_type);
+                char     *c_value  = SWIG_Python_str_AsChar(py_value);
+                m_message += std::string(c_type);
+                m_message += "\n";
+                m_message += std::string(c_value);
+                SWIG_Python_str_DelForPy3(c_type);
+                SWIG_Python_str_DelForPy3(c_value);
+                Py_DECREF(py_type);
+                Py_DECREF(py_value);
+            }
+        }
+    };
+};
+
 
 /***********************************************************************//**
  * @class GPythonTestSuite
@@ -63,8 +112,14 @@ public:
     void test(void) {
         PyObject* args = Py_BuildValue("()");
         PyObject* func = static_cast<PyObject*>(m_py_objects[m_index]);
-        PyEval_CallObject(func, args);
+        PyObject* res  = PyEval_CallObject(func, args);
         Py_DECREF(args);
+        if (res == NULL) {
+            throw GPythonException::test_error("GPythonTestSuite::test");
+        }
+        else {
+            Py_DECREF(res);
+        }
         return;
     }
 
@@ -105,11 +160,11 @@ public:
     void                      test_assert(bool result,
                                           const std::string& name,
                                           const std::string& message = "");
-    void                      test_value(double value,
-                                         double value_expected,
-                                         double eps = 0,
-                                         const std::string& name = "",
-                                         const std::string& message = "");
+    void                      test_value(const double&      value,
+                                         const double&      expected,
+                                         const double&      eps = 1.0e-10,
+                                         const std::string& name="",
+                                         const std::string& message="");
     void                      test_try(const std::string& name);
     void                      test_try_success(void);
     void                      test_try_failure(const std::string& message = "",
