@@ -1,7 +1,7 @@
 /***************************************************************************
  *           test_GApplication.cpp  -  test GApplication classes           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jurgen Knodlseder                                *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file test_GApplication.cpp
- * @brief Testing of application classes.
+ * @brief Testing of application classes
  * @author J. Knodlseder
  */
 
@@ -28,39 +28,51 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GammaLib.hpp"
 #include "test_GApplication.hpp"
-#include <iostream>
-#include <stdexcept>
-#include <stdlib.h>
 
 /* __ Globals ____________________________________________________________ */
 
-void TestGApplication::set(void){
+
+/***********************************************************************//**
+ * @brief Set parameters and tests
+ **************************************************************************/
+void TestGApplication::set(void)
+{
     // Test name
     name("GApplication");
 
-    //add tests
-    add_test(static_cast<pfunction>(&TestGApplication::test_constructor),"GLog constructor");
-    add_test(static_cast<pfunction>(&TestGApplication::test_stream_logger),"stream logger");
-    add_test(static_cast<pfunction>(&TestGApplication::test_C_logger),"C logger");
+    // Append tests
+    append(static_cast<pfunction>(&TestGApplication::test_constructor), "Test GLog constructor");
+    append(static_cast<pfunction>(&TestGApplication::test_stream_logger), "Test stream logger");
+    append(static_cast<pfunction>(&TestGApplication::test_C_logger), "Test C logger");
 
+    // Return
     return;
 }
 
 
-// Test constructor
+/***********************************************************************//**
+ * @brief Test GLog constructor
+ **************************************************************************/
 void TestGApplication::test_constructor(void)
 {
+    // Void constructor
     GLog log1;
+
+    // Copy constructor
     GLog log2 = log1;
 
+    // Return
     return; 
 }
 
-// Test stream logger
+
+/***********************************************************************//**
+ * @brief Test stream logger
+ **************************************************************************/
 void TestGApplication::test_stream_logger(void)
 {
+    // Test
     GLog log;
     log.date(true);
     log.name("Test");
@@ -73,12 +85,17 @@ void TestGApplication::test_stream_logger(void)
     log << "6. This is a C string: " << "a" << std::endl;
     log << "7. This is a Boolean: " << true << std::endl;
 
+    // Return
     return;
 }
 
-// Test C logger
+
+/***********************************************************************//**
+ * @brief Test C logger
+ **************************************************************************/
 void TestGApplication::test_C_logger(void)
 {
+    // Test
     GLog log;
     log.date(true);
     log.name("Test");
@@ -88,30 +105,34 @@ void TestGApplication::test_C_logger(void)
     log("%s %f", "10. This is a single precision:", float(1.23456789));
     log("%s %f", "11. This is a double precision:", double(1.23456789));
 
+    // Return
     return; 
 }
 
+
 /***************************************************************************
- *                            Main test function                           *
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
+    // Allocate test suit container
     GTestSuites testsuites("GApplication");
 
-    bool was_successful=true;
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    //Create a test suite
+    // Create a test suite
     TestGApplication test;
 
-    //Append to the container
+    // Append test suite to the container
     testsuites.append(test);
 
-    //Run
-    was_successful=testsuites.run();
+    // Run the testsuites
+    success = testsuites.run();
 
-    //save xml report
+    // Save test report
     testsuites.save("reports/GApplication.xml");
 
-    // Return
-    return was_successful ? 0:1;
+    // Return success status
+    return (success ? 0 : 1);
 }

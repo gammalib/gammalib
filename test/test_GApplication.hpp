@@ -18,32 +18,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GApplication.hpp
+ * @brief Definition of unit tests for GApplication classes
+ * @author Jean-Baptiste Cayrou
+ */
 
 #ifndef TEST_GAPPLICATION_HPP
 #define TEST_GAPPLICATION_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
-
-class TestGApplication : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGApplication(void) : GTestSuite(){ return; }
-        virtual ~TestGApplication(void){ return; }
-
-        // Methods
-        virtual void set(void);
-
-        void test_constructor(void);
-        void test_stream_logger(void);
-        void test_C_logger(void);
 
 
-    // Private methods
-    private:
+/***********************************************************************//**
+ * @class TestGApplication
+ *
+ * @brief Test suite for GApplication class testing
+ ***************************************************************************/
+class TestGApplication : public GTestSuite {
 
+public:
+    // Constructors and destructors
+    TestGApplication(void) : GTestSuite() {}
+    virtual ~TestGApplication(void) {}
+
+    // Methods
+    virtual void set(void);
+    void         test_constructor(void);
+    void         test_stream_logger(void);
+    void         test_C_logger(void);
 };
 
 #endif /* TEST_GAPPLICATION_HPP */
