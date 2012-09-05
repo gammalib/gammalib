@@ -1,5 +1,5 @@
 /***************************************************************************
- *              test_GXml.hpp  -   test xml class                          *
+ *                test_GXml.hpp  -   Test xml module                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,32 +18,42 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GXml.hpp
+ * @brief Definition of unit tests for XML module
+ * @author Jean-Baptiste Cayrou
+ */
 
 #ifndef TEST_GXML_HPP
 #define TEST_GXML_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
 
-class TestGXml : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGXml(void) : GTestSuite(){ return; }
-        virtual ~TestGXml(void){ return; }
 
-        // Methods
-        virtual void set(void);
-        void test_GXml_attributes(void);
-        void test_GXml_elements();
-        void test_GXml_construct();
-        void test_GXml_load();
-        void test_GXml_access();
+/***********************************************************************//**
+ * @class TestGXml
+ *
+ * @brief Test suite for XML module
+ ***************************************************************************/
+class TestGXml : public GTestSuite {
 
+public:
+    // Constructors and destructors
+    TestGXml(void) : GTestSuite() {}
+    virtual ~TestGXml(void) {}
+
+    // Methods
+    virtual void set(void);
+    void         test_GXml_attributes(void);
+    void         test_GXml_elements(void);
+    void         test_GXml_construct(void);
+    void         test_GXml_load(void);
+    void         test_GXml_access(void);
+
+private:
     // Private members
-    private:
-        std::string m_xml_file;
+    std::string  m_xml_file;  //!< XML filename
 };
 
 #endif /* TEST_GXML_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  test_GXml.cpp  -  test GXml classes                    *
+ *                test_GXml.hpp  -   Test xml module                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,41 +20,43 @@
  ***************************************************************************/
 /**
  * @file test_GXml.cpp
- * @brief Testing of XML module.
- * @author J. Knodlseder
+ * @brief Implementation of unit tests for XML module
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GammaLib.hpp"
 #include "test_GXml.hpp"
-#include <iostream>
-#include <stdexcept>
-#include <stdlib.h>
 
+
+/***********************************************************************//**
+ * @brief Set parameters and tests
+ **************************************************************************/
 void TestGXml::set(void)
 {
     // Test name
     name("GXml");
 
-    // xml file
-    m_xml_file="data/test.xml";
+    // Set XML filename
+    m_xml_file = "data/test.xml";
 
-    //Add Tests
-    add_test(static_cast<pfunction>(&TestGXml::test_GXml_attributes),"xml attributes");
-    add_test(static_cast<pfunction>(&TestGXml::test_GXml_elements),"xml elements");
-    add_test(static_cast<pfunction>(&TestGXml::test_GXml_construct),"xml constructors");
-    add_test(static_cast<pfunction>(&TestGXml::test_GXml_load),"xml load");
-    add_test(static_cast<pfunction>(&TestGXml::test_GXml_access),"xml access");
+    // Append tests
+    append(static_cast<pfunction>(&TestGXml::test_GXml_attributes), "Test XML attributes");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_elements), "Test XML elements");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_construct),"Test XML constructors");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_load),"Test XML load");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_access), "Test XML access");
 
+    // Return
     return; 
 }
 
-/***************************************************************************
- * Test: GXml element attributes                                           *
- ***************************************************************************/
+
+/***********************************************************************//**
+ * @brief Test XML arrtibutes
+ **************************************************************************/
 void TestGXml::test_GXml_attributes(void)
 {
     // Test valid attributes
@@ -142,16 +144,17 @@ void TestGXml::test_GXml_attributes(void)
         test_try_failure(e);
     }
 
-
+    // Return
     return;
 }
 
 
-/***************************************************************************
- * Test: GXml elements                                                     *
- ***************************************************************************/
+/***********************************************************************//**
+ * @brief Test XML elements
+ **************************************************************************/
 void TestGXml::test_GXml_elements(void)
 {
+    // Perform tests
     GXmlElement element;
     element.attribute("test", "1.0");
     test_assert(element.attribute("test") == "1.0",
@@ -172,16 +175,14 @@ void TestGXml::test_GXml_elements(void)
                             "Test if  element.attribute(\"test\")= 2.0 and if element.attribute(\"test2\")= 1.0",
                             "Unexpected attributes "+element.attribute("test")+" "+element.attribute("test2"));
 
-
-    // Exit test
+    // Return
     return;
-
 }
 
 
-/***************************************************************************
- * Test: GXml constructors                                                 *
- ***************************************************************************/
+/***********************************************************************//**
+ * @brief Test XML constructors
+ **************************************************************************/
 void TestGXml::test_GXml_construct(void)
 {
     // Test void constructor
@@ -241,33 +242,27 @@ void TestGXml::test_GXml_construct(void)
         GXmlNode* spat = src->element("spatialModel", 0);
         spat->append(new GXmlElement("parameter free=\"0\" max=\"1000\" min=\"0.001\""
                 " name=\"Prefactor\" scale=\"1\" value=\"1\""));
-        //xml.save("test2.xml");
-        //std::cout << xml << std::endl;
-
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    // Exit test
+    // Return
     return;
-
 }
 
 
-/***************************************************************************
- * Test: GXml loading/saving                                               *
- ***************************************************************************/
+/***********************************************************************//**
+ * @brief Test XML loading/saving
+ **************************************************************************/
 void TestGXml::test_GXml_load(void) 
 {
-
     // Test loading
     test_try("Test loading");
     try {
         GXml xml;
         xml.load(m_xml_file);
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -281,7 +276,6 @@ void TestGXml::test_GXml_load(void)
         xml.load(m_xml_file);
         xml.save("test.xml");
         xml.load("test.xml");
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -293,80 +287,80 @@ void TestGXml::test_GXml_load(void)
     try {
         GXml xml;
         xml.load("test.xml");
-
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    // Exit test
+    // Return
     return;
-
 }
 
 
-/***************************************************************************
- * Test: GXml element access                                               *
- ***************************************************************************/
+/***********************************************************************//**
+ * @brief Test XML element access
+ **************************************************************************/
 void TestGXml::test_GXml_access(void)
 {
     // Test root document access
     GXml xml;
     xml.load(m_xml_file);
-
     test_assert(xml.children() == 3,
                             "Test if xml.children()==3",
                             "Unexpected number of children in document "+str(xml.children()));
 
-    for (int i = 0; i < xml.children(); ++i)
+    // Test node access
+    for (int i = 0; i < xml.children(); ++i) {
         GXmlNode* ptr = xml.child(i);
-
+    }
     test_assert(xml.elements() == 1,
                             "Test if xml.elements()==1",
                             "Unexpected number of child elements in document "+str(xml.elements()));
 
-    for (int i = 0; i < xml.elements(); ++i)
+    // Test node access
+    for (int i = 0; i < xml.elements(); ++i) {
         GXmlNode* ptr = xml.element(i);
-
+    }
     test_assert( xml.elements("source_library") == 1,
                             "Test if the source_library = 1",
                             "Unexpected number of child elements in document "+str(xml.elements("source_library")));
 
+    // Test element access
     for (int i = 0; i < xml.elements("source_library"); ++i) {
         GXmlElement* ptr = xml.element("source_library", i);
         test_assert(ptr->name() == "source_library","Test name","Unexpected element name "+ptr->name());
     }
-    //std::cout << xml.elements("source_library") << std::endl;
 
 
-    // Exit test
+    // Return
     return;
-
 }
 
 
 /***************************************************************************
- *                            Main test function                           *
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    GTestSuites testsuites("GXml");
+    // Allocate test suit container
+    GTestSuites testsuites("XML module");
 
-    bool was_successful=true;
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    //Create a test suite
+    // Create a test suite
     TestGXml test;
 
-    //Append to the container
+    // Append test suite to the container
     testsuites.append(test);
 
-    //Run
-    was_successful=testsuites.run();
+    // Run the testsuites
+    success = testsuites.run();
 
-    //save xml report
+    // Save test report
     testsuites.save("reports/GXml.xml");
 
-    // Return
-    return was_successful ? 0:1;
+    // Return success status
+    return (success ? 0 : 1);
 }
