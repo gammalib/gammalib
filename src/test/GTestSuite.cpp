@@ -443,6 +443,67 @@ void GTestSuite::test_assert(bool               assert,
  *
  * @param[in] value Value to test.
  * @param[in] expected Expected value.
+ * @param[in] name Test case name (defaults to "").
+ * @param[in] message Test case message (defaults to "").
+ *
+ * Test if the value is comprised in the interval
+ * [expected-eps, expected+eps].
+ ***************************************************************************/
+void GTestSuite::test_value(const int&         value,
+                            const int&         expected,
+                            const std::string& name,
+                            const std::string& message)
+{
+    // Set test case name. If no name is specify then build the name from
+    // the actual test parameters.
+    std::string formated_name;
+    if (name != "") {
+        formated_name = format_name(name);
+    }
+    else {
+        formated_name = format_name("Test if " + str(value) + " is " + 
+                                    str(expected));
+    }
+
+    // Create a test case of failure type
+    GTestCase* testcase = new GTestCase(GTestCase::FAIL_TEST, formated_name);
+
+    // If value is not the expected one then signal test as failed and
+    // increment the number of failures
+    if (value != expected) {
+        testcase->passed(false);
+        m_failures++;
+    }
+
+    // If no message is specified then build message from test result
+    std::string formated_message;
+    if (message != "") {
+        formated_message = message;
+    }
+    else {
+        formated_message = "Value " + str(value) + " equals not the " +
+                           "expected value of " + str(expected) + ".";
+    }
+
+    // Set message
+    testcase->message(formated_message);
+
+    // Log the result (".","F" or, "E")
+    std::cout << testcase->print();
+
+    // Add test case to test suite
+    m_tests.push_back(testcase);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test a value
+ *
+ * @param[in] value Value to test.
+ * @param[in] expected Expected value.
  * @param[in] eps Precision of the test (default 1e-30).
  * @param[in] name Test case name (defaults to "").
  * @param[in] message Test case message (defaults to "").
@@ -472,7 +533,7 @@ void GTestSuite::test_value(const double&      value,
 
     // If value is not between in interval [expected-eps, expected+eps]
     // then signal test as failed and increment the number of failures
-    if(value > expected + eps || value < expected - eps) {
+    if (value > expected + eps || value < expected - eps) {
         testcase->passed(false);
         m_failures++;
     }

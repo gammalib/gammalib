@@ -158,6 +158,10 @@ public:
     void                      test_assert(bool result,
                                           const std::string& name,
                                           const std::string& message = "");
+    void                      test_value(const int&         value,
+                                         const int&         expected,
+                                         const std::string& name="",
+                                         const std::string& message="");
     void                      test_value(const double&      value,
                                          const double&      expected,
                                          const double&      eps = 1.0e-10,
