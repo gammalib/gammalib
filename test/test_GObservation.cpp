@@ -72,12 +72,12 @@ void TestOpenMP::set(void)
 
 
 /***********************************************************************//**
-* @brief Test observations optimizer.
-*
-* @param[in] mode Testing mode.
-* 
-* This method supports two testing modes: 0 = unbinned and 1 = binned.
-***************************************************************************/
+ * @brief Test observations optimizer.
+ *
+ * @param[in] mode Testing mode.
+ * 
+ * This method supports two testing modes: 0 = unbinned and 1 = binned.
+ ***************************************************************************/
 GModelPar& TestOpenMP::test_observations_optimizer(int mode)
 {
     // Create Test Model
@@ -155,7 +155,7 @@ GModelPar& TestOpenMP::test_observations_optimizer(int mode)
 /***********************************************************************//**
  * @brief Test optimizer with unbinned events and 1 thread
  ***************************************************************************/
-void TestOpenMP::test_observations_optimizer_unbinned_1()
+void TestOpenMP::test_observations_optimizer_unbinned_1(void)
 {
     // Test with 1 thread
     omp_set_num_threads(1);
@@ -168,7 +168,7 @@ void TestOpenMP::test_observations_optimizer_unbinned_1()
 /***********************************************************************//**
  * @brief Test optimizer with unbinned events and 10 thread
  ***************************************************************************/
-void TestOpenMP::test_observations_optimizer_unbinned_10()
+void TestOpenMP::test_observations_optimizer_unbinned_10(void)
 {
     // Test with 10 threads
     omp_set_num_threads(10);
@@ -182,7 +182,7 @@ void TestOpenMP::test_observations_optimizer_unbinned_10()
 /***********************************************************************//**
  * @brief Test optimizer with binned events and 1 thread
  ***************************************************************************/
-void TestOpenMP::test_observations_optimizer_binned_1()
+void TestOpenMP::test_observations_optimizer_binned_1(void)
 {
     // Test with 1 thread
     omp_set_num_threads(1);
@@ -196,7 +196,7 @@ void TestOpenMP::test_observations_optimizer_binned_1()
 /***********************************************************************//**
  * @brief Test optimizer with binned events and 10 threads
  ***************************************************************************/
-void TestOpenMP::test_observations_optimizer_binned_10()
+void TestOpenMP::test_observations_optimizer_binned_10(void)
 {
     // Test with 10 threads
     omp_set_num_threads(10);
