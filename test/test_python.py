@@ -21,17 +21,38 @@
 from gammalib import *
 from math import *
 import sys
-import test_GApp
+import test_GApplication
 import test_GLinalg
 import test_GModel
 import test_GNumerics
-import test_GObs
-import test_GOpt
+import test_GObservation
+import test_GOptimizer
 import test_GFits
 import test_GSky
 import test_GSupport
 import test_GTest
 import test_GXml
+
+# Try importing CTA tests
+try:
+	import test_CTA
+	has_cta = True
+except:
+	has_cta = False
+
+# Try importing LAT tests
+try:
+	import test_LAT
+	has_lat = True
+except:
+	has_lat = False
+
+# Try importing MWL tests
+try:
+	import test_MWL
+	has_mwl = True
+except:
+	has_mwl = False
 
 
 # ======================== #
@@ -45,15 +66,15 @@ if __name__ == '__main__':
 	suites = GTestSuites("Python interface testing")
 
 	# Allocate test suites and append them to the container
-	suite1 = test_GApp.Test()
-	suite2 = test_GFits.Test()
-	suite3 = test_GLinalg.Test()
-	suite4 = test_GModel.Test()
-	suite5 = test_GNumerics.Test()
-	suite6 = test_GObs.Test()
-	suite7 = test_GOpt.Test()
-	suite8 = test_GSky.Test()
-	suite9 = test_GSupport.Test()
+	suite1  = test_GApplication.Test()
+	suite2  = test_GFits.Test()
+	suite3  = test_GLinalg.Test()
+	suite4  = test_GModel.Test()
+	suite5  = test_GNumerics.Test()
+	suite6  = test_GObservation.Test()
+	suite7  = test_GOptimizer.Test()
+	suite8  = test_GSky.Test()
+	suite9  = test_GSupport.Test()
 	suite10 = test_GTest.Test()
 	suite11 = test_GXml.Test()
 
@@ -83,9 +104,26 @@ if __name__ == '__main__':
 	suites.append(suite10)
 	suites.append(suite11)
 
+	# Optionally handle CTA suite
+	if has_cta:
+		suite_cta = test_CTA.Test()
+		suite_cta.set()
+		suites.append(suite_cta)
+
+	# Optionally handle LAT suite
+	if has_lat:
+		suite_lat = test_LAT.Test()
+		suite_lat.set()
+		suites.append(suite_lat)
+
+	# Optionally handle MWL suite
+	if has_mwl:
+		suite_mwl = test_MWL.Test()
+		suite_mwl.set()
+		suites.append(suite_mwl)
+
 	# Run test suite
 	success = suites.run()
-	#print suites
 
 	# Save test results
 	suites.save("reports/GPython.xml")
