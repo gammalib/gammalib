@@ -1,5 +1,5 @@
 /***************************************************************************
- *             test_GObservations.cpp  -  Test GObersations class          *
+ *             test_GObservation.cpp  -  Test observation module           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GObservations.cpp
- * @brief Test GObservations class with a test intrument ("testint/")
+ * @file test_GObservation.cpp
+ * @brief Test observation module
  * @author J.-B. Cayrou
  */
 
@@ -29,9 +29,8 @@
 #include <config.h>
 #endif
 #include <iostream>
-#include "GammaLib.hpp"
 #include "testinst/GTestLib.hpp"
-#include "test_GObservations.hpp"
+#include "test_GObservation.hpp"
 
 /* __ OpenMP section _____________________________________________________ */
 #ifdef _OPENMP
@@ -51,17 +50,27 @@ pthread_attr_t gomp_thread_attr;
 
 
 #ifdef _OPENMP
-
 /***********************************************************************//**
- * @brief Constructor
- ***************************************************************************/
-TestGObservation::TestGObservation(const std::string& name) : GTestSuite(name){
+* @brief Set tests
+***************************************************************************/
+void TestOpenMP::set(void)
+{
+    // Set test name
+    name("OpenMP");
+
+    // Unbinned
+    append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_unbinned_1), "Test unbinned optimization (1 thread)");
+    append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_unbinned_10), "Test unbinned optimization (10 threads)");
+
+    // Binned
+    append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_binned_1), "Test binned optimization (1 thread)");
+    append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_binned_10), "Test binned optimisation (10 threads)");
+
+    // Return
     return;
 }
 
-TestGObservation::~TestGObservation(void){
-    return; 
-}
+
 /***********************************************************************//**
 * @brief Test observations optimizer.
 *
@@ -69,7 +78,7 @@ TestGObservation::~TestGObservation(void){
 * 
 * This method supports two testing modes: 0 = unbinned and 1 = binned.
 ***************************************************************************/
-GModelPar& TestGObservation::test_observations_optimizer(int mode)
+GModelPar& TestOpenMP::test_observations_optimizer(int mode)
 {
     // Create Test Model
     GTestModelData model;
@@ -85,7 +94,7 @@ GModelPar& TestGObservation::test_observations_optimizer(int mode)
     // Rate : events/sec
     double rate = RATE;
 
-        // Create observations
+    // Create observations
     GObservations obs;
 
     // Add some observation
@@ -95,14 +104,14 @@ GModelPar& TestGObservation::test_observations_optimizer(int mode)
         GRan ran;
         ran.seed(i);
 
+        // Allocate events pointer
         GEvents *events;
 
+        // Create either a event list or an event cube
         if (mode == UN_BINNED) {
-            // Create a list of events
             events = model.generateList(rate,tmin,tmax,ran);
         }
         else {
-            // Create a cube of events
             events = model.generateCube(rate,tmin,tmax,ran);
         }
 
@@ -129,114 +138,99 @@ GModelPar& TestGObservation::test_observations_optimizer(int mode)
     // Optimize
     obs.optimize(opt);
 
-    //std::cout << obs << std::endl;
-    //std::cout << opt << std::endl;
-
     // Get the result
     GModelPar& result = ((obs.models())[0])[0];
 
     //check if converged
-    test_assert(opt.status()==0,"Check if converged","Optimizer did not convered"); 
+    test_assert(opt.status()==0, "Check if converged", "Optimizer did not convered"); 
 
     //check if value is correct
     test_value(result.value(),RATE,result.error()*3); 
 
+    // Return
     return (((obs.models())[0])[0]);
 }
 
+
 /***********************************************************************//**
-* @brief Test optimizer with unbinned events and 1 thread
-***************************************************************************/
-void TestGObservation::test_observations_optimizer_unbinned_1()
+ * @brief Test optimizer with unbinned events and 1 thread
+ ***************************************************************************/
+void TestOpenMP::test_observations_optimizer_unbinned_1()
 {
-        // Test with 1 thread
+    // Test with 1 thread
     omp_set_num_threads(1);
     test_observations_optimizer(UN_BINNED);
 
+    // Return
     return;
 }
 
 /***********************************************************************//**
-    * @brief Test optimizer with unbinned events and 10 thread
-    ***************************************************************************/
-void TestGObservation::test_observations_optimizer_unbinned_10()
+ * @brief Test optimizer with unbinned events and 10 thread
+ ***************************************************************************/
+void TestOpenMP::test_observations_optimizer_unbinned_10()
 {
-        // Test with 10 thread
+    // Test with 10 threads
     omp_set_num_threads(10);
     test_observations_optimizer(UN_BINNED);
 
+    // Return
     return;
 }
 
+
 /***********************************************************************//**
-    * @brief Test optimizer with binned events and 1 thread
-    ***************************************************************************/
-void TestGObservation::test_observations_optimizer_binned_1()
+ * @brief Test optimizer with binned events and 1 thread
+ ***************************************************************************/
+void TestOpenMP::test_observations_optimizer_binned_1()
 {
-        // Test with 1 thread
+    // Test with 1 thread
     omp_set_num_threads(1);
     test_observations_optimizer(BINNED);
 
+    // Return
     return;
 }
 
+
 /***********************************************************************//**
-* @brief Test optimizer with binned events and 10 thread
-***************************************************************************/
-void TestGObservation::test_observations_optimizer_binned_10()
+ * @brief Test optimizer with binned events and 10 threads
+ ***************************************************************************/
+void TestOpenMP::test_observations_optimizer_binned_10()
 {
-        // Test with 10 thread
+    // Test with 10 threads
     omp_set_num_threads(10);
     test_observations_optimizer(BINNED);
 
+    // Return
     return;
 }
-
-/***********************************************************************//**
-* @brief Set tests
-***************************************************************************/
-void TestGObservation::set(void)
-{
-    //Unbinned
-    add_test(static_cast<pfunction>(&TestGObservation::test_observations_optimizer_unbinned_1),"Unbinned 1 thread");
-    add_test(static_cast<pfunction>(&TestGObservation::test_observations_optimizer_unbinned_10),"Unbinned 10 threads");
-
-    //Binned
-    add_test(static_cast<pfunction>(&TestGObservation::test_observations_optimizer_binned_1),"Binned 1 thread");
-    add_test(static_cast<pfunction>(&TestGObservation::test_observations_optimizer_binned_10),"Binned 10 thread");
-
-    return;
-}
-
 #endif
 
 
-/***********************************************************************//**
- * @brief Main test code.
+/***************************************************************************
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    GTestSuites testsuites("GObservations");
+    // Allocate test suit container
+    GTestSuites testsuites("Observation module");
 
-    bool was_successful=true;
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    //TODO: test gaussian.
+    // Create and append OpenMP test suite
     #ifdef _OPENMP
-    //Create a test suite
-    TestGObservation test("Test OpenMP");
-    //Append to the container
-    testsuites.append(test);
-
-    //Run
-    was_successful=testsuites.run();
-
-    #else
-            std::cout<<"GammaLib is not compiled with openmp option."<<std::endl;
+    TestOpenMP openmp;
+    testsuites.append(openmp);
     #endif
 
-    //save xml report
-    testsuites.save("reports/GObservations.xml");
+    // Run the testsuites
+    success = testsuites.run();
 
-    // Return
-    return was_successful ? 0:1;
+    // Save test report
+    testsuites.save("reports/GObservation.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }

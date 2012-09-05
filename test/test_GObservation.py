@@ -1,5 +1,5 @@
 # ==========================================================================
-# This module performs unit tests for the GammaLib obs module.
+# This module performs unit tests for the GammaLib observation module.
 #
 # Copyright (C) 2012 Juergen Knoedlseder
 #
@@ -22,12 +22,12 @@ from math import *
 import os
 
 
-# ================================== #
-# Test class for GammaLib obs module #
-# ================================== #
+# ========================================== #
+# Test class for GammaLib observation module #
+# ========================================== #
 class Test(GPythonTestSuite):
 	"""
-	Test class for GammaLib obs module.
+	Test class for GammaLib observation module.
 	"""
 	# Constructor
 	def __init__(self):
@@ -50,7 +50,7 @@ class Test(GPythonTestSuite):
 		self.name("obs")
 
 		# Append tests
-		self.append(self.test, "Dummy test")
+		self.append(self.test, "Observation module dummy test")
 
 		# Return
 		return

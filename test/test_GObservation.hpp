@@ -1,5 +1,5 @@
 /***************************************************************************
- *              test_GObservation.hpp  -  test GObservation class          *
+ *             test_GObservation.hpp  -  Test observation module           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,33 +18,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GObservation.hpp
+ * @brief Test observation module
+ * @author J.-B. Cayrou
+ */
 
 #ifndef TEST_GOBSERVATION_HPP
 #define TEST_GOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
-#include "testinst/GTestLib.hpp"              // Test instrument
+
 
 #ifdef _OPENMP
-class TestGObservation : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGObservation(const std::string& name);
-        virtual ~TestGObservation(void);
+/***********************************************************************//**
+ * @class TestOpenMP
+ *
+ * @brief Test suite for OpenMP testing
+ ***************************************************************************/
+class TestOpenMP : public GTestSuite {
+    
+public:
+    // Constructors and destructors
+    TestOpenMP(void) {}
+    virtual ~TestOpenMP(void) {}
 
-        // Methods
-        GModelPar& test_observations_optimizer(int mode=0);
-        void test_observations_optimizer_unbinned_1();
-        void test_observations_optimizer_unbinned_10();
-        void test_observations_optimizer_binned_1();
-        void test_observations_optimizer_binned_10();
-        virtual void set(void);
-
-    // Private members
-    private:
+    // Methods
+    virtual void set(void);
+    void         test_observations_optimizer_unbinned_1();
+    void         test_observations_optimizer_unbinned_10();
+    void         test_observations_optimizer_binned_1();
+    void         test_observations_optimizer_binned_10();
+    GModelPar&   test_observations_optimizer(int mode=0);
 };
 #endif
 
