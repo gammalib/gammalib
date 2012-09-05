@@ -50,7 +50,7 @@ class Test(GPythonTestSuite):
 		self.name("linalg")
 
 		# Append tests
-		self.append(self.test, "Dummy test")
+		self.append(self.test, "Linear algebra module dummy test")
 
 		# Return
 		return

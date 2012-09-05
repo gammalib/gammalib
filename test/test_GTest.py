@@ -50,7 +50,7 @@ class Test(GPythonTestSuite):
 		self.name("test")
 
 		# Append tests
-		self.append(self.test, "Dummy test")
+		self.append(self.test, "Test module dummy test")
 
 		# Return
 		return

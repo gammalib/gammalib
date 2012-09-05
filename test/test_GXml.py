@@ -50,7 +50,7 @@ class Test(GPythonTestSuite):
 		self.name("xml")
 
 		# Append tests
-		self.append(self.test, "Dummy test")
+		self.append(self.test, "XML module dummy test")
 
 		# Return
 		return

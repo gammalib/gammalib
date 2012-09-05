@@ -1,5 +1,5 @@
 # ==========================================================================
-# This module performs unit tests for the GammaLib app module.
+# This module performs unit tests for the GammaLib application module.
 #
 # Copyright (C) 2012 Juergen Knoedlseder
 #
@@ -22,12 +22,12 @@ from math import *
 import os
 
 
-# ================================== #
-# Test class for GammaLib app module #
-# ================================== #
+# ========================================== #
+# Test class for GammaLib application module #
+# ========================================== #
 class Test(GPythonTestSuite):
 	"""
-	Test class for GammaLib app module.
+	Test class for GammaLib application module.
 	"""
 	# Constructor
 	def __init__(self):
@@ -50,7 +50,7 @@ class Test(GPythonTestSuite):
 		self.name("app")
 
 		# Append tests
-		self.append(self.test, "Dummy test")
+		self.append(self.test, "Application module dummy test")
 
 		# Return
 		return
