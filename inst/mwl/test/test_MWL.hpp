@@ -1,5 +1,5 @@
 /***************************************************************************
- *              test_MWL.cpp  -  Test multi-wavelength classes             *
+ *              test_MWL.hpp  -  Test multi-wavelength classes             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -24,8 +24,8 @@
  * @author Juergen Knoedlseder
  */
 
-#ifndef TEST_GMWL_HPP
-#define TEST_GMWL_HPP
+#ifndef TEST_MWL_HPP
+#define TEST_MWL_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
@@ -51,4 +51,4 @@ public:
     void         test_optimizer(void);
 };
 
-#endif /* TEST_GMWL_HPP */
+#endif /* TEST_MWL_HPP */

@@ -33,7 +33,7 @@
 #include <unistd.h>
 #include "GLATLib.hpp"
 #include "GTools.hpp"
-#include "test_GLAT.hpp"
+#include "test_LAT.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -685,8 +685,8 @@ void TestGLATOptimize::test_one_binned_optimizer(const std::string& datadir,
                 //std::cout.precision(10);
                 //std::cout << model[k].real_value() << ", " << model[k].real_error() << "," << std::endl;
                 std::string msg = "Verify optimization result for " + model[k].print();
-                test_value(model[k].real_value(), fit_results[j++], 1.0e-6, msg);
-                test_value(model[k].real_error(), fit_results[j++], 1.0e-6, msg);
+                test_value(model[k].real_value(), fit_results[j++], 5.0e-5, msg);
+                test_value(model[k].real_error(), fit_results[j++], 5.0e-5, msg);
             }
         }
     }

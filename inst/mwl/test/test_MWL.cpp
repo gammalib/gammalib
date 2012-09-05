@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include "GMWLLib.hpp"
-#include "test_GMWL.hpp"
+#include "test_MWL.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -166,9 +166,6 @@ void TestGMWL::test_optimizer(void)
         opt.max_iter(1000);
         obs.optimize(opt);
         test_try_success();
-        //std::cout << obs << std::endl;
-        //std::cout << std::endl << opt << std::endl;
-        //std::cout << *(obs.models()) << std::endl;
     }
     catch (std::exception &e) {
         test_try_failure(e);
@@ -206,13 +203,13 @@ void TestGMWL::test_optimizer(void)
     double fit_results[] = {83.6331,             0,
                             22.0145,             0,
                             0.00231438040883405, 0.000191759607698647,
-                            -3.1111154491587,    0.127038860468962,
+                            -3.1111154491587,    0.127403,
                             1,                   0,
                             1,                   0,
                             83.6331,             0,
                             22.0145,             0,
                             4.5050091460345e-11, 1.95885803229878e-12,
-                            -2.13740092737976,   0.00577184857411904,
+                            -2.13740092737976,   0.00578641,
                             1000,                0,
                             1,                   0};
     test_try("Perform LM optimization");
@@ -227,8 +224,8 @@ void TestGMWL::test_optimizer(void)
             GModel& model = obs.models()[i];
             for (int k = 0; k < model.size(); ++k) {
                 std::string msg = "Verify optimization result for " + model[k].print();
-                test_value(model[k].real_value(), fit_results[j++], 1.0e-6, msg);
-                test_value(model[k].real_error(), fit_results[j++], 1.0e-6, msg);
+                test_value(model[k].real_value(), fit_results[j++], 1.0e-4, msg);
+                test_value(model[k].real_error(), fit_results[j++], 1.0e-3, msg);
             }
         }
     }

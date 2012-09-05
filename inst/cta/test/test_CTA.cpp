@@ -33,7 +33,7 @@
 #include <unistd.h>
 #include "GCTALib.hpp"
 #include "GTools.hpp"
-#include "test_GCTA.hpp"
+#include "test_CTA.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -544,8 +544,8 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
             GModel& model = obs.models()[i];
             for (int k = 0; k < model.size(); ++k) {
                 std::string msg = "Verify optimization result for " + model[k].print();
-                test_value(model[k].real_value(), fit_results[j++], 1.0e-6, msg);
-                test_value(model[k].real_error(), fit_results[j++], 1.0e-6, msg);
+                test_value(model[k].real_value(), fit_results[j++], 5.0e-5, msg);
+                test_value(model[k].real_error(), fit_results[j++], 5.0e-5, msg);
             }
         }
     }
@@ -605,8 +605,8 @@ void TestGCTAOptimize::test_binned_optimizer(void)
             GModel& model = obs.models()[i];
             for (int k = 0; k < model.size(); ++k) {
                 std::string msg = "Verify optimization result for " + model[k].print();
-                test_value(model[k].real_value(), fit_results[j++], 1.0e-6, msg);
-                test_value(model[k].real_error(), fit_results[j++], 1.0e-6, msg);
+                test_value(model[k].real_value(), fit_results[j++], 5.0e-5, msg);
+                test_value(model[k].real_error(), fit_results[j++], 5.0e-5, msg);
             }
         }
     }

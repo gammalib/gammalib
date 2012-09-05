@@ -24,8 +24,8 @@
  * @author Juergen Knoedlseder
  */
 
-#ifndef TEST_GLAT_HPP
-#define TEST_GLAT_HPP
+#ifndef TEST_LAT_HPP
+#define TEST_LAT_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
@@ -119,4 +119,4 @@ public:
 
 };
 
-#endif /* TEST_GLAT_HPP */
+#endif /* TEST_LAT_HPP */

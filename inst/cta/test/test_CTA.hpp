@@ -24,8 +24,8 @@
  * @author Juergen Knoedlseder
  */
 
-#ifndef TEST_GCTA_HPP
-#define TEST_GCTA_HPP
+#ifndef TEST_CTA_HPP
+#define TEST_CTA_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
@@ -95,4 +95,4 @@ public:
     void         test_binned_optimizer(void);
 };
 
-#endif /* TEST_GCTA_HPP */
+#endif /* TEST_CTA_HPP */
