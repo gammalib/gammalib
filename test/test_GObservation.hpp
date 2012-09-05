@@ -41,7 +41,7 @@ class TestOpenMP : public GTestSuite {
     
 public:
     // Constructors and destructors
-    TestOpenMP(void) {}
+    TestOpenMP(void) : GTestSuite() {}
     virtual ~TestOpenMP(void) {}
 
     // Methods
