@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GOptimizer.hpp  -  test GOptimizer class              *
+ *              test_GOptimizer.hpp  -  test optimizer module              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,29 +18,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GOptimizer.hpp
+ * @brief Definition of unit tests for optimizer module
+ * @author Juergen Knoedlseder
+ */
 
 #ifndef TEST_GOPTIMIZER_HPP
 #define TEST_GOPTIMIZER_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
 
-class TestGOptimizer : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGOptimizer(void) : GTestSuite(){ return; }
-        virtual ~TestGOptimizer(void){ return; }
 
-        // Methods
-        virtual void set(void);
-        void test_optimizer(void);
+/***********************************************************************//**
+ * @class TestGOptimizer
+ *
+ * @brief Test suite for optimizer module testing
+ ***************************************************************************/
+class TestGOptimizer : public GTestSuite {
 
-    // Private members
-    private:
+public:
+    // Constructors and destructors
+    TestGOptimizer(void) : GTestSuite() {}
+    virtual ~TestGOptimizer(void){}
+
+    // Methods
+    virtual void set(void);
+    void         test_unbinned_optimizer(void);
+    void         test_binned_optimizer(void);
+    GModelPar&   test_optimizer(int mode);
 };
-
-
 #endif /* TEST_GOPTIMIZER_HPP */

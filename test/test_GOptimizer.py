@@ -1,5 +1,5 @@
 # ==========================================================================
-# This module performs unit tests for the GammaLib opt module.
+# This module performs unit tests for the GammaLib optimizer module.
 #
 # Copyright (C) 2012 Juergen Knoedlseder
 #
@@ -23,11 +23,11 @@ import os
 
 
 # ================================== #
-# Test class for GammaLib opt module #
+# Test class for GammaLib optimizer module #
 # ================================== #
 class Test(GPythonTestSuite):
 	"""
-	Test class for GammaLib opt module.
+	Test class for GammaLib optimizer module.
 	"""
 	# Constructor
 	def __init__(self):
@@ -50,7 +50,7 @@ class Test(GPythonTestSuite):
 		self.name("opt")
 
 		# Append tests
-		self.append(self.test, "Dummy test")
+		self.append(self.test, "Optimizer module dummy test")
 
 		# Return
 		return
