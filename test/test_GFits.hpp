@@ -29,7 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
 
 
 /***********************************************************************//**
@@ -65,12 +64,6 @@ public:
     void         test_bintable_ulong(void);
     void         test_bintable_long(void);
     void         test_bintable_longlong(void);
-
-private:
-    // Private methods
-    int equal(double val, double ref, double eps);
-    int fequal(double val, double ref);
-    int dequal(double val, double ref);
 };
 
 #endif /* TEST_GFITS_HPP */
