@@ -26,6 +26,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <cmath>
+#include <cstdlib>        // for system
 #include "GTools.hpp"
 #include "test_GFits.hpp"
 
