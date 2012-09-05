@@ -942,8 +942,6 @@ std::string GSymMatrix::print(void) const
  *
  * @exception GException::matrix_not_symmetric
  *            Matrix is not symmetric.
- * @exception GException::empty
- *            Matrix is empty.
  *
  * This is the main constructor code that allocates and initialises memory
  * for matrix elements.
@@ -957,31 +955,34 @@ void GSymMatrix::constructor(int rows, int cols)
     // Determine number of physical elements in matrix
     int elements = rows*(rows+1)/2;
 
-    // Throw exception if requested matrix size is zero
-    if (elements == 0)
-      throw GException::empty(G_CONSTRUCTOR);
+    // Continue only if we have elements to store
+    if (elements > 0) {
 
-    // Allocate matrix array and column start index array. Throw an exception 
-    // if allocation failed
-    m_data     = new double[elements];
-    m_colstart = new int[cols+1];
-    m_inx      = new int[cols];
+        // Allocate matrix array and column start index array. Throw an exception 
+        // if allocation failed
+        m_data     = new double[elements];
+        m_colstart = new int[cols+1];
+        m_inx      = new int[cols];
 
-    // Store matrix size (logical and physical)
-    m_rows     = rows;
-    m_cols     = cols;
-    m_elements = elements;
-    m_alloc    = elements;
+        // Store matrix size (logical and physical)
+        m_rows     = rows;
+        m_cols     = cols;
+        m_elements = elements;
+        m_alloc    = elements;
 
-    // Set-up column start indices
-    m_colstart[0]   = 0;
-    int offset = rows;
-    for (int col = 1; col <= m_cols; ++col)
-        m_colstart[col] = m_colstart[col-1] + offset--;
+        // Set-up column start indices
+        m_colstart[0]   = 0;
+        int offset = rows;
+        for (int col = 1; col <= m_cols; ++col) {
+            m_colstart[col] = m_colstart[col-1] + offset--;
+        }
 
-    // Initialise matrix elements to 0.0
-    for (int i = 0; i < m_elements; ++i)
-        m_data[i] = 0.0;
+        // Initialise matrix elements to 0.0
+        for (int i = 0; i < m_elements; ++i) {
+            m_data[i] = 0.0;
+        }
+    
+    } // endif: we had elements
 
     // Return
     return;
