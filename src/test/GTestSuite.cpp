@@ -47,8 +47,9 @@ pthread_attr_t gomp_thread_attr;
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                            "GTestSuite::operator[](int&)"
 #define G_TRY_SUCCESS                        "GTestSuite::test_try_success()"
-#define G_TRY_FAILURE            "GTestSuite::test_try_failure(std::string&,"\
+#define G_TRY_FAILURE1           "GTestSuite::test_try_failure(std::string&,"\
                                                               "std::string&)"
+#define G_TRY_FAILURE2        "GTestSuite::test_try_failure(std::exception&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -624,7 +625,7 @@ void GTestSuite::test_try_success(void)
     // If the stack is empty
     if (m_stack_try.size() == 0) {
         throw GException::test_nested_try_error(G_TRY_SUCCESS, 
-              "Called test_try_success() without a previous call to test_try()");
+              "Called "G_TRY_SUCCESS" without a previous call to test_try()");
     }
 
     // Add test case to test suite
@@ -671,8 +672,8 @@ void GTestSuite::test_try_failure(const std::string& message,
 {
     // If the stack is empty
     if (m_stack_try.size() == 0) {
-        throw GException::test_nested_try_error(G_TRY_FAILURE,
-              "Called test_try_failure() without a previous call to test_try()");
+        throw GException::test_nested_try_error(G_TRY_FAILURE1,
+              "Called "G_TRY_FAILURE1" without a previous call to test_try()");
     }
 
     // Signal that test is not ok
@@ -709,6 +710,9 @@ void GTestSuite::test_try_failure(const std::string& message,
  *
  * @param[in] exception Exception.
  *
+ * @exception GException::test_nested_try_error
+ *            Test case index is out of range.
+ *
  * @see test_try_sucess()
  * @see test_try(const std::string& name)
  * @see test_try_failure(const std::string& message, const std::string& type)
@@ -727,6 +731,12 @@ void GTestSuite::test_try_failure(const std::string& message,
  ***************************************************************************/
 void GTestSuite::test_try_failure(const std::exception& e)
 {
+    // If the stack is empty
+    if (m_stack_try.size() == 0) {
+        throw GException::test_nested_try_error(G_TRY_FAILURE2,
+              "Called "G_TRY_FAILURE2" without a previous call to test_try()");
+    }
+
     // Extract message of exception and class name
     test_try_failure(e.what(), typeid(e).name());
 
