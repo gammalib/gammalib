@@ -1751,9 +1751,9 @@ std::string GSparseMatrix::print(void) const
     }
     
     // Append elements and compression schemes
-    //result.append(print_elements());
-    //result.append(print_row_compression());
-    //result.append(print_col_compression());
+    result.append(print_elements());
+    result.append(print_row_compression());
+    result.append(print_col_compression());
 
     // Append symbolic decomposition if available
     //if (m_symbolic != NULL) {
