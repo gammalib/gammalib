@@ -29,6 +29,9 @@
 #include "GTools.hpp"
 %}
 
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
+
 
 /***********************************************************************//**
  * @class GSymMatrix
@@ -85,26 +88,16 @@ public:
 
 /***********************************************************************//**
  * @brief GSymMatrix class extension
- *
- * @todo Use typemap to allow for a [row,col] matrix access
  ***************************************************************************/
 %extend GSymMatrix {
     char *__str__() {
         return tochar(self->print());
     }
-    double __getslice__(int row, int col) {
-        if (row >=0 && row < (int)self->rows() && col >= 0 && col < (int)self->cols())
-            return (*self)(row,col);
-        else
-            throw GException::out_of_range("__getitem__(int,int)", row, col,
-                                           (int)self->rows(), (int)self->cols());
+    double __getitem__(int GTuple[2]) {
+        return (*self)(GTuple[0], GTuple[1]);
     }
-    void __setslice__(int row, int col, const double val) {
-        if (row >=0 && row < (int)self->rows() && col >= 0 && col < (int)self->cols())
-            (*self)(row,col) = val;
-        else
-            throw GException::out_of_range("__setitem__(int,int)", row, col,
-                                           (int)self->rows(), (int)self->cols());
+    void __setitem__(int GTuple[2], double value) {
+        (*self)(GTuple[0], GTuple[1]) = value;
     }
     GSymMatrix __mul__(const double &a) {
         return (*self) * a;
