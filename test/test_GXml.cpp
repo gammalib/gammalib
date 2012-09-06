@@ -232,10 +232,10 @@ void TestGXml::test_GXml_construct(void)
                 " value=\"0.02754520844\""));
         spec->append(new GXmlElement("parameter free=\"1\" max=\"5\" min=\"-5\""
                 " name=\"Index1\" scale=\"1\" value=\"-2.0458781\""));
-        GXmlElement* par = (GXmlElement*)spec->element("parameter", 0);
+        GXmlElement* par = static_cast<GXmlElement*>(spec->element("parameter", 0));
         par->attribute("value", "1.01");
         par->attribute("error", "3.145");
-        par = (GXmlElement*)spec->element("parameter", 1);
+        par = static_cast<GXmlElement*>(spec->element("parameter", 1));
         par->attribute("value", "-2.100");
         par->attribute("error", "9.876");
         src->append(new GXmlElement("spatialModel file=\"LMC.fits\" type=\"SpatialMap\""));
@@ -307,29 +307,31 @@ void TestGXml::test_GXml_access(void)
     GXml xml;
     xml.load(m_xml_file);
     test_assert(xml.children() == 3,
-                            "Test if xml.children()==3",
-                            "Unexpected number of children in document "+str(xml.children()));
+                "Test if xml.children()==3",
+                "Unexpected number of children in document "+str(xml.children()));
 
     // Test node access
     for (int i = 0; i < xml.children(); ++i) {
         GXmlNode* ptr = xml.child(i);
     }
     test_assert(xml.elements() == 1,
-                            "Test if xml.elements()==1",
-                            "Unexpected number of child elements in document "+str(xml.elements()));
+                "Test if xml.elements()==1",
+                "Unexpected number of child elements in document "+str(xml.elements()));
 
     // Test node access
     for (int i = 0; i < xml.elements(); ++i) {
         GXmlNode* ptr = xml.element(i);
     }
-    test_assert( xml.elements("source_library") == 1,
-                            "Test if the source_library = 1",
-                            "Unexpected number of child elements in document "+str(xml.elements("source_library")));
+    test_assert(xml.elements("source_library") == 1,
+                "Test if the source_library = 1",
+                "Unexpected number of child elements in document "+str(xml.elements("source_library")));
 
     // Test element access
     for (int i = 0; i < xml.elements("source_library"); ++i) {
         GXmlElement* ptr = xml.element("source_library", i);
-        test_assert(ptr->name() == "source_library","Test name","Unexpected element name "+ptr->name());
+        test_assert(ptr->name() == "source_library",
+                    "Test name",
+                    "Unexpected element name "+ptr->name());
     }
 
 
