@@ -887,8 +887,26 @@ void test_arithmetics(const GSparseMatrix& m_test)
     if (result != compare) {
       cout << endl << "TEST ERROR: Corrupt GSparseMatrix.add_col(compressed array)." << endl;
 	  cout << "m_test " << m_test << endl;
+      for (int i = 0; i < g_rows; ++i) {
+        for (int j = 0; j < g_cols; ++j) {
+          std::cout << " " << m_test(i,j);
+        }
+        std::cout << std::endl;
+      }
 	  cout << "result " << result << endl;
+      for (int i = 0; i < g_rows; ++i) {
+        for (int j = 0; j < g_cols; ++j) {
+          std::cout << " " << result(i,j);
+        }
+        std::cout << std::endl;
+      }
 	  cout << "compare " << compare << endl;
+      for (int i = 0; i < g_rows; ++i) {
+        for (int j = 0; j < g_cols; ++j) {
+          std::cout << " " << compare(i,j);
+        }
+        std::cout << std::endl;
+      }
 	  throw;
 	}
 	cout << ".";
@@ -1039,7 +1057,7 @@ void test_conversion(void)
       std::cout << ".";
       //
       // Convert GSymMatrix back to GSparseMatrix matrix
-      GSparseMatrix back_convert = sparse_matrix(converted);
+      GSparseMatrix back_convert = GSparseMatrix(converted);
       std::cout << ".";
       //
       // Compare back converted matrix to original one. They should be identical
@@ -1115,7 +1133,7 @@ void test_conversion(void)
     //
     // Try converting now into GSymMatrix object (this should fail)
     try {
-      converted = sym_matrix(sparse);
+      converted = GSymMatrix(sparse);
       cout << endl << "TEST ERROR: Sparse->Sym conversion should have failed." << endl;
       throw;
     }
@@ -1128,11 +1146,11 @@ void test_conversion(void)
     }
     //
     // Convert matrix into GMatrix object
-    GMatrix full = matrix(sparse);
+    GMatrix full = GMatrix(sparse);
     cout << ".";
     //
     // Convert full matrix back to GSparseMatrix
-    back_convert = sparse_matrix(full);
+    back_convert = GSparseMatrix(full);
     cout << ".";
     //
     // Compare back converted matrix to original one. They should be identical
@@ -1731,6 +1749,14 @@ void test_heavy(int block = 512)
 	// Check that both are identical
 	if (large != stack) {
       cout << endl << "TEST ERROR: Stack-based insertion corrupted." << endl;
+      for (int i = 0; i < number; ++i) {
+        for (int j = 0; j < number; ++j) {
+          if (large(i,j) != stack(i,j)) {
+            std::cout << "(" << i << "," << j << "): ";
+            std::cout << large(i,j) << " is not stack " << stack(i,j) << std::endl;
+          }
+        }
+      }
 	  throw;
 	}
     //
@@ -1781,6 +1807,48 @@ void test_heavy(int block = 512)
 }
 
 
+void test_stack(int block = 512)
+{
+    // Set parameters
+    int nrows = 10;
+    int ncols = 10;
+
+    // Initialise column vector
+    GVector column(nrows);
+    for (int i = 0; i < nrows; i+=2) {
+        column[i] = 5.0;
+    }
+
+    // Initialise reference matrix
+    GSparseMatrix ref(nrows, ncols);
+    for (int i = 0; i < ncols; i+=2) {
+        ref.add_col(column, i);
+    }
+
+    // Initialise stack matrix
+    GSparseMatrix stack(nrows, ncols);
+    stack.stack_init(10000, 4);
+    for (int i = 0; i < ncols; i+=2) {
+        stack.add_col(column, i);
+    }
+    stack.stack_destroy();
+
+    // Compare
+	if (ref != stack) {
+        std::cout << endl << "TEST ERROR: Stack-based insertion corrupted." << std::endl;
+        for (int i = 0; i < nrows; ++i) {
+            for (int j = 0; j < ncols; ++j) {
+                if (ref(i,j) != stack(i,j)) {
+                    std::cout << "(" << i << "," << j << "): ";
+                    std::cout << "ref=" << ref(i,j) << " stack=" << stack(i,j) << std::endl;
+                }
+            }
+        }
+        throw;
+	}
+}
+
+
 /***************************************************************************
  *                            Main test function                           *
  ***************************************************************************/
@@ -1811,6 +1879,7 @@ int main(void)
     test_conversion();
     test_cholesky();
     test_heavy();
+    //test_stack();
 
     // Return
     return 0;
