@@ -135,7 +135,7 @@ if __name__ == '__main__':
 		rc = 1
 
 	# Print a linefeed
-	sys.stdout.write("\n")
+	#sys.stdout.write("\n")
 
 	# Exit with return code
 	sys.exit(rc)
