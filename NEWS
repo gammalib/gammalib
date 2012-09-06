@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-06-00
 
 Author(s) : Juergen Knoedlseder
 
-August, 21th, 2012
+September, 9th, 2012
 
 
 1. Introduction
@@ -22,7 +22,8 @@ Added OpenMP support to allow for code parallelization. If available,
 OpenMP is enabled by default. OpenMP support may be disabled using
 the --disable-openmp flag.
 
-Check for the presence of the Python.h header file.
+Check for the presence of the Python.h header file and the wrapper
+files for Python bindings.
 
 
 3. Application module
@@ -37,7 +38,16 @@ None
 
 5. Linear algebra module
 ------------------------
-None
+The matrix classes have been refactored using the actual coding
+conventions.
+
+Two bugs were corrected in GSparseMatrix. First, the non-equal
+operator != had a bug that left the major part of the matrix untested.
+This had hidden a problem with the fill stack from the unit test.
+Once the != operator bug was corrected, the unit test revealed that
+the misusage of an internal working array corrupted the fill stack
+after a flush. This has been corrected by adding an additional
+working array, so that conflicts can no longer arise.
 
 
 6. Model module
@@ -92,12 +102,25 @@ None
 None
 
 
-13. Multi-wavelength interface
+13. Test module
+---------------
+A new module has been introduced that supports unit testing of
+GammaLib. The module contains so far three classes:
+- GTestSuites is a container class for unit test suites
+- GTestSuite implements a specific unit test suite
+- GTestCase collects information about a specific test case
+GTestSuites outputs the result in a JUnit compliant XML file for test
+report analysis. The usual console output is also supported. The
+GammaLib unit tests have been rewritten to make use of the new
+test suite.
+
+
+14. Multi-wavelength interface
 ------------------------------
 None
 
 
-14. Fermi-LAT interface
+15. Fermi-LAT interface
 ----------------------
 Added support for Pass 7 data. In particular, P7SOURCE_V6 response
 functions are now included in the GammaLib distribution, together
@@ -108,7 +131,7 @@ that we still lack support for the Phi dependence of the IRF, and
 also energy dispersion has not yet been implemented.
 
 
-15. CTA interface
+16. CTA interface
 -----------------
 Added support for diffuse sources to CTA response. FITS sky maps can
 now be used to simulated and to fit CTA event data, both in binned and
