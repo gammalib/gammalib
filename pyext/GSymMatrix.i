@@ -18,13 +18,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GSymMatrix.i
+ * @brief SYmmetric matrix class definition.
+ * @author Juergen Knoedlseder
+ */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GSymMatrix.hpp"
 #include "GTools.hpp"
 %}
 
-%feature("notabstract") GSymMatrix;
 
 /***********************************************************************//**
  * @class GSymMatrix
@@ -38,40 +42,44 @@ class GSymMatrix : public GMatrixBase {
 public:
     // Constructors and destructors
     GSymMatrix(void);
-    GSymMatrix(int rows, int cols);
+    GSymMatrix(const int& rows, const int& cols);
     GSymMatrix(const GMatrix& matrix);
     GSymMatrix(const GSymMatrix& matrix);
     GSymMatrix(const GSparseMatrix& matrix);
     virtual ~GSymMatrix(void);
 
-    // Operators
-    GSymMatrix    operator+ (const GSymMatrix& m) const;
-    GSymMatrix    operator- (const GSymMatrix& m) const;
-    GSymMatrix    operator* (const GSymMatrix& m) const;
-    GVector       operator* (const GVector& v) const;
-    GSymMatrix    operator- () const;
-    GSymMatrix&   operator+= (const GSymMatrix& m);
-    GSymMatrix&   operator-= (const GSymMatrix& m);
-    GSymMatrix&   operator*= (const GSymMatrix& m);
-    GSymMatrix&   operator*= (const double& d);
-    GSymMatrix&   operator/= (const double& d);
+    // Implemented pure virtual base class operators
+    virtual GVector       operator*(const GVector& v) const;
 
-    // Methods
-    virtual void    add_col(const GVector& v, int col);
-    virtual void    cholesky_decompose(int compress = 1);
-    virtual GVector cholesky_solver(const GVector& v, int compress = 1);
-    virtual void    cholesky_invert(int compress = 1);
-    virtual void    clear(void);
-    virtual GVector extract_row(int row) const;
-    virtual GVector extract_col(int col) const;
-    virtual GMatrix extract_lower_triangle() const;
-    virtual GMatrix extract_upper_triangle() const;
-    virtual void    insert_col(const GVector& v, int col);
-    virtual double  fill(void) const;
-    virtual double  min(void) const;
-    virtual double  max(void) const;
-    virtual double  sum(void) const;
-    virtual void    transpose(void);
+    // Other operators
+    virtual GSymMatrix    operator+(const GSymMatrix& matrix) const;
+    virtual GSymMatrix    operator-(const GSymMatrix& matrix) const;
+    virtual GMatrix       operator*(const GSymMatrix& matrix) const;
+    virtual GSymMatrix    operator-(void) const;
+    virtual GSymMatrix&   operator+=(const GSymMatrix& matrix);
+    virtual GSymMatrix&   operator-=(const GSymMatrix& matrix);
+    virtual GSymMatrix&   operator*=(const double& scaler);
+    virtual GSymMatrix&   operator/=(const double& scalar);
+
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual void        transpose(void);
+    virtual void        invert(void);
+    virtual void        add_col(const GVector& vector, const int& col);
+    virtual void        insert_col(const GVector& vector, const int& col);
+    virtual GVector     extract_row(const int& row) const;
+    virtual GVector     extract_col(const int& col) const;
+    virtual double      fill(void) const;
+    virtual double      min(void) const;
+    virtual double      max(void) const;
+    virtual double      sum(void) const;
+
+    // Other methods
+    virtual GMatrix     extract_lower_triangle(void) const;
+    virtual GMatrix     extract_upper_triangle(void) const;
+    virtual void        cholesky_decompose(bool compress = true);
+    virtual GVector     cholesky_solver(const GVector& vector, bool compress = true);
+    virtual void        cholesky_invert(bool compress = true);
 };
 
 

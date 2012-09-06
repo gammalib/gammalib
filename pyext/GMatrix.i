@@ -18,13 +18,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GMatrix.i
+ * @brief Generic matrix class definition.
+ * @author Juergen Knoedlseder
+ */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GMatrix.hpp"
 #include "GTools.hpp"
 %}
 
-//%feature("notabstract") GMatrix;
 
 /***********************************************************************//**
  * @class GMatrix
@@ -38,39 +42,45 @@ class GMatrix : public GMatrixBase {
 public:
     // Constructors and destructors
     GMatrix(void);
-    GMatrix(int rows, int cols);
-    GMatrix(const GMatrix& m);
+    GMatrix(const int& rows, const int& cols);
+    GMatrix(const GMatrix& matrix);
+    GMatrix(const GSymMatrix& matrix);
+    GMatrix(const GSparseMatrix& matrix);
     virtual ~GMatrix(void);
 
-    // Operators
-    GMatrix  operator+ (const GMatrix& m) const;
-    GMatrix  operator- (const GMatrix& m) const;
-    GMatrix  operator* (const GMatrix& m) const;
-    GVector  operator* (const GVector& v) const;
-    GMatrix  operator- () const;
-    GMatrix& operator+= (const GMatrix& m);
-    GMatrix& operator-= (const GMatrix& m);
-    GMatrix& operator*= (const GMatrix& m);
-    GMatrix& operator*= (const double& s);
-    GMatrix& operator/= (const double& s);
+    // Implemented pure virtual base class operators
+    GVector       operator*(const GVector& vector) const;
 
-    // Methods
-    void    clear(void);
-    void    transpose(void);
-    void    invert(void);
-    void    add_col(const GVector& v, int col);
-    void    insert_col(const GVector& v, int col);
-    GVector extract_row(int row) const;
-    GVector extract_col(int col) const;
-    GMatrix extract_lower_triangle(void) const;
-    GMatrix extract_upper_triangle(void) const;
-    double  fill(void) const;
-    double  min(void) const;
-    double  max(void) const;
-    double  sum(void) const;
-    void    eulerx(const double& angle);
-    void    eulery(const double& angle);
-    void    eulerz(const double& angle);
+    // Other operators
+    GMatrix       operator+(const GMatrix& matrix) const;
+    GMatrix       operator-(const GMatrix& matrix) const;
+    GMatrix       operator*(const GMatrix& matrix) const;
+    GMatrix       operator-(void) const;
+    GMatrix&      operator+=(const GMatrix& matrix);
+    GMatrix&      operator-=(const GMatrix& matrix);
+    GMatrix&      operator*=(const GMatrix& matrix);
+    GMatrix&      operator*=(const double& scalar);
+    GMatrix&      operator/=(const double& scalar);
+
+    // Implemented pure virtual base class methods
+    void        clear(void);
+    void        transpose(void);
+    void        invert(void);
+    void        add_col(const GVector& vector, const int& col);
+    void        insert_col(const GVector& vector, const int& col);
+    GVector     extract_row(const int& row) const;
+    GVector     extract_col(const int& col) const;
+    double      fill(void) const;
+    double      min(void) const;
+    double      max(void) const;
+    double      sum(void) const;
+
+    // Other methods
+    GMatrix     extract_lower_triangle(void) const;
+    GMatrix     extract_upper_triangle(void) const;
+    void        eulerx(const double& angle);
+    void        eulery(const double& angle);
+    void        eulerz(const double& angle);
 };
 
 

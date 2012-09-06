@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GMatrixBase.hpp  -  Matrix abstract base class SWIG file       *
+ *                GMatrixBase.i  -  Abstract matrix base class             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,60 +18,54 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GMatrixBase.i
+ * @brief Abstract matrix base class definition
+ * @author Juergen Knoedlseder
+ */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GMatrixBase.hpp"
 %}
 
 
-/***************************************************************************
- *                        GMatrixBase class definition                     *
- * ----------------------------------------------------------------------- *
- * GMatrixBase is an abstract base class for all matrix classes. It        *
- * defines the common interfaces of the matrix objects and provides some   *
- * common services to the derived classes.                                 *
+/***********************************************************************//**
+ * @class GMatrixBase
+ *
+ * @brief Abstract matrix base class interface defintion
+ *
+ * This is an abstract base class for all matrix classes. It defines the
+ * common interface of the matrix objects and provides some common services
+ * to the derived classes.
  ***************************************************************************/
 class GMatrixBase {
-
-// Methods that are available to everybody
 public:
-  // Constructors and destructors
-  GMatrixBase();
-  GMatrixBase(const GMatrixBase& m);
-  virtual ~GMatrixBase();
+    // Constructors and destructors
+    GMatrixBase(void);
+    GMatrixBase(const GMatrixBase& matrix);
+    virtual ~GMatrixBase(void);
 
-  // Operators (first virtual, then pure virtual)
-  virtual int           operator== (const GMatrixBase& m) const;
-  virtual int           operator!= (const GMatrixBase& m) const;
-  //
-  //virtual GMatrixBase   operator+ (const GMatrixBase& m) const = 0;
-  //virtual GMatrixBase   operator- (const GMatrixBase& m) const = 0;
-  //virtual GMatrixBase   operator* (const GMatrixBase& m) const = 0;
-  virtual GVector       operator* (const GVector& v) const = 0;
-  //virtual GMatrixBase   operator- () const = 0;
-  //virtual GMatrixBase&  operator+= (const GMatrixBase& m) = 0;
-  //virtual GMatrixBase&  operator-= (const GMatrixBase& m) = 0;
-  //virtual GMatrixBase&  operator*= (const GMatrixBase& m) = 0;
-  //virtual GMatrixBase&  operator*= (const double& s) = 0;
-  //virtual GMatrixBase&  operator/= (const double& s) = 0;
+    // Pure virtual operators
+    virtual GVector       operator*(const GVector& vector) const = 0;
 
-  // Methods (first virtual, then pure virtual)
-  virtual int     cols(void) const { return m_cols; }
-  virtual int     rows(void) const { return m_rows; }
-  //
-  //virtual void    add_col(const GVector& v, int col) = 0;
-  //virtual void    cholesky_decompose(int compress = 1) = 0;
-  //virtual GVector cholesky_solver(const GVector& v, int compress = 1) = 0;
-  //virtual void    cholesky_invert(int compress = 1) = 0;
-  virtual void    clear() = 0;
-  virtual GVector extract_row(int row) const = 0;
-  virtual GVector extract_col(int col) const = 0;
-  //virtual GMatrix extract_lower_triangle() const = 0;
-  //virtual GMatrix extract_upper_triangle() const = 0;
-  //virtual void    insert_col(const GVector& v, int col) = 0;
-  virtual double  fill() const = 0;
-  virtual double  min() const = 0;
-  virtual double  max() const = 0;
-  virtual double  sum() const = 0;
-  virtual void    transpose() = 0;
+    // Implemented base class operators
+    virtual bool          operator==(const GMatrixBase& matrix) const;
+    virtual bool          operator!=(const GMatrixBase& matrix) const;
+
+    // Pure virtual methods
+    virtual void        clear() = 0;
+    virtual void        transpose() = 0;
+    virtual void        invert() = 0;
+    virtual void        add_col(const GVector& vector, const int& col) = 0;
+    virtual void        insert_col(const GVector& vector, const int& col) = 0;
+    virtual GVector     extract_row(const int& row) const = 0;
+    virtual GVector     extract_col(const int& col) const = 0;
+    virtual double      fill(void) const = 0;
+    virtual double      min(void) const = 0;
+    virtual double      max(void) const = 0;
+    virtual double      sum(void) const = 0;
+
+    // Implemented base class methods
+    virtual int         cols(void) const;
+    virtual int         rows(void) const;
 };
