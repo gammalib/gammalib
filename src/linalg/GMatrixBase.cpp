@@ -469,16 +469,78 @@ double GMatrixBase::get_element_sum(void) const
 
 /***********************************************************************//**
  * @brief Print all matrix elements
+ *
+ * @param[in] num Maximum number of rows and columns to print (default: 10)
+ *
+ * Prints all matrix elements into a string. The parameter max_elements
+ * allows to control the maximum number of matrix elements that should be
+ * printed. If set to 0, all elements will be printed. Otherwise, the number
+ * of rows and columns will be limited by ommitting the central values.
  ***************************************************************************/
-std::string GMatrixBase::print_elements(void) const
+std::string GMatrixBase::print_elements(const int& num) const
 {
     // Initialise result string
     std::string result;
 
+    // Set row and column limits
+    int row_stop  = 0;
+    int row_start = 0;
+    int col_stop  = 0;
+    int col_start = 0;
+    if (num > 0) {
+        if (m_rows > num) {
+            row_stop  = num/2;
+            row_start = m_rows - row_stop;
+        }
+        if (m_cols > num) {
+            col_stop  = num/2;
+            col_start = m_cols - col_stop;
+        }
+    }
+
     // Print matrix elements row by row using the access function
-    for (int row = 0; row < m_rows; ++row) {
+    for (int row = 0; row < row_stop; ++row) {
         result += "\n ";
-        for (int col = 0; col < m_cols; ++col) {
+        for (int col = 0; col < col_stop; ++col) {
+            result += str((*this)(row,col));
+            if (col != m_cols-1) {
+                result += ", ";
+            }
+        }
+        if (col_start > col_stop) {
+            result += "... ";
+        }
+        for (int col = col_start; col < m_cols; ++col) {
+            result += str((*this)(row,col));
+            if (col != m_cols-1) {
+                result += ", ";
+            }
+        }
+    }
+    if (row_start > row_stop) {
+        result += "\n ";
+        for (int col = 0; col < col_stop; ++col) {
+            result += "... ";
+        }
+        if (col_start > col_stop) {
+            result += "... ";
+        }
+        for (int col = col_start; col < m_cols; ++col) {
+            result += "... ";
+        }
+    }
+    for (int row = row_start; row < m_rows; ++row) {
+        result += "\n ";
+        for (int col = 0; col < col_stop; ++col) {
+            result += str((*this)(row,col));
+            if (col != m_cols-1) {
+                result += ", ";
+            }
+        }
+        if (col_start > col_stop) {
+            result += "... ";
+        }
+        for (int col = col_start; col < m_cols; ++col) {
             result += str((*this)(row,col));
             if (col != m_cols-1) {
                 result += ", ";

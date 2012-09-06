@@ -91,7 +91,7 @@ protected:
     double      get_min_element(void) const;
     double      get_max_element(void) const;
     double      get_element_sum(void) const;
-    std::string print_elements(void) const;
+    std::string print_elements(const int& num = 10) const;
     std::string print_row_compression(void) const;
     std::string print_col_compression(void) const;
 
