@@ -63,18 +63,18 @@ GMatrixBase::GMatrixBase(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] m Matrix from which class should be instantiated.
+ * @param[in] matrix Matrix.
  *
  * The copy constructor is sufficiently general to provide the base
  * constructor for all derived classes, including sparse matrices.
  ***************************************************************************/
-GMatrixBase::GMatrixBase(const GMatrixBase& m)
+GMatrixBase::GMatrixBase(const GMatrixBase& matrix)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(m);
+    copy_members(matrix);
 
     // Return
     return;
@@ -84,7 +84,7 @@ GMatrixBase::GMatrixBase(const GMatrixBase& m)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GMatrixBase::~GMatrixBase()
+GMatrixBase::~GMatrixBase(void)
 {
     // Free class members
     free_members();
@@ -96,19 +96,19 @@ GMatrixBase::~GMatrixBase()
 
 /*==========================================================================
  =                                                                         =
- =                                Operators                                =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] m Matrix.
+ * @param[in] matrix Matrix.
  ***************************************************************************/
-GMatrixBase& GMatrixBase::operator= (const GMatrixBase& m)
+GMatrixBase& GMatrixBase::operator=(const GMatrixBase& matrix)
 {
     // Execute only if object is not identical
-    if (this != &m) {
+    if (this != &matrix) {
 
         // Free members
         free_members();
@@ -117,7 +117,7 @@ GMatrixBase& GMatrixBase::operator= (const GMatrixBase& m)
         init_members();
 
         // Copy members
-        copy_members(m);
+        copy_members(matrix);
 
     } // endif: object was not identical
 
@@ -129,28 +129,32 @@ GMatrixBase& GMatrixBase::operator= (const GMatrixBase& m)
 /***********************************************************************//**
  * @brief Equalty operator
  *
- * @param[in] m Matrix.
+ * @param[in] matrix Matrix.
  *
- * Two matrixes are considered equal if they have the same dimensions and
- * identicial elements.
+ * This operator checks if two matrices are identical. Two matrices are
+ * considered identical if they have the same dimensions and identicial
+ * elements.
  ***************************************************************************/
-int GMatrixBase::operator== (const GMatrixBase& m) const
+bool GMatrixBase::operator==(const GMatrixBase& matrix) const
 {
-    // Initalise the result to 'equal matrices'
-    int result = 1;
-  
-    // Perform comparison (only if matrix dimensions and number of physical
-    // elements are identical; otherwise set result to 'false')
-    if (m_rows == m.m_rows && m_cols == m.m_cols && m_elements == m.m_elements) {
+    // Initalise result to true (are identical)
+    bool result = true;
+
+    // Perform test for non-identity. At the first non-identify we can
+    // stop.
+    if (m_rows     == matrix.m_rows &&
+        m_cols     == matrix.m_cols &&
+        m_elements == matrix.m_elements) {
         for (int i = 0; i < m_elements; ++i) {
-            if (m_data[i] != m.m_data[i]) {
-                result = 0;
+            if (m_data[i] != matrix.m_data[i]) {
+                result = false;
                 break;
             }
         }
     }
-    else
-        result = 0;
+    else {
+        result = false;
+    }
 
     // Return result
     return result;
@@ -160,28 +164,16 @@ int GMatrixBase::operator== (const GMatrixBase& m) const
 /***********************************************************************//**
  * @brief Non-equality operator
  *
- * @param[in] m Matrix.
+ * @param[in] matrix Matrix.
  *
- * Two matrixes are considered as non-equal (or different) if the differ
- * in their dimensions or if at least one element differs.
+ * This operator checks if two matrices are not identical. Two matrices are
+ * considered not identical if they differ in their dimensions or if at
+ * least one element differs.
  ***************************************************************************/
-int GMatrixBase::operator!= (const GMatrixBase& m) const
+bool GMatrixBase::operator!=(const GMatrixBase& matrix) const
 {
-    // Initalise the result to 'equal matrices'
-    int result = 0;
-
-    // Perform comparison (only if matrix dimensions and number of physical
-    // elements are identical; otherwise set result to 'true')
-    if (m_rows == m.m_rows && m_cols == m.m_cols && m_elements == m.m_elements) {
-        for (int i = 0; i < m_elements; ++i) {
-            if (m_data[i] != m.m_data[i]) {
-                result = 1;
-                break;
-            }
-        }
-    }
-    else
-        result = 1;
+    // Get negated result of equality operation
+    bool result = !(this->operator==(matrix));
 	
     // Return result
     return result;
@@ -190,11 +182,11 @@ int GMatrixBase::operator!= (const GMatrixBase& m) const
 
 /*==========================================================================
  =                                                                         =
- =                             Protected methods                           =
+ =                            Protected methods                            =
  =                                                                         =
  ==========================================================================*/
  
- /***********************************************************************//**
+/***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
 void GMatrixBase::init_members(void)
@@ -219,47 +211,51 @@ void GMatrixBase::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] m Matrix from which members should be copied.
+ * @param[in] matrix Matrix.
  ***************************************************************************/
-void GMatrixBase::copy_members(const GMatrixBase& m)
+void GMatrixBase::copy_members(const GMatrixBase& matrix)
 {
     // Copy matrix attributes
-    m_rows       = m.m_rows;
-    m_cols       = m.m_cols;
-    m_elements   = m.m_elements;
-    m_alloc      = m.m_alloc;
-    m_num_rowsel = m.m_num_rowsel;
-    m_num_colsel = m.m_num_colsel;
+    m_rows       = matrix.m_rows;
+    m_cols       = matrix.m_cols;
+    m_elements   = matrix.m_elements;
+    m_alloc      = matrix.m_alloc;
+    m_num_rowsel = matrix.m_num_rowsel;
+    m_num_colsel = matrix.m_num_colsel;
 
     // Allocate only memory if we have rows and columns and data to copy
     if (m_rows > 0 && m_cols > 0) {
 
         // Allocate memory for column start array and copy content
-        if (m.m_colstart != NULL) {
+        if (matrix.m_colstart != NULL) {
             m_colstart = new int[m_cols+1];
-            for (int i = 0; i <= m_cols; ++i)
-                m_colstart[i] = m.m_colstart[i];
+            for (int i = 0; i <= m_cols; ++i) {
+                m_colstart[i] = matrix.m_colstart[i];
+            }
         }
 
         // Allocate memory for elements and copy them
-        if (m.m_data != NULL && m_alloc > 0) {
+        if (matrix.m_data != NULL && m_alloc > 0) {
             m_data = new double[m_alloc];
-            for (int i = 0; i < m_elements; ++i)
-                m_data[i] = m.m_data[i];
+            for (int i = 0; i < m_elements; ++i) {
+                m_data[i] = matrix.m_data[i];
+            }
         }
 
         // If there is a row selection then copy it
-        if (m.m_rowsel != NULL && m_num_rowsel > 0) {
+        if (matrix.m_rowsel != NULL && m_num_rowsel > 0) {
             m_rowsel = new int[m_num_rowsel];
-            for (int i = 0; i < m_num_rowsel; ++i)
-                m_rowsel[i] = m.m_rowsel[i];
+            for (int i = 0; i < m_num_rowsel; ++i) {
+                m_rowsel[i] = matrix.m_rowsel[i];
+            }
         }
 
         // If there is a column selection then copy it
-        if (m.m_colsel != NULL && m_num_colsel > 0) {
+        if (matrix.m_colsel != NULL && m_num_colsel > 0) {
             m_colsel = new int[m_num_colsel];
-            for (int i = 0; i < m_num_colsel; ++i)
-                m_colsel[i] = m.m_colsel[i];
+            for (int i = 0; i < m_num_colsel; ++i) {
+                m_colsel[i] = matrix.m_colsel[i];
+            }
         }
 
     } // endif: there were data to copy
@@ -267,10 +263,10 @@ void GMatrixBase::copy_members(const GMatrixBase& m)
     // Optionally show debug information
     #if defined(G_DEBUG_COPY_MEMBERS)
     std::cout << "GMatrixBase::copy_members:"
-              << " m_colstart=" << m.m_colstart << "->" << m_colstart
-              << " m_data="     << m.m_data     << "->" << m_data
-              << " m_rowsel="   << m.m_rowsel   << "->" << m_rowsel
-              << " m_colsel="   << m.m_colsel   << "->" << m_colsel
+              << " m_colstart=" << matrix.m_colstart << "->" << m_colstart
+              << " m_data="     << matrix.m_data     << "->" << m_data
+              << " m_rowsel="   << matrix.m_rowsel   << "->" << m_rowsel
+              << " m_colsel="   << matrix.m_colsel   << "->" << m_colsel
               << std::endl;
     #endif
 
@@ -309,8 +305,9 @@ void GMatrixBase::free_members(void)
 void GMatrixBase::negation(void)
 {
     // Inverts the sign for all matrix elements
-    for (int i = 0; i < m_elements; ++i)
+    for (int i = 0; i < m_elements; ++i) {
         m_data[i] = -m_data[i];
+    }
 	
     // Return
     return;
@@ -320,15 +317,16 @@ void GMatrixBase::negation(void)
 /***********************************************************************//**
  * @brief Add matrix elements
  *
- * @param[in] m Matrix.
+ * @param[in] matrix Matrix.
  *
  * Add all matrix elements.
  ***************************************************************************/
-void GMatrixBase::addition(const GMatrixBase& m)
+void GMatrixBase::addition(const GMatrixBase& matrix)
 {
     // Add all elements of matrix
-    for (int i = 0; i < m_elements; ++i)
-        m_data[i] += m.m_data[i];
+    for (int i = 0; i < m_elements; ++i) {
+        m_data[i] += matrix.m_data[i];
+    }
 	
     // Return
     return;
@@ -338,15 +336,16 @@ void GMatrixBase::addition(const GMatrixBase& m)
 /***********************************************************************//**
  * @brief Subtract matrix elements
  *
- * @param[in] m Matrix.
+ * @param[in] matrix Matrix.
  *
  * Subtract all matrix elements.
  ***************************************************************************/
-void GMatrixBase::subtraction(const GMatrixBase& m)
+void GMatrixBase::subtraction(const GMatrixBase& matrix)
 {
     // Add all elements of matrix
-    for (int i = 0; i < m_elements; ++i)
-        m_data[i] -= m.m_data[i];
+    for (int i = 0; i < m_elements; ++i) {
+        m_data[i] -= matrix.m_data[i];
+    }
 	
     // Return
     return;
@@ -356,31 +355,34 @@ void GMatrixBase::subtraction(const GMatrixBase& m)
 /***********************************************************************//**
  * @brief Multiply matrix elements with scalar
  *
- * @param[in] s Scalar.
+ * @param[in] scalar Scalar.
  *
  * Multiply all matrix elements with a scalar. There are three cases:
  * (1) the multiplier is 0, then reset all elements to 0,
  * (2) the multiplier is +/-1, then do nothing or negate,
  * (3) in any other case, multiply by multiplier.
  ***************************************************************************/
-void GMatrixBase::multiplication(const double& s)
+void GMatrixBase::multiplication(const double& scalar)
 {
-    // Case A: If multiplicator is 0 then set entire matrix to 0
-    if (s == 0.0) {
-        for (int i = 0; i < m_elements; ++i)
+    // Case 1: If multiplicator is 0 then set entire matrix to 0
+    if (scalar == 0.0) {
+        for (int i = 0; i < m_elements; ++i) {
             m_data[i] = 0.0;
+        }
     }
   
-    // Case C: If multiplicator is not +/- 1 then perform multiplication
-    else if (std::abs(s) != 1.0) {
-        for (int i = 0; i < m_elements; ++i)
-            m_data[i] *= s;
+    // Case 3: If multiplicator is not +/- 1 then perform multiplication
+    else if (std::abs(scalar) != 1.0) {
+        for (int i = 0; i < m_elements; ++i) {
+            m_data[i] *= scalar;
+        }
     }
   
-    // Case B: If multiplication is -1 then negate
-    else if (s == -1.0) {
-        for (int i = 0; i < m_elements; ++i)
+    // Case 2: If multiplication is -1 then negate
+    else if (scalar == -1.0) {
+        for (int i = 0; i < m_elements; ++i) {
             m_data[i] = -m_data[i];
+        }
     }
 	
     // Return
@@ -391,13 +393,16 @@ void GMatrixBase::multiplication(const double& s)
 /***********************************************************************//**
  * @brief Set all elements to a specific value
  *
- * @param[in] s Value.
+ * @param[in] value Value.
+ *
+ * Sets all matrix elements to a specific value.
  ***************************************************************************/
-void GMatrixBase::set_all_elements(const double& s)
+void GMatrixBase::set_all_elements(const double& value)
 {
     // Set all matrix elements
-    for (int i = 0; i < m_elements; ++i)
-        m_data[i] = s;
+    for (int i = 0; i < m_elements; ++i) {
+        m_data[i] = value;
+    }
 	
     // Return
     return;
@@ -407,15 +412,16 @@ void GMatrixBase::set_all_elements(const double& s)
 /***********************************************************************//**
  * @brief Returns minimum matrix element 
  ***************************************************************************/
-double GMatrixBase::get_min_element() const
+double GMatrixBase::get_min_element(void) const
 {
     // Initialise minimum with first element
     double result = m_data[0];
   
     // Search all elements for the smallest one
     for (int i = 1; i < m_elements; ++i) {
-        if (m_data[i] < result)
+        if (m_data[i] < result) {
             result = m_data[i];
+        }
     }
   
     // Return result
@@ -426,15 +432,16 @@ double GMatrixBase::get_min_element() const
 /***********************************************************************//**
  * @brief Returns maximum matrix element 
  ***************************************************************************/
-double GMatrixBase::get_max_element() const
+double GMatrixBase::get_max_element(void) const
 {
     // Initialise maximum with first element
     double result = m_data[0];
   
     // Search all elements for the largest one
     for (int i = 1; i < m_elements; ++i) {
-        if (m_data[i] > result)
+        if (m_data[i] > result) {
             result = m_data[i];
+        }
     }
   
     // Return result
@@ -445,79 +452,18 @@ double GMatrixBase::get_max_element() const
 /***********************************************************************//**
  * @brief Returns sum over all matrix elements
  ***************************************************************************/
-double GMatrixBase::get_element_sum() const
+double GMatrixBase::get_element_sum(void) const
 {
     // Initialise matrix sum
     double result = 0.0;
   
     // Add all elements  
-    for (int i = 0; i < m_elements; ++i)
+    for (int i = 0; i < m_elements; ++i) {
         result += m_data[i];
+    }
   
     // Return result
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Dump all matrix elements in ostream
- *
- * @param[in] os Output stream.
- ***************************************************************************/
-void GMatrixBase::dump_elements(std::ostream& os) const
-{
-    // Dump matrix elements row by row using the access function
-    for (int row = 0; row < m_rows; ++row) {
-        os << " ";
-        for (int col = 0; col < m_cols; ++col) {
-            os << (*this)(row,col);
-            if (col != m_cols-1)
-                os << ", ";
-        }
-        if (row != m_rows-1)
-            os << std::endl;
-    }
-  
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Dump row compression scheme in ostream if it exists
- *
- * @param[in] os Output stream.
- ***************************************************************************/
-void GMatrixBase::dump_row_comp(std::ostream& os) const
-{
-    // If there is a row compression the show scheme
-    if (m_rowsel != NULL) {
-        os << std::endl << " Row selection ..:";
-        for (int row = 0; row < m_num_rowsel; ++row)
-            os << " " << m_rowsel[row];
-    }
-  
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Dump column compression scheme in ostream if it exists
- *
- * @param[in] os Output stream.
- ***************************************************************************/
-void GMatrixBase::dump_col_comp(std::ostream& os) const
-{
-    // If there is a column compression the show scheme
-    if (m_colsel != NULL) {
-        os << std::endl << " Column selection:";
-        for (int col = 0; col < m_num_colsel; ++col)
-            os << " " << m_colsel[col];
-    }
-  
-    // Return
-    return;
 }
 
 
@@ -617,11 +563,14 @@ void GMatrixBase::select_non_zero(void)
     // Find all non-zero rows
     for (row = 0; row < m_rows; ++row) {
         for (col = 0; col < m_cols; ++col) {
-            if ((*this)(row,col) != 0.0)
+            if ((*this)(row,col) != 0.0) {
                 break;
+            }
         }
-        if (col < m_cols)      // found a non-zero element in row
-        m_rowsel[m_num_rowsel++] = row;
+        // Found a non-zero element in row
+        if (col < m_cols) {
+            m_rowsel[m_num_rowsel++] = row;
+        }
     }
 
     // Find all non-zero columns
@@ -630,8 +579,10 @@ void GMatrixBase::select_non_zero(void)
             if ((*this)(row,col) != 0.0)
                 break;
         }
-        if (row < m_rows)      // found a non-zero element in column
-        m_colsel[m_num_colsel++] = col;
+        // Found a non-zero element in column
+        if (row < m_rows) {
+            m_colsel[m_num_colsel++] = col;
+        }
     }
   
     // Return

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GException_linalg.cpp  -  linalg exception handlers          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,68 +18,121 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException_linalg.cpp
+ * @brief Exception handlers for linear algebra module
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include "GException.hpp"
 #include "GTools.hpp"
 
 
-/***************************************************************************
- *                           Empty object exception                        *
+/***********************************************************************//**
+ * @brief Empty object exception
+ *
+ * @param[in] origin Method throwing the exception.
  ***************************************************************************/
 GException::empty::empty(std::string origin)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Zero-size allocation";
+
+    // Set message
+    m_message = "Zero-size allocation.";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                            Index out of range                           *
+/***********************************************************************//**
+ * @brief Index is out of range
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] inx Index.
+ * @param[in] min Minimum of valid range.
+ * @param[in] max Maximum of valid range.
  ***************************************************************************/
 GException::out_of_range::out_of_range(std::string origin,
                                        int         inx,
                                        int         min,
                                        int         max)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Index (" + str(inx) + ") out of range [" + str(min) +
-                "," + str(max) + "]";
+
+    // Set message
+    m_message = "Index " + str(inx) + " out of range [" + str(min) +
+                "," + str(max) + "].";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                            Value out of range                           *
+/***********************************************************************//**
+ * @brief Value is out of range
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] value Value.
+ * @param[in] min Minimum of valid range.
+ * @param[in] max Maximum of valid range.
  ***************************************************************************/
-GException::out_of_range::out_of_range(std::string origin, double value,
-                                       double min, double max)
+GException::out_of_range::out_of_range(std::string origin,
+                                       double      value,
+                                       double      min,
+                                       double      max)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Value (" + str(value) + ") out of range [" + str(min) +
-                "," + str(max) + "]";
+
+    // Set message
+    m_message = "Value " + str(value) + " out of range [" + str(min) +
+                "," + str(max) + "].";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                          Vector index out of range                      *
+/***********************************************************************//**
+ * @brief Vector index is out of range
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] inx Index.
+ * @param[in] elements Number of vector elements.
  ***************************************************************************/
 GException::out_of_range::out_of_range(std::string origin,
                                        int         inx,
                                        int         elements)
 {
+    // Set origin
     m_origin = origin;
+
+    // Set message
     if (elements > 0) {
-        m_message = "Vector index (" + str(inx) + ") out of range [0," +
-                    str(elements-1) + "]";
+        m_message = "Vector index " + str(inx) + " out of range [0," +
+                    str(elements-1) + "].";
     }
     else {
-        m_message = "Empty vector";
+        m_message = "Empty vector cannot be indexed.";
     }
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                      Matrix row or column out of range                  *
+/***********************************************************************//**
+ * @brief Matrix index is out of range
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] row Row index.
+ * @param[in] col Column index.
+ * @param[in] rows Number of rows in matrix.
+ * @param[in] cols Number of columns in matrix.
  ***************************************************************************/
 GException::out_of_range::out_of_range(std::string origin,
                                        int         row,
@@ -87,127 +140,243 @@ GException::out_of_range::out_of_range(std::string origin,
                                        int         rows,
                                        int         cols)
 {
-    m_origin  = origin;
-    m_message = "Matrix element (" + str(row) + "," + str(col) +
-                ") out of range ([0," + str(rows) + "], [0," +
-                str(cols) + "])";
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    if (rows > 0 && cols > 0) {
+        m_message = "Matrix element (" + str(row) + "," + str(col) +
+                    ") out of range ([0," + str(rows-1) + "], [0," +
+                    str(cols-1) + "])";
+    }
+    else {
+        m_message = "Empty matrix cannot be indexed.";
+    }
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                          Vector dimensions differ                       *
+/***********************************************************************//**
+ * @brief Vector dimensions differ
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] size1 Size of first vector.
+ * @param[in] size2 Size of second vector.
  ***************************************************************************/
 GException::vector_mismatch::vector_mismatch(std::string origin, int size1,
                                              int size2)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "Vector dimensions differ (" + str(size1) + " <-> " +
-                str(size2) + ")";
+                str(size2) + ").";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                   Invalid vector dimension for cross product            *
+/***********************************************************************//**
+ * @brief Invalid vector dimension for cross product
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] elements Size of vector.
  ***************************************************************************/
 GException::vector_bad_cross_dim::vector_bad_cross_dim(std::string origin,
                                                        int elements)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "Vector cross product only defined for 3 dimensions but"
-                " vector size is " + str(elements);
+                " vector size is " + str(elements) +".";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                     Mismatch between matrix and vector                  *
+/***********************************************************************//**
+ * @brief Mismatch between matrix and vector
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] num Vector length.
+ * @param[in] rows Number of matrix rows.
+ * @param[in] cols Number of matrix columns.
  ***************************************************************************/
 GException::matrix_vector_mismatch::matrix_vector_mismatch(std::string origin,
-                                                           int num, int rows,
-                                                           int cols)
+                                                           int         num, 
+                                                           int         rows,
+                                                           int         cols)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Vector dimension [" + str(num) +
-                "] is incompatible with matrix size [" +
-                str(rows) + "," + str(cols) + "]";
+
+    // Set message
+    m_message = "Vector length " + str(num) +
+                " is incompatible with matrix size (" +
+                str(rows) + "," + str(cols) + ").";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                       Matrix mismatch in operation                      *
+/***********************************************************************//**
+ * @brief Mismatch between matrices
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] rows1 Number of rows in first matrix.
+ * @param[in] cols1 Number of columns in first matrix.
+ * @param[in] rows2 Number of rows in second matrix.
+ * @param[in] cols2 Number of columns in second matrix.
  ***************************************************************************/
 GException::matrix_mismatch::matrix_mismatch(std::string origin, int rows1,
                                              int cols1, int rows2, int cols2)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Matrix mismatch: M1(" + str(rows1) + "," + str(cols1) +
-                ") incompatible with M2(" + str(rows2) + "," + str(cols2) + ")";
+
+    // Set message
+    m_message  = "Matrices are incompatible for operation.";
+    m_message += "Matrix size ";
+    m_message += "(" + str(rows1) + "," + str(cols1) + ")";
+    m_message += " differs from matrix size ";
+    m_message += "(" + str(rows2) + "," + str(cols2) + ").";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                           Matrix not square                             *
+/***********************************************************************//**
+ * @brief Matrix not square
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] rows Number of matrix rows.
+ * @param[in] cols Number of matrix columns.
  ***************************************************************************/
 GException::matrix_not_square::matrix_not_square(std::string origin,
                                                  int         rows,
                                                  int         cols)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Matrix is not square [" + str(rows) + "," + str(cols) + "]";
+
+    // Set message
+    m_message  = "Matrix of size (" + str(rows) + "," + str(cols) + ")";
+    m_message += " is not square.";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                     Matrix is not positive definite                     *
+/***********************************************************************//**
+ * @brief Matrix is not positive definite
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] row Matrix row.
+ * @param[in] sum Row sum.
  ***************************************************************************/
 GException::matrix_not_pos_definite::matrix_not_pos_definite(std::string origin,
                                                              int row, double sum)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "Matrix is not positive definite (sum " + str(sum) +
-                " occured in row/column " + str(row) + ")";
+                " occured in row/column " + str(row) + ").";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                         Matrix is not symmetric                         *
+/***********************************************************************//**
+ * @brief Matrix is not symmetric
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] rows Number of rows.
+ * @param[in] cols Number of columns.
  ***************************************************************************/
 GException::matrix_not_symmetric::matrix_not_symmetric(std::string origin,
-                                                       int  cols, int rows)
+                                                       int rows, int cols)
 {
+    // Set origin
     m_origin  = origin;
-    m_message = "Matrix is not symmetric [" + str(rows) + "," + str(cols) + "]";
+
+    // Set message
+    m_message = "Matrix (" + str(rows) + "," + str(cols) + ") is not symmetric.";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                       Matrix has not been factorised                    *
+/***********************************************************************//**
+ * @brief Matrix has not been factorised
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] type Factorisation type.
  ***************************************************************************/
 GException::matrix_not_factorised::matrix_not_factorised(std::string origin,
                                                          std::string type)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "Matrix has not been factorised using " + type;
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                       All matrix elements are zero                      *
+/***********************************************************************//**
+ * @brief All matrix elements are zero
+ *
+ * @param[in] origin Method throwing the exception.
  ***************************************************************************/
 GException::matrix_zero::matrix_zero(std::string origin)
 {
+    // Set origin
     m_origin = origin;
-    m_message = "All matrix elements are zero";
+
+    // Set message
+    m_message = "All matrix elements are zero.";
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                     Invalid ordering scheme requested                   *
+/***********************************************************************//**
+ * @brief Invalid ordering scheme requested
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] order Ordering scheme.
+ * @param[in] min_order Minimum ordering scheme.
+ * @param[in] max_order Maximum ordering scheme.
  ***************************************************************************/
 GException::invalid_order::invalid_order(std::string origin, int order,
                                          int min_order, int max_order)
 {
+    // Set origin
     m_origin  = origin;
+
+    // Set message
     m_message = "Invalid ordering type " + str(order) + 
                 "requested; must be comprised in [" + str(min_order) +
                 "," + str(max_order) + "]";
+
+    // Return
+    return;
 }

@@ -20,16 +20,17 @@
  ***************************************************************************/
 /**
  * @file GSparseMatrix.hpp
- * @brief GSparseMatrix class definition.
- * @author J. Knoedlseder
+ * @brief Sparse matrix class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GSPARSEMATRIX_HPP
 #define GSPARSEMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include <iostream>
-#include "GException.hpp"
+#include "GLog.hpp"
 #include "GMatrixBase.hpp"
 
 /* __ Definitions ________________________________________________________ */
@@ -38,17 +39,23 @@
 #define G_SPARSE_MATRIX_DEFAULT_STACK_SIZE     512  // Max # of stack elements
 
 /* __ Forward declarations _______________________________________________ */
+class GMatrix;
+class GSymMatrix;
+class GSparseMatrix;
 class GSparseSymbolic;
 class GSparseNumeric;
+
+/* __ Prototypes _________________________________________________________ */
 
 
 /***********************************************************************//**
  * @class GSparseMatrix
  *
- * @brief GSparseMatrix class interface defintion
+ * @brief Sparse matrix class interface defintion
  *
- * Implements a sparse matrix storage class. It derives from the abstract
- * base class GMatrixBase.
+ * This class implements a sparse matrix class. The class only stores
+ * non-zero elements, which can considerably reduce the memory requirements
+ * for large systems that are sparsly filled.
  ***************************************************************************/
 class GSparseMatrix : public GMatrixBase {
 
@@ -56,88 +63,105 @@ class GSparseMatrix : public GMatrixBase {
     friend class GSparseSymbolic;
     friend class GSparseNumeric;
 
-    // Binary operator friends
-    friend GSparseMatrix operator* (const double& a,  const GSparseMatrix& b);
-    friend GSparseMatrix operator* (const GSparseMatrix& a, const double& b);
-    friend GSparseMatrix operator/ (const GSparseMatrix& a, const double& b);
-
     // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GSparseMatrix& m);
+    friend std::ostream& operator<<(std::ostream& os, const GSparseMatrix& matrix);
+    friend GLog&         operator<<(GLog& log,        const GSparseMatrix& matrix);
+
+    // Binary operator friends
+    friend GSparseMatrix operator*(const double& a,  const GSparseMatrix& b);
+    friend GSparseMatrix operator*(const GSparseMatrix& a, const double& b);
+    friend GSparseMatrix operator/(const GSparseMatrix& a, const double& b);
 
     // Friend functions
-    friend GSparseMatrix transpose(const GSparseMatrix& m);
-    friend GSparseMatrix abs(const GSparseMatrix& m);
-    friend GSparseMatrix cholesky_decompose(const GSparseMatrix& m,
-                                            int compress = 1);
-    friend GSparseMatrix cholesky_invert(const GSparseMatrix& m,
-                                         int compress = 1);
-    //
-    friend GSparseMatrix cs_symperm(const GSparseMatrix& m, const int* pinv);
-    friend GSparseMatrix cs_transpose(const GSparseMatrix& m, int values);
+    friend GSparseMatrix transpose(const GSparseMatrix& matrix);
+    friend GSparseMatrix abs(const GSparseMatrix& matrix);
+    friend GSparseMatrix cholesky_decompose(const GSparseMatrix& matrix,
+                                            bool compress = true);
+    friend GSparseMatrix cholesky_invert(const GSparseMatrix& matrix,
+                                         bool compress = true);
+
+    // Some friend functions that we should not expose ... but I don't
+    // know what to do with them as they are also needed by GSparseSymbolic,
+    // yet they have to access low-level stuff from the matrix class, hence
+    // they need to be friends ...
+    friend GSparseMatrix cs_symperm(const GSparseMatrix& matrix, const int* pinv);
+    friend GSparseMatrix cs_transpose(const GSparseMatrix& matrix, int values);
+    friend double        cs_cumsum(int* p, int* c, int n);
 
 public:
     // Constructors and destructors
-    GSparseMatrix(int rows, int cols, int elements = 0);
-    GSparseMatrix(const GSparseMatrix& m);
+    GSparseMatrix(void);
+    GSparseMatrix(const int& rows, const int& cols, const int& elements = 0);
+    GSparseMatrix(const GMatrix& matrix);
+    GSparseMatrix(const GSymMatrix& matrix);
+    GSparseMatrix(const GSparseMatrix& matrix);
     virtual ~GSparseMatrix(void);
 
-    // Operators
-    GSparseMatrix& operator= (const GSparseMatrix& m);
-    double&        operator() (int row, int col);
-    const double&  operator() (int row, int col) const;
-    GSparseMatrix  operator+ (const GSparseMatrix& m) const;
-    GSparseMatrix  operator- (const GSparseMatrix& m) const;
-    GSparseMatrix  operator* (const GSparseMatrix& m) const;
-    GVector        operator* (const GVector& v) const;
-    int            operator== (const GSparseMatrix& m) const;
-    int            operator!= (const GSparseMatrix& m) const;
-    GSparseMatrix  operator- () const;
-    GSparseMatrix& operator+= (const GSparseMatrix& m);
-    GSparseMatrix& operator-= (const GSparseMatrix& m);
-    GSparseMatrix& operator*= (const GSparseMatrix& m);
-    GSparseMatrix& operator*= (const double& d);
-    GSparseMatrix& operator/= (const double& d);
+    // Implemented pure virtual base class operators
+    double&        operator()(const int& row, const int& col);
+    const double&  operator()(const int& row, const int& col) const;
+    GVector        operator*(const GVector& vector) const;
 
-    // Matrix methods
-    void          clear(void);
-    void          transpose(void);
-    void          add_col(const GVector& v, int col);
-    void          add_col(const double* values, const int* rows,
-                          int number, int col);
-    void          cholesky_decompose(int compress = 1);
-    GVector       cholesky_solver(const GVector& v, int compress = 1);
-    void          cholesky_invert(int compress = 1);
-    GVector       extract_row(int row) const;
-    GVector       extract_col(int col) const;
-    void          insert_col(const GVector& v, int col);
-    void          insert_col(const double* values, const int* rows,
-                             int number, int col);
-    void          set_mem_block(int block);
-    void          stack_init(int size = 0, int entries = 0);
-    int           stack_push_column(const GVector& v, int col);
-    int           stack_push_column(const double* values, const int* rows,
-                                    int number, int col);
-    void          stack_flush(void);
-    void          stack_destroy(void);
-    double        fill(void) const;
-    double        min(void) const;
-    double        max(void) const;
-    double        sum(void) const;
+    // Overloaded virtual base class operators
+    bool           operator==(const GSparseMatrix& matrix) const;
+    bool           operator!=(const GSparseMatrix& matrix) const;
+
+    // Other operators
+    GSparseMatrix& operator=(const GSparseMatrix& matrix);
+    GSparseMatrix  operator+(const GSparseMatrix& matrix) const;
+    GSparseMatrix  operator-(const GSparseMatrix& matrix) const;
+    GSparseMatrix  operator*(const GSparseMatrix& matrix) const;
+    GSparseMatrix  operator-(void) const;
+    GSparseMatrix& operator+=(const GSparseMatrix& matrix);
+    GSparseMatrix& operator-=(const GSparseMatrix& matrix);
+    GSparseMatrix& operator*=(const GSparseMatrix& matrix);
+    GSparseMatrix& operator*=(const double& scalar);
+    GSparseMatrix& operator/=(const double& scalar);
+
+    // Implemented pure virtual base class methods
+    void        clear(void);
+    void        transpose(void);
+    void        invert(void);
+    void        add_col(const GVector& vector, const int& col);
+    void        insert_col(const GVector& vector, const int& col);
+    GVector     extract_row(const int& row) const;
+    GVector     extract_col(const int& col) const;
+    double      fill(void) const;
+    double      min(void) const;
+    double      max(void) const;
+    double      sum(void) const;
+    std::string print(void) const;
+
+    // Other methods
+    void        add_col(const double* values, const int* rows,
+                        int number, const int& col);
+    void        insert_col(const double* values, const int* rows,
+                           int number, const int& col);
+    void        cholesky_decompose(bool compress = true);
+    GVector     cholesky_solver(const GVector& vector, bool compress = true);
+    void        cholesky_invert(bool compress = true);
+    void        set_mem_block(const int& block);
+    void        stack_init(const int& size = 0, const int& entries = 0);
+    int         stack_push_column(const GVector& vector, const int& col);
+    int         stack_push_column(const double* values, const int* rows,
+                                  const int& number, const int& col);
+    void        stack_flush(void);
+    void        stack_destroy(void);
 
 private:
     // Private methods
-    void constructor(int rows, int cols, int elements = 0);
     void init_members(void);
-    void init_stack_members(void);
     void copy_members(const GSparseMatrix& m);
     void free_members(void);
+    void alloc_members(const int& rows, const int& cols, const int& elements = 0);
+    void init_stack_members(void);
     void free_stack_members(void);
-    int  get_index(int row, int col) const;
+    int  get_index(const int& row, const int& col) const;
     void fill_pending(void);
-    void alloc_elements(int start, int num);
-    void free_elements(int start, int num);
+    void alloc_elements(int start, const int& num);
+    void free_elements(const int& start, const int& num);
     void remove_zero_row_col(void);
-    void insert_zero_row_col(int rows, int cols);
+    void insert_zero_row_col(const int& rows, const int& cols);
     void mix_column_prepare(const int* src1_row, int src1_num,
                             const int* src2_row, int src2_num,
                             int* num_1, int* num_2, int* num_mix);
@@ -163,8 +187,9 @@ private:
     int*    m_stack_start;        //!< Start in stack for each entry [m_stack_entries+1]
     double* m_stack_data;         //!< Stack data [m_stack_size]
     int*    m_stack_rowinx;       //!< Stack row indices [m_stack_size]
-    int*    m_stack_work;         //!< Stack integer working array [m_cols]
-    double* m_stack_buffer;       //!< Stack double buffer [m_cols]
+    int*    m_stack_work;         //!< Stack flush integer working array [m_cols]
+    int*    m_stack_rows;         //!< Stack push integer working array [m_cols]
+    double* m_stack_values;       //!< Stack push double buffer [m_cols]
 };
 
 
@@ -173,45 +198,45 @@ private:
  ***************************************************************************/
 // Binary matrix addition
 inline
-GSparseMatrix GSparseMatrix::operator+ (const GSparseMatrix& m) const
+GSparseMatrix GSparseMatrix::operator+(const GSparseMatrix& matrix) const
 {
     GSparseMatrix result = *this;
-    result += m;
+    result += matrix;
     return result;
 }
 
 // Binary matrix subtraction
 inline
-GSparseMatrix GSparseMatrix::operator- (const GSparseMatrix& m) const
+GSparseMatrix GSparseMatrix::operator-(const GSparseMatrix& matrix) const
 {
     GSparseMatrix result = *this;
-    result -= m;
+    result -= matrix;
     return result;
 }
 
 // Binary matrix multiplication
 inline
-GSparseMatrix GSparseMatrix::operator* (const GSparseMatrix& m) const
+GSparseMatrix GSparseMatrix::operator*(const GSparseMatrix& matrix) const
 {
     GSparseMatrix result = *this;
-    result *= m;
+    result *= matrix;
     return result;
 }
 
 // Matrix scaling
 inline
-GSparseMatrix& GSparseMatrix::operator*= (const double& s)
+GSparseMatrix& GSparseMatrix::operator*=(const double& scalar)
 {
     fill_pending();
-    multiplication(s);
+    multiplication(scalar);
     return *this;
 }
 
 // Matrix scalar division
 inline
-GSparseMatrix& GSparseMatrix::operator/= (const double& s)
+GSparseMatrix& GSparseMatrix::operator/=(const double& scalar)
 {
-    double inverse = 1.0/s;
+    double inverse = 1.0/scalar;
     fill_pending();
     multiplication(inverse);
     return *this;
@@ -219,7 +244,7 @@ GSparseMatrix& GSparseMatrix::operator/= (const double& s)
 
 // Negation
 inline
-GSparseMatrix GSparseMatrix::operator- ( ) const
+GSparseMatrix GSparseMatrix::operator-(void) const
 {
     GSparseMatrix result = *this;
     result.fill_pending();
@@ -229,23 +254,11 @@ GSparseMatrix GSparseMatrix::operator- ( ) const
 
 
 /***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
-// Transpose
-inline
-void GSparseMatrix::transpose()
-{
-    fill_pending();
-    *this = cs_transpose(*this, 1);
-}
-
-
-/***************************************************************************
  *                               Inline friends                            *
  ***************************************************************************/
 // Binary matrix scaling (matrix is left operand)
 inline
-GSparseMatrix operator* (const GSparseMatrix& a, const double& b)
+GSparseMatrix operator*(const GSparseMatrix& a, const double& b)
 {
     GSparseMatrix result = a;
     result.fill_pending();
@@ -255,7 +268,7 @@ GSparseMatrix operator* (const GSparseMatrix& a, const double& b)
 
 // Binary matrix scaling (matrix is right operand)
 inline
-GSparseMatrix operator* (const double& a, const GSparseMatrix& b)
+GSparseMatrix operator*(const double& a, const GSparseMatrix& b)
 {
     GSparseMatrix result = b;
     result.fill_pending();
@@ -265,7 +278,7 @@ GSparseMatrix operator* (const double& a, const GSparseMatrix& b)
 
 // Binary matrix division (matrix is left operand)
 inline
-GSparseMatrix operator/ (const GSparseMatrix& a, const double& b)
+GSparseMatrix operator/(const GSparseMatrix& a, const double& b)
 {
     GSparseMatrix result = a;
     result.fill_pending();
@@ -275,16 +288,16 @@ GSparseMatrix operator/ (const GSparseMatrix& a, const double& b)
 
 // Matrix transpose function
 inline
-GSparseMatrix transpose(const GSparseMatrix& m)
+GSparseMatrix transpose(const GSparseMatrix& matrix)
 {
-    GSparseMatrix result = m;
+    GSparseMatrix result = matrix;
     result.transpose();
     return result;
 }
 
 // Set memory block size
 inline
-void GSparseMatrix::set_mem_block(int block)
+void GSparseMatrix::set_mem_block(const int& block)
 {
     m_mem_block = (block > 0) ? block : 1;
     return;
@@ -292,26 +305,20 @@ void GSparseMatrix::set_mem_block(int block)
 
 // Cholesky decomposition
 inline
-GSparseMatrix cholesky_decompose(const GSparseMatrix& m, int compress)
+GSparseMatrix cholesky_decompose(const GSparseMatrix& matrix, bool compress)
 {
-    GSparseMatrix result = m;
+    GSparseMatrix result = matrix;
     result.cholesky_decompose(compress);
     return result;
 }
 
 // Matrix inversion using Cholesky decomposition
 inline
-GSparseMatrix cholesky_invert(const GSparseMatrix& m, int compress)
+GSparseMatrix cholesky_invert(const GSparseMatrix& matrix, bool compress)
 {
-    GSparseMatrix result = m;
+    GSparseMatrix result = matrix;
     result.cholesky_invert(compress);
     return result;
 }
-
-
-/***************************************************************************
- *                      Prototypes for other functions                     *
- ***************************************************************************/
-double cs_cumsum(int* p, int* c, int n);
 
 #endif /* GSPARSEMATRIX_HPP */

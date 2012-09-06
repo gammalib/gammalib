@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GMatrix.hpp  -  matrix class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GMatrix.hpp
- * @brief GMatrix class definition.
- * @author J. Knodlseder
+ * @brief Generic matrix class definition.
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMATRIX_HPP
@@ -41,73 +41,81 @@ class GSparseMatrix;
 /***********************************************************************//**
  * @class GMatrix
  *
- * @brief GMatrix class interface defintion
+ * @brief Generic matrix class defintion
+ *
+ * This class implements a generic matrix class. This class is a
+ * non-spezialized representation of a matrix, and all other matrix storage
+ * classes can be converted into that class.
  ***************************************************************************/
 class GMatrix : public GMatrixBase {
-
-    // Binary operator friends
-    friend GMatrix operator* (const double& a,  const GMatrix& b);
-    friend GMatrix operator* (const GMatrix& a, const double& b);
-    friend GMatrix operator/ (const GMatrix& a, const double& b);
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GMatrix& matrix);
     friend GLog&         operator<<(GLog& log,        const GMatrix& matrix);
 
+    // Binary operator friends
+    friend GMatrix operator*(const double& a,  const GMatrix& b);
+    friend GMatrix operator*(const GMatrix& a, const double& b);
+    friend GMatrix operator/(const GMatrix& a, const double& b);
+
     // Friend functions
-    friend GMatrix transpose(const GMatrix& m);
-    friend GMatrix invert(const GMatrix& m);
-    friend GMatrix abs(const GMatrix& m);
+    friend GMatrix transpose(const GMatrix& matrix);
+    friend GMatrix invert(const GMatrix& matrix);
+    friend GMatrix abs(const GMatrix& matrix);
 
 public:
     // Constructors and destructors
     GMatrix(void);
-    GMatrix(int rows, int cols);
+    GMatrix(const int& rows, const int& cols);
     GMatrix(const GMatrix& matrix);
     GMatrix(const GSymMatrix& matrix);
     GMatrix(const GSparseMatrix& matrix);
     virtual ~GMatrix(void);
 
-    // Operators
-    GMatrix&      operator= (const GMatrix& m);
-    double&       operator() (int row, int col);
-    const double& operator() (int row, int col) const;
-    GMatrix       operator+ (const GMatrix& m) const;
-    GMatrix       operator- (const GMatrix& m) const;
-    GMatrix       operator* (const GMatrix& m) const;
-    GVector       operator* (const GVector& v) const;
-    GMatrix       operator- () const;
-    GMatrix&      operator+= (const GMatrix& m);
-    GMatrix&      operator-= (const GMatrix& m);
-    GMatrix&      operator*= (const GMatrix& m);
-    GMatrix&      operator*= (const double& s);
-    GMatrix&      operator/= (const double& s);
+    // Implemented pure virtual base class operators
+    double&       operator()(const int& row, const int& col);
+    const double& operator()(const int& row, const int& col) const;
+    GVector       operator*(const GVector& vector) const;
 
-    // Methods
+    // Other operators
+    GMatrix&      operator=(const GMatrix& matrix);
+    GMatrix       operator+(const GMatrix& matrix) const;
+    GMatrix       operator-(const GMatrix& matrix) const;
+    GMatrix       operator*(const GMatrix& matrix) const;
+    GMatrix       operator-(void) const;
+    GMatrix&      operator+=(const GMatrix& matrix);
+    GMatrix&      operator-=(const GMatrix& matrix);
+    GMatrix&      operator*=(const GMatrix& matrix);
+    GMatrix&      operator*=(const double& scalar);
+    GMatrix&      operator/=(const double& scalar);
+
+    // Implemented pure virtual base class methods
     void        clear(void);
     void        transpose(void);
     void        invert(void);
-    void        add_col(const GVector& v, int col);
-    void        insert_col(const GVector& v, int col);
-    GVector     extract_row(int row) const;
-    GVector     extract_col(int col) const;
-    GMatrix     extract_lower_triangle(void) const;
-    GMatrix     extract_upper_triangle(void) const;
+    void        add_col(const GVector& vector, const int& col);
+    void        insert_col(const GVector& vector, const int& col);
+    GVector     extract_row(const int& row) const;
+    GVector     extract_col(const int& col) const;
     double      fill(void) const;
     double      min(void) const;
     double      max(void) const;
     double      sum(void) const;
+    std::string print(void) const;
+
+    // Other methods
+    GMatrix     extract_lower_triangle(void) const;
+    GMatrix     extract_upper_triangle(void) const;
     void        eulerx(const double& angle);
     void        eulery(const double& angle);
     void        eulerz(const double& angle);
-    std::string print(void) const;
 
 private:
     // Private methods
-    void constructor(int rows, int cols);
-    void init_members(void) { ; }
-    void copy_members(const GMatrix& m) { ; }
-    void free_members(void) { ; }
+    void init_members(void);
+    void copy_members(const GMatrix& matrix);
+    void free_members(void);
+    void alloc_members(const int& rows, const int& cols);
 };
 
 
@@ -116,51 +124,51 @@ private:
  ***************************************************************************/
 // Binary matrix addition
 inline
-GMatrix GMatrix::operator+ (const GMatrix& m) const
+GMatrix GMatrix::operator+(const GMatrix& matrix) const
 {
     GMatrix result = *this;
-    result += m;
+    result += matrix;
     return result;
 }
 
 // Binary matrix subtraction
 inline
-GMatrix GMatrix::operator- (const GMatrix& m) const
+GMatrix GMatrix::operator-(const GMatrix& matrix) const
 {
     GMatrix result = *this;
-    result -= m;
+    result -= matrix;
     return result;
 }
 
 // Binary matrix multiplication
 inline
-GMatrix GMatrix::operator* (const GMatrix& m) const
+GMatrix GMatrix::operator*(const GMatrix& matrix) const
 {
     GMatrix result = *this;
-    result *= m;
+    result *= matrix;
     return result;
 }
 
 // Matrix scaling
 inline
-GMatrix& GMatrix::operator*= (const double& s)
+GMatrix& GMatrix::operator*=(const double& scalar)
 {
-    multiplication(s);
+    multiplication(scalar);
     return *this;
 }
 
 // Matrix scalar division
 inline
-GMatrix& GMatrix::operator/= (const double& s)
+GMatrix& GMatrix::operator/=(const double& scalar)
 {
-    double inverse = 1.0/s;
+    double inverse = 1.0/scalar;
     multiplication(inverse);
     return *this;
 }
 
 // Negation
 inline
-GMatrix GMatrix::operator- ( ) const
+GMatrix GMatrix::operator-(void) const
 {
     GMatrix result = *this;
     result.negation();
@@ -209,18 +217,18 @@ GMatrix operator/ (const GMatrix& a, const double& b)
 
 // Matrix transpose function
 inline
-GMatrix transpose(const GMatrix& m)
+GMatrix transpose(const GMatrix& matrix)
 {
-    GMatrix result = m;
+    GMatrix result = matrix;
     result.transpose();
     return result;
 }
 
 // Matrix inversion
 inline
-GMatrix invert(const GMatrix& m)
+GMatrix invert(const GMatrix& matrix)
 {
-    GMatrix result = m;
+    GMatrix result = matrix;
     result.invert();
     return result;
 }
