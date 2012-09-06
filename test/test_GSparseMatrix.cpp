@@ -336,7 +336,7 @@ void TestGSparseMatrix::alloc_matrix(void)
         GMatrix cnv_matrix        = GMatrix(symmetric);
         GSparseMatrix back_matrix = GSparseMatrix(cnv_matrix);
         test_assert((symmetric == back_matrix),
-                    "Test symmetric GSparseMatrix <-> GMatrix conversion",
+                    "Test symmetric GSparseMatrix - GMatrix conversion",
                     "Found:\n"+back_matrix.print()+"\nExpected:\n"+symmetric.print());
         test_try_success();
     }
@@ -353,7 +353,7 @@ void TestGSparseMatrix::alloc_matrix(void)
         GMatrix       cnv_matrix  = GMatrix(m_test);
         GSparseMatrix back_matrix = GSparseMatrix(cnv_matrix);
         test_assert((m_test == back_matrix),
-                    "Test GSparseMatrix <-> GMatrix conversion",
+                    "Test GSparseMatrix - GMatrix conversion",
                     "Found:\n"+back_matrix.print()+"\nExpected:\n"+m_test.print());
         test_try_success();
     }
@@ -367,7 +367,7 @@ void TestGSparseMatrix::alloc_matrix(void)
         GSymMatrix    cnv_sym  = GSymMatrix(symmetric);
         GSparseMatrix back_sym = GSparseMatrix(cnv_sym);
         test_assert((symmetric == back_sym),
-                    "Test GSparseMatrix <-> GSymMatrix conversion",
+                    "Test GSparseMatrix - GSymMatrix conversion",
                     "Found:\n"+back_sym.print()+"\nExpected:\n"+symmetric.print());
         test_try_success();
     }
