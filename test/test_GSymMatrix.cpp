@@ -268,7 +268,7 @@ void TestGSymMatrix::alloc_matrix(void)
     test_try("Allocate zero matrix");
     try {
         GSymMatrix test(0,0);
-        test_try_failure();
+        test_try_failure("Expected GException::empty exception.");
     }
     catch (GException::empty &e) {
         test_try_success();
@@ -311,7 +311,7 @@ void TestGSymMatrix::assign_values(void)
     test_try("Verify range checking");
     try {
         test(3,3) = 1.0;
-        test_try_failure();
+        test_try_failure("Expected GException::out_of_range exception.");
     }
     catch (GException::out_of_range &e) {
         test_try_success();
@@ -336,7 +336,8 @@ void TestGSymMatrix::copy_matrix(void)
     
     // Test if original and compied matrices are correct
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test), "Test matrix copy operator", test.print());
+    test_assert(check_matrix(test), "Test matrix copy operator",
+                "Found:\n"+test.print()+"\nExpected:\n"+m_test.print());
 
     // Return
     return;
@@ -354,12 +355,14 @@ void TestGSymMatrix::matrix_operations(void)
 	GVector test1 = m_test * v_test;
 
     // Check if the result vector is as expected
+    GVector ref1 = test1;
     bool result = true;
     for (int row = 0; row < g_rows; ++row) {
         double value = 0.0;
         for (int col = 0; col < g_cols; ++col) {
             value += g_matrix[col+row*g_cols] * g_vector[col];
         }
+        ref1[row] = value;
         if (test1[row] != value) {
             result = false;
             break;
@@ -368,7 +371,8 @@ void TestGSymMatrix::matrix_operations(void)
 
     // Test if original matrix and result vector are correct
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(result, "Test matrix*vector multiplication", test1.print());
+    test_assert(result, "Test matrix*vector multiplication",
+                "Found:\n"+test1.print()+"\nExpected:\n"+ref1.print());
 
     // Test incompatible vector multiplication
     test_try("Test incompatible matrix*vector multiplication");
@@ -387,6 +391,7 @@ void TestGSymMatrix::matrix_operations(void)
 	GSymMatrix test3 = m_test * m_test;
     
     // Check if the result matrix is as expected
+    GSymMatrix ref3 = test3;
     result = true;
     for (int row = 0; row < test3.rows(); ++row) {
         for (int col = 0; col < test3.cols(); ++col) {
@@ -394,6 +399,7 @@ void TestGSymMatrix::matrix_operations(void)
             for (int i = 0; i < g_cols; ++i) {
                 value += g_matrix[i+row*g_cols] * g_matrix[i+col*g_cols];
             }
+            ref3(row,col) = value;
             if (test3(row,col) != value) {
                 result = false;
                 break;
@@ -403,7 +409,8 @@ void TestGSymMatrix::matrix_operations(void)
 
     // Test if original matrix and result matrix are correct
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(result, "Test matrix multiplication", test3.print());
+    test_assert(result, "Test matrix multiplication",
+                "Found:\n"+test3.print()+"\nExpected:\n"+ref3.print());
     test_assert(test3.rows() == g_rows, "Test number of rows of result matrix");
     test_assert(test3.cols() == g_cols, "Test number of columns of result matrix");
 
@@ -411,7 +418,7 @@ void TestGSymMatrix::matrix_operations(void)
     test_try("Test incompatible matrix multiplication");
     try {
         GSymMatrix test4 = m_test * m_bigger;
-        test_try_failure();
+        test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
         test_try_success();
@@ -424,7 +431,7 @@ void TestGSymMatrix::matrix_operations(void)
     test_try("Test incompatible matrix multiplication");
     try {
         GSymMatrix test5 = m_bigger * m_test;
-        test_try_failure();
+        test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
         test_try_success();
@@ -514,7 +521,7 @@ void TestGSymMatrix::matrix_arithmetics(void)
     try {
         test  = m_test;
         test += m_bigger;
-        test_try_failure();
+        test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
         test_try_success();
@@ -578,35 +585,38 @@ void TestGSymMatrix::matrix_functions(void)
     // Transpose function
 	GSymMatrix test1 = transpose(m_test);
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test1, 1.0, 0.0), "Test transpose(GSymMatrix) function",
-                test1.print());
+    test_assert(check_matrix(test1, 1.0, 0.0),
+                "Test transpose(GSymMatrix) function",
+                "Unexpected transposed matrix:\n"+test1.print());
 
     // Transpose method
 	test1 = m_test;
 	test1.transpose();
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test1, 1.0, 0.0), "Test GSymMatrix.transpose() method",
-                test1.print());
+    test_assert(check_matrix(test1, 1.0, 0.0), 
+                "Test GSymMatrix.transpose() method",
+                "Unexpected transposed matrix:\n"+test1.print());
 
     // Convert to general matrix
     GMatrix test2 = GMatrix(m_test);
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test2, 1.0, 0.0), "Test GMatrix(GSymMatrix) constructor",
-                test2.print());
+    test_assert(check_matrix(test2, 1.0, 0.0), 
+                "Test GMatrix(GSymMatrix) constructor",
+                "Unexpected GMatrix:\n"+test2.print());
 
     // Extract lower triangle
     test2 = m_test.extract_lower_triangle();
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix_lt(test2, 1.0, 0.0), 
                 "Test GSymMatrix.extract_lower_triangle() method",
-                test2.print());
+                "Unexpected GMatrix:\n"+test2.print());
 
     // Extract upper triangle
     test2 = m_test.extract_upper_triangle();
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix_ut(test2, 1.0, 0.0), 
                 "Test GSymMatrix.extract_upper_triangle() method",
-                test2.print());
+                "Unexpected GMatrix:\n"+test2.print());
 
     // Return
     return;
@@ -644,7 +654,7 @@ void TestGSymMatrix::matrix_cholesky(void)
 	GMatrix    cd_lower     = cd.extract_lower_triangle();
 	GMatrix    cd_upper     = transpose(cd_lower);
 	GMatrix    cd_product   = cd_lower * cd_upper;
-	GMatrix    cd_residuals = matrix(m_test) - cd_product;
+	GMatrix    cd_residuals = GMatrix(m_test) - cd_product;
 	double res = (abs(cd_residuals)).max();
     test_value(res, 0.0, 1.0e-15, "Test cholesky_decompose() method");
 
@@ -654,7 +664,7 @@ void TestGSymMatrix::matrix_cholesky(void)
 	GMatrix    cd_zero_lower     = cd_zero.extract_lower_triangle();
 	GMatrix    cd_zero_upper     = transpose(cd_zero_lower);
 	GMatrix    cd_zero_product   = cd_zero_lower * cd_zero_upper;
-	GMatrix    cd_zero_residuals = matrix(test_zero) - cd_zero_product;
+	GMatrix    cd_zero_residuals = GMatrix(test_zero) - cd_zero_product;
 	res = (abs(cd_zero_residuals)).max();
     test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_decompose() method");
 
@@ -745,8 +755,8 @@ void TestGSymMatrix::matrix_cholesky(void)
 	unit(0,0) = unit(1,1) = unit(2,2) = 1.0;
 	GSymMatrix test_inv = m_test;
 	test_inv.cholesky_invert();
-    GSymMatrix ci_product   = m_test * test_inv;
-    GSymMatrix ci_residuals = ci_product - unit;
+    GMatrix ci_product   = m_test * test_inv;
+    GMatrix ci_residuals = ci_product - unit;
 	res = (abs(ci_residuals)).max();
     test_value(res, 0.0, 1.0e-15, "Test cholesky_invert method");
 
@@ -755,8 +765,8 @@ void TestGSymMatrix::matrix_cholesky(void)
 	unit(0,0) = unit(1,1) = unit(3,3) = 1.0;
 	GSymMatrix test_zero_inv = test_zero;
 	test_zero_inv.cholesky_invert();
-    GSymMatrix ciz_product   = test_zero * test_zero_inv;
-    GSymMatrix ciz_residuals = ciz_product - unit;
+    GMatrix ciz_product   = test_zero * test_zero_inv;
+    GMatrix ciz_residuals = ciz_product - unit;
 	res = (abs(ciz_residuals)).max();
     test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_invert method");
 
@@ -783,7 +793,8 @@ void TestGSymMatrix::matrix_print(void)
 
     // Test the print method
     std::string output = m_test.print();
-    test_assert((output == reference), "Test matrix printing", output);
+    test_assert((output == reference), "Test matrix printing",
+                "Unexpected print() output:\n"+output);
 
     // Return
     return;

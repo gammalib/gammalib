@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 test_GMatrix.cpp  -  test GMatrix class                 *
+ *            test_GMatrix.cpp  -  Test generic matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,610 +18,363 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GMatrix.cpp
+ * @brief Implementation of unit tests for generic matrices
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <cmath>
-#include <iostream>                           // std::cout, cerr
-#include <stdexcept>                          // std::exception
-#include "GammaLib.hpp"
 #include "test_GMatrix.hpp"
-/* __ Namespaces _________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
+double g_matrix[] = {1.0, 2.0, 3.0, 4.0,
+                     5.0, 6.0, 7.0, 8.0,
+                     9.0, 10., 11., 12.};
+double g_vector[] = {1.0, 2.0, 3.0, 4.0};
+int    g_rows     = 3;
+int    g_cols     = 4;
 
-void TestGMatrix::set(void){
-    // Test name
+
+/***************************************************************************
+ * @brief Set test matrix
+ ***************************************************************************/
+GMatrix TestGMatrix::set_matrix(void) const
+{
+    // Allocate matrix
+    GMatrix matrix(g_rows,g_cols);
+
+    // Set matrix values
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+            matrix(row,col) = g_matrix[col+row*g_cols];
+        }
+    }
+
+    // Return matrix
+    return matrix;
+}
+
+
+/***************************************************************************
+ * @brief Set test matrix with zero lines
+ ***************************************************************************/
+GMatrix TestGMatrix::set_matrix_zero(void) const
+{
+    // Allocate matrix
+    GMatrix matrix(g_rows+1,g_cols+1);
+
+    // Set matrix values
+	int i = 0;
+    for (int row = 0; row < g_rows+1; ++row) {
+        if (row == 2) continue;
+        int j = 0;
+        for (int col = 0; col < g_cols+1; ++col) {
+            if (col == 2) continue;
+            matrix(row,col) = g_matrix[j+i*g_cols];
+            j++;
+        }
+        i++;
+    }
+
+    // Return matrix
+    return matrix;
+}
+
+
+/***************************************************************************
+ * @brief Set test vector
+ ***************************************************************************/
+GVector TestGMatrix::set_vector(void) const
+{
+    // Allocate vector
+    GVector vector(g_cols);
+
+    // Set vector values
+	for (int col = 0; col < g_cols; ++col) {
+        vector[col] = g_vector[col];
+    }
+
+    // Return vector
+    return vector;
+}
+
+
+/***************************************************************************
+ * @brief Check if matrix corresponds to test matrix
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] scale scale factor (default: 1.0).
+ * @param[in] offset offset value (default: 0.0).
+ *
+ * Checks if a matrix corresponds to the test matrix. Optionally, the test
+ * matrix can be scaled and an offset can be added.
+ ***************************************************************************/
+bool TestGMatrix::check_matrix(const GMatrix& matrix,
+                               const double&  scale,
+                               const double&  offset) const
+{
+    // Initialise check with true
+    bool result = true;
+    
+    // Compare all matrix elements
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+            double value = g_matrix[col+row*g_cols] * scale + offset;
+            if (std::abs(matrix(row,col)-value) > 1.0e-15) {
+                result = false;
+                break;
+            }
+        }
+	}
+
+    // Return result
+    return result;
+}
+
+
+/***************************************************************************
+ * @brief Check if transposed matrix corresponds to test matrix
+ *
+ * @param[in] matrix Trasposed matrix.
+ * @param[in] scale scale factor (default: 1.0).
+ * @param[in] offset offset value (default: 0.0).
+ *
+ * Checks if a matrix corresponds to the test matrix. Optionally, the test
+ * matrix can be scaled and an offset can be added.
+ ***************************************************************************/
+bool TestGMatrix::check_matrix_trans(const GMatrix& matrix,
+                                     const double&  scale,
+                                     const double&  offset) const
+{
+    // Initialise check with true
+    bool result = true;
+    
+    // Compare all matrix elements
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+            double value = g_matrix[col+row*g_cols] * scale + offset;
+            if (std::abs(matrix(col,row)-value) > 1.0e-15) {
+                result = false;
+                break;
+            }
+        }
+	}
+
+    // Return result
+    return result;
+}
+
+
+/***************************************************************************
+ * @brief Check lower triangle general matrix
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] ref Reference matrix.
+ ***************************************************************************/
+bool TestGMatrix::check_matrix_lt(const GMatrix& matrix,
+                                  const GMatrix& ref) const
+{
+    // Initialise check with true
+    bool result = true;
+    
+    // Compare all matrix elements
+    for (int row = 0; row < ref.rows(); ++row) {
+        for (int col = 0; col < ref.cols(); ++col) {
+            double value = (col <= row) ? ref(row,col) : 0.0;
+            if (matrix(row,col) != value) {
+                result = false;
+                break;
+            }
+        }
+	}
+
+    // Return result
+    return result;
+}
+
+
+/***************************************************************************
+ * @brief Check upper triangle general matrix
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] ref Reference matrix.
+ ***************************************************************************/
+bool TestGMatrix::check_matrix_ut(const GMatrix& matrix,
+                                  const GMatrix& ref) const
+{
+    // Initialise check with true
+    bool result = true;
+    
+    // Compare all matrix elements
+    for (int row = 0; row < ref.rows(); ++row) {
+        for (int col = 0; col < ref.cols(); ++col) {
+            double value = (col >= row) ? ref(row,col) : 0.0;
+            if (matrix(row,col) != value) {
+                result = false;
+                break;
+            }
+        }
+	}
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Set parameters and tests
+ **************************************************************************/
+void TestGMatrix::set(void)
+{
+    // Set test name
     name("GMatrix");
 
-    //Initialize m_test
-    init_matrix();
+    // Add tests
+    append(static_cast<pfunction>(&TestGMatrix::alloc_matrix), "Test matrix allocation");
+    append(static_cast<pfunction>(&TestGMatrix::assign_values), "Test value assignment");
+    append(static_cast<pfunction>(&TestGMatrix::copy_matrix), "Test matrix copying");
+    append(static_cast<pfunction>(&TestGMatrix::matrix_operations), "Test matrix operations");
+    append(static_cast<pfunction>(&TestGMatrix::matrix_arithmetics), "Test matrix arithmetics");
+    append(static_cast<pfunction>(&TestGMatrix::matrix_functions), "Test matrix functions");
+    append(static_cast<pfunction>(&TestGMatrix::matrix_compare), "Test matrix comparisons");
+    //append(static_cast<pfunction>(&TestGMatrix::matrix_cholesky), "Test matrix Cholesky decomposition");
+    append(static_cast<pfunction>(&TestGMatrix::matrix_print), "Test matrix printing");
 
-    //Initialize m_vector
-    init_vector();
-
-    //Set parameters
-    m_g_rows = 3;
-    m_g_cols = 4;
-
-    //add tests
-    add_test(static_cast<pfunction>(&TestGMatrix::set_matrix),"Set matrix");
-    add_test(static_cast<pfunction>(&TestGMatrix::set_vector),"Set Vector");
-    add_test(static_cast<pfunction>(&TestGMatrix::set_bigger),"Set matrix bigger");
-    add_test(static_cast<pfunction>(&TestGMatrix::test_output),"Output test matrix");
-    add_test(static_cast<pfunction>(&TestGMatrix::test_conversion),"Matrix conversions");
-    add_test(static_cast<pfunction>(&TestGMatrix::test_extract),"Vector extraction, insertion and addition");
-
-    add_test(static_cast<pfunction>(&TestGMatrix::test1),"Test 1: Allocate zero matrix");
-    //add_test(static_cast<pfunction>(&TestGMatrix::test2),"Test 2:  Allocate too large matrix");
-    add_test(static_cast<pfunction>(&TestGMatrix::test3),"Test3: Assign values");
-    add_test(static_cast<pfunction>(&TestGMatrix::test4),"Test 4: Matrix copy constructor");
-    add_test(static_cast<pfunction>(&TestGMatrix::test5),"Test 5: Matrix assignment");
-    add_test(static_cast<pfunction>(&TestGMatrix::test6),"Test 6: Transposition");
-    add_test(static_cast<pfunction>(&TestGMatrix::test7),"Test 7: Matrix*Vector multiplication");
-    add_test(static_cast<pfunction>(&TestGMatrix::test8),"Test 8: Matrix*Matrix multiplication");
-    add_test(static_cast<pfunction>(&TestGMatrix::test9),"Test 9: Assignment and arithmetics");
-    add_test(static_cast<pfunction>(&TestGMatrix::test10),"Test 10: Matrix functions");
-    add_test(static_cast<pfunction>(&TestGMatrix::test11),"Test 11: Matrix comparison");
-
-    return;
-}
-
-/***************************************************************************
-*                              Initializer m_test                          *
-***************************************************************************/
-void TestGMatrix::init_matrix(void)
-{
-    double g_matrix[] = {1.0, 2.0, 3.0, 4.0,
-                         5.0, 6.0, 7.0, 8.0,
-                         9.0, 10., 11., 12.};
-
-    for(int i=0;i<12;i++){
-        m_g_matrix[i]=g_matrix[i];
-    }
-
-    return;
-}
-
-/***************************************************************************
-*                              Initializer m_vector                        *
-***************************************************************************/
-void TestGMatrix::init_vector(void)
-{
-    double   g_vector[] = {1.0, 2.0, 3.0, 4.0};
-
-    for(int i=0;i<4;i++){
-        m_g_vector[i]=g_vector[i];
-    }
-
-    return;
-}
-
-/***************************************************************************
- *                              Set test matrix                            *
- ***************************************************************************/
-void TestGMatrix::set_matrix(void)
-{
-    GMatrix matrix(m_g_rows,m_g_cols);
-    for (int row = 0; row < m_g_rows; ++row) {
-    for (int col = 0; col < m_g_cols; ++col)
-        matrix(row,col) = m_g_matrix[col+row*m_g_cols];
-    }
-
-    m_test = matrix;
-
-    return;
-}
-
-
-/***************************************************************************
- *                              Set test vector                            *
- ***************************************************************************/
-void TestGMatrix::set_vector(void)
-{
-    GVector vector(m_g_cols);
-    for (int col = 0; col < m_g_cols; ++col){
-            vector[col] = m_g_vector[col];
-    }
-
-    v_test = vector;
-
-    return;
-}
-
-void TestGMatrix::set_bigger(void)
-{
-    bigger= GMatrix(m_g_rows+1,m_g_cols+1); 
-}
-/***************************************************************************
- *                             Check test matrix                           *
- ***************************************************************************/
-int TestGMatrix::check_matrix(const GMatrix& m, const double scale, const double add)
-{
-    int result = 1;
-
-    for (int row = 0; row < m_g_rows; ++row) {
-    for (int col = 0; col < m_g_cols; ++col) {
-            double value = m_g_matrix[col+row*m_g_cols] * scale + add;
-            if (fabs(m(row,col)-value) > 1.0e-15) {
-                result = 0;
-                break;
-                }
-        }
-        }
-
-    return result;
-}
-
-
-/***************************************************************************
- *                        Check transposed test matrix                     *
- ***************************************************************************/
-int TestGMatrix::check_transpose_matrix(const GMatrix& m, const double scale, const double add)
-{
-    int result = 1;
-
-    for (int row = 0; row < m_g_rows; ++row) {
-    for (int col = 0; col < m_g_cols; ++col) {
-            double value = m_g_matrix[col+row*m_g_cols] * scale + add;
-            if (m(col,row) != value) {
-                result = 0;
-                break;
-                }
-        }
-        }
-
-    return result;
-}
-
-
-/***************************************************************************
- *                     Check full test matrix (lower triangle)             *
- ***************************************************************************/
-int TestGMatrix::check_matrix_lt(const GMatrix& m, const double scale, const double add)
-{
-    int result = 1;
-    test_try("Check full test matrix (lower triangle)");
-    try {
-        for (int row = 0; row < m_g_rows; ++row) {
-        for (int col = 0; col < m_g_cols; ++col) {
-                double value = (col <= row) ? m_g_matrix[col+row*m_g_cols] * scale + add : 0.0;
-                if (m(row,col) != value) {
-                    result = 0;
-                    break;
-                    }
-            }
-            }
-            test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-    return result;
-}
-
-
-/***************************************************************************
- *                     Check full test matrix (upper triangle)             *
- ***************************************************************************/
-int TestGMatrix::check_matrix_ut(const GMatrix& m, const double scale, const double add)
-{
-    int result = 1;
-    test_try("Check full test matrix (upper triangle)");
-    try {
-        for (int row = 0; row < m_g_rows; ++row) {
-        for (int col = 0; col < m_g_cols; ++col) {
-                double value = (col >= row) ? m_g_matrix[col+row*m_g_cols] * scale + add : 0.0;
-                if (m(row,col) != value) {
-                    result = 0;
-                    break;
-                    }
-            }
-            }
-            test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-    return result;
-}
-
-
-/***************************************************************************
- *                             Check matrix*vector                         *
- ***************************************************************************/
-int TestGMatrix::check_matrix_vector(const GVector& v)
-{
-    int result = 1;
-    test_try(" Check matrix*vector");
-    try {
-        for (int row = 0; row < v.size(); ++row) {
-        double value = 0.0;
-            for (int col = 0; col < m_g_cols; ++col)
-                value += m_g_matrix[col+row*m_g_cols] * m_g_vector[col];
-            if (v[row] != value) {
-                result = 0;
-                break;
-            }
-        }
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-    return result;
-}
-
-
-/***************************************************************************
- *                             Check matrix*matrix                         *
- ***************************************************************************/
-int TestGMatrix::check_matrix_matrix(const GMatrix& m)
-{
-  if (m.rows() != m_g_rows || m.cols() != m_g_rows)
-    return 0;
-  int result = 1;
-  test_try("Check matrix*matrix");
-  try {
-    for (int row = 0; row < m.rows(); ++row) {
-	  for (int col = 0; col < m.cols(); ++col) {
-        double value = 0.0;
-		for (int i = 0; i < m_g_cols; ++i)
-	      value += m_g_matrix[i+row*m_g_cols] * m_g_matrix[i+col*m_g_cols];
-	    if (m(row,col) != value) {
-	      result = 0;
-	      break;
-	    }
-      }
-	}
-        test_try_success();
-  }
-  catch (std::exception &e) {
-      test_try_failure(e);
-  }
-  return result;
-}
-
-
-/***************************************************************************
- *                              Check matrix min                           *
- ***************************************************************************/
-int TestGMatrix::check_matrix_min(const double min)
-{
-  double value = m_g_matrix[0];
-  for (int row = 0; row < m_g_rows; ++row) {
-    for (int col = 0; col < m_g_cols; ++col) {
-	  if (m_g_matrix[col+row*m_g_cols] < value)
-		value = m_g_matrix[col+row*m_g_cols];
-	}
-  }
-  test_assert(min==value, "Check matrix min");
-  return (min == value);
-}
-
-
-/***************************************************************************
- *                              Check matrix max                           *
- ***************************************************************************/
-int TestGMatrix::check_matrix_max(const double max)
-{
-  double value = m_g_matrix[0];
-  for (int row = 0; row < m_g_rows; ++row) {
-    for (int col = 0; col < m_g_cols; ++col) {
-	  if (m_g_matrix[col+row*m_g_cols] > value)
-		value = m_g_matrix[col+row*m_g_cols];
-	}
-  }
-  test_assert(max==value,"Check matrix max");
-  return (max == value);
-}
-
-
-/***************************************************************************
- *                              Check matrix sum                           *
- ***************************************************************************/
-int TestGMatrix::check_matrix_sum(const double sum)
-{
-  double value = 0.0;
-  for (int row = 0; row < m_g_rows; ++row) {
-    for (int col = 0; col < m_g_cols; ++col)
-      value += m_g_matrix[col+row*m_g_cols];
-  }
-  test_assert(sum==value,"Check matrix sum");
-  return (sum == value);
-}
-
-
-/***************************************************************************
- *                                Test: Output                             *
- ***************************************************************************/
-void TestGMatrix::test_output(void)
-{
-      std::cout << "Output test matrix"<<std::endl<< m_test << std::endl;
-}
-
-
-/***************************************************************************
- *                     Test: Conversion between matrix types               *
- ***************************************************************************/
-void TestGMatrix::test_conversion(void)
-{
-    //
-    // Setup a symmetric matrix
-    int     num = 10;
-    GMatrix symmetric(num,num);
-    for (int i = 0; i < num; ++i) {
-    for (int j = 0; j < num; ++j)
-        symmetric(i,j) = (i+j+1)/2.0;
-    }
-
-    //
-    // Convert symmetric matrix into GSymMatrix object
-    //    GSymMatrix converted = sym_matrix(symmetric);
-    GSymMatrix converted = GSymMatrix(symmetric);
-
-    //
-    // Convert GSymMatrix back to full matrix
-    GMatrix back_convert = matrix(converted);
-
-    //
-    // Compare back converted matrix to original one. They should be identical
-    test_assert(symmetric == back_convert,"Compare back converted matrix to original one");
-    //
-    // Determine the fill of the matrix. It should be 1.0
-    double fill = back_convert.fill();
-    test_assert(fabs(fill-1.0) <= 1.0e-15,"Test the fill of the matrix","Bad fill "+str(fill)+" determined (expected 1.0).");
-    //
-    // Extract lower triangle and check values
-    GMatrix lower = symmetric.extract_lower_triangle();
-    int ok = 1;
-    for (int j = 1; j < num; ++j) {
-    for (int i = 0; i < j; ++i) {
-        if (lower(i,j) != 0.0)
-        ok = 0;
-    }
-    }
-    for (int j = 0; j < num; ++j) {
-    for (int i = j; i < num; ++i) {
-        if (lower(i,j) != symmetric(i,j))
-        ok = 0;
-    }
-    }
-    test_assert(ok,"Extract lower triangle");
-
-    //
-    // Extract upper triangle and check values
-    GMatrix upper = symmetric.extract_upper_triangle();
-    ok = 1;
-    for (int j = 0; j < num; ++j) {
-    for (int i = j+1; i < num; ++i) {
-        if (upper(i,j) != 0.0)
-        ok = 0;
-    }
-    }
-    for (int j = 0; j < num; ++j) {
-    for (int i = 0; i <= j; ++i) {
-        if (upper(i,j) != symmetric(i,j))
-        ok = 0;
-    }
-    }
-
-    test_assert(ok,"Extract upper triangle","Corrupt extract_upper_triangle.");
-
-    //
-    // Now make the matrix unsymmetric
-    symmetric(0,num-1) = 1000.0;
-    //
-    // Try converting now into GSymMatrix object (this should fail)
-    test_try("Try converting now into GSymMatrix object");
-    try {
-        converted = sym_matrix(symmetric);
-        test_try_failure();
-    }
-    catch (GException::matrix_not_symmetric &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-    //
-    // Now zero some elements to emulate a sparse matrix
-    symmetric(0,num-1) = 0.0;
-    for (int i = 5; i < 8; ++i) {
-    for (int j = i-2; j < i+2; ++j)
-        symmetric(i,j) = 0.0;
-    }
-
-    //
-    // Convert symmetric matrix into GSparseMatrix object
-    GSparseMatrix sparse = sparse_matrix(symmetric);
-    //
-    // Convert GSparseMatrix back to full matrix
-    back_convert = matrix(sparse);
-    //
-    // Compare back converted matrix to original one. They should be identical
-    test_assert(symmetric == back_convert,
-                            "Compare back converted matrix to original one",
-                            "Unable to convert matrixes (sparse)");
+    // Set members
+    m_test   = set_matrix();
+    v_test   = set_vector();
+    m_bigger = GMatrix(g_rows+1, g_cols+1);
 
     // Return
     return;
 }
 
 
-/***************************************************************************
- *                        Test: extraction and insertion                   *
+/***********************************************************************//**
+ * @brief Test matrix allocation
  ***************************************************************************/
-void TestGMatrix::test_extract(void)
+void TestGMatrix::alloc_matrix(void)
 {
-
-    //
-    // Set-up test matrix
-    int rows = 10;
-    int cols = 20;
-    GMatrix test(rows, cols);
-
-    //
-    // Add and extract column vectors
-    test_try("Add and extract column vectors");
-    try
-    {
-        for (int col = 0; col < cols; ++col) {
-            GVector column(rows);
-            for (int row = 0; row < rows; ++row)
-                column[row] = (col+1)*100.0 + (row+1)*1.0;
-            test.add_col(column, col);
-            GVector check = test.extract_col(col);
-            if (check != column) {
-                throw exception_failure("Unable to add and extract columns.\nAdded column ...: "+column.print()+"\nExtracted column: "+check.print());
-            }
-        }
-            test_try_success();
-    }
-    catch(std::exception& e)
-    {
-        test_try_failure(e);
-    }
-
-    //
-    // Insert and extract column vectors
-    test_try("Insert and extract column vectors");
-    try
-    {
-        for (int col = 0; col < cols; ++col) {
-        GVector column(rows);
-        for (int row = 0; row < rows; ++row)
-            column[row] = (col+1)*100.0 + (row+1)*1.0;
-        test.insert_col(column, col);
-        GVector check = test.extract_col(col);
-        if (check != column) {
-            throw exception_failure("Unable to insert and extract columns.\nIserted column ...: "+column.print()+"\nExtracted column: "+check.print());
-        }
-        }
-        test_try_success();
-    }
-    catch(std::exception& e)
-    {
-        test_try_failure(e);
-    }
-
-    //
-    // Extract rows
-    test_try("Extract rows");
-    try
-    {
-        for (int row = 0; row < rows; ++row) {
-        GVector v_row(cols);
-        for (int col = 0; col < cols; ++col)
-            v_row[col] = (col+1)*100.0 + (row+1)*1.0;
-        GVector check = test.extract_row(row);
-        if (check != v_row) {
-            throw exception_failure("Unable to extract rows.\nIserted row ...: "+v_row.print()+"\nExtracted row: "+check.print());
-        }
-        }
-
-        test_try_success();
-    }
-    catch(std::exception& e)
-    {
-        test_try_failure(e);
-    }
-
-}
-
-// Test 1:  Allocate zero matrix
-void TestGMatrix::test1(void)
-{
-    GMatrix test1(0,0);
-
-    return;
-}
-
-// Test 2:  Allocate too large matrix
-void TestGMatrix::test2(void)
-{
-    //GMatrix test2(100000,100000);
-
-    return;
-}
-
-// Test 3: Assign values
-void TestGMatrix::test3(void)
-{
-    GMatrix test3(3,3);
-    test3(1,1) = 1.0;
-    test_assert(test3(0,0) == 0.0 && test3(1,0) == 0.0 && test3(2,0) == 0.0 &&
-            test3(0,1) == 0.0 && test3(1,1) == 1.0 && test3(2,1) == 0.0 &&
-            test3(0,2) == 0.0 && test3(1,2) == 0.0 && test3(2,2) == 0.0,"Assign value");
-
-        #if defined(G_RANGE_CHECK)
-        test_try("Range check");
-        try {
-            GMatrix test3(3,3);
-            test3(3,3) = 1.0;
-            test_try_failure();
-        }
-        catch (GException::out_of_range &e) {
-            test_try_success();
-        }
-        catch (std::exception &e) {
-            test_try_failure(e);
-        }
-        #endif
-
-    return;
-}
-
-// Test 4: Matrix copy constructor
-void TestGMatrix::test4(void)
-{
-    GMatrix test4 = m_test;
-    if (!check_matrix(test4, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-        throw exception_failure("Corrupt copy constructor");
-    }
-
-    return;
-}
-
-// Test 5: Matrix assignment
-void TestGMatrix::test5(void)
-{
-    //
-    // GMatrix = GMatrix
-    result = m_test;
-    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-        throw exception_failure("Corrupt assignment");
-    }
-    //
-        // GMatrix = GMatrix (bigger matrix)
-    result = bigger;
-
-    return;
-}
-
-// Test 6: Transposition
-void TestGMatrix::test6(void)
-{
-    //
-    // transpose(GMatrix)
-    result = transpose(m_test);
-    test_assert(check_transpose_matrix(result, 1.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"transpose(GMatrix)","Corrupt transpose(GMatrix) function.");
-    //
-    // GMatrix.transpose()
-    result = m_test;
-    result.transpose();
-    test_assert(check_transpose_matrix(result, 1.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix.transpose()","Corrupt GMatrix.transpose() function.");
-}
-
-// Test 7: Matrix*Vector multiplication
-void TestGMatrix::test7(void)
-{
-    GVector v_test7 = m_test*v_test;
-    test_assert(check_matrix_vector(v_test7) && check_matrix(m_test, 1.0, 0.0),"","Corrupt Matrix*Vector multiplication");
-
-    test_try("Bigger*Vector");
+    // Allocate zero matrix. The allocation should fail.
+    test_try("Allocate zero matrix");
     try {
-        GVector v_test7 = bigger*v_test;
-        test_try_failure();
+        GMatrix test(0,0);
+        test_try_failure("Expected GException::empty exception.");
+    }
+    catch (GException::empty &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test value assignment
+ ***************************************************************************/
+void TestGMatrix::assign_values(void)
+{
+    // Setup 3x3 matrix
+    GMatrix test(3,3);
+    
+    // Assignment individual values
+    for (int i = 0; i < 3; ++i) {
+        for (int k = 0; k < 3; ++k) {
+            double value = i*2.0 + k*2.0;
+            test(i,k)   = value;
+        }
+    }
+
+    // Check assignment of individual values
+    for (int i = 0; i < 3; ++i) {
+        for (int k = 0; k < 3; ++k) {
+            double value = i*2.0 + k*2.0;
+            test_value(test(i,k), value, 1.0e-10, "Test matrix element assignment");
+        }
+    }
+
+    // Verify range checking
+    #ifdef G_RANGE_CHECK
+    test_try("Verify range checking");
+    try {
+        test(3,3) = 1.0;
+        test_try_failure("Expected GException::out_of_range exception.");
+    }
+    catch (GException::out_of_range &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test matrix copy
+ ***************************************************************************/
+void TestGMatrix::copy_matrix(void)
+{
+    // Copy matrix
+	GMatrix test = m_test;
+    
+    // Test if original and compied matrices are correct
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test), "Test matrix copy operator",
+                "Found:\n"+test.print()+"\nExpected:\n"+m_test.print());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test matrix operations
+ *
+ * Tests matrix*vector and matrix*matrix multiplication operations.
+ ***************************************************************************/
+void TestGMatrix::matrix_operations(void)
+{
+    // Perform vector multiplication
+	GVector test1 = m_test * v_test;
+
+    // Check if the result vector is as expected
+    GVector ref1 = test1;
+    bool result = true;
+    for (int row = 0; row < g_rows; ++row) {
+        double value = 0.0;
+        for (int col = 0; col < g_cols; ++col) {
+            value += g_matrix[col+row*g_cols] * g_vector[col];
+        }
+        ref1[row] = value;
+        if (test1[row] != value) {
+            result = false;
+            break;
+        }
+    }
+
+    // Test if original matrix and result vector are correct
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(result, "Test matrix*vector multiplication",
+                "Found:\n"+test1.print()+"\nExpected:\n"+ref1.print());
+
+    // Test incompatible vector multiplication
+    test_try("Test incompatible matrix*vector multiplication");
+    try {
+        GVector test2 = m_bigger * v_test;
+        test_try_failure("Expected GException::matrix_vector_mismatch exception.");
     }
     catch (GException::matrix_vector_mismatch &e) {
         test_try_success();
@@ -629,29 +382,39 @@ void TestGMatrix::test7(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
-    return;
-}
-
-// Test 8: Matrix*Matrix multiplication
-void TestGMatrix::test8(void)
-{
-    GMatrix m_test8 = m_test * transpose(m_test);
-    test_assert(check_matrix_matrix(m_test8) && check_matrix(m_test, 1.0, 0.0),"","Corrupt Matrix*Matrix multiplication");
-
-    test_try("Bigger*Matrix multiplication");
-    try {
-        GMatrix m_test8 = m_test*bigger;
-        test_try_success();
+    
+    // Test matrix multiplication
+	GMatrix test3 = m_test * transpose(m_test);
+    
+    // Check if the result matrix is as expected
+    GMatrix ref3 = test3;
+    result = true;
+    for (int row = 0; row < test3.rows(); ++row) {
+        for (int col = 0; col < test3.cols(); ++col) {
+            double value = 0.0;
+            for (int i = 0; i < g_cols; ++i) {
+                value += g_matrix[i+row*g_cols] * g_matrix[i+col*g_cols];
+            }
+            ref3(row,col) = value;
+            if (test3(row,col) != value) {
+                result = false;
+                break;
+            }
+        }
     }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
 
-    test_try("Bigger*Matrix multiplication 2");
+    // Test if original matrix and result matrix are correct
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(result, "Test matrix multiplication",
+                "Found:\n"+test3.print()+"\nExpected:\n"+ref3.print());
+    test_value(test3.rows(), g_rows, "Test number of rows of result matrix");
+    test_value(test3.cols(), g_rows, "Test number of columns of result matrix");
+
+    // Test incompatible matrix multiplication
+    test_try("Test incompatible matrix multiplication");
     try {
-        GMatrix m_test8 = bigger*m_test;
-        test_try_failure();
+        GMatrix test4 = m_bigger * m_test;
+        test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
         test_try_success();
@@ -660,71 +423,11 @@ void TestGMatrix::test8(void)
         test_try_failure(e);
     }
 
-    return;
-}
-
-// Test 9: Assignment and arithmetics
-void TestGMatrix::test9(void)
-{
-    //
-    // -GMatrix
-    result = -m_test;
-    test_assert(check_matrix(result, -1.0, 0.0)&&check_matrix(m_test, 1.0, 0.0),"-GMatrix","Corrupt -GMatrix operator.");
-
-    //
-    // GMatrix += GMatrix
-    result  = m_test;
-    result += m_test;
-    test_assert(check_matrix(result, 2.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix += GMatrix","Corrupt GMatrix += GMatrix operator.");
-
-    //
-    // GMatrix -= GMatrix
-    result  = m_test;
-    result -= m_test;
-    test_assert(check_matrix(result, 0.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix -= GMatrix","Corrupt GMatrix -= GMatrix operator.");
-
-    //
-    // GMatrix *= 3.0
-    result  = m_test;
-    result *= 3.0;
-    test_assert(check_matrix(result, 3.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix *= 3.0","Corrupt GMatrix *= double operator.");
-
-    //
-    // GMatrix /= 3.0
-    result  = m_test;
-    result /= 3.0;
-    test_assert(check_matrix(result, 1.0/3.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix /= 3.0","Corrupt GMatrix /= double operator.");
-
-    //
-    // GMatrix + GMatrix
-    result = m_test + m_test;
-    test_assert(check_matrix(result, 2.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix + GMatrix","Corrupt GMatrix + GMatrix operator.");
-
-    //
-    // GMatrix - GMatrix
-    result = m_test - m_test;
-    test_assert(check_matrix(result, 0.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix - GMatrix","Corrupt GMatrix - GMatrix operator.");
-
-    // GMatrix * 3.0
-    result = m_test * 3.0;
-    test_assert(check_matrix(result, 3.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix * 3.0","Corrupt GMatrix * double operator.");
-
-    //
-    // 3.0 * GMatrix
-    result = 3.0 * m_test;
-    test_assert(check_matrix(result, 3.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"3.0 * GMatrix","Corrupt double * GMatrix operator.");
-
-    //
-    // GMatrix / 3.0
-    result = m_test / 3.0;
-    test_assert(check_matrix(result, 1.0/3.0, 0.0) && check_matrix(m_test, 1.0, 0.0),"GMatrix / 3.0","Corrupt GMatrix / double operator.");
-
-
-    test_try("Test += with bigger");
+    // Test another incompatible matrix multiplication
+    test_try("Test incompatible matrix multiplication");
     try {
-        result  = m_test;
-        result += bigger;
-        test_try_failure();
+        GMatrix test5 = m_bigger * m_test;
+        test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
         test_try_success();
@@ -732,64 +435,417 @@ void TestGMatrix::test9(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
-    return;
-}
-
-// Test 10: Matrix functions
-void TestGMatrix::test10(void){
-    //
-    double min = m_test.min();
-    test_assert(check_matrix_min(min),"Test min","Corrupt GMatrix.min() function.");
-
-    //
-    double max = m_test.max();
-    test_assert(check_matrix_max(max),"Test max","Corrupt GMatrix.max() function.");
-
-    //
-    double sum = m_test.sum();
-    test_assert(check_matrix_sum(sum),"Test sum","Corrupt GMatrix.sum() function.");
-
-    return;
-}
-
-// Test 11: Matrix comparison
-void TestGMatrix::test11(void){
-
-    test_assert(((m_test == m_test) == 1),"GMatrix == GMatrix","Corrupt GMatrix == GMatrix operator.");
-    //
-    GMatrix m_test10(m_g_rows,m_g_cols);
-    test_assert(((m_test == m_test10) == 0),"GMatrix == GMatrix 2","Corrupt GMatrix == GMatrix operator.");
-    //
-    test_assert(((m_test == bigger) == 0),"GMatrix == GMatrix 3","Corrupt GMatrix == GMatrix operator.");
-    //
-    test_assert(((m_test != m_test) == 0),"GMatrix != GMatrix","Corrupt GMatrix != GMatrix operator.");
-    //
-    test_assert(((m_test != m_test10) == 1),"GMatrix != GMatrix 2","Corrupt GMatrix != GMatrix operator.");
-    //
-    test_assert(((m_test != bigger) == 1),"GMatrix != GMatrix 3","Corrupt GMatrix != GMatrix operator.");
-
-    return;
-}
-
-int main(void)
-{
-    GTestSuites testsuite("GMatrix");
-
-    bool was_successful=true;
-
-    //Create a test suite
-    TestGMatrix test;
-
-    //Append to the container
-    testsuite.append(test);
-
-    //Run
-    was_successful=testsuite.run();
-
-    //save xml report
-    testsuite.save("reports/GMatrix.xml");
 
     // Return
-    return was_successful ? 0:1;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test matrix arithmetics
+ *
+ * Tests matrix arithmetics.
+ ***************************************************************************/
+void TestGMatrix::matrix_arithmetics(void)
+{
+	// -GMatrix
+	GMatrix test = -m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, -1.0, 0.0), "Test -GMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix += GMatrix
+	test  = m_test;
+	test += m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 2.0, 0.0), "Test GMatrix += GMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix -= GMatrix
+	test  = m_test;
+	test -= m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 0.0, 0.0), "Test GMatrix -= GMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix *= 3.0
+	test  = m_test;
+	test *= 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 3.0, 0.0), "Test GMatrix *= 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix /= 3.0
+	test  = m_test;
+	test /= 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GMatrix /= 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix + GMatrix
+	test = m_test + m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 2.0, 0.0), "Test GMatrix + GMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix - GMatrix
+	test = m_test - m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 0.0, 0.0), "Test GMatrix - GMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix * 3.0
+	test = m_test * 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 3.0, 0.0), "Test GMatrix * 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
+	// 3.0 * GMatrix
+	test = 3.0 * m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 3.0, 0.0), "Test 3.0 * GMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
+	// GMatrix / 3.0
+	test = m_test / 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GMatrix / 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
+    // Test invalid matrix addition
+    test_try("Test invalid matrix addition");
+    try {
+        test  = m_test;
+        test += m_bigger;
+        test_try_failure("Expected GException::matrix_mismatch exception.");
+    }
+    catch (GException::matrix_mismatch &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test matrix functions
+ *
+ * Tests matrix functions.
+ ***************************************************************************/
+void TestGMatrix::matrix_functions(void)
+{
+    // Minimum
+	double min = m_test.min();
+
+    // Check mimimum
+    double value = g_matrix[0];
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+            if (g_matrix[col+row*g_cols] < value) {
+                value = g_matrix[col+row*g_cols];
+            }
+        }
+    }
+    test_value(min, value, 0.0, "Test minimum function");
+
+    // Maximum
+	double max = m_test.max();
+
+    // Check maximum
+    value = g_matrix[0];
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+            if (g_matrix[col+row*g_cols] > value) {
+                value = g_matrix[col+row*g_cols];
+            }
+        }
+    }
+    test_value(max, value, 0.0, "Test maximum function");
+
+	// Sum
+	double sum = m_test.sum();
+
+    // Check sum
+    value = 0.0;
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+            value += g_matrix[col+row*g_cols];
+        }
+    }
+    test_value(sum, value, 1.0e-20, "Test sum function");
+
+    // Transpose function
+	GMatrix test1 = transpose(m_test);
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix_trans(test1, 1.0, 0.0),
+                "Test transpose(GMatrix) function",
+                "Unexpected transposed matrix:\n"+test1.print());
+
+    // Transpose method
+	test1 = m_test;
+	test1.transpose();
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix_trans(test1, 1.0, 0.0), 
+                "Test GMatrix.transpose() method",
+                "Unexpected transposed matrix:\n"+test1.print());
+
+    // Convert to general matrix
+    GMatrix test2 = GMatrix(m_test);
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test2, 1.0, 0.0), 
+                "Test GMatrix(GMatrix) constructor",
+                "Unexpected GMatrix:\n"+test2.print());
+
+    // Try extracting of lower triangle
+    test_try("Try extracting of lower triangle");
+    try {
+        test2 = m_test.extract_lower_triangle();
+        test_try_failure("Expected GException::matrix_not_square exception.");
+    }
+    catch (GException::matrix_not_square &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Try extracting of upper triangle
+    test_try("Try extracting of lower triangle");
+    try {
+        test2 = m_test.extract_upper_triangle();
+        test_try_failure("Expected GException::matrix_not_square exception.");
+    }
+    catch (GException::matrix_not_square &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Extract lower triangle for square matrix
+    GMatrix test3 = m_test * transpose(m_test);
+    GMatrix test4 = test3.extract_lower_triangle();
+    test_assert(check_matrix_lt(test4, test3), 
+                "Test GMatrix.extract_lower_triangle() method",
+                "Unexpected lower triangle:\n"+test4.print());
+
+    // Extract upper triangle
+    test4 = test3.extract_upper_triangle();
+    test_assert(check_matrix_ut(test4, test3), 
+                "Test GMatrix.extract_upper_triangle() method",
+                "Unexpected lower triangle:\n"+test4.print());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test matrix comparisons
+ ***************************************************************************/
+void TestGMatrix::matrix_compare(void)
+{
+    // Allocate an empty matrix
+    GMatrix empty(g_rows,g_cols);
+
+    // Test operators
+    test_assert((m_test == m_test), "Test == operator");
+    test_assert(!(m_test == empty), "Test == operator");
+    test_assert(!(m_test == m_bigger), "Test == operator");
+    test_assert(!(m_test != m_test), "Test != operator");
+    test_assert((m_test != empty), "Test != operator");
+    test_assert((m_test != m_bigger), "Test != operator");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test Cholesky decomposition
+ ***************************************************************************/
+/*
+void TestGMatrix::matrix_cholesky(void)
+{
+    // Test Cholesky decomposition
+	GMatrix cd           = cholesky_decompose(m_test);
+	GMatrix    cd_lower     = cd.extract_lower_triangle();
+	GMatrix    cd_upper     = transpose(cd_lower);
+	GMatrix    cd_product   = cd_lower * cd_upper;
+	GMatrix    cd_residuals = matrix(m_test) - cd_product;
+	double res = (abs(cd_residuals)).max();
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_decompose() method");
+
+    // Test compressed Cholesky decomposition
+    GMatrix test_zero         = set_matrix_zero();
+	GMatrix cd_zero           = cholesky_decompose(test_zero);
+	GMatrix    cd_zero_lower     = cd_zero.extract_lower_triangle();
+	GMatrix    cd_zero_upper     = transpose(cd_zero_lower);
+	GMatrix    cd_zero_product   = cd_zero_lower * cd_zero_upper;
+	GMatrix    cd_zero_residuals = matrix(test_zero) - cd_zero_product;
+	res = (abs(cd_zero_residuals)).max();
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_decompose() method");
+
+	// Test Cholesky inplace decomposition
+	GMatrix test = m_test;
+    test.cholesky_decompose();
+	GMatrix cd_lower2 = test.extract_lower_triangle();
+    test_assert((cd_lower2 == cd_lower), "Test inplace cholesky_decompose() method");
+
+    // Test Cholesky solver (first test)
+	GVector e0(g_rows);
+	GVector a0(g_rows);
+	e0[0] = 1.0;
+	e0[1] = 0.0;
+	e0[2] = 0.0;
+	a0[0] = g_matrix[0];
+	a0[1] = g_matrix[3];
+	a0[2] = g_matrix[6];
+	GVector s0 = cd.cholesky_solver(a0) - e0;
+	res = max(abs(s0));
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method");
+
+    // Test Cholesky solver (second test)
+	e0[0] = 0.0;
+	e0[1] = 1.0;
+	e0[2] = 0.0;
+	a0[0] = g_matrix[1];
+	a0[1] = g_matrix[4];
+	a0[2] = g_matrix[7];
+	s0 = cd.cholesky_solver(a0) - e0;
+	res = max(abs(s0));
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method");
+
+    // Test Cholesky solver (third test)
+	e0[0] = 0.0;
+	e0[1] = 0.0;
+	e0[2] = 1.0;
+	a0[0] = g_matrix[2];
+	a0[1] = g_matrix[5];
+	a0[2] = g_matrix[8];
+	s0 = cd.cholesky_solver(a0) - e0;
+	res = max(abs(s0));
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method");
+
+    // Test compressed Cholesky solver (first test)
+	e0 = GVector(g_rows+1);
+	a0 = GVector(g_rows+1);
+	e0[0] = 1.0;
+	e0[1] = 0.0;
+	e0[2] = 0.0;
+	e0[3] = 0.0;
+	a0[0] = g_matrix[0];
+	a0[1] = g_matrix[3];
+	a0[2] = 0.0;
+	a0[3] = g_matrix[6];
+	s0    = cd_zero.cholesky_solver(a0) - e0;
+	res   = max(abs(s0));
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method");
+
+    // Test compressed Cholesky solver (second test)
+	e0[0] = 0.0;
+	e0[1] = 1.0;
+	e0[2] = 0.0;
+	e0[3] = 0.0;
+	a0[0] = g_matrix[1];
+	a0[1] = g_matrix[4];
+	a0[2] = 0.0;
+	a0[3] = g_matrix[7];
+	s0    = cd_zero.cholesky_solver(a0) - e0;
+	res   = max(abs(s0));
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method");
+
+    // Test compressed Cholesky solver (third test)
+	e0[0] = 0.0;
+	e0[1] = 0.0;
+	e0[2] = 0.0;
+	e0[3] = 1.0;
+	a0[0] = g_matrix[2];
+	a0[1] = g_matrix[5];
+	a0[2] = 0.0;
+	a0[3] = g_matrix[8];
+	s0    = cd_zero.cholesky_solver(a0) - e0;
+	res   = max(abs(s0));
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method");
+
+	// Test Cholesky inverter
+	GMatrix unit(g_rows,g_cols);
+	unit(0,0) = unit(1,1) = unit(2,2) = 1.0;
+	GMatrix test_inv = m_test;
+	test_inv.cholesky_invert();
+    GMatrix ci_product   = m_test * test_inv;
+    GMatrix ci_residuals = ci_product - unit;
+	res = (abs(ci_residuals)).max();
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_invert method");
+
+	// Test Cholesky inverter for compressed matrix
+	unit = GMatrix(4,4);
+	unit(0,0) = unit(1,1) = unit(3,3) = 1.0;
+	GMatrix test_zero_inv = test_zero;
+	test_zero_inv.cholesky_invert();
+    GMatrix ciz_product   = test_zero * test_zero_inv;
+    GMatrix ciz_residuals = ciz_product - unit;
+	res = (abs(ciz_residuals)).max();
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_invert method");
+
+    // Return
+    return;
+}
+*/
+
+/***************************************************************************
+ * @brief Test matrix printing
+ ***************************************************************************/
+void TestGMatrix::matrix_print(void)
+{
+    // Set reference
+    std::string reference;
+    reference.append("=== GMatrix ===\n");
+    reference.append(" Number of rows ............: 3\n");
+    reference.append(" Number of columns .........: 4\n");
+    reference.append(" Number of elements ........: 12\n");
+    reference.append(" Number of allocated cells .: 12\n");
+    reference.append(" 1, 2, 3, 4\n");
+    reference.append(" 5, 6, 7, 8\n");
+    reference.append(" 9, 10, 11, 12");
+
+    // Test the print method
+    std::string output = m_test.print();
+    test_assert((output == reference), "Test matrix printing",
+                "Unexpected print() output:\n"+output);
+
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Main entry point for test executable
+ ***************************************************************************/
+int main(void)
+{
+    // Allocate test suit container
+    GTestSuites testsuites("GMatrix class testing");
+
+    // Initially assume that we pass all tests
+    bool success = true;
+
+    // Create a test suite
+    TestGMatrix test;
+
+    // Append test suite to the container
+    testsuites.append(test);
+
+    // Run the testsuites
+    success = testsuites.run();
+
+    // Save test report
+    testsuites.save("reports/GMatrix.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }

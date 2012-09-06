@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GMatrix.hpp  -   test matrix class                    *
+ *             test_GMatrix.hpp  -  Test generic matrix class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,70 +18,65 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GMatrix.hpp
+ * @brief Definition of unit tests for generic matrices
+ * @author Juergen Knoedlseder
+ */
 
 #ifndef TEST_GMATRIX_HPP
 #define TEST_GMATRIX_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
 
-class TestGMatrix : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGMatrix(void) : GTestSuite(){ return; }
-        virtual ~TestGMatrix(void){ return; }
 
-        // Methods
-        virtual void set(void);
+/***********************************************************************//**
+ * @class TestGMatrix
+ *
+ * @brief Test suite for generic matrix class testing
+ *
+ * This test suite performs a unit test for the generic matrix class. Tests
+ * that match logically are gathered in a number of class methods, and the
+ * class methods are executed when running the test.
+ ***************************************************************************/
+class TestGMatrix : public GTestSuite {
 
-        void set_matrix(void);
-        void set_vector(void);
-        void set_bigger(void);
-        void test_output(void);
-        void test_conversion(void);
-        void test_extract(void);
-        void test1(void);
-        void test2(void);
-        void test3(void);
-        void test4(void);
-        void test5(void);
-        void test6(void);
-        void test7(void);
-        void test8(void);
-        void test9(void);
-        void test10(void);
-        void test11(void);
+public:
+    // Constructors and destructors
+    TestGMatrix(void) : GTestSuite() {}
+    virtual ~TestGMatrix(void) {}
 
+    // Methods
+    virtual void set(void);
+    void         alloc_matrix(void);
+    void         assign_values(void);
+    void         copy_matrix(void);
+    void         matrix_operations(void);
+    void         matrix_arithmetics(void);
+    void         matrix_functions(void);
+    void         matrix_compare(void);
+    //void         matrix_cholesky(void);
+    void         matrix_print(void);
+
+private:
     // Private methods
-    private:
-        void init_matrix(void);
-        void init_vector(void);
-
-        int check_matrix(const GMatrix& m, const double scale, const double add);
-        int check_transpose_matrix(const GMatrix& m, const double scale, const double add);
-        int check_matrix_lt(const GMatrix& m, const double scale, const double add);
-        int check_matrix_ut(const GMatrix& m, const double scale, const double add);
-        int check_matrix_vector(const GVector& v);
-        int check_matrix_matrix(const GMatrix& m);
-        int check_matrix_min(const double min);
-        int check_matrix_max(const double max);
-        int check_matrix_sum(const double sum);
-
-
-
+    GMatrix set_matrix(void) const;
+    GMatrix set_matrix_zero(void) const;
+    GVector set_vector(void) const;
+    bool    check_matrix(const GMatrix& matrix,
+                         const double&     scale = 1.0,
+                         const double&     offset = 0.0) const;
+    bool    check_matrix_trans(const GMatrix& matrix,
+                               const double&  scale,
+                               const double&  offset) const;
+    bool    check_matrix_lt(const GMatrix& matrix, const GMatrix& ref) const;
+    bool    check_matrix_ut(const GMatrix& matrix, const GMatrix& ref) const;
     
-    // Private attributes
-        GMatrix  m_test;
-        GMatrix  bigger;
-        GMatrix  result;
-        GVector  v_test;
-        double   m_g_matrix[12];//
-        double   m_g_vector[4];
-        int      m_g_rows;
-        int      m_g_cols;
-
+    // Private members;
+    GMatrix m_test;    //!< Test matrix
+    GMatrix m_bigger;  //!< Bigger test matrix (for collisions)
+    GVector v_test;    //!< Test vector
 };
 
 #endif /* TEST_GMATRIX_HPP */
