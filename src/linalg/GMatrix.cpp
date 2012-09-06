@@ -30,11 +30,11 @@
 #endif
 #include <cmath>
 #include "GException.hpp"
+#include "GTools.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                              "GMatrix::operator(int&,int&)"
