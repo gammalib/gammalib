@@ -864,14 +864,7 @@ void TestGSparseMatrix::matrix_functions(void)
 	double min = m_test.min();
 
     // Check mimimum
-    double value = g_matrix[0];
-    for (int row = 0; row < g_rows; ++row) {
-        for (int col = 0; col < g_cols; ++col) {
-            if (g_matrix[col+row*g_cols] < value) {
-                value = g_matrix[col+row*g_cols];
-            }
-        }
-    }
+    double value = 0.0;
     test_value(min, value, 0.0, "Test minimum function");
 
     // Maximum
@@ -879,11 +872,9 @@ void TestGSparseMatrix::matrix_functions(void)
 
     // Check maximum
     value = g_matrix[0];
-    for (int row = 0; row < g_rows; ++row) {
-        for (int col = 0; col < g_cols; ++col) {
-            if (g_matrix[col+row*g_cols] > value) {
-                value = g_matrix[col+row*g_cols];
-            }
+    for (int i = 1; i < g_elements; ++i) {
+        if (g_matrix[i] > value) {
+            value = g_matrix[i];
         }
     }
     test_value(max, value, 0.0, "Test maximum function");
@@ -893,10 +884,8 @@ void TestGSparseMatrix::matrix_functions(void)
 
     // Check sum
     value = 0.0;
-    for (int row = 0; row < g_rows; ++row) {
-        for (int col = 0; col < g_cols; ++col) {
-            value += g_matrix[col+row*g_cols];
-        }
+    for (int i = 0; i < g_elements; ++i) {
+        value += g_matrix[i];
     }
     test_value(sum, value, 1.0e-20, "Test sum function");
 
@@ -921,51 +910,6 @@ void TestGSparseMatrix::matrix_functions(void)
     test_assert(check_matrix(test2, 1.0, 0.0), 
                 "Test GSparseMatrix(GSparseMatrix) constructor",
                 "Unexpected GSparseMatrix:\n"+test2.print());
-
-    // Try extracting of lower triangle
-    /*
-    test_try("Try extracting of lower triangle");
-    try {
-        test2 = m_test.extract_lower_triangle();
-        test_try_failure("Expected GException::matrix_not_square exception.");
-    }
-    catch (GException::matrix_not_square &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-    */
-
-    // Try extracting of upper triangle
-    /*
-    test_try("Try extracting of lower triangle");
-    try {
-        test2 = m_test.extract_upper_triangle();
-        test_try_failure("Expected GException::matrix_not_square exception.");
-    }
-    catch (GException::matrix_not_square &e) {
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-    */
-    
-    // Extract lower triangle for square matrix
-    /*
-    GSparseMatrix test3 = m_test * transpose(m_test);
-    GSparseMatrix test4 = test3.extract_lower_triangle();
-    test_assert(check_matrix_lt(test4, test3), 
-                "Test GSparseMatrix.extract_lower_triangle() method",
-                "Unexpected lower triangle:\n"+test4.print());
-
-    // Extract upper triangle
-    test4 = test3.extract_upper_triangle();
-    test_assert(check_matrix_ut(test4, test3), 
-                "Test GSparseMatrix.extract_upper_triangle() method",
-                "Unexpected lower triangle:\n"+test4.print());
-    */
     
     // Return
     return;
