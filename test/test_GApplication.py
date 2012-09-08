@@ -37,6 +37,9 @@ class Test(GPythonTestSuite):
 		# Call base class constructor
 		GPythonTestSuite.__init__(self)
 
+		# Set members
+		self.logfile = "test_logger.log"
+
 		# Return
 		return
 
@@ -50,16 +53,102 @@ class Test(GPythonTestSuite):
 		self.name("app")
 
 		# Append tests
-		self.append(self.test, "Application module dummy test")
+		self.append(self.test_log, "Test GLog")
 
 		# Return
 		return
 
 
-	# Test function
-	def test(self):
+	# Test GLog
+	def test_log(self):
 		"""
-		Test function.
+		Test GLog.
 		"""
+		# Allocate logger
+		log = GLog(self.logfile, True)
+		
+		# Test print methods
+		log("Test __call__(std::string)")
+		log("\n")
+		log(True)
+		log("\n")
+		log(41)
+		log("\n")
+		log(3.1415)
+		log("\n")
+		log.parformat("This is a parameter")
+		log("\n")
+		log.toupper("upper case")
+		log("\n")
+		log.tolower("LOWER CASE")
+		log("\n")
+		log.fill("Higgs", 3)
+		log("\n")
+		log.left("Left", 10)
+		log("\n")
+		log.right("Right", 10)
+		log("\n")
+		log.center("Center", 10)
+		log("\n")
+		log.header0("Header 0")
+		log("\n")
+		log.header1("Header 1")
+		log.header2("Header 2")
+		log.header3("Header 3")
+		
+		# Close logger
+		log.close()
+		
+		# Set reference
+		ref = []
+		ref.append("Test __call__(std::string)\n")
+		ref.append("1\n")
+		ref.append("41\n")
+		ref.append("3.1415\n")
+		ref.append(" This is a parameter .......: \n")
+		ref.append("UPPER CASE\n")
+		ref.append("lower case\n")
+		ref.append("HiggsHiggsHiggs\n")
+		ref.append("Left      \n")
+		ref.append("     Right\n")
+		ref.append("  Center  \n")
+		ref.append("\n")
+		ref.append("+==========+\n")
+		ref.append("| Header 1 |\n")
+		ref.append("+==========+\n")
+		ref.append("+----------+\n")
+		ref.append("| Header 2 |\n")
+		ref.append("+----------+\n")
+		ref.append("=== Header 3 ===\n")
+
+		# Set calls for error messages
+		calls = []
+		calls.append("__call__(std::string)")
+		calls.append("__call__(bool)")
+		calls.append("__call__(int)")
+		calls.append("__call__(double)")
+		calls.append("parformat()")
+		calls.append("toupper()")
+		calls.append("tolower()")
+		calls.append("fill()")
+		calls.append("left()")
+		calls.append("right()")
+		calls.append("center()")
+		calls.append("header0()")
+		calls.append("header1()")
+		calls.append("header1()")
+		calls.append("header1()")
+		calls.append("header2()")
+		calls.append("header2()")
+		calls.append("header2()")
+		calls.append("header3()")
+	
+		# Check file
+		file  = open(self.logfile, "r")
+		lines = file.readlines()
+		file.close()
+		for i, line in enumerate(lines):
+			self.test_assert(line == ref[i], "Test "+calls[i])
+
 		# Return
 		return
