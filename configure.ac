@@ -472,6 +472,7 @@ fi
 #############################################################################
 # Set linker options                                                        #
 #############################################################################
+#
 case $ac_sys_system/$ac_sys_release in
 Darwin/*)
     # Use -undefined dynamic_lookup whenever possible (10.3 and later).
