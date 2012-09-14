@@ -75,7 +75,7 @@ check_PROGRAMS = test_GSupport \
                  test_GSky \
                  test_GOptimizer \
                  test_GObservation \
-                 $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INCL_COM)
+                 $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM)
 
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
@@ -95,7 +95,7 @@ TESTS = test_GSupport \
         test_GSky \
         test_GOptimizer \
         test_GObservation \
-        $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INCL_COM) \
+        $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) \
         $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links
