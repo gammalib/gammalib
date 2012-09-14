@@ -8,6 +8,7 @@
 if WITH_INST_MWL
   INST_MWL = test_MWL
   INCL_MWL = -I$(top_srcdir)/inst/mwl/include
+  TEST_MWL = :$(top_srcdir)/inst/mwl/test
   test_MWL_SOURCES = $(top_srcdir)/inst/mwl/test/test_MWL.cpp
   test_MWL_LDFLAGS = @LDFLAGS@
   test_MWL_CPPFLAGS = @CPPFLAGS@
@@ -16,6 +17,7 @@ endif
 if WITH_INST_CTA
   INST_CTA = test_CTA
   INCL_CTA = -I$(top_srcdir)/inst/cta/include
+  TEST_CTA = :$(top_srcdir)/inst/cta/test
   test_CTA_SOURCES = $(top_srcdir)/inst/cta/test/test_CTA.cpp
   test_CTA_LDFLAGS = @LDFLAGS@
   test_CTA_CPPFLAGS = @CPPFLAGS@
@@ -24,6 +26,7 @@ endif
 if WITH_INST_LAT
   INST_LAT = test_LAT
   INCL_LAT = -I$(top_srcdir)/inst/lat/include
+  TEST_LAT = :$(top_srcdir)/inst/lat/test
   test_LAT_SOURCES = $(top_srcdir)/inst/lat/test/test_LAT.cpp
   test_LAT_LDFLAGS = @LDFLAGS@
   test_LAT_CPPFLAGS = @CPPFLAGS@
@@ -32,6 +35,7 @@ endif
 if WITH_INST_COM
   INST_COM = test_COM
   INCL_COM = -I$(top_srcdir)/inst/com/include
+  TEST_COM = :$(top_srcdir)/inst/com/test
   test_COM_SOURCES = $(top_srcdir)/inst/com/test/test_COM.cpp
   test_COM_LDFLAGS = @LDFLAGS@
   test_COM_CPPFLAGS = @CPPFLAGS@
@@ -41,7 +45,7 @@ endif
 # Optional python bindings
 if WITH_PYTHON
   TEST_PYTHON_SCRIPT = test_python.py
-  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(PYTHONPATH)
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext$(TEST_MWL)$(TEST_CTA)$(TEST_LAT)$(TEST_COM):$(PYTHONPATH)
 endif
 
 # Darwin support
@@ -69,10 +73,9 @@ check_PROGRAMS = test_GSupport \
                  test_GApplication \
                  test_GModel \
                  test_GSky \
-                 $(INST_MWL) \
-                 $(INST_CTA) \
-                 $(INST_LAT) \
-                 $(INST_COM)
+                 test_GOptimizer \
+                 test_GObservation \
+                 $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INCL_COM)
 
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
@@ -90,10 +93,9 @@ TESTS = test_GSupport \
         test_GApplication \
         test_GModel \
         test_GSky \
-        $(INST_MWL) \
-        $(INST_CTA) \
-        $(INST_LAT) \
-        $(INST_COM) \
+        test_GOptimizer \
+        test_GObservation \
+        $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INCL_COM) \
         $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links
@@ -151,6 +153,16 @@ test_GSky_SOURCES = test_GSky.cpp
 test_GSky_LDFLAGS = @LDFLAGS@
 test_GSky_CPPFLAGS = @CPPFLAGS@
 test_GSky_LDADD = $(top_srcdir)/src/libgamma.la
+#
+test_GOptimizer_SOURCES = test_GOptimizer.cpp
+test_GOptimizer_LDFLAGS = @LDFLAGS@
+test_GOptimizer_CPPFLAGS = @CPPFLAGS@
+test_GOptimizer_LDADD = $(top_srcdir)/src/libgamma.la
+#
+test_GObservation_SOURCES = test_GObservation.cpp
+test_GObservation_LDFLAGS = @LDFLAGS@
+test_GObservation_CPPFLAGS = @CPPFLAGS@
+test_GObservation_LDADD = $(top_srcdir)/src/libgamma.la
 
 # Add Valgrind rule
 valgrind:

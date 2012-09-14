@@ -24,19 +24,20 @@ from distutils import sysconfig
 import glob
 import os
 import sys
+import re
 
 # Define package name
 pkg_name = 'gammalib'
 
 # Define core modules
 core_modules = ['app', 'fits', 'linalg', 'model', 'numerics', \
-                'obs', 'opt', 'sky', 'support', 'xml']
+                'obs', 'opt', 'sky', 'support', 'test', 'xml']
 
 # Detect execution mode
 is_unit_test = False
 if (len(sys.argv) >= 3):
 	if (sys.argv[2] == '--inplace'):
-		print "This build is for unit testing."
+		print@PYTHON_OPEN@"This build is for unit testing."@PYTHON_CLOSE@
 		is_unit_test = True
 
 # Darwin MacPorts kluge: Remove -L/opt/local/lib path from LDSHARED as this
@@ -57,7 +58,7 @@ if sys.platform.lower().startswith("darwin"):
 		else:
 			ldshared_rm += option + ' '
 	if (len(ldshared_rm) > 0):
-		print 'Removed following option(s) from LDSHARED: '+ldshared_rm
+		print@PYTHON_OPEN@"Removed following option(s) from LDSHARED: "+ldshared_rm@PYTHON_CLOSE@
 	
 	# Set LDSHARED
 	cvars['LDSHARED'] = ldshared_new
@@ -75,7 +76,7 @@ if is_unit_test and sys.platform.lower().startswith("darwin"):
 	# an already existing link.
 	try:
 		os.remove('../src/.libs/libgamma_python.a')
-		print 'Removed ../src/.libs/libgamma_python.a'
+		print@PYTHON_OPEN@"Removed ../src/.libs/libgamma_python.a"@PYTHON_CLOSE@
 	except:
 		pass
 	
@@ -83,10 +84,10 @@ if is_unit_test and sys.platform.lower().startswith("darwin"):
 	# symbolic link
 	try:
 		os.symlink('libgamma.a', '../src/.libs/libgamma_python.a')
-		print 'Created ../src/.libs/libgamma_python.a'
+		print@PYTHON_OPEN@"Created ../src/.libs/libgamma_python.a"@PYTHON_CLOSE@
 		libgamma='gamma_python'
 	except:
-		print 'WARNING: Failed to create symbolic link to static library. Link dynamically.'
+		print@PYTHON_OPEN@"WARNING: Failed to create symbolic link to static library. Link dynamically."@PYTHON_CLOSE@
 
 # Set default include directories, install files, library paths and libraries
 include_dirs         = ['@top_srcdir@/include']
@@ -101,12 +102,12 @@ if os.path.exists('@prefix@/lib'):
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
-	print "Link cfitsio into Python bindings."
+	print@PYTHON_OPEN@"Link cfitsio into Python bindings."@PYTHON_CLOSE@
 	libraries.append('cfitsio')
 
 # Add readline library only if available
 if '@WITH_READLINE_TRUE@' != '#':
-	print "Link readline into Python bindings."
+	print@PYTHON_OPEN@"Link readline into Python bindings."@PYTHON_CLOSE@
 	libraries.append('readline')
 	libraries.append('ncurses')
 
@@ -136,29 +137,43 @@ for extra_inc_path in extra_inc_paths:
 # Add definitions for instrument specific modules
 inst_modules = []
 if '@WITH_INST_MWL_TRUE@' != '#':
-	print "Include multi-wavelength interface in gammalib Python bindings."
+	print@PYTHON_OPEN@"Include multi-wavelength interface in gammalib Python bindings."@PYTHON_CLOSE@
 	inst_modules.append('mwl')
 if '@WITH_INST_CTA_TRUE@' != '#':
-	print "Include CTA instrument interface in gammalib Python bindings."
+	print@PYTHON_OPEN@"Include CTA instrument interface in gammalib Python bindings."@PYTHON_CLOSE@
 	inst_modules.append('cta')
 if '@WITH_INST_LAT_TRUE@' != '#':
-	print "Include Fermi/LAT instrument interface in gammalib Python bindings."
+	print@PYTHON_OPEN@"Include Fermi/LAT instrument interface in gammalib Python bindings."@PYTHON_CLOSE@
 	inst_modules.append('lat')
 if '@WITH_INST_COM_TRUE@' != '#':
 	print "Include COMPTEL instrument interface in gammalib Python bindings."
 	inst_modules.append('com')
 
 # Set extension definition for core modules
+all_modules = []
 ext_modules = []
 py_modules  = []
+
+# Optionally enable OpenMP
+if '@OPENMP_TRUE@' != '#':
+	extra_compile_args = ['@OPENMP_CXXFLAGS@']
+	extra_link_args    = ['@OPENMP_CXXFLAGS@']
+else:
+	extra_compile_args = []
+	extra_link_args    = []
+
+# Loop over all core modules
 for module in core_modules:
 	
 	# Define module
 	ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
 	                       include_dirs=include_dirs, \
-						   libraries=libraries,
-						   library_dirs=library_dirs,
-						   runtime_library_dirs=runtime_library_dirs)
+                           libraries=libraries,
+                           library_dirs=library_dirs,
+                           runtime_library_dirs=runtime_library_dirs,
+                           extra_compile_args=extra_compile_args,
+                           extra_link_args=extra_link_args)
+	all_modules.append(module)
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
@@ -178,20 +193,75 @@ for module in inst_modules:
 	
 	# Define module
 	ext_module = Extension('_'+module, [pkg_name+'/'+module+'_wrap.cpp'], \
-	                       include_dirs=include_dirs, \
-						   libraries=libraries,
-						   library_dirs=library_dirs,
-						   runtime_library_dirs=runtime_library_dirs)
+                           include_dirs=include_dirs, \
+                           libraries=libraries,
+                           library_dirs=library_dirs,
+                           runtime_library_dirs=runtime_library_dirs,
+                           extra_compile_args=extra_compile_args,
+                           extra_link_args=extra_link_args)
+	all_modules.append(module)
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
 # Create gammalib/__init__.py file
 file = open(pkg_name+'/__init__.py', 'w')
-for module in core_modules:
-	file.write('from '+module+' import *\n')
-for module in inst_modules:
-	file.write('from '+module+' import *\n')
+file.write('# This file is created automatically by setup.py\n')
+file.write('# Please do not modify, unless you exactly know what you do.\n')
+for module in all_modules:
+	file.write('from gammalib.'+module+' import *\n')
 file.close()
+
+# Post-process swig files. This post-processing is needed to transform
+# "import XXX" statements into "from XXX import *" statements. Furthermore,
+# the module information is stripped from all base classes, e.g.
+# "gammalib.obs.GRoi" becomes "GRoi".
+for module in all_modules:
+
+	# Set file names
+	filename = pkg_name+"/"+module+".py"
+	origname = pkg_name+"/"+module+".py.orig"
+
+	# Rename original file (for safety)
+	os.rename(filename,origname)
+
+	# Open files
+	infile  = open(origname, 'r')
+	outfile = open(filename, 'w')
+
+	# Initialize reformulation statistics
+	n_import = 0
+	n_class  = 0
+
+	# Loop over all lines of input file
+	for line in infile:
+
+		# Reformulate import statements
+		if line.find("import gammalib.") != -1:
+			pos      = line.find("gammalib.")
+			name     = line[pos:].rstrip('\n').strip(' ')
+			line     = "from "+name+" import *\n"
+			n_import = n_import + 1
+
+		# Reformulate base class declarations
+		elif re.search("gammalib.+.G+", line):
+			start   = line.find("gammalib.")
+			pos     = line[start:].find("G")+start
+			pre     = line[0:start]
+			post    = line[pos:]
+			line    = pre+post
+			n_class = n_class + 1
+
+		# Write line
+		outfile.write(line)
+
+	# Close files
+	infile.close()
+	outfile.close()
+
+	# Dump reformulation statistics for actual module
+	if n_import > 0 or n_class > 0:
+		print@PYTHON_OPEN@module+".py reformulation: "+str(n_import)+ \
+		      " imports, "+str(n_class)+" base class declarations."@PYTHON_CLOSE@
 
 # Set data files to install. Do not install data files in unit testing mode.
 if is_unit_test:
@@ -212,10 +282,10 @@ setup(name='@PACKAGE_NAME@',
       ext_package=pkg_name,
       ext_modules=ext_modules,
       py_modules=py_modules,
-	  data_files=data_files,
-	  license="GNU GPL v3",
-	  long_description="Versatile toolbox for the analysis of astronomical gamma-ray data",
-	  platforms=["Linux", "Solaris", "Mac OS-X", "Unix", "BSD"],
+      data_files=data_files,
+      license="GNU GPL v3",
+      long_description="Versatile toolbox for the analysis of astronomical gamma-ray data",
+      platforms=["Linux", "Solaris", "Mac OS-X", "Unix", "BSD"],
 	  )
 
 # Post-processing

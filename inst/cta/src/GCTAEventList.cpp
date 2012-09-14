@@ -592,9 +592,6 @@ void GCTAEventList::read_events_v0(const GFitsTable* table)
     // Clear existing events
     m_events.clear();
 
-    // Allocate space for keyword name
-    char keyword[10];
-
     // Continue only if HDU is valid
     if (table != NULL) {
 
@@ -674,9 +671,6 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
 {
     // Clear existing events
     m_events.clear();
-
-    // Allocate space for keyword name
-    char keyword[10];
 
     // Continue only if HDU is valid
     if (table != NULL) {
@@ -762,9 +756,6 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
  ***************************************************************************/
 void GCTAEventList::read_events_hillas(const GFitsTable* table)
 {
-    // Allocate space for keyword name
-    char keyword[10];
-
     // Continue only if HDU is valid
     if (table != NULL) {
 
@@ -953,11 +944,11 @@ void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
         // Loop over all data selection keys
         for (int i = 1; i <= ndskeys; ++i) {
             std::string type_key  = "DSTYP"+str(i);
-            std::string unit_key  = "DSUNI"+str(i);
+            //std::string unit_key  = "DSUNI"+str(i);
             std::string value_key = "DSVAL"+str(i);
             try {
                 if (hdu->string(type_key) == "POS(RA,DEC)") {
-                    std::string unit              = toupper(hdu->string(unit_key));
+                    //std::string unit              = toupper(hdu->string(unit_key));
                     std::string value             = hdu->string(value_key);
                     value                         = strip_chars(value, "CIRCLE(");
                     value                         = strip_chars(value, ")");

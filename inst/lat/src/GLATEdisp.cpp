@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.cpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEdisp.cpp
  * @brief Fermi LAT energy dispersion class implementation.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -74,7 +74,7 @@ GLATEdisp::GLATEdisp(void)
  * Construct instance by loading the energy dispersion information from FITS
  * file.
  ***************************************************************************/
-GLATEdisp::GLATEdisp(const std::string filename)
+GLATEdisp::GLATEdisp(const std::string& filename)
 {
     // Initialise class members
     init_members();
@@ -188,7 +188,7 @@ GLATEdisp* GLATEdisp::clone(void) const
  *
  * @param[in] filename FITS file.
  ***************************************************************************/
-void GLATEdisp::load(const std::string filename)
+void GLATEdisp::load(const std::string& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -207,7 +207,7 @@ void GLATEdisp::load(const std::string filename)
  * @param[in] filename FITS file.
  * @param[in] clobber Overwrite existing file?.
  ***************************************************************************/
-void GLATEdisp::save(const std::string filename, bool clobber)
+void GLATEdisp::save(const std::string& filename, bool clobber)
 {
     // Open FITS file
     GFits fits(filename, true);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.hpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,6 +43,24 @@ public:
     }
 protected:
     double m_sigma;
+};
+
+class TestGNumerics : public GTestSuite
+{
+    public:
+        // Constructors and destructors
+        TestGNumerics(void) : GTestSuite(){ return; }
+        virtual ~TestGNumerics(void){ return; }
+
+        // Methods
+        virtual void set(void);
+        void test_integral(void);
+        void test_romberg_integration(void);
+
+    // Private attributes
+    private:
+        double m_sigma;
+
 };
 
 #endif /* TEST_NUMERICS_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                test_GResponse.hpp  -  test Response classes             *
+ *              test_MWL.hpp  -  Test multi-wavelength classes             *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,14 +18,37 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_MWL.hpp
+ * @brief Definition of multi-wavelength classes unit tests
+ * @author Juergen Knoedlseder
+ */
 
-#ifndef TEST_GRESPONSE_HPP
-#define TEST_GRESPONSE_HPP
+#ifndef TEST_MWL_HPP
+#define TEST_MWL_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
-//#include <math.h>
 
-#endif /* TEST_GRESPONSE_HPP */
+
+/***********************************************************************//**
+ * @class TestGMWL
+ *
+ * @brief Test suite for multi-wavelength class testing
+ *
+ * This class defines a unit test suite for the multi-wavelength instrument
+ * interface.
+ ***************************************************************************/
+class TestGMWL : public GTestSuite {
+public:
+    // Constructors and destructors
+    TestGMWL(void) : GTestSuite() {}
+    virtual ~TestGMWL(void) {}
+
+    // Methods
+    virtual void set(void);
+    void         test_obs(void);
+    void         test_optimizer(void);
+};
+
+#endif /* TEST_MWL_HPP */

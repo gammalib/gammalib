@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCsv.cpp - Column separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCsv.cpp
  * @brief Column separated values table class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -155,8 +155,9 @@ std::string& GCsv::operator() (const int& row, const int& col)
 {
     // Perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
+    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
         throw GException::out_of_range(G_ACCESS, row, col, m_rows-1, m_cols-1);
+    }
     #endif
 
     // Return element
@@ -174,8 +175,9 @@ const std::string& GCsv::operator() (const int& row, const int& col) const
 {
     // Perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
+    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
         throw GException::out_of_range(G_ACCESS, row, col, m_rows, m_cols);
+    }
     #endif
 
     // Return element
@@ -287,8 +289,9 @@ void GCsv::load(const std::string& filename, std::string sep)
     clear();
 
     // If no seperator is given then assume a whitespace
-    if (sep.length() == 0)
+    if (sep.length() == 0) {
         sep = " ";
+    }
 
     // Allocate line buffer
     const int n = 10000; 
@@ -299,8 +302,9 @@ void GCsv::load(const std::string& filename, std::string sep)
 
     // Open CSV table (read-only
     FILE* fptr = std::fopen(fname.c_str(), "r");
-    if (fptr == NULL)
+    if (fptr == NULL) {
         throw GException::file_not_found(G_LOAD, fname);
+    }
 
     // Read lines
     int iline = 0;
@@ -318,11 +322,12 @@ void GCsv::load(const std::string& filename, std::string sep)
 
         // Split line in elements
         std::vector<std::string> elements = split(sline, sep);
-        for (int i = 0; i < elements.size(); ++i)
+        for (int i = 0; i < elements.size(); ++i) {
             elements[i] = strip_whitespace(elements[i]);
+        }
 
         // If this is the first valid line then simply store the elements
-        if (m_data.size() == 0) {
+        if (m_data.empty()) {
             m_data.push_back(elements);
             m_cols = elements.size();
         }
@@ -330,9 +335,10 @@ void GCsv::load(const std::string& filename, std::string sep)
         // ... otherwise check table consistency and add elements
         else {
             // Check table consistency
-            if (m_cols != elements.size())
+            if (m_cols != elements.size()) {
                 throw GException::csv_bad_columns(G_LOAD, fname,
                                   iline, m_cols, elements.size());
+            }
 
             // Append elements
             m_data.push_back(elements);

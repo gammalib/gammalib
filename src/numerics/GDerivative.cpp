@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GDerivative.cpp  -  Derivative class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GDerivative.cpp
  * @brief GDerivative class implementation.
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -209,12 +209,10 @@ double GDerivative::value(const double& x, double step)
     double h = step;
     if (h == 0.0) {
         h = m_step_frac * std::abs(x);
-        if (h < min_h)
+        if (h < min_h) {
             h = min_h;
+        }
     }
-
-    // Save initial step size
-    double h_initial = h;
 
     // Initialise tolerance
     double err = DBL_MAX;
@@ -238,8 +236,9 @@ double GDerivative::value(const double& x, double step)
         #endif
 
         // If uncertainty is below tolerance then exit now
-        if (err < m_eps)
+        if (err < m_eps) {
             break;
+        }
 
         // Reduce the step size
         h /= 5.0;
@@ -303,8 +302,9 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
         GMatrix a(ntab, ntab);
 
         // Throw exception if step size is zero
-        if (h <= 0)
+        if (h <= 0) {
             throw GException::invalid_argument(G_RIDDER, "Step size must be positive.");
+        }
 
         // Initialise adaptive step size
         double hh = h;
@@ -342,8 +342,9 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
             } // endfor: looped over tableau
 
             // If higher order is worse by a significant factor, then quit early
-            if (std::abs( a(i,i) - a(i-1,i-1) ) >= safe*err)
+            if (std::abs( a(i,i) - a(i-1,i-1) ) >= safe*err) {
                 break;
+            }
 
         } // endfor: looped over computations
 
@@ -438,8 +439,9 @@ double GDerivative::minuit2(const double& x, double& err)
 
         // Break is we are below the step tolerance
         step_change = std::abs((step-stepb4)/step);
-        if (step_change < step_tol)
+        if (step_change < step_tol) {
             break;
+        }
 
         // Store step size information
         gstep  = step;
@@ -469,8 +471,9 @@ double GDerivative::minuit2(const double& x, double& err)
         #endif
 
         // Break if gradient is accurate enough
-        if (err < grad_tol)
+        if (err < grad_tol) {
             break;
+        }
 
     } // endfor: looped over cycles
 
@@ -531,10 +534,12 @@ std::string GDerivative::print(void) const
     result.append("\n"+parformat("Relative precision")+str(eps()));
     result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
     result.append("\n"+parformat("Initial step fraction")+str(step_frac()));
-    if (silent())
+    if (silent()) {
         result.append("\n"+parformat("Warnings")+"suppressed");
-    else
+    }
+    else {
         result.append("\n"+parformat("Warnings")+"in standard output");
+    }
 
     // Return result
     return result;

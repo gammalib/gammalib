@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GResponse.cpp  -  test Response classes               *
+ *               GException_test.cpp  -  Unit Test exception handlers      *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,58 +18,65 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException_test.cpp
+ * @brief Implement exceptions for unit test module
+ * @author Jean-Baptiste Cayrou
+ */
 
 /* __ Includes ___________________________________________________________ */
-#include <stdlib.h>
-#include <iostream>
-#include "test_GResponse.hpp"
-
-/* __ Namespaces _________________________________________________________ */
-
-/* __ Globals ____________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include "GException.hpp"
+#include "GTools.hpp"
 
 
-/***************************************************************************
- *                          Test: LAT Response                             *
+/***********************************************************************//**
+ * @brief Test nested try error
+ *
+ * @param[in] message Optional error message.
  ***************************************************************************/
-void test_lat_response(void)
+GException::test_nested_try_error::test_nested_try_error(std::string origin, std::string message)
 {
-    // Remove FITS file
-    system("rm -rf test_rsp.fits");
-
-    std::cout << "Test GLATResponse: Open PSF FITS file: ";
-    try {
-        // Get HANDOFF Response
-        GLATResponse rsp;
-        rsp.set_caldb("irf/lat");
-        rsp.load("Pass5_v0", "front");
-
-        // Save response
-        rsp.save("test_rsp.fits");
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable to open FITS file." << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ". ok." << std::endl;
-}
-
-
-/***************************************************************************
- *                            Main test function                           *
- ***************************************************************************/
-int main(void)
-{
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "***************************" << std::endl;
-    std::cout << "* GResponse class testing *" << std::endl;
-    std::cout << "***************************" << std::endl;
-
-    // Execute the tests
-    test_lat_response();
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Nested try error ("+message+")";
 
     // Return
-    return 0;
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Failure test
+ *
+ * @param[in] message Optional error message.
+ *
+ * Use in unit tests to notice a fail in a try block
+ ***************************************************************************/
+GException::test_failure::test_failure(std::string origin, std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Failure Test ("+message+")";
+
+    // Return
+    return;
+}
+
+/***********************************************************************//**
+ * @brief Failure test
+ *
+ * @param[in] message Optional error message.
+ *
+ * Use in unit tests to notice a fail in a try block
+ ***************************************************************************/
+GException::test_error::test_error(std::string origin, std::string message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "Error Test ("+message+")";
+
+    // Return
+    return;
 }

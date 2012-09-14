@@ -38,7 +38,6 @@
 /* __ Numerics module ____________________________________________________ */
 #include "GVector.hpp"
 #include "GMatrixBase.hpp"
-#include "GMatrixTools.hpp"
 #include "GMatrix.hpp"
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
@@ -101,6 +100,10 @@
 #include "GOptimizerPars.hpp"
 #include "GOptimizerFunction.hpp"
 
+/* __ Unit Test class___________________________________________________ */
+#include "GTestCase.hpp"
+#include "GTestSuite.hpp"
+#include "GTestSuites.hpp"
 
 /***************************************************************************
  *                        Analysis support services                        *

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           test_GApplication.cpp  -  test GApplication classes           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file test_GApplication.cpp
- * @brief Testing of application classes.
+ * @brief Testing of application classes
  * @author J. Knodlseder
  */
 
@@ -28,102 +28,111 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GammaLib.hpp"
-#include <iostream>
-#include <stdexcept>
-#include <stdlib.h>
+#include "test_GApplication.hpp"
 
 /* __ Globals ____________________________________________________________ */
 
 
-/***************************************************************************
- * Test: GLog                                                              *
- ***************************************************************************/
-void test_GLog(void)
+/***********************************************************************//**
+ * @brief Set parameters and tests
+ **************************************************************************/
+void TestGApplication::set(void)
 {
-    // Dump header
-    std::cout << "Test GLog: ";
+    // Test name
+    name("GApplication");
 
-    // Test constructor
-    try {
-        GLog log1;
-        GLog log2 = log1;
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct GLog object."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    // Append tests
+    append(static_cast<pfunction>(&TestGApplication::test_constructor), "Test GLog constructor");
+    append(static_cast<pfunction>(&TestGApplication::test_stream_logger), "Test stream logger");
+    append(static_cast<pfunction>(&TestGApplication::test_C_logger), "Test C logger");
 
-    // Test stream logger
-    try {
-        GLog log;
-        log.date(true);
-        log.name("Test");
-        log.open("test_GApplication.log", true);
-        log << "1. This is a C++ string" << std::endl;
-        log << "2. This is an integer: " << int(1) << std::endl;
-        log << "3. This is a single precision: " << float(1.23456789) << std::endl;
-        log << "4. This is a double precision: " << double(1.23456789) << std::endl;
-        log << "5. This is a character: " << 'a' << std::endl;
-        log << "6. This is a C string: " << "a" << std::endl;
-        log << "7. This is a Boolean: " << true << std::endl;
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to stream into GLog object."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Test C logger
-    try {
-        GLog log;
-        log.date(true);
-        log.name("Test");
-        log.open("test_GApplication.log");
-        log("%s", "8. This is a C++ string");
-        log("%s %d", "9. This is an integer:", int(1));
-        log("%s %f", "10. This is a single precision:", float(1.23456789));
-        log("%s %f", "11. This is a double precision:", double(1.23456789));
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to write into GLog object."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Signal final test success
-    std::cout << " ok." << std::endl;
-
-    // Exit test
+    // Return
     return;
+}
 
+
+/***********************************************************************//**
+ * @brief Test GLog constructor
+ **************************************************************************/
+void TestGApplication::test_constructor(void)
+{
+    // Void constructor
+    GLog log1;
+
+    // Copy constructor
+    GLog log2 = log1;
+
+    // Return
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Test stream logger
+ **************************************************************************/
+void TestGApplication::test_stream_logger(void)
+{
+    // Test
+    GLog log;
+    log.date(true);
+    log.name("Test");
+    log.open("test_GApplication.log", true);
+    log << "1. This is a C++ string" << std::endl;
+    log << "2. This is an integer: " << int(1) << std::endl;
+    log << "3. This is a single precision: " << float(1.23456789) << std::endl;
+    log << "4. This is a double precision: " << double(1.23456789) << std::endl;
+    log << "5. This is a character: " << 'a' << std::endl;
+    log << "6. This is a C string: " << "a" << std::endl;
+    log << "7. This is a Boolean: " << true << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test C logger
+ **************************************************************************/
+void TestGApplication::test_C_logger(void)
+{
+    // Test
+    GLog log;
+    log.date(true);
+    log.name("Test");
+    log.open("test_GApplication.log");
+    log("%s", "8. This is a C++ string");
+    log("%s %d", "9. This is an integer:", int(1));
+    log("%s %f", "10. This is a single precision:", float(1.23456789));
+    log("%s %f", "11. This is a double precision:", double(1.23456789));
+
+    // Return
+    return; 
 }
 
 
 /***************************************************************************
- *                            Main test function                           *
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "********************************" << std::endl;
-    std::cout << "* GApplication classes testing *" << std::endl;
-    std::cout << "********************************" << std::endl;
+    // Allocate test suit container
+    GTestSuites testsuites("GApplication");
 
-    // Execute tests
-    test_GLog();
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    // Return
-    return 0;
+    // Create a test suite
+    TestGApplication test;
+
+    // Append test suite to the container
+    testsuites.append(test);
+
+    // Run the testsuites
+    success = testsuites.run();
+
+    // Save test report
+    testsuites.save("reports/GApplication.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }

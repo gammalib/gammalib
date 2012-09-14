@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GXmlElement.cpp - XML element node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlElement.cpp
  * @brief XML element node class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -195,13 +195,15 @@ GXmlElement* GXmlElement::clone(void) const
 void GXmlElement::write(FILE* fptr, int indent) const
 {
     // Write element name into file
-    for (int k = 0; k < indent; ++k)
+    for (int k = 0; k < indent; ++k) {
         std::fprintf(fptr, " ");
+    }
     std::fprintf(fptr, "<%s", m_name.c_str());
 
     // Write attributes into file
-    for (int k = 0; k < m_attr.size(); ++k)
+    for (int k = 0; k < m_attr.size(); ++k) {
         m_attr[k]->write(fptr);
+    }
 
     // If there are no children then write an empty tag
     if (children() < 1) {
@@ -214,12 +216,14 @@ void GXmlElement::write(FILE* fptr, int indent) const
         std::fprintf(fptr, ">\n");
 
         // Write children in file
-        for (int i = 0; i < children(); ++i)
+        for (int i = 0; i < children(); ++i) {
             m_nodes[i]->write(fptr, indent+g_indent);
+        }
 
         // Write end tag
-        for (int k = 0; k < indent; ++k)
+        for (int k = 0; k < indent; ++k) {
             std::fprintf(fptr, " ");
+        }
         std::fprintf(fptr, "</%s>\n", m_name.c_str());
     }
 
@@ -240,12 +244,14 @@ std::string GXmlElement::print(int indent) const
 
     // Append element to string
     result.append("GXmlElement::"+m_name);
-    for (int k = 0; k < m_attr.size(); ++k)
+    for (int k = 0; k < m_attr.size(); ++k) {
         result.append(m_attr[k]->print());
+    }
 
     // Append children
-    for (int i = 0; i < children(); ++i)
+    for (int i = 0; i < children(); ++i) {
         result.append("\n" + m_nodes[i]->print(indent+g_indent));
+    }
 
     // Return
     return result;
@@ -354,8 +360,9 @@ void GXmlElement::copy_members(const GXmlElement& node)
 
     // Copy attribute container
     m_attr.clear();
-    for (int i = 0; i < node.m_attr.size(); ++i)
+    for (int i = 0; i < node.m_attr.size(); ++i) {
         m_attr.push_back((node.m_attr[i]->clone()));
+    }
 
     // Return
     return;
@@ -403,35 +410,40 @@ void GXmlElement::parse_start(const std::string& segment)
     int n = segment.length();
 
     // Throw an error is segment is empty
-    if (n < 1)
+    if (n < 1) {
         throw GException::xml_syntax_error(G_PARSE_START, segment,
                           "no element name specified");
+    }
 
     // If string starts with brackets then check that the brackets are
     // valid comment brackets
     if (segment[0] == '<') {
         if (n < 2 || (segment.compare(0,1,"<") != 0) ||
-                     (segment.compare(n-1,1,">") != 0))
+                     (segment.compare(n-1,1,">") != 0)) {
             throw GException::xml_syntax_error(G_PARSE_START, segment,
                                                "invalid tag brackets");
+        }
         pos_start = 1;
     } // endif: there were brackets
 
     // Extract element name
     std::size_t pos = segment.find_first_of("\x20\x09\x0d\x0a>", 1);
-    if (pos == pos_start)
+    if (pos == pos_start) {
         throw GException::xml_syntax_error(G_PARSE_START, segment,
                           "no whitespace allowed before element name");
+    }
     if (pos == std::string::npos) {
-        if (pos_start == 1)
+        if (pos_start == 1) {
             throw GException::xml_syntax_error(G_PARSE_START, segment,
                               "element name not found");
+        }
     }
     m_name = segment.substr(pos_start, pos-pos_start);
 
     // Extract attributes
-    while (pos != std::string::npos)
+    while (pos != std::string::npos) {
         parse_attribute(&pos, segment);
+    }
 
     // Return
     return;
@@ -455,29 +467,34 @@ void GXmlElement::parse_stop(const std::string& segment)
 
     // Check on existence of brackets
     if (n < 3 || (segment.compare(0,2,"</") != 0) ||
-                 (segment.compare(n-1,1,">") != 0))
+                 (segment.compare(n-1,1,">") != 0)) {
         throw GException::xml_syntax_error(G_PARSE_STOP, segment,
                           "incorrect or missing tag brackets");
+    }
 
     // Extract and verify element name
     size_t pos = segment.find_first_of("\x20\x09\x0d\x0a>", 2);
-    if (pos == 2)
+    if (pos == 2) {
         throw GException::xml_syntax_error(G_PARSE_STOP, segment,
                           "no whitespace allowed after \"</\"");
-    if (pos == std::string::npos)
+    }
+    if (pos == std::string::npos) {
         throw GException::xml_syntax_error(G_PARSE_STOP, segment,
                           "element name not found");
+    }
     std::string name = segment.substr(2, pos-2);
-    if (name != m_name)
+    if (name != m_name) {
         throw GException::xml_syntax_error(G_PARSE_STOP, segment,
                           "invalid name in element stop tag"
                           " (found \""+name+"\", expected \""+m_name+"\"");
+    }
 
     // Verify that no further characters exist in element stop tag
     size_t pos2 = segment.find_first_of("\x20\x09\x0d\x0a>", pos);
-    if (pos2 != n-1)
+    if (pos2 != n-1) {
         throw GException::xml_syntax_error(G_PARSE_STOP, segment,
                           "invalid characters found after element name");
+    }
 
     // Return
     return;
@@ -514,49 +531,56 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
 
         // Find end of name substring
         std::size_t pos_name_end = segment.find_first_of("\x20\x09\x0d\x0a=", pos_name_start);
-        if (pos_name_end == std::string::npos)
+        if (pos_name_end == std::string::npos) {
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute name");
+        }
 
         // Find '=' character
         std::size_t pos_equal = segment.find_first_of("=", pos_name_end);
-        if (pos_equal == std::string::npos)
+        if (pos_equal == std::string::npos) {
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "\"=\" sign not found for attribute");
+        }
 
         // Find start of value substring
         std::size_t pos_value_start = segment.find_first_of("\x22\x27", pos_equal);
-        if (pos_value_start == std::string::npos)
+        if (pos_value_start == std::string::npos) {
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute value start hyphen");
+        }
 
         // Save hyphen character and step forward one character
         std::string hyphen = segment.substr(pos_value_start, 1);
         pos_value_start++;
-        if (pos_value_start >= segment.length())
+        if (pos_value_start >= segment.length()) {
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute value");
+        }
 
         // Find end of value substring
         std::size_t pos_value_end = segment.find_first_of(hyphen, pos_value_start);
-        if (pos_value_end == std::string::npos)
+        if (pos_value_end == std::string::npos) {
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute value end hyphen");
+        }
 
         // Get name substring
         std::size_t n_name = pos_name_end - pos_name_start;
-        if (n_name < 1)
+        if (n_name < 1) {
             throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
                               "invalid or missing attribute name");
+        }
         std::string name = segment.substr(pos_name_start, n_name);
 
         //@todo Check XML validity of attribute name
 
         // Get value substring length
         std::size_t n_value = pos_value_end - pos_value_start;
-        if (n_value < 0)
-            throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
-                              "invalid or missing attribute value");
+        //if (n_value < 0) {
+        //    throw GException::xml_syntax_error(G_PARSE_ATTRIBUTE, error,
+        //                      "invalid or missing attribute value");
+        //}
         std::string value = segment.substr(pos_value_start-1, n_value+2);
 
         //@todo Check XML validity of attribute value
@@ -567,8 +591,9 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
 
         // Update segment pointer
         pos_value_end++;
-        if (pos_value_end >= segment.length())
+        if (pos_value_end >= segment.length()) {
             pos_value_end = std::string::npos;
+        }
         *pos = pos_value_end;
 
     } while (0);

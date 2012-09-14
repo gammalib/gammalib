@@ -64,6 +64,7 @@ public:
     std::string name(void) const;
     int         max_size(void) const;
     int         indent(void) const;
+    std::string filename(void) const;
 };
 
 
@@ -74,7 +75,7 @@ public:
     GLog copy() {
         return (*self);
     }
-    void __call__(const GLog& log) {
+    void __call__(GLog& log) {
         (*self) << log;
     }
     void __call__(const std::string& arg) {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GFitsTableBoolCol.cpp  - FITS table boolean column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableBoolCol.cpp
  * @brief FITS table boolean column class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -72,9 +72,9 @@ GFitsTableBoolCol::GFitsTableBoolCol(void) : GFitsTableCol()
  * @param[in] size Vector size of column.
  ***************************************************************************/
 GFitsTableBoolCol::GFitsTableBoolCol(const std::string& name,
-                                   const int&         length,
-                                   const int&         size)
-                                   : GFitsTableCol(name, length, size, 1)
+                                     const int&         length,
+                                     const int&         size)
+                                     : GFitsTableCol(name, length, size, 1)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -87,10 +87,10 @@ GFitsTableBoolCol::GFitsTableBoolCol(const std::string& name,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] column Column from which class instance should be built.
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableBoolCol::GFitsTableBoolCol(const GFitsTableBoolCol& column) 
-                                                      : GFitsTableCol(column)
+                                     : GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -125,7 +125,7 @@ GFitsTableBoolCol::~GFitsTableBoolCol(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] column Column which should be assigned
+ * @param[in] column Table column.
  ***************************************************************************/
 GFitsTableBoolCol& GFitsTableBoolCol::operator= (const GFitsTableBoolCol& column)
 {
@@ -155,7 +155,7 @@ GFitsTableBoolCol& GFitsTableBoolCol::operator= (const GFitsTableBoolCol& column
  * @brief Column data access operator
  *
  * @param[in] row Row of column to access.
- * @param[in] inx Vector index in column row to access
+ * @param[in] inx Vector index in column row to access.
  *
  * Provides access to data in a column.
  ***************************************************************************/
@@ -180,7 +180,9 @@ bool& GFitsTableBoolCol::operator() (const int& row, const int& inx)
 const bool& GFitsTableBoolCol::operator() (const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) ((GFitsTableBoolCol*)this)->fetch_data();
+    if (m_data == NULL) {
+        const_cast<GFitsTableBoolCol*>(this)->fetch_data();
+    }
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -271,8 +273,9 @@ int GFitsTableBoolCol::integer(const int& row, const int& inx) const
 void GFitsTableBoolCol::insert(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length)
+    if (rownum < 0 || rownum > m_length) {
         throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    }
     
     // Continue only if there are rows to be inserted
     if (nrows > 0) {
@@ -309,12 +312,15 @@ void GFitsTableBoolCol::insert(const int& rownum, const int& nrows)
             // Copy and initialise data
             bool* src = m_data;
             bool* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
-            for (int i = 0; i < n_insert; ++i)
+            }
+            for (int i = 0; i < n_insert; ++i) {
                 *dst++ = 0;
-            for (int i = 0; i < n_after; ++i)
+            }
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -349,12 +355,14 @@ void GFitsTableBoolCol::insert(const int& rownum, const int& nrows)
 void GFitsTableBoolCol::remove(const int& rownum, const int& nrows)
 {
     // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length)
+    if (rownum < 0 || rownum >= m_length) {
         throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum)
+    if (nrows < 0 || nrows > m_length-rownum) {
         throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    }
     
     // Continue only if there are rows to be removed
     if (nrows > 0) {
@@ -385,11 +393,13 @@ void GFitsTableBoolCol::remove(const int& rownum, const int& nrows)
             // Copy data
             bool* src = m_data;
             bool* dst = new_data;
-            for (int i = 0; i < n_before; ++i)
+            for (int i = 0; i < n_before; ++i) {
                 *dst++ = *src++;
+            }
             src += n_remove;
-            for (int i = 0; i < n_after; ++i)
+            for (int i = 0; i < n_after; ++i) {
                 *dst++ = *src++;
+            }
         
             // Free old data
             if (m_data != NULL) delete [] m_data;
@@ -477,7 +487,9 @@ void GFitsTableBoolCol::copy_members(const GFitsTableBoolCol& column)
     // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
-    if (not_loaded) ((GFitsTableBoolCol*)(&column))->fetch_data();
+    if (not_loaded) {
+        const_cast<GFitsTableBoolCol*>(&column)->fetch_data();
+    }
 
     // Copy attributes
     m_type = column.m_type;
@@ -486,8 +498,9 @@ void GFitsTableBoolCol::copy_members(const GFitsTableBoolCol& column)
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
         alloc_data();
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = column.m_data[i];
+        }
     }
 
     // Copy NULL value
@@ -495,7 +508,9 @@ void GFitsTableBoolCol::copy_members(const GFitsTableBoolCol& column)
 
     // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
-    if (not_loaded) ((GFitsTableBoolCol*)(&column))->release_data();
+    if (not_loaded) {
+        const_cast<GFitsTableBoolCol*>(&column)->release_data();
+    }
     #endif
 
     // Return
@@ -545,8 +560,9 @@ void GFitsTableBoolCol::save(void)
     alloc_buffer();
 
     // Transfer string into buffer
-    for (int i = 0; i < m_size; ++i)
+    for (int i = 0; i < m_size; ++i) {
         m_buffer[i] = (char)m_data[i];
+    }
 
     // Save column
     save_column();
@@ -618,8 +634,9 @@ void GFitsTableBoolCol::alloc_data(void)
     m_data = NULL;
 
     // Allocate new data
-    if (m_size > 0)
+    if (m_size > 0) {
         m_data = new bool[m_size];
+    }
 
     // Return
     return;
@@ -672,8 +689,9 @@ void GFitsTableBoolCol::init_data(void)
 {
     // Initialise data if they exist
     if (m_data != NULL) {
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_data[i] = false;
+        }
     }
 
     // Return
@@ -705,8 +723,9 @@ void GFitsTableBoolCol::fetch_data(void) const
     const_cast<GFitsTableBoolCol*>(this)->load_column();
 
     // Extract values from buffer
-    for (int i = 0; i < m_size; ++i)
+    for (int i = 0; i < m_size; ++i) {
         m_data[i] = (bool)m_buffer[i];
+    }
 
     // Free buffer memory
     const_cast<GFitsTableBoolCol*>(this)->free_buffer();
@@ -727,8 +746,9 @@ void GFitsTableBoolCol::alloc_buffer(void)
     // Allocate and initialise buffer memory
     if (m_size > 0) {
         m_buffer = new char[m_size];
-        for (int i = 0; i < m_size; ++i)
+        for (int i = 0; i < m_size; ++i) {
             m_buffer[i] = 0;
+        }
     }
 
     // Return

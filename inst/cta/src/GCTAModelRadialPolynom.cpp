@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialPolynom.cpp  -  Radial Polynom CTA model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialPolynom.cpp
  * @brief Radial Polynom model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -338,7 +338,7 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
             double grad = offset_power * m_coeffs[i].scale();
 
             // Store gradient
-            ((GCTAModelRadialPolynom*)this)->m_coeffs[i].gradient(grad);
+            const_cast<GCTAModelRadialPolynom*>(this)->m_coeffs[i].gradient(grad);
 
             // Increase offset power for next coefficient
             offset_power *= offset;
@@ -510,7 +510,7 @@ void GCTAModelRadialPolynom::read(const GXmlElement& xml)
     for (int i = 0; i < max_coeffs; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Verify that parameter is indeed a coefficient
         if (par->attribute("name").compare(0,5,"Coeff") != 0) {
@@ -581,7 +581,7 @@ void GCTAModelRadialPolynom::read(const GXmlElement& xml)
         // Get corresponding parameter element
         GXmlElement* par = NULL;
         for (int k = 0; k < ncoeffs; ++k) {
-            GXmlElement* element = (GXmlElement*)xml.element("parameter", k);
+            GXmlElement* element = static_cast<GXmlElement*>(xml.element("parameter", k));
             if (element->attribute("name") == name) {
                 par = element;
                 break;
@@ -676,7 +676,7 @@ void GCTAModelRadialPolynom::write(GXmlElement& xml) const
         // Get corresponding parameter element
         GXmlElement* par = NULL;
         for (int k = 0; k < ncoeffs; ++k) {
-            GXmlElement* element = (GXmlElement*)xml.element("parameter", k);
+            GXmlElement* element = static_cast<GXmlElement*>(xml.element("parameter", k));
             if (element->attribute("name") == name) {
                 par = element;
                 break;

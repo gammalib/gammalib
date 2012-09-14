@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GSparseSymbolic.cpp  -  sparse matrix symbolic analysis class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010         by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,11 +18,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GSparseSymbolic.cpp
+ * @brief Sparse matrix symbolic analysis class implementation
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GSparseMatrix.hpp"
 #include "GSparseSymbolic.hpp"
 
 /* __ Macros _____________________________________________________________ */
@@ -1116,8 +1122,8 @@ int GSparseSymbolic::cs_fkeep(GSparseMatrix* A,
     // Return error if some of the input pointers is invalid
     if (!A || !fkeep) return (-1);
   
-    // Declare 
-    int j, p, nz = 0;
+    // Initialise counter for non-zero elements 
+    int nz = 0;
 
     // Assign matrix attributes
     int     n  = A->m_cols;
@@ -1129,12 +1135,12 @@ int GSparseSymbolic::cs_fkeep(GSparseMatrix* A,
     if (Ap != NULL && Ai != NULL && Ax != NULL) {
 
         // Loop over all columns
-        for (j = 0; j < n; j++) {
-            p     = Ap[j];                       // get current location of col j
-            Ap[j] = nz;                          // record new location of col j
+        for (int j = 0; j < n; j++) {
+            int p = Ap[j];                     // get current location of col j
+            Ap[j] = nz;                        // record new location of col j
             for ( ; p < Ap[j+1] ; p++) {
                 if (fkeep(Ai[p], j, Ax ? Ax[p] : 1, other)) {
-                    if (Ax) Ax[nz] = Ax[p];          // keep A(i,j)
+                    if (Ax) Ax[nz] = Ax[p];    // keep A(i,j)
                     Ai[nz++] = Ai[p] ;
                 }
             }

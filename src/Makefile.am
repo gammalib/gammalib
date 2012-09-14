@@ -18,7 +18,8 @@ SUBDIRS = support \
           opt \
           obs \
           model \
-          app
+          app \
+          test
 
 # Define sources for this directory
 sources =
@@ -59,11 +60,12 @@ libgamma_la_LIBADD = support/libsupport.la \
                      obs/libobs.la \
                      model/libmodel.la \
                      app/libapp.la \
+                     test/libtest.la \
                      $(INST_MWL) \
                      $(INST_CTA) \
                      $(INST_LAT) \
                      $(INST_COM)
-libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION)
+libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION) @OPENMP_LIB_LDFLAGS@
 
 # Distribute scripts
 EXTRA_DIST   = $(scripts)

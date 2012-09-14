@@ -334,7 +334,7 @@ void GLATObservation::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Unbinned format
         if (par->attribute("name") == "FT1") {
@@ -472,7 +472,7 @@ void GLATObservation::write(GXmlElement& xml) const
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle FT1
         if (par->attribute("name") == "FT1") {

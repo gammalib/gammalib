@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelRadialDisk.cpp  -  Radial disk source model class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Christoph Deil                                   *
+ *  copyright (C) 2011-2012 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -118,7 +118,7 @@ GModelRadialDisk::GModelRadialDisk(const GXmlElement& xml) : GModelRadial()
  * @param[in] model Radial disk model.
  ***************************************************************************/
 GModelRadialDisk::GModelRadialDisk(const GModelRadialDisk& model)
-                                                        : GModelRadial(model)
+                                   : GModelRadial(model)
 {
     // Initialise members
     init_members();
@@ -333,9 +333,10 @@ void GModelRadialDisk::read(const GXmlElement& xml)
     int npars = xml.elements("parameter");
 
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || npars != 3)
+    if (xml.elements() != 3 || npars != 3) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Disk model requires exactly 3 parameters.");
+    }
 
     // Read disk location
     GModelRadial::read(xml);
@@ -345,7 +346,7 @@ void GModelRadialDisk::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Radius
         if (par->attribute("name") == "Radius") {
@@ -362,9 +363,10 @@ void GModelRadialDisk::read(const GXmlElement& xml)
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1)
+    if (npar[0] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Require \"Radius\" parameter.");
+    }
 
     // Return
     return;
@@ -399,16 +401,17 @@ void GModelRadialDisk::write(GXmlElement& xml) const
     int npars = xml.elements("parameter");
 
     // Verify that XML element has exactly 3 parameters
-    if (xml.elements() != 3 || npars != 3)
+    if (xml.elements() != 3 || npars != 3) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Disk model requires exactly 3 parameters.");
+    }
 
     // Set or update model parameter attributes
     int npar[1] = {0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle Radius
         if (par->attribute("name") == "Radius") {
@@ -419,9 +422,10 @@ void GModelRadialDisk::write(GXmlElement& xml) const
     } // endfor: looped over all parameters
 
     // Check of all required parameters are present
-    if (npar[0] != 1)
+    if (npar[0] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Require \"Radius\" parameter.");
+    }
 
     // Return
     return;
@@ -439,8 +443,9 @@ std::string GModelRadialDisk::print(void) const
     // Append header
     result.append("=== GModelRadialDisk ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

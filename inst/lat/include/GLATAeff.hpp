@@ -60,7 +60,7 @@ class GLATAeff {
 public:
     // Constructors and destructors
     GLATAeff(void);
-    GLATAeff(const std::string filename);
+    GLATAeff(const std::string& filename);
     GLATAeff(const GLATAeff& aeff);
     virtual ~GLATAeff(void);
 
@@ -74,8 +74,8 @@ public:
     // Methods
     void         clear(void);
     GLATAeff*    clone(void) const;
-    void         load(const std::string filename);
-    void         save(const std::string filename, bool clobber = false);
+    void         load(const std::string& filename);
+    void         save(const std::string& filename, bool clobber = false);
     void         read(const GFits* file);
     void         write(GFits& file) const;
     int          size(void) const { return nenergies()*ncostheta(); }

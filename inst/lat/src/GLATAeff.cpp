@@ -76,7 +76,7 @@ GLATAeff::GLATAeff(void)
  * effective area information and the efficiency factor parameters are loaded
  * when available.
  ***************************************************************************/
-GLATAeff::GLATAeff(const std::string filename)
+GLATAeff::GLATAeff(const std::string& filename)
 {
     // Initialise class members
     init_members();
@@ -273,7 +273,7 @@ GLATAeff* GLATAeff::clone(void) const
  * efficiency factors, from the FITS response file. See the GLATAeff::read
  * method for details.
  ***************************************************************************/
-void GLATAeff::load(const std::string filename)
+void GLATAeff::load(const std::string& filename)
 {
     // Open FITS file
     GFits fits(filename);
@@ -296,7 +296,7 @@ void GLATAeff::load(const std::string filename)
  * efficiency factors, into the FITS response file. See the GLATAeff::write
  * method for details.
  ***************************************************************************/
-void GLATAeff::save(const std::string filename, bool clobber)
+void GLATAeff::save(const std::string& filename, bool clobber)
 {
     // Open FITS file
     GFits fits(filename, true);

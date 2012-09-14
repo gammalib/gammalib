@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.cpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,75 +32,52 @@
 
 /* __ Globals ____________________________________________________________ */
 
+/***********************************************************************//**
+ * @brief Set tests
+ ***************************************************************************/
+void TestGNumerics::set(void)
+{
+    //set name
+    name("GNumerics");
+
+    // Set parameters
+    m_sigma = 2.5;
+
+    //Unbinned
+    add_test(static_cast<pfunction>(&TestGNumerics::test_integral),"Test GIntegral");
+    add_test(static_cast<pfunction>(&TestGNumerics::test_romberg_integration),"Test Romberg integration");
+    return;
+}
 
 /***********************************************************************//**
  * @brief Test model parameter handling.
  ***************************************************************************/
-void test_GIntegral(void)
+void TestGNumerics::test_integral(void)
 {
-    // Write header
-    std::cout << "Test GIntegral: ";
-
-    // Set sigma
-    double sigma = 2.5;
-
     // Test integral and integrand allocation
-    try {
-        Gauss     integrand(sigma);
-        GIntegral integral(&integrand);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to allocated integral and integrand."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    Gauss     integrand(m_sigma);
+    GIntegral integral(&integrand);
 
-    // Test Romberg integration
-    try {
-        Gauss     integrand(sigma);
-        GIntegral integral(&integrand);
-        double    result = integral.romb(-10.0*sigma, 10.0*sigma);
-        if (fabs(result-1.0) > 1.0e-6) {
-            std::cout << std::endl
-                      << "TEST ERROR: Gaussian integral is not 1.0 "
-                      << " (integral=" << result << ")"
-                      << std::endl;
-            throw;
-        }
-        result = integral.romb(-sigma, sigma);
-        if (fabs(result-0.68268948130801355) > 1.0e-6) {
-            std::cout << std::endl
-                      << "TEST ERROR: Gaussian integral is not 0.682689 "
-                      << " (difference=" << (result-0.68268948130801355) << ")"
-                      << std::endl;
-            throw;
-        }
-        result = integral.romb(0.0, sigma);
-        if (fabs(result-0.3413447460687748) > 1.0e-6) {
-            std::cout << std::endl
-                      << "TEST ERROR: Gaussian integral is not 0.341345 "
-                      << " (difference=" << (result-0.3413447460687748) << ")"
-                      << std::endl;
-            throw;
-        }
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to allocated integral and integrand."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-
-    // Plot final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
+}
+
+/***********************************************************************//**
+ * @brief Test Romberg integration.
+ ***************************************************************************/
+void TestGNumerics::test_romberg_integration(void)
+{
+    Gauss     integrand(m_sigma);
+    GIntegral integral(&integrand);
+    double    result = integral.romb(-10.0*m_sigma, 10.0*m_sigma);
+    test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+str(result)+")");
+
+    result = integral.romb(-m_sigma, m_sigma);
+    test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+str((result-0.68268948130801355))+")");
+
+    result = integral.romb(0.0, m_sigma);
+    test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+str((result-0.3413447460687748))+")");
 }
 
 
@@ -109,15 +86,22 @@ void test_GIntegral(void)
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "********************" << std::endl;
-    std::cout << "* Numerics testing *" << std::endl;
-    std::cout << "********************" << std::endl;
+    GTestSuites testsuite("GNumerics");
 
-    // Execute Healpix tests
-    test_GIntegral();
+    bool was_successful=true;
+
+    //Create a test suite
+    TestGNumerics test;
+
+    //Append to the container
+    testsuite.append(test);
+
+    //Run
+    was_successful=testsuite.run();
+
+    //save xml report
+    testsuite.save("reports/GNumerics.xml");
 
     // Return
-    return 0;
+    return was_successful ? 0:1;
 }

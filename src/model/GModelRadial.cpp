@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelRadial.cpp  -  Abstract radial spatial model base class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadial.cpp
  * @brief Abstract radial spatial model base class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -216,9 +216,10 @@ void GModelRadial::read(const GXmlElement& xml)
     int npars = xml.elements("parameter");
 
     // Verify that XML element has at least 2 parameters
-    if (xml.elements() < 2 || npars < 2)
+    if (xml.elements() < 2 || npars < 2) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Radial model requires at least 2 parameters.");
+    }
 
     // Extract model parameters
     bool has_glon = false;
@@ -227,7 +228,7 @@ void GModelRadial::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle RA/GLON
         if (par->attribute("name") == "RA") {
@@ -266,9 +267,10 @@ void GModelRadial::read(const GXmlElement& xml)
     }
 
     // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1)
+    if (npar[0] != 1 || npar[1] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Require \"RA\"/\"DEC\" and \"GLON\"/\"GLAT\" parameters.");
+    }
 
     // Return
     return;
@@ -296,13 +298,15 @@ void GModelRadial::read(const GXmlElement& xml)
 void GModelRadial::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", type());
+    }
 
     // Verify model type
-    if (xml.attribute("type") != type())
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
               "Radial model is not of type \""+type()+"\".");
+    }
 
     // If XML element has 0 nodes then append 2 parameter nodes
     if (xml.elements() == 0) {
@@ -314,16 +318,17 @@ void GModelRadial::write(GXmlElement& xml) const
     int npars = xml.elements("parameter");
 
     // Verify that XML element has at least 2 parameters
-    if (xml.elements() < 2 || npars < 2)
+    if (xml.elements() < 2 || npars < 2) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Radial source model requires at least 2 parameters.");
+    }
 
     // Set or update model parameter attributes
     int npar[2] = {0, 0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = (GXmlElement*)xml.element("parameter", i);
+        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
         // Handle RA
         if (par->attribute("name") == "RA") {
@@ -340,9 +345,10 @@ void GModelRadial::write(GXmlElement& xml) const
     } // endfor: looped over all parameters
 
     // Check of all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1)
+    if (npar[0] != 1 || npar[1] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Require \"RA\" and \"DEC\" parameters.");
+    }
 
     // Return
     return;

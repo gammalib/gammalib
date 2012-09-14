@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  test_GXml.cpp  -  test GXml classes                    *
+ *                test_GXml.hpp  -   Test xml module                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,273 +20,204 @@
  ***************************************************************************/
 /**
  * @file test_GXml.cpp
- * @brief Testing of XML module.
- * @author J. Knodlseder
+ * @brief Implementation of unit tests for XML module
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GammaLib.hpp"
-#include <iostream>
-#include <stdexcept>
-#include <stdlib.h>
-
-/* __ Globals ____________________________________________________________ */
-const std::string xml_file = "data/test.xml";
+#include "test_GXml.hpp"
 
 
-/***************************************************************************
- * Test: GXml element attributes                                           *
- ***************************************************************************/
-void test_GXml_attributes(void)
+/***********************************************************************//**
+ * @brief Set parameters and tests
+ **************************************************************************/
+void TestGXml::set(void)
 {
-    // Dump header
-    std::cout << "Test XML attributes: ";
+    // Test name
+    name("GXml");
 
+    // Set XML filename
+    m_xml_file = "data/test.xml";
+
+    // Append tests
+    append(static_cast<pfunction>(&TestGXml::test_GXml_attributes), "Test XML attributes");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_elements), "Test XML elements");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_construct),"Test XML constructors");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_load),"Test XML load");
+    append(static_cast<pfunction>(&TestGXml::test_GXml_access), "Test XML access");
+
+    // Return
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Test XML arrtibutes
+ **************************************************************************/
+void TestGXml::test_GXml_attributes(void)
+{
     // Test valid attributes
+    test_try("Test valid attributes");
     try {
         GXmlAttribute attr("test", "1.0");
-        if (attr.value() != "1.0") {
-            std::cout << std::endl
-                      << "TEST 1 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "1.0","Test if value()= 1.0","Unexpected attribute "+attr.value());
+
         attr.value("\"1.0\"");
-        if (attr.value() != "1.0") {
-            std::cout << std::endl
-                      << "TEST 2 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "1.0","Test if value()= 1.0","Unexpected attribute "+attr.value());
+
         attr.value("'1.0'");
-        if (attr.value() != "1.0") {
-            std::cout << std::endl
-                      << "TEST 3 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "1.0","Test if value()= 1.0","Unexpected attribute "+attr.value());
+
         attr.value("''1.0'");
-        if (attr.value() != "''1.0'") {
-            std::cout << std::endl
-                      << "TEST 4 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "''1.0'",
+                              "Test if value()= ''1.0'",
+                              "Unexpected attribute "+attr.value());
+
         attr.value("'1.0");
-        if (attr.value() != "'1.0") {
-            std::cout << std::endl
-                      << "TEST 5 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "'1.0",
+                              "Test if value()= '1.0",
+                              "Unexpected attribute "+attr.value());
+
         attr.value("1.0'");
-        if (attr.value() != "1.0'") {
-            std::cout << std::endl
-                      << "TEST 6 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "1.0'",
+                              "Test if value()= 1.0'",
+                              "Unexpected attribute "+attr.value());
+
         attr.value("\"1.0");
-        if (attr.value() != "\"1.0") {
-            std::cout << std::endl
-                      << "TEST 7 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "\"1.0",
+                              "Test if value()= \"1.0",
+                              "Unexpected attribute "+attr.value());
+
+
         attr.value("1.0\"");
-        if (attr.value() != "1.0\"") {
-            std::cout << std::endl
-                      << "TEST 8 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "1.0\"",
+                              "Test if value()= 1.0\"",
+                              "Unexpected attribute "+attr.value());
+
         attr.value("\"\"1.0\"");
-        if (attr.value() != "\"\"1.0\"") {
-            std::cout << std::endl
-                      << "TEST 9 ERROR: Unexpected attribute "
-                      << attr.value() << std::endl;
-            throw;
-        }
-        std::cout << ".";
+        test_assert(attr.value() == "\"\"1.0\"",
+                              "Test if value()= \"\"1.0\"",
+                              "Unexpected attribute "+attr.value());
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to assign valid XML attributes."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test invalid attributes
+    test_try("Test invalid attributes 1");
     try {
         GXmlAttribute attr("test", "\"\"1.0'\"");
+        test_try_failure();
     }
     catch (GException::xml_attribute_value &e) {
-        std::cout << ".";
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST 10 ERROR: Unable to catch invalid XML attribute."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
+
+    test_try("Test invalid attributes 2");
     try {
         GXmlAttribute attr("test", "''1.0\"");
+        test_try_failure();
     }
     catch (GException::xml_attribute_value &e) {
-        std::cout << ".";
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST 11 ERROR: Unable to catch invalid XML attribute."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
+
+    test_try("Test invalid attributes 3");
     try {
         GXmlAttribute attr("test", "\"1.0'");
+        test_try_failure();
     }
     catch (GException::xml_attribute_value &e) {
-        std::cout << ".";
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST 12 ERROR: Unable to catch invalid XML attribute."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
-    // Signal final test success
-    std::cout << " ok." << std::endl;
-
-    // Exit test
+    // Return
     return;
-
 }
 
 
-/***************************************************************************
- * Test: GXml elements                                                     *
- ***************************************************************************/
-void test_GXml_elements(void)
+/***********************************************************************//**
+ * @brief Test XML elements
+ **************************************************************************/
+void TestGXml::test_GXml_elements(void)
 {
-    // Dump header
-    std::cout << "Test XML elements: ";
+    // Perform tests
+    GXmlElement element;
+    element.attribute("test", "1.0");
+    test_assert(element.attribute("test") == "1.0",
+                            "Test if element.attribute(\"test\")= 1.0",
+                            "Unexpected attribute "+element.attribute("test"));
 
-    // Test attribute setting
-    try {
-        GXmlElement   element;
-        element.attribute("test", "1.0");
-        if (element.attribute("test") != "1.0") {
-            std::cout << std::endl
-                      << "TEST 1 ERROR: Unexpected attribute "
-                      << element.attribute("test") << std::endl;
-            throw;
-        }
-        std::cout << ".";
-        element.attribute("test", "2.0");
-        if (element.attribute("test") != "2.0") {
-            std::cout << std::endl
-                      << "TEST 2 ERROR: Unexpected attribute "
-                      << element.attribute("test") << std::endl;
-            throw;
-        }
-        std::cout << ".";
-        element.attribute("test2", "1.0");
-        if (element.attribute("test")  != "2.0" ||
-            element.attribute("test2") != "1.0") {
-            std::cout << std::endl
-                      << "TEST 3 ERROR: Unexpected attributes "
-                      << element.attribute("test")
-                      << " " << element.attribute("test2") << std::endl;
-            throw;
-        }
-        std::cout << ".";
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to assign XML attributes."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    element.attribute("test", "2.0");
+    test_assert(element.attribute("test") == "2.0",
+                            "Test if element.attribute(\"test\")= 2.0",
+                            "Unexpected attribute "+element.attribute("test"));
 
-    // Signal final test success
-    std::cout << " ok." << std::endl;
+    element.attribute("test2", "1.0");
+    test_assert(element.attribute("test2") == "1.0",
+                            "Test if element.attribute(\"test2\")= 1.0",
+                            "Unexpected attribute "+element.attribute("test2"));
 
-    // Exit test
+    test_assert(element.attribute("test")  == "2.0"&& element.attribute("test2") == "1.0",
+                            "Test if  element.attribute(\"test\")= 2.0 and if element.attribute(\"test2\")= 1.0",
+                            "Unexpected attributes "+element.attribute("test")+" "+element.attribute("test2"));
+
+    // Return
     return;
-
 }
 
 
-/***************************************************************************
- * Test: GXml constructors                                                 *
- ***************************************************************************/
-void test_GXml_construct(void)
+/***********************************************************************//**
+ * @brief Test XML constructors
+ **************************************************************************/
+void TestGXml::test_GXml_construct(void)
 {
-    // Dump header
-    std::cout << "Test XML constructors: ";
-
     // Test void constructor
+    test_try("Test void constructor");
     try {
         GXml xml;
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct empty XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test load constructor
+    test_try("Test load constructor");
     try {
-        GXml xml(xml_file);
+        GXml xml(m_xml_file);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct empty XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test copy constructor
+    test_try("Test copy constructor");
     try {
-        GXml xml1(xml_file);
+        GXml xml1(m_xml_file);
         GXml xml2 = xml1;
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to copy construct XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test XML file creation
+    test_try("Test XML file creation");
     try {
         GXml xml;
         xml.append(new GXmlComment("This is a comment."));
@@ -297,190 +228,141 @@ void test_GXml_construct(void)
         src->append(new GXmlElement("spectrum type=\"PLSuperExpCutoff\""));
         GXmlNode* spec = src->element("spectrum", 0);
         spec->append(new GXmlElement("parameter free=\"1\" max=\"1000\" min=\"1e-07\""
-                                     " name=\"Prefactor\" scale=\"1e-07\""
-                                     " value=\"0.02754520844\""));
+                " name=\"Prefactor\" scale=\"1e-07\""
+                " value=\"0.02754520844\""));
         spec->append(new GXmlElement("parameter free=\"1\" max=\"5\" min=\"-5\""
-                                     " name=\"Index1\" scale=\"1\" value=\"-2.0458781\""));
-        GXmlElement* par = (GXmlElement*)spec->element("parameter", 0);
+                " name=\"Index1\" scale=\"1\" value=\"-2.0458781\""));
+        GXmlElement* par = static_cast<GXmlElement*>(spec->element("parameter", 0));
         par->attribute("value", "1.01");
         par->attribute("error", "3.145");
-        par = (GXmlElement*)spec->element("parameter", 1);
+        par = static_cast<GXmlElement*>(spec->element("parameter", 1));
         par->attribute("value", "-2.100");
         par->attribute("error", "9.876");
         src->append(new GXmlElement("spatialModel file=\"LMC.fits\" type=\"SpatialMap\""));
         GXmlNode* spat = src->element("spatialModel", 0);
         spat->append(new GXmlElement("parameter free=\"0\" max=\"1000\" min=\"0.001\""
-                                     " name=\"Prefactor\" scale=\"1\" value=\"1\""));
-        //xml.save("test2.xml");
-        //std::cout << xml << std::endl;
+                " name=\"Prefactor\" scale=\"1\" value=\"1\""));
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to copy construct XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
-    // Signal final test success
-    std::cout << " ok." << std::endl;
-
-    // Exit test
+    // Return
     return;
-
 }
 
 
-/***************************************************************************
- * Test: GXml loading/saving                                               *
- ***************************************************************************/
-void test_GXml_load(void)
+/***********************************************************************//**
+ * @brief Test XML loading/saving
+ **************************************************************************/
+void TestGXml::test_GXml_load(void) 
 {
-    // Dump header
-    std::cout << "Test XML loading and saving: ";
-
     // Test loading
+    test_try("Test loading");
     try {
         GXml xml;
-        xml.load(xml_file);
+        xml.load(m_xml_file);
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to load XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test saving
+    test_try("Test saving");
     try {
         GXml xml;
-        xml.load(xml_file);
+        xml.load(m_xml_file);
         xml.save("test.xml");
         xml.load("test.xml");
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to save XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
     // Test loading of saved XML document
+    test_try("Test loading of saved XML document");
     try {
         GXml xml;
         xml.load("test.xml");
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to load previously saved XML document."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
 
-    // Signal final test success
-    std::cout << " ok." << std::endl;
-
-    // Exit test
+    // Return
     return;
-
 }
 
 
-/***************************************************************************
- * Test: GXml element access                                               *
- ***************************************************************************/
-void test_GXml_access(void)
+/***********************************************************************//**
+ * @brief Test XML element access
+ **************************************************************************/
+void TestGXml::test_GXml_access(void)
 {
-    // Dump header
-    std::cout << "Test XML element access: ";
-
     // Test root document access
-    try {
-        GXml xml;
-        xml.load(xml_file);
-        std::cout << ".";
-        if (xml.children() != 3) {
-            std::cout << std::endl
-                      << "TEST ERROR: Unexpected number of children in document "
-                      << xml.children() << std::endl;
-            throw;
-        }
-        std::cout << ".";
-        for (int i = 0; i < xml.children(); ++i)
-            GXmlNode* ptr = xml.child(i);
-        std::cout << ".";
-        if (xml.elements() != 1) {
-            std::cout << std::endl
-                      << "TEST ERROR: Unexpected number of child elements in document "
-                      << xml.elements() << std::endl;
-            throw;
-        }
-        std::cout << ".";
-        for (int i = 0; i < xml.elements(); ++i)
-            GXmlNode* ptr = xml.element(i);
-        std::cout << ".";
-        if (xml.elements("source_library") != 1) {
-            std::cout << std::endl
-                      << "TEST ERROR: Unexpected number of child elements in document "
-                      << xml.elements("source_library") << std::endl;
-            throw;
-        }
-        std::cout << ".";
-        for (int i = 0; i < xml.elements("source_library"); ++i) {
-            GXmlElement* ptr = xml.element("source_library", i);
-            if (ptr->name() != "source_library") {
-                std::cout << std::endl
-                        << "TEST ERROR: Unexpected element name "
-                        << ptr->name() << std::endl;
-                throw;
-            }
-        }
-        std::cout << ".";
-        //std::cout << xml.elements("source_library") << std::endl;
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to access XML elements."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+    GXml xml;
+    xml.load(m_xml_file);
+    test_assert(xml.children() == 3,
+                "Test if xml.children()==3",
+                "Unexpected number of children in document "+str(xml.children()));
 
-    // Signal final test success
-    std::cout << " ok." << std::endl;
+    // Test node access
+    for (int i = 0; i < xml.children(); ++i) {
+        GXmlNode* ptr = xml.child(i);
+    }
+    test_assert(xml.elements() == 1,
+                "Test if xml.elements()==1",
+                "Unexpected number of child elements in document "+str(xml.elements()));
 
-    // Exit test
+    // Test node access
+    for (int i = 0; i < xml.elements(); ++i) {
+        GXmlNode* ptr = xml.element(i);
+    }
+    test_assert(xml.elements("source_library") == 1,
+                "Test if the source_library = 1",
+                "Unexpected number of child elements in document "+str(xml.elements("source_library")));
+
+    // Test element access
+    for (int i = 0; i < xml.elements("source_library"); ++i) {
+        GXmlElement* ptr = xml.element("source_library", i);
+        test_assert(ptr->name() == "source_library",
+                    "Test name",
+                    "Unexpected element name "+ptr->name());
+    }
+
+
+    // Return
     return;
-
 }
 
 
 /***************************************************************************
- *                            Main test function                           *
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "************************" << std::endl;
-    std::cout << "* GXml classes testing *" << std::endl;
-    std::cout << "************************" << std::endl;
+    // Allocate test suit container
+    GTestSuites testsuites("XML module");
 
-    // Execute XML tests
-    test_GXml_attributes();
-    test_GXml_elements();
-    test_GXml_construct();
-    test_GXml_load();
-    test_GXml_access();
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    // Return
-    return 0;
+    // Create a test suite
+    TestGXml test;
+
+    // Append test suite to the container
+    testsuites.append(test);
+
+    // Run the testsuites
+    success = testsuites.run();
+
+    // Save test report
+    testsuites.save("reports/GXml.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }

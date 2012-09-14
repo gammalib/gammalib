@@ -21,7 +21,7 @@
 /**
  * @file GMWLObservation.hpp
  * @brief Multi-wavelength observation class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMWLOBSERVATION_HPP
@@ -65,9 +65,9 @@ public:
     virtual GMWLResponse*    response(void) const;
     virtual GMWLPointing*    pointing(void) const;
     virtual std::string      instrument(void) const { return "MWL"; }
-    virtual double           ontime(void) const { return 0.0; }
-    virtual double           livetime(void) const { return 0.0; }
-    virtual double           deadc(const GTime& time) const { return 0.0; }
+    virtual double           ontime(void) const { return 1.0; }
+    virtual double           livetime(void) const { return 1.0; }
+    virtual double           deadc(const GTime& time) const { return 1.0; }
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
     virtual std::string      print(void) const;

@@ -61,6 +61,7 @@ BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
                 gammalib/sky_wrap.cpp gammalib/sky.py \
                 gammalib/support_wrap.cpp gammalib/support.py \
                 gammalib/xml_wrap.cpp gammalib/xml.py \
+                gammalib/test_wrap.cpp gammalib/test.py \
                 $(INST_SWIG_TARGETS)
 
 # Set files to be removed in clean. We remove only the SWIG interface files if SWIG
@@ -75,7 +76,7 @@ all-local: build
 
 # Build the gammalib extension module
 build: $(BUILT_SOURCES)
-	$(PYTHON) setup.py build_ext
+	@PYTHON_BUILD_PREFIX@ $(PYTHON) setup.py build_ext
 
 # If 'make check' is invoked we build the extension modules inplace, so that
 # putting the 'pyext' directory in the PYTHONPATH allows importing the gammalib
@@ -83,7 +84,7 @@ build: $(BUILT_SOURCES)
 # linking with libgamma, which will allow a successful 'make check' on systems
 # (such as Mac OS X) that have fixed shared library paths.
 check-local:
-	$(PYTHON) setup.py build_ext --inplace
+	@PYTHON_BUILD_PREFIX@ $(PYTHON) setup.py build_ext --inplace
 
 # Install the gammalib extension module
 install-exec-local:

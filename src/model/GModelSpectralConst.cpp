@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralConst.cpp  -  Spectral constant model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralConst.cpp
  * @brief Constant spectral model class implementation
- * @author J. Knodlseder
+ * @author J. Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -79,8 +79,8 @@ GModelSpectralConst::GModelSpectralConst(void) : GModelSpectral()
  * from an XML element. See GModelSpectralConst::read() for more information
  * about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
-                     GModelSpectral()
+GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml)
+                                         : GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -98,8 +98,8 @@ GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
  *
  * @param[in] model Spectral constant model.
  ***************************************************************************/
-GModelSpectralConst::GModelSpectralConst(const GModelSpectralConst& model) :
-                     GModelSpectral(model)
+GModelSpectralConst::GModelSpectralConst(const GModelSpectralConst& model)
+                                         : GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -238,7 +238,7 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
     double g_norm = (m_norm.isfree()) ? m_norm.scale() : 0.0;
 
     // Set gradients (circumvent const correctness)
-    ((GModelSpectralConst*)this)->m_norm.gradient(g_norm);
+    const_cast<GModelSpectralConst*>(this)->m_norm.gradient(g_norm);
 
     // Return
     return value;
@@ -336,21 +336,24 @@ GEnergy GModelSpectralConst::mc(const GEnergy& emin, const GEnergy& emax,
 void GModelSpectralConst::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Spectral constant requires exactly 1 parameter.");
+    }
 
     // Get parameter element
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Get value
     if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value")
+        par->attribute("name") == "Value") {
         m_norm.read(*par);
-    else
+    }
+    else {
         throw GException::model_invalid_parnames(G_READ, xml,
                           "Spectral constant requires either"
                           " \"Normalization\" or \"Value\" parameter.");
+    }
 
     // Return
     return;
@@ -376,37 +379,43 @@ void GModelSpectralConst::read(const GXmlElement& xml)
 void GModelSpectralConst::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", "ConstantValue");
+    }
 
     // Verify model type
-    if (xml.attribute("type") != "ConstantValue")
+    if (xml.attribute("type") != "ConstantValue") {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
               "Spectral model is not of type \"ConstantValue\".");
+    }
 
     // If XML element has 0 nodes then append parameter node. The name
     // of the node is "Value" as this is the Fermi-LAT standard.
     // We thus assure that the XML files will be compatible with
     // Fermi-LAT.
-    if (xml.elements() == 0)
+    if (xml.elements() == 0) {
         xml.append(new GXmlElement("parameter name=\"Value\""));
+    }
 
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Spectral constant requires exactly 1 parameter.");
+    }
 
     // Get parameter element
-    GXmlElement* par = (GXmlElement*)xml.element("parameter", 0);
+    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
 
     // Set parameyter
     if (par->attribute("name") == "Normalization" ||
-        par->attribute("name") == "Value")
+        par->attribute("name") == "Value") {
         m_norm.write(*par);
-    else
+    }
+    else {
         throw GException::model_invalid_parnames(G_WRITE, xml,
                           "Spectral constant requires either"
                           " \"Normalization\" or \"Value\" parameter.");
+    }
 
     // Return
     return;
@@ -424,8 +433,9 @@ std::string GModelSpectralConst::print(void) const
     // Append header
     result.append("=== GModelSpectralConst ===\n");
     result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i)
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
 
     // Return result
     return result;

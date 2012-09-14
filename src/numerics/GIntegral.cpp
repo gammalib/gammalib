@@ -296,12 +296,13 @@ double GIntegral::trapzd(double a, double b, int n, double result)
             double y_b = m_integrand->eval(b);
             
             // Compute result
-            result = 0.5*(b-a)*(m_integrand->eval(a) + m_integrand->eval(b));
+            result = 0.5*(b-a)*(y_a + y_b);
             
         } // endif: only a single step was requested
 
         // Case B: More than a single step is requested
         else {
+
             // Compute step level 2^(n-1)
             int it = 1;
             for (int j = 1; j < n-1; ++j) {
