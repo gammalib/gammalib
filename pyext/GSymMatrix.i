@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GSymMatrix.i  -  Symmetric Matrix class SWIG file            *
+ *                GSymMatrix.i  -  Symmetric Matrix class                  *
  * ----------------------------------------------------------------------- *
- *  copyright - (C) 2008-2011 by Jurgen Knodlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,83 +18,86 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GSymMatrix.i
+ * @brief SYmmetric matrix class definition.
+ * @author Juergen Knoedlseder
+ */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GSymMatrix.hpp"
 #include "GTools.hpp"
 %}
 
-%feature("notabstract") GSymMatrix;
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
 
-/***************************************************************************
- *                       GSymMatrix class definition                       *
- * ----------------------------------------------------------------------- *
- * GSymMatrix implements a symmetric matrix storage class. It derives from *
- * the abstract base class GMatrixBase.                                    *
+
+/***********************************************************************//**
+ * @class GSymMatrix
+ *
+ * @brief Symmetric matrix class definition
+ *
+ * GSymMatrix implements a symmetric matrix storage class. It derives from
+ * the abstract base class GMatrixBase.
  ***************************************************************************/
 class GSymMatrix : public GMatrixBase {
 public:
-    // Constructors and destructors (not inherited)
-    GSymMatrix(int rows, int cols);
-    GSymMatrix(const GSymMatrix& m);
-    virtual ~GSymMatrix();
+    // Constructors and destructors
+    GSymMatrix(void);
+    GSymMatrix(const int& rows, const int& cols);
+    GSymMatrix(const GMatrix& matrix);
+    GSymMatrix(const GSymMatrix& matrix);
+    GSymMatrix(const GSparseMatrix& matrix);
+    virtual ~GSymMatrix(void);
 
-    // Operators
-    GSymMatrix    operator+ (const GSymMatrix& m) const;
-    GSymMatrix    operator- (const GSymMatrix& m) const;
-    GSymMatrix    operator* (const GSymMatrix& m) const;
-    GVector       operator* (const GVector& v) const;
-    //_USE_BASE int           operator== (const GSymMatrix& m) const;
-    //_USE_BASE int           operator!= (const GSymMatrix& m) const;
-    GSymMatrix    operator- () const;
-    GSymMatrix&   operator+= (const GSymMatrix& m);
-    GSymMatrix&   operator-= (const GSymMatrix& m);
-    GSymMatrix&   operator*= (const GSymMatrix& m);
-    GSymMatrix&   operator*= (const double& d);
-    GSymMatrix&   operator/= (const double& d);
+    // Implemented pure virtual base class operators
+    virtual GVector       operator*(const GVector& v) const;
 
-    // Methods
-    void    add_col(const GVector& v, int col);
-    void    cholesky_decompose(int compress = 1);
-    GVector cholesky_solver(const GVector& v, int compress = 1);
-    void    cholesky_invert(int compress = 1);
-    void    clear();
-    GVector extract_row(int row) const;
-    GVector extract_col(int col) const;
-    GMatrix extract_lower_triangle() const;
-    GMatrix extract_upper_triangle() const;
-    void    insert_col(const GVector& v, int col);
-    double  fill() const;
-    double  min() const;
-    double  max() const;
-    double  sum() const;
-    void    transpose() { return; }
+    // Other operators
+    virtual GSymMatrix    operator+(const GSymMatrix& matrix) const;
+    virtual GSymMatrix    operator-(const GSymMatrix& matrix) const;
+    virtual GMatrix       operator*(const GSymMatrix& matrix) const;
+    virtual GSymMatrix    operator-(void) const;
+    virtual GSymMatrix&   operator+=(const GSymMatrix& matrix);
+    virtual GSymMatrix&   operator-=(const GSymMatrix& matrix);
+    virtual GSymMatrix&   operator*=(const double& scaler);
+    virtual GSymMatrix&   operator/=(const double& scalar);
+
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual void        transpose(void);
+    virtual void        invert(void);
+    virtual void        add_col(const GVector& vector, const int& col);
+    virtual void        insert_col(const GVector& vector, const int& col);
+    virtual GVector     extract_row(const int& row) const;
+    virtual GVector     extract_col(const int& col) const;
+    virtual double      fill(void) const;
+    virtual double      min(void) const;
+    virtual double      max(void) const;
+    virtual double      sum(void) const;
+
+    // Other methods
+    virtual GMatrix     extract_lower_triangle(void) const;
+    virtual GMatrix     extract_upper_triangle(void) const;
+    virtual void        cholesky_decompose(bool compress = true);
+    virtual GVector     cholesky_solver(const GVector& vector, bool compress = true);
+    virtual void        cholesky_invert(bool compress = true);
 };
 
 
-/***************************************************************************
- *                    GSymMatrix class SWIG extension                      *
+/***********************************************************************//**
+ * @brief GSymMatrix class extension
  ***************************************************************************/
 %extend GSymMatrix {
     char *__str__() {
-        std::ostringstream buffer;
-        buffer << *self;
-        std::string str = buffer.str();
-        return tochar(str);
+        return tochar(self->print());
     }
-    double __getslice__(int row, int col) {
-        if (row >=0 && row < (int)self->rows() && col >= 0 && col < (int)self->cols())
-            return (*self)(row,col);
-        else
-            throw GException::out_of_range("__getitem__(int,int)", row, col,
-                                           (int)self->rows(), (int)self->cols());
+    double __getitem__(int GTuple[2]) {
+        return (*self)(GTuple[0], GTuple[1]);
     }
-    void __setslice__(int row, int col, const double val) {
-        if (row >=0 && row < (int)self->rows() && col >= 0 && col < (int)self->cols())
-            (*self)(row,col) = val;
-        else
-            throw GException::out_of_range("__setitem__(int,int)", row, col,
-                                           (int)self->rows(), (int)self->cols());
+    void __setitem__(int GTuple[2], double value) {
+        (*self)(GTuple[0], GTuple[1]) = value;
     }
     GSymMatrix __mul__(const double &a) {
         return (*self) * a;

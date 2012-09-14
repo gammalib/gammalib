@@ -33,7 +33,6 @@
 /* __ Linear Algebra _____________________________________________________ */
 %include "GVector.i"
 %include "GMatrixBase.i"
-//%include "GMatrixTools.i"
 %include "GMatrix.i"
 %include "GSymMatrix.i"
 %include "GSparseMatrix.i"

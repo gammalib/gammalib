@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GMatrixBase.hpp  -  matrix abstract base class            *
+ *               GMatrixBase.hpp  -  Abstract matrix base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,72 +20,80 @@
  ***************************************************************************/
 /**
  * @file GMatrixBase.hpp
- * @brief GMatrixBase class definition.
- * @author J. Knodlseder
+ * @brief Abstract matrix base class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMATRIXBASE_HPP
 #define GMATRIXBASE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GVector.hpp"
 
 
 /***********************************************************************//**
  * @class GMatrixBase
  *
- * @brief GMatrixBase class interface defintion
+ * @brief Abstract matrix base class interface defintion
  *
- * GMatrixBase is an abstract base class for all matrix classes. It defines
- * the common interfaces of the matrix objects and provides some common
- * services to the derived classes.
+ * This is an abstract base class for all matrix classes. It defines the
+ * common interface of the matrix objects and provides some common services
+ * to the derived classes.
  ***************************************************************************/
 class GMatrixBase {
 
 public:
     // Constructors and destructors
     GMatrixBase(void);
-    GMatrixBase(const GMatrixBase& m);
+    GMatrixBase(const GMatrixBase& matrix);
     virtual ~GMatrixBase(void);
 
-    // Operators
-    virtual GMatrixBase&  operator= (const GMatrixBase& m);
-    virtual int           operator== (const GMatrixBase& m) const;
-    virtual int           operator!= (const GMatrixBase& m) const;
-    virtual double&       operator() (int row, int col) = 0;
-    virtual const double& operator() (int row, int col) const = 0;
-    virtual GVector       operator* (const GVector& v) const = 0;
+    // Pure virtual operators
+    virtual double&       operator()(const int& row, const int& col) = 0;
+    virtual const double& operator()(const int& row, const int& col) const = 0;
+    virtual GVector       operator*(const GVector& vector) const = 0;
 
-    // Methods
-    virtual int     cols(void) const { return m_cols; }
-    virtual int     rows(void) const { return m_rows; }
-    virtual void    clear() = 0;
-    virtual void    transpose() = 0;
-//    virtual void    invert() = 0;
-    virtual GVector extract_row(int row) const = 0;
-    virtual GVector extract_col(int col) const = 0;
-    virtual double  fill(void) const = 0;
-    virtual double  min(void) const = 0;
-    virtual double  max(void) const = 0;
-    virtual double  sum(void) const = 0;
+    // Implemented base class operators
+    virtual GMatrixBase&  operator=(const GMatrixBase& matrix);
+    virtual bool          operator==(const GMatrixBase& matrix) const;
+    virtual bool          operator!=(const GMatrixBase& matrix) const;
+
+    // Pure virtual methods
+    virtual void        clear() = 0;
+    virtual void        transpose() = 0;
+    virtual void        invert() = 0;
+    virtual void        add_col(const GVector& vector, const int& col) = 0;
+    virtual void        insert_col(const GVector& vector, const int& col) = 0;
+    virtual GVector     extract_row(const int& row) const = 0;
+    virtual GVector     extract_col(const int& col) const = 0;
+    virtual double      fill(void) const = 0;
+    virtual double      min(void) const = 0;
+    virtual double      max(void) const = 0;
+    virtual double      sum(void) const = 0;
+    virtual std::string print(void) const = 0;
+
+    // Implemented base class methods
+    virtual int         cols(void) const { return m_cols; }
+    virtual int         rows(void) const { return m_rows; }
 
 protected:
     // Protected methods
-    void   init_members(void);
-    void   copy_members(const GMatrixBase& m);
-    void   free_members(void);
-    void   select_non_zero(void);
-    void   negation(void);
-    void   addition(const GMatrixBase& m);
-    void   subtraction(const GMatrixBase& m);
-    void   multiplication(const double& s);
-    void   set_all_elements(const double& s);
-    double get_min_element(void) const;
-    double get_max_element(void) const;
-    double get_element_sum(void) const;
-    void   dump_elements(std::ostream& os) const;
-    void   dump_row_comp(std::ostream& os) const;
-    void   dump_col_comp(std::ostream& os) const;
+    void        init_members(void);
+    void        copy_members(const GMatrixBase& matrix);
+    void        free_members(void);
+    void        select_non_zero(void);
+    void        negation(void);
+    void        addition(const GMatrixBase& matrix);
+    void        subtraction(const GMatrixBase& matrix);
+    void        multiplication(const double& scalar);
+    void        set_all_elements(const double& value);
+    double      get_min_element(void) const;
+    double      get_max_element(void) const;
+    double      get_element_sum(void) const;
+    std::string print_elements(const int& num = 10) const;
+    std::string print_row_compression(void) const;
+    std::string print_col_compression(void) const;
 
     // Protected data area
     int     m_rows;       //!< Number of rows

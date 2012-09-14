@@ -1,7 +1,7 @@
 /***************************************************************************
  *             test_GOptimizer.cpp  -  test GOptimizer class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,146 +18,171 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GOptimizer.cpp
+ * @brief Implementation of unit tests for optimizer module
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
-#include <stdlib.h>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+//#include <stdlib.h>
 #include "test_GOptimizer.hpp"
+#include "testinst/GTestLib.hpp"
 
-/* __ Namespaces _________________________________________________________ */
+/* __ Coding definitions _________________________________________________ */
+#define RATE      13.0        //!< Events per seconde. For events generation.
+#define UN_BINNED 0
+#define BINNED    1
 
-/* __ Globals ____________________________________________________________ */
 
+/***********************************************************************//**
+ * @brief Set parameters and tests
+ **************************************************************************/
+void TestGOptimizer::set(void){
 
-/***************************************************************************
- *  Test: Optimizer                                                        *
- ***************************************************************************/
-void test_optimizer(void)
-{
-    // Write header
-    std::cout << "Test GOptimizer: ";
-    
-    // Number of observations in data
-    int nobs = 1;
+    // Test name
+    name("Optimizer module");
 
-    // Setup GData for optimizing
-    GData           data;
-    GLATObservation obs;
-    try {
-        obs.load_binned("data/lat/cntmap.fits.gz", "", "");
-        for (int i = 0; i < nobs; ++i)
-            data.add(obs);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GData for optimizing." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-//std::cout << data << std::endl;
+    // Append tests
+    append(static_cast<pfunction>(&TestGOptimizer::test_unbinned_optimizer), "Test unbinned optimization");
+    append(static_cast<pfunction>(&TestGOptimizer::test_binned_optimizer), "Test binned optimization");
 
-    // Setup GModels for optimizing
-    GModelSpatialPtsrc point_source;
-    GModelSpectralPlaw power_law;
-    GModel             crab;
-    GModels            models;
-    try {
-        GSkyDir dir;
-        dir.radec_deg(83.6331, +22.0145);
-        point_source = GModelSpatialPtsrc(dir);
-        power_law    = GModelSpectralPlaw(1.0e-7, -2.1);
-        crab         = GModel(point_source, power_law);
-        crab.name("Crab");
-        models.add(crab);
-        data.models(models);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GModels for optimizing." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-//std::cout << models << std::endl;
-
-    // Setup parameters for optimizing
-    GOptimizerPars pars;
-    try {
-        pars = GOptimizerPars(models);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup GOptimizerPars for optimizing." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-//std::cout << pars << std::endl;
-
-    // Time simple GData iterator
-    double  t_elapse;
-    try {
-        clock_t t_start = clock();
-        int num = 0;
-        int sum = 0;
-        for (GData::iterator event = data.begin(); event != data.end(); ++event) {
-            num++;
-            sum += (int)event->counts();
-        }
-        t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable to iterate GData." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << "." << std::endl;
-    std::cout << " - Reference time for GData::iterator: " << t_elapse << std::endl;
-
-    // Setup LM optimizer
-    GOptimizerLM opt;
-    try {
-        data.optimize(opt);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl 
-                  << "TEST ERROR: Unable setup optimizer." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-//std::cout << opt << std::endl;
-std::cout << data << std::endl;
-
-    // Plot final test success
-    std::cout << " ok." << std::endl;
-
-    // Exit test
+    // Return
     return;
+}
 
+
+/***********************************************************************//**
+ * @brief Test optimizer
+ *
+ * @param[in] mode Testing mode.
+ * 
+ * This method supports two testing modes: 0 = unbinned and 1 = binned.
+ ***************************************************************************/
+GModelPar& TestGOptimizer::test_optimizer(int mode)
+{
+    // Create Test Model
+    GTestModelData model;
+
+    // Create Models conteners
+    GModels models;
+    models.append(model);
+
+    // Time iterval
+    GTime tmin(0,0,   "sec");
+    GTime tmax(1800,0,"sec");
+
+    // Rate : events/sec
+    double rate = RATE;
+
+    // Create observations
+    GObservations obs;
+
+    // Add some observation
+    for (int i=0; i<6; ++i) {
+
+        // Random Generator
+        GRan ran;
+        ran.seed(i);
+
+        // Allocate events pointer
+        GEvents *events;
+
+        // Create either a event list or an event cube
+        if (mode == UN_BINNED) {
+            events = model.generateList(rate,tmin,tmax,ran);
+        }
+        else {
+            events = model.generateCube(rate,tmin,tmax,ran);
+        }
+
+        // Create an observation
+        GTestObservation ob;
+
+        // Add events to the observation
+        ob.events(events);
+        ob.ontime(tmax.met()-tmin.met());
+        obs.append(ob);
+    }
+
+    // Add the model to the observation
+    obs.models(models);
+
+    // Create a GLog for show the interations of optimizer.
+    GLog log;
+
+    // Create an optimizer.
+    GOptimizerLM opt(log);
+
+    opt.max_stalls(50);
+
+    // Optimize
+    obs.optimize(opt);
+
+    // Get the result
+    GModelPar& result = ((obs.models())[0])[0];
+
+    //check if converged
+    test_assert(opt.status()==0, "Check if converged", "Optimizer did not convered"); 
+
+    //check if value is correct
+    test_value(result.value(),RATE,result.error()*3); 
+
+    // Return
+    return (((obs.models())[0])[0]);
+}
+
+
+/***********************************************************************//**
+ * @brief Test unbinned optimizer
+ ***************************************************************************/
+void TestGOptimizer::test_unbinned_optimizer(void)
+{
+    // Test
+    test_optimizer(UN_BINNED);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test binned optimizer
+ ***************************************************************************/
+void TestGOptimizer::test_binned_optimizer(void)
+{
+    // Test
+    test_optimizer(BINNED);
+
+    // Return
+    return;
 }
 
 
 /***************************************************************************
- *                            Main test function                           *
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "****************************" << std::endl;
-    std::cout << "* GOptimizer class testing *" << std::endl;
-    std::cout << "****************************" << std::endl;
+    // Allocate test suit container
+    GTestSuites testsuites("Optimizer module");
 
-    // Execute the tests
-    test_optimizer();
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    // Return
-    return 0;
+    // Create and append test suite
+    TestGOptimizer openmp;
+    testsuites.append(openmp);
+
+    // Run the testsuites
+    success = testsuites.run();
+
+    // Save test report
+    testsuites.save("reports/GOptimizer.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }

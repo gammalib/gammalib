@@ -7,7 +7,6 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GVector.cpp \
-          GMatrixTools.cpp \
           GMatrixBase.cpp \
           GMatrix.cpp \
           GSymMatrix.cpp \

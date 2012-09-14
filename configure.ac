@@ -33,7 +33,8 @@ AC_INIT([gammalib], [0.6.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
-AC_CONFIG_HEADERS([config.h])
+#AC_CONFIG_HEADERS([config.h])
+AM_CONFIG_HEADER([config.h])
 
 
 #############################################################################
@@ -487,6 +488,55 @@ esac
 
 
 #############################################################################
+# Checks for optional instrument specific interfaces                        #
+#############################################################################
+# Checks for the existence of instrument specific interfaces
+AC_CHECK_FILE([inst/Makefile.am],
+              [with_inst=yes],
+              [with_inst=no])
+AM_CONDITIONAL([WITH_INST], [test "x$with_inst" = "xyes"])
+
+# Checks for MWL interface
+AC_ARG_WITH([mwl],
+            [AS_HELP_STRING([--with-mwl],
+                            [compile in multi-wavelength interface [default=yes]])],
+            [],
+            [with_mwl=yes])
+if test "x$with_mwl" = "xyes"; then
+  AC_CHECK_FILE([inst/mwl/Makefile.am],
+                [with_mwl=yes],
+                [with_mwl=no])
+fi
+AM_CONDITIONAL(WITH_INST_MWL, test "x$with_mwl" = "xyes")
+
+# Checks for CTA interface
+AC_ARG_WITH([cta],
+            [AS_HELP_STRING([--with-cta],
+                            [compile in CTA specific interface [default=yes]])],
+            [],
+            [with_cta=yes])
+if test "x$with_cta" = "xyes"; then
+  AC_CHECK_FILE([inst/cta/Makefile.am],
+                [with_cta=yes],
+                [with_cta=no])
+fi
+AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
+
+# Checks for LAT interface
+AC_ARG_WITH([lat],
+            [AS_HELP_STRING([--with-lat],
+                            [compile in LAT specific interface [default=yes]])],
+            [],
+            [with_lat=yes])
+if test "x$with_lat" = "xyes"; then
+  AC_CHECK_FILE([inst/lat/Makefile.am],
+                [with_lat=yes],
+                [with_lat=no])
+fi
+AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
+
+
+#############################################################################
 # Checks for header files                                                   #
 #############################################################################
 AC_HEADER_STDC
@@ -622,6 +672,7 @@ if test "x$openmp_ok" = "xyes" ; then
   fi
 fi
 AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
+AC_SUBST(OPENMP_CXXFLAGS)
 
 # Set system specific settings
 OPENMP_LIB_LDFLAGS=
@@ -665,6 +716,20 @@ fi
 AM_PATH_PYTHON([2.2],
                [has_python="yes"],
                [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
+
+# It would really be weired if Python has not been found, as barely every system has Python. Maybe
+# it was not found because the autoconf is so old, and in an early version of the AM_PATH_PYTHON
+# there were no [Action-if-found] and [Action-if-not-found] arguments, hence $has_python is possibly
+# badly set. However, the Python executable and version should be set correctly, and we can test
+# for this to see whether Python is really there or not.
+if test "x$has_python" = "xno"; then
+  AM_PYTHON_CHECK_VERSION([$PYTHON], [${PYTHON_VERSION}],
+                          [has_python="yes"
+                           AC_MSG_NOTICE([Wow! You're running a pretty old system. Found Python nevertheless:-)])],
+                          [AC_MSG_WARN([Python not found.])])
+fi
+
+# If we have Python then verify the presence of the header and set some flags
 if test "x$has_python" = "xyes"; then
 
   # Set opening and closing symbols to make setup.py compatible for versions 2 and 3
@@ -732,9 +797,48 @@ if test "$SWIG"; then
 fi
 AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
 
+# Do we have Python wrappers
+has_wrappers="yes"
+AC_CHECK_FILES([pyext/gammalib/__init__.py
+                pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
+                pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
+                pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
+                pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
+                pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py
+                pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
+                pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
+                pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
+                pyext/gammalib/sky_wrap.cpp pyext/gammalib/sky.py
+                pyext/gammalib/support_wrap.cpp pyext/gammalib/support.py
+                pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
+                pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py],,
+               [has_wrappers="no"])
+if test "x$with_mwl" = "xyes"; then
+  AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
+                 [has_wrappers="no"])
+fi
+if test "x$with_lat" = "xyes"; then
+  AC_CHECK_FILES([pyext/gammalib/lat_wrap.cpp pyext/gammalib/lat.py],,
+                 [has_wrappers="no"])
+fi
+if test "x$with_cta" = "xyes"; then
+  AC_CHECK_FILES([pyext/gammalib/cta_wrap.cpp pyext/gammalib/cta.py],,
+                 [has_wrappers="no"])
+fi
+if test "x$has_wrappers" = "xno"; then
+  AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
+fi
+
+# Do we have wrappers or can we created wrappers?
+can_wrappers="no"
+if [test "x$has_wrappers" = "xyes" -o "x$has_swig" = "xyes"]; then
+  can_wrappers="yes"
+fi
+
 # Signal if Python is enabled
-if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes"]; then
+if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
   enable_python="yes"
+  AC_DEFINE([HAVE_PYTHON], [1], [Define if Python bindings are built])
 fi
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
 
@@ -1048,55 +1152,6 @@ fi
 
 
 #############################################################################
-# Checks for optional instrument specific interfaces                        #
-#############################################################################
-# Checks for the existence of instrument specific interfaces
-AC_CHECK_FILE([inst/Makefile.am],
-              [with_inst=yes],
-              [with_inst=no])
-AM_CONDITIONAL([WITH_INST], [test "x$with_inst" = "xyes"])
-
-# Checks for MWL interface
-AC_ARG_WITH([mwl],
-            [AS_HELP_STRING([--with-mwl],
-                            [compile in multi-wavelength interface [default=yes]])],
-            [],
-            [with_mwl=yes])
-if test "x$with_mwl" = "xyes"; then
-  AC_CHECK_FILE([inst/mwl/Makefile.am],
-                [with_mwl=yes],
-                [with_mwl=no])
-fi
-AM_CONDITIONAL(WITH_INST_MWL, test "x$with_mwl" = "xyes")
-
-# Checks for CTA interface
-AC_ARG_WITH([cta],
-            [AS_HELP_STRING([--with-cta],
-                            [compile in CTA specific interface [default=yes]])],
-            [],
-            [with_cta=yes])
-if test "x$with_cta" = "xyes"; then
-  AC_CHECK_FILE([inst/cta/Makefile.am],
-                [with_cta=yes],
-                [with_cta=no])
-fi
-AM_CONDITIONAL(WITH_INST_CTA, test "x$with_cta" = "xyes")
-
-# Checks for LAT interface
-AC_ARG_WITH([lat],
-            [AS_HELP_STRING([--with-lat],
-                            [compile in LAT specific interface [default=yes]])],
-            [],
-            [with_lat=yes])
-if test "x$with_lat" = "xyes"; then
-  AC_CHECK_FILE([inst/lat/Makefile.am],
-                [with_lat=yes],
-                [with_lat=no])
-fi
-AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
-
-
-#############################################################################
 # Checks for Doxygen                                                        #
 #############################################################################
 DX_HTML_FEATURE(ON)
@@ -1121,6 +1176,7 @@ AC_CONFIG_FILES([Makefile
                  src/obs/Makefile
                  src/model/Makefile
                  src/app/Makefile
+                 src/test/Makefile
                  src/gammalib-setup
                  include/Makefile
                  test/Makefile
@@ -1173,6 +1229,11 @@ if test "x$has_python_h" = "xyes"; then
 else
   echo "  - Python.h                     (no)"
 fi
+if test "x$has_wrappers" = "xyes"; then
+  echo "  * Python wrappers              (yes)"
+else
+  echo "  - Python wrappers              (no)"
+fi
 if test "x$has_swig" = "xyes"; then
   echo "  * swig                         (yes)"
 else
@@ -1183,15 +1244,27 @@ fi
 if test "x$ac_enable_python_binding" = "xyes"; then
   if test "x$has_python" = "xyes"; then
     if test "x$has_python_h" = "xyes"; then
-      echo "  * Make Python bindings         (yes)"
+      if test "x$has_wrappers" = "xyes"; then
+        if test "x$has_swig" = "xyes"; then
+          echo "  * Make Python binding          (yes)   use swig for updates"
+        else
+          echo "  * Make Python binding          (yes)   use wrappers"
+        fi
+      else
+        if test "x$has_swig" = "xyes"; then
+          echo "  * Make Python binding          (yes)   use swig for building"
+        else
+          echo "  - Make Python binding          (no)    swig required to build wrappers"
+        fi
+      fi
     else
-      echo "  - Make Python bindings         (no)    Python.h not installed"
+      echo "  - Make Python binding          (no)    Python.h not installed"
     fi
   else
-    echo "  - Make Python bindings         (no)    Python not installed"
+    echo "  - Make Python binding          (no)    Python not installed"
   fi
 else
-  echo "  - Make Python bindings         (no)"
+  echo "  - Make Python binding          (no)"
 fi
 
 # Dump instrument interface information

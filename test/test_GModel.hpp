@@ -1,7 +1,7 @@
 /***************************************************************************
- *                     GMatrixTools.hpp  -  Matrix tools                   *
+ *                test_GModel.hpp  -  test model class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009 by Jurgen Knodlseder                                *
+ *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,25 +19,37 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef GMATRIXTOOLS_HPP
-#define GMATRIXTOOLS_HPP
+#ifndef TEST_GMODEL_HPP
+#define TEST_GMODEL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GMatrix.hpp"
-#include "GSymMatrix.hpp"
-#include "GSparseMatrix.hpp"
+#include "GammaLib.hpp"
+#include "GTools.hpp"
 
-/* __ Namespaces _________________________________________________________ */
+class TestGModel : public GTestSuite
+{
+    public:
+        // Constructors and destructors
+        TestGModel(void) : GTestSuite(){ return; }
+        virtual ~TestGModel(void){ return; }
 
-/* __ Constants __________________________________________________________ */
+        // Methods
+        virtual void set(void);
 
-/* __ Prototypes _________________________________________________________ */
-GMatrix       matrix(const GSymMatrix& m);
-GMatrix       matrix(const GSparseMatrix& m);
-GSymMatrix    sym_matrix(const GMatrix& m);
-GSymMatrix    sym_matrix(const GSparseMatrix& m);
-GSparseMatrix sparse_matrix(const GMatrix& m);
-GSparseMatrix sparse_matrix(const GSymMatrix& m);
+        void test_model_par(void);
+        void test_model(void);
+        void test_models(void);
+        void test_spectral_model(void);
+        void test_spacial_model(void);
+    // Private attributes
+    private:
+        std::string m_xml_file;
+        std::string m_xml_model_point_nodes;
+        std::string m_xml_model_spatial_map;
+        
+    //private methods
+        void test_xml_model(const std::string &name, const std::string &filename);
 
+};
 
-#endif /* GMATRIXTOOLS_HPP */
+#endif /* TEST_GMODEL_HPP */

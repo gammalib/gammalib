@@ -21,13 +21,14 @@
 /**
  * @file GSparseSymbolic.cpp
  * @brief Sparse matrix symbolic analysis class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include "GSparseMatrix.hpp"
 #include "GSparseSymbolic.hpp"
 
 /* __ Macros _____________________________________________________________ */

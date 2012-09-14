@@ -1,4 +1,4 @@
-2012-08-23  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2012-09-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.6.0 released
         ========================
@@ -8,6 +8,8 @@
         Add sky direction access operator to GSkymap class
         Add support for diffuse source models to CTA response
         Add OpenMP support and parallelize likelihood optimizer
+        Add unit test support (introduce test module)
+        Correct bugs in GSparseMatrix
         Enhance code quality
 
 2012-04-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
@@ -31,6 +33,7 @@
 
         * Version 0.4.12 released
         =========================
+
         Add missing #include <cstring> to GTools.cpp
         Correct but in python interface for GSymMatrix and GSparseMatrix
 

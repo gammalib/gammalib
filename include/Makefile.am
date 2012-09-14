@@ -111,7 +111,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFits.hpp \
                      GVector.hpp \
                      GMatrixBase.hpp \
-                     GMatrixTools.hpp \
                      GMatrix.hpp \
                      GSymMatrix.hpp \
                      GSparseMatrix.hpp \
@@ -122,4 +121,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
                      GOptimizerPars.hpp \
-                     GOptimizerFunction.hpp
+                     GOptimizerFunction.hpp \
+                     GTestSuite.hpp \
+                     GTestSuites.hpp \
+                     GTestCase.hpp

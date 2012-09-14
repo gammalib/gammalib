@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_GSparseMatrix.cpp  -  test GSparseMatrix class          *
+ *           test_GSparseMatrix.cpp  -  Test sparse matrix class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,23 +20,16 @@
  ***************************************************************************/
 /**
  * @file test_GSparseMatrix.cpp
- * @brief Testing of GSparseMatrix class
- * @author J. Knodlseder
+ * @brief Implementation of unit tests for sparse matrices
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <cstdlib>
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include <cmath>
-#include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
-#include "GammaLib.hpp"
-
-/* __ Namespaces _________________________________________________________ */
-using namespace std;
-
-/* __ Definitions ________________________________________________________ */
-//#define DUMP_RESIDUALS                                    // Dump residuals
-#define DUMP_TIMING                                          // Dump timing
+#include "test_GSparseMatrix.hpp"
 
 /* __ Globals ____________________________________________________________ */
 double g_matrix[] = {1.0, 7.0, 3.0, 2.0, 4.0, 8.0, 5.0, 6.0, 9.0};
@@ -49,1189 +42,977 @@ int    g_cols     = 5;
 
 
 /***************************************************************************
- *                              Set test matrix                            *
+ * @brief Set test matrix
  ***************************************************************************/
-GSparseMatrix set_matrix(void)
+GSparseMatrix TestGSparseMatrix::set_matrix(void) const
 {
-  try {
-    GSparseMatrix matrix(g_rows,g_cols);
-    for (int i = 0; i < g_elements; ++i)
-	  matrix(g_row[i],g_col[i]) = g_matrix[i];
-    return matrix;
-  }
-  catch (exception &e) {
-    cout << "TEST ERROR: Unable to set test matrix." << endl;
-	throw;
-  }
-  return GSparseMatrix(g_rows,g_cols);
-}
+    // Allocate matrix
+    GSparseMatrix matrix(g_rows, g_cols);
 
-
-/***************************************************************************
- *                              Set test vector                            *
- ***************************************************************************/
-GVector set_vector(void)
-{
-  try {
-    GVector vector(g_cols);
-	for (int col = 0; col < g_cols; ++col)
-	  vector[col] = g_vector[col];
-    return vector;
-  }
-  catch (exception &e) {
-    cout << "TEST ERROR: Unable to set test vector." << endl;
-	throw;
-  }
-  return GVector(g_cols);
-}
-
-
-/***************************************************************************
- *                             Check test matrix                           *
- ***************************************************************************/
-int check_matrix(const GSparseMatrix& m, const double scale, const double add)
-{
-  int result = 1;
-  try {
-    for (int row = 0; row < g_rows; ++row) {
-      for (int col = 0; col < g_cols; ++col) {
-	    int i;
-		double   ref_value = add;
-		for (i = 0; i < g_elements; ++i) {
-		  if (g_row[i] == row && g_col[i] == col) {
-		    ref_value = g_matrix[i] * scale + add;
-			break;
-		  }
-		}
-	    if (abs(m(row,col)-ref_value) > 1.0e-15) {
-		  result = 0;
-		  break;
-		}
-	  }
-	}
-  }
-  catch (exception &e) {
-    cout << "TEST ERROR: Unable to check test matrix." << endl;
-	throw;
-  }
-  return result;
-}
-
-
-/***************************************************************************
- *                             Check matrix*vector                         *
- ***************************************************************************/
-int check_matrix_vector(const GVector& v)
-{
-  int result = 1;
-  try {
-    for (int row = 0; row < v.size(); ++row) {
-      double value = 0.0;
-	  for (int col = 0; col < g_cols; ++col) {
-	    int i;
-		double   ref_value = 0.0;
-		for (i = 0; i < g_elements; ++i) {
-		  if (g_row[i] == row && g_col[i] == col) {
-		    ref_value = g_matrix[i];
-			break;
-		  }
-		}
-	    value += ref_value * g_vector[col];
-	  }
-	  if (v[row] != value) {
-	    result = 0;
-	    break;
-	  }
+    // Set matrix values
+    for (int i = 0; i < g_elements; ++i) {
+        matrix(g_row[i],g_col[i]) = g_matrix[i];
     }
-  }
-  catch (exception &e) {
-    cout << "TEST ERROR: Unable to check matrix*vector product." << endl;
-	throw;
-  }
-  return result;
+
+    // Return matrix
+    return matrix;
 }
 
 
 /***************************************************************************
- *                             Check matrix*matrix                         *
+ * @brief Set test matrix with zero lines
  ***************************************************************************/
-int check_matrix_matrix(const GSparseMatrix& m)
+/*
+GSparseMatrix TestGSparseMatrix::set_matrix_zero(void) const
 {
-  if (m.rows() != g_rows || m.cols() != g_rows)
-    return 0;
-  int result = 1;
-  try {
-    for (int row = 0; row < m.rows(); ++row) {
-	  for (int col = 0; col < m.cols(); ++col) {
-        double value = 0.0;
-		for (int i = 0; i < g_cols; ++i) {
-	      int k;
-		  double   ref_value_1 = 0.0;
-		  double   ref_value_2 = 0.0;
-		  for (k = 0; k < g_elements; ++k) {
-		    if (g_row[k] == row && g_col[k] == i) {
-		      ref_value_1 = g_matrix[k];
-			  break;
-		    }
-		  }
-		  for (k = 0; k < g_elements; ++k) {
-		    if (g_row[k] == col && g_col[k] == i) {
-		      ref_value_2 = g_matrix[k];
-			  break;
-		    }
-		  }
-		  value += ref_value_1 * ref_value_2;
-		}
-//cout << row << "," << col << ": " << abs(m(row,col)-value) << endl;
-		if (m(row,col) != value) {
-		  result = 0;
-		  break;
-		}
-	  }
-	}
-  }
-  catch (exception &e) {
-    cout << "TEST ERROR: Unable to check matrix*matrix product." << endl;
-	throw;
-  }
-  return result;
+    // Allocate matrix
+    GSparseMatrix matrix(g_rows+1,g_cols+1);
+
+    // Set matrix values
+	int i = 0;
+    for (int row = 0; row < g_rows+1; ++row) {
+        if (row == 2) continue;
+        int j = 0;
+        for (int col = 0; col < g_cols+1; ++col) {
+            if (col == 2) continue;
+            matrix(row,col) = g_matrix[j+i*g_cols];
+            j++;
+        }
+        i++;
+    }
+
+    // Return matrix
+    return matrix;
+}
+*/
+
+/***************************************************************************
+ * @brief Set test vector
+ ***************************************************************************/
+GVector TestGSparseMatrix::set_vector(void) const
+{
+    // Allocate vector
+    GVector vector(g_cols);
+
+    // Set vector values
+	for (int col = 0; col < g_cols; ++col) {
+        vector[col] = g_vector[col];
+    }
+
+    // Return vector
+    return vector;
 }
 
 
 /***************************************************************************
- *                        Check transposed test matrix                     *
+ * @brief Check if matrix corresponds to test matrix
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] scale scale factor (default: 1.0).
+ * @param[in] offset offset value (default: 0.0).
+ *
+ * Checks if a matrix corresponds to the test matrix. Optionally, the test
+ * matrix can be scaled and an offset can be added.
  ***************************************************************************/
-int check_transpose_matrix(const GSparseMatrix& m, const double scale, const double add)
+bool TestGSparseMatrix::check_matrix(const GSparseMatrix& matrix,
+                                     const double&        scale,
+                                     const double&        offset) const
 {
-  int result = 1;
-  try {
+    // Initialise check with true
+    bool result = true;
+    
+    // Compare all matrix elements
     for (int row = 0; row < g_rows; ++row) {
-      for (int col = 0; col < g_cols; ++col) {
-	    int i;
-		double   ref_value = 0.0;
-		for (i = 0; i < g_elements; ++i) {
-		  if (g_row[i] == row && g_col[i] == col) {
-		    ref_value = g_matrix[i] * scale + add;
-			break;
-		  }
-		}
-	    if (abs(m(col,row)-ref_value) > 1.0e-15) {
-		  result = 0;
-		  break;
-		}
-	  }
-	}
-  }
-  catch (exception &e) {
-    cout << "TEST ERROR: Unable to check test matrix." << endl;
-	throw;
-  }
-  return result;
+        for (int col = 0; col < g_cols; ++col) {
+
+            // Set reference value
+            double ref_value = offset;
+            for (int i = 0; i < g_elements; ++i) {
+                if (g_row[i] == row && g_col[i] == col) {
+                    ref_value = g_matrix[i] * scale + offset;
+                    break;
+                }
+            }
+
+            // Check matrix
+            if (std::abs(matrix(row,col)-ref_value) > 1.0e-15) {
+                result = false;
+                break;
+            }
+            
+        } // endfor: looped over columns
+	} // endfor: looped over rows
+
+    // Return result
+    return result;
 }
 
 
 /***************************************************************************
- *                              Check matrix min                           *
+ * @brief Check if transposed matrix corresponds to test matrix
+ *
+ * @param[in] matrix Trasposed matrix.
+ * @param[in] scale scale factor (default: 1.0).
+ * @param[in] offset offset value (default: 0.0).
+ *
+ * Checks if a matrix corresponds to the test matrix. Optionally, the test
+ * matrix can be scaled and an offset can be added.
  ***************************************************************************/
-int check_matrix_min(const double min)
+bool TestGSparseMatrix::check_matrix_trans(const GSparseMatrix& matrix,
+                                           const double&        scale,
+                                           const double&        offset) const
 {
-  double value = g_matrix[0];
-  for (int i = 0; i < g_elements; ++i) {
-	if (g_matrix[i] < value)
-	  value = g_matrix[i];
-  }
-//  return (min == value);
-  return (min == 0.0);
+    // Initialise check with true
+    bool result = true;
+
+    // Compare all matrix elements
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+
+            // Set reference value
+            double ref_value = offset;
+            for (int i = 0; i < g_elements; ++i) {
+                if (g_row[i] == row && g_col[i] == col) {
+                    ref_value = g_matrix[i] * scale + offset;
+                    break;
+                }
+            }
+
+            // Check matrix
+            if (std::abs(matrix(col,row)-ref_value) > 1.0e-15) {
+                result = false;
+                break;
+            }
+            
+        } // endfor: looped over columns
+	} // endfor: looped over rows
+
+    // Return result
+    return result;
 }
 
 
 /***************************************************************************
- *                              Check matrix max                           *
+ * @brief Check lower triangle general matrix
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] ref Reference matrix.
  ***************************************************************************/
-int check_matrix_max(const double max)
+bool TestGSparseMatrix::check_matrix_lt(const GSparseMatrix& matrix,
+                                        const GSparseMatrix& ref) const
 {
-  double value = g_matrix[0];
-  for (int i = 0; i < g_elements; ++i) {
-	if (g_matrix[i] > value)
-	  value = g_matrix[i];
-  }
-  return (max == value);
+    // Initialise check with true
+    bool result = true;
+
+    // Compare all matrix elements
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+
+            // Set reference value
+            double ref_value = 0.0;
+            if (col <= row) {
+                for (int i = 0; i < g_elements; ++i) {
+                    if (g_row[i] == row && g_col[i] == col) {
+                        ref_value = g_matrix[i];
+                        break;
+                    }
+                }
+            }
+
+            // Check matrix
+            if (std::abs(matrix(row,col)-ref_value) > 1.0e-15) {
+                result = false;
+                break;
+            }
+            
+        } // endfor: looped over columns
+	} // endfor: looped over rows
+
+    // Return result
+    return result;
 }
 
 
 /***************************************************************************
- *                              Check matrix sum                           *
+ * @brief Check upper triangle general matrix
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] ref Reference matrix.
  ***************************************************************************/
-int check_matrix_sum(const double sum)
+bool TestGSparseMatrix::check_matrix_ut(const GSparseMatrix& matrix,
+                                        const GSparseMatrix& ref) const
 {
-  double value = 0.0;
-  for (int i = 0; i < g_elements; ++i)
-	  value += g_matrix[i];
-  return (sum == value);
+    // Initialise check with true
+    bool result = true;
+
+    // Compare all matrix elements
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_cols; ++col) {
+
+            // Set reference value
+            double ref_value = 0.0;
+            if (col >= row) {
+                for (int i = 0; i < g_elements; ++i) {
+                    if (g_row[i] == row && g_col[i] == col) {
+                        ref_value = g_matrix[i];
+                        break;
+                    }
+                }
+            }
+
+            // Check matrix
+            if (std::abs(matrix(row,col)-ref_value) > 1.0e-15) {
+                result = false;
+                break;
+            }
+            
+        } // endfor: looped over columns
+	} // endfor: looped over rows
+
+    // Return result
+    return result;
 }
 
 
-/***************************************************************************
- *                                Test: Output                             *
- ***************************************************************************/
-void test_output(const GSparseMatrix& m_test)
+/***********************************************************************//**
+ * @brief Set parameters and tests
+ **************************************************************************/
+void TestGSparseMatrix::set(void)
 {
-  cout << "Test GSparseMatrix: Output test matrix: " << endl;
-  try {
-    cout << m_test << endl;
-  }
-  catch (exception &e) {
-	cout << endl << "TEST ERROR: Unable to output matrix." << endl;
-    cout << e.what() << endl;
-	throw;
-  }
+    // Set test name
+    name("GSparseMatrix");
+
+    // Add tests
+    append(static_cast<pfunction>(&TestGSparseMatrix::alloc_matrix), "Test matrix allocation");
+    append(static_cast<pfunction>(&TestGSparseMatrix::assign_values), "Test value assignment");
+    append(static_cast<pfunction>(&TestGSparseMatrix::copy_matrix), "Test matrix copying");
+    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_operations), "Test matrix operations");
+    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_arithmetics), "Test matrix arithmetics");
+    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_functions), "Test matrix functions");
+    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_compare), "Test matrix comparisons");
+    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_cholesky), "Test matrix Cholesky decomposition");
+    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_print), "Test matrix printing");
+
+    // Set members
+    m_test   = set_matrix();
+    v_test   = set_vector();
+    m_bigger = GSparseMatrix(g_rows+1, g_cols+1);
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                          Test: Allocate zero matrix                     *
+/***********************************************************************//**
+ * @brief Test matrix allocation
  ***************************************************************************/
-void test_allocate(void)
+void TestGSparseMatrix::alloc_matrix(void)
 {
-  cout << "Test GSparseMatrix: Allocate zero matrix: ";
-  try {
-    GSparseMatrix test(0,0);
-  }
-  catch (GException::empty &e) {
-    cout << ". ok." << endl;
-  }
-  catch (exception &e) {
-	cout << endl << "TEST ERROR: Did not signal zero matrix allocation." << endl;
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << ". ok." << endl;
-}
-
-
-/***************************************************************************
- *                              Test: Assign values                        *
- ***************************************************************************/
-void test_assign_values(const GSparseMatrix& m_test)
-{
-  //
-  cout << "Test GSparseMatrix: Assign matrix values: ";
-  try {
-    //
-    GSparseMatrix test(3,3);
-	test(1,1) = 1.0; 
-    if (test(0,0) != 0.0 || test(1,0) != 0.0 || test(2,0) != 0.0 ||
-        test(0,1) != 0.0 || test(1,1) != 1.0 || test(2,1) != 0.0 ||
-        test(0,2) != 0.0 || test(1,2) != 0.0 || test(2,2) != 0.0) {
-      cout << endl << "TEST ERROR: Unable to set matrix values." << endl;
-	  cout << test << endl;
-	  throw;
-	}
-    cout << ".";
-	//
-	GSparseMatrix result = m_test;
-	result(0,0) = 0.0;
-	result(0,0) = 1.0;
-    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Bad M(row,col) assignment." << endl;
-	  cout << "result:" << endl << result << endl;
-	  cout << "m_test:" << endl << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	result      = m_test;
-	result(0,0) = 0.0;
-	result(0,4) = 0.0;
-	result(0,0) = 1.0;
-	result(0,4) = 0.0;
-	result(0,4) = 7.0;
-    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Bad M(row,col) assignment." << endl;
-	  cout << "result:" << endl << result << endl;
-	  cout << "m_test:" << endl << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	result      = m_test;
-	result(0,1) = 2.0;
-	result(0,2) = 2.0;
-	result(0,3) = 2.0;
-	result(0,1) = 0.0;
-	result(0,2) = 0.0;
-	result(0,3) = 0.0;
-    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Bad M(row,col) assignment." << endl;
-	  cout << "result:" << endl << result << endl;
-	  cout << "m_test:" << endl << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	result.clear();
-    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.clear()." << endl;
-	  cout << "result:" << endl << result << endl;
-	  cout << "m_test:" << endl << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-    #if defined(G_RANGE_CHECK)
+    // Allocate zero matrix. The allocation should fail.
+    test_try("Allocate zero matrix");
     try {
-        GSparseMatrix test(3,3);
+        GSparseMatrix test(0,0);
+        test_try_failure("Expected GException::empty exception.");
+    }
+    catch (GException::empty &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Setup a symmetric sparse matrix
+    int size = 30;
+    GSparseMatrix symmetric(size,size);
+    for (int i = 0; i < size; i+=2) {
+        for (int j = 0; j < size; j+=2) {
+            symmetric(i,j) = 1.0+i+j;
+        }
+    }
+
+    // Convert to GMatrix
+    test_try("Test symmetric GMatrix conversion");
+    try {
+        GMatrix cnv_matrix        = GMatrix(symmetric);
+        GSparseMatrix back_matrix = GSparseMatrix(cnv_matrix);
+        test_assert((symmetric == back_matrix),
+                    "Test symmetric GSparseMatrix - GMatrix conversion",
+                    "Found:\n"+back_matrix.print()+"\nExpected:\n"+symmetric.print());
+        test_try_success();
+    }
+    catch (GException::empty &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GMatrix conversion
+    test_try("Test GMatrix conversion");
+    try {
+        GMatrix       cnv_matrix  = GMatrix(m_test);
+        GSparseMatrix back_matrix = GSparseMatrix(cnv_matrix);
+        test_assert((m_test == back_matrix),
+                    "Test GSparseMatrix - GMatrix conversion",
+                    "Found:\n"+back_matrix.print()+"\nExpected:\n"+m_test.print());
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GSparseMatrix <-> GSymMatrix conversion
+    test_try("Test GSymMatrix conversion");
+    try {
+        GSymMatrix    cnv_sym  = GSymMatrix(symmetric);
+        GSparseMatrix back_sym = GSparseMatrix(cnv_sym);
+        test_assert((symmetric == back_sym),
+                    "Test GSparseMatrix - GSymMatrix conversion",
+                    "Found:\n"+back_sym.print()+"\nExpected:\n"+symmetric.print());
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test invalid GSparseMatrix <-> GSymMatrix conversion
+    test_try("Test invalid GSymMatrix conversion");
+    try {
+        GSymMatrix bad_sym = GSymMatrix(m_test);
+        test_try_failure("Expected GException::matrix_not_symmetric exception.");
+    }
+    catch (GException::matrix_not_symmetric &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test value assignment
+ ***************************************************************************/
+void TestGSparseMatrix::assign_values(void)
+{
+    // Setup 3x3 matrix
+    GSparseMatrix test(3,3);
+    
+    // Assignment individual values
+    for (int i = 0; i < 3; ++i) {
+        for (int k = 0; k < 3; ++k) {
+            double value = i*2.0 + k*2.0;
+            test(i,k)   = value;
+        }
+    }
+
+    // Check assignment of individual values
+    for (int i = 0; i < 3; ++i) {
+        for (int k = 0; k < 3; ++k) {
+            double value = i*2.0 + k*2.0;
+            test_value(test(i,k), value, 1.0e-10, "Test matrix element assignment");
+        }
+    }
+
+    // Verify range checking
+    #ifdef G_RANGE_CHECK
+    test_try("Verify range checking");
+    try {
         test(3,3) = 1.0;
+        test_try_failure("Expected GException::out_of_range exception.");
     }
     catch (GException::out_of_range &e) {
+        test_try_success();
     }
-    catch (exception &e) {
-        cout << e.what() << endl;
-        throw;
+    catch (std::exception &e) {
+        test_try_failure(e);
     }
-    cout << ".";
     #endif
-  //
-  // Insert column into 10 x 10 matrix using matrix stack and the
-  // compressed vector format
-  try {
-    //
-	// Set-up sparse matrix for adding  
+
+    // Setup 10x10 matrix and keep for reference
 	GSparseMatrix sparse(10,10);
-	for (int i = 3; i < 5; ++i)
-	  sparse(i,i) = 5.0;
+	for (int i = 3; i < 5; ++i) {
+        sparse(i,i) = 5.0;
+    }
+	GSparseMatrix initial   = sparse;
 	GSparseMatrix reference = sparse;
-	//
-	// Initialise vector for column adding
-	GVector column(10);
-	//
-	// Initialise matrix stack  
+
+    // Insert column into 10 x 10 matrix using large matrix stack and the
+    // add_col(GVector) method
 	sparse.stack_init(100,50);
-	//
-	// Fill matrix using add_col
+	GVector column(10);
     for (int j = 0; j < 10; ++j) {
-	  // 
-	  // Set column index
-	  int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
-	  if (col > 9) col -= 10;          // This avoids overflow
-	  //
-	  // Set-up vector
-	  int i_min = (j < 2) ?  0 : j-2;
-	  int i_max = (j > 8) ? 10 : j+2;
-	  column    = 0.0;
-	  for (int i = i_min; i < i_max; ++i) {
-		column[i]         = (i+1)*1;
-		reference(i,col) += column[i];
-	  }
-	  //
-	  // Add vector
-	  sparse.add_col(column, col);
+        int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+        if (col > 9) col -= 10;          // This avoids overflow
+        int i_min = (j < 2) ?  0 : j-2;
+        int i_max = (j > 8) ? 10 : j+2;
+        column = 0.0;
+        for (int i = i_min; i < i_max; ++i) {
+            column[i]         = (i+1)*1;
+            reference(i,col) += column[i];
+        }
+        sparse.add_col(column, col);
 	}
-	//
-	// Destroy stack
 	sparse.stack_destroy();
-    if (sparse != reference) {
-      cout << endl << "TEST ERROR: Corrupt add_col function (vector version)." << endl;
-	  cout << "Sparse " << sparse << endl;
-	  cout << "Reference " << reference << endl;
-	  throw;
+    test_assert((sparse == reference),
+                "Test stack fill with large stack using add_col(GVector) method",
+                "Found:\n"+sparse.print()+"\nExpected:\n"+reference.print());
+
+    // Insert column into 10 x 10 matrix using small matrix stack and the
+    // add_col(GVector) method
+    sparse = initial;
+	sparse.stack_init(100,3);
+    for (int j = 0; j < 10; ++j) {
+        int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+        if (col > 9) col -= 10;          // This avoids overflow
+        int i_min = (j < 2) ?  0 : j-2;
+        int i_max = (j > 8) ? 10 : j+2;
+        column = 0.0;
+        for (int i = i_min; i < i_max; ++i) {
+            column[i]         = (i+1)*1;
+        }
+        sparse.add_col(column, col);
 	}
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  //
-  // Insert column into 10 x 10 matrix using matrix stack and the
-  // compressed vector format
-  try {
-    //
-	// Set-up sparse matrix for adding  
-	GSparseMatrix sparse(10,10);
-	sparse.clear();
-	for (int i = 3; i < 5; ++i)
-	  sparse(i,i) = 5.0;
-	GSparseMatrix reference = sparse;
-	//
-	// Set-up workspace for column adding
+	sparse.stack_destroy();
+    test_assert((sparse == reference),
+                "Test stack fill with small stack using add_col(GVector) method",
+                "Found:\n"+sparse.print()+"\nExpected:\n"+reference.print());
+
+    // Insert column into 10 x 10 matrix using tiny matrix stack and the
+    // add_col(GVector) method
+    sparse = initial;
+	sparse.stack_init(8,3);
+    for (int j = 0; j < 10; ++j) {
+        int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+        if (col > 9) col -= 10;          // This avoids overflow
+        int i_min = (j < 2) ?  0 : j-2;
+        int i_max = (j > 8) ? 10 : j+2;
+        column = 0.0;
+        for (int i = i_min; i < i_max; ++i) {
+            column[i]         = (i+1)*1;
+        }
+        sparse.add_col(column, col);
+	}
+	sparse.stack_destroy();
+    test_assert((sparse == reference),
+                "Test stack fill with tiny stack using add_col(GVector) method",
+                "Found:\n"+sparse.print()+"\nExpected:\n"+reference.print());
+
+    // Insert column into 10 x 10 matrix using no matrix stack and the
+    // add_col(GVector) method
+    sparse = initial;
+    for (int j = 0; j < 10; ++j) {
+        int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+        if (col > 9) col -= 10;          // This avoids overflow
+        int i_min = (j < 2) ?  0 : j-2;
+        int i_max = (j > 8) ? 10 : j+2;
+        column = 0.0;
+        for (int i = i_min; i < i_max; ++i) {
+            column[i]         = (i+1)*1;
+        }
+        sparse.add_col(column, col);
+	}
+	sparse.stack_destroy();
+    test_assert((sparse == reference),
+                "Test fill using add_col(GVector) method",
+                "Found:\n"+sparse.print()+"\nExpected:\n"+reference.print());
+
+	// Set-up workspace for compressed column adding
 	double* wrk_data = new double[10];
 	int*    wrk_row  = new int[10];
-	//
-	// Initialise matrix stack  
-	sparse.stack_init(100,50);
-	//
-	// Fill matrix using add_col
-    for (int j = 0; j < 10; ++j) {
-	  // 
-	  // Set column index
-	  int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
-	  if (col > 9) col -= 10;          // This avoids overflow
-	  //
-	  // Set-up vector
-	  int inx   = 0;
-	  int i_min = (j < 2) ?  0 : j-2;
-	  int i_max = (j > 8) ? 10 : j+2;
-	  for (int i = i_min; i < i_max; ++i) {
-		wrk_data[inx]     = (i+1)*1;
-		wrk_row[inx]      = i;
-		reference(i,col) += wrk_data[inx];
-		inx++;
-	  }
-	  //
-	  // Add vector
-	  sparse.add_col(wrk_data, wrk_row, inx, col);
-	}
-	//
-	// Destroy stack
-	sparse.stack_destroy();
-    if (sparse != reference) {
-      cout << endl << "TEST ERROR: Corrupt add_col function (compressed array version)." << endl;
-	  cout << "Sparse " << sparse << endl;
-	  cout << "Reference " << reference << endl;
-	  throw;
-	}
-	//
+
+    // Compressed tests
+    test_try("Verify compressed column add_col() method");
+    try {
+
+        // Insert column into 10 x 10 matrix using large matrix stack and the
+        // compressed column add_col() method
+        sparse    = initial;
+        reference = initial;
+        sparse.stack_init(100,50);
+        for (int j = 0; j < 10; ++j) {
+            int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+            if (col > 9) col -= 10;          // This avoids overflow
+            int inx   = 0;
+            int i_min = (j < 3) ?  0 : j-3;
+            int i_max = (j > 8) ? 10 : j+2;
+            for (int i = i_min; i < i_max; ++i) {
+                wrk_data[inx]     = (i+1)*3.7;
+                wrk_row[inx]      = i;
+                reference(i,col) += wrk_data[inx];
+                inx++;
+            }
+            sparse.add_col(wrk_data, wrk_row, inx, col);
+        }
+        sparse.stack_destroy();
+        test_assert((sparse == reference),
+                    "Test stack fill with large stack using compressed add_col() method",
+                    "Found:\n"+sparse.print()+"\nExpected:\n"+reference.print());
+
+        // Insert column into 10 x 10 matrix using small matrix stack and the
+        // compressed column add_col() method
+        sparse = initial;
+        sparse.stack_init(100,2);
+        for (int j = 0; j < 10; ++j) {
+            int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+            if (col > 9) col -= 10;          // This avoids overflow
+            int inx   = 0;
+            int i_min = (j < 3) ?  0 : j-3;
+            int i_max = (j > 8) ? 10 : j+2;
+            for (int i = i_min; i < i_max; ++i) {
+                wrk_data[inx] = (i+1)*3.7;
+                wrk_row[inx]  = i;
+                inx++;
+            }
+            sparse.add_col(wrk_data, wrk_row, inx, col);
+        }
+        sparse.stack_destroy();
+        test_assert((sparse == reference),
+                    "Test stack fill with small stack using compressed add_col() method",
+                    "Found:\n"+sparse.print()+"\nExpected:\n"+reference.print());
+
+        // Insert column into 10 x 10 matrix using tiny matrix stack and the
+        // compressed column add_col() method
+        sparse = initial;
+        sparse.stack_init(3,2);
+        for (int j = 0; j < 10; ++j) {
+            int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+            if (col > 9) col -= 10;          // This avoids overflow
+            int inx   = 0;
+            int i_min = (j < 3) ?  0 : j-3;
+            int i_max = (j > 8) ? 10 : j+2;
+            for (int i = i_min; i < i_max; ++i) {
+                wrk_data[inx] = (i+1)*3.7;
+                wrk_row[inx]  = i;
+                inx++;
+            }
+            sparse.add_col(wrk_data, wrk_row, inx, col);
+        }
+        sparse.stack_destroy();
+        test_assert((sparse == reference),
+                    "Test stack fill with tiny stack using compressed add_col() method",
+                    "Found:\n"+sparse.print()+"\nExpected:\n"+reference.print());
+
+        // Insert column into 10 x 10 matrix using no matrix stack and the
+        // compressed column add_col() method
+        sparse = initial;
+        for (int j = 0; j < 10; ++j) {
+            int col = int(0.8 * j + 0.5);    // This allows that some columns are twice
+            if (col > 9) col -= 10;          // This avoids overflow
+            int inx   = 0;
+            int i_min = (j < 3) ?  0 : j-3;
+            int i_max = (j > 8) ? 10 : j+2;
+            for (int i = i_min; i < i_max; ++i) {
+                wrk_data[inx] = (i+1)*3.7;
+                wrk_row[inx]  = i;
+                inx++;
+            }
+            sparse.add_col(wrk_data, wrk_row, inx, col);
+        }
+        sparse.stack_destroy();
+        test_assert((sparse == reference),
+                    "Test fill using compressed add_col() method",
+                    "Found:\n"+sparse.print()+"\nExpected:\n"+reference.print());
+
+        // Signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
 	// Free workspace
 	delete [] wrk_data;
 	delete [] wrk_row;
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << " ok." << endl;
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                        Test: Matrix copy constructor                    *
+/***********************************************************************//**
+ * @brief Test matrix copy
  ***************************************************************************/
-void test_copy_constructor(const GSparseMatrix& m_test)
+void TestGSparseMatrix::copy_matrix(void)
 {
-  cout << "Test GSparseMatrix: Define matrix using copy constructor: ";
-  try {
-	//
+    // Copy matrix
 	GSparseMatrix test = m_test;
-    if (!check_matrix(test, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt copy constructor." << endl;
-	  cout << test << endl;
-	  throw;
-	}
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << ". ok." << endl;
+    
+    // Test if original and compied matrices are correct
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test), "Test matrix copy operator",
+                "Found:\n"+test.print()+"\nExpected:\n"+m_test.print());
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                           Test: Matrix assignment                       *
+/***********************************************************************//**
+ * @brief Test matrix operations
+ *
+ * Tests matrix*vector and matrix*matrix multiplication operations.
  ***************************************************************************/
-void test_assign_matrix(const GSparseMatrix& m_test)
+void TestGSparseMatrix::matrix_operations(void)
 {
-  cout << "Test GSparseMatrix: Matrix assignment: ";
-  try {
-	//
-	// GSparseMatrix = GSparseMatrix
-	GSparseMatrix result(1,1);
-	result = m_test;
-    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt assignment." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	// GSparseMatrix = GSparseMatrix (bigger matrix)
-	GSparseMatrix bigger(1000,1000);
-	for (int i = 0; i < 1000; ++i)
-	  bigger(i,i) = (i+1)*1.1;
-	result = bigger;
-	cout << ".";
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << " ok." << endl;
-}
+    // Perform vector multiplication
+	GVector test1 = m_test * v_test;
 
+    // Check result
+    GVector ref1(g_rows);
+    for (int i = 0; i < g_elements; ++i) {
+        ref1[g_row[i]] += g_matrix[i] * v_test[g_col[i]];
+    }
+    bool result = true;
+    for (int i = 0; i < g_rows; ++i) {
+        if (ref1[i] != test1[i]) {
+            result = false;
+            break;
+        }
+    }
 
-/***************************************************************************
- *                           Test: Matrix transpose                        *
- ***************************************************************************/
-void test_transpose(const GSparseMatrix& m_test)
-{
-  cout << "Test GSparseMatrix: Matrix transpose: ";
-  try {
-    //
-	// transpose(GSparseMatrix)
-	GSparseMatrix result(1,1);
-	result = transpose(m_test);
-    if (!check_transpose_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt transpose(GSparseMatrix) function." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	cout << ".";
-    //
-	// GSparseMatrix.transpose()
-	result = m_test;
-	result.transpose();
-    if (!check_transpose_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.transpose() function." << endl;
-	  cout << result << endl;
-	  throw;
-	}
-	cout << ".";
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << " ok." << endl;
-}
+    // Test if original matrix and result vector are correct
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(result, "Test matrix*vector multiplication",
+                "Found:\n"+test1.print()+"\nExpected:\n"+ref1.print());
 
-
-/***************************************************************************
- *                     Test: Matrix*Vector multiplication                  *
- ***************************************************************************/
-void test_matrix_vector(const GSparseMatrix& m_test, const GVector& v_test)
-{
-  cout << "Test GSparseMatrix: Matrix*Vector multiplication: ";
-  try {
-    //
-	GVector test = m_test*v_test;
-	if (!check_matrix_vector(test) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt Matrix*Vector multiplication." << endl;
-	  cout << test << endl;
-	  throw;
-	}
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << ".";
-  try {
-	GSparseMatrix bigger(1000,1000);
-	for (int i = 0; i < 1000; ++i)
-	  bigger(i,i) = (i+1)*1.1;
-	GVector test = bigger*v_test;
-  }
-  catch (GException::matrix_vector_mismatch &e) {
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << ". ok." << endl;
-}
-
-
-/***************************************************************************
- *                     Test: Matrix*Vector multiplication                  *
- ***************************************************************************/
-void test_matrix_matrix(const GSparseMatrix& m_test)
-{
-  cout << "Test GSparseMatrix: Matrix*Matrix multiplication: ";
-  try {
-    //
-	GSparseMatrix test = m_test * transpose(m_test);
-	if (!check_matrix_matrix(test) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt Matrix*Matrix multiplication." << endl;
-	  cout << "test:"   << endl << test << endl;
-	  cout << "m_test:" << endl << m_test << endl;
-	  throw;
-	}
-    cout << ".";
-    //
-	GSparseMatrix bigger(1000,1000);
-	for (int i = 0; i < 1000; ++i)
-	  bigger(i,i) = (i+1)*1.1;
+    // Test incompatible vector multiplication
+    test_try("Test incompatible matrix*vector multiplication");
     try {
-	  GSparseMatrix test = m_test * bigger;
+        GVector test2 = m_bigger * v_test;
+        test_try_failure("Expected GException::matrix_vector_mismatch exception.");
+    }
+    catch (GException::matrix_vector_mismatch &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test matrix multiplication
+	GSparseMatrix test3 = m_test * transpose(m_test);
+
+    // Check if the result matrix is as expected
+    GSparseMatrix ref3(g_rows, g_rows);
+    for (int row = 0; row < g_rows; ++row) {
+        for (int col = 0; col < g_rows; ++col) {
+            double value = 0.0;
+            for (int i = 0; i < g_cols; ++i) {
+                double ref_value_1 = 0.0;
+                double ref_value_2 = 0.0;
+                for (int k = 0; k < g_elements; ++k) {
+                    if (g_row[k] == row && g_col[k] == i) {
+                        ref_value_1 = g_matrix[k];
+                        break;
+                    }
+                }
+                for (int k = 0; k < g_elements; ++k) {
+                    if (g_row[k] == col && g_col[k] == i) {
+                        ref_value_2 = g_matrix[k];
+                        break;
+                    }
+                }
+                value += ref_value_1 * ref_value_2;
+            }
+            ref3(row,col) = value;
+            if (test3(row,col) != value) {
+                result = false;
+                break;
+            }
+        }
+    }
+
+    // Test if original matrix and result matrix are correct
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(result, "Test matrix multiplication",
+                "Found:\n"+test3.print()+"\nExpected:\n"+ref3.print());
+    test_value(test3.rows(), g_rows, "Test number of rows of result matrix");
+    test_value(test3.cols(), g_rows, "Test number of columns of result matrix");
+
+    // Test incompatible matrix multiplication
+    test_try("Test incompatible matrix multiplication");
+    try {
+        GSparseMatrix test4 = m_bigger * m_test;
+        test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
-      cout << ".";
+        test_try_success();
     }
-    catch (exception &e) {
-      cout << e.what() << endl;
-	  throw;
+    catch (std::exception &e) {
+        test_try_failure(e);
     }
-	//
+
+    // Test another incompatible matrix multiplication
+    test_try("Test incompatible matrix multiplication");
     try {
-	  GSparseMatrix test7 = bigger * m_test;
+        GSparseMatrix test5 = m_bigger * m_test;
+        test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
-      cout << ".";
+        test_try_success();
     }
-    catch (exception &e) {
-      cout << e.what() << endl;
-	  throw;
+    catch (std::exception &e) {
+        test_try_failure(e);
     }
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << " ok." << endl;
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                           Test: Arithmetics                             *
+/***********************************************************************//**
+ * @brief Test matrix arithmetics
+ *
+ * Tests matrix arithmetics.
  ***************************************************************************/
-void test_arithmetics(const GSparseMatrix& m_test)
+void TestGSparseMatrix::matrix_arithmetics(void)
 {
-  cout << "Test GSparseMatrix: Arithmetics: ";
-  try {
-	//
 	// -GSparseMatrix
-	GSparseMatrix result(1,1);
-	result = -m_test;
-    if (!check_matrix(result, -1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt -GSparseMatrix operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	// abs(GSparseMatrix)
-	result = abs(m_test);
-    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt abs(GSparseMatrix) function." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	GSparseMatrix test = -m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, -1.0, 0.0), "Test -GSparseMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
 	// GSparseMatrix += GSparseMatrix
-	result  = m_test;
-	result += m_test;
-    if (!check_matrix(result, 2.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix += GSparseMatrix operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	test  = m_test;
+	test += m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 2.0, 0.0), "Test GSparseMatrix += GSparseMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
 	// GSparseMatrix -= GSparseMatrix
-	result  = m_test;
-	result -= m_test;
-    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix -= GSparseMatrix operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	test  = m_test;
+	test -= m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 0.0, 0.0), "Test GSparseMatrix -= GSparseMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
 	// GSparseMatrix *= 3.0
-	result  = m_test;
-	result *= 3.0;
-    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix *= double operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	test  = m_test;
+	test *= 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 3.0, 0.0), "Test GSparseMatrix *= 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
 	// GSparseMatrix /= 3.0
-	result  = m_test;
-	result /= 3.0;
-    if (!check_matrix(result, 1.0/3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix /= double operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	test  = m_test;
+	test /= 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GSparseMatrix /= 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
 	// GSparseMatrix + GSparseMatrix
-	result = m_test + m_test;
-    if (!check_matrix(result, 2.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix + GSparseMatrix operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	test = m_test + m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 2.0, 0.0), "Test GSparseMatrix + GSparseMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
 	// GSparseMatrix - GSparseMatrix
-	result = m_test - m_test;
-    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix - GSparseMatrix operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	// GSparseMatrix - GSparseMatrix
-	result = m_test - m_test;
-    if (!check_matrix(result, 0.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix - GSparseMatrix operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	test = m_test - m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 0.0, 0.0), "Test GSparseMatrix - GSparseMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
 	// GSparseMatrix * 3.0
-	result = m_test * 3.0;
-    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix * double operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	// GSparseMatrix * -7.12
-	result = m_test * -7.12;
-    if (!check_matrix(result, -7.12, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix * double operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	test = m_test * 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 3.0, 0.0), "Test GSparseMatrix * 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
 	// 3.0 * GSparseMatrix
-	result = 3.0 * m_test;
-    if (!check_matrix(result, 3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt double * GSparseMatrix operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+	test = 3.0 * m_test;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 3.0, 0.0), "Test 3.0 * GSparseMatrix",
+                "Unexpected result matrix:\n"+test.print());
+
 	// GSparseMatrix / 3.0
-	result = m_test / 3.0;
-    if (!check_matrix(result, 1.0/3.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix / double operator." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	// GSparseMatrix / 0.0
-	double zero = 0.0;
-	result = m_test / zero;
-    if (!check_matrix(result, 1.0/zero, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix / 0.0." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	cout << ".";
-	}
-	//
-	// GSparseMatrix.add_col()
-	result = m_test;
- 	GVector v_add(g_rows);
-	for (int i = 0; i < g_rows; ++i)
-	  v_add[i] = 7.0;
-	for (int col = 0; col < g_cols; ++col)
-	  result.add_col(v_add, col);
-    if (!check_matrix(result, 1.0, 7.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.add_col(+v)." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	// GSparseMatrix.add_col()
-	for (int col = 0; col < g_cols; ++col)
-	  result.add_col(-v_add, col);
-    if (!check_matrix(result, 1.0, 0.0) || !check_matrix(m_test, 1.0, 0.0)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.add_col(-v)." << endl;
-	  cout << "result " << result << endl;
-	  cout << "m_test " << m_test << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	// GSparseMatrix.add_col() using a compressed array
-	GSparseMatrix compare = m_test;
- 	GVector v_sparse(g_rows);
-	for (int i = 0; i < g_rows; i += 2)  // Build vector for comparison
-	  v_sparse[i] = 7.0;
-	for (int col = 0; col < g_cols; ++col)
-	  compare.add_col(v_sparse, col);
-	result = m_test;
-	double* values = new double[g_rows];
-	int*    rows   = new int[g_rows];
-	int     number = 0;
-	for (int i = 0; i < g_rows; i += 2, ++number) {
-	  values[number] = 7.0;
-	  rows[number]   = i;
-	}
-	for (int col = 0; col < g_cols; ++col)
-	  result.add_col(values, rows, number, col);
-    delete [] values;
-	delete [] rows;
-    if (result != compare) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.add_col(compressed array)." << endl;
-	  cout << "m_test " << m_test << endl;
-	  cout << "result " << result << endl;
-	  cout << "compare " << compare << endl;
-	  throw;
-	}
-	cout << ".";
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  try {
-	GSparseMatrix bigger(1000,1000);
-	GSparseMatrix result(1,1);
-	for (int i = 0; i < 1000; ++i)
-	  bigger(i,i) = (i+1)*1.1;
-	result  = m_test;
-	result += bigger;
-  }
-  catch (GException::matrix_mismatch &e) {
-	cout << ".";
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << " ok." << endl;
+	test = m_test / 3.0;
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GSparseMatrix / 3.0",
+                "Unexpected result matrix:\n"+test.print());
+
+    // Test invalid matrix addition
+    test_try("Test invalid matrix addition");
+    try {
+        test  = m_test;
+        test += m_bigger;
+        test_try_failure("Expected GException::matrix_mismatch exception.");
+    }
+    catch (GException::matrix_mismatch &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                           Test: Matrix functions                        *
+/***********************************************************************//**
+ * @brief Test matrix functions
+ *
+ * Tests matrix functions.
  ***************************************************************************/
-void test_functions(const GSparseMatrix& m_test)
+void TestGSparseMatrix::matrix_functions(void)
 {
-  cout << "Test GSparseMatrix: Matrix functions: ";
-  try {
-	//
+    // Minimum
 	double min = m_test.min();
-    if (!check_matrix_min(min)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.min() function." << endl;
-	  cout << "min:" << min << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+
+    // Check mimimum
+    double value = 0.0;
+    test_value(min, value, 0.0, "Test minimum function");
+
+    // Maximum
 	double max = m_test.max();
-    if (!check_matrix_max(max)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.max() function." << endl;
-	  cout << "max:" << max << endl;
-	  throw;
-	}
-	cout << ".";
-	//
+
+    // Check maximum
+    value = g_matrix[0];
+    for (int i = 1; i < g_elements; ++i) {
+        if (g_matrix[i] > value) {
+            value = g_matrix[i];
+        }
+    }
+    test_value(max, value, 0.0, "Test maximum function");
+
+	// Sum
 	double sum = m_test.sum();
-    if (!check_matrix_sum(sum)) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.sum() function." << endl;
-	  cout << "sum:" << sum << endl;
-	  throw;
-	}
-	cout << ".";
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-  }
-  cout << " ok." << endl;
+
+    // Check sum
+    value = 0.0;
+    for (int i = 0; i < g_elements; ++i) {
+        value += g_matrix[i];
+    }
+    test_value(sum, value, 1.0e-20, "Test sum function");
+
+    // Transpose function
+	GSparseMatrix test1 = transpose(m_test);
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix_trans(test1, 1.0, 0.0),
+                "Test transpose(GSparseMatrix) function",
+                "Unexpected transposed matrix:\n"+test1.print());
+
+    // Transpose method
+	test1 = m_test;
+	test1.transpose();
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix_trans(test1, 1.0, 0.0), 
+                "Test GSparseMatrix.transpose() method",
+                "Unexpected transposed matrix:\n"+test1.print());
+
+    // Convert to general matrix
+    GSparseMatrix test2 = GSparseMatrix(m_test);
+    test_assert(check_matrix(m_test), "Test source matrix");
+    test_assert(check_matrix(test2, 1.0, 0.0), 
+                "Test GSparseMatrix(GSparseMatrix) constructor",
+                "Unexpected GSparseMatrix:\n"+test2.print());
+    
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                           Test: Matrix comparison                       *
+/***********************************************************************//**
+ * @brief Test matrix comparisons
  ***************************************************************************/
-void test_comparison(const GSparseMatrix& m_test)
+void TestGSparseMatrix::matrix_compare(void)
 {
-  cout << "Test GSparseMatrix: Comparison: ";
-  try {
-	GSparseMatrix bigger(1000,1000);
-	for (int i = 0; i < 1000; ++i)
-	  bigger(i,i) = (i+1)*1.1;
-	//
-	if ((m_test == m_test) != 1) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix == GSparseMatrix operator." << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	GSparseMatrix test(g_rows,g_cols);
-	if ((m_test == test) != 0) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix == GSparseMatrix operator." << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	if ((m_test == bigger) != 0) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix == GSparseMatrix operator." << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	if ((m_test != m_test) != 0) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix != GSparseMatrix operator." << endl;
-	  throw;
-	}
-	cout << ".";
-    //
-	if ((m_test != test) != 1) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix != GSparseMatrix operator." << endl;
-	  throw;
-	}
-	cout << ".";
-	//
-	if ((m_test != bigger) != 1) {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix != GSparseMatrix operator." << endl;
-	  throw;
-	}
-	cout << ".";
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  cout << " ok." << endl;
+    // Allocate an empty matrix
+    GSparseMatrix empty(g_rows, g_cols);
+
+    // Allocate a full matrix
+    GSparseMatrix full(g_rows, g_cols);
+    for (int i = 0; i < g_rows; ++i) {
+        for (int j = 0; j < g_rows; ++j) {
+            full(i,j) = 1.0 + i*1000.0 + j*10.0;
+        }
+    }
+
+    // Test == operator
+    test_assert((m_test == m_test), "Test == operator",
+                "Identity test faileded on:\n"+m_test.print());
+    test_assert(!(m_test == empty), "Test == operator",
+                "Matrix\n"+m_test.print()+"\nshould not be equal to\n"+empty.print());
+    test_assert(!(m_test == full), "Test == operator",
+                "Matrix\n"+m_test.print()+"\nshould not be equal to\n"+full.print());
+    test_assert(!(m_test == m_bigger), "Test == operator",
+                "Matrix\n"+m_test.print()+"\nshould not be equal to\n"+m_bigger.print());
+
+    // Test != operator
+    test_assert(!(m_test != m_test), "Test != operator",
+                "Unequality test faileded on:\n"+m_test.print());
+    test_assert((m_test != empty), "Test != operator",
+                "Matrix\n"+m_test.print()+"\nshould differ from\n"+empty.print());
+    test_assert((m_test != full), "Test != operator",
+                "Matrix\n"+m_test.print()+"\nshould differ from\n"+full.print());
+    test_assert((m_test != m_bigger), "Test != operator",
+                "Matrix\n"+m_test.print()+"\nshould differ from\n"+m_bigger.print());
+
+    // Return
+    return;
 }
 
 
-/***************************************************************************
- *                     Test: Conversion between matrix types               *
+/***********************************************************************//**
+ * @brief Test Cholesky decomposition
  ***************************************************************************/
-void test_conversion(void)
+void TestGSparseMatrix::matrix_cholesky(void)
 {
-    // Dump header
-    std::cout << "Test GSparseMatrix: Matrix conversions: ";
+    // Setup matrix for Cholesky decomposition
+    GSparseMatrix chol_test(5,5);
+    chol_test(0,0) = 1.0;
+    chol_test(0,1) = 0.2;
+    chol_test(0,2) = 0.2;
+    chol_test(0,3) = 0.2;
+    chol_test(0,4) = 0.2;
+    chol_test(1,0) = 0.2;
+    chol_test(2,0) = 0.2;
+    chol_test(3,0) = 0.2;
+    chol_test(4,0) = 0.2;
+    chol_test(1,1) = 1.0;
+    chol_test(2,2) = 1.0;
+    chol_test(3,3) = 1.0;
+    chol_test(4,4) = 1.0;
 
-    // Test 1
+    // Try to solve now (should not work)
+    test_try("Try Cholesky solver without factorisation");
     try {
-      //
-      // Setup a symmetric sparse matrix
-      int           num = 10;
-      GSparseMatrix sparse(num,num);
-      for (int i = 0; i < num; ++i)
-          sparse(i,i) = (i+1);
-      for (int j = 1; j < num; ++j) {
-          sparse(0,j) = (j+1);
-          sparse(j,0) = (j+1);
-      }
-      std::cout << ".";
-      //
-      // Convert GSparseMatrix matrix into GSymMatrix object
-//      GSymMatrix converted = sym_matrix(sparse);
-      GSymMatrix converted = GSymMatrix(sparse);
-      std::cout << ".";
-      //
-      // Convert GSymMatrix back to GSparseMatrix matrix
-      GSparseMatrix back_convert = sparse_matrix(converted);
-      std::cout << ".";
-      //
-      // Compare back converted matrix to original one. They should be identical
-      if (sparse != back_convert) {
-          std::cout << std::endl
-                    << "TEST ERROR: Unable to convert matrixes (symmetric)."
-                    << std::endl;
-          std::cout << "Original matrix " << sparse << std::endl;
-          std::cout << "GSymMatrix matrix " << converted << std::endl;
-          std::cout << "Back converted matrix " << back_convert << std::endl;
-        throw;
-      }
-    //
-    // Determine the fill of the matrix. It should be 0.28
-    double fill = back_convert.fill();
-    if (abs(fill-0.28) > 1.0e-15) {
-      cout << endl << "TEST ERROR: Bad fill " << fill << " determined (expected 1.0)." <<
-           endl;
-      throw;
+        GVector vector(5);
+        vector = chol_test.cholesky_solver(vector);
+        test_try_failure("Expected GException::matrix_not_factorised exception.");
     }
-    cout << ".";
-    //
-    // Extract lower triangle and check values
-    #if 0
-    GMatrix lower = sparse.extract_lower_triangle();
-    int ok = 1;
-    for (int j = 1; j < num; ++j) {
-      for (int i = 0; i < j; ++i) {
-        if (lower(i,j) != 0.0)
-          ok = 0;
-      }
+    catch (GException::matrix_not_factorised) {
+        test_try_success();
     }
-    for (int j = 0; j < num; ++j) {
-      for (int i = j; i < num; ++i) {
-        if (lower(i,j) != sparse(i,j))
-          ok = 0;
-      }
+    catch (std::exception &e) {
+        test_try_failure(e);
     }
-    if (!ok) {
-      cout << endl << "TEST ERROR: Corrupt extract_lower_triangle." << endl;
-      cout << "Original matrix " << sparse << endl;
-      cout << "Lower triangle matrix " << lower << endl;
-      throw;
-    }
-    cout << ".";
-    //
-    // Extract upper triangle and check values
-    GMatrix upper = sparse.extract_upper_triangle();
-    ok = 1;
-    for (int j = 0; j < num; ++j) {
-      for (int i = j+1; i < num; ++i) {
-        if (upper(i,j) != 0.0)
-          ok = 0;
-      }
-    }
-    for (int j = 0; j < num; ++j) {
-      for (int i = 0; i <= j; ++i) {
-        if (upper(i,j) != sparse(i,j))
-          ok = 0;
-      }
-    }
-    if (!ok) {
-      cout << endl << "TEST ERROR: Corrupt extract_upper_triangle." << endl;
-      cout << "Original matrix " << sparse << endl;
-      cout << "Upper triangle matrix " << upper << endl;
-      throw;
-    }
-    cout << ".";
-    #endif
-    //
-    // Now make the matrix unsymmetric
-    sparse(0,num-1) = 1000.0;
-    //
-    // Try converting now into GSymMatrix object (this should fail)
-    try {
-      converted = sym_matrix(sparse);
-      cout << endl << "TEST ERROR: Sparse->Sym conversion should have failed." << endl;
-      throw;
-    }
-    catch (GException::matrix_not_symmetric &e) {
-      cout << ".";
-    }
-    catch (exception &e) {
-      cout << e.what() << endl;
-      throw;
-    }
-    //
-    // Convert matrix into GMatrix object
-    GMatrix full = matrix(sparse);
-    cout << ".";
-    //
-    // Convert full matrix back to GSparseMatrix
-    back_convert = sparse_matrix(full);
-    cout << ".";
-    //
-    // Compare back converted matrix to original one. They should be identical
-    if (sparse != back_convert) {
-      cout << endl << "TEST ERROR: Unable to convert matrixes (sparse)." << endl;
-      cout << "Original matrix " << sparse << endl;
-      cout << "GMatrix matrix " << full << endl;
-      cout << "Back converted matrix " << back_convert << endl;
-      throw;
-    }
-    cout << ".";
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-     throw;
-  }
-  cout << " ok." << endl;
 
-  // Return
-  return;
-}
+    // Perform Cholesky decomposition
+    GSparseMatrix cd = cholesky_decompose(chol_test);
 
+    // Perform inplace Cholesky decomposition
+    cd = chol_test;
+    cd.cholesky_decompose();
 
-/***************************************************************************
- *                        Test: Cholesky factorisation                     *
- ***************************************************************************/
-void test_cholesky(void)
-{
-    // Dump header
-    std::cout << "Test GSparseMatrix: Cholesky decomposition, solver and inverter: ";
+    // Test Cholesky solver (first test)
+    GVector e0(5);
+    GVector a0(5);
+    e0[0] = 1.0;
+    a0[0] = 1.0;
+    a0[1] = 0.2;
+    a0[2] = 0.2;
+    a0[3] = 0.2;
+    a0[4] = 0.2;
+    GVector s0 = cd.cholesky_solver(a0);
+    double res = max(abs(s0-e0));
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method - 1");
 
-    // Test 1
-    try {
-        //
-        // Setup matrix for Cholesky decomposition
-        GSparseMatrix m_chol_test(5,5);
-        m_chol_test(0,0) = 1.0;
-        m_chol_test(0,1) = 0.2;
-        m_chol_test(0,2) = 0.2;
-        m_chol_test(0,3) = 0.2;
-        m_chol_test(0,4) = 0.2;
-        m_chol_test(1,0) = 0.2;
-        m_chol_test(2,0) = 0.2;
-        m_chol_test(3,0) = 0.2;
-        m_chol_test(4,0) = 0.2;
-        m_chol_test(1,1) = 1.0;
-        m_chol_test(2,2) = 1.0;
-        m_chol_test(3,3) = 1.0;
-        m_chol_test(4,4) = 1.0;
-        //
-        // Try to solve now (should not work)
-        try {
-            GVector v_test12(5);
-            v_test12 = m_chol_test.cholesky_solver(v_test12);
-        }
-        catch (GException::matrix_not_factorised) {
-            std::cout << ".";
-        }
-        catch (exception &e) {
-            std::cout << e.what() << std::endl;
-            throw;
-        }
-        //
-        // Test Cholesky decomposition
-        GSparseMatrix cd = cholesky_decompose(m_chol_test);
-        std::cout << ".";
-        //
-        // Test inplace Cholesky decomposition
-        cd = m_chol_test;
-        cd.cholesky_decompose();
-        std::cout << ".";
-        //
-        // Test Cholesky solver
-        GVector e0(5);
-        GVector a0(5);
-        e0[0] = 1.0;
-        a0[0] = 1.0;
-        a0[1] = 0.2;
-        a0[2] = 0.2;
-        a0[3] = 0.2;
-        a0[4] = 0.2;
-        GVector s0 = cd.cholesky_solver(a0);
-        double res = max(abs(s0-e0));
-        if (res < 1.0e-15) {
-            #if defined(DUMP_RESIDUALS)
-            std::cout << " Res(S0)=" << res << " ";
-            #else
-            std::cout << ".";
-            #endif
-        }
-        else {
-            std::cout << std::endl
-                      << "TEST ERROR: Corrupt cholesky_solver(GVector) function."
-                      << std::endl;
-            std::cout << "Residual vector (all elements should be zero):" << std::endl;
-            std::cout << s0 << std::endl;
-            throw;
-        }
-	//
+    // Test Cholesky solver (second test)
 	e0[0] = 0.0;
 	e0[1] = 1.0;
 	a0[0] = 0.2;
@@ -1241,97 +1022,56 @@ void test_cholesky(void)
 	a0[4] = 0.0;
 	s0    = cd.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S1)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method - 2");
+
+    // Test Cholesky solver (third test)
 	e0[1] = 0.0;
 	e0[2] = 1.0;
 	a0[1] = 0.0;
 	a0[2] = 1.0;
 	s0    = cd.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S2)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method - 3");
+
+    // Test Cholesky solver (forth test)
 	e0[2] = 0.0;
 	e0[3] = 1.0;
 	a0[2] = 0.0;
 	a0[3] = 1.0;
 	s0    = cd.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S3)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method - 4");
+
+    // Test Cholesky solver (fifth test)
 	e0[3] = 0.0;
 	e0[4] = 1.0;
 	a0[3] = 0.0;
 	a0[4] = 1.0;
 	s0    = cd.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S4)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method - 5");
+
 	// Setup matrix for Cholesky decomposition with zero row/col
-	GSparseMatrix m_chol_test_zero(6,6);
-	m_chol_test_zero(0,0) = 1.0;
-	m_chol_test_zero(0,1) = 0.2;
-	m_chol_test_zero(0,2) = 0.2;
-	m_chol_test_zero(0,4) = 0.2;
-	m_chol_test_zero(0,5) = 0.2;
-	m_chol_test_zero(1,0) = 0.2;
-	m_chol_test_zero(2,0) = 0.2;
-	m_chol_test_zero(4,0) = 0.2;
-	m_chol_test_zero(5,0) = 0.2;
-	m_chol_test_zero(1,1) = 1.0;
-	m_chol_test_zero(2,2) = 1.0;
-	m_chol_test_zero(4,4) = 1.0;
-	m_chol_test_zero(5,5) = 1.0;
-	//
+	GSparseMatrix chol_test_zero(6,6);
+	chol_test_zero(0,0) = 1.0;
+	chol_test_zero(0,1) = 0.2;
+	chol_test_zero(0,2) = 0.2;
+	chol_test_zero(0,4) = 0.2;
+	chol_test_zero(0,5) = 0.2;
+	chol_test_zero(1,0) = 0.2;
+	chol_test_zero(2,0) = 0.2;
+	chol_test_zero(4,0) = 0.2;
+	chol_test_zero(5,0) = 0.2;
+	chol_test_zero(1,1) = 1.0;
+	chol_test_zero(2,2) = 1.0;
+	chol_test_zero(4,4) = 1.0;
+	chol_test_zero(5,5) = 1.0;
+
     // Test compressed Cholesky decomposition
-	GSparseMatrix cd_zero = m_chol_test_zero;
+	GSparseMatrix cd_zero = chol_test_zero;
 	cd_zero.cholesky_decompose();
-	//
-    // Test compressed Cholesky solver
+
+    // Test compressed Cholesky solver (first test)
 	e0 = GVector(6);
 	a0 = GVector(6);
 	e0[0] = 1.0;
@@ -1342,19 +1082,9 @@ void test_cholesky(void)
 	a0[5] = 0.2;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S0Z)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method - 1");
+
+    // Test compressed Cholesky solver (second test)
 	e0[0] = 0.0;
 	e0[1] = 1.0;
 	a0[0] = 0.2;
@@ -1364,96 +1094,55 @@ void test_cholesky(void)
 	a0[5] = 0.0;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S1Z)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method - 2");
+
+    // Test compressed Cholesky solver (third test)
 	e0[1] = 0.0;
 	e0[2] = 1.0;
 	a0[1] = 0.0;
 	a0[2] = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S2Z)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method - 3");
+
+    // Test compressed Cholesky solver (forth test)
 	e0[2] = 0.0;
 	e0[4] = 1.0;
 	a0[2] = 0.0;
 	a0[4] = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S3Z)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method - 4");
+
+    // Test compressed Cholesky solver (fifth test)
 	e0[4] = 0.0;
 	e0[5] = 1.0;
 	a0[4] = 0.0;
 	a0[5] = 1.0;
 	s0    = cd_zero.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S4Z)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}	
-	//
+    test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method - 5");
+
 	// Setup matrix for Cholesky decomposition with zero row/col (unsymmetric case)
-	GSparseMatrix m_chol_test_zero2(6,5);
-	m_chol_test_zero2(0,0) = 1.0;
-	m_chol_test_zero2(0,1) = 0.2;
-	m_chol_test_zero2(0,2) = 0.2;
-	m_chol_test_zero2(0,3) = 0.2;
-	m_chol_test_zero2(0,4) = 0.2;
-	m_chol_test_zero2(1,0) = 0.2;
-	m_chol_test_zero2(2,0) = 0.2;
-	m_chol_test_zero2(4,0) = 0.2;
-	m_chol_test_zero2(5,0) = 0.2;
-	m_chol_test_zero2(1,1) = 1.0;
-	m_chol_test_zero2(2,2) = 1.0;
-	m_chol_test_zero2(4,3) = 1.0;
-	m_chol_test_zero2(5,4) = 1.0;
-	//
+	GSparseMatrix chol_test_zero2(6,5);
+	chol_test_zero2(0,0) = 1.0;
+	chol_test_zero2(0,1) = 0.2;
+	chol_test_zero2(0,2) = 0.2;
+	chol_test_zero2(0,3) = 0.2;
+	chol_test_zero2(0,4) = 0.2;
+	chol_test_zero2(1,0) = 0.2;
+	chol_test_zero2(2,0) = 0.2;
+	chol_test_zero2(4,0) = 0.2;
+	chol_test_zero2(5,0) = 0.2;
+	chol_test_zero2(1,1) = 1.0;
+	chol_test_zero2(2,2) = 1.0;
+	chol_test_zero2(4,3) = 1.0;
+	chol_test_zero2(5,4) = 1.0;
+
     // Test compressed Cholesky decomposition (unsymmetric case)
-	GSparseMatrix cd_zero2 = m_chol_test_zero2;
+	GSparseMatrix cd_zero2 = chol_test_zero2;
 	cd_zero2.cholesky_decompose();
-	//
+
     // Test compressed Cholesky solver (unsymmetric case)
 	e0 = GVector(5);
 	a0 = GVector(6);
@@ -1465,19 +1154,10 @@ void test_cholesky(void)
 	a0[5] = 0.2;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S0ZU)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, 
+               "Test unsymmetric compressed cholesky_solver() method - 1");
+
+    // Test compressed Cholesky solver (unsymmetric case)
 	e0[0] = 0.0;
 	e0[1] = 1.0;
 	a0[0] = 0.2;
@@ -1487,76 +1167,39 @@ void test_cholesky(void)
 	a0[5] = 0.0;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S1ZU)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, 
+               "Test unsymmetric compressed cholesky_solver() method - 2");
+
+    // Test compressed Cholesky solver (unsymmetric case)
 	e0[1] = 0.0;
 	e0[2] = 1.0;
 	a0[1] = 0.0;
 	a0[2] = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S2ZU)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, 
+               "Test unsymmetric compressed cholesky_solver() method - 3");
+
+    // Test compressed Cholesky solver (unsymmetric case)
 	e0[2] = 0.0;
 	e0[3] = 1.0;
 	a0[2] = 0.0;
 	a0[4] = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S3ZU)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, 
+               "Test unsymmetric compressed cholesky_solver() method - 4");
+
+    // Test compressed Cholesky solver (unsymmetric case)
 	e0[3] = 0.0;
 	e0[4] = 1.0;
 	a0[4] = 0.0;
 	a0[5] = 1.0;
 	s0    = cd_zero2.cholesky_solver(a0);
 	res   = max(abs(s0-e0));
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(S4ZU)=" << res << " "; 
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_solver(GVector) function." << endl;
-	  cout << "Residual vector (all elements should be zero):" << endl;
-	  cout << s0 << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, 
+               "Test unsymmetric compressed cholesky_solver() method - 5");
+
 	// Test Cholesky inverter (inplace)
 	GSparseMatrix unit(5,5);
 	unit(0,0) = 1.0;
@@ -1564,77 +1207,33 @@ void test_cholesky(void)
 	unit(2,2) = 1.0;
 	unit(3,3) = 1.0;
 	unit(4,4) = 1.0;
-	GSparseMatrix m_chol_test_inv = m_chol_test;
-	m_chol_test_inv.cholesky_invert();
-    GSparseMatrix ci_product   = m_chol_test * m_chol_test_inv;
+	GSparseMatrix chol_test_inv = chol_test;
+	chol_test_inv.cholesky_invert();
+    GSparseMatrix ci_product   = chol_test * chol_test_inv;
     GSparseMatrix ci_residuals = ci_product - unit;
 	res = (abs(ci_residuals)).max();
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(CI)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt GSparseMatrix.cholesky_invert() function." << endl;
-	  cout << "Residual matrix (all elements should be zero):" << endl;
-	  cout << ci_residuals << endl;
-	  throw;
-	}
-	//
+    test_value(res, 0.0, 1.0e-15, "Test inplace Cholesky inverter");
+            
 	// Test Cholesky inverter
-	m_chol_test_inv = cholesky_invert(m_chol_test);
-    ci_product      = m_chol_test * m_chol_test_inv;
-    ci_residuals    = ci_product - unit;
-	res             = (abs(ci_residuals)).max();
-	if (res < 1.0e-15)
-	  #if defined(DUMP_RESIDUALS)
-	  cout << "Res(CI2)=" << res << " ";
-	  #else
-	  cout << ".";
-	  #endif
-	else {
-      cout << endl << "TEST ERROR: Corrupt cholesky_invert(GSparseMatrix) function." << endl;
-	  cout << "Residual matrix (all elements should be zero):" << endl;
-	  cout << ci_residuals << endl;
-	  throw;
-	}
-	//
-        // Test Cholesky inverter for compressed matrix
-        unit = GSparseMatrix(6,6);
-        unit(0,0) = 1.0;
-        unit(1,1) = 1.0;
-        unit(2,2) = 1.0;
-        unit(4,4) = 1.0;
-        unit(5,5) = 1.0;
-        GSparseMatrix m_chol_test_zero_inv = m_chol_test_zero;
-        m_chol_test_zero_inv.cholesky_invert();
-        GSparseMatrix ciz_product   = m_chol_test_zero * m_chol_test_zero_inv;
-        GSparseMatrix ciz_residuals = ciz_product - unit;
-        res = (abs(ciz_residuals)).max();
-        if (res < 1.0e-15) {
-            #if defined(DUMP_RESIDUALS)
-            std::cout << "Res(CIZ)=" << res << " ";
-            #else
-            std::cout << ".";
-            #endif
-        }
-       else {
-           std::cout << std::endl
-                << "TEST ERROR: Corrupt compressed GSparseMatrix.cholesky_invert()"
-                   " method." << std::endl;
-           std::cout << "Residual matrix (all elements should be zero):" << std::endl;
-           std::cout << ciz_residuals << std::endl;
-           throw;
-       }
-    }
-    catch (exception &e) {
-        std::cout << e.what() << std::endl;
-        throw;
-    }
+	chol_test_inv = cholesky_invert(chol_test);
+    ci_product    = chol_test * chol_test_inv;
+    ci_residuals  = ci_product - unit;
+	res           = (abs(ci_residuals)).max();
+    test_value(res, 0.0, 1.0e-15, "Test Cholesky inverter");
 
-    // Dump final test ok
-    std::cout << "ok." << std::endl;
+    // Test Cholesky inverter for compressed matrix
+    unit = GSparseMatrix(6,6);
+    unit(0,0) = 1.0;
+    unit(1,1) = 1.0;
+    unit(2,2) = 1.0;
+    unit(4,4) = 1.0;
+    unit(5,5) = 1.0;
+    GSparseMatrix chol_test_zero_inv = chol_test_zero;
+    chol_test_zero_inv.cholesky_invert();
+    GSparseMatrix ciz_product   = chol_test_zero * chol_test_zero_inv;
+    GSparseMatrix ciz_residuals = ciz_product - unit;
+    res = (abs(ciz_residuals)).max();
+    test_value(res, 0.0, 1.0e-15, "Test compressed matrix Cholesky inverter");
 
     // Return
     return;
@@ -1642,176 +1241,97 @@ void test_cholesky(void)
 
 
 /***************************************************************************
- *                            Test: Heavy calculus                         *
+ * @brief Test matrix printing
  ***************************************************************************/
-void test_heavy(int block = 512)
+void TestGSparseMatrix::matrix_print(void)
 {
-  // Allocate some variables
-  clock_t t_start;
-  double  t_elapse;
-  int     number;
-  int     num_cols;
-  int     i_min, i_max;
-  
-  // Perform test
-  cout << "Test GSparseMatrix: Heavy calculus: ";
-  try {
-    //
-	// Fill 10000 x 10000 matrix with 10000 values
-    t_start = clock();
-	number  = 10000;
-	GSparseMatrix large(number,number);
-	large.set_mem_block(block);
-	for (int i = 0; i < number; ++i)
-	  large(i,i) = (i+1)*3.14;
-	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-    #if defined(DUMP_TIMING)
-	cout << endl << " - Fill of 10000 values needed " << t_elapse << 
-	                " sec (reference ~ 0.2 sec)";
-	#endif   
-    //
-	// Modify 10000 x 10000 matrix with 10000 (exisiting) values
-    t_start = clock();
-	for (int i = 0; i < number; ++i)
-	  large(i,i) = (i+1)*1.0;
-	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-    #if defined(DUMP_TIMING)
-	cout << endl << " - Modification of 10000 values needed " << t_elapse << 
-	                " sec (reference ~ 0 sec)";
-	#endif   
-    //
-	// Insert columns into 10000 x 10000 matrix
-	number   = 10000;
-	num_cols = 10000;
-	GSparseMatrix diag(number,number);
-	for (int j = 10; j < number-10; ++j)
-	  diag(j,j) = 3.14;
-	large = diag;
-	large.set_mem_block(block);
-	GVector column(number);
-    t_start = clock();
-	for (int j = 0; j < num_cols; ++j) {
-	  i_min = (j < 2) ? 0 : j-2;
-	  i_max = (j > num_cols-2) ? num_cols : j+2;
-	  column = 0.0;
-	  for (int i = i_min; i < i_max; ++i)
-	    column[i] = (i+1)*0.01;
-	  large.add_col(column, j);
+    // Set reference
+    std::string reference;
+    reference.append("=== GSparseMatrix ===\n");
+    reference.append(" Number of rows ............: 4\n");
+    reference.append(" Number of columns .........: 5\n");
+    reference.append(" Number of nonzero elements : 9\n");
+    reference.append(" Pending element ...........: (3,4)=9\n");
+    reference.append(" Number of allocated cells .: 512\n");
+    reference.append(" Memory block size .........: 512\n");
+    reference.append(" Sparse matrix fill ........: 0.45\n");
+    reference.append(" Pending element ...........: 9\n");
+    reference.append(" Fill stack size ...........: 0 (none)\n");
+    reference.append(" 1, 0, 0, 0, 7\n");
+    reference.append(" 0, 3, 0, 0, 0\n");
+    reference.append(" 2, 0, 4, 0, 8\n");
+    reference.append(" 0, 0, 5, 6, 9");
+ 
+    // Test the print method
+    std::string output = m_test.print();
+    test_assert((output == reference), "Test matrix printing",
+                "Unexpected print() output:\n"+output+"\nExpected:\n"+reference);
+
+    // Allocate big matrix
+    GSparseMatrix big(30, 40);
+    for (int i = 0; i < 30; ++i) {
+        for (int j = 0; j < 40; ++j) {
+            big(i,j) = i+j;
+        }
     }
-	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-    #if defined(DUMP_TIMING)
-	cout << endl << " - " << num_cols << " columns adding needed " << t_elapse << 
-	                " sec (reference ~ 4.6 sec)";
-	#endif   
-    //
-	// Insert columns into 10000 x 10000 matrix using matrix stack
-	GSparseMatrix stack(number,number);
-	stack = diag;
-	stack.set_mem_block(block);
-	for (int j = 200; j < 400; ++j)
-	  stack(j,j) = 3.14;
-    t_start = clock();
-	column = GVector(number);
-	stack.stack_init(10000, 1000);
-	for (int j = 0; j < num_cols; ++j) {
-	  i_min = (j < 2)          ? 0 : j-2;
-	  i_max = (j > num_cols-2) ? num_cols : j+2;
-	  column = 0.0;
-	  for (int i = i_min; i < i_max; ++i)
-	    column[i] = (i+1)*0.01;
-	  stack.add_col(column, j);
-    }
-	stack.stack_destroy();
-	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-    #if defined(DUMP_TIMING)
-	cout << endl << " - " << num_cols << " columns stack-adding needed " << t_elapse << 
-	                " sec (reference ~ 1 sec)";
-	#endif
-	//
-	// Check that both are identical
-	if (large != stack) {
-      cout << endl << "TEST ERROR: Stack-based insertion corrupted." << endl;
-	  throw;
-	}
-    //
-	// Subsequent addition and subtractions
-	number  = 300;
-    t_start = clock();
-	GSparseMatrix sum(number,number);
-	GSparseMatrix add(number,number);
-	GSparseMatrix sub(number,number);
-	sum.set_mem_block(block);
-	add.set_mem_block(block);
-	sub.set_mem_block(block);
-	for (int i = 0; i < number; ++i) {
-	  add(i,number-i-1) = (i*i+1)*0.01;
-	  sum += add;
-	  sub(i,i) = (i+1)*1.0;
-	  sum -= sub;
-	}
-	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-    #if defined(DUMP_TIMING)
-	cout << endl << " - Matrix adding and subtraction 300 times " << t_elapse << 
-	                " sec (reference ~ 1.4 sec)";
-	#endif   
-    //
-	// Subsequent multiplications
-	GSparseMatrix fac(number,number);
-	fac.set_mem_block(block);
-    t_start = clock();
-	for (int i = 0; i < 1; ++i) {
-	  for (int j = 0; j < number; ++j)
-	    fac(j,j) = (i+1)*1.0;
-	  sum *= fac;
-	}
-	t_elapse = double(clock() - t_start)/double(CLOCKS_PER_SEC);
-    #if defined(DUMP_TIMING)
-	cout << endl << " - Matrix multiplication 1 times " << t_elapse << 
-	                " sec (reference ~ 3.1 sec)";
-	#endif   
-  }
-  catch (exception &e) {
-    cout << e.what() << endl;
-	throw;
-  }
-  #if defined(DUMP_TIMING)
-  cout << endl;
-  #endif
-  cout << "ok." << endl;
+
+    // Set reference for big matrix
+    std::string ref_big;
+    ref_big.append("=== GSparseMatrix ===\n");
+    ref_big.append(" Number of rows ............: 30\n");
+    ref_big.append(" Number of columns .........: 40\n");
+    ref_big.append(" Number of nonzero elements : 1199\n");
+    ref_big.append(" Pending element ...........: (29,39)=68\n");
+    ref_big.append(" Number of allocated cells .: 1536\n");
+    ref_big.append(" Memory block size .........: 512\n");
+    ref_big.append(" Sparse matrix fill ........: 0.999167\n");
+    ref_big.append(" Pending element ...........: 68\n");
+    ref_big.append(" Fill stack size ...........: 0 (none)\n");
+    ref_big.append(" 0, 1, 2, 3, 4, ... 35, 36, 37, 38, 39\n");
+    ref_big.append(" 1, 2, 3, 4, 5, ... 36, 37, 38, 39, 40\n");
+    ref_big.append(" 2, 3, 4, 5, 6, ... 37, 38, 39, 40, 41\n");
+    ref_big.append(" 3, 4, 5, 6, 7, ... 38, 39, 40, 41, 42\n");
+    ref_big.append(" 4, 5, 6, 7, 8, ... 39, 40, 41, 42, 43\n");
+    ref_big.append(" ... ... ... ... ... ... ... ... ... ... ... \n");
+    ref_big.append(" 25, 26, 27, 28, 29, ... 60, 61, 62, 63, 64\n");
+    ref_big.append(" 26, 27, 28, 29, 30, ... 61, 62, 63, 64, 65\n");
+    ref_big.append(" 27, 28, 29, 30, 31, ... 62, 63, 64, 65, 66\n");
+    ref_big.append(" 28, 29, 30, 31, 32, ... 63, 64, 65, 66, 67\n");
+    ref_big.append(" 29, 30, 31, 32, 33, ... 64, 65, 66, 67, 68");
+ 
+    // Test the print method
+    output = big.print();
+    test_assert((output == ref_big), "Test big matrix printing",
+                "Unexpected print() output:\n"+output+"\nExpected:\n"+ref_big);
+
+    // Return
+    return;
 }
 
 
 /***************************************************************************
- *                            Main test function                           *
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "*******************************" << std::endl;
-    std::cout << "* GSparseMatrix class testing *" << std::endl;
-    std::cout << "*******************************" << std::endl;
+    // Allocate test suit container
+    GTestSuites testsuites("GSparseMatrix class testing");
 
-    // Set test matrix and vector
-    GSparseMatrix m_test = set_matrix();
-    GVector       v_test = set_vector();
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    // Execute the tests
-    test_output(m_test);
-    test_allocate();
-    test_assign_values(m_test);
-    test_copy_constructor(m_test);
-    test_assign_matrix(m_test);
-    test_transpose(m_test);
-    test_matrix_vector(m_test, v_test);
-    test_matrix_matrix(m_test);
-    test_arithmetics(m_test);
-    test_functions(m_test);
-    test_comparison(m_test);
-    test_conversion();
-    test_cholesky();
-    test_heavy();
+    // Create a test suite
+    TestGSparseMatrix test;
 
-    // Return
-    return 0;
+    // Append test suite to the container
+    testsuites.append(test);
+
+    // Run the testsuites
+    success = testsuites.run();
+
+    // Save test report
+    testsuites.save("reports/GSparseMatrix.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }
