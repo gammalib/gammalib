@@ -33,6 +33,13 @@ import test_GSupport
 import test_GTest
 import test_GXml
 
+# Try importing MWL tests
+try:
+	import test_MWL
+	has_mwl = True
+except:
+	has_mwl = False
+
 # Try importing CTA tests
 try:
 	import test_CTA
@@ -47,12 +54,13 @@ try:
 except:
 	has_lat = False
 
-# Try importing MWL tests
+# Try importing COMPTEL tests
 try:
-	import test_MWL
-	has_mwl = True
+	import test_COM
+	has_com = True
 except:
-	has_mwl = False
+	has_com = False
+
 
 
 # ======================== #
@@ -104,6 +112,12 @@ if __name__ == '__main__':
 	suites.append(suite10)
 	suites.append(suite11)
 
+	# Optionally handle MWL suite
+	if has_mwl:
+		suite_mwl = test_MWL.Test()
+		suite_mwl.set()
+		suites.append(suite_mwl)
+
 	# Optionally handle CTA suite
 	if has_cta:
 		suite_cta = test_CTA.Test()
@@ -116,11 +130,11 @@ if __name__ == '__main__':
 		suite_lat.set()
 		suites.append(suite_lat)
 
-	# Optionally handle MWL suite
-	if has_mwl:
-		suite_mwl = test_MWL.Test()
-		suite_mwl.set()
-		suites.append(suite_mwl)
+	# Optionally handle COMPTEL suite
+	if has_com:
+		suite_com = test_COM.Test()
+		suite_com.set()
+		suites.append(suite_com)
 
 	# Run test suite
 	success = suites.run()
