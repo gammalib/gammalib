@@ -29,10 +29,9 @@
 #include <config.h>
 #endif
 #include <stdlib.h>
-#include <iostream>
 #include <unistd.h>
-#include "GCOMLib.hpp"
 #include "GTools.hpp"
+#include "test_COM.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -50,13 +49,49 @@ const std::string com_obs       = datadir+"obs.xml";
 
 
 /***********************************************************************//**
+ * @brief Set COMPTEL response test methods
+ ***************************************************************************/
+void TestGCOMResponse::set(void)
+{
+    // Set test name
+    name("GCOMResponse");
+
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCOMResponse::test_iaq_response), "Test IAQ response");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set COMPTEL observation test methods
+ ***************************************************************************/
+void TestGCOMObservation::set(void)
+{
+    // Set test name
+    name("GCOMObservation");
+
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCOMObservation::test_binned_obs), "Test binned observation");
+    append(static_cast<pfunction>(&TestGCOMObservation::test_event_bin), "Test event bin");
+    append(static_cast<pfunction>(&TestGCOMObservation::test_event_cube), "Test event cube");
+
+    // Return
+    return;
+}
+
+
+
+
+/***********************************************************************//**
  * @brief Checks handling of IAQ response files
  *
  * This function checks the handling of IAQ response files. IAQ response
  * files are 2D images that show the instrument response as function of
  * geometrical (Phi_geo) and measured (Phi_bar) Compton scatter angle.
  ***************************************************************************/
-void test_iaq_response(void)
+void TestGCOMResponse::test_iaq_response(void)
 {
 /*
     // Test response loading
@@ -79,396 +114,6 @@ void test_iaq_response(void)
 
 
 /***********************************************************************//**
- * @brief Checks handling of COMPTEL response files
- ***************************************************************************/
-void test_response(void)
-{
-    // Dump header
-    std::cout << "Test COMPTEL response: ";
-
-    // Test IAQ
-    test_iaq_response();
-
-    // Dump final ok
-    std::cout << " ok." << std::endl;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Checks handling of COMPTEL event bin
- ***************************************************************************/
-void test_event_bin(void)
-{
-    // Dump header
-    std::cout << "Test COMPTEL event bin: ";
-
-    // Test COMPTEL event bin methods (one by one)
-    try {
-        // Event bin void constructor
-        GCOMEventBin bin;
-        std::cout << ".";
-
-        // Copy constructor
-        GCOMEventBin bin2(bin);
-        std::cout << ".";
-
-        // Assignment operator
-        GCOMEventBin bin3 = bin;
-        std::cout << ".";
-
-        // clear method
-        bin.clear();
-        std::cout << ".";
-
-        // clone method
-        GCOMEventBin* bin4 = bin.clone();
-        std::cout << ".";
-
-        // size method
-        if (bin.size() != 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: Event bin size is expected to be zero"
-                      << " but a size of "+str(bin.size())+" was found."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // dir method
-        GCOMInstDir dir = bin.dir();
-        std::cout << ".";
-
-        // energy method
-        GEnergy energy = bin.energy();
-        std::cout << ".";
-
-        // time method
-        GTime time = bin.time();
-        std::cout << ".";
-
-        // counts method
-        double counts = bin.counts();
-        if (counts != 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: Counts are expected to be zero"
-                      << " but "+str(counts)+" counts were found."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // error method
-        double error = bin.error();
-        if (error > 1.0e-10) { // A small delta is added for the optimizer
-            std::cout << std::endl
-                      << "TEST ERROR: The counts error is expected to be zero"
-                      << " but "+str(error)+" error counts were found."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // counts setting
-        bin.counts(1.0);
-        std::cout << ".";
-
-        // print method
-        std::string text = bin.print();
-        std::cout << ".";
-
-        // omega method
-        double omega = bin.omega();
-        if (omega != 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: The solid angle is expected to be zero"
-                      << " but an angle of "+str(omega)+" was found."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // ewidth method
-        GEnergy ewidth = bin.ewidth();
-        std::cout << ".";
-
-        // ontime method
-        double ontime = bin.ontime();
-        if (ontime != 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: The ontime is expected to be zero"
-                      << " but an ontime of "+str(ontime)+" was found."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to handle empty COMPTEL event bin."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-
-    // Test COMPTEL event bin operations
-    try {
-        // Write and read back counts
-        GCOMEventBin bin;
-        bin.counts(3.3);
-        std::cout << ".";
-        double counts = bin.counts();
-        if (counts != 3.3) {
-            std::cout << std::endl
-                      << "TEST ERROR: Counts are expected to be 3.3"
-                      << " but "+str(counts)+" counts were found."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to handle COMPTEL event bin."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-
-    // Dump final ok
-    std::cout << " ok." << std::endl;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Checks handling of COMPTEL event cube
- ***************************************************************************/
-void test_event_cube(void)
-{
-    // Dump header
-    std::cout << "Test COMPTEL event cube: ";
-
-    // Test COMPTEL event cube methods (one by one)
-    try {
-        // Event cube void constructor
-        GCOMEventCube cube;
-        std::cout << ".";
-
-        // Event cube load constructor
-        GCOMEventCube cube2(com_dre);
-        std::cout << ".";
-
-        // Event cube copy constructor
-        GCOMEventCube cube3(cube2);
-        if (cube2.size() != cube3.size()) {
-            std::cout << std::endl
-                      << "TEST ERROR: Different cube size after using the"
-                      << " copy constructor (before="+str(cube2.size())
-                      << " after="+str(cube3.size())+")"
-                      << std::endl;
-            throw;
-        };
-        if (cube2.number() != cube3.number()) {
-            std::cout << std::endl
-                      << "TEST ERROR: Different number of events after using"
-                      << " the copy constructor (before="+str(cube2.number())
-                      << " after="+str(cube3.number())+")"
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // Event cube assignment operator
-        GCOMEventCube cube4 = cube2;
-        if (cube2.size() != cube4.size()) {
-            std::cout << std::endl
-                      << "TEST ERROR: Different cube size after using the"
-                      << " assignment operator (before="+str(cube2.size())
-                      << " after="+str(cube4.size())+")"
-                      << std::endl;
-            throw;
-        };
-        if (cube2.number() != cube4.number()) {
-            std::cout << std::endl
-                      << "TEST ERROR: Different number of events after using"
-                      << " the assignment operator (before="+str(cube2.number())
-                      << " after="+str(cube4.number())+")"
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-        
-        // clear method
-        cube4.clear();
-        if (cube4.size() != 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected event cube with size 0 after"
-                      << " clear but found size "+str(cube4.size())+"."
-                      << std::endl;
-            throw;
-        };
-        if (cube4.number() != 0) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected 0 events in cube after"
-                      << " clear but found size "+str(cube4.number())+" events."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // clone method
-        GCOMEventCube* cube5 = cube2.clone();
-        if (cube2.size() != cube5->size()) {
-            std::cout << std::endl
-                      << "TEST ERROR: Different cube size after cloning"
-                      << " (before="+str(cube2.size())
-                      << " after="+str(cube5->size())+")"
-                      << std::endl;
-            throw;
-        };
-        if (cube2.number() != cube5->number()) {
-            std::cout << std::endl
-                      << "TEST ERROR: Different number of events after"
-                      << " cloning (before="+str(cube2.number())
-                      << " after="+str(cube5->number())+")"
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // size method
-        if (cube2.size() != 140600) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected cube dimension 140600, found "
-                      << str(cube2.size())+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // dim method
-        if (cube2.dim() != 3) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected cube dimension 3, found "
-                      << str(cube2.dim())+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // naxis method
-        if (cube2.naxis(0) != 76) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected Chi axis dimension 76, found "
-                      << str(cube2.naxis(0))+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-        if (cube2.naxis(1) != 74) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected Psi axis dimension 74, found "
-                      << str(cube2.naxis(1))+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-        if (cube2.naxis(2) != 25) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected Phi axis dimension 25, found "
-                      << str(cube2.naxis(2))+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // nchi, npsi, nphi methods
-        if (cube2.nchi() != 76) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected Chi axis dimension 76, found "
-                      << str(cube2.nchi())+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-        if (cube2.npsi() != 74) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected Psi axis dimension 74, found "
-                      << str(cube2.npsi())+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-        if (cube2.nphi() != 25) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected Phi axis dimension 25, found "
-                      << str(cube2.nphi())+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // npix method
-        int npix = cube2.nchi() * cube2.npsi();
-        if (cube2.npix() != npix) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected "+str(npix)+" pixels in"
-                      << " (Chi,Psi) plane, found "
-                      << str(cube2.npix())+"."
-                      << std::endl;
-            throw;
-        };
-
-        // number method
-        if (cube2.number() != 316141) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected 316141 events in cube, found "
-                      << str(cube2.number())+"."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-        // event access
-        double sum = 0.0;
-        for (int i = 0; i < cube2.size(); ++i) {
-            sum += cube2[i]->counts();
-        }
-        if (int(sum+0.5) != cube2.number()) {
-            std::cout << std::endl
-                      << "TEST ERROR: Expected "+str(cube2.number())
-                      << " events in cube, found "
-                      << str(int(sum+0.5))+" by summing over all elements."
-                      << std::endl;
-            throw;
-        };
-        std::cout << ".";
-
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to handle COMPTEL event cube."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-
-    // Dump final ok
-    std::cout << " ok." << std::endl;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Checks handling of binned observations
  *
  * This function checks the handling of binned observations. Binned
@@ -482,11 +127,8 @@ void test_event_cube(void)
  * Note that in first approximation we can use the DRG file as background
  * model.
  ***************************************************************************/
-void test_binned_obs(void)
+void TestGCOMObservation::test_binned_obs(void)
 {
-    // Write header
-    std::cout << "Test binned COMPTEL observation handling: ";
-
     // Declare observation and container
     GObservations obs;
 
@@ -519,8 +161,6 @@ void test_binned_obs(void)
     }
     std::cout << ".";
 */
-    // Notify final test success
-    std::cout << " ok." << std::endl;
 
     // Exit test
     return;
@@ -529,26 +169,218 @@ void test_binned_obs(void)
 
 
 /***********************************************************************//**
- * @brief Main test function
+ * @brief Checks handling of COMPTEL event bin
+ ***************************************************************************/
+void TestGCOMObservation::test_event_bin(void)
+{
+    // Test COMPTEL event bin methods (one by one)
+    test_try("Test event bin methods");
+    try {
+        // Event bin void constructor
+        GCOMEventBin bin;
+
+        // Copy constructor
+        GCOMEventBin bin2(bin);
+
+        // Assignment operator
+        GCOMEventBin bin3 = bin;
+
+        // clear method
+        bin.clear();
+
+        // clone method
+        GCOMEventBin* bin4 = bin.clone();
+
+        // size method
+        test_value(bin.size(), 0, "Test size() method.");
+
+        // dir method
+        GCOMInstDir dir = bin.dir();
+
+        // energy method
+        GEnergy energy = bin.energy();
+
+        // time method
+        GTime time = bin.time();
+
+        // counts method
+        test_value(bin.counts(), 0.0, 1.0e-10, "Test counts() method for zero counts.");
+
+        // error method
+        test_value(bin.error(), 0.0, 1.0e-10, "Test error() method for zero counts.");
+
+        // counts setting
+        bin.counts(1.0);
+        test_value(bin.counts(), 1.0, 1.0e-10, "Test counts() method for one count.");
+        test_value(bin.error(), 1.0, 1.0e-10, "Test error() method for one count.");
+
+        // print method
+        std::string text = bin.print();
+
+        // omega method
+        test_value(bin.omega(), 0.0, 1.0e-10, "Test omega() method.");
+
+        // ewidth method
+        GEnergy ewidth = bin.ewidth();
+
+        // ontime method
+        test_value(bin.ontime(), 0.0, 1.0e-10, "Test ontime() method.");
+
+        // If we arrived here, signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test COMPTEL event bin operations
+    GCOMEventBin bin;
+    bin.counts(3.3);
+    test_value(bin.counts(), 3.3, 1.0e-10, "Test counts() method for 3.3 counts.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Checks handling of COMPTEL event cube
+ ***************************************************************************/
+void TestGCOMObservation::test_event_cube(void)
+{
+    // Event cube void constructor
+    GCOMEventCube cube;
+
+    // Event cube load constructor
+    GCOMEventCube cube2(com_dre);
+
+    // Event cube copy constructor
+    GCOMEventCube cube3(cube2);
+    test_value(cube2.size(), cube3.size(), "Test copy constructor.",
+               "Different cube size after using the"
+               " copy constructor (before="+str(cube2.size())+
+               " after="+str(cube3.size())+")");
+    test_value(cube2.number(), cube3.number(), "Test copy constructor.",
+               "Different number of events after using the"
+               " copy constructor (before="+str(cube2.number())+
+               " after="+str(cube3.number())+").");
+
+    // Event cube assignment operator
+    GCOMEventCube cube4 = cube2;
+    test_value(cube2.size(), cube4.size(), "Test assignment operator.",
+               "Different cube size after using the"
+               " assignment operator (before="+str(cube2.size())+
+               " after="+str(cube4.size())+")");
+    test_value(cube2.number(), cube4.number(), "Test assignment operator.",
+               "Different number of events after using the"
+               " assignment operator (before="+str(cube2.number())+
+               " after="+str(cube4.number())+").");
+        
+    // clear method
+    cube4.clear();
+    test_value(cube4.size(), 0, "Test clear method.",
+               "Expected event cube with size 0 after"
+               " clear but found size "+str(cube4.size())+".");
+    test_value(cube4.number(), 0, "Test clear method.",
+               "Expected 0 events in cube after"
+               " clear but found "+str(cube4.size())+" events.");
+
+    // clone method
+    GCOMEventCube* cube5 = cube2.clone();
+    test_value(cube2.size(), cube5->size(), "Test clone() method.",
+               "Different cube size after cloning"
+               " (before="+str(cube2.size())+
+               " after="+str(cube5->size())+")");
+    test_value(cube2.number(), cube5->number(), "Test clone() method.",
+               "Different number of events after cloning"
+               " (before="+str(cube2.number())+
+               " after="+str(cube5->number())+").");
+
+    // size method
+    test_value(cube2.size(), 140600, "Test size() method.",
+               "Expected cube dimension 140600, found "+
+               str(cube2.size())+".");
+
+    // dim method
+    test_value(cube2.dim(), 3, "Test dim() method.",
+               "Expected 3 cube dimensions, found "+
+               str(cube2.dim())+".");
+
+    // naxis method
+    test_value(cube2.naxis(0), 76, "Test naxis(0) method.",
+               "Expected Chi axis dimension 76, found "+
+               str(cube2.naxis(0))+".");
+    test_value(cube2.naxis(1), 74, "Test naxis(1) method.",
+               "Expected Chi axis dimension 74, found "+
+               str(cube2.naxis(1))+".");
+    test_value(cube2.naxis(2), 25, "Test naxis(2) method.",
+               "Expected Chi axis dimension 25, found "+
+               str(cube2.naxis(2))+".");
+
+    // nchi, npsi, nphi methods
+    test_value(cube2.nchi(), 76, "Test nchi() method.",
+               "Expected Chi axis dimension 76, found "+
+               str(cube2.nchi())+".");
+    test_value(cube2.npsi(), 74, "Test npsi() method.",
+               "Expected Chi axis dimension 74, found "+
+               str(cube2.npsi())+".");
+    test_value(cube2.nphi(), 25, "Test nphi() method.",
+               "Expected Chi axis dimension 25, found "+
+               str(cube2.nphi())+".");
+
+    // npix method
+    int npix = cube2.nchi() * cube2.npsi();
+    test_value(cube2.npix(), npix, "Test npix() method.",
+               "Expected "+str(npix)+" pixels in (Chi,Psi) plane, found "+
+               str(cube2.npix())+".");
+
+    // number method
+    test_value(cube2.number(), 316141, "Test number() method.",
+               "Expected 316141 events in cube, found "+
+               str(cube2.number())+".");
+
+    // event access
+    double sum = 0.0;
+    for (int i = 0; i < cube2.size(); ++i) {
+        sum += cube2[i]->counts();
+    }
+    test_value(cube2.number(), int(sum+0.5), "Test event access.",
+               "Expected "+str(cube2.number())+
+               " events in cube, found "+
+               str(int(sum+0.5))+" by summing over all elements.");
+
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Main entry point for test executable
  ***************************************************************************/
 int main(void)
 {
-    // Dump header
-    std::cout << std::endl;
-    std::cout << "*********************************************" << std::endl;
-    std::cout << "* COMPTEL instrument specific class testing *" << std::endl;
-    std::cout << "*********************************************" << std::endl;
+    // Allocate test suit container
+    GTestSuites testsuites("COMPTEL instrument specific class testing");
 
     // Set CALDB environment variable
     std::string caldb = "CALDB="+com_caldb;
     putenv((char*)caldb.c_str());
 
-    // Execute tests not needing data
-    test_event_bin();
-    test_event_cube();
-    test_response();
-    test_binned_obs();
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    // Return
-    return 0;
+    // Create test suites and append them to the container
+    TestGCOMResponse    rsp;
+    TestGCOMObservation obs;
+    testsuites.append(rsp);
+    testsuites.append(obs);
+
+    // Run the testsuites
+    success = testsuites.run();
+
+    // Save test report
+    testsuites.save("reports/GCOM.xml");
+
+    // Return success status
+    return (success ? 0 : 1);
 }
