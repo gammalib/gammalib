@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-06-00
 
 Author(s) : Juergen Knoedlseder
 
-September, 9th, 2012
+September, 14th, 2012
 
 
 1. Introduction
@@ -28,7 +28,9 @@ files for Python bindings.
 
 3. Application module
 ---------------------
-None
+The GLog class was improved. The printed dates reflect now the time
+when a new line was started in a log file. The copy operator has also
+been implemented.
 
 
 4. FITS I/O Interface

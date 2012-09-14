@@ -1,4 +1,4 @@
-2012-09-06  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2012-09-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.6.0 released
         ========================
@@ -33,6 +33,7 @@
 
         * Version 0.4.12 released
         =========================
+
         Add missing #include <cstring> to GTools.cpp
         Correct but in python interface for GSymMatrix and GSparseMatrix
 
