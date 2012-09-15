@@ -29,7 +29,7 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [0.6.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [0.6.1], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
@@ -80,8 +80,8 @@ AC_CANONICAL_HOST
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
 #############################################################################
 AC_LANG(C++)
-AC_PROG_CXX([g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++])
-AC_PROG_CC([gcc cc cl.exe clang])
+AC_PROG_CXX([clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC])
+AC_PROG_CC([clang gcc cc cl.exe])
 
 
 #############################################################################
