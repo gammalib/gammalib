@@ -45,7 +45,7 @@ const std::string com_dre       = datadir+"/m50439_dre.fits"; // 1-3 MeV
 const std::string com_drb       = datadir+"/m34997_drg.fits";
 const std::string com_drg       = datadir+"/m34997_drg.fits";
 const std::string com_drx       = datadir+"/m32171_drx.fits";
-const std::string com_obs       = datadir+"obs.xml";
+const std::string com_obs       = datadir+"/obs.xml";
 
 
 /***********************************************************************//**
@@ -57,7 +57,9 @@ void TestGCOMResponse::set(void)
     name("GCOMResponse");
 
     // Append tests to test suite
-    append(static_cast<pfunction>(&TestGCOMResponse::test_iaq_response), "Test IAQ response");
+    append(static_cast<pfunction>(&TestGCOMResponse::test_inst_dir), "Test instrument direction");
+    append(static_cast<pfunction>(&TestGCOMResponse::test_pointing), "Test pointing");
+    append(static_cast<pfunction>(&TestGCOMResponse::test_response), "Test response");
 
     // Return
     return;
@@ -85,29 +87,165 @@ void TestGCOMObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Test GCOMInstDir class
+ ***************************************************************************/
+void TestGCOMResponse::test_inst_dir(void)
+{
+    // Test constructors
+    test_try("Test constructors");
+    try {
+        // Void constructor
+        GCOMInstDir dir1;
+
+        // Copy constructor
+        GCOMInstDir dir2(dir1);
+
+        // If we arrived here, signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Create void object
+    GCOMInstDir dir;
+
+    // skydir method
+    GSkyDir sky;
+    sky.radec_deg(37.0, 45.3);
+    dir.skydir(sky);
+    test_assert(dir.skydir() == sky, "Test skydir() method.",
+                "Expected "+sky.print()+", found "+dir.skydir().print());
+
+    // phi method
+    dir.phi(27.2);
+    test_value(dir.phi(), 27.2, 1.0e-10, "Test phi() method.");
+
+    // copy constructor
+    GCOMInstDir dir_copy(dir);
+    test_assert(dir_copy.skydir() == sky, "Test copy constructor method.",
+                "Expected "+sky.print()+", found "+dir_copy.skydir().print());
+    test_value(dir_copy.phi(), 27.2, 1.0e-10, "Test copy constructor method.");
+
+    // assignment operator
+    GCOMInstDir dir_assign = dir;
+    test_assert(dir_assign.skydir() == sky, "Test assignment operator method.",
+                "Expected "+sky.print()+", found "+dir_assign.skydir().print());
+    test_value(dir_assign.phi(), 27.2, 1.0e-10, "Test assignment operator method.");
+
+    // clone
+    GCOMInstDir* dir_clone = dir.clone();
+    test_assert(dir_clone->skydir() == sky, "Test clone() method.",
+                "Expected "+sky.print()+", found "+dir_clone->skydir().print());
+    test_value(dir_clone->phi(), 27.2, 1.0e-10, "Test clone() method.");
+
+    // clear
+    dir.clear();
+    sky.clear();
+    test_assert(dir.skydir() == sky, "Test clear() method.",
+                "Expected "+sky.print()+", found "+dir.skydir().print());
+    test_value(dir.phi(), 0.0, 1.0e-10, "Test clean() method.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GCOMPointing class
+ ***************************************************************************/
+void TestGCOMResponse::test_pointing(void)
+{
+    // Test constructors
+    test_try("Test constructors");
+    try {
+        // Void constructor
+        GCOMPointing pnt1;
+
+        // Copy constructor
+        GCOMPointing pnt2(pnt1);
+
+        // If we arrived here, signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Create void object
+    GCOMPointing pnt;
+
+    // dir method
+    GSkyDir sky;
+    sky.radec_deg(37.0, 45.3);
+    pnt.dir(sky);
+    test_assert(pnt.dir() == sky, "Test dir() method.",
+                "Expected "+sky.print()+", found "+pnt.dir().print());
+
+    // copy constructor
+    GCOMPointing pnt_copy(pnt);
+    test_assert(pnt_copy.dir() == sky, "Test copy constructor method.",
+                "Expected "+sky.print()+", found "+pnt_copy.dir().print());
+
+    // assignment operator
+    GCOMPointing pnt_assign = pnt;
+    test_assert(pnt_assign.dir() == sky, "Test assignment operator method.",
+                "Expected "+sky.print()+", found "+pnt_assign.dir().print());
+
+    // clone
+    GCOMPointing* pnt_clone = pnt.clone();
+    test_assert(pnt_clone->dir() == sky, "Test clone() method.",
+                "Expected "+sky.print()+", found "+pnt_clone->dir().print());
+
+    // clear
+    pnt.clear();
+    sky.clear();
+    test_assert(pnt.dir() == sky, "Test clear() method.",
+                "Expected "+sky.print()+", found "+pnt.dir().print());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Checks handling of IAQ response files
  *
  * This function checks the handling of IAQ response files. IAQ response
  * files are 2D images that show the instrument response as function of
  * geometrical (Phi_geo) and measured (Phi_bar) Compton scatter angle.
  ***************************************************************************/
-void TestGCOMResponse::test_iaq_response(void)
+void TestGCOMResponse::test_response(void)
 {
-/*
-    // Test response loading
+    // Test constructors
+    test_try("Test constructors");
     try {
-        // Construct observation from datasets
-        GCOMResponse rsp(com_caldb, com_iaq);
+        // Void constructor
+        GCOMResponse rsp1;
+
+        // Copy constructor
+        GCOMResponse rsp2(rsp1);
+
+        // If we arrived here, signal success
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct IAQ response."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-*/
+
+    // Test response loading
+    test_try("Test response loading");
+    try {
+        // Construct response from datasets
+        GCOMResponse rsp(com_iaq, com_caldb);
+
+        // If we arrived here, signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Return
     return;
 }
@@ -129,42 +267,52 @@ void TestGCOMResponse::test_iaq_response(void)
  ***************************************************************************/
 void TestGCOMObservation::test_binned_obs(void)
 {
-    // Declare observation and container
-    GObservations obs;
+    // Test constructors
+    test_try("Test constructors");
+    try {
+        // Void constructor
+        GCOMObservation obs1;
 
-/*
-    // Dataset constructor
+        // Copy constructor
+        GCOMObservation obs2(obs1);
+
+        // If we arrived here, signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test observation loading
+    test_try("Test observation loading");
     try {
         // Construct observation from datasets
-        GCOMObservation com(com_dre, com_drb, com_drg, com_drx);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct observation from datasets."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
+        GCOMObservation obs(com_dre, com_drb, com_drg, com_drx);
+//std::cout << obs << std::endl;
 
-    // XML constructor
-    try {
-        // Construct observation from XML file
-        GObservations obs(com_obs);
+        // If we arrived here, signal success
+        test_try_success();
     }
     catch (std::exception &e) {
-        std::cout << std::endl
-                  << "TEST ERROR: Unable to construct observation from XML file."
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
+        test_try_failure(e);
     }
-    std::cout << ".";
-*/
+
+    // Test XML constructor
+    test_try("Test XML constructor");
+    try {
+        // Construct observation from datasets
+        GObservations obs(com_obs);
+//std::cout << obs << std::endl;
+
+        // If we arrived here, signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Exit test
     return;
- 
 }
 
 

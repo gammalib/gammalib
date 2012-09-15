@@ -47,7 +47,9 @@ public:
 
     // Methods
     virtual void set(void);
-    void         test_iaq_response(void);
+    void         test_inst_dir(void);
+    void         test_pointing(void);
+    void         test_response(void);
 };
 
 
