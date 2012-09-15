@@ -799,8 +799,7 @@ AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
 
 # Do we have Python wrappers
 has_wrappers="yes"
-AC_CHECK_FILES([pyext/gammalib/__init__.py
-                pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
+AC_CHECK_FILES([pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
                 pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
                 pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
                 pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
