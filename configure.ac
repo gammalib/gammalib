@@ -29,7 +29,7 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [0.6.1], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [0.6.2], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
@@ -78,10 +78,30 @@ AC_CANONICAL_HOST
 #############################################################################
 # Check for valid C++ compiler.  This has to come before the check for      #
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
+#                                                                           #
+# A special kluge was added for Mac OS X >=10.7. As Apple switched to clang #
+# we search from this version on for the clang compiler.                    #
 #############################################################################
+# Check if we have Mac OS X >= 10.7
+ac_sys_system=`uname -s`
+if test "$ac_sys_system" = "Darwin"; then
+  cur_target=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'`
+  if test ${cur_target} '>' 10.6; then
+    mac_clang="yes"
+  fi
+fi
+
+# Our language is C++
 AC_LANG(C++)
-AC_PROG_CXX([clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC])
-AC_PROG_CC([clang gcc cc cl.exe])
+
+# Check for compilers
+if test "x$mac_clang" = "xyes"; then
+  AC_PROG_CXX([clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC])
+  AC_PROG_CC([clang gcc cc cl.exe])
+else
+  AC_PROG_CXX([g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++])
+  AC_PROG_CC([gcc cc cl.exe clang])
+fi
 
 
 #############################################################################
