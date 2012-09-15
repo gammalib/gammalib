@@ -1,3 +1,12 @@
+2012-09-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+        * Bug fix version 0.6.1 released
+        ================================
+
+        Do not require gammalib/__init__.py file to be present
+        Do not install swig files
+        clang++ compiler takes precedence over g++ compiler
+
 2012-09-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.6.0 released
