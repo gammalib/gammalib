@@ -1,8 +1,8 @@
 <observation_list title="observation library">
   <observation name="Crab" id="00001" instrument="COM">
-    <parameter name="DRE" file="../inst/cta/test/data/m50439_dre.fits"/>
-    <parameter name="DRB" file="../inst/cta/test/data/m34997_drg.fits"/>
-    <parameter name="DRG" file="../inst/cta/test/data/m34997_drg.fits"/>
-    <parameter name="DRX" file="../inst/cta/test/data/m32171_drx.fits"/>
+    <parameter name="DRE" file="../inst/com/test/data/m50439_dre.fits"/>
+    <parameter name="DRB" file="../inst/com/test/data/m34997_drg.fits"/>
+    <parameter name="DRG" file="../inst/com/test/data/m34997_drg.fits"/>
+    <parameter name="DRX" file="../inst/com/test/data/m32171_drx.fits"/>
   </observation>
 </observation_list>
