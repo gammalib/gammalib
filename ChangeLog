@@ -1,3 +1,10 @@
+2012-09-16  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+        * Bug fix version 0.6.2 released
+        ================================
+
+        clang++ compiler precedence is only taken for Mac OS X >= 10.7
+
 2012-09-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix version 0.6.1 released

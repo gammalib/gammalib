@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-06-01
+New Features and Important Changes in GammaLib 00-06-02
 
 Author(s) : Juergen Knoedlseder
 
-September, 15th, 2012
+September, 16th, 2012
 
 
 1. Introduction
@@ -13,16 +13,9 @@ changes made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-The configuration script does no longer check for the presence of the
-gammalib/__init__.py file. This file is generated upon installation
-of the Python bindings, and is not shipped with the GammaLib library.
-In version 00-06-00, a missing gammalib/__init__.py file was 
-misinterpreted as a need for swig to build the Python bindings. On 
-systems without swig the Pyhton bindings were thus not built.
-
-The clang++ compiler takes now precedence over the g++ compiler. In
-that way, clang++ will be selected by default on Mac OS X systems
-(usually from Mac OS X 10.7 on).
+The clang++ compiler takes now only precedence over the g++ compiler
+if the system on which compilation is performed is Mac OS X 10.7 or
+later.
 
 
 3. Application module
