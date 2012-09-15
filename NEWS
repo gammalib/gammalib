@@ -20,9 +20,6 @@ In version 00-06-00, a missing gammalib/__init__.py file was
 misinterpreted as a need for swig to build the Python bindings. On 
 systems without swig the Pyhton bindings were thus not built.
 
-The swig files are no longer installed in the GammaLib directory.
-These files are indeed not needed.
-
 The clang++ compiler takes now precedence over the g++ compiler. In
 that way, clang++ will be selected by default on Mac OS X systems
 (usually from Mac OS X 10.7 on).

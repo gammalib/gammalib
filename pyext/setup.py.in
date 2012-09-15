@@ -264,8 +264,7 @@ for module in all_modules:
 if is_unit_test:
 	data_files=[]
 else:
-	#data_files=[('@prefix@/share/gammalib/swig', install_files)]
-	data_files=[]
+	data_files=[('@prefix@/share/gammalib/swig', install_files)]
 
 # Setup
 setup(name='@PACKAGE_NAME@',
