@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GException_obs.cpp  -  observations exception handlers         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GException_obs.cpp
  * @brief Observation exception handler interface implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -201,15 +201,20 @@ GException::caldb_not_found::caldb_not_found(std::string origin,
  *
  * @param[in] origin Method that throws the error.
  * @param[in] type Specified response type.
+ * @param[in] message Optional error message.
  ***************************************************************************/
 GException::rsp_invalid_type::rsp_invalid_type(std::string origin,
-                                               std::string type)
+                                               std::string type,
+                                               std::string message)
 {
     // Set method name
     m_origin = origin;
 
     // Set error message
     m_message = "Invalid response type \""+type+"\" specified.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
 
     // Return
     return;

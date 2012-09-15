@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.hpp  -  exception handler                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GException.hpp
  * @brief Exception handler interface definiton.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GEXCEPTION_HPP
@@ -507,7 +507,8 @@ public:
     };
     class rsp_invalid_type : public GExceptionHandler {
     public:
-        rsp_invalid_type(std::string origin, std::string type);
+        rsp_invalid_type(std::string origin, std::string type,
+                         std::string message = "");
     };
     class gti_invalid : public GExceptionHandler {
     public:
