@@ -21,7 +21,7 @@
 /**
  * @file GCOMLib.hpp
  * @brief Collection of COMPTEL support header files
- * @author <author>
+ * @author Juergen Knoedlseder    
  */
 
 #ifndef GCOMLIB_HPP
@@ -32,11 +32,11 @@
 
 /* __ COMPTEL specific headers ___________________________________________ */
 #include "GCOMException.hpp"
-//#include "GCOMObservation.hpp"
 #include "GCOMEventCube.hpp"
 #include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
-//#include "GCOMPointing.hpp"
-//#include "GCOMResponse.hpp"
+#include "GCOMPointing.hpp"
+#include "GCOMResponse.hpp"
+#include "GCOMObservation.hpp"
 
 #endif /* GCOMLIB_HPP */
