@@ -17,6 +17,11 @@ The clang++ compiler takes now only precedence over the g++ compiler
 if the system on which compilation is performed is Mac OS X 10.7 or
 later.
 
+If Python bindings are disabled we omit now all the Python related
+checks during configuration. This includes detection of the Python
+executable, detection of the swig executable, and the checks for the
+presence of the Python wrapper files.
+
 
 3. Application module
 ---------------------
