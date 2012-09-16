@@ -810,57 +810,58 @@ else
   
   fi
 
-fi
+  # Do we have swig?
+  AC_PATH_PROG([SWIG], [swig])
+  if test "$SWIG"; then
+    has_swig="yes"
+  fi
 
-# Do we have swig?
-AC_PATH_PROG([SWIG], [swig])
-if test "$SWIG"; then
-  has_swig="yes"
+  # Do we have Python wrappers
+  has_wrappers="yes"
+  AC_CHECK_FILES([pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
+                  pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
+                  pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
+                  pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
+                  pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py
+                  pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
+                  pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
+                  pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
+                  pyext/gammalib/sky_wrap.cpp pyext/gammalib/sky.py
+                  pyext/gammalib/support_wrap.cpp pyext/gammalib/support.py
+                  pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
+                  pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py],,
+                 [has_wrappers="no"])
+  if test "x$with_mwl" = "xyes"; then
+    AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_lat" = "xyes"; then
+    AC_CHECK_FILES([pyext/gammalib/lat_wrap.cpp pyext/gammalib/lat.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$with_cta" = "xyes"; then
+    AC_CHECK_FILES([pyext/gammalib/cta_wrap.cpp pyext/gammalib/cta.py],,
+                   [has_wrappers="no"])
+  fi
+  if test "x$has_wrappers" = "xno"; then
+    AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
+  fi
+
+  # Do we have wrappers or can we created wrappers?
+  can_wrappers="no"
+  if [test "x$has_wrappers" = "xyes" -o "x$has_swig" = "xyes"]; then
+    can_wrappers="yes"
+  fi
+
+  # Signal if Python is enabled
+  if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
+    enable_python="yes"
+    AC_DEFINE([HAVE_PYTHON], [1], [Define if Python bindings are built])
+  fi
+  
+
 fi
 AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
-
-# Do we have Python wrappers
-has_wrappers="yes"
-AC_CHECK_FILES([pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
-                pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
-                pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
-                pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
-                pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py
-                pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
-                pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
-                pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
-                pyext/gammalib/sky_wrap.cpp pyext/gammalib/sky.py
-                pyext/gammalib/support_wrap.cpp pyext/gammalib/support.py
-                pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
-                pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py],,
-               [has_wrappers="no"])
-if test "x$with_mwl" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$with_lat" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/lat_wrap.cpp pyext/gammalib/lat.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$with_cta" = "xyes"; then
-  AC_CHECK_FILES([pyext/gammalib/cta_wrap.cpp pyext/gammalib/cta.py],,
-                 [has_wrappers="no"])
-fi
-if test "x$has_wrappers" = "xno"; then
-  AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
-fi
-
-# Do we have wrappers or can we created wrappers?
-can_wrappers="no"
-if [test "x$has_wrappers" = "xyes" -o "x$has_swig" = "xyes"]; then
-  can_wrappers="yes"
-fi
-
-# Signal if Python is enabled
-if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
-  enable_python="yes"
-  AC_DEFINE([HAVE_PYTHON], [1], [Define if Python bindings are built])
-fi
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
 
 # Set Python environment
@@ -1240,26 +1241,6 @@ else
     echo "  - Readline support             (no)    no ncurses library found"
   fi
 fi
-if test "x$has_python" = "xyes"; then
-  echo "  * Python                       (yes)"
-else
-  echo "  - Python                       (no)"
-fi
-if test "x$has_python_h" = "xyes"; then
-  echo "  * Python.h                     (yes)"
-else
-  echo "  - Python.h                     (no)"
-fi
-if test "x$has_wrappers" = "xyes"; then
-  echo "  * Python wrappers              (yes)"
-else
-  echo "  - Python wrappers              (no)"
-fi
-if test "x$has_swig" = "xyes"; then
-  echo "  * swig                         (yes)"
-else
-  echo "  - swig                         (no)"
-fi
 
 # Dump Python bindings information
 if test "x$ac_enable_python_binding" = "xyes"; then
@@ -1283,6 +1264,26 @@ if test "x$ac_enable_python_binding" = "xyes"; then
     fi
   else
     echo "  - Make Python binding          (no)    Python not installed"
+  fi
+  if test "x$has_python" = "xyes"; then
+    echo "  * Python                       (yes)"
+  else
+    echo "  - Python                       (no)"
+  fi
+  if test "x$has_python_h" = "xyes"; then
+    echo "  * Python.h                     (yes)"
+  else
+    echo "  - Python.h                     (no)"
+  fi
+  if test "x$has_wrappers" = "xyes"; then
+    echo "  * Python wrappers              (yes)"
+  else
+    echo "  - Python wrappers              (no)"
+  fi
+  if test "x$has_swig" = "xyes"; then
+    echo "  * swig                         (yes)"
+  else
+    echo "  - swig                         (no)"
   fi
 else
   echo "  - Make Python binding          (no)"
