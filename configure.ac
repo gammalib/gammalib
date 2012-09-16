@@ -730,84 +730,86 @@ AC_ARG_ENABLE([python-binding],
 if test "x$ac_enable_python_binding" = "xno"; then
   AC_MSG_NOTICE([Python binding for gammalib will not be built])
   AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
-fi
+else
 
-# Do we have Python and Python.h?
-AM_PATH_PYTHON([2.2],
-               [has_python="yes"],
-               [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
+  # Do we have Python and Python.h?
+  AM_PATH_PYTHON([2.2],
+                 [has_python="yes"],
+                 [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
 
-# It would really be weired if Python has not been found, as barely every system has Python. Maybe
-# it was not found because the autoconf is so old, and in an early version of the AM_PATH_PYTHON
-# there were no [Action-if-found] and [Action-if-not-found] arguments, hence $has_python is possibly
-# badly set. However, the Python executable and version should be set correctly, and we can test
-# for this to see whether Python is really there or not.
-if test "x$has_python" = "xno"; then
-  AM_PYTHON_CHECK_VERSION([$PYTHON], [${PYTHON_VERSION}],
-                          [has_python="yes"
-                           AC_MSG_NOTICE([Wow! You're running a pretty old system. Found Python nevertheless:-)])],
-                          [AC_MSG_WARN([Python not found.])])
-fi
-
-# If we have Python then verify the presence of the header and set some flags
-if test "x$has_python" = "xyes"; then
-
-  # Set opening and closing symbols to make setup.py compatible for versions 2 and 3
-  if test ${PYTHON_VERSION} '<' 3; then
-    PYTHON_OPEN=" "
-    PYTHON_CLOSE=""
-  else
-    PYTHON_OPEN="("
-    PYTHON_CLOSE=")"
-  fi
-  AC_SUBST(PYTHON_OPEN)  
-  AC_SUBST(PYTHON_CLOSE)
-
-  # Do we have distutils?
-  AC_MSG_CHECKING([for the distutils Python package])
-  ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
-  if test -z "$ac_distutils_result"; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
+  # It would really be weired if Python has not been found, as barely every system has Python. Maybe
+  # it was not found because the autoconf is so old, and in an early version of the AM_PATH_PYTHON
+  # there were no [Action-if-found] and [Action-if-not-found] arguments, hence $has_python is possibly
+  # badly set. However, the Python executable and version should be set correctly, and we can test
+  # for this to see whether Python is really there or not.
+  if test "x$has_python" = "xno"; then
+    AM_PYTHON_CHECK_VERSION([$PYTHON], [${PYTHON_VERSION}],
+                            [has_python="yes"
+                             AC_MSG_NOTICE([Wow! You're running a pretty old system. Found Python nevertheless:-)])],
+                            [AC_MSG_WARN([Python not found.])])
   fi
 
-  # If we have distutils then get python path from distutils ...
-  if test -z "$ac_distutils_result"; then
-    AC_MSG_CHECKING([for Python include path])
+  # If we have Python then verify the presence of the header and set some flags
+  if test "x$has_python" = "xyes"; then
+
+    # Set opening and closing symbols to make setup.py compatible for versions 2 and 3
     if test ${PYTHON_VERSION} '<' 3; then
-      python_path=`$PYTHON -c "import distutils.sysconfig; \
-                               print distutils.sysconfig.get_python_inc();"`
+      PYTHON_OPEN=" "
+      PYTHON_CLOSE=""
     else
-      python_path=`$PYTHON -c "import distutils.sysconfig; \
-                               print(distutils.sysconfig.get_python_inc());"`
-    fi                                         
-    if test -n "${python_path}"; then
-      AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
-      python_path="-I$python_path"
+      PYTHON_OPEN="("
+      PYTHON_CLOSE=")"
     fi
-    PYTHON_CPPFLAGS=$python_path
-    CPPFLAGS="${CPPFLAGS} ${python_path}"
-    AC_SUBST([PYTHON_CPPFLAGS])
+    AC_SUBST(PYTHON_OPEN)  
+    AC_SUBST(PYTHON_CLOSE)
 
-  # ... otherwise check for includes relative to exectuable (obsolete?)
-  else                             
+    # Do we have distutils?
+    AC_MSG_CHECKING([for the distutils Python package])
+    ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
+    if test -z "$ac_distutils_result"; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+
+    # If we have distutils then get python path from distutils ...
+    if test -z "$ac_distutils_result"; then
+      AC_MSG_CHECKING([for Python include path])
+      if test ${PYTHON_VERSION} '<' 3; then
+        python_path=`$PYTHON -c "import distutils.sysconfig; \
+                                 print distutils.sysconfig.get_python_inc();"`
+      else
+        python_path=`$PYTHON -c "import distutils.sysconfig; \
+                                 print(distutils.sysconfig.get_python_inc());"`
+      fi                                         
+      if test -n "${python_path}"; then
+        AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
+        python_path="-I$python_path"
+      fi
+      PYTHON_CPPFLAGS=$python_path
+      CPPFLAGS="${CPPFLAGS} ${python_path}"
+      AC_SUBST([PYTHON_CPPFLAGS])
+
+    # ... otherwise check for includes relative to exectuable (obsolete?)
+    else                             
                              
-    # Determine include path for python
-    AC_PATH_PROG(PY_INCLUDE, python)  
-    PY_INCLUDE=`echo $PY_INCLUDE | sed -e "s/bin/include/"`
-    PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
+      # Determine include path for python
+      AC_PATH_PROG(PY_INCLUDE, python)  
+      PY_INCLUDE=`echo $PY_INCLUDE | sed -e "s/bin/include/"`
+      PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
   
-    # Check if we have Python.h
-    AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
+      # Check if we have Python.h
+      AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
+  
+    fi
+
+    # Signal missing Python headers
+    if test "x$has_python_h" = "xno"; then
+      AC_MSG_WARN([No Python header file "Python.h" found. Please install appropriate Python development package.])
+    fi
   
   fi
 
-  # Signal missing Python headers
-  if test "x$has_python_h" = "xno"; then
-    AC_MSG_WARN([No Python header file "Python.h" found. Please install appropriate Python development package.])
-  fi
-  
 fi
 
 # Do we have swig?
