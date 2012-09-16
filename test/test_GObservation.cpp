@@ -35,6 +35,10 @@
 /* __ OpenMP section _____________________________________________________ */
 #ifdef _OPENMP
 #include <omp.h>
+#ifdef HAVE_OPENMP_DARWIN_KLUGE
+#include <pthread.h>
+pthread_attr_t gomp_thread_attr;
+#endif
 #endif
 
 /* __ Coding definitions _________________________________________________ */
