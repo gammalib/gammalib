@@ -5,6 +5,7 @@
 
         clang++ compiler precedence is only taken for Mac OS X >= 10.7
         Omit Python checks if Python bindings are disabled
+        Enhance OpenMP configuration on Darwin
 
 2012-09-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

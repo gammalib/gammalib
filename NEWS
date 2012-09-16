@@ -22,6 +22,16 @@ checks during configuration. This includes detection of the Python
 executable, detection of the swig executable, and the checks for the
 presence of the Python wrapper files.
 
+The Apple gcc compiler requires the gomp_thread_attr global to be
+defined when OpenMP functions are called without having any OpenMP
+section in the code. This specific requirement is now detected in
+the configure script using some dedicated test code, and the compile
+definition HAVE_OPENMP_DARWIN_KLUGE is set that allows inclusion of
+the appropriate code when needed.
+
+Furthermore, the OPENMP_LIB_LDFLAGS is not set to -lgomp on Darwin
+anymore as this appears not to be needed.
+
 
 3. Application module
 ---------------------

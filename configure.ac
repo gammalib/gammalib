@@ -642,6 +642,7 @@ fi
 #############################################################################
 # Initialise flags
 openmp_ok=no
+darwin_kluge=no
 
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
@@ -668,6 +669,27 @@ if test "x$openmp_ok" = "xyes" ; then
     LDFLAGS=$SAVED_LDFLAGS
   fi
 
+  # Special Darwin test to see whether OpenMP compiles without adding the
+  # gomp_thread_attr global or whether we need to add this global. 
+  if test "$ac_sys_system" = "Darwin"; then
+    AC_MSG_CHECKING(whether we need to add gomp_thread_attr)
+    SAVED_CXXFLAGS=$CXXFLAGS
+    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+    AC_TRY_RUN(AC_LANG_PROGRAM([#include <omp.h>],
+                               [omp_set_num_threads(1);]),
+               [AC_MSG_RESULT(no)],
+               [AC_TRY_RUN(AC_LANG_PROGRAM([#include <omp.h>;
+                                            #include <pthread.h>;
+                                            pthread_attr_t gomp_thread_attr;],
+                                           [omp_set_num_threads(1);]),
+                           [AC_MSG_RESULT(yes)
+                            darwin_kluge="yes"
+                            AC_DEFINE([HAVE_OPENMP_DARWIN_KLUGE], [1], [Define if OpenMP Darwin kluge is needed])],
+                           [AC_MSG_RESULT(no)
+                            AC_MSG_WARN([Do not manage to compile OpenMP.])])])
+    CXXFLAGS=$SAVED_CXXFLAGS
+  fi
+
   # Signal actual test
   AC_MSG_CHECKING(whether to enable OpenMP)
 
@@ -688,18 +710,18 @@ if test "x$openmp_ok" = "xyes" ; then
     AC_MSG_RESULT(no)
   fi
 fi
-AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
+AM_CONDITIONAL(OPENMP, test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 AC_SUBST(OPENMP_CXXFLAGS)
 
 # Set system specific settings
 OPENMP_LIB_LDFLAGS=
-if test "x$enable_openmp" = "xyes"; then
-  case $ac_sys_system/$ac_sys_release in
-  Darwin/*)
-    OPENMP_LIB_LDFLAGS=-lgomp
-    ;;
-  esac
-fi
+#if test "x$enable_openmp" = "xyes"; then
+#  case $ac_sys_system/$ac_sys_release in
+#  Darwin/*)
+#    OPENMP_LIB_LDFLAGS=-lgomp
+#    ;;
+#  esac
+#fi
 AC_SUBST(OPENMP_LIB_LDFLAGS)
 
 
