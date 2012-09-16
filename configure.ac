@@ -82,26 +82,23 @@ AC_CANONICAL_HOST
 # A special kluge was added for Mac OS X >=10.7. As Apple switched to clang #
 # we search from this version on for the clang compiler.                    #
 #############################################################################
+
+# Set default compiler lists
+cxx_list="g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++"
+cc_list="gcc cc cl.exe clang"
+
 # Check if we have Mac OS X >= 10.7
-ac_sys_system=`uname -s`
-if test "$ac_sys_system" = "Darwin"; then
-  cur_target=`sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'`
-  if test ${cur_target} '>' 10.6; then
-    mac_clang="yes"
+if test `uname -s` = "Darwin"; then
+  if test `sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'` '>' 10.6; then
+    cxx_list="clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC"
+    cc_list="clang gcc cc cl.exe"
   fi
 fi
 
 # Our language is C++
 AC_LANG(C++)
-
-# Check for compilers
-if test "x$mac_clang" = "xyes"; then
-  AC_PROG_CXX([clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC])
-  AC_PROG_CC([clang gcc cc cl.exe])
-else
-  AC_PROG_CXX([g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++])
-  AC_PROG_CC([gcc cc cl.exe clang])
-fi
+AC_PROG_CXX($cxx_list)
+AC_PROG_CC($cc_list)
 
 
 #############################################################################
