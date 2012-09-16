@@ -35,12 +35,6 @@
 /* __ OpenMP section _____________________________________________________ */
 #ifdef _OPENMP
 #include <omp.h>
-#ifdef __APPLE__ 
-#ifdef __MACH__
-#include <pthread.h>
-pthread_attr_t gomp_thread_attr;
-#endif
-#endif
 #endif
 
 /* __ Coding definitions _________________________________________________ */
