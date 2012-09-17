@@ -33,7 +33,6 @@ AC_INIT([gammalib], [0.6.2], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
-#AC_CONFIG_HEADERS([config.h])
 AM_CONFIG_HEADER([config.h])
 
 
@@ -174,7 +173,6 @@ else
 	AC_MSG_RESULT(no)
 fi
 AC_SUBST(UNIVERSALSDK)
-AM_CONDITIONAL(WITH_UNIVERSALSDK, test "${enable_universalsdk}")
 
 
 #############################################################################
