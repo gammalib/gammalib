@@ -174,6 +174,7 @@ else
 	AC_MSG_RESULT(no)
 fi
 AC_SUBST(UNIVERSALSDK)
+AM_CONDITIONAL(WITH_UNIVERSALSDK, test "${enable_universalsdk}")
 
 
 #############################################################################
