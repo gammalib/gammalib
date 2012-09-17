@@ -37,7 +37,7 @@ core_modules = ['app', 'fits', 'linalg', 'model', 'numerics', \
 is_unit_test = False
 if (len(sys.argv) >= 3):
 	if (sys.argv[2] == '--inplace'):
-		print@PYTHON_OPEN@"This build is for unit testing."@PYTHON_CLOSE@
+		sys.stdout.write("This build is for unit testing.\n")
 		is_unit_test = True
 
 # Darwin MacPorts kluge: Remove -L/opt/local/lib path from LDSHARED as this
@@ -47,6 +47,12 @@ if sys.platform.lower().startswith("darwin"):
 	
 	# Get configuration variables
 	cvars = sysconfig.get_config_vars()
+	
+	# Remove MACOSX_DEPLOYMENT_TARGET
+	if '@WITH_UNIVERSALSDK_FALSE@' != '#':
+		if cvars.get('MACOSX_DEPLOYMENT_TARGET') != None:
+			del cvars['MACOSX_DEPLOYMENT_TARGET']
+			sys.stdout.write("Removed MACOSX_DEPLOYMENT_TARGET from environment variables.\n")
 	
 	# Extract LDSHARED
 	ldshared_old = cvars.get('LDSHARED')
@@ -58,8 +64,7 @@ if sys.platform.lower().startswith("darwin"):
 		else:
 			ldshared_rm += option + ' '
 	if (len(ldshared_rm) > 0):
-		print@PYTHON_OPEN@"Removed following option(s) from LDSHARED: "+ldshared_rm@PYTHON_CLOSE@
-	
+		sys.stdout.write("Removed following option(s) from LDSHARED: "+ldshared_rm+"\n")	
 	# Set LDSHARED
 	cvars['LDSHARED'] = ldshared_new
 
@@ -68,15 +73,14 @@ if sys.platform.lower().startswith("darwin"):
 # This is required on some system (such as Mac OS X) to avoid problems
 # with finding the shared library during unit testing.
 libgamma='gamma'
-#if is_unit_test:
 if is_unit_test and sys.platform.lower().startswith("darwin"):
-	
+
 	# Remove any existing symbolic link to libgamma.a. This will
 	# prevent any exception in creating the symbolic link due to
 	# an already existing link.
 	try:
 		os.remove('../src/.libs/libgamma_python.a')
-		print@PYTHON_OPEN@"Removed ../src/.libs/libgamma_python.a"@PYTHON_CLOSE@
+		sys.stdout.write("Removed ../src/.libs/libgamma_python.a\n")
 	except:
 		pass
 	
@@ -84,10 +88,10 @@ if is_unit_test and sys.platform.lower().startswith("darwin"):
 	# symbolic link
 	try:
 		os.symlink('libgamma.a', '../src/.libs/libgamma_python.a')
-		print@PYTHON_OPEN@"Created ../src/.libs/libgamma_python.a"@PYTHON_CLOSE@
+		sys.stdout.write("Created ../src/.libs/libgamma_python.a\n")
 		libgamma='gamma_python'
 	except:
-		print@PYTHON_OPEN@"WARNING: Failed to create symbolic link to static library. Link dynamically."@PYTHON_CLOSE@
+		sys.stdout.write("WARNING: Failed to create symbolic link to static library. Link dynamically.\n")
 
 # Set default include directories, install files, library paths and libraries
 include_dirs         = ['@top_srcdir@/include']
@@ -102,12 +106,12 @@ if os.path.exists('@prefix@/lib'):
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
-	print@PYTHON_OPEN@"Link cfitsio into Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Link cfitsio into Python bindings.\n")
 	libraries.append('cfitsio')
 
 # Add readline library only if available
 if '@WITH_READLINE_TRUE@' != '#':
-	print@PYTHON_OPEN@"Link readline into Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Link readline into Python bindings.\n")
 	libraries.append('readline')
 	libraries.append('ncurses')
 
@@ -137,13 +141,13 @@ for extra_inc_path in extra_inc_paths:
 # Add definitions for instrument specific modules
 inst_modules = []
 if '@WITH_INST_MWL_TRUE@' != '#':
-	print@PYTHON_OPEN@"Include multi-wavelength interface in gammalib Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Include multi-wavelength interface in gammalib Python bindings.\n")
 	inst_modules.append('mwl')
 if '@WITH_INST_CTA_TRUE@' != '#':
-	print@PYTHON_OPEN@"Include CTA instrument interface in gammalib Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Include CTA instrument interface in gammalib Python bindings.\n")
 	inst_modules.append('cta')
 if '@WITH_INST_LAT_TRUE@' != '#':
-	print@PYTHON_OPEN@"Include Fermi/LAT instrument interface in gammalib Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Include Fermi/LAT instrument interface in gammalib Python bindings.\n")
 	inst_modules.append('lat')
 
 # Set extension definition for core modules
@@ -257,8 +261,8 @@ for module in all_modules:
 
 	# Dump reformulation statistics for actual module
 	if n_import > 0 or n_class > 0:
-		print@PYTHON_OPEN@module+".py reformulation: "+str(n_import)+ \
-		      " imports, "+str(n_class)+" base class declarations."@PYTHON_CLOSE@
+		sys.stdout.write(module+".py reformulation: "+str(n_import)+ \
+		      " imports, "+str(n_class)+" base class declarations.\n")
 
 # Set data files to install. Do not install data files in unit testing mode.
 if is_unit_test:
