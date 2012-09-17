@@ -33,13 +33,6 @@ pkg_name = 'gammalib'
 core_modules = ['app', 'fits', 'linalg', 'model', 'numerics', \
                 'obs', 'opt', 'sky', 'support', 'test', 'xml']
 
-# Detect execution mode
-is_unit_test = False
-if (len(sys.argv) >= 3):
-	if (sys.argv[2] == '--inplace'):
-		sys.stdout.write("This build is for unit testing.\n")
-		is_unit_test = True
-
 # Darwin MacPorts kluge: Remove -L/opt/local/lib path from LDSHARED as this
 # overrides the GammaLib settings. Otherwise, MacPorts libraries would be
 # used instead of the libraries selected by GammaLib
@@ -47,12 +40,6 @@ if sys.platform.lower().startswith("darwin"):
 	
 	# Get configuration variables
 	cvars = sysconfig.get_config_vars()
-	
-	# Remove MACOSX_DEPLOYMENT_TARGET
-	if '@WITH_UNIVERSALSDK_FALSE@' != '#':
-		if cvars.get('MACOSX_DEPLOYMENT_TARGET') != None:
-			del cvars['MACOSX_DEPLOYMENT_TARGET']
-			sys.stdout.write("Removed MACOSX_DEPLOYMENT_TARGET from environment variables.\n")
 	
 	# Extract LDSHARED
 	ldshared_old = cvars.get('LDSHARED')
@@ -68,37 +55,12 @@ if sys.platform.lower().startswith("darwin"):
 	# Set LDSHARED
 	cvars['LDSHARED'] = ldshared_new
 
-# Set GammaLib library name. If we're about to make the test build then
-# create a symbolic link to the static library to enforce static linking.
-# This is required on some system (such as Mac OS X) to avoid problems
-# with finding the shared library during unit testing.
-libgamma='gamma'
-if is_unit_test and sys.platform.lower().startswith("darwin"):
-
-	# Remove any existing symbolic link to libgamma.a. This will
-	# prevent any exception in creating the symbolic link due to
-	# an already existing link.
-	try:
-		os.remove('../src/.libs/libgamma_python.a')
-		sys.stdout.write("Removed ../src/.libs/libgamma_python.a\n")
-	except:
-		pass
-	
-	# Now create a symbolic link and set the library name to this
-	# symbolic link
-	try:
-		os.symlink('libgamma.a', '../src/.libs/libgamma_python.a')
-		sys.stdout.write("Created ../src/.libs/libgamma_python.a\n")
-		libgamma='gamma_python'
-	except:
-		sys.stdout.write("WARNING: Failed to create symbolic link to static library. Link dynamically.\n")
-
 # Set default include directories, install files, library paths and libraries
 include_dirs         = ['@top_srcdir@/include']
 install_files        = glob.glob('@top_srcdir@/pyext/*.i')
 library_dirs         = ['../src/.libs']
 runtime_library_dirs = ['../src/.libs']
-libraries            = [libgamma]
+libraries            = ['gamma']
 
 # Add install directory to runtime library path
 if os.path.exists('@prefix@/lib'):
@@ -264,11 +226,8 @@ for module in all_modules:
 		sys.stdout.write(module+".py reformulation: "+str(n_import)+ \
 		      " imports, "+str(n_class)+" base class declarations.\n")
 
-# Set data files to install. Do not install data files in unit testing mode.
-if is_unit_test:
-	data_files=[]
-else:
-	data_files=[('@prefix@/share/gammalib/swig', install_files)]
+# Set data files to install.
+data_files=[('@prefix@/share/gammalib/swig', install_files)]
 
 # Setup
 setup(name='@PACKAGE_NAME@',
@@ -289,4 +248,18 @@ setup(name='@PACKAGE_NAME@',
       platforms=["Linux", "Solaris", "Mac OS-X", "Unix", "BSD"],
 	  )
 
-# Post-processing
+# Post-processing. A symbolic link is created to the directory containing the
+# shared wrapper libraries so that we can add this directory to the PYTHONPATH
+# for testing.
+try:
+	os.chdir('build')
+	os.remove('gammalib')
+	sys.stdout.write("Removed symbolic link build/gammalib.\n")
+except:
+	pass
+try:
+	path = glob.glob('lib.*/gammalib')
+	os.symlink(path[0], 'gammalib')
+	sys.stdout.write("Created symbolic link build/gammalib.\n")
+except:
+	sys.stdout.write("WARNING: Failed to create symbolic link build/gammalib.\n")
