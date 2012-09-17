@@ -387,16 +387,17 @@ yes)
             ;;
         esac
 	    
-	    # Make sure that MACOSX_DEPLOYMENT_TARGET is set in the 
-	    # environment with a value that is the same as what we'll use
-	    # in the Makefile to ensure that we'll get the same compiler
-	    # environment during configure and build time.
-	    MACOSX_DEPLOYMENT_TARGET="$CONFIGURE_MACOSX_DEPLOYMENT_TARGET"
-	    export MACOSX_DEPLOYMENT_TARGET
-	    EXPORT_MACOSX_DEPLOYMENT_TARGET=''
-
         # Set compile, link and pre-processor flags dependent on architecture
 	    if test "${enable_universalsdk}"; then
+
+	        # Make sure that MACOSX_DEPLOYMENT_TARGET is set in the 
+	        # environment with a value that is the same as what we'll use
+	        # in the Makefile to ensure that we'll get the same compiler
+	        # environment during configure and build time.
+	        MACOSX_DEPLOYMENT_TARGET="$CONFIGURE_MACOSX_DEPLOYMENT_TARGET"
+	        export MACOSX_DEPLOYMENT_TARGET
+	        EXPORT_MACOSX_DEPLOYMENT_TARGET=''
+
 		    UNIVERSAL_ARCH_FLAGS=""
 	        if test "$UNIVERSAL_ARCHS" = "32-bit" ; then
 		        UNIVERSAL_ARCH_FLAGS="-arch ppc -arch i386"

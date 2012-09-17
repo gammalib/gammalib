@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-06-02
 
 Author(s) : Juergen Knoedlseder
 
-September, 16th, 2012
+September, 17th, 2012
 
 
 1. Introduction
@@ -31,6 +31,13 @@ the appropriate code when needed.
 
 Furthermore, the OPENMP_LIB_LDFLAGS is not set to -lgomp on Darwin
 anymore as this appears not to be needed.
+
+The MACOSX_DEPLOYMENT_TARGET environment variable is now only exported
+when the --enable-universalsdk option is specified. This solved problems
+related to uncatched exceptions in unit tests. Possibly, these uncatched
+exceptions were due to weak linking, a feature that exists since Mac OS
+X version 10.2. By not exporting MACOSX_DEPLOYMENT_TARGET, Mac OS X
+version 10.1 is assumed.
 
 
 3. Application module
