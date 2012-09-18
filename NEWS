@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-06-01
+New Features and Important Changes in GammaLib 00-06-02
 
 Author(s) : Juergen Knoedlseder
 
-September, 15th, 2012
+September, 17th, 2012
 
 
 1. Introduction
@@ -13,16 +13,42 @@ changes made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-The configuration script does no longer check for the presence of the
-gammalib/__init__.py file. This file is generated upon installation
-of the Python bindings, and is not shipped with the GammaLib library.
-In version 00-06-00, a missing gammalib/__init__.py file was 
-misinterpreted as a need for swig to build the Python bindings. On 
-systems without swig the Pyhton bindings were thus not built.
+The clang++ compiler takes now only precedence over the g++ compiler
+if the system on which compilation is performed is Mac OS X 10.7 or
+later.
 
-The clang++ compiler takes now precedence over the g++ compiler. In
-that way, clang++ will be selected by default on Mac OS X systems
-(usually from Mac OS X 10.7 on).
+If Python bindings are disabled we omit now all the Python related
+checks during configuration. This includes detection of the Python
+executable, detection of the swig executable, and the checks for the
+presence of the Python wrapper files.
+
+The Apple gcc compiler requires the gomp_thread_attr global to be
+defined when OpenMP functions are called without having any OpenMP
+section in the code. This specific requirement is now detected in
+the configure script using some dedicated test code, and the compile
+definition HAVE_OPENMP_DARWIN_KLUGE is set that allows inclusion of
+the appropriate code when needed.
+
+Furthermore, the OPENMP_LIB_LDFLAGS is not set to -lgomp on Darwin
+anymore as this appears not to be needed.
+
+The MACOSX_DEPLOYMENT_TARGET environment variable is now only exported
+when the --enable-universalsdk option is specified. This solved problems
+related to uncatched exceptions in unit tests. Possibly, these uncatched
+exceptions were due to weak linking, a feature that exists since Mac OS
+X version 10.2. By not exporting MACOSX_DEPLOYMENT_TARGET, Mac OS X
+version 10.1 is assumed.
+
+The Python bindings configuration has been improved to handle also
+the MacPorts gcc compiler on Mac OS X. Static linking during unit
+testing has been removed as this is no longer needed (don't ask me why).
+The double compilation for unit check has also be removed. A static
+link is used instead that allows adding of the wrapper directory to
+the PYTHONPATH.
+
+The TEST_ENV_DIR environment variable is also added to the load
+library path in the GammaLib setup script. This ensures the correct
+loading of shared libraries in non-standard locations.
 
 
 3. Application module

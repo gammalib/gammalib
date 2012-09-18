@@ -1,3 +1,15 @@
+2012-09-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+
+        * Bug fix version 0.6.2 released
+        ================================
+
+        clang++ compiler precedence is only taken for Mac OS X >= 10.7
+        Omit Python checks if Python bindings are disabled
+        Enhance OpenMP configuration on Darwin
+        Export MACOSX_DEPLOYMENT_TARGET only for --enable-universalsdk
+        Improve Python bindings configuration
+        Add TEST_ENV_DIR to load library path
+
 2012-09-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Bug fix version 0.6.1 released
