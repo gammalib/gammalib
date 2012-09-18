@@ -29,7 +29,7 @@ fi
 prefix="@prefix@"
 exec_prefix="@exec_prefix@"
 gammalib_bin="@bindir@"
-gammalib_lib="@libdir@"
+gammalib_lib="@libdir@@TEST_ENV_DIR@"
 uname_system=`uname`
 python_dir="@pythondir@"
 python_exec_dir="@pyexecdir@"
