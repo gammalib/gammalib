@@ -20,7 +20,7 @@
 from gammalib import *
 from math import *
 import os
-
+import sys
 
 # ========================================== #
 # Test class for GammaLib application module #
@@ -54,6 +54,7 @@ class Test(GPythonTestSuite):
 
 		# Append tests
 		self.append(self.test_log, "Test GLog")
+		self.append(self.test_pars, "Test GPars")
 
 		# Return
 		return
@@ -149,6 +150,24 @@ class Test(GPythonTestSuite):
 		file.close()
 		for i, line in enumerate(lines):
 			self.test_assert(line == ref[i], "Test "+calls[i])
+
+		# Return
+		return
+
+	# Test GPars
+	def test_pars(self):
+		"""
+		Test GPars.
+		"""
+		# Test GPars constructor with bad filename.
+		self.test_try("Test GPars constructor with bad filename")
+		try:
+			pars = GPars("testme.par")
+			self.test_try_failure("Exception not thrown.")
+		except:
+			self.test_try_success()
+		else:
+			self.test_try_failure("This should never happen.")
 
 		# Return
 		return
