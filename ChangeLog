@@ -7,6 +7,7 @@
         Omit Python checks if Python bindings are disabled
         Enhance OpenMP configuration on Darwin
         Export MACOSX_DEPLOYMENT_TARGET only for --enable-universalsdk
+        Improve Python bindings configuration
 
 2012-09-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

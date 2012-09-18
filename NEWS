@@ -39,6 +39,17 @@ exceptions were due to weak linking, a feature that exists since Mac OS
 X version 10.2. By not exporting MACOSX_DEPLOYMENT_TARGET, Mac OS X
 version 10.1 is assumed.
 
+The Python bindings configuration has been improved to handle also
+the MacPorts gcc compiler on Mac OS X. Static linking during unit
+testing has been removed as this is no longer needed (don't ask me why).
+The double compilation for unit check has also be removed. A static
+link is used instead that allows adding of the wrapper directory to
+the PYTHONPATH.
+
+The TEST_ENV_DIR environment variable is also added to the load
+library path in the GammaLib setup script. This ensures the correct
+loading of shared libraries in non-standard locations.
+
 
 3. Application module
 ---------------------
