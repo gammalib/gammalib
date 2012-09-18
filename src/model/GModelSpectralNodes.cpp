@@ -37,8 +37,8 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralNodes    g_spectral_func_seed;
-const GModelSpectralRegistry g_spectral_func_registry(&g_spectral_func_seed);
+const GModelSpectralNodes    g_spectral_nodes_seed;
+const GModelSpectralRegistry g_spectral_nodes_registry(&g_spectral_nodes_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                "GModelSpectralNodes::flux(GEnergy&, GEnergy&)"

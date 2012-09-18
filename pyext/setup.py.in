@@ -33,13 +33,6 @@ pkg_name = 'gammalib'
 core_modules = ['app', 'fits', 'linalg', 'model', 'numerics', \
                 'obs', 'opt', 'sky', 'support', 'test', 'xml']
 
-# Detect execution mode
-is_unit_test = False
-if (len(sys.argv) >= 3):
-	if (sys.argv[2] == '--inplace'):
-		print@PYTHON_OPEN@"This build is for unit testing."@PYTHON_CLOSE@
-		is_unit_test = True
-
 # Darwin MacPorts kluge: Remove -L/opt/local/lib path from LDSHARED as this
 # overrides the GammaLib settings. Otherwise, MacPorts libraries would be
 # used instead of the libraries selected by GammaLib
@@ -58,43 +51,16 @@ if sys.platform.lower().startswith("darwin"):
 		else:
 			ldshared_rm += option + ' '
 	if (len(ldshared_rm) > 0):
-		print@PYTHON_OPEN@"Removed following option(s) from LDSHARED: "+ldshared_rm@PYTHON_CLOSE@
-	
+		sys.stdout.write("Removed following option(s) from LDSHARED: "+ldshared_rm+"\n")	
 	# Set LDSHARED
 	cvars['LDSHARED'] = ldshared_new
-
-# Set GammaLib library name. If we're about to make the test build then
-# create a symbolic link to the static library to enforce static linking.
-# This is required on some system (such as Mac OS X) to avoid problems
-# with finding the shared library during unit testing.
-libgamma='gamma'
-#if is_unit_test:
-if is_unit_test and sys.platform.lower().startswith("darwin"):
-	
-	# Remove any existing symbolic link to libgamma.a. This will
-	# prevent any exception in creating the symbolic link due to
-	# an already existing link.
-	try:
-		os.remove('../src/.libs/libgamma_python.a')
-		print@PYTHON_OPEN@"Removed ../src/.libs/libgamma_python.a"@PYTHON_CLOSE@
-	except:
-		pass
-	
-	# Now create a symbolic link and set the library name to this
-	# symbolic link
-	try:
-		os.symlink('libgamma.a', '../src/.libs/libgamma_python.a')
-		print@PYTHON_OPEN@"Created ../src/.libs/libgamma_python.a"@PYTHON_CLOSE@
-		libgamma='gamma_python'
-	except:
-		print@PYTHON_OPEN@"WARNING: Failed to create symbolic link to static library. Link dynamically."@PYTHON_CLOSE@
 
 # Set default include directories, install files, library paths and libraries
 include_dirs         = ['@top_srcdir@/include']
 install_files        = glob.glob('@top_srcdir@/pyext/*.i')
 library_dirs         = ['../src/.libs']
 runtime_library_dirs = ['../src/.libs']
-libraries            = [libgamma]
+libraries            = ['gamma']
 
 # Add install directory to runtime library path
 if os.path.exists('@prefix@/lib'):
@@ -102,12 +68,12 @@ if os.path.exists('@prefix@/lib'):
 
 # Add cfitsio library only if available
 if '@WITH_CFITSIO_TRUE@' != '#':
-	print@PYTHON_OPEN@"Link cfitsio into Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Link cfitsio into Python bindings.\n")
 	libraries.append('cfitsio')
 
 # Add readline library only if available
 if '@WITH_READLINE_TRUE@' != '#':
-	print@PYTHON_OPEN@"Link readline into Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Link readline into Python bindings.\n")
 	libraries.append('readline')
 	libraries.append('ncurses')
 
@@ -137,13 +103,13 @@ for extra_inc_path in extra_inc_paths:
 # Add definitions for instrument specific modules
 inst_modules = []
 if '@WITH_INST_MWL_TRUE@' != '#':
-	print@PYTHON_OPEN@"Include multi-wavelength interface in gammalib Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Include multi-wavelength interface in gammalib Python bindings.\n")
 	inst_modules.append('mwl')
 if '@WITH_INST_CTA_TRUE@' != '#':
-	print@PYTHON_OPEN@"Include CTA instrument interface in gammalib Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Include CTA instrument interface in gammalib Python bindings.\n")
 	inst_modules.append('cta')
 if '@WITH_INST_LAT_TRUE@' != '#':
-	print@PYTHON_OPEN@"Include Fermi/LAT instrument interface in gammalib Python bindings."@PYTHON_CLOSE@
+	sys.stdout.write("Include Fermi/LAT instrument interface in gammalib Python bindings.\n")
 	inst_modules.append('lat')
 if '@WITH_INST_COM_TRUE@' != '#':
 	print "Include COMPTEL instrument interface in gammalib Python bindings."
@@ -260,14 +226,11 @@ for module in all_modules:
 
 	# Dump reformulation statistics for actual module
 	if n_import > 0 or n_class > 0:
-		print@PYTHON_OPEN@module+".py reformulation: "+str(n_import)+ \
-		      " imports, "+str(n_class)+" base class declarations."@PYTHON_CLOSE@
+		sys.stdout.write(module+".py reformulation: "+str(n_import)+ \
+		      " imports, "+str(n_class)+" base class declarations.\n")
 
-# Set data files to install. Do not install data files in unit testing mode.
-if is_unit_test:
-	data_files=[]
-else:
-	data_files=[('@prefix@/share/gammalib/swig', install_files)]
+# Set data files to install.
+data_files=[('@prefix@/share/gammalib/swig', install_files)]
 
 # Setup
 setup(name='@PACKAGE_NAME@',
@@ -288,4 +251,18 @@ setup(name='@PACKAGE_NAME@',
       platforms=["Linux", "Solaris", "Mac OS-X", "Unix", "BSD"],
 	  )
 
-# Post-processing
+# Post-processing. A symbolic link is created to the directory containing the
+# shared wrapper libraries so that we can add this directory to the PYTHONPATH
+# for testing.
+try:
+	os.chdir('build')
+	os.remove('gammalib')
+	sys.stdout.write("Removed symbolic link build/gammalib.\n")
+except:
+	pass
+try:
+	path = glob.glob('lib.*/gammalib')
+	os.symlink(path[0], 'gammalib')
+	sys.stdout.write("Created symbolic link build/gammalib.\n")
+except:
+	sys.stdout.write("WARNING: Failed to create symbolic link build/gammalib.\n")

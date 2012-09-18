@@ -29,11 +29,10 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [0.6.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [0.6.2], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([gnu no-dependencies])
-#AC_CONFIG_HEADERS([config.h])
 AM_CONFIG_HEADER([config.h])
 
 
@@ -78,10 +77,27 @@ AC_CANONICAL_HOST
 #############################################################################
 # Check for valid C++ compiler.  This has to come before the check for      #
 # header files, otherwise we won't detect if the C++ compiler is missing.   #
+#                                                                           #
+# A special kluge was added for Mac OS X >=10.7. As Apple switched to clang #
+# we search from this version on for the clang compiler.                    #
 #############################################################################
+
+# Set default compiler lists
+cxx_list="g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++"
+cc_list="gcc cc cl.exe clang"
+
+# Check if we have Mac OS X >= 10.7
+if test `uname -s` = "Darwin"; then
+  if test `sw_vers -productVersion | sed 's/\(10\.[[0-9]]*\).*/\1/'` '>' 10.6; then
+    cxx_list="clang++ g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC"
+    cc_list="clang gcc cc cl.exe"
+  fi
+fi
+
+# Our language is C++
 AC_LANG(C++)
-AC_PROG_CXX([g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++])
-AC_PROG_CC([gcc cc cl.exe clang])
+AC_PROG_CXX($cxx_list)
+AC_PROG_CC($cc_list)
 
 
 #############################################################################
@@ -370,16 +386,17 @@ yes)
             ;;
         esac
 	    
-	    # Make sure that MACOSX_DEPLOYMENT_TARGET is set in the 
-	    # environment with a value that is the same as what we'll use
-	    # in the Makefile to ensure that we'll get the same compiler
-	    # environment during configure and build time.
-	    MACOSX_DEPLOYMENT_TARGET="$CONFIGURE_MACOSX_DEPLOYMENT_TARGET"
-	    export MACOSX_DEPLOYMENT_TARGET
-	    EXPORT_MACOSX_DEPLOYMENT_TARGET=''
-
         # Set compile, link and pre-processor flags dependent on architecture
 	    if test "${enable_universalsdk}"; then
+
+	        # Make sure that MACOSX_DEPLOYMENT_TARGET is set in the 
+	        # environment with a value that is the same as what we'll use
+	        # in the Makefile to ensure that we'll get the same compiler
+	        # environment during configure and build time.
+	        MACOSX_DEPLOYMENT_TARGET="$CONFIGURE_MACOSX_DEPLOYMENT_TARGET"
+	        export MACOSX_DEPLOYMENT_TARGET
+	        EXPORT_MACOSX_DEPLOYMENT_TARGET=''
+
 		    UNIVERSAL_ARCH_FLAGS=""
 	        if test "$UNIVERSAL_ARCHS" = "32-bit" ; then
 		        UNIVERSAL_ARCH_FLAGS="-arch ppc -arch i386"
@@ -638,6 +655,7 @@ fi
 #############################################################################
 # Initialise flags
 openmp_ok=no
+darwin_kluge=no
 
 # Check if openMP is available
 m4_ifdef([AC_OPENMP],[AC_OPENMP], [AX_OPENMP([openmp_ok=yes],[openmp_ok=no])])
@@ -664,6 +682,27 @@ if test "x$openmp_ok" = "xyes" ; then
     LDFLAGS=$SAVED_LDFLAGS
   fi
 
+  # Special Darwin test to see whether OpenMP compiles without adding the
+  # gomp_thread_attr global or whether we need to add this global. 
+  if test "$ac_sys_system" = "Darwin"; then
+    AC_MSG_CHECKING(whether we need to add gomp_thread_attr)
+    SAVED_CXXFLAGS=$CXXFLAGS
+    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+    AC_TRY_RUN(AC_LANG_PROGRAM([#include <omp.h>],
+                               [omp_set_num_threads(1);]),
+               [AC_MSG_RESULT(no)],
+               [AC_TRY_RUN(AC_LANG_PROGRAM([#include <omp.h>;
+                                            #include <pthread.h>;
+                                            pthread_attr_t gomp_thread_attr;],
+                                           [omp_set_num_threads(1);]),
+                           [AC_MSG_RESULT(yes)
+                            darwin_kluge="yes"
+                            AC_DEFINE([HAVE_OPENMP_DARWIN_KLUGE], [1], [Define if OpenMP Darwin kluge is needed])],
+                           [AC_MSG_RESULT(no)
+                            AC_MSG_WARN([Do not manage to compile OpenMP.])])])
+    CXXFLAGS=$SAVED_CXXFLAGS
+  fi
+
   # Signal actual test
   AC_MSG_CHECKING(whether to enable OpenMP)
 
@@ -684,18 +723,18 @@ if test "x$openmp_ok" = "xyes" ; then
     AC_MSG_RESULT(no)
   fi
 fi
-AM_CONDITIONAL(OPENMP,test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
+AM_CONDITIONAL(OPENMP, test "x$openmp_ok" = "xyes" && test "x$enable_openmp" = "xyes")
 AC_SUBST(OPENMP_CXXFLAGS)
 
 # Set system specific settings
 OPENMP_LIB_LDFLAGS=
-if test "x$enable_openmp" = "xyes"; then
-  case $ac_sys_system/$ac_sys_release in
-  Darwin/*)
-    OPENMP_LIB_LDFLAGS=-lgomp
-    ;;
-  esac
-fi
+#if test "x$enable_openmp" = "xyes"; then
+#  case $ac_sys_system/$ac_sys_release in
+#  Darwin/*)
+#    OPENMP_LIB_LDFLAGS=-lgomp
+#    ;;
+#  esac
+#fi
 AC_SUBST(OPENMP_LIB_LDFLAGS)
 
 
@@ -723,109 +762,106 @@ AC_ARG_ENABLE([python-binding],
 if test "x$ac_enable_python_binding" = "xno"; then
   AC_MSG_NOTICE([Python binding for gammalib will not be built])
   AC_MSG_NOTICE([Enable Python binding module building with --enable-python-binding])
-fi
+else
 
-# Do we have Python and Python.h?
-AM_PATH_PYTHON([2.2],
-               [has_python="yes"],
-               [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
+  # Do we have Python and Python.h?
+  AM_PATH_PYTHON([2.2],
+                 [has_python="yes"],
+                 [AC_MSG_WARN([Python >= 2.2 not found. Python >= 2.2 is required to build python binding. Python can be obtained from http://www.python.org])])
 
-# It would really be weired if Python has not been found, as barely every system has Python. Maybe
-# it was not found because the autoconf is so old, and in an early version of the AM_PATH_PYTHON
-# there were no [Action-if-found] and [Action-if-not-found] arguments, hence $has_python is possibly
-# badly set. However, the Python executable and version should be set correctly, and we can test
-# for this to see whether Python is really there or not.
-if test "x$has_python" = "xno"; then
-  AM_PYTHON_CHECK_VERSION([$PYTHON], [${PYTHON_VERSION}],
-                          [has_python="yes"
-                           AC_MSG_NOTICE([Wow! You're running a pretty old system. Found Python nevertheless:-)])],
-                          [AC_MSG_WARN([Python not found.])])
-fi
-
-# If we have Python then verify the presence of the header and set some flags
-if test "x$has_python" = "xyes"; then
-
-  # Set opening and closing symbols to make setup.py compatible for versions 2 and 3
-  if test ${PYTHON_VERSION} '<' 3; then
-    PYTHON_OPEN=" "
-    PYTHON_CLOSE=""
-  else
-    PYTHON_OPEN="("
-    PYTHON_CLOSE=")"
-  fi
-  AC_SUBST(PYTHON_OPEN)  
-  AC_SUBST(PYTHON_CLOSE)
-
-  # Do we have distutils?
-  AC_MSG_CHECKING([for the distutils Python package])
-  ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
-  if test -z "$ac_distutils_result"; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no])
+  # It would really be weired if Python has not been found, as barely every system has Python. Maybe
+  # it was not found because the autoconf is so old, and in an early version of the AM_PATH_PYTHON
+  # there were no [Action-if-found] and [Action-if-not-found] arguments, hence $has_python is possibly
+  # badly set. However, the Python executable and version should be set correctly, and we can test
+  # for this to see whether Python is really there or not.
+  if test "x$has_python" = "xno"; then
+    AM_PYTHON_CHECK_VERSION([$PYTHON], [${PYTHON_VERSION}],
+                            [has_python="yes"
+                             AC_MSG_NOTICE([Wow! You're running a pretty old system. Found Python nevertheless:-)])],
+                            [AC_MSG_WARN([Python not found.])])
   fi
 
-  # If we have distutils then get python path from distutils ...
-  if test -z "$ac_distutils_result"; then
-    AC_MSG_CHECKING([for Python include path])
+  # If we have Python then verify the presence of the header and set some flags
+  if test "x$has_python" = "xyes"; then
+
+    # Set opening and closing symbols to make setup.py compatible for versions 2 and 3
     if test ${PYTHON_VERSION} '<' 3; then
-      python_path=`$PYTHON -c "import distutils.sysconfig; \
-                               print distutils.sysconfig.get_python_inc();"`
+      PYTHON_OPEN=" "
+      PYTHON_CLOSE=""
     else
-      python_path=`$PYTHON -c "import distutils.sysconfig; \
-                               print(distutils.sysconfig.get_python_inc());"`
-    fi                                         
-    if test -n "${python_path}"; then
-      AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
-      python_path="-I$python_path"
+      PYTHON_OPEN="("
+      PYTHON_CLOSE=")"
     fi
-    PYTHON_CPPFLAGS=$python_path
-    CPPFLAGS="${CPPFLAGS} ${python_path}"
-    AC_SUBST([PYTHON_CPPFLAGS])
+    AC_SUBST(PYTHON_OPEN)  
+    AC_SUBST(PYTHON_CLOSE)
 
-  # ... otherwise check for includes relative to exectuable (obsolete?)
-  else                             
+    # Do we have distutils?
+    AC_MSG_CHECKING([for the distutils Python package])
+    ac_distutils_result=`$PYTHON -c "import distutils" 2>&1`
+    if test -z "$ac_distutils_result"; then
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
+
+    # If we have distutils then get python path from distutils ...
+    if test -z "$ac_distutils_result"; then
+      if test ${PYTHON_VERSION} '<' 3; then
+        python_path=`$PYTHON -c "import distutils.sysconfig; \
+                                 print distutils.sysconfig.get_python_inc();"`
+      else
+        python_path=`$PYTHON -c "import distutils.sysconfig; \
+                                 print(distutils.sysconfig.get_python_inc());"`
+      fi                                         
+      if test -n "${python_path}"; then
+        AC_CHECK_HEADERS($python_path/Python.h, [has_python_h="yes"], [has_python_h="no"]) 
+        python_path="-I$python_path"
+      fi
+      PYTHON_CPPFLAGS=$python_path
+      CPPFLAGS="${CPPFLAGS} ${python_path}"
+      AC_SUBST([PYTHON_CPPFLAGS])
+
+    # ... otherwise check for includes relative to exectuable (obsolete?)
+    else                             
                              
-    # Determine include path for python
-    AC_PATH_PROG(PY_INCLUDE, python)  
-    PY_INCLUDE=`echo $PY_INCLUDE | sed -e "s/bin/include/"`
-    PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
+      # Determine include path for python
+      AC_PATH_PROG(PY_INCLUDE, python)  
+      PY_INCLUDE=`echo $PY_INCLUDE | sed -e "s/bin/include/"`
+      PY_INCLUDE="$PY_INCLUDE$PYTHON_VERSION"
   
-    # Check if we have Python.h
-    AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
+      # Check if we have Python.h
+      AC_CHECK_HEADERS($PY_INCLUDE/Python.h, [has_python_h="yes"], [has_python_h="no"])
+  
+    fi
+
+    # Signal missing Python headers
+    if test "x$has_python_h" = "xno"; then
+      AC_MSG_WARN([No Python header file "Python.h" found. Please install appropriate Python development package.])
+    fi
   
   fi
 
-  # Signal missing Python headers
-  if test "x$has_python_h" = "xno"; then
-    AC_MSG_WARN([No Python header file "Python.h" found. Please install appropriate Python development package.])
+  # Do we have swig?
+  AC_PATH_PROG([SWIG], [swig])
+  if test "$SWIG"; then
+    has_swig="yes"
   fi
-  
-fi
 
-# Do we have swig?
-AC_PATH_PROG([SWIG], [swig])
-if test "$SWIG"; then
-  has_swig="yes"
-fi
-AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
-
-# Do we have Python wrappers
-has_wrappers="yes"
-AC_CHECK_FILES([pyext/gammalib/__init__.py
-                pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
-                pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
-                pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
-                pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
-                pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py
-                pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
-                pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
-                pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
-                pyext/gammalib/sky_wrap.cpp pyext/gammalib/sky.py
-                pyext/gammalib/support_wrap.cpp pyext/gammalib/support.py
-                pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
-                pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py],,
-               [has_wrappers="no"])
+  # Do we have Python wrappers
+  has_wrappers="yes"
+  AC_CHECK_FILES([pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
+                  pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
+                  pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
+                  pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
+                  pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py
+                  pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
+                  pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
+                  pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
+                  pyext/gammalib/sky_wrap.cpp pyext/gammalib/sky.py
+                  pyext/gammalib/support_wrap.cpp pyext/gammalib/support.py
+                  pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
+                  pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py],,
+                 [has_wrappers="no"])
 if test "x$with_mwl" = "xyes"; then
   AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
                  [has_wrappers="no"])
@@ -846,17 +882,21 @@ if test "x$has_wrappers" = "xno"; then
   AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
 fi
 
-# Do we have wrappers or can we created wrappers?
-can_wrappers="no"
-if [test "x$has_wrappers" = "xyes" -o "x$has_swig" = "xyes"]; then
-  can_wrappers="yes"
-fi
+  # Do we have wrappers or can we created wrappers?
+  can_wrappers="no"
+  if [test "x$has_wrappers" = "xyes" -o "x$has_swig" = "xyes"]; then
+    can_wrappers="yes"
+  fi
 
-# Signal if Python is enabled
-if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
-  enable_python="yes"
-  AC_DEFINE([HAVE_PYTHON], [1], [Define if Python bindings are built])
+  # Signal if Python is enabled
+  if [test "x$ac_enable_python_binding" = "xyes" -a "x$has_python" = "xyes" -a "x$has_python_h" = "xyes" -a "x$can_wrappers" = "xyes"]; then
+    enable_python="yes"
+    AC_DEFINE([HAVE_PYTHON], [1], [Define if Python bindings are built])
+  fi
+  
+
 fi
+AM_CONDITIONAL(HAVE_SWIG, test "x$has_swig" = "xyes")
 AM_CONDITIONAL(WITH_PYTHON, test "x$enable_python" = "xyes")
 
 # Set Python environment
@@ -1239,26 +1279,6 @@ else
     echo "  - Readline support             (no)    no ncurses library found"
   fi
 fi
-if test "x$has_python" = "xyes"; then
-  echo "  * Python                       (yes)"
-else
-  echo "  - Python                       (no)"
-fi
-if test "x$has_python_h" = "xyes"; then
-  echo "  * Python.h                     (yes)"
-else
-  echo "  - Python.h                     (no)"
-fi
-if test "x$has_wrappers" = "xyes"; then
-  echo "  * Python wrappers              (yes)"
-else
-  echo "  - Python wrappers              (no)"
-fi
-if test "x$has_swig" = "xyes"; then
-  echo "  * swig                         (yes)"
-else
-  echo "  - swig                         (no)"
-fi
 
 # Dump Python bindings information
 if test "x$ac_enable_python_binding" = "xyes"; then
@@ -1282,6 +1302,26 @@ if test "x$ac_enable_python_binding" = "xyes"; then
     fi
   else
     echo "  - Make Python binding          (no)    Python not installed"
+  fi
+  if test "x$has_python" = "xyes"; then
+    echo "  * Python                       (yes)"
+  else
+    echo "  - Python                       (no)"
+  fi
+  if test "x$has_python_h" = "xyes"; then
+    echo "  * Python.h                     (yes)"
+  else
+    echo "  - Python.h                     (no)"
+  fi
+  if test "x$has_wrappers" = "xyes"; then
+    echo "  * Python wrappers              (yes)"
+  else
+    echo "  - Python wrappers              (no)"
+  fi
+  if test "x$has_swig" = "xyes"; then
+    echo "  * swig                         (yes)"
+  else
+    echo "  - swig                         (no)"
   fi
 else
   echo "  - Make Python binding          (no)"

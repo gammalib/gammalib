@@ -78,13 +78,8 @@ all-local: build
 build: $(BUILT_SOURCES)
 	@PYTHON_BUILD_PREFIX@ $(PYTHON) setup.py build_ext
 
-# If 'make check' is invoked we build the extension modules inplace, so that
-# putting the 'pyext' directory in the PYTHONPATH allows importing the gammalib
-# module. We also catch this special build in the setup script to force static
-# linking with libgamma, which will allow a successful 'make check' on systems
-# (such as Mac OS X) that have fixed shared library paths.
-check-local:
-	@PYTHON_BUILD_PREFIX@ $(PYTHON) setup.py build_ext --inplace
+# Do nothing for 'make check'
+#check-local:
 
 # Install the gammalib extension module
 install-exec-local:
