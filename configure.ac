@@ -793,7 +793,6 @@ else
 
     # If we have distutils then get python path from distutils ...
     if test -z "$ac_distutils_result"; then
-      AC_MSG_CHECKING([for Python include path])
       if test ${PYTHON_VERSION} '<' 3; then
         python_path=`$PYTHON -c "import distutils.sysconfig; \
                                  print distutils.sysconfig.get_python_inc();"`
