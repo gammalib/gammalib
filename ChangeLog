@@ -8,6 +8,7 @@
         Enhance OpenMP configuration on Darwin
         Export MACOSX_DEPLOYMENT_TARGET only for --enable-universalsdk
         Improve Python bindings configuration
+        Add TEST_ENV_DIR to load library path
 
 2012-09-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
