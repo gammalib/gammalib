@@ -38,7 +38,7 @@ def simulate(xmlname, e_min, e_max, area, duration):
 	
 	# Load models and extract first model
 	models = GModels(xmlname)
-	model  = cast_GModelSky(models[0])
+	model  = models[0]
 	print model
 	
 	# Simulate photons
@@ -93,7 +93,7 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
 
 		# Get model values
 		models = GModels(xmlname)
-		crab   = cast_GModelSky(models[0])
+		crab   = models[0]
 		model = []
 		d = GSkyDir()
 		d.radec_deg(83.6331, 22.0145)
