@@ -30,24 +30,24 @@ class TestGVector : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGVector(void) : GTestSuite(){ return; }
-        virtual ~TestGVector(void){ return; }
+        TestGVector(void) : GTestSuite(), m_num(5) { return; }
+        virtual ~TestGVector(void) { return; }
 
         // Methods
         virtual void set(void);
-        void define_vectors(void);
-        void test1(void);
-        void test2(void);
-        void test3(void);
-        void test4(void);
-        void test5(void);
-        void test6(void);
-        void test7(void);
+        void         define_vectors(void);
+        void         test1(void);
+        void         test2(void);
+        void         test3(void);
+        void         test4(void);
+        void         test5(void);
+        void         test6(void);
+        void         test7(void);
 
 
     // Private members
     private:
-        int m_num;
+        int     m_num;
         GVector m_test;
         GVector m_result;
         GVector m_smaller;

@@ -49,7 +49,7 @@ class TestGNumerics : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGNumerics(void) : GTestSuite(){ return; }
+        TestGNumerics(void) : GTestSuite(), m_sigma(1.0) { return; }
         virtual ~TestGNumerics(void){ return; }
 
         // Methods
