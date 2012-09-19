@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.i  -  Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,16 +21,28 @@
 /**
  * @file GModels.i
  * @brief GModels class SWIG interface.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModels.hpp"
+#include "GModelSky.hpp"
+#include "GModelData.hpp"
 #include "GTools.hpp"
 %}
 
 /* __ Inform about base classes ___________________________________________*/
 %import(module="opt") "GOptimizerPars.i";
+
+/* __ Typemaps ____________________________________________________________*/
+%typemap(out) GModel& {
+    if (dynamic_cast<GModelSky*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSky, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelData, 0 |  0 );
+    }
+}
 
 
 /***********************************************************************//**
@@ -68,8 +80,9 @@ public:
         return tochar(self->print());
     }
     GModel& __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
+        }
         else
             throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
