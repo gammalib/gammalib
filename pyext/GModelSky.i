@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelSky.i  -  Abstract virtual sky model class python I/F       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSky.i
  * @brief GModelSky class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -79,14 +79,3 @@ public:
  ***************************************************************************/
 %extend GModelSky {
 };
-
-
-/***********************************************************************//**
- * @brief GModelSky type casts
- ***************************************************************************/
-%inline %{
-    GModelSky* cast_GModelSky(GModel* model) {
-        return dynamic_cast<GModelSky*>(model);
-    }
-%};
-
