@@ -92,16 +92,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageFloat type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageFloat* cast_GFitsImageFloat(GFitsImage* image) {
-        if (image->type() != 42)
-            throw GException::fits_invalid_type("cast_GFitsImageFloat(GFitsImage*)",
-                                                "Expecting single precision image.");
-        return dynamic_cast<GFitsImageFloat*>(image);
-    }
-%};

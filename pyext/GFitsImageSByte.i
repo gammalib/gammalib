@@ -92,16 +92,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageSByte type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageSByte* cast_GFitsImageSByte(GFitsImage* image) {
-        if (image->type() != 12)
-            throw GException::fits_invalid_type("cast_GFitsImageSByte(GFitsImage*)",
-                                                "Expecting signed byte image.");
-        return dynamic_cast<GFitsImageSByte*>(image);
-    }
-%};

@@ -92,16 +92,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageShort type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageShort* cast_GFitsImageShort(GFitsImage* image) {
-        if (image->type() != 21)
-            throw GException::fits_invalid_type("cast_GFitsImageShort(GFitsImage*)",
-                                                "Expecting short integer image.");
-        return dynamic_cast<GFitsImageShort*>(image);
-    }
-%};

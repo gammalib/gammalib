@@ -92,16 +92,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageLongLong type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageLongLong* cast_GFitsImageLongLong(GFitsImage* image) {
-        if (image->type() != 81)
-            throw GException::fits_invalid_type("cast_GFitsImageLongLong(GFitsImage*)",
-                                                "Expecting long long integer image.");
-        return dynamic_cast<GFitsImageLongLong*>(image);
-    }
-%};

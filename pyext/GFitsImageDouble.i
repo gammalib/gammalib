@@ -92,16 +92,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageDouble type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageDouble* cast_GFitsImageDouble(GFitsImage* image) {
-        if (image->type() != 82)
-            throw GException::fits_invalid_type("cast_GFitsImageDouble(GFitsImage*)",
-                                                "Expecting double precision image.");
-        return dynamic_cast<GFitsImageDouble*>(image);
-    }
-%};
