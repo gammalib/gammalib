@@ -61,13 +61,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GModelPointSource type casts
- ***************************************************************************/
-%inline %{
-    GModelPointSource* cast_GModelPointSource(GModel* model) {
-        return dynamic_cast<GModelPointSource*>(model);
-    }
-%};

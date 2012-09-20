@@ -61,13 +61,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GModelDiffuseSource type casts
- ***************************************************************************/
-%inline %{
-    GModelDiffuseSource* cast_GModelDiffuseSource(GModel* model) {
-        return dynamic_cast<GModelDiffuseSource*>(model);
-    }
-%};

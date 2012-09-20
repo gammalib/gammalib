@@ -84,13 +84,3 @@ public:
         return self->GModelRadial::eval_gradients(srcDir);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GModelRadialShell type casts
- ***************************************************************************/
-%inline %{
-    GModelRadialShell* cast_GModelRadialShell(GModelSpatial* model) {
-        return dynamic_cast<GModelRadialShell*>(model);
-    }
-%};

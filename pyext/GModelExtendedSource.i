@@ -66,13 +66,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GModelExtendedSource type casts
- ***************************************************************************/
-%inline %{
-    GModelExtendedSource* cast_GModelExtendedSource(GModel* model) {
-        return dynamic_cast<GModelExtendedSource*>(model);
-    }
-%};

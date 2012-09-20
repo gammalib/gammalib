@@ -80,13 +80,3 @@ public:
         return self->GModelRadial::eval_gradients(srcDir);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GModelRadialGauss type casts
- ***************************************************************************/
-%inline %{
-    GModelRadialGauss* cast_GModelRadialGauss(GModelSpatial* model) {
-        return dynamic_cast<GModelRadialGauss*>(model);
-    }
-%};
