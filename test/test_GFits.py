@@ -201,11 +201,10 @@ class Test(GPythonTestSuite):
 
 		# Get double precision image, take square root of pixel and save in
 		# another file
-		img_double = cast_GFitsImageDouble(fits.image("Double"))
+		img_double = fits.image("Double")
 		for x in range(nx):
 			for y in range(ny):
 				img_double[x,y] = sqrt(img_double[x,y])
-		#img_byte = cast_GFitsImageByte(fits.image("Double"))
 		sys.stdout.write(".")
 
 		# Save into another FITS file
