@@ -37,29 +37,8 @@
 /* __ Inform about base classes ___________________________________________*/
 %import(module="opt") "GOptimizerPars.i";
 
-/* __ Typemaps ____________________________________________________________*/
-%typemap(out) GModel& {
-    if (dynamic_cast<GModelSky*>($1) != NULL) {
-        if (dynamic_cast<GModelDiffuseSource*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelDiffuseSource, 0 |  0 );
-        }
-        else if (dynamic_cast<GModelExtendedSource*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelExtendedSource, 0 |  0 );
-        }
-        else if (dynamic_cast<GModelPointSource*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelPointSource, 0 |  0 );
-        }
-        else {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSky, 0 |  0 );
-        }
-    }
-    else if (dynamic_cast<GModelData*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelData, 0 |  0 );
-    }
-    else {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModel, 0 |  0 );
-    }
-}
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
 
 
 /***********************************************************************//**
