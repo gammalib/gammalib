@@ -137,3 +137,231 @@ static int var_tuple_to_index(PyObject *input, int *ptr) {
         }
     }
 }
+
+
+/***********************************************************************//**
+ * @brief GFitsHDU* output conversion
+ *
+ * This typemap implements an automatic cast of a GFitsHDU pointer to
+ * the relevant derived class pointer.
+ ***************************************************************************/
+%typemap(out) GFitsHDU* {
+    if (dynamic_cast<GFitsImage*>($1) != NULL) {
+        if (dynamic_cast<GFitsImageByte*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageByte, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsImageDouble*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageDouble, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsImageFloat*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageFloat, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsImageLong*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageFloat, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsImageLongLong*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageLongLong, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsImageSByte*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageSByte, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsImageShort*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageShort, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsImageULong*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageULong, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsImageUShort*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageUShort, 0 |  0 );
+        }
+        else {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImage, 0 |  0 );
+        }
+    }
+    else if (dynamic_cast<GFitsTable*>($1) != NULL) {
+        if (dynamic_cast<GFitsBinTable*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsBinTable, 0 |  0 );
+        }
+        else if (dynamic_cast<GFitsAsciiTable*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsAsciiTable, 0 |  0 );
+        }
+        else {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsTable, 0 |  0 );
+        }
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsHDU, 0 |  0 );
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief GFitsImage* output conversion
+ *
+ * This typemap implements an automatic cast of a GFitsImage pointer to
+ * the relevant derived class pointer.
+ ***************************************************************************/
+%typemap(out) GFitsImage* {
+    if (dynamic_cast<GFitsImageByte*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageByte, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsImageDouble*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageDouble, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsImageFloat*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageFloat, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsImageLong*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageFloat, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsImageLongLong*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageLongLong, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsImageSByte*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageSByte, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsImageShort*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageShort, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsImageULong*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageULong, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsImageUShort*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImageUShort, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsImage, 0 |  0 );
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief GFitsTable* output conversion
+ *
+ * This typemap implements an automatic cast of a GFitsTable pointer to
+ * the relevant derived class pointer.
+ ***************************************************************************/
+%typemap(out) GFitsTable* {
+    if (dynamic_cast<GFitsBinTable*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsBinTable, 0 |  0 );
+    }
+    else if (dynamic_cast<GFitsAsciiTable*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsAsciiTable, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GFitsTable, 0 |  0 );
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief GModel& output conversion
+ *
+ * This typemap implements an automatic cast of a GModel reference to
+ * the relevant derived class reference.
+ ***************************************************************************/
+%typemap(out) GModel& {
+    if (dynamic_cast<GModelSky*>($1) != NULL) {
+        if (dynamic_cast<GModelDiffuseSource*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelDiffuseSource, 0 |  0 );
+        }
+        else if (dynamic_cast<GModelExtendedSource*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelExtendedSource, 0 |  0 );
+        }
+        else if (dynamic_cast<GModelPointSource*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelPointSource, 0 |  0 );
+        }
+        else {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSky, 0 |  0 );
+        }
+    }
+    else if (dynamic_cast<GModelData*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelData, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModel, 0 |  0 );
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief GModelSpatial* output conversion
+ *
+ * This typemap implements an automatic cast of a GModelSpatial pointer to
+ * the relevant derived class pointer.
+ ***************************************************************************/
+%typemap(out) GModelSpatial* {
+    if (dynamic_cast<GModelRadial*>($1) != NULL) {
+        if (dynamic_cast<GModelRadialDisk*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialDisk, 0 |  0 );
+        }
+        else if (dynamic_cast<GModelRadialGauss*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialGauss, 0 |  0 );
+        }
+        else if (dynamic_cast<GModelRadialShell*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialShell, 0 |  0 );
+        }
+        else {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadial, 0 |  0 );
+        }
+    }
+    else if (dynamic_cast<GModelSpatialConst*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialConst, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpatialCube*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialCube, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpatialMap*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialMap, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpatialPtsrc*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialPtsrc, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatial, 0 |  0 );
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief GModelSpectral* output conversion
+ *
+ * This typemap implements an automatic cast of a GModelSpectral pointer to
+ * the relevant derived class pointer.
+ ***************************************************************************/
+%typemap(out) GModelSpectral* {
+    if (dynamic_cast<GModelSpectralConst*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralConst, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralFunc*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralFunc, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralNodes*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralNodes, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralPlaw*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralPlaw, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralPlaw2*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralPlaw2, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectral, 0 |  0 );
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief GModelTemporal* output conversion
+ *
+ * This typemap implements an automatic cast of a GModelTemporal pointer to
+ * the relevant derived class pointer.
+ ***************************************************************************/
+%typemap(out) GModelTemporal* {
+    if (dynamic_cast<GModelTemporalConst*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelTemporalConst, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelTemporal, 0 |  0 );
+    }
+}
