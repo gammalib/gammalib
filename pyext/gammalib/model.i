@@ -27,6 +27,10 @@
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 
+/* __ Make sure that exceptions are catched ______________________________ */
+%import(module="gammalib.support") "GException.i";
+%import(module="gammalib.opt") "GOptimizerPars.i";
+
 /* __ Model handling _____________________________________________________ */
 %include "GModelPar.i"
 %include "GModels.i"

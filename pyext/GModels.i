@@ -34,9 +34,6 @@
 #include "GTools.hpp"
 %}
 
-/* __ Inform about base classes ___________________________________________*/
-%import(module="opt") "GOptimizerPars.i";
-
 /* __ Includes ___________________________________________________________ */
 %include "GTypemaps.i"
 
