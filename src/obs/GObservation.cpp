@@ -200,23 +200,29 @@ double GObservation::model(const GModels& models, const GEvent& event,
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
-        // Check if model applies to specific instrument
-        if (models[i]->isvalid(instrument())) {
+        // Get model pointer. Continue only if pointer is valid
+        const GModel* mptr = models[i];
+        if (mptr != NULL) {
 
-            // Compute value and add to model
-            model += models[i]->eval_gradients(event, *this);
+            // Check if model applies to specific instrument
+            if (mptr->isvalid(instrument())) {
 
-            // Optionally determine model gradients
-            if (gradient != NULL) {
-                for (int k = 0; k < models[i]->size(); ++k) {
-                    (*gradient)[igrad+k] = model_grad(*(models[i]), event, k);
+                // Compute value and add to model
+                model += mptr->eval_gradients(event, *this);
+
+                // Optionally determine model gradients
+                if (gradient != NULL) {
+                    for (int k = 0; k < mptr->size(); ++k) {
+                        (*gradient)[igrad+k] = model_grad(*mptr, event, k);
+                    }
                 }
-            }
 
-        } // endif: model component was valid for instrument
+            } // endif: model component was valid for instrument
 
-        // Increment parameter counter for gradients
-        igrad += models[i]->size();
+            // Increment parameter counter for gradients
+            igrad += mptr->size();
+
+        } // endif: model was valid
 
     } // endfor: Looped over models
 
@@ -264,24 +270,30 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
-        // Handle only components that are relevant for the actual
-        // instrument
-        if (models[i]->isvalid(instrument())) {
+        // Get model pointer. Continue only if pointer is valid
+        const GModel* mptr = models[i];
+        if (mptr != NULL) {
 
-            // Determine Npred for model
-            npred += npred_temp(*(models[i]));
+            // Handle only components that are relevant for the actual
+            // instrument
+            if (mptr->isvalid(instrument())) {
 
-            // Optionally determine Npred gradients
-            if (gradient != NULL) {
-                for (int k = 0; k < models[i]->size(); ++k) {
-                    (*gradient)[igrad+k] = npred_grad(*(models[i]), k);
+                // Determine Npred for model
+                npred += npred_temp(*mptr);
+
+                // Optionally determine Npred gradients
+                if (gradient != NULL) {
+                    for (int k = 0; k < mptr->size(); ++k) {
+                        (*gradient)[igrad+k] = npred_grad(*mptr, k);
+                    }
                 }
-            }
 
-        } // endif: model component was valid for instrument
+            } // endif: model component was valid for instrument
 
-        // Increment parameter counter for gradient
-        igrad += models[i]->size();
+            // Increment parameter counter for gradient
+            igrad += mptr->size();
+
+        } // endif: model was valid
 
     } // endfor: Looped over models
 
