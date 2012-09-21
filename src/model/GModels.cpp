@@ -21,7 +21,7 @@
 /**
  * @file GModels.cpp
  * @brief Model container class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -56,6 +56,8 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Constructs an empty model container.
  ***************************************************************************/
 GModels::GModels(void) : GOptimizerPars()
 {
@@ -71,6 +73,8 @@ GModels::GModels(void) : GOptimizerPars()
  * @brief Copy constructor
  *
  * @param[in] models Model container.
+ *
+ * Constructs a copy of a model container.
  ***************************************************************************/
 GModels::GModels(const GModels& models) : GOptimizerPars(models)
 {
@@ -89,6 +93,8 @@ GModels::GModels(const GModels& models) : GOptimizerPars(models)
  * @brief Load constructor
  *
  * @param[in] filename XML filename.
+ *
+ * Constructs model container from the model information of an XML file.
  ***************************************************************************/
 GModels::GModels(const std::string& filename)
 {
@@ -107,6 +113,8 @@ GModels::GModels(const std::string& filename)
 
 /***********************************************************************//**
  * @brief Destructor
+ *
+ * Destroys the model container.
  ***************************************************************************/
 GModels::~GModels(void)
 {
@@ -128,6 +136,8 @@ GModels::~GModels(void)
  * @brief Assignment operator
  *
  * @param[in] models Model container.
+ *
+ * Assigns a model container to the instance.
  ***************************************************************************/
 GModels& GModels::operator= (const GModels& models)
 {
@@ -154,14 +164,16 @@ GModels& GModels::operator= (const GModels& models)
 
 
 /***********************************************************************//**
- * @brief Returns reference to model
+ * @brief Returns reference to pointer to model
  *
  * @param[in] index Model index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
+ *
+ * Returns a reference to the model pointer by index.
  ***************************************************************************/
-GModel& GModels::operator[](const int& index)
+GModel*& GModels::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -170,20 +182,22 @@ GModel& GModels::operator[](const int& index)
     }
     #endif
 
-    // Return reference
-    return *(m_models[index]);
+    // Return pointer
+    return m_models[index];
 }
 
 
 /***********************************************************************//**
- * @brief Returns reference to model
+ * @brief Returns pointer to model (const version)
  *
  * @param[in] index Model index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
+ *
+ * Returns a constant model pointer by index.
  ***************************************************************************/
-const GModel& GModels::operator[](const int& index) const
+const GModel* GModels::operator[](const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -192,20 +206,22 @@ const GModel& GModels::operator[](const int& index) const
     }
     #endif
 
-    // Return reference
-    return *(m_models[index]);
+    // Return pointer
+    return m_models[index];
 }
 
 
 /***********************************************************************//**
- * @brief Returns reference to model
+ * @brief Returns pointer to model
  *
  * @param[in] name Model name.
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
+ *
+ * Returns a reference to the model pointer by model name.
  ***************************************************************************/
-GModel& GModels::operator[](const std::string& name)
+GModel*& GModels::operator[](const std::string& name)
 {
     // Get parameter index
     int index = 0;
@@ -220,20 +236,22 @@ GModel& GModels::operator[](const std::string& name)
         throw GException::model_not_found(G_ACCESS2, name);
     }
 
-    // Return reference
-    return *(m_models[index]);
+    // Return pointer
+    return m_models[index];
 }
 
 
 /***********************************************************************//**
- * @brief Returns reference to model (const version)
+ * @brief Returns pointer to model (const version)
  *
  * @param[in] name Model name.
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
+ *
+ * Returns a constant model pointer by model name.
  ***************************************************************************/
-const GModel& GModels::operator[](const std::string& name) const
+const GModel* GModels::operator[](const std::string& name) const
 {
     // Get parameter index
     int index = 0;
@@ -248,8 +266,8 @@ const GModel& GModels::operator[](const std::string& name) const
         throw GException::model_not_found(G_ACCESS2, name);
     }
 
-    // Return reference
-    return *(m_models[index]);
+    // Return pointer
+    return m_models[index];
 }
 
 
@@ -260,9 +278,9 @@ const GModel& GModels::operator[](const std::string& name) const
  ==========================================================================*/
 
  /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear object
  *
- * This method properly resets the object to an initial state.
+ * Removes all models from the container.
  ***************************************************************************/
 void GModels::clear(void)
 {
@@ -281,6 +299,8 @@ void GModels::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * Makes a deep copy of the model container instance.
  ***************************************************************************/
 GModels* GModels::clone(void) const
 {
@@ -293,8 +313,7 @@ GModels* GModels::clone(void) const
  *
  * @param[in] model Model.
  *
- * This method appends one model to the container by cloning the model. The
- * model provided to the method can be deleted after calling this method.
+ * Appends one model to the container by making a deep copy of the model.
  ***************************************************************************/
 void GModels::append(const GModel& model)
 {
@@ -310,9 +329,11 @@ void GModels::append(const GModel& model)
 
 
 /***********************************************************************//**
- * @brief Load models from XML file.
+ * @brief Load models from XML file
  *
- * @param[in] filename Name of XML file.
+ * @param[in] filename XML filename.
+ *
+ * Loads all models that are defined in an XML file.
  ***************************************************************************/
 void GModels::load(const std::string& filename)
 {
@@ -331,9 +352,11 @@ void GModels::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save models into XML file.
+ * @brief Save models into XML file
  *
- * @param[in] filename Name of XML file.
+ * @param[in] filename XML filename.
+ *
+ * Saves all models in the container into an XML file.
  ***************************************************************************/
 void GModels::save(const std::string& filename) const
 {
@@ -442,10 +465,12 @@ void GModels::write(GXml& xml) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate sum of all models
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ *
+ * Evaluates the sum of all models for the specified event and observation.
  ***************************************************************************/
 double GModels::eval(const GEvent& event, const GObservation& obs) const
 {
@@ -463,10 +488,13 @@ double GModels::eval(const GEvent& event, const GObservation& obs) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function and gradients
+ * @brief Evaluate sum and gradients of all models
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ *
+ * Evaluates the sum and the parameter gradients of all models for the
+ * specified event and observation.
  ***************************************************************************/
 double GModels::eval_gradients(const GEvent& event,
                                const GObservation& obs) const
@@ -486,6 +514,8 @@ double GModels::eval_gradients(const GEvent& event,
 
 /***********************************************************************//**
  * @brief Print models
+ *
+ * Prints all models into a string.
  ***************************************************************************/
 std::string GModels::print(void) const
 {
@@ -531,7 +561,9 @@ void GModels::init_members(void)
  *
  * @param[in] models Model container.
  *
- * This method clones all models.
+ * Makes a copy of all class members. All models are deep copied, and the
+ * linear pointer array for parameter access through the GOptimizerPars
+ * base class is set.
  ***************************************************************************/
 void GModels::copy_members(const GModels& models)
 {
@@ -552,9 +584,8 @@ void GModels::copy_members(const GModels& models)
 /***********************************************************************//**
  * @brief Delete class members
  *
- * As container classes that hold pointers need to handle themselves the
- * proper deallocation of memory, we loop here over all pointers and make
- * sure that we deallocate all models in the container.
+ * Deallocates all models. The method loops over the model container and
+ * deallocates the memory that has been allocated before.
  ***************************************************************************/
 void GModels::free_members(void)
 {
@@ -573,8 +604,8 @@ void GModels::free_members(void)
  * @brief Set parameter pointers
  *
  * Gathers all parameter pointers from the models into a linear array of
- * GModelPar pointers. This allows the optimizer to see all parameters in a
- * linear array.
+ * GModelPar pointers. This exposes all model parameters to the base class
+ * GOptimizerPars in form of a linear array.
  ***************************************************************************/
 void GModels::set_pointers(void)
 {
@@ -604,6 +635,8 @@ void GModels::set_pointers(void)
  *
  * @param[in] os Output stream.
  * @param[in] models Model container.
+ *
+ * Dumps a model container into the output stream.
  ***************************************************************************/
 std::ostream& operator<< (std::ostream& os, const GModels& models)
 {
@@ -620,6 +653,8 @@ std::ostream& operator<< (std::ostream& os, const GModels& models)
  *
  * @param[in] log Logger.
  * @param[in] models Model container.
+ *
+ * Logs a model container into a logger.
  ***************************************************************************/
 GLog& operator<< (GLog& log, const GModels& models)
 {

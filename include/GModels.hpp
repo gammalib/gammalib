@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GModels.hpp  -  Model container class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModels.hpp
  * @brief Model container class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELS_HPP
@@ -47,6 +47,10 @@ class GObservation;
  * This container class collects models of gamma-ray data that are used
  * for maximum likelihood fitting. It derives from the optimizer parameter
  * class GOptimizerPars.
+ *
+ * @todo Add extend method to append a container to the container
+ * @todo Add insert method to insert a model into the container
+ * @todo Add pop method to delete a model from the container (default: last)
  ***************************************************************************/
 class GModels : public GOptimizerPars {
 
@@ -63,10 +67,10 @@ public:
 
     // Operators
     GModels&      operator=(const GModels& models);
-    GModel&       operator[](const int& index);
-    const GModel& operator[](const int& index) const;
-    GModel&       operator[](const std::string& name);
-    const GModel& operator[](const std::string& name) const;
+    GModel*&      operator[](const int& index);
+    const GModel* operator[](const int& index) const;
+    GModel*&      operator[](const std::string& name);
+    const GModel* operator[](const std::string& name) const;
 
     // Methods
     void          clear(void);

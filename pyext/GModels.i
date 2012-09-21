@@ -26,11 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModels.hpp"
-#include "GModelSky.hpp"
-#include "GModelDiffuseSource.hpp"
-#include "GModelExtendedSource.hpp"
-#include "GModelPointSource.hpp"
-#include "GModelData.hpp"
 #include "GTools.hpp"
 %}
 
@@ -72,26 +67,30 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GModel& __getitem__(const int& index) {
+    GModel* __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
-        else
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+        else {
+            throw GException::out_of_range("__getitem__(int)", index,
+                                           0, self->size()-1);
+        }
     }
-    GModel& __getitem__(const std::string& name) {
+    GModel* __getitem__(const std::string& name) {
         return (*self)[name];
     }
-    void __setitem__(const int& index, const GModel& val) {
+    void __setitem__(const int& index, GModel* val) {
         if (index>=0 && index < self->size()) {
-            (*self)[index] = val;
+            (*self)[index] = val->clone();
             return;
         }
-        else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+        else {
+            throw GException::out_of_range("__setitem__(int)", index,
+                                           0, self->size()-1);
+        }
     }
-    void __setitem__(const std::string& name, const GModel& val) {
-        (*self)[name] = val;
+    void __setitem__(const std::string& name, GModel* val) {
+        (*self)[name] = val->clone();
         return;
     }
     GModels copy() {
