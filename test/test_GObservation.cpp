@@ -137,7 +137,7 @@ GModelPar& TestOpenMP::test_observations_optimizer(int mode)
     obs.optimize(opt);
 
     // Get the result
-    GModelPar& result = ((obs.models())[0])[0];
+    GModelPar& result = (*(obs.models()[0]))[0];
 
     //check if converged
     test_assert(opt.status()==0, "Check if converged", "Optimizer did not convered"); 
@@ -146,7 +146,7 @@ GModelPar& TestOpenMP::test_observations_optimizer(int mode)
     test_value(result.value(),RATE,result.error()*3); 
 
     // Return
-    return (((obs.models())[0])[0]);
+    return (*(obs.models()[0]))[0];
 }
 
 
