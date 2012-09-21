@@ -1,5 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% GammaLib Coding conventions
+% GammaLib Coding and Design Conventions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,10 +7,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\task}{\mbox{GammaLib}}
 \newcommand{\this}{\mbox{\tt \task}}
-\newcommand{\shorttype}{\mbox{CCD}}
-\newcommand{\doctype}{\mbox{Coding Conventions Document}}
+\newcommand{\shorttype}{\mbox{CDC}}
+\newcommand{\doctype}{\mbox{Coding and Design Conventions}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{10 November 2011}}
+\newcommand{\calendar}{\mbox{21 September 2012}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -35,10 +35,22 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-The present document summarises the coding conventions that should be
-followed in implementing the \this\ toolbox.
-The respect of coherent coding conventions throughout the code
-improves code readibility and enhances the portability of the code.
+This document summarises the coding and design conventions that should be following for
+the \this\ development.
+
+Respecting uniform and coherent coding and design conventions is crucial for software
+development.
+They improve code readability, ease code development and maintenance, ensure code
+portability, and provide standards for the user interface.
+
+Coding and design conventions were introduced at a very early stage of the \this\ project, and
+are followed as strictly as possible.
+The choices that were made for \this\ were inspired by a large survey of existing C++ coding
+rules, combined with the experience of the leading code developers.
+Obviously, there is no single best way to code in C++, and the adopted conventions may not
+meet the coding usage of individual developers.
+They should nevertheless be respected strictly, as the \this\ code base is already very large,
+and assuring uniformity and coherence is a primary goal of the project.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -48,13 +60,38 @@ improves code readibility and enhances the portability of the code.
 
 The following general rules should be followed:
 \begin{itemize}
-\item[R1] Each function and/or method terminates with a {\tt return} statement.
-\item[R2] Each function and/or method has only a single exit point (i.e. a single {\tt return} statement).
-\item[R3] Put a blank line at the end of each file.
-\item[R4] Use {\tt explicit} for constructors to avoid use of the constructor for unintended
+\item Blocks are indented by 4 characters.
+\item Do not use tabs (code formatting should be independent of editor configurations).
+\item Do not exceed a line length of 80 characters (a few more characters are in exceptional cases acceptable).
+\item Put a blank line at the end of each file.
+\end{itemize}
+
+\begin{itemize}
+\item Each function and/or method terminates with a {\tt return} statement.
+\item Each function and/or method has only a single exit point (i.e. a single {\tt return} statement).
+\item Use {\tt explicit} for constructors to avoid use of the constructor for unintended
 type conversion.
-\item[R5] Do not use tabs to make code formating independent of editor configurations.
-\item[R6] Blocks are indented by 4 characters.
+\item Each function starts with a curly bracket in the line following the function name.
+The return type is in the same line as the function name. Example:
+\begin{verbatim}
+void function(void)
+{
+    int = 0;
+    return;
+}
+\end{verbatim}
+\item Each block should be encompassed in curly brackets, even if it is a single line block.
+The block starts in the same line as the related statement. Examples:
+\begin{verbatim}
+if (inx < 0 || inx >= m_num) {
+    throw GException::out_of_range("GVector::operator(int)", inx, m_num);
+}
+\end{verbatim}
+\begin{verbatim}
+for (int i = 0; i < 10; ++i) {
+    sum += i;
+}
+\end{verbatim}
 \end{itemize}
 
 
@@ -91,8 +128,9 @@ the library configuration:
 
 \begin{verbatim}
 #if defined(G_RANGE_CHECK)
-if (inx < 0 || inx >= m_num)
+if (inx < 0 || inx >= m_num) {
     throw GException::out_of_range("GVector::operator(int)", inx, m_num);
+}
 #endif
 \end{verbatim}
 
@@ -445,6 +483,16 @@ GLog& operator<< (GLog& log, const GFits& fits)
 \end{verbatim}
 
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Design Conventsions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Design Conventions}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{C++ classes}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Container classes}
 
@@ -456,6 +504,72 @@ A non-const and a const version of the operator should exist.
 
 Similar to the C++ template classes, {\tt at()} methods could also be implemented that
 perform range checking.
+
+%%% Mandatory methods for container classes %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{table}[!h]
+%\caption{Mandatory methods for container classes holding a list of elements.
+%{\tt e} designates the type of a container element,
+%{\tt C} designates the type of the container.
+%\label{tab:containers}}
+\begin{center}
+\begin{tabular}{ll}
+\hline
+\hline
+\noalign{\smallskip}
+Method & Usage \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt e\& operator[](const int\&)} & Element access operator \\
+{\tt const e\& operator[](const int\&) const} & Element access operator \\
+{\tt void clear()} & Delete all objects in container \\
+{\tt void size()} & Return number of elements in container \\
+{\tt void append(const e\&)} & Append an element to the container \\
+{\tt void insert(const int\&, const e\&)} & Insert an element into the container \\
+{\tt void set(const int\&, const e\&)} & Set an element of the container \\
+{\tt void extend(const C\&)} & Append another container to the container \\
+{\tt void pop(const int\&)} & Removes an element from the container \\
+{\tt std::string print()} & Print container (see section \ref{sec:output}) \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+%\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+TBW: Specific note about containers of pointers.
+
+%%% Mandatory methods for container classes %%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{table}[!h]
+%\caption{Mandatory methods for container classes holding a list of element pointers.
+%{\tt e} designates the type of a container element,
+%{\tt C} designates the type of the container.
+%\label{tab:ptrcontainers}}
+\begin{center}
+\begin{tabular}{ll}
+\hline
+\hline
+\noalign{\smallskip}
+Method & Usage \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt e* operator[](const int\&)} & Element access operator \\
+{\tt const e* operator[](const int\&) const} & Element access operator \\
+{\tt void clear()} & Delete all objects in container \\
+{\tt void size()} & Return number of elements in container \\
+{\tt void append(const e\&)} & Append an element to the container \\
+{\tt void insert(const int\&, const e\&)} & Insert an element into the container \\
+{\tt void set(const int\&, const e\&)} & Set an element of the container \\
+{\tt void extend(const C\&)} & Append another container to the container \\
+{\tt void pop(const int\&)} & Removes an element from the container \\
+{\tt std::string print()} & Print container (see section \ref{sec:output}) \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+%\end{table}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
