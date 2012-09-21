@@ -21,7 +21,7 @@
 /**
  * @file GObservation.cpp
  * @brief Abstract observation base class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -201,22 +201,22 @@ double GObservation::model(const GModels& models, const GEvent& event,
     for (int i = 0; i < models.size(); ++i) {
 
         // Check if model applies to specific instrument
-        if (models[i].isvalid(instrument())) {
+        if (models[i]->isvalid(instrument())) {
 
             // Compute value and add to model
-            model += models[i].eval_gradients(event, *this);
+            model += models[i]->eval_gradients(event, *this);
 
             // Optionally determine model gradients
             if (gradient != NULL) {
-                for (int k = 0; k < models[i].size(); ++k) {
-                    (*gradient)[igrad+k] = model_grad(models[i], event, k);
+                for (int k = 0; k < models[i]->size(); ++k) {
+                    (*gradient)[igrad+k] = model_grad(*(models[i]), event, k);
                 }
             }
 
         } // endif: model component was valid for instrument
 
         // Increment parameter counter for gradients
-        igrad += models[i].size();
+        igrad += models[i]->size();
 
     } // endfor: Looped over models
 
@@ -266,22 +266,22 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
         // Handle only components that are relevant for the actual
         // instrument
-        if (models[i].isvalid(instrument())) {
+        if (models[i]->isvalid(instrument())) {
 
             // Determine Npred for model
-            npred += npred_temp(models[i]);
+            npred += npred_temp(*(models[i]));
 
             // Optionally determine Npred gradients
             if (gradient != NULL) {
-                for (int k = 0; k < models[i].size(); ++k) {
-                    (*gradient)[igrad+k] = npred_grad(models[i], k);
+                for (int k = 0; k < models[i]->size(); ++k) {
+                    (*gradient)[igrad+k] = npred_grad(*(models[i]), k);
                 }
             }
 
         } // endif: model component was valid for instrument
 
         // Increment parameter counter for gradient
-        igrad += models[i].size();
+        igrad += models[i]->size();
 
     } // endfor: Looped over models
 
