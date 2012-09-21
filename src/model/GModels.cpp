@@ -39,6 +39,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                                 "GModels::operator[](int&)"
 #define G_ACCESS2                         "GModels::operator[](std::string&)"
+#define G_SET1                                   "GModels::set(int&,GModel&)"
+#define G_SET2                           "GModels::set(std::string&,GModel&)"
 #define G_READ                                         "GModels::read(GXml&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -164,16 +166,16 @@ GModels& GModels::operator= (const GModels& models)
 
 
 /***********************************************************************//**
- * @brief Returns reference to pointer to model
+ * @brief Returns pointer to model
  *
  * @param[in] index Model index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Returns a reference to the model pointer by index.
+ * Returns a model pointer by index.
  ***************************************************************************/
-GModel*& GModels::operator[](const int& index)
+GModel* GModels::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -219,17 +221,12 @@ const GModel* GModels::operator[](const int& index) const
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Returns a reference to the model pointer by model name.
+ * Returns a model pointer by model name.
  ***************************************************************************/
-GModel*& GModels::operator[](const std::string& name)
+GModel* GModels::operator[](const std::string& name)
 {
     // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_models[index]->name() == name) {
-            break;
-        }
-    }
+    int index = get_index(name);
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
@@ -254,12 +251,7 @@ GModel*& GModels::operator[](const std::string& name)
 const GModel* GModels::operator[](const std::string& name) const
 {
     // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_models[index]->name() == name) {
-            break;
-        }
-    }
+    int index = get_index(name);
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
@@ -313,12 +305,81 @@ GModels* GModels::clone(void) const
  *
  * @param[in] model Model.
  *
- * Appends one model to the container by making a deep copy of the model.
+ * Appends one model to the container by making a deep copy.
  ***************************************************************************/
 void GModels::append(const GModel& model)
 {
     // Append model
     m_models.push_back(model.clone());
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append model to container
+ *
+ * @param[in] index Model index [0,...,size()-1].
+ * @param[in] model Model.
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ *
+ * Set model in the container by making a deep copy.
+ ***************************************************************************/
+void GModels::set(const int& index, const GModel& model)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_SET1, index, 0, size()-1);
+    }
+    #endif
+
+    // Delete any existing model
+    if (m_models[index] != NULL) delete m_models[index];
+
+    // Assign new model by cloning
+    m_models[index] = model.clone();
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append model to container
+ *
+ * @param[in] name Model name.
+ * @param[in] model Model.
+ *
+ * @exception GException::model_not_found
+ *            Model with specified name not found in container.
+ *
+ * Set model in the container by making a deep copy.
+ ***************************************************************************/
+void GModels::set(const std::string& name, const GModel& model)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if parameter name was not found
+    if (index >= size()) {
+        throw GException::model_not_found(G_SET2, name);
+    }
+
+    // Delete any existing model
+    if (m_models[index] != NULL) delete m_models[index];
+
+    // Assign new model by cloning
+    m_models[index] = model.clone();
 
     // Set parameter pointers
     set_pointers();
@@ -621,6 +682,29 @@ void GModels::set_pointers(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns index to model
+ *
+ * @param[in] name Model name.
+ *
+ * Returns index to model specified by the model name. If no model is found
+ * the method returns the size of the model container.
+ ***************************************************************************/
+int GModels::get_index(const std::string& name) const
+{
+    // Get parameter index
+    int index = 0;
+    for (; index < size(); ++index) {
+        if (m_models[index]->name() == name) {
+            break;
+        }
+    }
+
+    // Return index
+    return index;
 }
 
 

@@ -67,9 +67,9 @@ public:
 
     // Operators
     GModels&      operator=(const GModels& models);
-    GModel*&      operator[](const int& index);
+    GModel*       operator[](const int& index);
     const GModel* operator[](const int& index) const;
-    GModel*&      operator[](const std::string& name);
+    GModel*       operator[](const std::string& name);
     const GModel* operator[](const std::string& name) const;
 
     // Methods
@@ -77,6 +77,8 @@ public:
     GModels*      clone(void) const;
     int           size(void) const { return m_models.size(); }
     void          append(const GModel& model);
+    void          set(const int& index, const GModel& model);
+    void          set(const std::string& name, const GModel& model);
     void          load(const std::string& filename);
     void          save(const std::string& filename) const;
     void          read(const GXml& xml);
@@ -91,6 +93,7 @@ protected:
     void          copy_members(const GModels& models);
     void          free_members(void);
     void          set_pointers(void);
+    int           get_index(const std::string& name) const;
 
     // Proteced members
     std::vector<GModel*> m_models;  //!< List of models
