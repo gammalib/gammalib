@@ -23,6 +23,45 @@
  * @brief Provides typemaps for GammaLib
  * @author Juergen Knoedlseder
  */
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GFitsHDU.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsImageByte.hpp"
+#include "GFitsImageSByte.hpp"
+#include "GFitsImageUShort.hpp"
+#include "GFitsImageShort.hpp"
+#include "GFitsImageULong.hpp"
+#include "GFitsImageLong.hpp"
+#include "GFitsImageLongLong.hpp"
+#include "GFitsImageFloat.hpp"
+#include "GFitsImageDouble.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsAsciiTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GModelSky.hpp"
+#include "GModelDiffuseSource.hpp"
+#include "GModelExtendedSource.hpp"
+#include "GModelPointSource.hpp"
+#include "GModelData.hpp"
+#include "GModelSpatial.hpp"
+#include "GModelRadial.hpp"
+#include "GModelRadialDisk.hpp"
+#include "GModelRadialGauss.hpp"
+#include "GModelRadialShell.hpp"
+#include "GModelSpatialConst.hpp"
+#include "GModelSpatialCube.hpp"
+#include "GModelSpatialMap.hpp"
+#include "GModelSpatialPtsrc.hpp"
+#include "GModelSpectral.hpp"
+#include "GModelSpectralConst.hpp"
+#include "GModelSpectralFunc.hpp"
+#include "GModelSpectralNodes.hpp"
+#include "GModelSpectralPlaw.hpp"
+#include "GModelSpectralPlaw2.hpp"
+#include "GModelTemporal.hpp"
+#include "GModelTemporalConst.hpp"
+%}
 
 
 /***********************************************************************//**
@@ -260,7 +299,7 @@ static int var_tuple_to_index(PyObject *input, int *ptr) {
  * This typemap implements an automatic cast of a GModel reference to
  * the relevant derived class reference.
  ***************************************************************************/
-%typemap(out) GModel& {
+%typemap(out) GModel* {
     if (dynamic_cast<GModelSky*>($1) != NULL) {
         if (dynamic_cast<GModelDiffuseSource*>($1) != NULL) {
             $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelDiffuseSource, 0 |  0 );
