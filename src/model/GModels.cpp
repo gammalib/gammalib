@@ -321,17 +321,19 @@ void GModels::append(const GModel& model)
 
 
 /***********************************************************************//**
- * @brief Append model to container
+ * @brief Set model in container
  *
  * @param[in] index Model index [0,...,size()-1].
- * @param[in] model Model.
+ * @param[in] model Model pointer.
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Set model in the container by making a deep copy.
+ * Set model in the container. If the specified model pointer is not NULL,
+ * a deep copy of the model will be made. Otherwise a NULL pointer will
+ * be set.
  ***************************************************************************/
-void GModels::set(const int& index, const GModel& model)
+void GModels::set(const int& index, const GModel* model)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -344,7 +346,7 @@ void GModels::set(const int& index, const GModel& model)
     if (m_models[index] != NULL) delete m_models[index];
 
     // Assign new model by cloning
-    m_models[index] = model.clone();
+    m_models[index] = (model != NULL) ? model->clone() : NULL;
 
     // Set parameter pointers
     set_pointers();
@@ -355,17 +357,19 @@ void GModels::set(const int& index, const GModel& model)
 
 
 /***********************************************************************//**
- * @brief Append model to container
+ * @brief Set model in container
  *
  * @param[in] name Model name.
- * @param[in] model Model.
+ * @param[in] model Model pointer.
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Set model in the container by making a deep copy.
+ * Set model in the container. If the specified model pointer is not NULL,
+ * a deep copy of the model will be made. Otherwise a NULL pointer will
+ * be set.
  ***************************************************************************/
-void GModels::set(const std::string& name, const GModel& model)
+void GModels::set(const std::string& name, const GModel* model)
 {
     // Get parameter index
     int index = get_index(name);
@@ -379,7 +383,7 @@ void GModels::set(const std::string& name, const GModel& model)
     if (m_models[index] != NULL) delete m_models[index];
 
     // Assign new model by cloning
-    m_models[index] = model.clone();
+    m_models[index] = (model != NULL) ? model->clone() : NULL;
 
     // Set parameter pointers
     set_pointers();

@@ -51,8 +51,6 @@ public:
     GModels* clone(void) const;
     int      size(void) const;
     void     append(const GModel& model);
-    void     set(const int& index, const GModel& model);
-    void     set(const std::string& name, const GModel& model);
     void     load(const std::string& filename);
     void     save(const std::string& filename) const;
     void     read(const GXml& xml);
@@ -81,7 +79,7 @@ public:
     GModel* __getitem__(const std::string& name) {
         return (*self)[name];
     }
-    void __setitem__(const int& index, const GModel& val) {
+    void __setitem__(const int& index, const GModel* val) {
         if (index >= 0 && index < self->size()) {
             self->set(index, val);
             return;
@@ -91,7 +89,7 @@ public:
                                            0, self->size()-1);
         }
     }
-    void __setitem__(const std::string& name, const GModel& val) {
+    void __setitem__(const std::string& name, const GModel* val) {
         self->set(name, val);
         return;
     }
