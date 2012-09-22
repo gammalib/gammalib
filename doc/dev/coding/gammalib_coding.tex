@@ -12,7 +12,6 @@
 \newcommand{\version}{\mbox{draft}}
 \newcommand{\calendar}{\mbox{21 September 2012}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
-\newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -58,19 +57,19 @@ and assuring uniformity and coherence is a primary goal of the project.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{General coding rules}
 
-The following general rules should be followed:
+This section provides lists of general coding rules for the \this\ development.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{C++ rules}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Code format}
+
 \begin{itemize}
 \item Blocks are indented by 4 characters.
 \item Do not use tabs (code formatting should be independent of editor configurations).
 \item Do not exceed a line length of 80 characters (a few more characters are in exceptional cases acceptable).
-\item Put a blank line at the end of each file.
-\end{itemize}
-
-\begin{itemize}
-\item Each function and/or method terminates with a {\tt return} statement.
-\item Each function and/or method has only a single exit point (i.e. a single {\tt return} statement).
-\item Use {\tt explicit} for constructors to avoid use of the constructor for unintended
-type conversion.
+\item Put a blank line at the end of each file (this is required by some compilers).
 \item Each function starts with a curly bracket in the line following the function name.
 The return type is in the same line as the function name. Example:
 \begin{verbatim}
@@ -80,52 +79,478 @@ void function(void)
     return;
 }
 \end{verbatim}
-\item Each block should be encompassed in curly brackets, even if it is a single line block.
-The block starts in the same line as the related statement. Examples:
-\begin{verbatim}
-if (inx < 0 || inx >= m_num) {
-    throw GException::out_of_range("GVector::operator(int)", inx, m_num);
-}
-\end{verbatim}
+\item Each block should be encompassed in curly brackets, even if the block consists only
+of a single line.
+\item The opening curly bracket of a block starts in the same line as the related statement. 
+Example:
 \begin{verbatim}
 for (int i = 0; i < 10; ++i) {
     sum += i;
 }
 \end{verbatim}
+\item Use spaces between code elements (see above example).
+\item Align successive similar lines on common elements.
+Example illustrating the alignment on the {\tt =} symbol:
+\begin{verbatim}
+m_max    = par.m_max;
+m_prompt = par.m_prompt;
+sum     += par.m_sum;
+\end{verbatim}
+Example illustrating the alignment in a class definition on the member function name:
+\begin{verbatim}
+void        log10GeV(const double& eng);
+void        log10TeV(const double& eng);
+std::string print(void) const;
+\end{verbatim}
 \end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Coding style
+\paragraph{Code semantics}
+
+\begin{itemize}
+\item Each function and/or method terminates with a {\tt return} statement.
+\item Each function and/or method has only a single exit point (i.e. a single {\tt return} statement).
+\item Use {\tt explicit} for constructors with arguments to prevent unintended type conversions.
+The only exception to this rule is the copy constructor or type conversion constructors.
+\item Specify {\tt void} for function definitions without arguments.
+\item Use pre incrementation in loops (pre incrementation is faster than post incrementation).
+Example:
+\begin{verbatim}
+for (int i = 0; i < 10; ++i) {
+    sum += i;
+}
+\end{verbatim}
+\item Where possible (and appropriate), use {\tt std::vector} or {\tt std::array} containers instead of
+allocating memory. In other words: avoid direct memory allocation.
+\item Provide comments, comments, comments!!!
+\end{itemize}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Coding style}
+\paragraph{Language features}
+
+\begin{itemize}
+\item Do not use templates.
+\item Do not use macros.
+\item Do not use namespaces.
+\item Do not use {\tt \#define} directives for the declaration of constants. Use {\tt const} instead.
+\item Do not use {\tt std::strncpy}, {\tt std::memcpy} or similar as these functions are corrupted on
+some systems.
+\item If possible, pass arguments by reference.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Coding conventions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Coding conventions}
+
+The style summarizes coding conventions for the \this\ development.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{C++ classes}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{General rules}
+
+Each class should be defined in a pair of individual files:
+\begin{itemize}
+\item a header file that defines the class interface (with filename suffix {\tt .hpp})
+\item a source code file that implements the class (with filename suffix {\tt .cpp})
+\end{itemize}
+In addition, a SWIG interface file should be provided for the Python bindings (with filename suffix {\tt .i}).
+
+Each file should contain the {\tt \#include} directives that are necessary for compilation of
+the specific file.
+{\tt \#include} directives that are specified in the header file can be omitted in the source code
+file, provided that the header file is include in the source code file.
+
+The C++ style header files should be used instead of the C style header files to ensure 
+maximum portability.
+The following table provides the correspondence between C++ and C header files for
+headers commonly used in \this.
+
+%%% Header files correspondence %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\begin{tabular}{lll}
+\hline
+\hline
+\noalign{\smallskip}
+C++ & C & Function examples \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt <cctype>} & & \\
+{\tt <cmath>} & {\tt <math.h>} & {\tt std::abs}, {\tt std::cos} \\
+{\tt <cfloat>} & & \\
+{\tt <cstdio>} & {\tt <stdio.h>} & {\tt std::fopen}, {\tt std::fgets}, {\tt std::fclose}, {\tt std::fprintf}, {\tt std::sprintf} \\
+{\tt <cstdlib>} & & \\
+{\tt <cstring>} & {\tt <string.h>} & {\tt std::strlen} \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Note that functions and types should be prefixed by {\tt std::}.
+For example,
+{\tt cos} becomes {\tt std::cos},
+{\tt time\_t} becomes {\tt std::time\_t}, etc.
+One significant change between C and C++ is that {\tt fabs} becomes {\tt std::abs} since
+the C style {\tt abs} function only applies to integers.
+Here, the {\tt std::} prefix is crucial to distinguish the C++ function (which is
+also defined for doubles) from the C function.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Header file structure}
+\label{sec:header}
+
+The header file defines the interface of the class.
+Here is an example of a header file.
+\begin{verbatim}
+/***************************************************************************
+ *                        GClass.hpp  -  My nice class                     *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GClass.hpp
+ * @brief Definition of my nice class interface
+ * @author Juergen Knoedlseder
+ */
+
+#ifndef GCLASS_HPP
+#define GCLASS_HPP
+
+/* __ Includes ___________________________________________________________ */
+#include <string>
+#include <iostream>
+#include "GLog.hpp"
+
+
+/***********************************************************************//**
+ * @class GClass
+ *
+ * @brief Illustration of a GammaLib class
+ *
+ * My nice class illustrates how a GammaLib class should be defined.
+ ***************************************************************************/
+class GClass {
+
+    // I/O friends
+    friend std::ostream& operator<< (std::ostream& os, const GClass& c);
+    friend GLog&         operator<< (GLog& log, const GClass& c);
+
+public:
+    // Constructors and destructors
+    GClass(void);
+    GClass(const GClass& c);
+    virtual ~GClass(void);
+ 
+    // Operators
+    GClass& operator= (const GClass& c);
+
+    // Methods
+    void        clear(void);
+    GClass*     clone(void) const;
+    std::string print(void) const;
+  
+protected:
+    // Protected methods
+    void init_members(void);
+    void copy_members(const GClass& c);
+    void free_members(void);
+
+    // Protected data members
+    std::string     m_name;          //!< Name
+};
+
+#endif /* GCLASS_HPP */
+\end{verbatim}
+
+The header file starts with a comment containing the file name and class purpose, the
+copyright information and the license text.
+The years in the copyright information should cover the years over which the file has been
+modified, the author is the person who initially created the file.
+
+Following the header comment is a comment that provides file information to the
+Doxygen documentation system.
+
+The subsequent
+\begin{verbatim}
+    #ifndef GCLASS_HPP
+    #define GCLASS_HPP
+\end{verbatim}
+declarations together with the 
+\begin{verbatim}
+    #endif /* GCLASS_HPP */
+\end{verbatim}
+declaration at the end protect the file from multiple inclusions of the header.
+This is a crucial feature needed for proper compilation of the code.
+
+Now all header files are included.
+Standard header files are included using the {\tt < >} brackets, \this\ header files are included
+using {\tt " "}.
+A 80 character long separator precedes the header inclusion.
+Further 80 character long separators may be added for additional sections, such as
+constants, type definitions, forward declarations, etc.
+Use one separator to precede each additional section.
+
+The class definition is preceded by a comment block that will be used by the Doxygen system
+to extract the class definition.
+Provide here the class name, a brief one line description of the class, and an extended
+detailed description of the class purpose.
+
+The class definition is structured in several sections:
+\begin{itemize}
+\item Declaration of friend functions
+\item Definition of public constructors
+\item Definition of public operators
+\item Definition of public methods
+\item Definition of protected methods
+\item Definition of protected members
+\end{itemize}
+The definition of pure virtual methods should be done in a section that is separate from the
+methods that are implemented.
+
+Output stream and logging operators should be implemented for every class as friend
+operators.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Source code file structure}
+\label{sec:sourcecode}
+
+The source code file implements the code of the class.
+Here is an example of the start of a source code file.
+\begin{verbatim}
+/***************************************************************************
+ *                        GClass.cpp  -  My nice class                     *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GClass.cpp
+ * @brief Implementation of my nice class
+ * @author Juergen Knoedlseder
+ */
+
+/* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include "GClass.hpp"
+#include "GTools.hpp"
+
+/* __ Method name definitions ____________________________________________ */
+#define G_CLEAR                                             "GClass::clear()"
+#define G_CLONE                                       "GClass::clone() const"
+#define G_PRINT                                       "GClass::print() const"
+
+/* __ Compile options ____________________________________________________ */
+#define G_USE_MY_OPTION
+
+/* __ Debug options ______________________________________________________ */
+#define G_DEBUG_PRINT
+
+/* __ Constants __________________________________________________________ */
+const double pi = 3.14;
+\end{verbatim}
+
+The include section starts with a conditional include of the code configuration header file
+(see section \ref{sec:configure}).
+This makes \this\ compile options available to the source code.
+
+The include section is followed by the declaration of method names.
+These method names will be used in exceptions (see section \ref{sec:exceptions}).
+Define the method names at the top of the file eases the maintainability of the code,
+as changes in method names or interfaces need only to be implemented in a single 
+place.
+Method names need only be defined for methods throwing exceptions.
+
+Compile options are used to control which parts of the code should be compiled.
+Such options may be used, for example, to compare different algorithms or computation
+methods.
+They can also be used during development, allowing an easy switch between the new and
+the old code for comparison.
+
+Debug options are compile options that are used to add additional code for debugging.
+Often, these are print statements that allow to trace the execution of the code.
+For code checked into the repository, all debug options should be commented out.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Python classes}
+\label{sec:pyhton}
+
+The Python interface for C++ classes is defined by a so-called SWIG interface file.
+SWIG uses these interface files to build Python wrapper files, which are C files
+that define the interface between \this\ and Python.
+The structure of the SWIG interface file follows closely that of the header file, with
+a few exceptions.
+Here an example:
+\begin{verbatim}
+/***************************************************************************
+ *                         GClass.i  -  My nice class                      *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GClass.i
+ * @brief Python interface of my nice class
+ * @author Juergen Knoedlseder
+ */
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GClass.hpp"
+#include "GTools.hpp"
+%}
+
+
+/***********************************************************************//**
+ * @class GClass
+ *
+ * @brief Illustration of a GammaLib class
+ *
+ * My nice class illustrates how a GammaLib class should be defined.
+ ***************************************************************************/
+class GClass {
+public:
+    // Constructors and destructors
+    GClass(void);
+    GClass(const GClass& c);
+    virtual ~GClass(void);
+
+    // Methods
+    void        clear(void);
+    GClass*     clone(void) const;
+};
+
+
+/***********************************************************************//**
+ * @brief GClass class extension
+ ***************************************************************************/
+%extend GClass {
+    char *__str__() {
+        return tochar(self->print());
+    }
+    GClass copy() {
+        return (*self);
+    }
+};
+\end{verbatim}
+
+The code starts with a section that is enclosed in {\tt \%\{  \%\}} brackets.
+In this section, all header files are specified that are needed to compile the SWIG wrapper
+file.
+
+Then follows the class definition, with the following differences with respect to the
+definition in the header file:
+\begin{itemize}
+\item it does not include the assignment operator
+\item it does not include any access operator (these have to be implemented specifically, see below)
+\item it does not include the {\tt print()} method (see below)
+\item it does not include protected or private members
+\end{itemize}
+
+Finally, there is a section with extension to the C++ class.
+Here, methods are implement that do not exist in the actual C++ class, but that will
+exist in the Python interface.
+In this example, the {\tt\_\_str\_\_()} method is the generic Python conversion operator that
+converts an object into a string.
+It can be seen that this method calls the class's @print()@ method.
+By providing the conversion method, the class becomes "printable", and one
+my specify
+\begin{verbatim}
+GClass c;
+print c;
+\end{verbatim}
+to print out the class (i.e. to invoke the print() method of the class).
+
+In case that an access operator needs to be implement, the {\tt\_\_getitem\_\_()} and {\tt\_\_setitem\_\_()}
+methods need to be added to the class extensions.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Design conventions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Design conventions}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Code configuration}
+\label{sec:configure}
 
-The code configuration is controlled via an include file that has to be added on top of
-each source file.
-Each source file should start with:
-
+The code configuration is controlled via the {\tt config.h} header file that is created during the
+configuration step of \this.
+To make configuration options available the following code has to be added to the
+source code file:
 \begin{verbatim}
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 \end{verbatim}
+Note that the {\tt config.h} file should {\bf not be included in header files}, since header files
+are used by the outside world without any knowledge about {\tt config.h}.
 
-Note that the {\tt config.h} file should {\bf not be included in header files}, since header file
-are used by the outside world for which a different {\tt config.h} include file may exist.
-
-One of the most common options used throughout \this\ is range checking.
-Range checking is particularily important during code development since it allows to catch
-memory leaks.
-However, range checking is time consuming and thus leads to somewhat slower code.
-Range checking can thus be disable during installation of \this\ by using
-{\tt ./configure --disable-range-check} during library installation.
-Within the code, the following instruction adds range checking that dependens on
-the library configuration:
-
+One of the most commonly used configuration options used throughout \this\ is related to
+range checking.
+Range checks are usually performed when accessing array elements, assuring that no
+elements outside the valid range are accessed.
+Range checking, however, is time consuming, in particular if many elements are
+accessed subsequently.
+\this\ therefore allows to disable range checks.
+This can be done by specifying {\tt ./configure --disable-range-check} when configuring 
+\this\ for compilation.
+The {\tt --disable-range-check} option undefines {\tt G\_RANGE\_CHECK}, and optional
+range checking is thus achieved by adding for example
 \begin{verbatim}
 #if defined(G_RANGE_CHECK)
 if (inx < 0 || inx >= m_num) {
@@ -133,45 +558,42 @@ if (inx < 0 || inx >= m_num) {
 }
 #endif
 \end{verbatim}
+to the code.
 
-Range checking is provided if the {\tt G\_RANGE\_CHECK} macro is defined.
+The following table gives a list of important configuration options that are available in 
+{\tt config.h} and that can be used to tune the code:
 
-
+%%% Configuration options %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\begin{tabular}{lll}
+\hline
+\hline
+\noalign{\smallskip}
+Definition & Option & Usage \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt G\_DEBUG} & {\tt --enable-debug} & Code debugging \\
+{\tt G\_PROFILE} & {\tt --enable-profiling} & Code profiling \\
+{\tt G\_RANGE\_CHECK} & {\tt --enable-range-check} & Performs range checking \\
+{\tt G\_NAN\_CHECK} & {\tt --enable-nan-check} & Check for NaN and Inf values \\
+{\tt G\_SMALL\_MEMORY} & {\tt --enable-small-memory} & Optimizes for small memory \\
+{\tt HAVE\_OPENMP} &{\tt  --enable-openmp} & Has OpenMP multi-threading support \\
+{\tt HAVE\_LIBREADLINE} & {\tt --with-readline} & Has readline library \\
+{\tt HAVE\_LIBCFITSIO} & {\tt --with-cfitsio} & Has cfitsio library \\
+{\tt HAVE\_PYTHON} & {\tt --enable-python-binding} & Has Python bindings \\
+{\tt PACKAGE} & n.a. & {\tt gammalib} \\
+{\tt PACKAGE\_PREFIX} & n.a. & Installation location (e.g. {\tt /usr/local/gamma}) \\
+{\tt PACKAGE\_STRING} & n.a. & Full name and version of \this\ \\
+{\tt PACKAGE\_VERSION} & n.a. & Version of \this\ (format: x.y.z) \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Header inclusions}
 
-Each file should contain the {\tt \#include} directives that are necessary for compilation of
-the specific file.
-Only {\tt \#include} directives that are already given by the corresponding header file can
-be omitted.
-
-As \this\ is written in C++, the C++ style headers should be used instead of the C style
-headers to ensure maximum portability.
-Examples of common C++ style headers are
-{\tt <cstdio>} (instead of {\tt <stdio.h>}),
-{\tt <cmath>} (instead of {\tt <math.h>}),
-{\tt <cstring>} (instead of {\tt <string.h>}), etc.
-Functions and types should then be prefixed by {\tt std::}.
-For example,
-{\tt cos} becomes {\tt std::cos},
-{\tt time\_t} becomes {\tt std::time\_t}, etc.
-One significant change is that {\tt fabs} becomes {\tt std::abs} since
-the C style {\tt abs} function only applies to integers.
-Here, the {\tt std::} prefix is crucial to distinguish the C++ function (which is
-also defined for doubles) from the C function.
-
-Note also that some compilers are more tolerant in omitting {\tt \#include} directives, such
-as {\tt <cstdio>} or {\tt <cstring>}, so these directives should also be included for compatibility,
-even if they seem not to be required on specific systems.
-Examples of include directives needed by common functions are:
-\begin{itemize}
-\item[] {\tt <cstdio>} contains {\tt std::fopen}, {\tt std::fgets}, {\tt std::fclose}, {\tt std::fprintf}, {\tt std::sprintf}
-\item[] {\tt <cstring>} contains {\tt std::strncpy}, {\tt std::memcpy}
-\end{itemize}
-
-If possible, however, {\tt std::strncpy} and {\tt std::memcpy} should be avoided at all as these
-functions happend to have some compatibility problems in the past.
-
+Note that {\tt enable} may be replaced by {\tt disable} and {\tt with} by {\tt without} for switching off
+an option.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -187,10 +609,10 @@ Members should be prefixed by {\tt m\_} and should be in lower case.
 For long member names, additional underscores may be added.
 Examples of valid member names are
 \begin{verbatim}
-  m_num
-  m_response
-  m_grid_length
-  m_axis_dir_qual
+m_num
+m_response
+m_grid_length
+m_axis_dir_qual
 \end{verbatim}
 
 Initialisation, copying and deleting of class members should be gathered in a single
@@ -202,8 +624,8 @@ methods for memory management:
 initial values. The class should be fully operational and consistent with these initial
 values. All pointers that will hold dynamically allocated memory should be
 initialised to {\tt NULL}.
-\item {\tt copy\_members(const \&A a)} copies all members from one instance {\tt a}
-to the {\tt this} instance.
+\item {\tt copy\_members(const \&A a)} copies all members from an instance {\tt a}
+into the class.
 \item {\tt free\_members()} frees all memory that has been allocated by the class.
 Memory pointers should be set to {\tt NULL} after the memory was deleted to signal
 that no valid memory is associated to the pointer.
@@ -245,6 +667,30 @@ void GEbounds::free_members(void)
     return;
 }
 \end{verbatim}
+In this example, on may probably want to add a {\tt alloc\_members()} method for memory allocation:
+\begin{verbatim}
+void GEbounds::alloc_members(const int& num)
+{
+    if (num > 0) {
+        m_min = new GEnergy[num];
+        m_max = new GEnergy[num];
+        for (int i = 0; i < num; ++i) {
+            m_min[i] = 0.0;
+            m_max[i] = 0.0;
+        }
+        m_num = num;
+    }
+    return;
+}
+\end{verbatim}
+This example illustrates several design conventions:
+\begin{itemize}
+\item Do always check if a pointer is not {\tt NULL} before de-allocating memory.
+\item After de-allocation, always set the pointer immediately to {\tt NULL}.
+\item Do never allocate zero elements (check if the number of elements to be allocated is positive).
+\item Do always initialise allocated memory to well defined values (do not expect that the compiler
+will do this for your).
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -307,35 +753,66 @@ the source of memory leaks.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Inheritence}
+\subsubsection{Inheritance}
 
-Class inheritence is heavily used in \this\ to implement instrument specific functionnalities
-that satisfy a generic interface.
-
-Derived classes should never set explicitely base class members.
-Base class members should be set by proper constructors, and base class constructors are
-to to be invoked in derived class constructors.
-
+Class inheritance is central feature of the C++ language, and is largely used throughout \this.
+Although the inheritance philosophy may differ from class to class, the following guidelines
+should be respected as far as possible:
+\begin{itemize}
+\item The base class and derived class destructors should be declared {\tt virtual}.
+\item Avoid overloading of base class methods by derived class methods. 
+Preferentially, define base class methods as pure virtual.
+\item All base class methods that should be implemented in the derived class should
+be declared {\tt virtual}.
+Exceptions are the {\tt init\_members()}, the {\tt copy\_members()} and the {\tt free\_members()}
+methods that will be implemented in the base class and the derived class.
+\item Base classes manage base class members, derived classes manage derived class
+members. 
+By managing we mean here in particular memory allocation and de-allocation,
+but also proper initialization.
+\item Derived class constructors should invoke base class constructors for proper
+base class initialization. Example:
+\begin{verbatim}
+GEventList::GEventList(void) : GEvents()
+{
+    init_members();
+    return;
+}
+\end{verbatim}
+\item Avoid as far as possible methods that are only defined in the derived class.
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Methods}
+\subsubsection{Method naming conventions}
 
 Uniform {\tt public} method names should be provided throughout \this\ for all classes.
 Unless the {\tt public} method names are very long (which should be avoided), names
 should not comprise underscores as separators.
 {\tt Public} method names are all lowercase.
 
-{\tt Private} or {\tt protected} may differ from this since they are hidden within the class.
+{\tt Private} or {\tt protected} method name may differ from this since they are hidden within 
+the class.
 Yet also here, all method names should be lowercase, and the use of underscores
 should be limited.
- 
-In addition, the following {\tt public} method names should be used:
+
+Methods that set or retrieve class attributes should be named after the attribute.
+Here an example for the attribute {\tt m\_name}:
+\begin{verbatim}
+public:
+    void        name(const std::string& name);
+    std::string name(void) const;
+protected:
+    m_name;
+\end{verbatim}
+
+A method name that is used in multiple classes should always perform an equivalent action.
+Here is a list of method names that are widely used in \this, together with their typical usage.
+The last column specifies where these methods are used.
+Note that {\bf the {\tt clear()}, {\tt clone()}, and {\tt print()} methods should be implemented for all 
+classes}.
 
 %%% Naming conventions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{table}[!h]
-\caption{Naming conventions for class methods.
-\label{tab:naming}}
 \begin{center}
 \begin{tabular}{lll}
 \hline
@@ -346,19 +823,34 @@ Method & Usage & Implementation \\
 \hline
 \noalign{\smallskip}
 {\tt clear()} & Set object to initial empty state & all classes \\
+{\tt clone()} & Provides a deep copy of the class & all classes \\
 {\tt print()} & Print object into string & all classes (see section \ref{sec:output}) \\
-{\tt append()} & Append element to list of elements & container classes \\
-{\tt size()} & Return number of elements in object & container classes \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt append()} & Append element to list of elements & container classes (see section \ref{sec:containers}) \\
+{\tt extend()} & Append container elements to list of elements & container classes (see section \ref{sec:containers}) \\
+{\tt insert()} & Insert element to list of elements & container classes (see section \ref{sec:containers}) \\
+{\tt pop()} & Remove element from list of elements & container classes (see section \ref{sec:containers}) \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
 {\tt load()} & Load data from file (open, read, close) & if applicable \\
 {\tt save()} & Save data into file (open, write, close) & if applicable \\
+{\tt open()} & Open file & if applicable \\
 {\tt read()} & Read data from open file & if applicable \\
 {\tt write()} & Write data into open file & if applicable \\
+{\tt close()} & Close file & if applicable \\
 {\tt name()} & Name of object & if applicable \\
+{\tt type()} & Type of object & if applicable \\
+{\tt size()} & Size of object & if applicable \\
+{\tt real()} & Returns {\tt double} precision value & if applicable \\
+{\tt integer()} & Returns {\tt int} value & if applicable \\
+{\tt string()} & Returns {\tt std::string} value & if applicable \\
 \noalign{\smallskip}
 \hline
 \end{tabular}
 \end{center}
-\end{table}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 Note the difference between {\tt load()} and {\tt read()} and between {\tt save()} and {\tt write()}.
@@ -370,77 +862,160 @@ Typically, these methods take a {\tt GFits*} or a {\tt GFitsHDU*} pointer as arg
 
 Methods that perform checks should return a {\tt bool} type and should start with the
 prefix {\tt is} or {\tt has}.
-
-Valid examples are:
+Examples are:
 \begin{verbatim}
-  islong()
-  isin()
-  hasedisp()
+islong()
+isin()
+hasedisp()
 \end{verbatim}
 
-Method arguments should be generally passed as {\tt const} and by reference.
+All methods that do not alter accessible class members should be declared {\tt const}.
+With accessible we mean here class members that can be read or written in some
+way by one of the methods.
+Non-accessible class members would be members that are only used internally, and
+for which no consistent state has to be preserved for the outside world.
+These could for example be members that hold pre-computed values.
 
-Numeric argument types should be typically {\tt int} and {\tt double}.
-Unless absolutely required, {\tt short int}, {\tt long}, and {\tt float} should be avoided.
-True/false checks should always be done using {\tt bool}.
-
-Methods should be declared as {\tt const} if they do not alter class members.
-In some classes, pre-computations are done to speed up calculations, and these
-pre-computations will alter class members.
-If these pre-computation are not supposed to alter the content of a class,
-methods that perform pre-computations should also be declared as {\tt const}.
-Internally, they have to circumvent const correctness by casting the pointer to
-non {\tt const} or by using the {\tt mutable} attribute in the declaration of the members
-that hold the pre-computed values (the latter option is preferred).
+Methods that do not alter accessible members, but that modify non-accessible
+members, should also be declared {\tt const}.
+The non-accessible class members need then to be declared {\tt mutable} to avoid
+compiler errors.
+Alternatively, the {\tt const\_cast} declaration can be used to allow member modifications
+within a {\tt const} method.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Method arguments and return values}
 
-Arguments to methods should in general be passed by reference to reduce function
-overhead.
-In addition, arguments that are not intended to be changed by a method call should
-be passed as {\tt const}.
-Return values should also be passed by reference.
-To assure that the return values will not change class members inadvertably, return
-values passed by reference should also be declared as {\tt const}.
+%True/false checks should always be done using {\tt bool}.
 
-If the class member is a pointer, the argument should also be a pointer to allow
-setting the pointer to {\tt NULL}.
-The exception to this are container classes which in general do not contain
-{\tt NULL} pointers in the container.
-
-Return values should be passed by reference if they concern class members.
-
-If the class member is a pointer, and if the pointer may be {\tt NULL}, it should be
-returned as a pointer.
-Again, the pointer should be declared {\tt const} to avoid inadvertable changes of
-the class members.
-The exception to this are container classes which in general do not contain
-{\tt NULL} pointers in the container.
-Container classes should return references to container elements.
-
-An example is given by the following excerpt of the {\tt GObservation} class.
-Note that in general there are two distinct methods to set and to return a
-class member.
+If possible, method arguments should always be passed by reference.
+To protect references from changes by the method, {\bf arguments passed by reference
+should always be declared {\tt const}}.
+Pointers should only be used as arguments if {\tt NULL} should be a possible
+argument value.
+Also pointers should always be declared {\tt const}.
+Here some examples:
 \begin{verbatim}
-    void               obsname(const std::string& obsname);
-    void               ebounds(const GEbounds& ebounds);
-    void               gti(const GGti& gti);
-    void               roi(const GRoi* roi);
-    void               events(const GEvents* events);
-    void               statistics(const std::string& statistics);
-    const std::string& obsname(void) const;
-    GTime              tstart(void) const { return m_gti.tstart(); }  // no class member
-    GTime              tstop(void) const { return  m_gti.tstop(); }   // no class member
-    GEnergy            emin(void) const { return m_ebounds.emin(); }  // no class member
-    GEnergy            emax(void) const { return m_ebounds.emax(); }  // no class member
-    const GEbounds&    ebounds(void) const;
-    const GGti&        gti(void) const;
-    const GRoi*        roi(void) const;
-    const GEvents*     events(void) const;
-    const std::string& statistics(void) const;
+void obsname(const std::string& obsname);
+void ebounds(const GEbounds& ebounds);
+void gti(const GGti& gti);
+void roi(const GRoi* roi);
+void events(const GEvents* events);
+void statistics(const std::string& statistics);
 \end{verbatim}
+
+Numeric argument types should be either {\tt int} or {\tt double}.
+Unless absolutely necessary, avoid {\tt short int}, {\tt long}, and {\tt float}.
+
+If a method returns a class member, the return value should be passed by reference.
+Unless we explicitly want to modify a class member through the method call,
+return values passed by reference should be declared {\tt const}.
+
+If a method returns a base class object, a pointer should be returned.
+{\bf Do never return base class objects by reference, as this will lead to
+code slicing if the method is used for object assignment.}
+Unless we explicitly want to modify a class member through the method call,
+the returned pointer should be declared {\tt const}.
+
+Here some examples:
+\begin{verbatim}
+const std::string& obsname(void) const;     // const base class member reference
+GTime              tstart(void) const;      // no class member
+GTime              tstop(void) const;       // no class member
+GEnergy            emin(void) const;        // no class member
+GEnergy            emax(void) const;        // no class member
+const GEbounds&    ebounds(void) const;     // const base class member reference
+const GGti&        gti(void) const;         // const base class member reference
+const GRoi*        roi(void) const;         // const base class pointer
+const GEvents*     events(void) const;      // const base class pointer
+const std::string& statistics(void) const;  // const base class member reference
+\end{verbatim}
+The {\tt tstart()}, {\tt tstop()}, {\tt emin()}, and {\tt emax()} methods do not return class members,
+hence they return an object by value.
+All other methods return class members.
+The {\tt roi()} and {\tt events()} methods return base class objects, hence the return type
+is a pointer.
+All other methods return by reference.
+All returned references or pointers are declared {\tt const} to prevent modification of
+class members.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Container classes}
+\label{sec:containers}
+
+Container classes are classes that contain list of elements.
+Two cases are distinguished here: containers holding objects, and containers holding
+pointers to objects.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Containers holding objects}
+
+Containers holding objects should have element access operators {\tt operator[]} implemented
+that return container elements by reference.
+A non-const and a const version of the operator should exist.
+Eventually, {\tt at()} methods could be added that always perform range checking.
+Here is a list of mandatory methods for container classes holding objects:
+
+%%% Mandatory methods for container classes %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\begin{tabular}{ll}
+\hline
+\hline
+\noalign{\smallskip}
+Method & Usage \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt e\& operator[](const int\&)} & Element access operator \\
+{\tt const e\& operator[](const int\&) const} & Element access operator \\
+{\tt void clear()} & Delete all objects in container \\
+{\tt void size()} & Return number of elements in container \\
+{\tt void append(const e\&)} & Append an element to the container \\
+{\tt void insert(const int\&, const e\&)} & Insert an element into the container \\
+{\tt void extend(const C\&)} & Append another container to the container \\
+{\tt void pop(const int\&)} & Removes an element from the container \\
+{\tt std::string print()} & Print container (see section \ref{sec:output}) \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Containers holding pointers}
+
+Containers holding pointers different from those holding objects in that their {\tt operator[]}
+operators return a pointer, and in that they implement a {\tt set()} method for value setting.
+Here is a list of mandatory methods for container classes holding pointers:
+
+%%% Mandatory methods for container classes %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\begin{tabular}{ll}
+\hline
+\hline
+\noalign{\smallskip}
+Method & Usage \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt e* operator[](const int\&)} & Element access operator \\
+{\tt const e* operator[](const int\&) const} & Element access operator \\
+{\tt void set(const int\&, const e\&)} & Set an element of the container \\
+{\tt void clear()} & Delete all objects in container \\
+{\tt void size()} & Return number of elements in container \\
+{\tt void append(const e\&)} & Append an element to the container \\
+{\tt void insert(const int\&, const e\&)} & Insert an element into the container \\
+{\tt void extend(const C\&)} & Append another container to the container \\
+{\tt void pop(const int\&)} & Removes an element from the container \\
+{\tt std::string print()} & Print container (see section \ref{sec:output}) \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -448,16 +1023,7 @@ class member.
 \label{sec:output}
 
 Output stream and logging operators should be implemented for every class as friend
-operators.
-An example is:
-\begin{verbatim}
-#include <iostream>
-#include "GLog.hpp"
-class GFits {
-    friend std::ostream& operator<< (std::ostream& os, const GFits& fits);
-    friend GLog&         operator<< (GLog& log, const GFits& fits);
-    ...
-\end{verbatim}
+operators (see section \ref{sec:header}).
 The usage of friend operators (instead of member operators) allows for correct handling
 of code such as
 \begin{verbatim}
@@ -484,150 +1050,38 @@ GLog& operator<< (GLog& log, const GFits& fits)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Python classes}
+\subsubsection{Exceptions}
+\label{sec:exceptions}
 
-TBW
+Exceptions are largely used in \this\ to handle the occurrence of unexpected events.
+\this\ exceptions are implement by the {\tt GException} class.
+For each new exception type, a new exception subclass is added.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Design Conventsions
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Design Conventions}
+Each exception returns the method name in which the exception occurs and an exception
+message.
+The exception message is generally build from values that are passed as arguments to the
+exception constructor.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{C++ classes}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Container classes}
-
-Container classes are classes that contain list of elements.
-
-Each container class should have element access operators {\tt operator[]} implemented,
-returning either a reference or a pointer to the class elements.
-A non-const and a const version of the operator should exist.
-
-Similar to the C++ template classes, {\tt at()} methods could also be implemented that
-perform range checking.
-
-%%% Mandatory methods for container classes %%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\begin{table}[!h]
-%\caption{Mandatory methods for container classes holding a list of elements.
-%{\tt e} designates the type of a container element,
-%{\tt C} designates the type of the container.
-%\label{tab:containers}}
-\begin{center}
-\begin{tabular}{ll}
-\hline
-\hline
-\noalign{\smallskip}
-Method & Usage \\
-\noalign{\smallskip}
-\hline
-\noalign{\smallskip}
-{\tt e\& operator[](const int\&)} & Element access operator \\
-{\tt const e\& operator[](const int\&) const} & Element access operator \\
-{\tt void clear()} & Delete all objects in container \\
-{\tt void size()} & Return number of elements in container \\
-{\tt void append(const e\&)} & Append an element to the container \\
-{\tt void insert(const int\&, const e\&)} & Insert an element into the container \\
-{\tt void extend(const C\&)} & Append another container to the container \\
-{\tt void pop(const int\&)} & Removes an element from the container \\
-{\tt std::string print()} & Print container (see section \ref{sec:output}) \\
-\noalign{\smallskip}
-\hline
-\end{tabular}
-\end{center}
-%\end{table}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-TBW: Specific note about containers of pointers.
-
-%%% Mandatory methods for container classes %%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\begin{table}[!h]
-%\caption{Mandatory methods for container classes holding a list of element pointers.
-%{\tt e} designates the type of a container element,
-%{\tt C} designates the type of the container.
-%\label{tab:ptrcontainers}}
-\begin{center}
-\begin{tabular}{ll}
-\hline
-\hline
-\noalign{\smallskip}
-Method & Usage \\
-\noalign{\smallskip}
-\hline
-\noalign{\smallskip}
-{\tt e* operator[](const int\&)} & Element access operator \\
-{\tt const e* operator[](const int\&) const} & Element access operator \\
-{\tt void set(const int\&, const e*)} & Set an element of the container \\
-{\tt void clear()} & Delete all objects in container \\
-{\tt void size()} & Return number of elements in container \\
-{\tt void append(const e\&)} & Append an element to the container \\
-{\tt void insert(const int\&, const e\&)} & Insert an element into the container \\
-{\tt void extend(const C\&)} & Append another container to the container \\
-{\tt void pop(const int\&)} & Removes an element from the container \\
-{\tt std::string print()} & Print container (see section \ref{sec:output}) \\
-\noalign{\smallskip}
-\hline
-\end{tabular}
-\end{center}
-%\end{table}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Below a list of conventions for implementing and using exceptions:
+\begin{itemize}
+\item Re-use existing exceptions as far as possible.
+\item Pass exception arguments by reference.
+\item Use exceptions only for events that cannot be handled by a method.
+Do not use exceptions to check a value or a state. Implement appropriate methods instead.
+\item Never use exceptions in a destructor.
+\item De-allocate all memory that is not de-allocated by the destructor before throwing an
+exception. 
+\item Always catch exceptions by reference.
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Python classes}
+%\subsection{Python classes}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Container classes}
+%\subsubsection{Container classes}
 
-TBW
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Documentation
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Documentation}
-
-Code documentation should be done within the source files using Doxygen
-compliant annotations.
-
-The following rules apply.
-
-
-\subsection{File descriptor}
-
-Put a 80 character wide header comment on top of {\bf each file}
-(header, source code, templates, etc.).
-The header contains
-the file name,
-a brief description of the file content,
-the development period and the name of the person which {\bf initially}
-created the file, and
-a standard GNU Public License statement.
-The header comment is immediately followed by a Doxygen compliant
-file description that provides
-the file name,
-a brief description of the file content, and
-the name of the person which {\bf initially} created the file.
-\begin{verbatim}
-/***************************************************************************
- *                       GMatrix.cpp  -  matrix class                      *
- * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
- * ----------------------------------------------------------------------- *
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
-/**
- * @file GMatrix.cpp
- * @brief GVector class implementation.
- * @author J. Knodlseder
- */
-\end{verbatim}
+%TBW
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -641,29 +1095,24 @@ the name of the person which {\bf initially} created the file.
 \this\ applies a three-number version numbering scheme:
 {\tt major\_revision-minor\_revision-patch}.
 
-A {\tt major\_revision} of {\tt 00} designates the development version of \this.
-At this level, external interfaces of \this\ may change constantly, hence no
+A {\tt major\_revision} of {\tt 00} indicates that the \this\ design is not yet frozen.
+At this level, external interfaces of \this\ may change without notification, and no
 interface control system is implemented.
-The {\tt minor\_revision} tag will be incremented once new major features become
-available.
-The {\tt patch} tag will be incremented after adding minor features and code corrections.
+The {\tt minor\_revision} tag will be incremented for each new release, signaling
+that new features have become available.
+The {\tt patch} tag will be incremented after correcting bugs that were reported
+on releases.
 
-Once the development phase is finished the release phase is entred.
-At this moment the {\tt major\_revision} number will be incremented to {\tt 01}.
-
-During release phase, external interfaces of \this\ will be under configuration control.
-If modifications of existing external interfaces will be done, the {\tt major\_revision}
-number will be incremented.
-At the same time, the {\tt libtool} version number of the \this\ will also change.
-
-The {\tt minor\_revision} number will be incremented in the release phase when
-extensions of the existing interfaces get implemented.
-Extensions should always be backward compatible, i.e. any existing software should
-not break due to the add of extensions.
-
-The {\tt patch} number will be incremented in the release phase after bug corrections
-or code improvements.
-The corresponding modifications should not change the functionality of the library.
+Once the \this\ design is frozen, the {\tt major\_revision} number will be incremented 
+to {\tt 01}.
+From this moment on, external interfaces of \this\ will be under configuration control.
+If existing external interfaces will be modified, the {\tt major\_revision} number will be
+incremented.
+At the same time, the {\tt libtool} version number of the \this\ will also be incremented.
+The {\tt minor\_revision} number will be incremented if modifications and extensions
+are backward compatible
+As before, the {\tt patch} number will be incremented after correcting bugs that were 
+reported on releases.
 
 \end{document}
 
