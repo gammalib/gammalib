@@ -173,7 +173,7 @@ GModels& GModels::operator= (const GModels& models)
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Returns a model pointer by index.
+ * Returns a model pointer by index. The return value will never be NULL.
  ***************************************************************************/
 GModel* GModels::operator[](const int& index)
 {
@@ -197,7 +197,8 @@ GModel* GModels::operator[](const int& index)
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Returns a constant model pointer by index.
+ * Returns a constant model pointer by index. The return value will never be
+ * NULL.
  ***************************************************************************/
 const GModel* GModels::operator[](const int& index) const
 {
@@ -221,7 +222,8 @@ const GModel* GModels::operator[](const int& index) const
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Returns a model pointer by model name.
+ * Returns a model pointer by model name. The return value will never be
+ * NULL.
  ***************************************************************************/
 GModel* GModels::operator[](const std::string& name)
 {
@@ -246,7 +248,8 @@ GModel* GModels::operator[](const std::string& name)
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Returns a constant model pointer by model name.
+ * Returns a constant model pointer by model name. The return value will
+ * never be NULL.
  ***************************************************************************/
 const GModel* GModels::operator[](const std::string& name) const
 {
@@ -324,16 +327,14 @@ void GModels::append(const GModel& model)
  * @brief Set model in container
  *
  * @param[in] index Model index [0,...,size()-1].
- * @param[in] model Model pointer.
+ * @param[in] model Model.
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Set model in the container. If the specified model pointer is not NULL,
- * a deep copy of the model will be made. Otherwise a NULL pointer will
- * be set.
+ * Set model in the container. A deep copy of the model will be made.
  ***************************************************************************/
-void GModels::set(const int& index, const GModel* model)
+void GModels::set(const int& index, const GModel& model)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -346,7 +347,7 @@ void GModels::set(const int& index, const GModel* model)
     if (m_models[index] != NULL) delete m_models[index];
 
     // Assign new model by cloning
-    m_models[index] = (model != NULL) ? model->clone() : NULL;
+    m_models[index] = model.clone();
 
     // Set parameter pointers
     set_pointers();
@@ -365,11 +366,9 @@ void GModels::set(const int& index, const GModel* model)
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Set model in the container. If the specified model pointer is not NULL,
- * a deep copy of the model will be made. Otherwise a NULL pointer will
- * be set.
+ * Set model in the container. A deep copy of the model will be made.
  ***************************************************************************/
-void GModels::set(const std::string& name, const GModel* model)
+void GModels::set(const std::string& name, const GModel& model)
 {
     // Get parameter index
     int index = get_index(name);
@@ -383,7 +382,7 @@ void GModels::set(const std::string& name, const GModel* model)
     if (m_models[index] != NULL) delete m_models[index];
 
     // Assign new model by cloning
-    m_models[index] = (model != NULL) ? model->clone() : NULL;
+    m_models[index] = model.clone();
 
     // Set parameter pointers
     set_pointers();
