@@ -79,7 +79,7 @@ public:
     GModel* __getitem__(const std::string& name) {
         return (*self)[name];
     }
-    void __setitem__(const int& index, const GModel* val) {
+    void __setitem__(const int& index, const GModel& val) {
         if (index >= 0 && index < self->size()) {
             self->set(index, val);
             return;
@@ -89,7 +89,7 @@ public:
                                            0, self->size()-1);
         }
     }
-    void __setitem__(const std::string& name, const GModel* val) {
+    void __setitem__(const std::string& name, const GModel& val) {
         self->set(name, val);
         return;
     }
