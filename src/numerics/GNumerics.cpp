@@ -67,7 +67,7 @@ double gammln(const double& x) {
     for (int i = 0; i < 6; ++i) {
         d += cof[i]/++b;
     }
-    double result = log(2.5066282746310005 * d/a) - c;
+    double result = std::log(2.5066282746310005 * d/a) - c;
 	
     // Return result
     return result;
