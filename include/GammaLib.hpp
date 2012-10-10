@@ -18,11 +18,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GammaLib.hpp
+ * @brief GammaLib definitions
+ * @author Juergen Knoedlseder
+ */
 
 #ifndef GAMMALIB_HPP
 #define GAMMALIB_HPP
-
-/* __ Includes ___________________________________________________________ */
 
 
 /***************************************************************************
@@ -45,6 +48,7 @@
 #include "GIntegrand.hpp"
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
+#include "GNumerics.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"
