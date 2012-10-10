@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GRan.i  -  Random number generator class python I/F           *
+ *                  GRan.i - Random number generator class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GRan.i
  * @brief GRan class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -54,6 +54,7 @@ public:
     unsigned long long int int64(void);
     double                 uniform(void);
     double                 exp(const double& arg);
+    double                 poisson(const double& lambda);
     double                 chisq2(void);
 };
 

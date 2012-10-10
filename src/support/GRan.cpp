@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GRan.cpp - Randon number generator class                *
+ *                 GRan.cpp - Random number generator class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GRan.cpp
  * @brief Randon number generator class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GRan.hpp"
 #include "GTools.hpp"
+#include "GNumerics.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -281,6 +282,62 @@ double GRan::exp(const double& lambda)
 
 
 /***********************************************************************//**
+ * @brief Returns Poisson deviates
+ *
+ * @param[in] lambda Expectation value.
+ *
+ * Returns Poisson deviates for an expectation value.
+ *
+ * This method may be used to simulate the number of events in case that a
+ * given mean number of events is expected.
+ * 
+ * This method is inspired from Numerical Recipes Third Edition, page 362.
+ ***************************************************************************/
+double GRan::poisson(const double& lambda)
+{
+    // Declare variables
+    double em;
+    double t;
+    double y;
+
+    // Use direct method for small numbers ...
+    if (lambda < 12.0) {
+        if (lambda != m_oldm) {
+            m_oldm = lambda;
+            m_g    = std::exp(-lambda);
+        }
+        em = -1.0;
+        t  =  1.0;
+        do {
+            em += 1.0;
+            t  *= uniform();
+        } while (t > m_g);
+    } // endif: direct method used
+
+    // ... otherwise use rejection method        
+    else {
+        if (lambda != m_oldm) {
+            m_oldm = lambda;
+            m_sq   = std::sqrt(2.0*lambda);
+            m_alxm = std::log(lambda);
+            m_g    = lambda * m_alxm - gammln(lambda+1.0);
+        }
+        do {
+            do {
+                y  = std::tan(pi * uniform());
+                em = m_sq * y + lambda;
+            } while (em < 0.0);
+            em = floor(em);
+            t  = 0.9*(1.0+y*y) * std::exp(em*m_alxm - gammln(em+1.0)-m_g);
+        } while (uniform() > t);
+    }
+    
+    // Return random deviate
+    return em;
+}
+
+
+/***********************************************************************//**
  * @brief Returns Chi2 deviates for 2 degrees of freedom
  *
  * Returns exponential deviates from the probability distribution
@@ -339,6 +396,10 @@ void GRan::init_members(unsigned long long int seed)
     m_seed = seed;
     m_v    = 4101842887655102017LL;
     m_w    = 1;
+    m_oldm = -1.0;
+    m_sq   = 0.0;
+    m_alxm = 0.0;
+    m_g    = 0.0;
 
     // Initialise u, v, and w
     m_u = m_seed ^ m_v;
@@ -365,6 +426,10 @@ void GRan::copy_members(const GRan& ran)
     m_u    = ran.m_u;
     m_v    = ran.m_v;
     m_w    = ran.m_w;
+    m_oldm = ran.m_oldm;
+    m_sq   = ran.m_sq;
+    m_alxm = ran.m_alxm;
+    m_g    = ran.m_g;
     
     // Return
     return;
