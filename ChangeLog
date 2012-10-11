@@ -11,6 +11,7 @@
         Refactor CTA response classes
         Define new instrument response interface
         Add GSource class
+        File locking failures do no longer throw exceptions
 
 2012-09-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

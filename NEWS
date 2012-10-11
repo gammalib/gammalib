@@ -20,7 +20,9 @@ modification of the interface files.
 
 3. Application module
 ---------------------
-None
+File locking failures do no longer throw exceptions. This allows to
+operate GammaLib also on systems that do not support file locking.
+Unsupported file locking may occur on some file systems.
 
 
 4. Base module

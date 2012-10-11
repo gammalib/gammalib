@@ -1,6 +1,6 @@
 GammaLib information
 ====================
-Version: 00-06-02 (September 17th, 2012)
+Version: 00-06-03 (October 11th, 2012)
 Author:  Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu)
 
 
@@ -44,6 +44,7 @@ Web sites
 http://gammalib.sourceforge.net                   - for documentation
 https://sourceforge.net/projects/gammalib/        - for downloads
 https://cta-redmine.irap.omp.eu/projects/gammalib - for developers
+
 
 Prerequisites
 =============
