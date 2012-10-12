@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{CDC}}
 \newcommand{\doctype}{\mbox{Coding and Design Conventions}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{21 September 2012}}
+\newcommand{\calendar}{\mbox{12 October 2012}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 
 
@@ -121,7 +121,7 @@ for (int i = 0; i < 10; ++i) {
     sum += i;
 }
 \end{verbatim}
-\item Where possible (and appropriate), use {\tt std::vector} or {\tt std::array} containers instead of
+\item Where possible (and appropriate), use {\tt std::vector} containers instead of
 allocating memory. In other words: avoid direct memory allocation.
 \item Provide comments, comments, comments!!!
 \end{itemize}
@@ -138,6 +138,8 @@ allocating memory. In other words: avoid direct memory allocation.
 \item Do not use {\tt std::strncpy}, {\tt std::memcpy} or similar as these functions are corrupted on
 some systems.
 \item If possible, pass arguments by reference.
+\item Use C++ (std::string) instead of C-style (char*) strings.
+\item Use C++ casts instead of C-style casts.
 \end{itemize}
 
 
@@ -329,9 +331,53 @@ The class definition is structured in several sections:
 \end{itemize}
 The definition of pure virtual methods should be done in a section that is separate from the
 methods that are implemented.
-
 Output stream and logging operators should be implemented for every class as friend
 operators.
+
+Here any illustration of the expected structure, based on the {\tt GObservation} class:
+\begin{verbatim}
+class GObservation {
+
+    // Friend classes
+    friend std::ostream& operator<< (std::ostream& os, const GObservation& obs);
+    friend GLog&         operator<< (GLog& log,        const GObservation& obs);
+
+public:
+    // Constructors and destructors
+    GObservation(void);
+    GObservation(const GObservation& obs);
+    virtual ~GObservation(void);
+
+    // Operators
+    virtual GObservation& operator= (const GObservation& obs);
+
+    // Pure virtual methods
+    virtual void          clear(void) = 0;
+    virtual GObservation* clone(void) const = 0;
+
+    // Virtual methods
+    virtual double        model(const GModels& models, const GEvent& event,
+                                GVector* gradient = NULL) const;
+    virtual double        npred(const GModels& models, GVector* gradient = NULL) const;
+
+    // Implemented methods
+    void                  name(const std::string& name);
+    void                  id(const std::string& id);
+
+protected:
+    // Protected methods
+    void init_members(void);
+    void copy_members(const GObservation& obs);
+    void free_members(void);
+
+    // Protected data area
+    std::string m_name;         //!< Name of observation
+    std::string m_id;           //!< Observation identifier
+    std::string m_statistics;   //!< Optimizer statistics (default=poisson)
+    GEvents*    m_events;       //!< Pointer to event container
+};
+\end{verbatim}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -509,8 +555,8 @@ It can be seen that this method calls the class's @print()@ method.
 By providing the conversion method, the class becomes "printable", and one
 my specify
 \begin{verbatim}
-GClass c;
-print c;
+>>> GClass c
+>>> print c
 \end{verbatim}
 to print out the class (i.e. to invoke the print() method of the class).
 
@@ -685,10 +731,10 @@ void GEbounds::alloc_members(const int& num)
 \end{verbatim}
 This example illustrates several design conventions:
 \begin{itemize}
-\item Do always check if a pointer is not {\tt NULL} before de-allocating memory.
+\item Always check if a pointer is not {\tt NULL} before de-allocating memory.
 \item After de-allocation, always set the pointer immediately to {\tt NULL}.
-\item Do never allocate zero elements (check if the number of elements to be allocated is positive).
-\item Do always initialise allocated memory to well defined values (do not expect that the compiler
+\item Never allocate zero elements (check if the number of elements to be allocated is positive).
+\item Always initialise allocated memory to well defined values (do not expect that the compiler
 will do this for your).
 \end{itemize}
 
@@ -732,30 +778,16 @@ GEbounds& GEbounds::operator= (const GEbounds& ebds)
     return *this;
 }
 \end{verbatim}
-Note that for a derived class, the assignment operator will have the form:
-\begin{verbatim}
-GEventCube& GEventCube::operator= (const GEventCube& cube)
-{
-    if (this != &cube) {
-        this->GEvents::operator=(cube);    // Copy base class members
-        free_members();
-        init_members();
-        copy_members(cube);
-    }
-    return *this;
-}
-\end{verbatim}
-Also note that {\bf for a derived class, {\tt init\_members()}, {\tt copy\_members(const \&A a)}
-and {\tt free\_members()} should only act on derived class members but not on
-base class members}.
-Any exception from this rule needs very careful documentation since it can easily be
-the source of memory leaks.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Inheritance}
 
 Class inheritance is central feature of the C++ language, and is largely used throughout \this.
+Multiple inheritance is not used at the moment in \this.
+Because of the added complexity of multiple inheritance in C++ in python there would have to 
+be very good reasons to use it in \this.
+
 Although the inheritance philosophy may differ from class to class, the following guidelines
 should be respected as far as possible:
 \begin{itemize}
@@ -771,7 +803,7 @@ members.
 By managing we mean here in particular memory allocation and de-allocation,
 but also proper initialization.
 \item Derived class constructors should invoke base class constructors for proper
-base class initialization. Example:
+base class initialization. A void constructor should look like
 \begin{verbatim}
 GEventList::GEventList(void) : GEvents()
 {
@@ -779,8 +811,51 @@ GEventList::GEventList(void) : GEvents()
     return;
 }
 \end{verbatim}
+and a copy constructor should look like
+\begin{verbatim}
+GEventList::GEventList(const GEventList& list) : GEvents(list)
+{
+    init_members();
+    copy_members(list);
+    return;
+}
+\end{verbatim}
+\item Derived class operators should invoke base class operators, as illustrated
+by the following example:
+\begin{verbatim}
+GEventList& GEventList::operator=(const GEventList& list)
+{
+    if (this != &list) {
+        this->GEvents::operator=(list);
+        free_members();
+        init_members();
+        copy_members(list);
+    }
+    return *this;
+}
+\end{verbatim}
+\item The {\tt clear()} method of a derived class show invoke the {\tt free\_members()} method
+of the base class, as illustrated by the following example:
+\begin{verbatim}
+void GCTAEventList::clear(void)
+{
+    free_members();
+    this->GEventList::free_members();
+    this->GEvents::free_members();
+    this->GEvents::init_members();
+    this->GEventList::init_members();
+    init_members();
+    return;
+}
+\end{verbatim}
 \item Avoid as far as possible methods that are only defined in the derived class.
 \end{itemize}
+
+Also note that {\bf for a derived class, {\tt init\_members()}, {\tt copy\_members(const \&A a)}
+and {\tt free\_members()} should only act on derived class members but not on
+base class members}.
+Any exception from this rule needs very careful documentation since it can easily be
+the source of memory leaks.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -869,6 +944,10 @@ isin()
 hasedisp()
 \end{verbatim}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Method const declarations}
+
 All methods that do not alter accessible class members should be declared {\tt const}.
 With accessible we mean here class members that can be read or written in some
 way by one of the methods.
@@ -883,6 +962,61 @@ compiler errors.
 Alternatively, the {\tt const\_cast} declaration can be used to allow member modifications
 within a {\tt const} method.
 
+As example we show here part of the definition of {\tt GModelSpectralPlaw2}:
+\begin{verbatim}
+class GModelSpectralPlaw2 : public GModelSpectral {
+public:
+    virtual double eval(const GEnergy& srcEng) const;
+    virtual void   read(const GXmlElement& xml);
+protected:
+    // Protected members
+    GModelPar       m_integral;        //!< Integral flux
+    GModelPar       m_index;           //!< Spectral index
+    GModelPar       m_emin;            //!< Lower energy limit (MeV)
+    GModelPar       m_emax;            //!< Upper energy limit (MeV)
+
+    // Cached members used for pre-computations
+    mutable double  m_log_emin;        //!< Log(emin)
+    mutable double  m_log_emax;        //!< Log(emax)
+    mutable double  m_pow_emin;        //!< emin^(index+1)
+    mutable double  m_pow_emax;        //!< emax^(index+1)
+    mutable double  m_norm;            //!< Power-law normalization (for pivot energy 1 MeV)
+    mutable double  m_g_norm;          //!< Power-law normalization gradient
+    mutable double  m_power;           //!< Power-law factor
+    mutable double  m_last_integral;   //!< Last integral flux
+    mutable double  m_last_index;      //!< Last spectral index (MeV)
+    mutable double  m_last_emin;       //!< Last lower energy limit (MeV)
+    mutable double  m_last_emax;       //!< Last upper energy limit (MeV)
+    mutable GEnergy m_last_energy;     //!< Last source energy
+    mutable double  m_last_value;      //!< Last function value
+    mutable double  m_last_g_integral; //!< Last integral flux gradient
+    mutable double  m_last_g_index;    //!< Last spectral index gradient
+\end{verbatim}
+This class has an internal cache for precomputation, which is potentially updated when
+{\tt eval} is called.
+Here the corresponding code:
+\begin{verbatim}
+double GModelSpectralPlaw2::eval(const GEnergy& srcEng) const
+{
+    // Update precomputed values
+    update(srcEng);
+
+    // Compute function value
+    double value = integral() * m_norm * m_power;
+
+    // Return
+    return value;
+}
+\end{verbatim}
+As the pre-computation cache is not exposed to the external world but fully handled within
+the class, {\tt eval()} is declared {\tt const} as it does not modify any of the model parameters
+(which are {\tt m\_integral}, {\tt m\_index}, {\tt m\_emin}, and {\tt m\_emax}).
+It may however modified some of the cache members, that's why these members are
+declared {\tt mutable}.
+As there is however no way to access these cache values from the outside (no method exists
+to access them), the {\tt eval()} method does not modify any {\em observable} property of the class,
+hence it is declared {\tt const}.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Method arguments and return values}
@@ -895,15 +1029,20 @@ should always be declared {\tt const}}.
 Pointers should only be used as arguments if {\tt NULL} should be a possible
 argument value.
 Also pointers should always be declared {\tt const}.
-Here some examples:
+Here an example based on the definition of {\tt GObservation}:
 \begin{verbatim}
-void obsname(const std::string& obsname);
-void ebounds(const GEbounds& ebounds);
-void gti(const GGti& gti);
-void roi(const GRoi* roi);
-void events(const GEvents* events);
-void statistics(const std::string& statistics);
+class GObservation {
+public:
+    void                  events(const GEvents* events);
+    void                  statistics(const std::string& statistics);
+protected:
+    std::string m_statistics;   //!< Optimizer statistics (default=poisson)
+    GEvents*    m_events;       //!< Pointer to event container
+};
 \end{verbatim}
+The {\tt statictics} value is passed by reference because the class will hold the actual
+value, while {\tt events} is passed as a pointer because the class will hold the
+pointer.
 
 Numeric argument types should be either {\tt int} or {\tt double}.
 Unless absolutely necessary, avoid {\tt short int}, {\tt long}, and {\tt float}.
@@ -918,25 +1057,25 @@ code slicing if the method is used for object assignment.}
 Unless we explicitly want to modify a class member through the method call,
 the returned pointer should be declared {\tt const}.
 
-Here some examples:
+Here an example based on the definition of {\tt GObservation}:
 \begin{verbatim}
-const std::string& obsname(void) const;     // const base class member reference
-GTime              tstart(void) const;      // no class member
-GTime              tstop(void) const;       // no class member
-GEnergy            emin(void) const;        // no class member
-GEnergy            emax(void) const;        // no class member
-const GEbounds&    ebounds(void) const;     // const base class member reference
-const GGti&        gti(void) const;         // const base class member reference
-const GRoi*        roi(void) const;         // const base class pointer
-const GEvents*     events(void) const;      // const base class pointer
-const std::string& statistics(void) const;  // const base class member reference
+class GObservation {
+public:
+    virtual double        ontime(void) const = 0;
+    const GEvents*        events(void) const;
+    const std::string&    statistics(void) const { return m_statistics; }
+protected:
+    std::string m_statistics;   //!< Optimizer statistics (default=poisson)
+    GEvents*    m_events;       //!< Pointer to event container
+};
 \end{verbatim}
-The {\tt tstart()}, {\tt tstop()}, {\tt emin()}, and {\tt emax()} methods do not return class members,
-hence they return an object by value.
-All other methods return class members.
-The {\tt roi()} and {\tt events()} methods return base class objects, hence the return type
-is a pointer.
-All other methods return by reference.
+The {\tt ontime()} method does return a double by value as the ontime property is not
+stored explicitly in the class (hence no reference can be returned to it).
+On the other hand, the {\tt statistics()} method returns by reference as the statistics
+property is stored as a data member (hence a reference can be returned).
+Although we could have returned a reference to the event container, this would lead
+to code slicing.
+Therefore, the {\tt events()} method returns a pointer.
 All returned references or pointers are declared {\tt const} to prevent modification of
 class members.
 
