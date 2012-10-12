@@ -32,7 +32,8 @@
 AC_INIT([gammalib], [0.7.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu no-dependencies])
+#AM_INIT_AUTOMAKE([gnu no-dependencies])
+AM_INIT_AUTOMAKE([gnu])
 AM_CONFIG_HEADER([config.h])
 
 
