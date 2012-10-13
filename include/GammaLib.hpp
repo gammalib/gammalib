@@ -18,16 +18,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GammaLib.hpp
+ * @brief Header file for all GammaLib classes
+ * @author Juergen Knoedlseder
+ */
 
 #ifndef GAMMALIB_HPP
 #define GAMMALIB_HPP
 
-/* __ Includes ___________________________________________________________ */
-
-
 /***************************************************************************
  *                              Core services                              *
  ***************************************************************************/
+
+/* __ Interface classes __________________________________________________ */
+#include "GBase.hpp"
 
 /* __ Common tools _______________________________________________________ */
 #include "GException.hpp"
