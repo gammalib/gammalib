@@ -20,69 +20,58 @@
  ***************************************************************************/
 /**
  * @file GBase.hpp
- * @brief Definition of interface for all GammaLib classes
+ * @brief Implementation of interface for all GammaLib classes
  * @author Juergen Knoedlseder
  */
 
-#ifndef GBASE_HPP
-#define GBASE_HPP
-
 /* __ Includes ___________________________________________________________ */
-#include <string>
-#include <iostream>
-#include "GLog.hpp"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include "GBase.hpp"
+
+/* __ Method name definitions ____________________________________________ */
+
+/* __ Macros _____________________________________________________________ */
+
+/* __ Coding definitions _________________________________________________ */
+
+/* __ Debug definitions __________________________________________________ */
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Output operator
+ *
+ * @param[in] os Output stream.
+ * @param[in] base Object.
+ ***************************************************************************/
+std::ostream& operator<< (std::ostream& os, const GBase& base)
+{
+     // Write class in output stream
+    os << base.print();
+
+    // Return output stream
+    return os;
+}
 
 
 /***********************************************************************//**
- * @class GBase
+ * @brief Log operator
  *
- * @brief Interface class for all GammaLib classes
- *
- * This class defines the interface for all GammaLib classes. It is an
- * abstract base class from which all other GammaLib classes will be
- * derived. The interface class imposes on all GammaLib classes to
- * implement the following methods:
- * 
- * clear() Sets the object to a clean initial state
- *
- * clone() Creates a deep copy of the object
- *
- * print() Print content of object
+ * @param[in] log Logger.
+ * @param[in] base Object.
  ***************************************************************************/
-class GBase {
+GLog& operator<< (GLog& log, const GBase& base)
+{
+    // Write class into logger
+    log << base.print();
 
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GBase& base);
-    friend GLog&         operator<<(GLog& log,        const GBase& base);
-
-public:
-    /// @brief Destructor
-    ///
-    /// Destroys class.
-    virtual ~GBase(void) {}
- 
-    /// @brief Clear object
-    ///
-    /// Sets the object to a clean initial state. After calling the method
-    /// the object will be in the same state as it were if an empty instance
-    /// of the object would have been created.
-    virtual void        clear(void) = 0;
-
-    /// @brief Clones object
-    ///
-    /// @return Pointer to deep copy of object.
-    ///
-    /// Creates a deep copy of the object and returns a pointer to the
-    /// object.
-    virtual GBase*      clone(void) const = 0;
-
-    /// @brief Print content of object
-    ///
-    /// @return String containing the content of the object.
-    ///
-    /// Formats the content in a standard way and puts this content in a
-    /// C++ string that is returned.
-    virtual std::string print(void) const = 0;
-};
-
-#endif /* GBASE_HPP */
+    // Return logger
+    return log;
+}

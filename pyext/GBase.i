@@ -1,5 +1,5 @@
 /***************************************************************************
- *                      GBase.hpp - GammaLib base class                    *
+ *                       GBase.i - GammaLib base class                     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,18 +19,15 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GBase.hpp
+ * @file GBase.i
  * @brief Definition of interface for all GammaLib classes
  * @author Juergen Knoedlseder
  */
-
-#ifndef GBASE_HPP
-#define GBASE_HPP
-
-/* __ Includes ___________________________________________________________ */
-#include <string>
-#include <iostream>
-#include "GLog.hpp"
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GBase.hpp"
+#include "GTools.hpp"
+%}
 
 
 /***********************************************************************//**
@@ -50,39 +47,25 @@
  * print() Print content of object
  ***************************************************************************/
 class GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GBase& base);
-    friend GLog&         operator<<(GLog& log,        const GBase& base);
-
 public:
-    /// @brief Destructor
-    ///
-    /// Destroys class.
-    virtual ~GBase(void) {}
+    // Constructors and destructors
+    virtual ~GBase(void);
  
-    /// @brief Clear object
-    ///
-    /// Sets the object to a clean initial state. After calling the method
-    /// the object will be in the same state as it were if an empty instance
-    /// of the object would have been created.
+    // Methods
     virtual void        clear(void) = 0;
-
-    /// @brief Clones object
-    ///
-    /// @return Pointer to deep copy of object.
-    ///
-    /// Creates a deep copy of the object and returns a pointer to the
-    /// object.
     virtual GBase*      clone(void) const = 0;
-
-    /// @brief Print content of object
-    ///
-    /// @return String containing the content of the object.
-    ///
-    /// Formats the content in a standard way and puts this content in a
-    /// C++ string that is returned.
     virtual std::string print(void) const = 0;
 };
 
-#endif /* GBASE_HPP */
+
+/***********************************************************************//**
+ * @brief GBase class extension
+ ***************************************************************************/
+%extend GBase {
+    char *__str__() {
+        return tochar(self->print());
+    }
+    GBase copy() {
+        return (*self);
+    }
+};

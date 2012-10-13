@@ -9,7 +9,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Set sub directories
-SUBDIRS = support \
+SUBDIRS = base \
+          support \
           linalg \
           numerics \
           fits \
@@ -47,7 +48,8 @@ scripts = gammalib-setup \
 # Build libtool library
 lib_LTLIBRARIES = libgamma.la
 libgamma_la_SOURCES = $(sources)
-libgamma_la_LIBADD = support/libsupport.la \
+libgamma_la_LIBADD = base/libbase.la \
+                     support/libsupport.la \
                      linalg/liblinalg.la \
                      numerics/libnumerics.la \
                      fits/libfits.la \

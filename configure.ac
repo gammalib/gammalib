@@ -1207,6 +1207,7 @@ DX_INIT_DOXYGEN([GammaLib], [doc/Doxyfile], [doc/doxygen])
 #############################################################################
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 src/base/Makefile
                  src/support/Makefile
                  src/linalg/Makefile
                  src/numerics/Makefile
