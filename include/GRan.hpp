@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GRan.hpp - Randon number generator class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GRan.hpp
  * @brief Randon number generator class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GRAN_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
@@ -40,8 +41,10 @@
  * @class GRan
  *
  * @brief Random number generator class
+ *
+ * This class implements a random number generator.
  ***************************************************************************/
-class GRan {
+class GRan : GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GRan& ran);
