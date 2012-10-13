@@ -107,22 +107,22 @@ swig: $(BUILT_SOURCES)
 # Rule for MWL module
 if WITH_INST_MWL
 gammalib/mwl_wrap.cpp gammalib/mwl.py: $(top_srcdir)/inst/mwl/pyext/mwl.i
-	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
-	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/mwl.Tpi" "gammalib/mwl.Pi"; else rm -f "gammalib/mwl.Tpi"; exit 1; fi
 endif
 
 # Rule for CTA module
 if WITH_INST_CTA
 gammalib/cta_wrap.cpp gammalib/cta.py: $(top_srcdir)/inst/cta/pyext/cta.i
-	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
-	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/cta.Tpi" "gammalib/cta.Pi"; else rm -f "gammalib/cta.Tpi"; exit 1; fi
 endif
 
 # Rule for LAT module
 if WITH_INST_LAT
 gammalib/lat_wrap.cpp gammalib/lat.py: $(top_srcdir)/inst/lat/pyext/lat.i
-	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
-	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/lat.Tpi" "gammalib/lat.Pi"; else rm -f "gammalib/lat.Tpi"; exit 1; fi
 endif
 
 endif # HAVE_SWIG
