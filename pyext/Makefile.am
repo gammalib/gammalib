@@ -58,12 +58,19 @@ BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
                 gammalib/test_wrap.cpp gammalib/test.py \
                 $(INST_SWIG_TARGETS)
 
+# Dependencies. Obtain the list of dependencies by executing ls.
+DEPFILES = $(shell ls gammalib/*.Pi 2> /dev/null)
+include $(DEPFILES)
+
 # Set files to be removed in clean. We remove only the SWIG interface files if SWIG
 # is available to rebuild them. 
 if HAVE_SWIG
   CLEAN_FILES = $(BUILT_SOURCES)
 endif
-CLEANFILES = $(CLEAN_FILES)
+CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
+
+# Set SWIG compile command
+SWIGCOMPILE = $(SWIG) -c++ -python -Wall
 
 # Things we want to do when 'make' is invoked.
 all-local: build
@@ -94,24 +101,28 @@ swig: $(BUILT_SOURCES)
 
 # General rule for core modules
 %_wrap.cpp %.py: %.i
-	$(SWIG) -c++ -python -Wall -o $@ -outdir gammalib $<
+	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o $@ -outdir gammalib $<; \
+	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
 
 # Rule for MWL module
 if WITH_INST_MWL
 gammalib/mwl_wrap.cpp gammalib/mwl.py: $(top_srcdir)/inst/mwl/pyext/mwl.i
-	$(SWIG) -c++ -python -Wall -o gammalib/mwl_wrap.cpp -outdir gammalib $<
+	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
+	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
 endif
 
 # Rule for CTA module
 if WITH_INST_CTA
 gammalib/cta_wrap.cpp gammalib/cta.py: $(top_srcdir)/inst/cta/pyext/cta.i
-	$(SWIG) -c++ -python -Wall -o gammalib/cta_wrap.cpp -outdir gammalib $<
+	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
+	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
 endif
 
 # Rule for LAT module
 if WITH_INST_LAT
 gammalib/lat_wrap.cpp gammalib/lat.py: $(top_srcdir)/inst/lat/pyext/lat.i
-	$(SWIG) -c++ -python -Wall -o gammalib/lat_wrap.cpp -outdir gammalib $<
+	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
+	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
 endif
 
 endif # HAVE_SWIG
