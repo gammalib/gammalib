@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GRan.hpp
- * @brief Randon number generator class definition.
+ * @brief Random number generator class definition
  * @author Juergen Knoedlseder
  */
 
@@ -31,7 +31,6 @@
 #include <string>
 #include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -45,10 +44,6 @@
  * This class implements a random number generator.
  ***************************************************************************/
 class GRan : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GRan& ran);
-    friend GLog&         operator<< (GLog& log, const GRan& ran);
 
 public:
     // Constructors and destructors

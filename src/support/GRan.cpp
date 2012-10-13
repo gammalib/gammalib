@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GRan.cpp
- * @brief Randon number generator class implementation
+ * @brief Random number generator class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -443,42 +443,4 @@ void GRan::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] ran Column separated values table.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GRan& ran)
-{
-     // Write random number generator in output stream
-    os << ran.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] ran Column separated values table.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GRan& ran)
-{
-    // Write random number generator into logger
-    log << ran.print();
-
-    // Return logger
-    return log;
 }
