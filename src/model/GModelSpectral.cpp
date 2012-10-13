@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectral.cpp  -  Abstract spectral model base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectral.cpp
  * @brief Abstract spectral model base class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -265,42 +265,4 @@ void GModelSpectral::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] model Spectral model.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelSpectral& model)
-{
-     // Write model in output stream
-    os << model.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] model Spectral model.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelSpectral& model)
-{
-    // Write model into logger
-    log << model.print();
-
-    // Return logger
-    return log;
 }

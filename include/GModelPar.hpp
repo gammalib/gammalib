@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GException.hpp"
 #include "GXmlElement.hpp"
 
@@ -56,10 +54,6 @@
  * gradient (if "hasgrad" is true).
  ***************************************************************************/
 class GModelPar : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GModelPar& par);
-    friend GLog&         operator<<(GLog& log,        const GModelPar& par);
 
 public:
     // Constructors and destructors

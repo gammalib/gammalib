@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCaldb.cpp  -  Calibration database class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Juergen Knoedlseder                              *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCaldb.cpp
  * @brief Calibration database class implementation.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -557,42 +557,4 @@ std::string GCaldb::cifname(const std::string& mission, const std::string& instr
 
     // Return cif
     return cif;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] caldb Calibration database.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCaldb& caldb)
-{
-     // Write calibration database in output stream
-    os << caldb.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] caldb Calibration database.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GCaldb& caldb)
-{
-    // Write calibration database into logger
-    log << caldb.print();
-
-    // Return logger
-    return log;
 }

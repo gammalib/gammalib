@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GEnergy.hpp"
@@ -64,10 +62,6 @@ class GObservation;
  * implement the model parameters.
  ***************************************************************************/
 class GModel : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModel& model);
-    friend GLog&         operator<< (GLog& log, const GModel& model);
 
 public:
     // Constructors and destructors

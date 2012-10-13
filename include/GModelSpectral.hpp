@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
 #include "GRan.hpp"
@@ -48,10 +46,6 @@
  * model.
  ***************************************************************************/
 class GModelSpectral : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GModelSpectral& model);
-    friend GLog&         operator<<(GLog& log,        const GModelSpectral& model);
 
 public:
     // Constructors and destructors

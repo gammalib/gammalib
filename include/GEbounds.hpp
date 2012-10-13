@@ -31,7 +31,6 @@
 #include <iostream>
 #include <string>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GEnergy.hpp"
@@ -45,10 +44,6 @@
  * This class holds a list of energy intervals.
  ***************************************************************************/
 class GEbounds : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GEbounds& ebds);
-    friend GLog&         operator<<(GLog& log,        const GEbounds& ebds);
 
 public:
     // Constructors and destructors

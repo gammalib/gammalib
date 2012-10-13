@@ -21,7 +21,7 @@
 /**
  * @file GNodeArray.cpp
  * @brief Node array class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -597,43 +597,4 @@ void GNodeArray::setup(void)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] array Node array.
- ***************************************************************************/
-std::ostream& operator<<(std::ostream& os, const GNodeArray& array)
-{
-     // Write array in output stream
-    os << array.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] array Node array.
- ***************************************************************************/
-GLog& operator<<(GLog& log, const GNodeArray& array)
-{
-    // Write array into logger
-    log << array.print();
-
-    // Return logger
-    return log;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GGti.hpp  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GGti.hpp
  * @brief Good time interval class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GGTI_HPP
@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GTime.hpp"
@@ -46,10 +44,6 @@
  * are valid for science analysis. Times are stored using the GTime class.
  ***************************************************************************/
 class GGti : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GGti& gti);
-    friend GLog&         operator<< (GLog& log,        const GGti& gti);
 
 public:
     // Constructors and destructors

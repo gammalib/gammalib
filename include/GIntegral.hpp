@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GIntegrand.hpp"
 
 
@@ -44,10 +42,6 @@
  * integrand is implemented by a derived class of GIntegrand.
  ***************************************************************************/
 class GIntegral : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GIntegral& integral);
-    friend GLog&         operator<<(GLog& log,        const GIntegral& integral);
 
 public:
 

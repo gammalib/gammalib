@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -71,10 +69,6 @@
  * in the derived classes.
  ***************************************************************************/
 class GEvent : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GEvent& event);
-    friend GLog&         operator<< (GLog& log, const GEvent& event);
 
 public:
     // Constructors and destructors

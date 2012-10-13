@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -47,10 +45,6 @@
  * non-imaging devices.
  ***************************************************************************/
 class GInstDir : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GInstDir& dir);
-    friend GLog&         operator<< (GLog& log, const GInstDir& dir);
 
 public:
     // Constructors and destructors

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEvent.cpp  -  Event abstract base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,15 +21,13 @@
 /**
  * @file GEvent.cpp
  * @brief GEvent abstract base class implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include <iomanip>
 #include "GException.hpp"
 #include "GEvent.hpp"
 
@@ -165,42 +163,4 @@ void GEvent::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
- 
- /***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] event Event.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GEvent& event)
-{
-     // Write event in output stream
-    os << event.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] event Event.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GEvent& event)
-{
-    // Write event into logger
-    log << event.print();
-
-    // Return logger
-    return log;
 }

@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GEvents.hpp"
 #include "GResponse.hpp"
 #include "GPointing.hpp"
@@ -61,13 +59,6 @@
  * execution speed for data analysis.
  ***************************************************************************/
 class GObservation : public GBase {
-
-    // Friend classes
-    //friend class GObservations;
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GObservation& obs);
-    friend GLog&         operator<< (GLog& log,        const GObservation& obs);
 
 public:
     // Constructors and destructors

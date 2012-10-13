@@ -31,7 +31,6 @@
 #include <iostream>
 #include <string>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
 
@@ -59,10 +58,6 @@
  * accessed. After usage, the database is closed using the close() method.
  ***************************************************************************/
 class GCaldb : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GCaldb& caldb);
-    friend GLog&         operator<<(GLog& log,        const GCaldb& caldb);
 
 public:
     // Constructors and destructors

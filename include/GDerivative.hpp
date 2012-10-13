@@ -31,7 +31,6 @@
 #include <string>
 #include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GFunction.hpp"
 
 
@@ -45,10 +44,6 @@
  * class.
  ***************************************************************************/
 class GDerivative : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GDerivative& dx);
-    friend GLog&         operator<<(GLog& log,        const GDerivative& dx);
 
 public:
 

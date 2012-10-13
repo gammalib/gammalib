@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GXmlElement.hpp"
@@ -49,10 +47,6 @@
  * (implemented by the derived class GModelSpatialPtsrc).
  ***************************************************************************/
 class GModelSpatial : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GModelSpatial& model);
-    friend GLog&         operator<<(GLog& log,        const GModelSpatial& model);
 
 public:
     // Constructors and destructors

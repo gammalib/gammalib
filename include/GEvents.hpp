@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GEvent.hpp"
 #include "GFits.hpp"
 #include "GEbounds.hpp"
@@ -63,10 +61,6 @@
  * container.
  ***************************************************************************/
 class GEvents : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GEvents& events);
-    friend GLog&         operator<<(GLog& log,        const GEvents& events);
 
 public:
     // Constructors and destructors

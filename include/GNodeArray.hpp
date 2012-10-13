@@ -32,7 +32,6 @@
 #include <string>
 #include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GVector.hpp"
 
 
@@ -55,10 +54,6 @@
  * If the nodes are equally spaced, interpolation is more rapid.
  ***************************************************************************/
 class GNodeArray : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GNodeArray& array);
-    friend GLog&         operator<<(GLog& log,        const GNodeArray& array);
 
 public:
     // Constructors and destructors

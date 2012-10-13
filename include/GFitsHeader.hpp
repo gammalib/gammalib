@@ -28,9 +28,7 @@
 #define GFITSHEADER_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GFitsHeaderCard.hpp"
 
 
@@ -46,10 +44,6 @@
  * changed using the 'update' method.
  ***************************************************************************/
 class GFitsHeader : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsHeader& header);
-    friend GLog&         operator<< (GLog& log, const GFitsHeader& header);
 
 public:
     // Constructors and destructors
