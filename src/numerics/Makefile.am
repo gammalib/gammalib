@@ -2,14 +2,15 @@
 
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src
 
 # Define sources for this directory
 sources = GIntegral.cpp \
           GIntegrand.cpp \
-	  GDerivative.cpp \
+          GDerivative.cpp \
           GFunction.cpp \
+          GNumerics.cpp \
           GException_numerics.cpp
 
 # Build libtool library

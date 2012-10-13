@@ -20,12 +20,13 @@
  ***************************************************************************/
 /**
  * @file GammaLib.hpp
- * @brief Header file for all GammaLib classes
+ * @brief GammaLib definitions
  * @author Juergen Knoedlseder
  */
 
 #ifndef GAMMALIB_HPP
 #define GAMMALIB_HPP
+
 
 /***************************************************************************
  *                              Core services                              *
@@ -50,6 +51,7 @@
 #include "GIntegrand.hpp"
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
+#include "GNumerics.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"
