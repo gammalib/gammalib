@@ -27,6 +27,9 @@
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 
+/* __ Include interface classes __________________________________________ */
+%import "GBase.i";
+
 /* __ Support module _____________________________________________________ */
 %include "GException.i"
 %include "GNodeArray.i"
