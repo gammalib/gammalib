@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GRan.hpp - Randon number generator class                *
+ *                 GRan.hpp - Random number generator class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -68,6 +68,7 @@ public:
     unsigned long long int int64(void);
     double                 uniform(void);
     double                 exp(const double& lambda);
+    double                 poisson(const double& lambda);
     double                 chisq2(void);
     std::string            print(void) const;
   
@@ -82,6 +83,12 @@ protected:
     unsigned long long int m_u;     //!< u
     unsigned long long int m_v;     //!< v
     unsigned long long int m_w;     //!< w
+
+    // Poisson cache
+    double                 m_oldm;
+    double                 m_sq;
+    double                 m_alxm;
+    double                 m_g;
 };
 
 #endif /* GRAN_HPP */
