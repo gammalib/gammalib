@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GBase.hpp"
+#include "GLog.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -51,7 +52,7 @@
  * @param[in] os Output stream.
  * @param[in] base Object.
  ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GBase& base)
+std::ostream& operator<<(std::ostream& os, const GBase& base)
 {
      // Write class in output stream
     os << base.print();
@@ -67,7 +68,7 @@ std::ostream& operator<< (std::ostream& os, const GBase& base)
  * @param[in] log Logger.
  * @param[in] base Object.
  ***************************************************************************/
-GLog& operator<< (GLog& log, const GBase& base)
+GLog& operator<<(GLog& log, const GBase& base)
 {
     // Write class into logger
     log << base.print();
@@ -75,3 +76,4 @@ GLog& operator<< (GLog& log, const GBase& base)
     // Return logger
     return log;
 }
+

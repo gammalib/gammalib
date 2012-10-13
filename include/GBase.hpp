@@ -30,7 +30,6 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
-#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -50,10 +49,6 @@
  * print() Print content of object
  ***************************************************************************/
 class GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GBase& base);
-    friend GLog&         operator<<(GLog& log,        const GBase& base);
 
 public:
     /// @brief Destructor
@@ -84,5 +79,12 @@ public:
     /// C++ string that is returned.
     virtual std::string print(void) const = 0;
 };
+
+/* __ Forward declarations _______________________________________________ */
+class GLog;
+
+/* __ Prototypes _________________________________________________________ */
+std::ostream& operator<<(std::ostream& os, const GBase& base);
+GLog&         operator<<(GLog& log,        const GBase& base);
 
 #endif /* GBASE_HPP */
