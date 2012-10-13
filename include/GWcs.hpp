@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.hpp  -  World Coordinate System virtual base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcs.hpp
  * @brief World Coordinate System virtual base class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GWCS_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
@@ -41,7 +42,7 @@
  *
  * @brief GWcs virtual base class interface defintion
  ***************************************************************************/
-class GWcs {
+class GWcs : public GBase {
 
     // Operator friends
     friend bool operator== (const GWcs &a, const GWcs &b);

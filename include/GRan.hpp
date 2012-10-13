@@ -44,7 +44,7 @@
  *
  * This class implements a random number generator.
  ***************************************************************************/
-class GRan : GBase {
+class GRan : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GRan& ran);

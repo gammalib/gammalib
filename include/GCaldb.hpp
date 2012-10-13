@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCaldb.hpp  -  Calibration database class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Juergen Knoedlseder                              *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCaldb.hpp
  * @brief Calibration database class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCALDB_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include <string>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsBinTable.hpp"
@@ -57,7 +58,7 @@
  * using the open() method. Once opened, database information can be
  * accessed. After usage, the database is closed using the close() method.
  ***************************************************************************/
-class GCaldb {
+class GCaldb : public GBase {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GCaldb& caldb);

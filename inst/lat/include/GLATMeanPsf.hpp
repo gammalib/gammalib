@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GLATMeanPsf.hpp  -  Fermi LAT mean PSF                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATMeanPsf.hpp
  * @brief GLATMeanPsf class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATMEANPSF_HPP
@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GSkyDir.hpp"
 #include "GNodeArray.hpp"
@@ -49,7 +50,7 @@ class GLATObservation;
  * averaging is done using the livetime cube which holds the lifetime as
  * function and zenith and azimuth angles for an observation.
  ***************************************************************************/
-class GLATMeanPsf {
+class GLATMeanPsf : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GLATMeanPsf& psf);

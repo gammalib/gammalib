@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeader.hpp  - FITS header handling class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsHeader.hpp
  * @brief FITS header class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSHEADER_HPP
@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GFitsHeaderCard.hpp"
 
@@ -44,7 +45,7 @@
  * saved into another file (using the 'save' method). Cards are added or
  * changed using the 'update' method.
  ***************************************************************************/
-class GFitsHeader {
+class GFitsHeader : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GFitsHeader& header);

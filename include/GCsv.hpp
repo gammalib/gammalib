@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCsv.hpp - Column separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCsv.hpp
  * @brief Column separated values table class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCsv_HPP
@@ -31,6 +31,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 
 
@@ -39,7 +40,7 @@
  *
  * @brief Column separated values table class definition
  ***************************************************************************/
-class GCsv {
+class GCsv : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GCsv& csv);

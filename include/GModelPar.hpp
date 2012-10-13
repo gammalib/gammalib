@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GModelPar.hpp  -  Model parameter class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelPar.hpp
  * @brief Model parameter class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELPAR_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GException.hpp"
 #include "GXmlElement.hpp"
@@ -54,7 +55,7 @@
  * Each parameter has a name, and holds optionally information about its
  * gradient (if "hasgrad" is true).
  ***************************************************************************/
-class GModelPar {
+class GModelPar : public GBase {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GModelPar& par);

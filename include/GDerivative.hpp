@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GDerivative.hpp  -  Derivative class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GDerivative.hpp
  * @brief GDerivative class interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GDERIVATIVE_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GFunction.hpp"
 
@@ -43,7 +44,7 @@
  * The function to be derived is implemented by the abstract GFunction
  * class.
  ***************************************************************************/
-class GDerivative {
+class GDerivative : public GBase {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GDerivative& dx);

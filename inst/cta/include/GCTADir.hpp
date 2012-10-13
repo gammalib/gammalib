@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTADir.hpp  -  CTA direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTADir.hpp
  * @brief CTA camera direction class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTADIR_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GSkyDir.hpp"
 #include "GCTAPointing.hpp"
@@ -45,7 +46,7 @@
  * coordinate is defined by the radial offset angle theta and the polar
  * angle phi. Both are stored in units of radians in this class.
  ***************************************************************************/
-class GCTADir {
+class GCTADir : public GBase {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GCTADir& dir);

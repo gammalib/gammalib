@@ -21,7 +21,7 @@
 /**
  * @file GLATAeff.hpp
  * @brief Fermi/LAT effective area class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATAEFF_HPP
@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponseTable.hpp"
@@ -51,7 +52,7 @@
  * handles the IRF efficiency information that has been introduced for
  * Pass 7 data analysis.
  ***************************************************************************/
-class GLATAeff {
+class GLATAeff : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GLATAeff& aeff);

@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -44,7 +45,7 @@
  * This class holds a list of Good Time Intervals, i.e. time intervals that
  * are valid for science analysis. Times are stored using the GTime class.
  ***************************************************************************/
-class GGti {
+class GGti : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GGti& gti);
@@ -61,6 +62,7 @@ public:
 
     // Methods
     void        clear(void);
+    GGti*       clone(void) const;
     int         size(void) const { return m_num; }
     void        add(const GTime& tstart, const GTime& tstop);
     void        append(const GTime& tstart, const GTime& tstop);
@@ -88,7 +90,6 @@ protected:
     void  copy_members(const GGti& gti);
     void  free_members(void);
     void  set_attributes(void);
-    GGti* clone(void) const;
     void  insert_gti(int inx, const GTime& tstart, const GTime& tstop);
     void  merge_gtis(void);
 

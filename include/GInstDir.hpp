@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GInstDir.hpp  -  Instrument direction abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GInstDir.hpp
  * @brief GInstDir abstract base class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GINSTDIR_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 
 
@@ -45,7 +46,7 @@
  * reconstructions for imaging devices or detector numbers etc. for
  * non-imaging devices.
  ***************************************************************************/
-class GInstDir {
+class GInstDir : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GInstDir& dir);

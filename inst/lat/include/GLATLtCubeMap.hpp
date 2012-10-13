@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GLATLtCubeMap.hpp  -  Fermi LAT livetime cube map            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATLtCubeMap.hpp
  * @brief  Fermi LAT livetime cube map class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATLTCUBEMAP_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GFitsTable.hpp"
 #include "GSkymap.hpp"
@@ -50,7 +51,7 @@ typedef double (*_ltcube_ctheta_phi)(const double& costheta, const double& phi);
  * A livetime cube map holds a set of HEALPix skymaps that are a function
  * of the cosine of the zenith angle and (optionally) of the azimuth angle.
  ***************************************************************************/
-class GLATLtCubeMap {
+class GLATLtCubeMap : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GLATLtCubeMap& map);

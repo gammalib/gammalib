@@ -21,7 +21,7 @@
 /**
  * @file GLATResponseTable.hpp
  * @brief Fermi/LAT response table class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATRESPONSETABLE_HPP
@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GNodeArray.hpp"
 #include "GFitsTable.hpp"
@@ -46,7 +47,7 @@
  * response values can be obtained using a bilinear interpolation in
  * log10 of energy and in cos theta.
  ***************************************************************************/
-class GLATResponseTable {
+class GLATResponseTable : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GLATResponseTable& table);

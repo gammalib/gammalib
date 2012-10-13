@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GOptimizer.hpp  -  Abstract base class for optimizer          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GOptimizer.hpp
  * @brief Optimizer abstract base class interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GOPTIMIZER_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GOptimizerPars.hpp"
 #include "GOptimizerFunction.hpp"
@@ -43,7 +44,7 @@
  *
  * This class defines the abstract interface for the optimizer class.
  ***************************************************************************/
-class GOptimizer {
+class GOptimizer : public GBase {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GOptimizer& opt);

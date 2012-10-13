@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectral.hpp  -  Abstract spectral model base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectral.hpp
  * @brief Abstract spectral model base class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSPECTRAL_HPP
@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
@@ -46,7 +47,7 @@
  * This class implements the spectral component of the factorised source
  * model.
  ***************************************************************************/
-class GModelSpectral {
+class GModelSpectral : public GBase {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GModelSpectral& model);

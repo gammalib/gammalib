@@ -21,7 +21,7 @@
 /**
  * @file GSkymap.hpp
  * @brief Sky map class definition.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GSKYMAP_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GWcs.hpp"
 #include "GSkyDir.hpp"
@@ -61,7 +62,7 @@
  * index or sky pixel and the true physical sky direction are provided by the
  * pix2dir() and dir2pix() methods.
  ***************************************************************************/
-class GSkymap {
+class GSkymap : public GBase {
 
     // I/O friends
     friend std::ostream& operator<< (std::ostream& os, const GSkymap& map);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GIntegral.hpp  -  Integration class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GIntegral.hpp
  * @brief Integration class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GINTEGRAL_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GIntegrand.hpp"
 
@@ -42,7 +43,7 @@
  * This class allows to perform integration using various methods. The
  * integrand is implemented by a derived class of GIntegrand.
  ***************************************************************************/
-class GIntegral {
+class GIntegral : public GBase {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GIntegral& integral);

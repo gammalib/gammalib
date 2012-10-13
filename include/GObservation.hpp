@@ -21,7 +21,7 @@
 /**
  * @file GObservation.hpp
  * @brief Abstract observation base class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GOBSERVATION_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GEvents.hpp"
 #include "GResponse.hpp"
@@ -59,7 +60,7 @@
  * that implement instrument specific observations in order to optimize the
  * execution speed for data analysis.
  ***************************************************************************/
-class GObservation {
+class GObservation : public GBase {
 
     // Friend classes
     //friend class GObservations;

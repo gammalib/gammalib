@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GEbounds.hpp  -  Energy boundaries class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEbounds.hpp
  * @brief Energy boundaries class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GEBOUNDS_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include <string>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -43,7 +44,7 @@
  *
  * This class holds a list of energy intervals.
  ***************************************************************************/
-class GEbounds {
+class GEbounds : public GBase {
 
     // I/O friends
     friend std::ostream& operator<<(std::ostream& os, const GEbounds& ebds);
