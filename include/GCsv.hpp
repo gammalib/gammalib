@@ -24,8 +24,8 @@
  * @author Juergen Knoedlseder
  */
 
-#ifndef GCsv_HPP
-#define GCsv_HPP
+#ifndef GCSV_HPP
+#define GCSV_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
@@ -41,10 +41,6 @@
  * @brief Column separated values table class definition
  ***************************************************************************/
 class GCsv : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCsv& csv);
-    friend GLog&         operator<< (GLog& log, const GCsv& csv);
 
 public:
     // Constructors and destructors
@@ -82,4 +78,4 @@ protected:
     std::vector<std::vector<std::string> > m_data;  //!< CSV table data
 };
 
-#endif /* GCsv_HPP */
+#endif /* GCSV_HPP */

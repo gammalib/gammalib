@@ -21,7 +21,7 @@
 /**
  * @file GCsv.cpp
  * @brief Column separated values table class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -428,34 +428,3 @@ void GCsv::free_members(void)
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] csv Column separated values table.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCsv& csv)
-{
-     // Write CSV in output stream
-    os << csv.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] csv Column separated values table.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GCsv& csv)
-{
-    // Write CSV into logger
-    log << csv.print();
-
-    // Return logger
-    return log;
-}
