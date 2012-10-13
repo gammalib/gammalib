@@ -52,20 +52,6 @@ public:
     virtual ~GBase(void);
  
     // Methods
-    virtual void        clear(void) = 0;
-    virtual GBase*      clone(void) const = 0;
-    virtual std::string print(void) const = 0;
-};
-
-
-/***********************************************************************//**
- * @brief GBase class extension
- ***************************************************************************/
-%extend GBase {
-    char *__str__() {
-        return tochar(self->print());
-    }
-    GBase copy() {
-        return (*self);
-    }
+    virtual void   clear(void) = 0;
+    virtual GBase* clone(void) const = 0;
 };
