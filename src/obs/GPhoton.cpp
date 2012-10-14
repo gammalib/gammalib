@@ -158,8 +158,6 @@ GPhoton* GPhoton::clone(void) const
 
 /***********************************************************************//**
  * @brief Print photon
- *
- * @todo Implement print() method for GSkyDir
  ***************************************************************************/
 std::string GPhoton::print(void) const
 {
