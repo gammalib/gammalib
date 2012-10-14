@@ -28,7 +28,7 @@
 %include stl.i
 
 /* __ Include interface classes __________________________________________ */
-%import(module="gammalib") "GBase.i";
+%import(module="gammalib.base") "GBase.i";
 
 /* __ Support module _____________________________________________________ */
 %include "GException.i"

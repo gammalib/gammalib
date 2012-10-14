@@ -1,7 +1,7 @@
 /***************************************************************************
- *                     model module  -  Python bindings                    *
+ *                     base module  -  Python bindings                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,50 +19,13 @@
  *                                                                         *
  * ----------------------------------------------------------------------- *
  * Usage:                                                                  *
- * swig -c++ -python -Wall model.i                                         *
+ * swig -c++ -python -Wall base.i                                          *
  ***************************************************************************/
-%module model
+%module base
 %feature("autodoc", "1");
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
-
-/* __ Make sure that exceptions are catched ______________________________ */
-%import(module="gammalib.support") "GException.i";
-%import(module="gammalib.opt") "GOptimizerPars.i";
-
-/* __ Model handling _____________________________________________________ */
-%include "GModelPar.i"
-%include "GModels.i"
-%include "GModel.i"
-%include "GModelRegistry.i"
-%include "GModelSky.i"
-%include "GModelData.i"
-%include "GModelPointSource.i"
-%include "GModelExtendedSource.i"
-%include "GModelDiffuseSource.i"
-%include "GModelSpatial.i"
-%include "GModelSpatialRegistry.i"
-%include "GModelSpatialConst.i"
-%include "GModelSpatialCube.i"
-%include "GModelSpatialMap.i"
-%include "GModelSpatialPtsrc.i"
-%include "GModelRadial.i"
-%include "GModelRadialRegistry.i"
-%include "GModelRadialDisk.i"
-%include "GModelRadialGauss.i"
-%include "GModelRadialShell.i"
-%include "GModelSpectral.i"
-%include "GModelSpectralRegistry.i"
-%include "GModelSpectralConst.i"
-%include "GModelSpectralExpPlaw.i"
-%include "GModelSpectralFunc.i"
-%include "GModelSpectralNodes.i"
-%include "GModelSpectralPlaw.i"
-%include "GModelSpectralPlaw2.i"
-%include "GModelTemporal.i"
-%include "GModelTemporalRegistry.i"
-%include "GModelTemporalConst.i"
+/* __ Base module ________________________________________________________ */
+%include "GBase.i"

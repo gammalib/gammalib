@@ -46,6 +46,7 @@ INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) $(CTA_SWIG_TARGETS) $(LAT_SWIG_TARGETS)
 # We use this here to make sure that all these targets are build by swig before we
 # start compiling the Python modules.
 BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
+                gammalib/base_wrap.cpp gammalib/base.py \
                 gammalib/fits_wrap.cpp gammalib/fits.py \
                 gammalib/linalg_wrap.cpp gammalib/linalg.py \
                 gammalib/model_wrap.cpp gammalib/model.py \
