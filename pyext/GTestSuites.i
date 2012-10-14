@@ -35,7 +35,7 @@
  *
  * @brief Test suites Python interface defintion
  ***************************************************************************/
-class GTestSuites {
+class GTestSuites : public GBase {
     
 public:
 

@@ -49,7 +49,8 @@
  *
  * @brief FITS table column abstract Python base class definition
  ***************************************************************************/
-class GFitsTableCol {
+class GFitsTableCol : public GBase {
+
 public:
     // Constructors and destructors
     GFitsTableCol(void);

@@ -31,7 +31,6 @@
 #include <string>
 #include "GBase.hpp"
 #include "GSkyDir.hpp"
-#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -39,8 +38,7 @@
  *
  * @brief Interface for the pointing classes
  *
- * The pointing class holds information about the time dependent telescope
- * pointing.
+ * The pointing class holds information about the telescope pointing.
  ***************************************************************************/
 class GPointing : public GBase {
 

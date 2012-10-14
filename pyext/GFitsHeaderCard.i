@@ -40,7 +40,8 @@
  * keyname (string), a value (string, floating pointer, integer or logical)
  * and a comment (string). COMMENT or HISTORY cards do not have any value.
  ***************************************************************************/
-class GFitsHeaderCard {
+class GFitsHeaderCard : public GBase {
+
 public:
     // Constructors & Destructors
     GFitsHeaderCard(void);

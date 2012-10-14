@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GPars.i - Application parameters Python interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPars.i
  * @brief Application parameter container class Python interface definition
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -36,7 +36,7 @@
  *
  * @brief Application parameter container class
  ***************************************************************************/
-class GPars {
+class GPars : public GBase {
 
 public:
     // Constructors and destructors
@@ -47,15 +47,15 @@ public:
     virtual ~GPars(void);
  
     // Methods
-    void        clear(void);
-    GPars*      clone(void) const;
-    int         size(void) const;
-    void        append(const GPar& par);
-    void        append_standard(void);
-    void        load(const std::string& filename);
-    void        load(const std::string& filename, const std::vector<std::string>& args);
-    void        save(const std::string& filename);
-    bool        haspar(const std::string& name) const;
+    void   clear(void);
+    GPars* clone(void) const;
+    int    size(void) const;
+    void   append(const GPar& par);
+    void   append_standard(void);
+    void   load(const std::string& filename);
+    void   load(const std::string& filename, const std::vector<std::string>& args);
+    void   save(const std::string& filename);
+    bool   haspar(const std::string& name) const;
 };
 
 

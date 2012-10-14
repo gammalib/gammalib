@@ -35,7 +35,8 @@
  *
  * @brief GSkyPixel class interface defintion
  ***************************************************************************/
-class GSkyPixel {
+class GSkyPixel : public GBase {
+
 public:
     // Constructors and destructors
     GSkyPixel(void);

@@ -30,7 +30,6 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GException.hpp"
 #include "GXmlElement.hpp"
 
 

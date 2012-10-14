@@ -28,7 +28,6 @@
 #define GEBOUNDS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
 #include "GBase.hpp"
 #include "GFits.hpp"

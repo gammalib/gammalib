@@ -35,7 +35,7 @@
  *
  * @brief Sky direction class
  ***************************************************************************/
-class GSkyDir {
+class GSkyDir : public GBase {
 
 public:
     // Constructors and destructors

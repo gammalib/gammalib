@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GModelRegistry.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
 
 /* __ Static members _____________________________________________________ */

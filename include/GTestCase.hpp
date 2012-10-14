@@ -28,7 +28,6 @@
 #define GTESTCASE_H
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
 #include "GBase.hpp"
 

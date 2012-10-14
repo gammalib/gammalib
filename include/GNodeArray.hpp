@@ -30,7 +30,6 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
 #include "GVector.hpp"
 

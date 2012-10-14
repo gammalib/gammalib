@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GOptimizerPars.hpp"
 #include "GOptimizerFunction.hpp"
 #include "GModels.hpp"
@@ -45,10 +43,6 @@
  * This class defines the abstract interface for the optimizer class.
  ***************************************************************************/
 class GOptimizer : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GOptimizer& opt);
-    friend GLog&         operator<<(GLog& log,        const GOptimizer& opt);
 
 public:
     // Constructors and destructors

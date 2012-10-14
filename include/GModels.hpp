@@ -28,6 +28,7 @@
 #define GMODELS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
 #include "GXml.hpp"

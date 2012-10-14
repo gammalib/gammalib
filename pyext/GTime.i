@@ -40,7 +40,8 @@
  * The GTime class stores a time value in seconds and its MJD reference in
  * days. The time can be retrieved in any MJD reference.
  ***************************************************************************/
-class GTime {
+class GTime : public GBase {
+
 public:
     // Constructors and destructors
     GTime(void);

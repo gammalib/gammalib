@@ -29,7 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
 #include "GFunction.hpp"
 

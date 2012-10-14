@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GEvents.i  -  Abstract event container class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEvents.i
  * @brief Abstract event container class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,7 @@
  *
  * @brief Abstract event container class Python interface
  ***************************************************************************/
-class GEvents {
+class GEvents : public GBase {
 public:
     // Constructors and destructors
     GEvents(void);

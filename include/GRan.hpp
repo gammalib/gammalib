@@ -29,11 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
 
 
 /***********************************************************************//**

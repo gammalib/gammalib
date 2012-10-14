@@ -34,7 +34,6 @@ class GTestSuite;
 typedef void (GTestSuite::*pfunction)(void);
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <vector>
 #include <string>
 #include "GLog.hpp"

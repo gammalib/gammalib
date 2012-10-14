@@ -21,7 +21,7 @@
 /**
  * @file GSkymap.i
  * @brief Sky map class SWIG file.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -105,7 +105,8 @@ static int skymap_tuple(PyObject *input, int *ptr) {
  *
  * @brief GSkymap class interface defintion
  ***************************************************************************/
-class GSkymap {
+class GSkymap : public GBase {
+
 public:
     // Constructors and destructors
     GSkymap(void);
@@ -121,12 +122,13 @@ public:
     virtual ~GSkymap(void);
 
     // Methods
+    void      clear(void);
+    GSkymap*  clone(void) const;
     GSkyDir   pix2dir(const int& pix);
     int       dir2pix(const GSkyDir& dir) const;
     double    omega(const int& pix) const;
     GSkyDir   xy2dir(const GSkyPixel& pix);
     GSkyPixel dir2xy(const GSkyDir& dir) const;
-    void      clear(void);
     void      load(const std::string& filename);
     void      save(const std::string& filename, bool clobber = false) const;
     void      read(const GFitsHDU* hdu);

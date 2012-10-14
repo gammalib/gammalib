@@ -40,7 +40,7 @@
  * units. This makes instrument specific implementations more robust and
  * reduces the risk of unit errors.
  ***************************************************************************/
-class GEnergy {
+class GEnergy : public GBase {
 public:
     // Constructors and destructors
     GEnergy(void);
