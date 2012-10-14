@@ -177,6 +177,19 @@ void GEbounds::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone GEbounds
+ *
+ * Cloning provides a copy of the GEbounds. Cloning is used to allocate
+ * derived classes into a base class pointer.
+ ***************************************************************************/
+GEbounds* GEbounds::clone(void) const
+{
+    // Clone this image
+    return new GEbounds(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Append energy boundaries
  *
  * @param[in] emin Minimum energy of interval to be appended.
@@ -704,19 +717,6 @@ void GEbounds::set_attributes(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone GEbounds
- *
- * Cloning provides a copy of the GEbounds. Cloning is used to allocate
- * derived classes into a base class pointer.
- ***************************************************************************/
-GEbounds* GEbounds::clone(void) const
-{
-    // Clone this image
-    return new GEbounds(*this);
 }
 
 

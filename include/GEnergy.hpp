@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GEnergy.hpp - Energy class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEnergy.hpp
  * @brief Energy value class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GENERGY_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -46,11 +45,7 @@
  * value is changed. This considerably reduces the number of log10 operations
  * in many applications and speeds up the performance.
  ***************************************************************************/
-class GEnergy {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GEnergy& eng);
-    friend GLog&         operator<< (GLog& log, const GEnergy& eng);
+class GEnergy : public GBase {
 
     // Operator friends
     friend GEnergy operator+ (const GEnergy &a, const GEnergy &b);
@@ -78,6 +73,7 @@ public:
 
     // Methods
     void        clear(void);
+    GEnergy*    clone(void) const;
     double      erg(void) const;
     double      keV(void) const;
     double      MeV(void) const;
