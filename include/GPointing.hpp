@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GPointing.hpp  -  Pointing abstract base class             *
+ *                GPointing.hpp  -  Pointing interface class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GPointing.hpp
- * @brief Pointing abstract base class definition
+ * @brief Pointing interface class definition
  * @author Juergen Knoedlseder
  */
 
@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GSkyDir.hpp"
 #include "GTime.hpp"
 
@@ -39,16 +37,12 @@
 /***********************************************************************//**
  * @class GPointing
  *
- * @brief Abstract interface for the pointing classes
+ * @brief Interface for the pointing classes
  *
  * The pointing class holds information about the time dependent telescope
  * pointing.
  ***************************************************************************/
 class GPointing : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GPointing& pnt);
-    friend GLog&         operator<<(GLog& log,        const GPointing& pnt);
 
 public:
     // Constructors and destructors

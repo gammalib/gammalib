@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
@@ -62,10 +60,6 @@ class GObservation;
  * over the dataspace. This method is only required for unbinned analysis.
  ***************************************************************************/
 class GResponse : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GResponse& rsp);
-    friend GLog&         operator<< (GLog& log, const GResponse& rsp);
 
 public:
     // Constructors and destructors

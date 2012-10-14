@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -47,10 +45,6 @@ class GWcs : public GBase {
     // Operator friends
     friend bool operator== (const GWcs &a, const GWcs &b);
     friend bool operator!= (const GWcs &a, const GWcs &b);
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GWcs& wcs);
-    friend GLog&         operator<< (GLog& log, const GWcs& wcs);
 
 public:
     // Constructors and destructors

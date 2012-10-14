@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GWcs.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -63,10 +61,6 @@
  * pix2dir() and dir2pix() methods.
  ***************************************************************************/
 class GSkymap : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GSkymap& map);
-    friend GLog&         operator<<(GLog& log, const GSkymap& map);
 
 public:
     // Constructors and destructors

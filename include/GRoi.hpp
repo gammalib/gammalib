@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GRoi.hpp  -  Region of interest abstract base class           *
+ *             GRoi.hpp  -  Region of interest interface class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GRoi.hpp
- * @brief Region of interest abstract base class definition
+ * @brief Region of interest interface class definition
  * @author Juergen Knoedlseder
  */
 
@@ -29,15 +29,13 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 
 
 /***********************************************************************//**
  * @class GRoi
  *
- * @brief Abstract interface for the region of interest classes
+ * @brief Interface for the region of interest classes
  *
  * The region of interest class holds instrument specific information about
  * the spatial region in detector or telescopes coordinates that is used
@@ -46,12 +44,8 @@
  ***************************************************************************/
 class GRoi : public GBase {
 
-  // Friend classes
-  friend class GObservation;
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GRoi& roi);
-    friend GLog&         operator<<(GLog& log,        const GRoi& roi);
+    // Friend classes
+    friend class GObservation;
 
 public:
     // Constructors and destructors

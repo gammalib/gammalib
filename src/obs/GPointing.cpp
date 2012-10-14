@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GPointing.cpp  -  Pointing abstract base class            *
+ *                GPointing.cpp  -  Pointing interface class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,13 @@
 /**
  * @file GPointing.cpp
  * @brief Pointing abstract base class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GException.hpp"
 #include "GPointing.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -165,43 +164,4 @@ void GPointing::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] pnt Pointing.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GPointing& pnt)
-{
-     // Write pointing in output stream
-    os << pnt.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] pnt Pointing.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GPointing& pnt)
-{
-    // Write pointing into logger
-    log << pnt.print();
-
-    // Return logger
-    return log;
 }

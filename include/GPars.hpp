@@ -30,10 +30,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
 #include "GPar.hpp"
-#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -47,10 +45,6 @@ class GPars : public GBase {
 
     // Friend classes
     friend class GApplication;
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GPars& pars);
-    friend GLog&         operator<<(GLog&        log, const GPars& pars);
 
 public:
     // Constructors and destructors
