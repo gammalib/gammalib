@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageDouble.cpp
  * @brief FITS double precision image class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -442,6 +442,41 @@ const double& GFitsImageDouble::operator() (const int& ix, const int& iy,
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsImageDouble::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsImage::free_members();
+    this->GFitsHDU::free_members();
+
+    // Initialise members
+    this->GFitsHDU::init_members();
+    this->GFitsImage::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone FITS image
+ *
+ * Cloning provides a copy of the FITS file. Cloning is used to allocate
+ * derived classes into a base class pointer.
+ ***************************************************************************/
+GFitsImageDouble* GFitsImageDouble::clone(void) const
+{
+    // Clone this image
+    return new GFitsImageDouble(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Image pixel access operator
  *
  * @param[in] ix Pixel index (starting from 0).
@@ -681,19 +716,6 @@ int GFitsImageDouble::type(void) const
 {
     // Return type
     return __TDOUBLE;
-}
-
-
-/***********************************************************************//**
- * @brief Clone FITS image
- *
- * Cloning provides a copy of the FITS file. Cloning is used to allocate
- * derived classes into a base class pointer.
- ***************************************************************************/
-GFitsImageDouble* GFitsImageDouble::clone(void) const
-{
-    // Clone this image
-    return new GFitsImageDouble(*this);
 }
 
 

@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageSByte.hpp
  * @brief GFitsImageSByte class definition.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSIMAGESBYTE_HPP
@@ -61,6 +61,8 @@ public:
     const char&      operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
+    void             clear(void);
+    GFitsImageSByte* clone(void) const;
     char&            at(const int& ix);
     char&            at(const int& ix, const int& iy);
     char&            at(const int& ix, const int& iy, const int& iz);
@@ -75,7 +77,6 @@ public:
     double           pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*            pixels(void);
     int              type(void) const;
-    GFitsImageSByte* clone(void) const;
 
 private:
     // Private methods

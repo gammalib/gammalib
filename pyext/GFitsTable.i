@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GFitsTable.i  - FITS table abstract base class SWIG interface       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTable.i
  * @brief FITS table abstract base class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -114,7 +114,9 @@ public:
     virtual ~GFitsTable(void);
 
     // Pure virtual methods
+    virtual void        clear(void) = 0;
     virtual GFitsTable* clone(void) const = 0;
+    virtual HDUType     exttype(void) const = 0;
 
     // Implemented Methods
     void append_column(GFitsTableCol& column);

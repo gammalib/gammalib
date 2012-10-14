@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableUShortCol.cpp
  * @brief FITS table unsigned short integer column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -194,6 +194,35 @@ const unsigned short& GFitsTableUShortCol::operator() (const int& row, const int
  =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableUShortCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableUShortCol* GFitsTableUShortCol::clone(void) const
+{
+    return new GFitsTableUShortCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -538,15 +567,6 @@ void GFitsTableUShortCol::free_members(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableUShortCol* GFitsTableUShortCol::clone(void) const
-{
-    return new GFitsTableUShortCol(*this);
 }
 
 

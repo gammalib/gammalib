@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageLongLong.hpp
  * @brief GFitsImageLongLong class definition.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSIMAGELONGLONG_HPP
@@ -61,6 +61,8 @@ public:
     const long long&    operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
+    void                clear(void);
+    GFitsImageLongLong* clone(void) const;
     long long&          at(const int& ix);
     long long&          at(const int& ix, const int& iy);
     long long&          at(const int& ix, const int& iy, const int& iz);
@@ -75,7 +77,6 @@ public:
     double              pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*               pixels(void);
     int                 type(void) const;
-    GFitsImageLongLong* clone(void) const;
 
 private:
     // Private methods

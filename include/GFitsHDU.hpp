@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsHDU.hpp  - FITS HDU handling class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsHDU.hpp
  * @brief GFitsHDU class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSHDU_HPP
@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GBase.hpp"
 #include "GFitsHeader.hpp"
 #include "GFitsHeaderCard.hpp"
 
@@ -47,7 +48,7 @@
  * @todo Implement GFitsHDU* select(const std::string& expr) that applies
  * to a table HDU for row selection.
  ***************************************************************************/
-class GFitsHDU {
+class GFitsHDU : public GBase {
 
     // Friend classes
     friend class GFits;
@@ -69,8 +70,9 @@ public:
     };
 
     // Pure virtual methods
-    virtual HDUType     exttype(void) const = 0;
+    virtual void        clear(void) = 0;
     virtual GFitsHDU*   clone(void) const = 0;
+    virtual HDUType     exttype(void) const = 0;
     virtual std::string print(void) const = 0;
 
     // Implemented methods
@@ -96,6 +98,9 @@ public:
 
 protected:
     // Protected methods
+    void         init_members(void);
+    void         copy_members(const GFitsHDU& hdu);
+    void         free_members(void);
     void         connect(void* fptr);
     void         move_to_hdu(void);
     HDUType      get_hdu_type(void) const;
@@ -115,12 +120,6 @@ protected:
     int          m_hdunum;      //!< HDU number (starting from 0)
     std::string  m_name;        //!< HDU name (extname)
     GFitsHeader  m_header;      //!< HDU header
-
-private:
-    // Private methods
-    void init_members(void);
-    void copy_members(const GFitsHDU& hdu);
-    void free_members(void);
 };
 
 #endif /* GFITSHDU_HPP */

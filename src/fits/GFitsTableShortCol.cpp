@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableShortCol.cpp
  * @brief FITS table short integer column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -194,6 +194,35 @@ const short& GFitsTableShortCol::operator() (const int& row, const int& inx) con
  =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableShortCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableShortCol* GFitsTableShortCol::clone(void) const
+{
+    return new GFitsTableShortCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -545,15 +574,6 @@ void GFitsTableShortCol::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableShortCol* GFitsTableShortCol::clone(void) const
-{
-    return new GFitsTableShortCol(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Returns format string of ASCII table
  ***************************************************************************/
 std::string GFitsTableShortCol::ascii_format(void) const
@@ -668,10 +688,3 @@ void GFitsTableShortCol::init_data(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

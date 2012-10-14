@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GFitsBinTable.cpp  - FITS binary table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,15 +21,13 @@
 /**
  * @file GFitsBinTable.cpp
  * @brief FITS binary table class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
-#include "GException.hpp"
 #include "GFitsBinTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -111,7 +109,7 @@ GFitsBinTable::~GFitsBinTable(void)
 
 /*==========================================================================
  =                                                                         =
- =                         GFitsBinTable operators                         =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -120,7 +118,7 @@ GFitsBinTable::~GFitsBinTable(void)
  *
  * @param[in] table Table which will be assigned
  ***************************************************************************/
-GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
+GFitsBinTable& GFitsBinTable::operator=(const GFitsBinTable& table)
 {
     // Execute only if object is not identical
     if (this != &table) {
@@ -146,13 +144,44 @@ GFitsBinTable& GFitsBinTable::operator= (const GFitsBinTable& table)
 
 /*==========================================================================
  =                                                                         =
- =                       GFitsBinTable public methods                      =
+ =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsBinTable::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTable::free_members();
+    this->GFitsHDU::free_members();
+
+    // Initialise members
+    this->GFitsHDU::init_members();
+    this->GFitsTable::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone binary table
+ ***************************************************************************/
+GFitsBinTable* GFitsBinTable::clone(void) const
+{
+    return new GFitsBinTable(*this);
+}
+
+
 /*==========================================================================
  =                                                                         =
- =                       GFitsBinTable private methods                     =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -176,8 +205,6 @@ void GFitsBinTable::init_members(void)
  ***************************************************************************/
 void GFitsBinTable::copy_members(const GFitsBinTable& table)
 {
-    // Copy members
-
     // Return
     return;
 }
@@ -188,26 +215,6 @@ void GFitsBinTable::copy_members(const GFitsBinTable& table)
  ***************************************************************************/
 void GFitsBinTable::free_members(void)
 {
-    // Free memory
-
-    // Mark memory as freed
-
     // Return
     return;
 }
-
-
-/***********************************************************************//**
- * @brief Clone binary table
- ***************************************************************************/
-GFitsBinTable* GFitsBinTable::clone(void) const
-{
-    return new GFitsBinTable(*this);
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GFitsImage.cpp  - FITS image class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,13 @@
 /**
  * @file GFitsImage.cpp
  * @brief FITS image class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsImage.hpp"
@@ -952,42 +951,4 @@ void GFitsImage::free_members(void)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                               Friends                                   =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] image FITS image.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsImage& image)
-{
-     // Write image in output stream
-    os << image.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] image FITS image.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GFitsImage& image)
-{
-    // Write image into logger
-    log << image.print();
-
-    // Return logger
-    return log;
 }

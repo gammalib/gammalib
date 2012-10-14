@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsTableCDoubleCol.hpp  - FITS table double precision complex column *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableCDoubleCol.hpp
  * @brief FITS table double complex column class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSTABLECDOUBLECOL_HPP
@@ -56,11 +56,13 @@ public:
     const GFits::cdouble& operator() (const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
-    virtual std::string string(const int& row, const int& col = 0) const;
-    virtual double      real(const int& row, const int& col = 0) const;
-    virtual int         integer(const int& row, const int& col = 0) const;
-    virtual void        insert(const int& rownum, const int& nrows);
-    virtual void        remove(const int& rownum, const int& nrows);
+    virtual void                  clear(void);
+    virtual GFitsTableCDoubleCol* clone(void) const;
+    virtual std::string           string(const int& row, const int& col = 0) const;
+    virtual double                real(const int& row, const int& col = 0) const;
+    virtual int                   integer(const int& row, const int& col = 0) const;
+    virtual void                  insert(const int& rownum, const int& nrows);
+    virtual void                  remove(const int& rownum, const int& nrows);
     
     // Other methods
     GFits::cdouble* data(void) { return m_data; }
@@ -69,18 +71,17 @@ public:
 
 private:
     // Private methods
-    void                  init_members(void);
-    void                  copy_members(const GFitsTableCDoubleCol& column);
-    void                  free_members(void);
-    GFitsTableCDoubleCol* clone(void) const;
-    std::string           ascii_format(void) const;
-    std::string           binary_format(void) const;
-    void                  alloc_data(void);
-    void                  release_data(void);
-    void                  alloc_nulval(const GFits::cdouble* value);
-    void                  init_data(void);
-    void*                 ptr_data(void) { return m_data; }
-    void*                 ptr_nulval(void) { return m_nulval; }
+    void        init_members(void);
+    void        copy_members(const GFitsTableCDoubleCol& column);
+    void        free_members(void);
+    std::string ascii_format(void) const;
+    std::string binary_format(void) const;
+    void        alloc_data(void);
+    void        release_data(void);
+    void        alloc_nulval(const GFits::cdouble* value);
+    void        init_data(void);
+    void*       ptr_data(void) { return m_data; }
+    void*       ptr_nulval(void) { return m_nulval; }
 
     // Private data area
     GFits::cdouble* m_data;       //!< Data vector

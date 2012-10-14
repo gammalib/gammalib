@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GFitsBinTable.i  - FITS binary table class SWIG definition        *
+ *                GFitsBinTable.i - FITS binary table class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,14 +20,13 @@
  ***************************************************************************/
 /**
  * @file GFitsBinTable.i
- * @brief Binary FITS table Python interface
+ * @brief FITS binary table class definition
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsBinTable.hpp"
 %}
-%feature("notabstract") GFitsBinTable;
 
 
 /***********************************************************************//**
@@ -36,6 +35,7 @@
  * @brief SWIG interface for FITS binary table
  ***************************************************************************/
 class GFitsBinTable : public GFitsTable {
+
 public:
     // Constructors and destructors
     GFitsBinTable(void);
@@ -44,5 +44,20 @@ public:
     virtual ~GFitsBinTable(void);
 
     // Implemented pure virtual methods
-    HDUType exttype(void) const;
+    virtual void           clear(void);
+    virtual GFitsBinTable* clone(void) const;
+    HDUType                exttype(void) const { return HT_BIN_TABLE; }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsBinTable class SWIG extension
+ ***************************************************************************/
+%extend GFitsBinTable {
+    char *__str__() {
+        return tochar(self->print());
+    }
+    GFitsBinTable copy() {
+        return (*self);
+    }
+}

@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GApplication.i - GammaLib application base class Python interface     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GApplication.i
  * @brief GammaLib application base class Python interface defintion
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,7 +39,7 @@
  *
  * @brief GammaLib application Python interface defintion.
  ***************************************************************************/
-class GApplication {
+class GApplication : public GBase {
 public:
     // Constructors and destructors
     GApplication(void);
@@ -50,23 +50,25 @@ public:
     ~GApplication(void);
 
     // Methods
-    std::string name(void) const;
-    std::string version(void) const;
-    double      telapse(void) const;
-    double      celapse(void) const;
-    void        logFileOpen(bool clobber = true);
-    bool        logTerse(void) const;
-    bool        logNormal(void) const;
-    bool        logExplicit(void) const;
-    bool        logVerbose(void) const;
-    bool        logDebug(void) const;
-    bool        clobber(void) const;
-    bool        haspar(const std::string& name) const;
-    std::string par_filename(void) const;
-    std::string log_filename(void) const;
-    void        log_header(void);
-    void        log_trailer(void);
-    void        log_parameters(void);
+    void          clear(void);
+    GApplication* clone(void) const;
+    std::string   name(void) const;
+    std::string   version(void) const;
+    double        telapse(void) const;
+    double        celapse(void) const;
+    void          logFileOpen(bool clobber = true);
+    bool          logTerse(void) const;
+    bool          logNormal(void) const;
+    bool          logExplicit(void) const;
+    bool          logVerbose(void) const;
+    bool          logDebug(void) const;
+    bool          clobber(void) const;
+    bool          haspar(const std::string& name) const;
+    std::string   par_filename(void) const;
+    std::string   log_filename(void) const;
+    void          log_header(void);
+    void          log_trailer(void);
+    void          log_parameters(void);
 
     // Public members
     GLog        log;

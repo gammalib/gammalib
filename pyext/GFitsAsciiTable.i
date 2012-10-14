@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GFitsAsciiTable.hpp  - FITS ASCII table class SWIG definition      *
+ *              GFitsAsciiTable.i - FITS ASCII table class                 *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2008 by Jurgen Knodlseder                   *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,26 +20,44 @@
  ***************************************************************************/
 /**
  * @file GFitsAsciiTable.i
- * @brief GFitsAsciiTable class SWIG file.
+ * @brief FITS ASCII table class definition
  * @author J. Knodlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFitsAsciiTable.hpp"
 %}
-%feature("notabstract") GFitsAsciiTable;
 
 
 /***********************************************************************//**
  * @class GFitsAsciiTable
  *
- * @brief SWIG interface for FITS binary table
+ * @brief SWIG interface for FITS ASCII table
  ***************************************************************************/
 class GFitsAsciiTable : public GFitsTable {
+
 public:
     // Constructors and destructors
-    GFitsAsciiTable();
+    GFitsAsciiTable(void);
     GFitsAsciiTable(int nrows);
     GFitsAsciiTable(const GFitsAsciiTable& table);
-    virtual ~GFitsAsciiTable();
+    virtual ~GFitsAsciiTable(void);
+
+    // Methods
+    virtual void             clear(void);
+    virtual GFitsAsciiTable* clone(void) const;
+    HDUType                  exttype(void) const { return HT_ASCII_TABLE; }
 };
+
+
+/***********************************************************************//**
+ * @brief GFitsAsciiTable class SWIG extension
+ ***************************************************************************/
+%extend GFitsAsciiTable {
+    char *__str__() {
+        return tochar(self->print());
+    }
+    GFitsAsciiTable copy() {
+        return (*self);
+    }
+}

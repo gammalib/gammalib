@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableBoolCol.cpp
  * @brief FITS table boolean column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -194,6 +194,35 @@ const bool& GFitsTableBoolCol::operator() (const int& row, const int& inx) const
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableBoolCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableBoolCol* GFitsTableBoolCol::clone(void) const
+{
+    return new GFitsTableBoolCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -572,15 +601,6 @@ void GFitsTableBoolCol::save(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableBoolCol* GFitsTableBoolCol::clone(void) const
-{
-    return new GFitsTableBoolCol(*this);
 }
 
 

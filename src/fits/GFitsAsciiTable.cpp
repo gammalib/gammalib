@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsAsciiTable.cpp  - FITS ASCII table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,12 +21,10 @@
 /**
  * @file GFitsAsciiTable.cpp
  * @brief FITS ASCII table class implementation
- * @author J. Knodlseder
+ * @author Juergen Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GException.hpp"
 #include "GFitsAsciiTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -106,7 +104,7 @@ GFitsAsciiTable::~GFitsAsciiTable()
 
 /*==========================================================================
  =                                                                         =
- =                                Operators                                =
+ =                               Operators                                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -115,7 +113,7 @@ GFitsAsciiTable::~GFitsAsciiTable()
  *
  * @param[in] table Table.
  ***************************************************************************/
-GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
+GFitsAsciiTable& GFitsAsciiTable::operator=(const GFitsAsciiTable& table)
 {
     // Execute only if object is not identical
     if (this != &table) {
@@ -144,6 +142,37 @@ GFitsAsciiTable& GFitsAsciiTable::operator= (const GFitsAsciiTable& table)
  =                              Public methods                             =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsAsciiTable::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTable::free_members();
+    this->GFitsHDU::free_members();
+
+    // Initialise members
+    this->GFitsHDU::init_members();
+    this->GFitsTable::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone ASCII table
+ ***************************************************************************/
+GFitsAsciiTable* GFitsAsciiTable::clone(void) const 
+{
+    return new GFitsAsciiTable(*this);
+}
+
 
 /*==========================================================================
  =                                                                         =
@@ -184,19 +213,3 @@ void GFitsAsciiTable::free_members(void)
     // Return
     return;
 }
-
-
-/***********************************************************************//**
- * @brief Clone ASCII table
- ***************************************************************************/
-GFitsAsciiTable* GFitsAsciiTable::clone(void) const 
-{
-    return new GFitsAsciiTable(*this);
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

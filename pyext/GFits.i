@@ -67,6 +67,7 @@ public:
 
     // Methods
     void        clear(void);
+    GFits*      clone(void) const;
     int         size(void) const;
     void        open(const std::string& filename, bool create = false);
     void        save(bool clobber = false);
