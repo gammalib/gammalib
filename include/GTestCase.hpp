@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <iostream>
 #include <string>
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -44,7 +45,7 @@
  * Furthermore, the test case knows whether the test succeeded or failed,
  * and whether the test was an error or a failure test.
  ***************************************************************************/
-class GTestCase{
+class GTestCase : public GBase {
     
 public:
     // public enumerators
@@ -63,6 +64,8 @@ public:
     GTestCase&  operator= (const GTestCase& test);
 
     // Methods
+    void        clear(void);
+    GTestCase*  clone(void) const;
     std::string name(void) const;
     void        name(const std::string& name);
     std::string message(void) const;

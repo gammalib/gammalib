@@ -29,8 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
 #include "GMatrixBase.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -48,10 +46,6 @@ class GSparseMatrix;
  * imposing strict matrix symmetry.
  ***************************************************************************/
 class GSymMatrix : public GMatrixBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GSymMatrix& matrix);
-    friend GLog&         operator<<(GLog& log,        const GSymMatrix& matrix);
 
     // Binary operator friends
     friend GSymMatrix operator*(const double& a,  const GSymMatrix& b);
@@ -91,6 +85,7 @@ public:
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
+    virtual GSymMatrix* clone(void) const;
     virtual void        transpose(void) { return; }
     virtual void        invert(void);
     virtual void        add_col(const GVector& vector, const int& col);
@@ -175,7 +170,6 @@ GSymMatrix GSymMatrix::operator-(void) const
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline void   GSymMatrix::clear(void) { set_all_elements(0.0); }
 inline double GSymMatrix::min(void) const { return get_min_element(); }
 inline double GSymMatrix::max(void) const { return get_max_element(); }
 

@@ -150,6 +150,32 @@ GTestCase&  GTestCase::operator= (const GTestCase& test)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GTestCase::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+    
+    // Return
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GTestCase* GTestCase::clone(void) const
+{
+    // Clone this image
+    return new GTestCase(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Return test case name
  ***************************************************************************/
 std::string GTestCase::name(void) const

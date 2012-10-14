@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GPhoton.hpp - Photon class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPhoton.cpp
  * @brief Photon class implementation.
- * @author J. Knodlseder
+ * @author Juergen Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -147,6 +147,16 @@ void GPhoton::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GPhoton* GPhoton::clone(void) const
+{
+    // Clone this image
+    return new GPhoton(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Print photon
  *
  * @todo Implement print() method for GSkyDir
@@ -218,42 +228,4 @@ void GPhoton::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] ph Photon.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GPhoton& ph)
-{
-     // Write photon in output stream
-    os << ph.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] ph Photon.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GPhoton& ph)
-{
-    // Write photon into logger
-    log << ph.print();
-
-    // Return logger
-    return log;
 }

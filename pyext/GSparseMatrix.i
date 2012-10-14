@@ -70,33 +70,34 @@ public:
     GSparseMatrix& operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
-    void        clear(void);
-    void        transpose(void);
-    void        invert(void);
-    void        add_col(const GVector& vector, const int& col);
-    void        insert_col(const GVector& vector, const int& col);
-    GVector     extract_row(const int& row) const;
-    GVector     extract_col(const int& col) const;
-    double      fill(void) const;
-    double      min(void) const;
-    double      max(void) const;
-    double      sum(void) const;
+    void           clear(void);
+    GSparseMatrix* clone(void) const;
+    void           transpose(void);
+    void           invert(void);
+    void           add_col(const GVector& vector, const int& col);
+    void           insert_col(const GVector& vector, const int& col);
+    GVector        extract_row(const int& row) const;
+    GVector        extract_col(const int& col) const;
+    double         fill(void) const;
+    double         min(void) const;
+    double         max(void) const;
+    double         sum(void) const;
 
     // Other methods
-    void        add_col(const double* values, const int* rows,
-                        int number, const int& col);
-    void        insert_col(const double* values, const int* rows,
-                           int number, const int& col);
-    void        cholesky_decompose(bool compress = true);
-    GVector     cholesky_solver(const GVector& vector, bool compress = true);
-    void        cholesky_invert(bool compress = true);
-    void        set_mem_block(const int& block);
-    void        stack_init(const int& size = 0, const int& entries = 0);
-    int         stack_push_column(const GVector& vector, const int& col);
-    int         stack_push_column(const double* values, const int* rows,
-                                  const int& number, const int& col);
-    void        stack_flush(void);
-    void        stack_destroy(void);
+    void    add_col(const double* values, const int* rows,
+                    int number, const int& col);
+    void    insert_col(const double* values, const int* rows,
+                       int number, const int& col);
+    void    cholesky_decompose(bool compress = true);
+    GVector cholesky_solver(const GVector& vector, bool compress = true);
+    void    cholesky_invert(bool compress = true);
+    void    set_mem_block(const int& block);
+    void    stack_init(const int& size = 0, const int& entries = 0);
+    int     stack_push_column(const GVector& vector, const int& col);
+    int     stack_push_column(const double* values, const int* rows,
+                              const int& number, const int& col);
+    void    stack_flush(void);
+    void    stack_destroy(void);
 };
 
 

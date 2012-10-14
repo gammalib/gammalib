@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GVector.hpp  -  Vector class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GVector.hpp
  * @brief Vector class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GVECTOR_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <cmath>
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GException.hpp"
 
 
@@ -44,11 +43,7 @@
  * is intended to be used for numerical computation (it is not ment to
  * replace the std::vector template class).
  ***************************************************************************/
-class GVector {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GVector& v);
-    friend GLog&         operator<<(GLog& log,        const GVector& v);
+class GVector : public GBase {
 
     // Operator friends
     friend GVector  operator+(const GVector &a, const GVector &b);
@@ -118,6 +113,7 @@ public:
 
     // Vector methods
     void        clear(void);
+    GVector*    clone(void) const;
     int         size(void) const;
     int         non_zeros(void) const;
     std::string print(void) const;

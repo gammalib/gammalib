@@ -131,6 +131,31 @@ GOptimizerPars& GOptimizerPars::operator= (const GOptimizerPars& pars)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear object
+ ***************************************************************************/
+void GOptimizerPars::clear(void)
+{
+    // Free class members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ ***************************************************************************/
+GOptimizerPars* GOptimizerPars::clone(void) const
+{
+    return new GOptimizerPars(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Returns number of free parameters
  ***************************************************************************/
 int GOptimizerPars::nfree(void) const
@@ -251,43 +276,4 @@ void GOptimizerPars::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] pars Parameter container.
- ***************************************************************************/
-std::ostream& operator<<(std::ostream& os, const GOptimizerPars& pars)
-{
-     // Write parameters in output stream
-    os << pars.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] pars Parameter container.
- ***************************************************************************/
-GLog& operator<<(GLog& log, const GOptimizerPars& pars)
-{
-    // Write parameters into logger
-    log << pars.print();
-
-    // Return logger
-    return log;
 }

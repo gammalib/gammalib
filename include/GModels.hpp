@@ -28,8 +28,6 @@
 #define GMODELS_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GOptimizerPars.hpp"
 #include "GModel.hpp"
 #include "GXml.hpp"
@@ -53,10 +51,6 @@ class GObservation;
  * @todo Add pop method to delete a model from the container (default: last)
  ***************************************************************************/
 class GModels : public GOptimizerPars {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GModels& models);
-    friend GLog&         operator<<(GLog& log,        const GModels& models);
 
 public:
     // Constructors and destructors

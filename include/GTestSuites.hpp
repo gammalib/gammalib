@@ -30,10 +30,10 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GBase.hpp"
+#include "GLog.hpp"
 #include "GXml.hpp"
-#include "GTools.hpp"
 #include "GTestSuite.hpp"
-#include "GTestCase.hpp"
 
 
 /***********************************************************************//**
@@ -45,7 +45,7 @@
  *
  * @todo Detailed description
  ***************************************************************************/
-class GTestSuites {
+class GTestSuites : public GBase {
     
 public:
     // Constructors and destructors
@@ -60,19 +60,20 @@ public:
     const GTestSuite& operator[](const int& index) const;
         
     // Methods
-    void        clear(void);
-    int         size(void) const;
-    void        append(GTestSuite& suite);
-    bool        run(void);
-    void        save(const std::string& filename) const;
-    std::string name(void) const;
-    void        name(const std::string& name);
-    void        cout(bool cout);
-    int         errors(void) const;
-    int         failures(void) const;
-    int         tests(void) const;
-    time_t      timestamp(void) const;
-    std::string print(void) const;
+    void         clear(void);
+    GTestSuites* clone(void) const;
+    int          size(void) const;
+    void         append(GTestSuite& suite);
+    bool         run(void);
+    void         save(const std::string& filename) const;
+    std::string  name(void) const;
+    void         name(const std::string& name);
+    void         cout(bool cout);
+    int          errors(void) const;
+    int          failures(void) const;
+    int          tests(void) const;
+    time_t       timestamp(void) const;
+    std::string  print(void) const;
     
 protected:
     // Protected methods

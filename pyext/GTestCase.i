@@ -35,7 +35,7 @@
  *
  * @brief Test case Python interface defintion
  ***************************************************************************/
-class GTestCase {
+class GTestCase : public GBase {
 
 public:
     // public enumerators
@@ -51,6 +51,8 @@ public:
     virtual ~GTestCase(void);
 
     // Methods
+    void        clear(void);
+    GTestCase*  clone(void) const;
     std::string name(void) const;
     void        name(const std::string& name);
     std::string message(void) const;

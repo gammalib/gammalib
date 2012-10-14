@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GBase.hpp"
 #include "GVector.hpp"
 
 
@@ -41,7 +42,7 @@
  * common interface of the matrix objects and provides some common services
  * to the derived classes.
  ***************************************************************************/
-class GMatrixBase {
+class GMatrixBase : public GBase {
 
 public:
     // Constructors and destructors
@@ -60,22 +61,23 @@ public:
     virtual bool          operator!=(const GMatrixBase& matrix) const;
 
     // Pure virtual methods
-    virtual void        clear() = 0;
-    virtual void        transpose() = 0;
-    virtual void        invert() = 0;
-    virtual void        add_col(const GVector& vector, const int& col) = 0;
-    virtual void        insert_col(const GVector& vector, const int& col) = 0;
-    virtual GVector     extract_row(const int& row) const = 0;
-    virtual GVector     extract_col(const int& col) const = 0;
-    virtual double      fill(void) const = 0;
-    virtual double      min(void) const = 0;
-    virtual double      max(void) const = 0;
-    virtual double      sum(void) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual void         clear(void) = 0;
+    virtual GMatrixBase* clone(void) const = 0;
+    virtual void         transpose(void) = 0;
+    virtual void         invert(void) = 0;
+    virtual void         add_col(const GVector& vector, const int& col) = 0;
+    virtual void         insert_col(const GVector& vector, const int& col) = 0;
+    virtual GVector      extract_row(const int& row) const = 0;
+    virtual GVector      extract_col(const int& col) const = 0;
+    virtual double       fill(void) const = 0;
+    virtual double       min(void) const = 0;
+    virtual double       max(void) const = 0;
+    virtual double       sum(void) const = 0;
+    virtual std::string  print(void) const = 0;
 
     // Implemented base class methods
-    virtual int         cols(void) const { return m_cols; }
-    virtual int         rows(void) const { return m_rows; }
+    virtual int          cols(void) const { return m_cols; }
+    virtual int          rows(void) const { return m_rows; }
 
 protected:
     // Protected methods

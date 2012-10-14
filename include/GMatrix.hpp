@@ -29,8 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
 #include "GMatrixBase.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -48,10 +46,6 @@ class GSparseMatrix;
  * classes can be converted into that class.
  ***************************************************************************/
 class GMatrix : public GMatrixBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GMatrix& matrix);
-    friend GLog&         operator<<(GLog& log,        const GMatrix& matrix);
 
     // Binary operator friends
     friend GMatrix operator*(const double& a,  const GMatrix& b);
@@ -91,6 +85,7 @@ public:
 
     // Implemented pure virtual base class methods
     void        clear(void);
+    GMatrix*    clone(void) const;
     void        transpose(void);
     void        invert(void);
     void        add_col(const GVector& vector, const int& col);
@@ -179,7 +174,6 @@ GMatrix GMatrix::operator-(void) const
 /***************************************************************************
  *                              Inline methods                             *
  ***************************************************************************/
-inline void   GMatrix::clear(void) { set_all_elements(0.0); }
 inline double GMatrix::min(void) const { return get_min_element(); }
 inline double GMatrix::max(void) const { return get_max_element(); }
 inline double GMatrix::sum(void) const { return get_element_sum(); }

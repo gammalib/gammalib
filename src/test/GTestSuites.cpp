@@ -28,8 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include<ctime>
+#include <ctime>
 #include "GTestSuites.hpp"
+#include "GTestCase.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                           "GTestSuites::operator[](int&)"
@@ -200,6 +202,16 @@ void GTestSuites::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GTestSuites* GTestSuites::clone(void) const
+{
+    // Clone object
+    return new GTestSuites(*this);
 }
 
 

@@ -590,6 +590,32 @@ GSparseMatrix& GSparseMatrix::operator*=(const GSparseMatrix& matrix)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GSparseMatrix::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+    
+    // Return
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GSparseMatrix* GSparseMatrix::clone(void) const
+{
+    // Clone this image
+    return new GSparseMatrix(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Transpose matrix
  *
  * The transpose operation exchanges the number of rows against the number
@@ -1580,24 +1606,6 @@ void GSparseMatrix::cholesky_invert(bool compress)
 
     // Assign result
     *this = result;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set all matrix elements to 0
- ***************************************************************************/
-void GSparseMatrix::clear(void)
-{
-    // Free memory
-    free_elements(0, m_elements);
-
-    // Initialise column start indices to 0
-    for (int col = 0; col <= m_cols; ++col) {
-         m_colstart[col] = 0;
-    }
 
     // Return
     return;
@@ -3152,38 +3160,6 @@ void GSparseMatrix::mix_column(const double* src1_data, const int* src1_row,
  =                           Friend functions                              =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] matrix Matrix.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GSparseMatrix& matrix)
-{
-     // Write matrix in output stream
-    os << matrix.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] matrix Matrix.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GSparseMatrix& matrix)
-{
-    // Write matrix into logger
-    log << matrix.print();
-
-    // Return logger
-    return log;
-}
-
 
 /***********************************************************************//**
  * @brief Return matrix with absolute values of all elements

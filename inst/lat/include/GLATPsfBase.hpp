@@ -21,7 +21,7 @@
 /**
  * @file GLATPsfBase.hpp
  * @brief Fermi/LAT point spread function abstract base class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATPSFBASE_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GLATResponseTable.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
@@ -45,7 +44,7 @@
  * function (PSF). Classes that are derived from GLATPsfBase implement the
  * version dependent LAT PSFs.
  ***************************************************************************/
-class GLATPsfBase {
+class GLATPsfBase : public GBase {
 
 public:
     // Constructors and destructors
@@ -64,6 +63,7 @@ public:
     virtual double       psf(const double& offset, const double& logE,
                              const double& ctheta) = 0;
     virtual int          version(void) const = 0;
+    virtual std::string  print(void) const = 0;
 
     // Other methods
     void   read_scale(const GFitsTable* hdu);

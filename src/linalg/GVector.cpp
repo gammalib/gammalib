@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.cpp  -  Vector class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GVector.cpp
  * @brief Vector class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -238,8 +238,9 @@ double& GVector::operator[](const int& inx)
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= size())
+    if (inx < 0 || inx >= size()) {
         throw GException::out_of_range(G_ACCESS, inx, size()-1);
+    }
     #endif
 
     // Return vector element
@@ -259,8 +260,9 @@ const double& GVector::operator[](const int& inx) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= size())
+    if (inx < 0 || inx >= size()) {
         throw GException::out_of_range(G_ACCESS, inx, size()-1);
+    }
     #endif
 
     // Return vector element
@@ -275,16 +277,28 @@ const double& GVector::operator[](const int& inx) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Set vector elements to 0
+ * @brief Clear instance
  ***************************************************************************/
 void GVector::clear(void)
 {
-    // Set all elements to 0
-    for (int i = 0; i < m_num; ++i)
-        m_data[i] = 0.0;
+    // Free members
+    free_members();
 
+    // Initialise private members
+    init_members();
+    
     // Return
-    return;
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GVector* GVector::clone(void) const
+{
+    // Clone this image
+    return new GVector(*this);
 }
 
 
@@ -298,8 +312,9 @@ int GVector::non_zeros(void) const
 
     // Gather all non-zero elements
     for (int i = 0; i < m_num; ++i) {
-        if (m_data[i] != 0.0)
+        if (m_data[i] != 0.0) {
             non_zeros++;
+        }
     }
 
     // Return number of non-zero elements
@@ -318,8 +333,9 @@ std::string GVector::print(void) const
     // Put all elements in stream
     for (int i = 0; i < m_num; ++i) {
         result += str((*this)[i]);
-        if (i != m_num-1)
+        if (i != m_num-1) {
             result += ", ";
+        }
     }
 
     // Append )
@@ -360,8 +376,9 @@ void GVector::alloc_members(void)
 
         // Allocate vector and initialize elements to 0
         m_data = new double[m_num];
-        for (int i = 0; i < m_num; ++i)
+        for (int i = 0; i < m_num; ++i) {
             m_data[i] = 0.0;
+        }
 
     } // endif: vector had non-zero length
 
@@ -383,8 +400,9 @@ void GVector::copy_members(const GVector& v)
     // Copy elements
     if (m_num > 0) {
         alloc_members();
-        for (int i = 0; i <  m_num; ++i)
+        for (int i = 0; i <  m_num; ++i) {
             m_data[i] = v.m_data[i];
+        }
     }
 
     // Return
@@ -414,37 +432,6 @@ void GVector::free_members(void)
  =                                                                         =
  ==========================================================================*/
 
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] v Vector.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GVector& v)
-{
-     // Write vector in output stream
-    os << v.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] v Vector.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GVector& v)
-{
-    // Write vector into logger
-    log << v.print();
-
-    // Return logger
-    return log;
-}
-
 
 /***********************************************************************//**
  * @brief GVector cross product
@@ -461,12 +448,14 @@ GLog& operator<< (GLog& log, const GVector& v)
 GVector cross(const GVector &a, const GVector &b)
 {
     // Verify that vectors have same dimensions
-    if (a.m_num != b.m_num)
+    if (a.m_num != b.m_num) {
         throw GException::vector_mismatch(G_CROSS, a.m_num, b.m_num);
+    }
 
     // Verify that vectors have 3 elements
-    if (a.m_num != 3)
+    if (a.m_num != 3) {
        throw GException::vector_bad_cross_dim(G_CROSS, a.m_num);
+    }
 
     // Compute cross product
     GVector result(3);

@@ -21,7 +21,7 @@
 /**
  * @file GLATPsfV3.cpp
  * @brief Fermi/LAT point spread function version 3 class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -379,6 +379,22 @@ double GLATPsfV3::psf(const double& offset, const double& logE,
 
     // Return point spread function
     return psf;
+}
+
+
+/***********************************************************************//**
+ * @brief Print PSF
+ ***************************************************************************/
+std::string GLATPsfV3::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GLATPsfV3 ===");
+
+    // Return result
+    return result;
 }
 
 

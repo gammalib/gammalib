@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GPhoton.hpp - Photon class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPhoton.hpp
  * @brief Photon class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GPHOTON_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -46,11 +45,7 @@
  * photon arrival direction, its energy and its arrival time. This class is
  * mainly used for Monte Carlo simulations.
  ***************************************************************************/
-class GPhoton {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GPhoton& ph);
-    friend GLog&         operator<< (GLog& log, const GPhoton& ph);
+class GPhoton : public GBase {
 
     // Operator friends
     friend bool operator== (const GPhoton &a, const GPhoton &b);
@@ -67,6 +62,7 @@ public:
 
     // Methods
     void           clear(void);
+    GPhoton*       clone(void) const;
     const GSkyDir& dir(void) const { return m_dir; }
     const GEnergy& energy(void) const { return m_energy; }
     const GTime&   time(void) const { return m_time; }

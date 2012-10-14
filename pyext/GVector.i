@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.i - Vector class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GVector.i
  * @brief Vector class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 %{
@@ -36,7 +36,7 @@
  *
  * @brief Vector class
  ***************************************************************************/
-class GVector {
+class GVector : public GBase {
 public:
     // Constructors and destructors
     GVector(void);
@@ -57,9 +57,10 @@ public:
     GVector  operator- () const;
 
     // Vector functions
-    void clear(void);
-    int  size() const;
-    int  non_zeros() const;
+    void     clear(void);
+    GVector* clone(void) const;
+    int      size(void) const;
+    int      non_zeros(void) const;
 };
 
 

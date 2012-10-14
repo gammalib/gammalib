@@ -46,18 +46,19 @@ public:
     virtual ~GTestSuites(void);
 
     // Methods
-    void        clear(void);
-    int         size(void) const;
-    void        append(GTestSuite& suite);
-    bool        run(void);
-    void        save(std::string filename);
-    std::string name(void) const;
-    void        name(const std::string& name);
-    void        cout(bool cout);
-    int         errors(void) const;
-    int         failures(void) const;
-    int         tests(void) const;
-    time_t      timestamp(void) const;
+    void         clear(void);
+    GTestSuites* clone(void) const;
+    int          size(void) const;
+    void         append(GTestSuite& suite);
+    bool         run(void);
+    void         save(std::string filename);
+    std::string  name(void) const;
+    void         name(const std::string& name);
+    void         cout(bool cout);
+    int          errors(void) const;
+    int          failures(void) const;
+    int          tests(void) const;
+    time_t       timestamp(void) const;
 };
 
 

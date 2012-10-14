@@ -272,7 +272,7 @@ const GModel* GModels::operator[](const std::string& name) const
  =                                                                         =
  ==========================================================================*/
 
- /***********************************************************************//**
+/***********************************************************************//**
  * @brief Clear object
  *
  * Removes all models from the container.
@@ -708,46 +708,4 @@ int GModels::get_index(const std::string& name) const
 
     // Return index
     return index;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] models Model container.
- *
- * Dumps a model container into the output stream.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModels& models)
-{
-     // Write models in output stream
-    os << models.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] models Model container.
- *
- * Logs a model container into a logger.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GModels& models)
-{
-    // Write models into logger
-    log << models.print();
-
-    // Return logger
-    return log;
 }
