@@ -28,11 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdlib.h>
-#include "GammaLib.hpp"
-#include "test_GSky.hpp"
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
+#include <stdlib.h>
+#include "test_GSky.hpp"
+#include "GTools.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
