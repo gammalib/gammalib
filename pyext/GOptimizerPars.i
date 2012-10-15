@@ -42,16 +42,12 @@ public:
     GOptimizerPars(const GOptimizerPars& pars);
     virtual ~GOptimizerPars(void);
 
-    // Pure virtual methods
-    void             clear(void) = 0;
-    GOptimizerPars*  clone(void) const = 0;
-
-    // Methods
-    virtual void             clear(void);
-    virtual GOptimizerPars*  clone(void) const;
-    virtual int              npars(void) const;
-    virtual int              nfree(void) const;
-    virtual GModelPar&       par(const int& index);
+    // Virtual methods
+    virtual void            clear(void);
+    virtual GOptimizerPars* clone(void) const;
+    virtual int             npars(void) const;
+    virtual int             nfree(void) const;
+    virtual GModelPar&      par(const int& index);
 };
 
 
