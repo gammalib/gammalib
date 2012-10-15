@@ -34,6 +34,7 @@
 
 /* __ Interface classes __________________________________________________ */
 #include "GBase.hpp"
+#include "GRegistry.hpp"
 
 /* __ Common tools _______________________________________________________ */
 #include "GException.hpp"

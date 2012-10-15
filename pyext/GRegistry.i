@@ -1,5 +1,5 @@
 /***************************************************************************
- *                     base module  -  Python bindings                     *
+ *               GRegistry.i - Interface class for registries              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -17,16 +17,47 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * Usage:                                                                  *
- * swig -c++ -python -Wall base.i                                          *
  ***************************************************************************/
-%module base
-%feature("autodoc", "1");
+/**
+ * @file GRegistry.i
+ * @brief Interface class definition for registries
+ * @author Juergen Knoedlseder
+ */
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GRegistry.hpp"
+#include "GTools.hpp"
+%}
 
-/* __ Include standard typemaps for vectors and strings __________________ */
-%include stl.i
 
-/* __ Base module ________________________________________________________ */
-%include "GBase.i"
-%include "GRegistry.i"
+/***********************************************************************//**
+ * @class GRegistry
+ *
+ * @brief Interface class for registries
+ *
+ * This class defines the interface for registries. A registry is a
+ * container class that contains instance of derived classes. For example,
+ * if three different derived classes exist for a given base class, the
+ * registry will contain one instance for each derived class. Using the
+ * clone mechanism, the registry may thus provide a new instance of a given
+ * derived class, depending on the type of the derived class.
+ *
+ * The interface class requires the implementation of the following methods
+ * for all registry classes:
+ * 
+ * size(void) Number of elements in registry class
+ *
+ * name(const int& index) Name of registered class by index
+ *
+ * print() Print content of registry
+ ***************************************************************************/
+class GRegistry {
+
+public:
+    // Constructors and destructors
+    virtual ~GRegistry(void);
+ 
+    // Methods
+    virtual int         size(void) const = 0;
+    virtual std::string name(const int& index) const = 0;
+};

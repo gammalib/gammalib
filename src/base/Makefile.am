@@ -6,7 +6,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Define sources for this directory
-sources = GBase.cpp
+sources = GBase.cpp \
+          GRegistry.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libbase.la
