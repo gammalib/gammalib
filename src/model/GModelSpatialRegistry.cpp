@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GModelSpatialRegistry.cpp  -  Spatial model registry class        *
+ *        GModelSpatialRegistry.cpp - Spatial model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialRegistry.cpp
- * @brief GModelSpatialRegistry class interface definition
+ * @brief Spatial model registry class implemenation
  * @author J. Knodlseder
  */
 
@@ -64,8 +64,9 @@ GModelSpatialRegistry::GModelSpatialRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelSpatialRegistry(void): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -76,6 +77,11 @@ GModelSpatialRegistry::GModelSpatialRegistry(void)
 
 /***********************************************************************//**
  * @brief Model constructor
+ *
+ * @param[in] model Model.
+ *
+ * Construct registry by adding a model to the registry. This is the standard
+ * constructor that is used to register a new model to GammaLib.
  ***************************************************************************/
 GModelSpatialRegistry::GModelSpatialRegistry(const GModelSpatial* model)
 {
@@ -116,8 +122,9 @@ GModelSpatialRegistry::GModelSpatialRegistry(const GModelSpatial* model)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelSpatialRegistry(const GModelSpatial*): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -167,6 +174,7 @@ GModelSpatialRegistry::~GModelSpatialRegistry(void)
  * @brief Assignment operator
  *
  * @param[in] registry Registry.
+ * @return Reference to registry.
  ***************************************************************************/
 GModelSpatialRegistry& GModelSpatialRegistry::operator= (const GModelSpatialRegistry& registry)
 {
@@ -196,22 +204,23 @@ GModelSpatialRegistry& GModelSpatialRegistry::operator= (const GModelSpatialRegi
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate spatial model of given type
+ * @brief Allocate spatial model of given name
  *
- * @param[in] type Spatial model type.
+ * @param[in] name Model name.
+ * @return Pointer to model (NULL if name is not registered).
  *
  * Returns a pointer to a void spatial model instance of the specified
- * type. If the type has not been found in the registry, a NULL pointer is
+ * name. If the name has not been found in the registry, a NULL pointer is
  * returned.
  ***************************************************************************/
-GModelSpatial* GModelSpatialRegistry::alloc(const std::string& type) const
+GModelSpatial* GModelSpatialRegistry::alloc(const std::string& name) const
 {
     // Initialise spatial model
     GModelSpatial* model = NULL;
 
     // Search for model in registry
     for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == type) {
+        if (m_names[i] == name) {
             model = m_models[i]->clone();
             break;
         }
@@ -226,6 +235,7 @@ GModelSpatial* GModelSpatialRegistry::alloc(const std::string& type) const
  * @brief Returns model name
  *
  * @param[in] index Model index [0,...,size()-1].
+ * @return Model name.
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -234,8 +244,9 @@ std::string GModelSpatialRegistry::name(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_NAME, index, 0, size()-1);
+    }
     #endif
 
     // Return name
@@ -245,6 +256,8 @@ std::string GModelSpatialRegistry::name(const int& index) const
 
 /***********************************************************************//**
  * @brief Print registry information
+ *
+ * @return Registry content.
  ***************************************************************************/
 std::string GModelSpatialRegistry::print(void) const
 {
@@ -300,42 +313,4 @@ void GModelSpatialRegistry::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] registry Spatial model registry.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelSpatialRegistry& registry)
-{
-     // Write registry in output stream
-    os << registry.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] registry Spatial model registry.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelSpatialRegistry& registry)
-{
-    // Write registry into logger
-    log << registry.print();
-
-    // Return logger
-    return log;
 }

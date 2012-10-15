@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GObservationRegistry.cpp  -  Observation registry class         *
+ *          GObservationRegistry.cpp - Observation registry class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Juergen Knoedlseder                              *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GObservationRegistry.cpp
- * @brief GObservationRegistry class interface implementation
- * @author J. Knoedlseder
+ * @brief Observation registry class definition
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -77,6 +77,8 @@ GObservationRegistry::GObservationRegistry(void)
 
 /***********************************************************************//**
  * @brief Observation constructor
+ *
+ * @param[in] obs Observation.
  ***************************************************************************/
 GObservationRegistry::GObservationRegistry(const GObservation* obs)
 {
@@ -169,6 +171,7 @@ GObservationRegistry::~GObservationRegistry(void)
  * @brief Assignment operator
  *
  * @param[in] registry Registry.
+ * @return Reference to registry.
  ***************************************************************************/
 GObservationRegistry& GObservationRegistry::operator= (const GObservationRegistry& registry)
 {
@@ -198,22 +201,23 @@ GObservationRegistry& GObservationRegistry::operator= (const GObservationRegistr
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate observation of given type
+ * @brief Allocate observation of given name
  *
- * @param[in] instrument Instrument name.
+ * @param[in] name Instrument name.
+ * @return Pointer to observation (NULL if name is not registered).
  *
- * Returns a pointer to a void observation instance for a specific
- * instrument. If the instrument has not been found in the registry, a NULL
+ * Returns a pointer to an observation instance for a specific name.
+ * If the instrument name has not been found in the registry, a NULL
  * pointer is returned.
  ***************************************************************************/
-GObservation* GObservationRegistry::alloc(const std::string& instrument) const
+GObservation* GObservationRegistry::alloc(const std::string& name) const
 {
     // Initialise observation
     GObservation* obs = NULL;
 
     // Search for observation in registry
     for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == instrument) {
+        if (m_names[i] == name) {
             obs = m_obs[i]->clone();
             break;
         }
@@ -228,11 +232,12 @@ GObservation* GObservationRegistry::alloc(const std::string& instrument) const
  * @brief Returns instrument name for a specific registered observation
  *
  * @param[in] index Observation index [0,...,size()-1].
+ * @return Instrument name.
  *
  * @exception GException::out_of_range
  *            Observation index is out of range.
  ***************************************************************************/
-std::string GObservationRegistry::instrument(const int& index) const
+std::string GObservationRegistry::name(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -248,6 +253,8 @@ std::string GObservationRegistry::instrument(const int& index) const
 
 /***********************************************************************//**
  * @brief Print registry information
+ *
+ * @return Registry content.
  ***************************************************************************/
 std::string GObservationRegistry::print(void) const
 {
@@ -303,42 +310,4 @@ void GObservationRegistry::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] registry Observation registry.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GObservationRegistry& registry)
-{
-     // Write registry in output stream
-    os << registry.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] registry Observation registry.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GObservationRegistry& registry)
-{
-    // Write registry into logger
-    log << registry.print();
-
-    // Return logger
-    return log;
 }

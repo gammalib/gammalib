@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GModelRegistry.hpp  -  Model registry class               *
+ *                GModelRegistry.hpp - Model registry class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelRegistry.hpp
- * @brief GModelRegistry class interface definition
- * @author J. Knodlseder
+ * @brief Model registry class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELREGISTRY_HPP
@@ -29,31 +29,28 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GRegistry.hpp"
 #include "GModel.hpp"
 
 
 /***********************************************************************//**
  * @class GModelRegistry
  *
- * @brief Interface definition for the model registry class.
+ * @brief Interface definition for the model registry class
  *
  * The registry class allows the registration of models that are not
  * necessarily compiled into the GammaLib. It uses the static members
  * m_number, m_names, and m_models which are allocated globally to keep track
  * of models that are available throughout all linked libraries. To register
  * a model it is sufficient to add
- *  const GModelXXX      g_XXX_seed;
- *  const GModelRegistry g_XXX_registry(&g_XXX_seed);
+ *
+ *     const GModelXXX      g_XXX_seed;
+ *     const GModelRegistry g_XXX_registry(&g_XXX_seed);
+ *
  * at the top of the .cpp file of the model. Here, XXX is a unique name that
  * describes the model.
  ***************************************************************************/
-class GModelRegistry {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GModelRegistry& registry);
-    friend GLog&         operator<<(GLog& log, const GModelRegistry& registry);
+class GModelRegistry : public GRegistry {
 
 public:
     // Constructors and destructors
@@ -67,7 +64,7 @@ public:
 
     // Methods
     int         size(void) const { return m_number; }
-    GModel*     alloc(const std::string& type) const;
+    GModel*     alloc(const std::string& name) const;
     std::string name(const int& index) const;
     std::string print(void) const;
 

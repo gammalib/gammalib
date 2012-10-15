@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GWcsRegistry.cpp  -  World Coordinate Projection registry class     *
+ *      GWcsRegistry.cpp - World Coordinate Projection registry class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsRegistry.cpp
  * @brief World Coordinate Projection registry class interface implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -125,8 +125,9 @@ GWcsRegistry::GWcsRegistry(const GWcs* prj)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GWcsRegistry(const GWcs*): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_codes[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -176,6 +177,7 @@ GWcsRegistry::~GWcsRegistry(void)
  * @brief Assignment operator
  *
  * @param[in] registry Registry.
+ * @return Reference to registry.
  ***************************************************************************/
 GWcsRegistry& GWcsRegistry::operator= (const GWcsRegistry& registry)
 {
@@ -208,9 +210,10 @@ GWcsRegistry& GWcsRegistry::operator= (const GWcsRegistry& registry)
  * @brief Allocate World Coordinate projection of given code
  *
  * @param[in] code World Coordinate System code.
+ * @return Pointer to WCS (NULL if code is not registered).
  *
- * Returns a pointer to a void WCS instance of the specified code. If the
- * code has not been found in the registry, a NULL pointer is returned.
+ * Returns a pointer to a WCS instance of the specified code. If the code has
+ * not been found in the registry, a NULL pointer is returned.
  ***************************************************************************/
 GWcs* GWcsRegistry::alloc(const std::string& code) const
 {
@@ -234,6 +237,7 @@ GWcs* GWcsRegistry::alloc(const std::string& code) const
  * @brief Returns projection code
  *
  * @param[in] index Projection index [0,...,size()-1].
+ * @return Projection code.
  *
  * @exception GException::out_of_range
  *            Projection index is out of range.
@@ -242,8 +246,9 @@ std::string GWcsRegistry::code(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_CODE, index, 0, size()-1);
+    }
     #endif
 
     // Return code
@@ -255,6 +260,7 @@ std::string GWcsRegistry::code(const int& index) const
  * @brief Returns projection name
  *
  * @param[in] index Projection index [0,...,size()-1].
+ * @return Projection name.
  *
  * @exception GException::out_of_range
  *            Projection index is out of range.
@@ -263,8 +269,9 @@ std::string GWcsRegistry::name(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_NAME, index, 0, size()-1);
+    }
     #endif
 
     // Return name
@@ -275,6 +282,8 @@ std::string GWcsRegistry::name(const int& index) const
 /***********************************************************************//**
  * @brief Return list string of projection codes
  *
+ * @return Projection code list.
+ *
  * Returns a list of the projection codes in the format 'xxx/yyy/zzz'.
  ***************************************************************************/
 std::string GWcsRegistry::list(void) const
@@ -284,8 +293,9 @@ std::string GWcsRegistry::list(void) const
 
     // Append projections
     for (int i = 0; i < m_number; ++i) {
-        if (i > 0)
+        if (i > 0) {
             result.append("/");
+        }
         result.append(m_codes[i]);
     }
 
@@ -296,6 +306,8 @@ std::string GWcsRegistry::list(void) const
 
 /***********************************************************************//**
  * @brief Print registry information
+ *
+ * @return Registry content.
  ***************************************************************************/
 std::string GWcsRegistry::print(void) const
 {
@@ -352,42 +364,4 @@ void GWcsRegistry::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] registry WCS projection registry.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GWcsRegistry& registry)
-{
-     // Write registry in output stream
-    os << registry.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] registry WCS projection registry.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GWcsRegistry& registry)
-{
-    // Write registry into logger
-    log << registry.print();
-
-    // Return logger
-    return log;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelTemporalRegistry.cpp  -  Temporal model registry class       *
+ *       GModelTemporalRegistry.cpp - Temporal model registry class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelTemporalRegistry.cpp
- * @brief GModelTemporalRegistry class interface definition
- * @author J. Knodlseder
+ * @brief Temporal model registry class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -77,6 +77,8 @@ GModelTemporalRegistry::GModelTemporalRegistry(void)
 
 /***********************************************************************//**
  * @brief Model constructor
+ *
+ * @param[in] model Model.
  ***************************************************************************/
 GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
 {
@@ -117,8 +119,9 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelTemporalRegistry(const GModelTemporal*): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -168,6 +171,7 @@ GModelTemporalRegistry::~GModelTemporalRegistry(void)
  * @brief Assignment operator
  *
  * @param[in] registry Registry.
+ * @return Reference to registry.
  ***************************************************************************/
 GModelTemporalRegistry& GModelTemporalRegistry::operator= (const GModelTemporalRegistry& registry)
 {
@@ -197,22 +201,23 @@ GModelTemporalRegistry& GModelTemporalRegistry::operator= (const GModelTemporalR
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate temporal model of given type
+ * @brief Allocate temporal model of given name
  *
- * @param[in] type Temporal model type.
+ * @param[in] name Temporal model name.
+ * @return Pointer to temporal model (NULL if name is not registered).
  *
- * Returns a pointer to a void temporal model instance of the specified
- * type. If the type has not been found in the registry, a NULL pointer is
+ * Returns a pointer to a temporal model instance of the specified name.
+ * If the name has not been found in the registry, a NULL pointer is
  * returned.
  ***************************************************************************/
-GModelTemporal* GModelTemporalRegistry::alloc(const std::string& type) const
+GModelTemporal* GModelTemporalRegistry::alloc(const std::string& name) const
 {
     // Initialise temporal model
     GModelTemporal* model = NULL;
 
     // Search for model in registry
     for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == type) {
+        if (m_names[i] == name) {
             model = m_models[i]->clone();
             break;
         }
@@ -227,6 +232,7 @@ GModelTemporal* GModelTemporalRegistry::alloc(const std::string& type) const
  * @brief Returns model name
  *
  * @param[in] index Model index [0,...,size()-1].
+ * @return Model name.
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -235,8 +241,9 @@ std::string GModelTemporalRegistry::name(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_NAME, index, 0, size()-1);
+    }
     #endif
 
     // Return name
@@ -246,6 +253,8 @@ std::string GModelTemporalRegistry::name(const int& index) const
 
 /***********************************************************************//**
  * @brief Print registry information
+ *
+ * @return Registry content.
  ***************************************************************************/
 std::string GModelTemporalRegistry::print(void) const
 {
@@ -301,42 +310,4 @@ void GModelTemporalRegistry::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] registry Temporal model registry.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelTemporalRegistry& registry)
-{
-     // Write registry in output stream
-    os << registry.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] registry Temporal model registry.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelTemporalRegistry& registry)
-{
-    // Write registry into logger
-    log << registry.print();
-
-    // Return logger
-    return log;
 }

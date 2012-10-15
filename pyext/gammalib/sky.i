@@ -29,6 +29,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+%import(module="gammalib.base") "GRegistry.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";

@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelTemporalRegistry.hpp  -  Temporal model registry class       *
+ *       GModelTemporalRegistry.hpp - Temporal model registry class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelTemporalRegistry.hpp
- * @brief GModelTemporalRegistry class interface definition
- * @author J. Knodlseder
+ * @brief Temporal model registry class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELTEMPORALREGISTRY_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GRegistry.hpp"
 #include "GModelTemporal.hpp"
 
 
@@ -44,16 +43,14 @@
  * m_number, m_names, and m_models which are allocated globally to keep track
  * of temporal models that are available throughout all linked libraries. To
  * register a temporal model it is sufficient to add
- *  const GModelTemporalXXX      g_temporal_XXX_seed;
- *  const GModelTemporalRegistry g_temporal_XXX_registry(&g_spectral_XXX_seed);
+ *
+ *     const GModelTemporalXXX      g_temporal_XXX_seed;
+ *     const GModelTemporalRegistry g_temporal_XXX_registry(&g_spectral_XXX_seed);
+ *
  * at the top of the .cpp file of the temporal model. Here, XXX is a unique
  * name that describes the model.
  ***************************************************************************/
-class GModelTemporalRegistry {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GModelTemporalRegistry& registry);
-    friend GLog&         operator<<(GLog& log, const GModelTemporalRegistry& registry);
+class GModelTemporalRegistry : public GRegistry {
 
 public:
     // Constructors and destructors
@@ -67,7 +64,7 @@ public:
 
     // Methods
     int             size(void) const { return m_number; }
-    GModelTemporal* alloc(const std::string& type) const;
+    GModelTemporal* alloc(const std::string& name) const;
     std::string     name(const int& index) const;
     std::string     print(void) const;
 
