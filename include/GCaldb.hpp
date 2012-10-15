@@ -46,10 +46,22 @@
  * variable, or set using the dir() method.
  *
  * It is assumed that the calibration data are found under
- *   $CALDB/data/<mission>[/<instrument>]
+ *
+ *     $CALDB/data/<mission>[/<instrument>]
+ *
+ * or
+ *
+ *     $GAMMALIB_CALDB/data/<mission>[/<instrument>]
+ *
  * and that the Calibration Index File (CIF) is located at
- *   $CALDB/data/<mission>[/<instrument>]/caldb.indx
- * where <mission> is the name of the mission and <instrument> is the
+ *
+ *     $CALDB/data/<mission>[/<instrument>]/caldb.indx
+ *
+ * or
+ *
+ *     $GAMMALIB_CALDB/data/<mission>[/<instrument>]/caldb.indx
+ *
+ * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case).
  *
  * The calibration database for a given mission and instrument is opened

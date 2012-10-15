@@ -112,15 +112,19 @@ GCaldb::GCaldb(const GCaldb& caldb)
  * @param[in] pathname Calibration database root directory.
  *
  * @exception GException::env_not_found
- *            CALDB environment variable not found
+ *            CALDB or GAMMALIB_CALDB environment variables not found
  *
  * This constructor sets the calibration database using the specified root
  * directory. Unless the specified pathname is not empty, any existing CALDB
- * environment variable will be ignored. If the pathname is empty, however,
- * the constructor attempts to detemine the CALDB root directory from the
- * CALDB environment variable. If this fails, the constructor will throw an
+ * or GAMMALIB_CALDB environment variables will be ignored.
+ *
+ * If the pathname is empty, however, the constructor attempts to detemine
+ * the CALDB root directory from the GAMMALIB_CALDB environment variable. If
+ * GAMMALIB_CALDB is not found, the method will check for the CALDB
+ * environment variable. If this fails, the constructor will throw an
  * exception.
- * Any environment variable contained in the pathname will be expected.
+ *
+ * Any environment variable contained in the pathname will be expanded.
  ***************************************************************************/
 GCaldb::GCaldb(const std::string& pathname)
 {
@@ -132,18 +136,24 @@ GCaldb::GCaldb(const std::string& pathname)
         set_database(expand_env(pathname));
     }
 
-    // ... otherwise try to determine root pathname from CALDB environment
-    // variable.
+    // ... otherwise try to determine root pathname from GAMMALIB_CALDB
+    // environment variable.
     else {
 
-        // Get root directory from CALDB environment variable
-        char* ptr = std::getenv("CALDB");
+        // Get root directory from GAMMALIB_CALDB environment variable
+        char* ptr = std::getenv("GAMMALIB_CALDB");
+
+        // If this failed, get root directory from CALDB environment
+        // variable
+        if (ptr == NULL) {
+            ptr = std::getenv("CALDB");
+        }
     
         // Throw an exception if the environment variable is not found
         if (ptr == NULL) {
             throw GException::env_not_found(G_CALDB2, "CALDB",
-                  "Please set the CALDB environment variable to a valid"
-                  " calibration database root directory.");
+                  "Please set the GAMMALIB_CALDB or the CALDB environment"
+                  " variable to a valid calibration database root directory.");
         }
 
         // ... otherwise set calibration database
@@ -473,13 +483,12 @@ void GCaldb::set_database(const std::string& pathname)
  * @exception GException::directory_not_accessible
  *            No read permission granted to calibration directory.
  *
- * The calibration directory path is given by
+ * The calibration directory path is given by one of the following
  *
  *     $CALDB/data/<mission>
- *
- * or
- *
  *     $CALDB/data/<mission>/<instrument>
+ *     $GAMMALIB_CALDB/data/<mission>
+ *     $GAMMALIB_CALDB/data/<mission>/<instrument>
  *
  * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case). The arguments provided to the
@@ -537,13 +546,12 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
  * @exception GException::file_not_found
  *            CIF not found.
  *
- * The calibration directory path is given by
+ * The calibration directory path is given by one of the following
  *
  *     $CALDB/data/<mission>/caldb.indx
- *
- * or
- *
  *     $CALDB/data/<mission>/<instrument>/caldb.indx
+ *     $GAMMALIB_CALDB/data/<mission>/caldb.indx
+ *     $GAMMALIB_CALDB/data/<mission>/<instrument>/caldb.indx
  *
  * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case). The arguments provided to the
