@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeaderCard.hpp  - FITS header card class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,15 +21,15 @@
 /**
  * @file GFitsHeaderCard.hpp
  * @brief FITS header card class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSHEADERCARD_HPP
 #define GFITSHEADERCARD_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
+#include <string>
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -43,14 +43,10 @@
  *
  * @todo Many more datatypes may exist for a header card.
  ***************************************************************************/
-class GFitsHeaderCard {
+class GFitsHeaderCard : public GBase {
 
     // Friend classes
     friend class GFitsHeader;
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GFitsHeaderCard& card);
-    friend GLog&         operator<<(GLog& log,        const GFitsHeaderCard& card);
 
 public:
     // Constructors & Destructors
@@ -67,32 +63,32 @@ public:
     // Operators
     GFitsHeaderCard& operator= (const GFitsHeaderCard& card);
 
-    // Methods to set card properties
-    void         keyname(const std::string& keyname);
-    void         value(const std::string& value);
-    void         value(const bool& value);
-    void         value(const float& value);
-    void         value(const double& value);
-    void         value(const unsigned short& value);
-    void         value(const short& value);
-    void         value(const unsigned int& value);
-    void         value(const int& value);
-    void         value(const long& value);
-    void         value(const unsigned long& value);
-    void         value(const long long& value);
-    void         unit(const std::string& unit);
-    void         comment(const std::string& comment);
-
-    // Methods to get card properties
-    std::string  keyname(void) const;
-    std::string  value(void) const;
-    int          decimals(void) const;
-    std::string  unit(void) const;
-    std::string  comment(void) const;
-    std::string  string(void);
-    double       real(void);
-    int          integer(void);
-    std::string  print(void) const;
+    // Methods
+    void             clear(void);
+    GFitsHeaderCard* clone(void) const;
+    void             keyname(const std::string& keyname);
+    std::string      keyname(void) const;
+    void             value(const std::string& value);
+    void             value(const bool& value);
+    void             value(const float& value);
+    void             value(const double& value);
+    void             value(const unsigned short& value);
+    void             value(const short& value);
+    void             value(const unsigned int& value);
+    void             value(const int& value);
+    void             value(const long& value);
+    void             value(const unsigned long& value);
+    void             value(const long long& value);
+    std::string      value(void) const;
+    int              decimals(void) const;
+    void             unit(const std::string& unit);
+    std::string      unit(void) const;
+    void             comment(const std::string& comment);
+    std::string      comment(void) const;
+    std::string      string(void);
+    double           real(void);
+    int              integer(void);
+    std::string      print(void) const;
 
 private:
     // Private methods

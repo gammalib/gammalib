@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GFitsImageSByte.i  - FITS signed Byte image class SWIG interface     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageSByte.i
  * @brief GFitsImageSByte class SWIG file.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -48,13 +48,14 @@ public:
     virtual ~GFitsImageSByte(void);
 
     // Methods
+    void             clear(void);
+    GFitsImageSByte* clone(void) const;
     double           pixel(const int& ix) const;
     double           pixel(const int& ix, const int& iy) const;
     double           pixel(const int& ix, const int& iy, const int& iz) const;
     double           pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*            pixels(void);
     int              type(void) const;
-    GFitsImageSByte* clone(void) const;
 };
 
 

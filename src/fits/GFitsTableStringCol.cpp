@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableStringCol.cpp
  * @brief FITS table string column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -195,6 +195,35 @@ const std::string& GFitsTableStringCol::operator() (const int& row, const int& i
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableStringCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableStringCol* GFitsTableStringCol::clone(void) const
+{
+    return new GFitsTableStringCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -596,15 +625,6 @@ void GFitsTableStringCol::save(void)
 
 
 /***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableStringCol* GFitsTableStringCol::clone(void) const
-{
-    return new GFitsTableStringCol(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Returns format string of ASCII table
  ***************************************************************************/
 std::string GFitsTableStringCol::ascii_format(void) const
@@ -816,10 +836,3 @@ void GFitsTableStringCol::free_buffer(void) const
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

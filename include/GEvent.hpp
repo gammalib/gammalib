@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GEvent.hpp  -  Event abstract base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEvent.hpp
  * @brief GEvent abstract base class interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GEVENT_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GInstDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
@@ -69,11 +68,7 @@
  * The GEvent class does not hold any data members. Data members are stored
  * in the derived classes.
  ***************************************************************************/
-class GEvent {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GEvent& event);
-    friend GLog&         operator<< (GLog& log, const GEvent& event);
+class GEvent : public GBase {
 
 public:
     // Constructors and destructors

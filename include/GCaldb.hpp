@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCaldb.hpp  -  Calibration database class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Juergen Knoedlseder                              *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,18 +21,17 @@
 /**
  * @file GCaldb.hpp
  * @brief Calibration database class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCALDB_HPP
 #define GCALDB_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GFits.hpp"
-#include "GFitsBinTable.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -47,21 +46,29 @@
  * variable, or set using the dir() method.
  *
  * It is assumed that the calibration data are found under
- *   $CALDB/data/<mission>[/<instrument>]
+ *
+ *     $CALDB/data/<mission>[/<instrument>]
+ *
+ * or
+ *
+ *     $GAMMALIB_CALDB/data/<mission>[/<instrument>]
+ *
  * and that the Calibration Index File (CIF) is located at
- *   $CALDB/data/<mission>[/<instrument>]/caldb.indx
- * where <mission> is the name of the mission and <instrument> is the
+ *
+ *     $CALDB/data/<mission>[/<instrument>]/caldb.indx
+ *
+ * or
+ *
+ *     $GAMMALIB_CALDB/data/<mission>[/<instrument>]/caldb.indx
+ *
+ * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case).
  *
  * The calibration database for a given mission and instrument is opened
  * using the open() method. Once opened, database information can be
  * accessed. After usage, the database is closed using the close() method.
  ***************************************************************************/
-class GCaldb {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GCaldb& caldb);
-    friend GLog&         operator<<(GLog& log,        const GCaldb& caldb);
+class GCaldb : public GBase {
 
 public:
     // Constructors and destructors

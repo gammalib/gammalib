@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.hpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,17 +21,16 @@
 /**
  * @file GXmlNode.hpp
  * @brief Abstract XML node base class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GXMLNODE_HPP
 #define GXMLNODE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
 #include <vector>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -41,11 +40,7 @@
  *
  * This class defines an abstract node of a XML document.
  ***************************************************************************/
-class GXmlNode {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GXmlNode& node);
-    friend GLog&         operator<<(GLog& log,        const GXmlNode& node);
+class GXmlNode : public GBase {
 
 public:
     // Constructors and destructors
@@ -72,8 +67,9 @@ public:
     virtual void        clear(void) = 0;
     virtual GXmlNode*   clone(void) const = 0;
     virtual void        write(FILE* fptr, int indent = 0) const = 0;
-    virtual std::string print(int indent = 0) const = 0;
     virtual NodeType    type(void) const = 0;
+    virtual std::string print(void) const;
+    virtual std::string print(int indent) const = 0;
 
     // Methods
     void      append(GXmlNode* node);

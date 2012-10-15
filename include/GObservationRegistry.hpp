@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GObservationRegistry.hpp  -  Observation registry class         *
+ *          GObservationRegistry.hpp - Observation registry class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Juergen Knoedlseder                              *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GObservationRegistry.hpp
- * @brief GObservationRegistry class interface definition
- * @author J. Knoedlseder
+ * @brief Observation registry class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GOBSERVATIONREGISTRY_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GRegistry.hpp"
 #include "GObservation.hpp"
 
 
@@ -44,17 +43,15 @@
  * m_number, m_names, and m_obs which are allocated globally to keep track
  * of observations that are available throughout all linked libraries. To
  * register an observation it is sufficient to add
- *  const GXXXObservation      g_obs_XXX_seed;
- *  const GObservationRegistry g_obs_XXX_registry(&g_obs_XXX_seed);
+ *
+ *     const GXXXObservation      g_obs_XXX_seed;
+ *     const GObservationRegistry g_obs_XXX_registry(&g_obs_XXX_seed);
+ *
  * at the top of the .cpp file of the observation. Here, XXX is a unique
  * name that describes the instrument for which the observation class is
  * implemented.
  ***************************************************************************/
-class GObservationRegistry {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GObservationRegistry& registry);
-    friend GLog&         operator<<(GLog& log,        const GObservationRegistry& registry);
+class GObservationRegistry : public GRegistry {
 
 public:
     // Constructors and destructors
@@ -68,8 +65,8 @@ public:
 
     // Methods
     int           size(void) const { return m_number; }
-    GObservation* alloc(const std::string& instrument) const;
-    std::string   instrument(const int& index) const;
+    GObservation* alloc(const std::string& name) const;
+    std::string   name(const int& index) const;
     std::string   print(void) const;
 
 protected:

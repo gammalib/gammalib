@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableULongCol.cpp
  * @brief FITS table unsigned long integer column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -194,6 +194,35 @@ const unsigned long& GFitsTableULongCol::operator() (const int& row, const int& 
  =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableULongCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableULongCol* GFitsTableULongCol::clone(void) const
+{
+    return new GFitsTableULongCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -542,15 +571,6 @@ void GFitsTableULongCol::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableULongCol* GFitsTableULongCol::clone(void) const
-{
-    return new GFitsTableULongCol(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Returns format string of ASCII table
  ***************************************************************************/
 std::string GFitsTableULongCol::ascii_format(void) const
@@ -665,10 +685,3 @@ void GFitsTableULongCol::init_data(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GCTAModelRadialRegistry.cpp  -  CTA radial model registry class     *
+ *      GCTAModelRadialRegistry.cpp - CTA Radial model registry class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialRegistry.cpp
- * @brief GCTAModelRadialRegistry class interface definition
- * @author J. Knodlseder
+ * @brief CTA radial model registry class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -118,8 +118,9 @@ GCTAModelRadialRegistry::GCTAModelRadialRegistry(const GCTAModelRadial* model)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GCTAModelRadialRegistry(const GCTAModelRadial*): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -169,6 +170,7 @@ GCTAModelRadialRegistry::~GCTAModelRadialRegistry(void)
  * @brief Assignment operator
  *
  * @param[in] registry Registry.
+ * @return Reference to registry.
  ***************************************************************************/
 GCTAModelRadialRegistry& GCTAModelRadialRegistry::operator= (const GCTAModelRadialRegistry& registry)
 {
@@ -198,22 +200,22 @@ GCTAModelRadialRegistry& GCTAModelRadialRegistry::operator= (const GCTAModelRadi
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate radial model of given type
+ * @brief Allocate radial model of given name
  *
- * @param[in] type Radial model type.
+ * @param[in] name Radial model name.
  *
- * Returns a pointer to a void radial model instance of the specified
- * type. If the type has not been found in the registry, a NULL pointer is
+ * Returns a pointer to a radial model instance of the specified name.
+ * If the name has not been found in the registry, a NULL pointer is
  * returned.
  ***************************************************************************/
-GCTAModelRadial* GCTAModelRadialRegistry::alloc(const std::string& type) const
+GCTAModelRadial* GCTAModelRadialRegistry::alloc(const std::string& name) const
 {
     // Initialise radial model
     GCTAModelRadial* model = NULL;
 
     // Search for model in registry
     for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == type) {
+        if (m_names[i] == name) {
             model = m_models[i]->clone();
             break;
         }
@@ -228,6 +230,7 @@ GCTAModelRadial* GCTAModelRadialRegistry::alloc(const std::string& type) const
  * @brief Returns model name
  *
  * @param[in] index Model index [0,...,size()-1].
+ * @return Model name.
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -236,8 +239,9 @@ std::string GCTAModelRadialRegistry::name(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_NAME, index, 0, size()-1);
+    }
     #endif
 
     // Return name
@@ -247,6 +251,8 @@ std::string GCTAModelRadialRegistry::name(const int& index) const
 
 /***********************************************************************//**
  * @brief Print registry information
+ *
+ * @return Registry content.
  ***************************************************************************/
 std::string GCTAModelRadialRegistry::print(void) const
 {
@@ -302,42 +308,4 @@ void GCTAModelRadialRegistry::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] registry Radial model registry.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GCTAModelRadialRegistry& registry)
-{
-     // Write registry in output stream
-    os << registry.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] registry Radial model registry.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GCTAModelRadialRegistry& registry)
-{
-    // Write registry into logger
-    log << registry.print();
-
-    // Return logger
-    return log;
 }

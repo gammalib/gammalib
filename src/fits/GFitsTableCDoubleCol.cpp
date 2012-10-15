@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableCDoubleCol.cpp
  * @brief FITS table double precision complex column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -194,6 +194,35 @@ const GFits::cdouble& GFitsTableCDoubleCol::operator() (const int& row,
  =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableCDoubleCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableCDoubleCol* GFitsTableCDoubleCol::clone(void) const
+{
+    return new GFitsTableCDoubleCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -547,15 +576,6 @@ void GFitsTableCDoubleCol::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableCDoubleCol* GFitsTableCDoubleCol::clone(void) const
-{
-    return new GFitsTableCDoubleCol(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Returns format string of ASCII table
  ***************************************************************************/
 std::string GFitsTableCDoubleCol::ascii_format(void) const
@@ -669,10 +689,3 @@ void GFitsTableCDoubleCol::init_data(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

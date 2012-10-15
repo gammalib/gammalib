@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GWcs.cpp  -  World Coordinate System virtual base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcs.cpp
  * @brief World Coordinate System virtual base class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -287,36 +287,4 @@ bool operator!= (const GWcs &a, const GWcs &b)
 {
     // Return result
     return !(a == b);
-}
-
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] wcs WCS.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GWcs& wcs)
-{
-     // Write WCS in output stream
-    os << wcs.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] wcs WCS.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GWcs& wcs)
-{
-    // Write WCS into logger
-    log << wcs.print();
-
-    // Return logger
-    return log;
 }

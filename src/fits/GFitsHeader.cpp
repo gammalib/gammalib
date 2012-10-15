@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeader.cpp  - FITS header handling class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,13 @@
 /**
  * @file GFitsHeader.cpp
  * @brief FITS header class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsHeader.hpp"
@@ -635,42 +634,4 @@ GFitsHeaderCard* GFitsHeader::card_ptr(const std::string& keyname) const
 
     // Return pointer
     return ptr;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                            GFitsHeader friends                          =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] header FITS header.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsHeader& header)
-{
-     // Write header in output stream
-    os << header.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] header FITS header.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GFitsHeader& header)
-{
-    // Write header in logger
-    log << header.print();
-
-    // Return logger
-    return log;
 }

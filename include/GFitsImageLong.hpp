@@ -61,6 +61,8 @@ public:
     const long&     operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
+    void            clear(void);
+    GFitsImageLong* clone(void) const;
     long&           at(const int& ix);
     long&           at(const int& ix, const int& iy);
     long&           at(const int& ix, const int& iy, const int& iz);
@@ -75,7 +77,6 @@ public:
     double          pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*           pixels(void);
     int             type(void) const;
-    GFitsImageLong* clone(void) const;
 
 private:
     // Private methods

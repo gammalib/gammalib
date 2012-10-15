@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GSkyPixel.cpp  -  Class that implements a 2D sky pixel index      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GSkyPixel.hpp
- * @brief GSkyPixel class definition.
- * @author J. Knodlseder
+ * @brief Sky pixel class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GSKYPIXEL_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -38,11 +37,7 @@
  *
  * @brief GSkyPixel class interface defintion
  ***************************************************************************/
-class GSkyPixel {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GSkyPixel& pixel);
-    friend GLog&         operator<< (GLog& log, const GSkyPixel& pixel);
+class GSkyPixel : public GBase {
 
 public:
     // Constructors and destructors
@@ -55,6 +50,8 @@ public:
     GSkyPixel& operator= (const GSkyPixel& pixel);
     
     // Methods
+    void        clear(void);
+    GSkyPixel*  clone(void) const;
     void        x(const double& x);
     void        y(const double& y);
     double      x(void) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsImageByte.hpp  - FITS Byte image class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,8 @@ public:
     const unsigned char& operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
+    void                 clear(void);
+    GFitsImageByte*      clone(void) const;
     unsigned char&       at(const int& ix);
     unsigned char&       at(const int& ix, const int& iy);
     unsigned char&       at(const int& ix, const int& iy, const int& iz);
@@ -75,7 +77,6 @@ public:
     double               pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*                pixels(void);
     int                  type(void) const;
-    GFitsImageByte*      clone(void) const;
 
 private:
     // Private methods

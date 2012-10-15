@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GRan.i
- * @brief GRan class python interface
+ * @brief Random number generator class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -38,7 +38,7 @@
  * The GRan class implements a random number generator that is inspired from
  * the Ran structure given in Numerical Recipes, Third Edition (p. 341ff).
  ***************************************************************************/
-class GRan {
+class GRan : public GBase {
 public:
     // Constructors and destructors
     GRan(void);
@@ -54,7 +54,7 @@ public:
     unsigned long long int int64(void);
     double                 uniform(void);
     double                 exp(const double& arg);
-    double                 poisson(const double& lambda);
+    double                 poisson(const double& arg);
     double                 chisq2(void);
 };
 

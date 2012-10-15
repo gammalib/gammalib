@@ -35,7 +35,8 @@
  *
  * @brief Interface for the Fermi/LAT energy dispersion
  ***************************************************************************/
-class GLATEdisp {
+class GLATEdisp : public GBase {
+
 public:
     // Constructors and destructors
     GLATEdisp(void);

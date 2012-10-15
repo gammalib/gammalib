@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableStringCol.hpp  - FITS table string column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableStringCol.hpp
  * @brief FITS table string column class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSTABLESTRINGCOL_HPP
@@ -55,11 +55,13 @@ public:
     const std::string&    operator() (const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
-    virtual std::string string(const int& row, const int& col = 0) const;
-    virtual double      real(const int& row, const int& col = 0) const;
-    virtual int         integer(const int& row, const int& col = 0) const;
-    virtual void        insert(const int& rownum, const int& nrows);
-    virtual void        remove(const int& rownum, const int& nrows);
+    virtual void                 clear(void);
+    virtual GFitsTableStringCol* clone(void) const;
+    virtual std::string          string(const int& row, const int& col = 0) const;
+    virtual double               real(const int& row, const int& col = 0) const;
+    virtual int                  integer(const int& row, const int& col = 0) const;
+    virtual void                 insert(const int& rownum, const int& nrows);
+    virtual void                 remove(const int& rownum, const int& nrows);
     
     // Other methods
     std::string* data(void) { return m_data; }
@@ -72,7 +74,6 @@ private:
     void                 copy_members(const GFitsTableStringCol& column);
     void                 free_members(void);
     void                 save(void);
-    GFitsTableStringCol* clone(void) const;
     std::string          ascii_format(void) const;
     std::string          binary_format(void) const;
     void                 alloc_data(void);

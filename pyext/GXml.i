@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GXml.i - XML class definition                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXml.i
  * @brief XML class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,7 @@
  *
  * @brief XML class
  ***************************************************************************/
-class GXml {
+class GXml : public GBase {
 
 public:
     // Constructors and destructors
@@ -46,6 +46,7 @@ public:
 
     // Methods
     void         clear(void);
+    GXml*        clone(void) const;
     void         append(GXmlNode* node);
     void         load(const std::string& filename);
     void         save(const std::string& filename);
@@ -64,5 +65,8 @@ public:
 %extend GXml {
     char *__str__() {
         return tochar(self->print());
+    }
+    GXml copy() {
+        return (*self);
     }
 };

@@ -21,7 +21,7 @@
 /**
  * @file GNodeArray.hpp
  * @brief Node array class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GNODEARRAY_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GVector.hpp"
 
 
@@ -53,11 +52,7 @@
  * wgt_left() and wgt_right().
  * If the nodes are equally spaced, interpolation is more rapid.
  ***************************************************************************/
-class GNodeArray {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GNodeArray& array);
-    friend GLog&         operator<<(GLog& log,        const GNodeArray& array);
+class GNodeArray : public GBase {
 
 public:
     // Constructors and destructors

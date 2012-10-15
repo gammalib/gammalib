@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GGti.cpp  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GGti.cpp
  * @brief Good time interval class implementation.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -778,43 +778,4 @@ void GGti::merge_gtis(void)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] gti Good Time Intervals.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GGti& gti)
-{
-     // Write GTIs in output stream
-    os << gti.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] gti Good Time Intervals.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GGti& gti)
-{
-    // Write GTIs into logger
-    log << gti.print();
-
-    // Return logger
-    return log;
 }

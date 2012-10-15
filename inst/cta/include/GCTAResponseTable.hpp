@@ -21,7 +21,7 @@
 /**
  * @file GCTAResponseTable.hpp
  * @brief CTA response table class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTARESPONSETABLE_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GNodeArray.hpp"
 #include "GFitsTable.hpp"
 
@@ -44,11 +43,7 @@
  * A response table contains response parameters in multi-dimensional vector
  * column format. Each dimension is described by axes columns. 
  ***************************************************************************/
-class GCTAResponseTable {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAResponseTable& table);
-    friend GLog&         operator<< (GLog& log,        const GCTAResponseTable& table);
+class GCTAResponseTable : public GBase {
 
 public:
     // Constructors and destructors

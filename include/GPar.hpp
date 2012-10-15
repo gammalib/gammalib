@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -38,15 +37,11 @@
  *
  * @brief Application parameter class interface defintion.
  ***************************************************************************/
-class GPar {
+class GPar : public GBase {
 
     // Friend classes
     friend class GPars;
     friend class GApplication;
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GPar& par);
-    friend GLog&         operator<<(GLog& log,        const GPar& par);
 
 public:
     // Constructors and destructors
@@ -62,6 +57,7 @@ public:
     GPar& operator= (const GPar& par);
 
     // Methods
+    void        clear(void);
     GPar*       clone(void) const;
     void        type(const std::string& type);
     void        mode(const std::string& mode);

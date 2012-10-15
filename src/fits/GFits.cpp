@@ -21,7 +21,7 @@
 /**
  * @file GFits.cpp
  * @brief FITS file access class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -29,7 +29,6 @@
 #include <config.h>
 #endif
 #include <cstdio>
-#include <iostream>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFits.hpp"
@@ -191,6 +190,15 @@ void GFits::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GFits* GFits::clone(void) const 
+{
+    return new GFits(*this);
 }
 
 
@@ -1066,42 +1074,4 @@ GFitsImage* GFits::new_primary(void)
 
     // Return image
     return image;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param os Output stream.
- * @param fits FITS file.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFits& fits)
-{
-     // Write column in output stream
-    os << fits.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param log Logger.
- * @param fits FITS file.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GFits& fits)
-{
-    // Write column in logger
-    log << fits.print();
-
-    // Return logger
-    return log;
 }

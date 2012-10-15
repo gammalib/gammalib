@@ -21,7 +21,7 @@
 /**
  * @file GObservations.cpp
  * @brief Observations container class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -206,6 +206,16 @@ void GObservations::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GObservations* GObservations::clone(void) const
+{
+    // Clone this image
+    return new GObservations(*this);
 }
 
 
@@ -568,43 +578,4 @@ void GObservations::free_members(void)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] obs Observation container.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GObservations& obs)
-{
-     // Write observations in output stream
-    os << obs.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] obs Observation container.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GObservations& obs)
-{
-    // Write observations into logger
-    log << obs.print();
-
-    // Return logger
-    return log;
 }

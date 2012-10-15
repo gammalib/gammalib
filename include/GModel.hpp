@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.hpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModel.hpp
  * @brief Abstract model base class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODEL_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GEnergy.hpp"
@@ -62,11 +61,7 @@ class GObservation;
  * model parameters. This will be done by the classes that actually
  * implement the model parameters.
  ***************************************************************************/
-class GModel {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GModel& model);
-    friend GLog&         operator<< (GLog& log, const GModel& model);
+class GModel : public GBase {
 
 public:
     // Constructors and destructors

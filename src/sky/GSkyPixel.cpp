@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GSkyPixel.cpp  -  Class that implements a 2D sky pixel index      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GSkyPixel.hpp
+ * @brief Sky pixel class implementation
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -143,6 +148,32 @@ GSkyPixel& GSkyPixel::operator= (const GSkyPixel& pixel)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GSkyPixel::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+    
+    // Return
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GSkyPixel* GSkyPixel::clone(void) const
+{
+    // Clone this image
+    return new GSkyPixel(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set x value of sky pixel
  *
  * @param[in] x X value.
@@ -248,43 +279,4 @@ void GSkyPixel::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] pixel Sky pixel.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GSkyPixel& pixel)
-{
-     // Write pixel in output stream
-    os << pixel.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] pixel Sky pixel.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GSkyPixel& pixel)
-{
-    // Write pixel into logger
-    log << pixel.print();
-
-    // Return logger
-    return log;
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GEvent.i  -  Abstract event class python I/F              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEvent.i
  * @brief GEvent class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -63,7 +63,7 @@
  * The GEvent class does not hold any data members. Data members are stored
  * in the derived classes.
  ***************************************************************************/
-class GEvent {
+class GEvent : public GBase {
 
 public:
     // Constructors and destructors

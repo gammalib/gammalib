@@ -35,7 +35,8 @@
  *
  * @brief Interface for the Fermi/LAT point spread function
  ***************************************************************************/
-class GLATPsf {
+class GLATPsf : public GBase {
+
 public:
     // Constructors and destructors
     GLATPsf(void);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *  GFitsTableShortCol.i  - FITS table short column class SWIG definition  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableShortCol.i
  * @brief FITS table short integer column class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -44,11 +44,13 @@ public:
     virtual ~GFitsTableShortCol(void);
 
     // Implement virtual methods
-    virtual std::string string(const int& row, const int& col = 0) const;
-    virtual double      real(const int& row, const int& col = 0) const;
-    virtual int         integer(const int& row, const int& col = 0) const;
-    virtual void        insert(const int& rownum, const int& nrows);
-    virtual void        remove(const int& rownum, const int& nrows);
+    virtual void                clear(void);
+    virtual GFitsTableShortCol* clone(void) const;
+    virtual std::string         string(const int& row, const int& col = 0) const;
+    virtual double              real(const int& row, const int& col = 0) const;
+    virtual int                 integer(const int& row, const int& col = 0) const;
+    virtual void                insert(const int& rownum, const int& nrows);
+    virtual void                remove(const int& rownum, const int& nrows);
     
     // Other methods
     short* data(void);

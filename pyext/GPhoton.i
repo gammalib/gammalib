@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPhoton.i  -  Photon class python I/F                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPhoton.i
  * @brief GPhoton class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -41,7 +41,7 @@
  * photon arrival direction, its energy and its arrival time. This class is
  * mainly used for Monte Carlo simulations.
  ***************************************************************************/
-class GPhoton {
+class GPhoton : public GBase {
 public:
     // Constructors and destructors
     GPhoton(void);
@@ -50,12 +50,13 @@ public:
  
     // Methods
     void           clear(void);
-    const GSkyDir& dir(void) const { return m_dir; }
-    const GEnergy& energy(void) const { return m_energy; }
-    const GTime&   time(void) const { return m_time; }
-    void           dir(const GSkyDir& dir) { m_dir=dir; }
-    void           energy(const GEnergy& energy) { m_energy=energy; }
-    void           time(const GTime& time) { m_time=time; }
+    GPhoton*       clone(void) const;
+    const GSkyDir& dir(void) const;
+    const GEnergy& energy(void) const;
+    const GTime&   time(void) const;
+    void           dir(const GSkyDir& dir);
+    void           energy(const GEnergy& energy);
+    void           time(const GTime& time);
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GEvents.hpp  -  Abstract event container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEvents.hpp
  * @brief Abstract event container class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GEVENTS_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GEvent.hpp"
 #include "GFits.hpp"
 #include "GEbounds.hpp"
@@ -61,11 +60,7 @@
  * An event iterator allows iterating over the event atoms or bins of the
  * container.
  ***************************************************************************/
-class GEvents {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GEvents& events);
-    friend GLog&         operator<<(GLog& log,        const GEvents& events);
+class GEvents : public GBase {
 
 public:
     // Constructors and destructors

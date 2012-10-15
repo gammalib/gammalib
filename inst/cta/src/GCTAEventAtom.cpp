@@ -158,7 +158,7 @@ void GCTAEventAtom::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GCTAEventAtom* GCTAEventAtom::clone(void) const
 {
     return new GCTAEventAtom(*this);
@@ -167,18 +167,16 @@ GCTAEventAtom* GCTAEventAtom::clone(void) const
 
 /***********************************************************************//**
  * @brief Print event information
- *
- * @todo Implement and use GTime::print method.
  ***************************************************************************/
 std::string GCTAEventAtom::print(void) const
 {
     // Initialise result string
     std::string result;
 
-    // Append number of counts
+    // Append event information
     result.append("Dir="+m_dir.print());
     result.append(" Energy="+m_energy.print());
-    result.append(" Time="+str(m_time.met()));
+    result.append(" Time="+m_time.print());
 
     // Return result
     return result;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GCTAModelRadial.hpp  -  Radial model abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GRan.hpp"
@@ -45,11 +44,7 @@
  * This class implements the radial component of the CTA radial acceptance
  * model.
  ***************************************************************************/
-class GCTAModelRadial {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GCTAModelRadial& model);
-    friend GLog&         operator<<(GLog& log,        const GCTAModelRadial& model);
+class GCTAModelRadial : public GBase {
 
 public:
     // Constructors and destructors

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPars.hpp - Application parameters                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPars.hpp
  * @brief Application parameter container class definition
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GPARS_HPP
@@ -30,9 +30,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
+#include "GBase.hpp"
 #include "GPar.hpp"
-#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -42,14 +41,10 @@
  *
  * This class holds a collection of application parameters.
  ***************************************************************************/
-class GPars {
+class GPars : public GBase {
 
     // Friend classes
     friend class GApplication;
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GPars& pars);
-    friend GLog&         operator<<(GLog&        log, const GPars& pars);
 
 public:
     // Constructors and destructors

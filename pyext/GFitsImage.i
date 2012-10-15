@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GFitsImage.i  - FITS image abstract base class SWIG interface      *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
+ *  copyright : (C) 2008-2012 by Juergen Knoedlseder                       *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImage.i
  * @brief GFitsImage class SWIG file.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -104,13 +104,14 @@ public:
     virtual ~GFitsImage(void);
 
     // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GFitsImage* clone(void) const = 0;
     virtual void*       pixels(void) = 0;
     virtual double      pixel(const int& ix) const = 0;
     virtual double      pixel(const int& ix, const int& iy) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz, const int& it) const = 0;
     virtual int         type(void) const = 0;
-    virtual GFitsImage* clone(void) const = 0;
 
     // Implemented pure virtual methods
     HDUType exttype(void) const { return HT_IMAGE; }

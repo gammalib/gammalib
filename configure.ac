@@ -32,7 +32,9 @@
 AC_INIT([gammalib], [0.7.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu no-dependencies])
+#AM_INIT_AUTOMAKE([gnu no-dependencies])
+AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability])
+#AM_INIT_AUTOMAKE([gnu -Wno-portability])
 AM_CONFIG_HEADER([config.h])
 
 
@@ -837,6 +839,7 @@ else
   # Do we have Python wrappers
   has_wrappers="yes"
   AC_CHECK_FILES([pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
+                  pyext/gammalib/base_wrap.cpp pyext/gammalib/base.py
                   pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
                   pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
                   pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
@@ -1206,6 +1209,7 @@ DX_INIT_DOXYGEN([GammaLib], [doc/Doxyfile], [doc/doxygen])
 #############################################################################
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 src/base/Makefile
                  src/support/Makefile
                  src/linalg/Makefile
                  src/numerics/Makefile

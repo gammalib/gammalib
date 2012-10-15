@@ -21,7 +21,7 @@
 /**
  * @file GNodeArray.i
  * @brief Node array class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,8 @@
  *
  * @brief Python interface for the node array class
  ***************************************************************************/
-class GNodeArray {
+class GNodeArray : public GBase {
+
 public:
     // Constructors and destructors
     GNodeArray(void);

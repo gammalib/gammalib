@@ -82,7 +82,7 @@ static int csv_tuple(PyObject *input, int *ptr) {
  *
  * @brief Column separated values table class definition
  ***************************************************************************/
-class GCsv {
+class GCsv : public GBase {
 public:
     // Constructors and destructors
     GCsv(void);

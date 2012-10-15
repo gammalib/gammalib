@@ -67,6 +67,7 @@ public:
 
     // Implemented pure virtual base class methods
     void        clear(void);
+    GMatrix*    clone(void) const;
     void        transpose(void);
     void        invert(void);
     void        add_col(const GVector& vector, const int& col);

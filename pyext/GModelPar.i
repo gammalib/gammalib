@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelPar.i  -  Model parameter class Python interface        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelPar.i
  * @brief Model parameter class Python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,8 @@
  *
  * @brief Model parameter class
  ***************************************************************************/
-class GModelPar {
+class GModelPar : public GBase {
+
 public:
     // Constructors and destructors
     GModelPar(void);

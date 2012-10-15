@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableFloatCol.cpp
  * @brief FITS table single precision column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -194,6 +194,35 @@ const float& GFitsTableFloatCol::operator() (const int& row, const int& inx) con
  =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableFloatCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableFloatCol* GFitsTableFloatCol::clone(void) const
+{
+    return new GFitsTableFloatCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -545,15 +574,6 @@ void GFitsTableFloatCol::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableFloatCol* GFitsTableFloatCol::clone(void) const
-{
-    return new GFitsTableFloatCol(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Returns format string of ASCII table
  ***************************************************************************/
 std::string GFitsTableFloatCol::ascii_format(void) const
@@ -666,10 +686,3 @@ void GFitsTableFloatCol::init_data(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GException_obs.cpp  -  observations exception handlers         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GException_obs.cpp
  * @brief Observation exception handler interface implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -320,7 +320,7 @@ GException::invalid_instrument::invalid_instrument(std::string origin,
             if (i > 0) {
                 m_message += ", ";
             }
-            m_message += "\"" + registry.instrument(i) + "\"";
+            m_message += "\"" + registry.name(i) + "\"";
         }
         m_message += ".";
     }

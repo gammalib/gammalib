@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSkyDir.cpp  -  Class that implements a sky direction          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GSkyDir.cpp
  * @brief Sky direction class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -148,6 +148,15 @@ void GSkyDir::clear(void)
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GSkyDir* GSkyDir::clone(void) const
+{
+    // Clone this image
+    return new GSkyDir(*this);
+}
 
 
 /***********************************************************************//**
@@ -715,38 +724,6 @@ void GSkyDir::euler(const int& type, const double& xin, const double &yin,
  =                                 Friends                                 =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] dir Sky direction.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GSkyDir& dir)
-{
-     // Write sky direction in output stream
-    os << dir.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] dir Sky direction.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GSkyDir& dir)
-{
-    // Write sky direction into logger
-    log << dir.print();
-
-    // Return logger
-    return log;
-}
-
 
 /***********************************************************************//**
  * @brief Equality operator

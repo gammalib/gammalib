@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.hpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GTime.hpp
  * @brief Time class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GTIME_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -44,11 +43,7 @@
  *
  * @todo Make use of MJD reference in operators.
  ***************************************************************************/
-class GTime {
-
-    // I/O friends
-    friend GLog&         operator<< (GLog& log,        const GTime& time);
-    friend std::ostream& operator<< (std::ostream& os, const GTime& time);
+class GTime : public GBase {
 
     // Operator friends
     friend GTime operator+ (const GTime &a, const GTime &b);
@@ -85,6 +80,7 @@ public:
 
     // Methods
     void        clear(void);
+    GTime*      clone(void) const;
     double      jd(void) const;
     double      mjd(void) const;
     double      met(void) const;

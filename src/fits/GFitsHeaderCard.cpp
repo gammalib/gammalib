@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GFitsHeaderCard.cpp  - FITS header card abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2011 by Jurgen Knodlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsHeaderCard.cpp
  * @brief FITS header card class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -30,7 +30,6 @@
 #endif
 #include <cfloat>
 #include <climits>
-#include <iostream>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -216,6 +215,31 @@ GFitsHeaderCard& GFitsHeaderCard::operator= (const GFitsHeaderCard& card)
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear object
+ ***************************************************************************/
+void GFitsHeaderCard::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GFitsHeaderCard* GFitsHeaderCard::clone(void) const
+{
+    return new GFitsHeaderCard(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Set name of header card
@@ -1161,43 +1185,3 @@ void GFitsHeaderCard::write(void* vptr)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] card Header card.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsHeaderCard& card)
-{
-     // Write card in output stream
-    os << card.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] card Header card.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GFitsHeaderCard& card)
-{
-    // Write crad in logger
-    log << card.print();
-
-    // Return logger
-    return log;
-}
-
-

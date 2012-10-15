@@ -233,8 +233,6 @@ std::string GCTAPointing::print(void) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Implement GMatrix::clear() method and use it.
  ***************************************************************************/
 void GCTAPointing::init_members(void)
 {
@@ -243,7 +241,7 @@ void GCTAPointing::init_members(void)
     m_zenith    = 0.0;
     m_azimuth   = 0.0;
     m_has_cache = false;
-    m_Rback = GMatrix();
+    m_Rback.clear();
 
     // Return
     return;

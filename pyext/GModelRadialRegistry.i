@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GModelRadialRegistry.i  -  Radial spatial model registry class      *
+ *           GModelRadialRegistry.i - Radial model registry class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelRadialRegistry.i
- * @brief Radial spatial model registry class Python interface definition
- * @author J. Knodlseder
+ * @brief Radial model registry class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -33,9 +33,10 @@
 /***********************************************************************//**
  * @class GModelRadialRegistry
  *
- * @brief Radial spatial model registry class
+ * @brief Radial model registry class
  ***************************************************************************/
-class GModelRadialRegistry {
+class GModelRadialRegistry : public GRegistry {
+
 public:
     // Constructors and destructors
     GModelRadialRegistry(void);
@@ -45,7 +46,7 @@ public:
 
     // Methods
     int           size(void) const;
-    GModelRadial* alloc(const std::string& type) const;
+    GModelRadial* alloc(const std::string& name) const;
     std::string   name(const int& index) const;
 };
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GInstDir.cpp  -  Instrument direction class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GInstDir.cpp
  * @brief Abstract instrument direction class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -163,42 +163,4 @@ void GInstDir::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] dir Instrument direction.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GInstDir& dir)
-{
-    // Write instrument direction in output stream
-    os << dir.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] dir Instrument direction.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GInstDir& dir)
-{
-    // Write instrument direction into logger
-    log << dir.print();
-
-    // Return logger
-    return log;
 }

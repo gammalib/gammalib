@@ -27,6 +27,10 @@
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 
+/* __ Include interface classes __________________________________________ */
+%import(module="gammalib.base") "GBase.i";
+%import(module="gammalib.base") "GRegistry.i";
+
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
 %import(module="gammalib.opt") "GOptimizerPars.i";

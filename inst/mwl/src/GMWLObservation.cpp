@@ -306,10 +306,10 @@ GMWLPointing* GMWLObservation::pointing(void) const
  * Reads information for a multi-wavelength observation from an XML element.
  * The expected format of the XML element is
  *
- *  <observation name="..." id="..." instrument="MWL">
- *    <parameter name="Instrument" value="..."/>
- *    <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="MWL">
+ *       <parameter name="Instrument" value="..."/>
+ *       <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
+ *     </observation>
  *
  * The extno and extname attributes of the data parameter are optional, and
  * can be used to indicate the extension number or name from which the
@@ -399,10 +399,10 @@ void GMWLObservation::read(const GXmlElement& xml)
  * Writes information for a multi-wavelength observation into an XML element.
  * The format of the XML element is
  *
- *  <observation name="..." id="..." instrument="MWL">
- *    <parameter name="Instrument" value="..."/>
- *    <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="MWL">
+ *       <parameter name="Instrument" value="..."/>
+ *       <parameter name="Data" file="..." [extno="..."] [extname="..."]/>
+ *     </observation>
  ***************************************************************************/
 void GMWLObservation::write(GXmlElement& xml) const
 {

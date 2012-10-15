@@ -21,7 +21,7 @@
 /**
  * @file GLATPsf.hpp
  * @brief Fermi LAT point spread function class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATPSF_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GLATPsfBase.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATPointing.hpp"
@@ -55,11 +54,7 @@
  *
  * @todo Implement Phi dependence
  ***************************************************************************/
-class GLATPsf {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATPsf& psf);
-    friend GLog&         operator<< (GLog& log, const GLATPsf& psf);
+class GLATPsf : public GBase {
 
 public:
     // Constructors and destructors

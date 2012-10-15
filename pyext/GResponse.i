@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GResponse.i  -  Abstract response base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GResponse.i
  * @brief Abstract response base class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,7 @@
  *
  * @brief Abstract response base class
  ***************************************************************************/
-class GResponse {
+class GResponse : public GBase {
 
 public:
     // Constructors and destructors

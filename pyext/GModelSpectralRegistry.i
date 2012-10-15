@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GModelSpectralRegistry.i  -  Spectral model registry class python I/F  *
+ *        GModelSpectralRegistry.i - Spectral model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralRegistry.i
- * @brief GModelSpectralRegistry class python interface.
+ * @brief Spectral model registry class definition
  * @author J. Knodlseder
  */
 %{
@@ -33,9 +33,10 @@
 /***********************************************************************//**
  * @class GModelSpectralRegistry
  *
- * @brief Interface definition for the spectral model registry class.
+ * @brief Interface definition for the spectral model registry class
  ***************************************************************************/
-class GModelSpectralRegistry {
+class GModelSpectralRegistry : public GRegistry {
+
 public:
     // Constructors and destructors
     GModelSpectralRegistry(void);
@@ -45,7 +46,7 @@ public:
 
     // Methods
     int             size(void) const { return m_number; }
-    GModelSpectral* alloc(const std::string& type) const;
+    GModelSpectral* alloc(const std::string& name) const;
     std::string     name(const int& index) const;
 };
 

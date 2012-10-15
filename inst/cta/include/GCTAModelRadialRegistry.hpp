@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GCTAModelRadialRegistry.hpp  -  CTA Radial model registry class     *
+ *      GCTAModelRadialRegistry.hpp - CTA Radial model registry class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialRegistry.hpp
- * @brief GCTAModelRadialRegistry class interface definition
- * @author J. Knodlseder
+ * @brief CTA radial model registry class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAMODELRADIALREGISTRY_HPP
@@ -29,31 +29,28 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GRegistry.hpp"
 #include "GCTAModelRadial.hpp"
 
 
 /***********************************************************************//**
  * @class GCTAModelRadialRegistry
  *
- * @brief Interface definition for the CTA radial model registry class.
+ * @brief Interface definition for the CTA radial model registry class
  *
  * The registry class allows the registration of radial models for CTA that
  * are not necessarily compiled into the GammaLib. It uses the static members
  * m_number, m_names, and m_models which are allocated globally to keep track
  * of radial models that are available throughout all linked libraries. To
  * register a radial model it is sufficient to add
- *  const GCTAModelRadialXXX      g_cta_radial_XXX_seed;
- *  const GCTAModelRadialRegistry g_cta_radial_XXX_registry(&g_cta_radial_XXX_seed);
+ *
+ *     const GCTAModelRadialXXX      g_cta_radial_XXX_seed;
+ *     const GCTAModelRadialRegistry g_cta_radial_XXX_registry(&g_cta_radial_XXX_seed);
+ *
  * at the top of the .cpp file of the radial model. Here, XXX is a unique
  * name that describes the model.
  ***************************************************************************/
-class GCTAModelRadialRegistry {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GCTAModelRadialRegistry& registry);
-    friend GLog&         operator<<(GLog& log, const GCTAModelRadialRegistry& registry);
+class GCTAModelRadialRegistry : public GRegistry {
 
 public:
     // Constructors and destructors
@@ -67,7 +64,7 @@ public:
 
     // Methods
     int              size(void) const { return m_number; }
-    GCTAModelRadial* alloc(const std::string& type) const;
+    GCTAModelRadial* alloc(const std::string& name) const;
     std::string      name(const int& index) const;
     std::string      print(void) const;
 

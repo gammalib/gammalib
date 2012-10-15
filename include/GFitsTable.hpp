@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsTable.hpp  - FITS table abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,20 +21,15 @@
 /**
  * @file GFitsTable.hpp
  * @brief FITS table abstract base class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSTABLE_HPP
 #define GFITSTABLE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsTableCol.hpp"
-
-
-/* __ Structures _________________________________________________________ */
 
 
 /***********************************************************************//**
@@ -49,10 +44,6 @@
  * @todo Implement remove_column method
  ***************************************************************************/
 class GFitsTable : public GFitsHDU {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsTable& table);
-    friend GLog&         operator<< (GLog& log, const GFitsTable& table);
 
 public:
     // Constructors and destructors
@@ -69,7 +60,9 @@ public:
     const GFitsTableCol& operator[](const std::string& colname) const;
 
     // Pure virtual methods
+    virtual void        clear(void) = 0;
     virtual GFitsTable* clone(void) const = 0;
+    virtual HDUType     exttype(void) const = 0;
 
     // Implemented Methods
     void        append_column(GFitsTableCol& column);
@@ -84,6 +77,9 @@ public:
 
 protected:
     // Protected methods
+    void  init_members(void);
+    void  copy_members(const GFitsTable& table);
+    void  free_members(void);
     void  data_open(void* vptr);
     void  data_save(void);
     void  data_close(void);
@@ -100,9 +96,6 @@ protected:
 
 private:
     // Private methods
-    void            init_members(void);
-    void            copy_members(const GFitsTable& table);
-    void            free_members(void);
     GFitsTableCol*  alloc_column(int typecode) const;
     GFitsTableCol*  ptr_column(const std::string& colname) const;
 };

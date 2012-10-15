@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GXml.hpp - XML class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,16 +21,15 @@
 /**
  * @file GXml.hpp
  * @brief XML class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GXML_HPP
 #define GXML_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlDocument.hpp"
 #include "GXmlElement.hpp"
@@ -47,16 +46,12 @@
  * This class implements an XML object. It holds the root node of the XML
  * document.
  ***************************************************************************/
-class GXml {
+class GXml : public GBase {
 
     // Friend classes
     friend class GXmlNode;
     friend class GXmlDocument;
     friend class GXmlText;
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GXml& xml);
-    friend GLog&         operator<<(GLog& log,        const GXml& xml);
 
 public:
     // Constructors and destructors
@@ -70,6 +65,7 @@ public:
 
     // Methods
     void         clear(void);
+    GXml*        clone(void) const;
     void         append(GXmlNode* node);
     void         load(const std::string& filename);
     void         save(const std::string& filename);
@@ -79,7 +75,8 @@ public:
     int          elements(const std::string& name) const;
     GXmlElement* element(int index) const;
     GXmlElement* element(const std::string& name, int index) const;
-    std::string  print(int indent = 0) const;
+    std::string  print(void) const;
+    std::string  print(int indent) const;
 
 protected:
     // Protected enumerators

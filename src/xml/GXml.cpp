@@ -21,7 +21,7 @@
 /**
  * @file GXml.cpp
  * @brief XML class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -171,6 +171,16 @@ void GXml::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GXml* GXml::clone(void) const
+{
+    // Clone this image
+    return new GXml(*this);
 }
 
 
@@ -340,6 +350,19 @@ std::string GXml::print(int indent) const
 
     // Append model
     result.append("\n"+m_root.print(0));
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Print XML object
+ ***************************************************************************/
+std::string GXml::print(void) const
+{
+    // Initialise result string
+    std::string result = print(0);
 
     // Return result
     return result;
@@ -719,44 +742,4 @@ GXml::MarkupType GXml::get_markuptype(const std::string& segment) const
 
     // Return type
     return type;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] xml XML object.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GXml& xml)
-{
-     // Write XML document in output stream
-    os << "=== GXml ===" << std::endl;
-    os << xml.m_root.print(0);
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] xml XML object.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GXml& xml)
-{
-     // Write XML document into logger
-    log << "=== GXml ===" << std::endl;
-    log << xml.m_root.print(0);
-
-    // Return logger
-    return log;
 }

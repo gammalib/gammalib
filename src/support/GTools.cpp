@@ -96,8 +96,8 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
  * @param[in] arg String
  *
  * Expands any environment variable that is found in a string. Valid
- * delimiters for environment variables are $ENV{<name>}, $ENV(<name>),
- * ${<name>}, $(<name>) and $<name> (in the last case the terminating
+ * delimiters for environment variables are $ENV{\<name\>}, $ENV(\<name\>),
+ * ${\<name\>}, $(\<name\>) and $\<name\> (in the last case the terminating
  * delimiter is either a / or a blank character or the end of the string).
  * Environment variables occuring within single quotes (') are ignored.
  *

@@ -40,7 +40,7 @@
  *
  * @brief Interface for the CTA response table class
  ***************************************************************************/
-class GCTAResponseTable {
+class GCTAResponseTable : public GBase {
 
 public:
     // Constructors and destructors
@@ -74,5 +74,8 @@ public:
 %extend GCTAResponseTable {
     char *__str__() {
         return tochar(self->print());
+    }
+    GCTAResponseTable copy() {
+        return (*self);
     }
 };

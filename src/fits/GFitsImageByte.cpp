@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsImageByte.cpp  - FITS Byte image class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,13 @@
 /**
  * @file GFitsImageByte.cpp
  * @brief FITS byte image class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsImageByte.hpp"
@@ -443,6 +442,41 @@ const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsImageByte::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsImage::free_members();
+    this->GFitsHDU::free_members();
+
+    // Initialise members
+    this->GFitsHDU::init_members();
+    this->GFitsImage::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone FITS image
+ *
+ * Cloning provides a copy of the FITS file. Cloning is used to allocate
+ * derived classes into a base class pointer.
+ ***************************************************************************/
+GFitsImageByte* GFitsImageByte::clone(void) const
+{
+    // Clone this image
+    return new GFitsImageByte(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Image pixel access operator
  *
  * @param[in] ix Pixel index (starting from 0).
@@ -685,19 +719,6 @@ int GFitsImageByte::type(void) const
 }
 
 
-/***********************************************************************//**
- * @brief Clone FITS image
- *
- * Cloning provides a copy of the FITS file. Cloning is used to allocate
- * derived classes into a base class pointer.
- ***************************************************************************/
-GFitsImageByte* GFitsImageByte::clone(void) const
-{
-    // Clone this image
-    return new GFitsImageByte(*this);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -903,10 +924,3 @@ void GFitsImageByte::alloc_nulval(const void* value)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

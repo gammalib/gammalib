@@ -29,8 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
 #include "GRoi.hpp"
 #include "GLATInstDir.hpp"
 
@@ -45,10 +43,6 @@
  * been implemented.
  ***************************************************************************/
 class GLATRoi : public GRoi {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATRoi& roi);
-    friend GLog&         operator<< (GLog& log, const GLATRoi& roi);
 
 public:
     // Constructors and destructors

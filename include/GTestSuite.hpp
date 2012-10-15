@@ -34,7 +34,6 @@ class GTestSuite;
 typedef void (GTestSuite::*pfunction)(void);
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <vector>
 #include <string>
 #include "GLog.hpp"
@@ -73,7 +72,7 @@ public:
     virtual bool              run(void);
     std::string               name(void) const;
     void                      name(const std::string& name);
-    void                      cout(bool cout);
+    void                      cout(const bool& flag);
     void                      test_assert(bool               result,
                                           const std::string& name,
                                           const std::string& message="");

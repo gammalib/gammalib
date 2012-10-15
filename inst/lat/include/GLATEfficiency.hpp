@@ -21,7 +21,7 @@
 /**
  * @file GLATEfficiency.hpp
  * @brief Fermi/LAT IRF efficiency factor functor class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATEFFICIENCY_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -39,11 +38,7 @@
  *
  * @brief Interface for the Fermi/LAT efficiency factor functor
  ***************************************************************************/
-class GLATEfficiency {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATEfficiency& eff);
-    friend GLog&         operator<< (GLog& log,        const GLATEfficiency& eff);
+class GLATEfficiency : public GBase {
 
 public:
     // Constructors and destructors

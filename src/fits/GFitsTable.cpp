@@ -21,7 +21,7 @@
 /**
  * @file GFitsTable.cpp
  * @brief FITS table abstract base class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -1442,42 +1442,4 @@ GFitsTableCol* GFitsTable::ptr_column(const std::string& colname) const
     
     // Return pointer
     return ptr;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] table FITS table.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTable& table)
-{
-     // Write table in output stream
-    os << table.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] table FITS table.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GFitsTable& table)
-{
-    // Write table into logger
-    log << table.print();
-
-    // Return logger
-    return log;
 }

@@ -56,7 +56,7 @@
  * via members of GFits. A FITS file is composed of Header Data Units (HDU)
  * which are implemented by the GFitsHDU class.
  ***************************************************************************/
-class GFits {
+class GFits : public GBase {
 
 public:
     // Constructors and destructors
@@ -67,6 +67,7 @@ public:
 
     // Methods
     void        clear(void);
+    GFits*      clone(void) const;
     int         size(void) const;
     void        open(const std::string& filename, bool create = false);
     void        save(bool clobber = false);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.hpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2010 by Jurgen Knodlseder                              *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEdisp.hpp
  * @brief Fermi LAT energy dispersion class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATEDISP_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponseTable.hpp"
 #include "GFits.hpp"
@@ -48,11 +47,7 @@
  *
  * @todo Implement support for older response functions?
  ***************************************************************************/
-class GLATEdisp {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATEdisp& edisp);
-    friend GLog&         operator<< (GLog& log, const GLATEdisp& edisp);
+class GLATEdisp : public GBase {
 
 public:
     // Constructors and destructors

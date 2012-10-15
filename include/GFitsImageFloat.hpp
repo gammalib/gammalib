@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageFloat.hpp
  * @brief GFitsImageFloat class definition.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSIMAGEFLOAT_HPP
@@ -61,6 +61,8 @@ public:
     const float&     operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
+    void             clear(void);
+    GFitsImageFloat* clone(void) const;
     float&           at(const int& ix);
     float&           at(const int& ix, const int& iy);
     float&           at(const int& ix, const int& iy, const int& iz);
@@ -75,7 +77,6 @@ public:
     double           pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*            pixels(void);
     int              type(void) const;
-    GFitsImageFloat* clone(void) const;
 
 private:
     // Private methods
