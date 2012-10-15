@@ -322,21 +322,23 @@ void GCTAObservation::pointing(const GCTAPointing& pointing)
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="EventList" file="..."/>
- *       <parameter name="ARF" file="..."/>
- *       <parameter name="RMF" file="..."/>
- *       <parameter name="PSF" file="..."/>
+ *       <parameter name="EffectiveArea"       file="..."/>
+ *       <parameter name="PointSpreadFunction" file="..."/>
+ *       <parameter name="EnergyDispersion"    file="..."/>
  *     </observation>
  *
  * for an unbinned observation and
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="CountsMap" file="..."/>
- *       <parameter name="ARF" file="..."/>
- *       <parameter name="RMF" file="..."/>
- *       <parameter name="PSF" file="..."/>
+ *       <parameter name="EffectiveArea"       file="..."/>
+ *       <parameter name="PointSpreadFunction" file="..."/>
+ *       <parameter name="EnergyDispersion"    file="..."/>
  *     </observation>
  *
  * for a binned observation.
+ *
+ * @todo Still supports old ARF, PSF and RMF parameter names.
  ***************************************************************************/
 void GCTAObservation::read(const GXmlElement& xml)
 {
@@ -344,9 +346,9 @@ void GCTAObservation::read(const GXmlElement& xml)
     clear();
 
     // Initialise response parameters
-    std::string arf;
-    std::string rmf;
+    std::string aeff;
     std::string psf;
+    std::string rmf;
     double      thetacut = 0.0;
     double      scale    = 1.0;
 
@@ -395,11 +397,12 @@ void GCTAObservation::read(const GXmlElement& xml)
             npar[0]++;
         }
 
-        // Handle ARF
-        else if (par->attribute("name") == "ARF") {
+        // Handle effective area
+        else if ((par->attribute("name") == "EffectiveArea") ||
+                 (par->attribute("name") == "ARF")) {
 
             // Store filename
-            arf = par->attribute("file");
+            aeff = par->attribute("file");
 
             // Optionally extract thetacut (0.0 if no thetacut)
             std::string s_thetacut = par->attribute("thetacut");
@@ -417,15 +420,18 @@ void GCTAObservation::read(const GXmlElement& xml)
             npar[1]++;
         }
 
-        // Handle RMF
-        else if (par->attribute("name") == "RMF") {
-            rmf = par->attribute("file");
+        // Handle PSF
+        else if ((par->attribute("name") == "PointSpreadFunction") ||
+                 (par->attribute("name") == "PSF")) {
+            psf = par->attribute("file");
             npar[2]++;
         }
 
-        // Handle PSF
-        else if (par->attribute("name") == "PSF") {
-            psf = par->attribute("file");
+
+        // Handle RMF
+        else if ((par->attribute("name") == "EnergyDispersion") ||
+                 (par->attribute("name") == "RMF")) {
+            rmf = par->attribute("file");
             npar[3]++;
         }
 
@@ -434,8 +440,8 @@ void GCTAObservation::read(const GXmlElement& xml)
     // Verify that all parameters were found
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
         throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"EventList\" or \"CountsMap\" and \"ARF\", \"RMF\""
-              " \"PSF\" parameters.");
+              "Require \"EventList\" or \"CountsMap\" and \"EffectiveArea\""
+              ", \"PointSpreadFunction\" and \"EnergyDispersion\" parameters.");
     }
 
     // Delete old response function
@@ -444,16 +450,16 @@ void GCTAObservation::read(const GXmlElement& xml)
     // Allocate new CTA response function
     m_response = new GCTAResponse;
 
-    // Load PSF (need this before ARF to handle thetacut)
+    // Load PSF (need this before Aeff to handle thetacut)
     if (strip_whitespace(psf).length() > 0) {
         m_response->load_psf(psf);
     }
 
-    // Load ARF
-    if (strip_whitespace(arf).length() > 0) {
+    // Load effective area
+    if (strip_whitespace(aeff).length() > 0) {
         m_response->arf_thetacut(thetacut);
         m_response->arf_scale(scale);
-        m_response->load_arf(arf);
+        m_response->load_arf(aeff);
     }
 
     // Return
@@ -478,18 +484,18 @@ void GCTAObservation::read(const GXmlElement& xml)
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="EventList" file="..."/>
- *       <parameter name="ARF" file="..."/>
- *       <parameter name="RMF" file="..."/>
- *       <parameter name="PSF" file="..."/>
+ *       <parameter name="EffectiveArea"       file="..."/>
+ *       <parameter name="PointSpreadFunction" file="..."/>
+ *       <parameter name="EnergyDispersion"    file="..."/>
  *     </observation>
  *
  * for an unbinned observation and
  *
  *     <observation name="..." id="..." instrument="...">
  *       <parameter name="CountsMap" file="..."/>
- *       <parameter name="ARF" file="..."/>
- *       <parameter name="RMF" file="..."/>
- *       <parameter name="PSF" file="..."/>
+ *       <parameter name="EffectiveArea"       file="..."/>
+ *       <parameter name="PointSpreadFunction" file="..."/>
+ *       <parameter name="EnergyDispersion"    file="..."/>
  *     </observation>
  *
  * for a binned observation.
@@ -518,9 +524,9 @@ void GCTAObservation::write(GXmlElement& xml) const
         else {
             xml.append(new GXmlElement("parameter name=\"CountsMap\""));
         }
-        xml.append(new GXmlElement("parameter name=\"ARF\""));
-        xml.append(new GXmlElement("parameter name=\"RMF\""));
-        xml.append(new GXmlElement("parameter name=\"PSF\""));
+        xml.append(new GXmlElement("parameter name=\"EffectiveArea\""));
+        xml.append(new GXmlElement("parameter name=\"PointSpreadFunction\""));
+        xml.append(new GXmlElement("parameter name=\"EnergyDispersion\""));
     }
 
     // Verify that XML element has exactly 4 parameters
@@ -549,16 +555,16 @@ void GCTAObservation::write(GXmlElement& xml) const
         }
 
         // Handle ARF
-        else if (par->attribute("name") == "ARF") {
-            std::string arf      = "";
+        else if (par->attribute("name") == "EffectiveArea") {
+            std::string aeff     = "";
             double      thetacut = 0.0;
             double      scale    = 1.0;
             if (m_response != NULL) {
-                arf      = m_response->arffile();
+                aeff     = m_response->arffile();
                 thetacut = m_response->arf_thetacut();
                 scale    = m_response->arf_scale();
             }
-            par->attribute("file", arf);
+            par->attribute("file", aeff);
             if (thetacut > 0.0) {
                 par->attribute("thetacut", str(thetacut));
             }
@@ -568,23 +574,23 @@ void GCTAObservation::write(GXmlElement& xml) const
             npar[1]++;
         }
 
-        // Handle RMF
-        else if (par->attribute("name") == "RMF") {
-            std::string rmf = "";
-            if (m_response != NULL) {
-                rmf = m_response->rmffile();
-            }
-            par->attribute("file", rmf);
-            npar[2]++;
-        }
-
         // Handle PSF
-        else if (par->attribute("name") == "PSF") {
+        else if (par->attribute("name") == "PointSpreadFunction") {
             std::string psf = "";
             if (m_response != NULL) {
                 psf = m_response->psffile();
             }
             par->attribute("file", psf);
+            npar[2]++;
+        }
+
+        // Handle RMF
+        else if (par->attribute("name") == "EnergyDispersion") {
+            std::string rmf = "";
+            if (m_response != NULL) {
+                rmf = m_response->rmffile();
+            }
+            par->attribute("file", rmf);
             npar[3]++;
         }
 
