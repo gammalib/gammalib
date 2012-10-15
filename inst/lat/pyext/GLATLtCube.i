@@ -35,7 +35,7 @@
  *
  * @brief Interface for the Fermi LAT lifetime cube.
  ***************************************************************************/
-class GLATLtCube {
+class GLATLtCube : public GBase {
 
 public:
     // Constructors and destructors

@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GFitsTable.hpp"
 #include "GSkymap.hpp"
 #include "GSkyDir.hpp"
@@ -52,10 +50,6 @@ typedef double (*_ltcube_ctheta_phi)(const double& costheta, const double& phi);
  * of the cosine of the zenith angle and (optionally) of the azimuth angle.
  ***************************************************************************/
 class GLATLtCubeMap : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATLtCubeMap& map);
-    friend GLog&         operator<< (GLog& log, const GLATLtCubeMap& map);
 
 public:
     // Constructors and destructors

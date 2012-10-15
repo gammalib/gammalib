@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GSkyDir.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
@@ -47,10 +45,6 @@
  * angle phi. Both are stored in units of radians in this class.
  ***************************************************************************/
 class GCTADir : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GCTADir& dir);
-    friend GLog&         operator<<(GLog& log,        const GCTADir& dir);
 
 public:
     // Constructors and destructors

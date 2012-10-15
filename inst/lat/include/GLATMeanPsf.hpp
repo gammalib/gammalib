@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GSkyDir.hpp"
 #include "GNodeArray.hpp"
 
@@ -51,10 +49,6 @@ class GLATObservation;
  * function and zenith and azimuth angles for an observation.
  ***************************************************************************/
 class GLATMeanPsf : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATMeanPsf& psf);
-    friend GLog&         operator<< (GLog& log, const GLATMeanPsf& psf);
 
 public:
     // Constructors and destructors

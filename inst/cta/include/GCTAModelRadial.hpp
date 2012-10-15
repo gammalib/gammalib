@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GRan.hpp"
@@ -47,10 +45,6 @@
  * model.
  ***************************************************************************/
 class GCTAModelRadial : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GCTAModelRadial& model);
-    friend GLog&         operator<<(GLog& log,        const GCTAModelRadial& model);
 
 public:
     // Constructors and destructors

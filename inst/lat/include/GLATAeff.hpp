@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponseTable.hpp"
 #include "GLATEfficiency.hpp"
@@ -53,10 +51,6 @@
  * Pass 7 data analysis.
  ***************************************************************************/
 class GLATAeff : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATAeff& aeff);
-    friend GLog&         operator<< (GLog& log,        const GLATAeff& aeff);
 
 public:
     // Constructors and destructors

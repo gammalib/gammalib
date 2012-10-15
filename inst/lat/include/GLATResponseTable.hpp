@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GNodeArray.hpp"
 #include "GFitsTable.hpp"
 
@@ -48,10 +46,6 @@
  * log10 of energy and in cos theta.
  ***************************************************************************/
 class GLATResponseTable : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATResponseTable& table);
-    friend GLog&         operator<< (GLog& log, const GLATResponseTable& table);
 
 public:
     // Constructors and destructors

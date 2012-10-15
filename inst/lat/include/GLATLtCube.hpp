@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GLATLtCubeMap.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
@@ -49,10 +47,6 @@
  * angles for a given observation. The azimuth dependence is optional. 
  ***************************************************************************/
 class GLATLtCube : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATLtCube& cube);
-    friend GLog&         operator<< (GLog& log, const GLATLtCube& cube);
 
 public:
     // Constructors and destructors

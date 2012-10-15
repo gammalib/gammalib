@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GLATPointing.hpp"
 #include "GLATResponseTable.hpp"
 #include "GFits.hpp"
@@ -50,10 +48,6 @@
  * @todo Implement support for older response functions?
  ***************************************************************************/
 class GLATEdisp : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATEdisp& edisp);
-    friend GLog&         operator<< (GLog& log, const GLATEdisp& edisp);
 
 public:
     // Constructors and destructors

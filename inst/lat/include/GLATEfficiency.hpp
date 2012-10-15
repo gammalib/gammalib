@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 
 
 /***********************************************************************//**
@@ -41,10 +39,6 @@
  * @brief Interface for the Fermi/LAT efficiency factor functor
  ***************************************************************************/
 class GLATEfficiency : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATEfficiency& eff);
-    friend GLog&         operator<< (GLog& log,        const GLATEfficiency& eff);
 
 public:
     // Constructors and destructors

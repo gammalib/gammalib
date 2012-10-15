@@ -35,7 +35,8 @@
  *
  * @brief CTA camera direction class.
  ***************************************************************************/
-class GCTADir {
+class GCTADir : public GBase {
+
 public:
     // Constructors and destructors
     GCTADir(void);

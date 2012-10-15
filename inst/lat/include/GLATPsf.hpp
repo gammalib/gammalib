@@ -29,9 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GLATPsfBase.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATPointing.hpp"
@@ -57,10 +55,6 @@
  * @todo Implement Phi dependence
  ***************************************************************************/
 class GLATPsf : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATPsf& psf);
-    friend GLog&         operator<< (GLog& log, const GLATPsf& psf);
 
 public:
     // Constructors and destructors

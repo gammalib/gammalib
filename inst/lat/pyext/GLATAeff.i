@@ -35,7 +35,8 @@
  *
  * @brief Interface for the Fermi/LAT effective area
  ***************************************************************************/
-class GLATAeff {
+class GLATAeff : public GBase {
+
 public:
     // Constructors and destructors
     GLATAeff(void);

@@ -30,9 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
 #include "GBase.hpp"
-#include "GLog.hpp"
 #include "GNodeArray.hpp"
 #include "GFitsTable.hpp"
 
@@ -46,10 +44,6 @@
  * column format. Each dimension is described by axes columns. 
  ***************************************************************************/
 class GCTAResponseTable : public GBase {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GCTAResponseTable& table);
-    friend GLog&         operator<< (GLog& log,        const GCTAResponseTable& table);
 
 public:
     // Constructors and destructors
