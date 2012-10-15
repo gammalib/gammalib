@@ -1,5 +1,5 @@
 /***************************************************************************
- *                      GBase.hpp - GammaLib base class                    *
+ *                      GBase.cpp - GammaLib base class                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GBase.hpp
+ * @file GBase.cpp
  * @brief Implementation of interface for all GammaLib classes
  * @author Juergen Knoedlseder
  */
@@ -54,7 +54,7 @@
  ***************************************************************************/
 std::ostream& operator<<(std::ostream& os, const GBase& base)
 {
-     // Write class in output stream
+    // Write class in output stream
     os << base.print();
 
     // Return output stream
