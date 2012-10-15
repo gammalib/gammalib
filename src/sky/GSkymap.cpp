@@ -1021,7 +1021,7 @@ bool GSkymap::isinmap(const GSkyDir& dir) const
 /***********************************************************************//**
  * @brief Verifies if sky pixel falls in map
  *
- * @param[in] dir Sky direction.
+ * @param[in] pixel Sky pixel.
  *
  * This method checks if the specified sky pixel is within the skymap.
  ***************************************************************************/

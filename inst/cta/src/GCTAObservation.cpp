@@ -320,21 +320,21 @@ void GCTAObservation::pointing(const GCTAPointing& pointing)
  * Reads information for a CTA observation from an XML element.
  * The expected format of the XML element is
  *
- *  <observation name="..." id="..." instrument="...">
- *    <parameter name="EventList" file="..."/>
- *    <parameter name="ARF" file="..."/>
- *    <parameter name="RMF" file="..."/>
- *    <parameter name="PSF" file="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="EventList" file="..."/>
+ *       <parameter name="ARF" file="..."/>
+ *       <parameter name="RMF" file="..."/>
+ *       <parameter name="PSF" file="..."/>
+ *     </observation>
  *
  * for an unbinned observation and
  *
- *  <observation name="..." id="..." instrument="...">
- *    <parameter name="CountsMap" file="..."/>
- *    <parameter name="ARF" file="..."/>
- *    <parameter name="RMF" file="..."/>
- *    <parameter name="PSF" file="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="CountsMap" file="..."/>
+ *       <parameter name="ARF" file="..."/>
+ *       <parameter name="RMF" file="..."/>
+ *       <parameter name="PSF" file="..."/>
+ *     </observation>
  *
  * for a binned observation.
  ***************************************************************************/
@@ -476,21 +476,21 @@ void GCTAObservation::read(const GXmlElement& xml)
  * Writes information for a CTA observation into an XML element. The expected
  * format of the XML element is
  *
- *  <observation name="..." id="..." instrument="...">
- *    <parameter name="EventList" file="..."/>
- *    <parameter name="ARF" file="..."/>
- *    <parameter name="RMF" file="..."/>
- *    <parameter name="PSF" file="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="EventList" file="..."/>
+ *       <parameter name="ARF" file="..."/>
+ *       <parameter name="RMF" file="..."/>
+ *       <parameter name="PSF" file="..."/>
+ *     </observation>
  *
  * for an unbinned observation and
  *
- *  <observation name="..." id="..." instrument="...">
- *    <parameter name="CountsMap" file="..."/>
- *    <parameter name="ARF" file="..."/>
- *    <parameter name="RMF" file="..."/>
- *    <parameter name="PSF" file="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="CountsMap" file="..."/>
+ *       <parameter name="ARF" file="..."/>
+ *       <parameter name="RMF" file="..."/>
+ *       <parameter name="PSF" file="..."/>
+ *     </observation>
  *
  * for a binned observation.
  *

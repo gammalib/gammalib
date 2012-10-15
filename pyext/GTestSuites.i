@@ -54,7 +54,7 @@ public:
     void         save(std::string filename);
     std::string  name(void) const;
     void         name(const std::string& name);
-    void         cout(bool cout);
+    void         cout(const bool& flag);
     int          errors(void) const;
     int          failures(void) const;
     int          tests(void) const;

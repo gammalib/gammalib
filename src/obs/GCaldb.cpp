@@ -474,10 +474,14 @@ void GCaldb::set_database(const std::string& pathname)
  *            No read permission granted to calibration directory.
  *
  * The calibration directory path is given by
- * $CALDB/data/<mission>
+ *
+ *     $CALDB/data/<mission>
+ *
  * or
- * $CALDB/data/<mission>/<instrument>
- * where <mission> is the name of the mission and <instrument> is the
+ *
+ *     $CALDB/data/<mission>/<instrument>
+ *
+ * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case). The arguments provided to the
  * method are transformed to lower case.
  ***************************************************************************/
@@ -534,10 +538,14 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
  *            CIF not found.
  *
  * The calibration directory path is given by
- * $CALDB/data/<mission>/caldb.indx
+ *
+ *     $CALDB/data/<mission>/caldb.indx
+ *
  * or
- * $CALDB/data/<mission>/<instrument>/caldb.indx
- * where <mission> is the name of the mission and <instrument> is the
+ *
+ *     $CALDB/data/<mission>/<instrument>/caldb.indx
+ *
+ * where \<mission\> is the name of the mission and \<instrument\> is the
  * optional instrument name (all lower case). The arguments provided to the
  * method are transformed to lower case.
  ***************************************************************************/

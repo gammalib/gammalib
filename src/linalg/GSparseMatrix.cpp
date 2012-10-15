@@ -771,7 +771,7 @@ void GSparseMatrix::add_col(const GVector& vector, const int& col)
  *
  * @param[in] values Compressed array.
  * @param[in] rows Row indices of array.
- * @param[in] num Number of elements in array.
+ * @param[in] number Number of elements in array.
  * @param[in] col Column index (starting from 0).
  *
  * @exception GException::out_of_range
@@ -1037,7 +1037,7 @@ void GSparseMatrix::insert_col(const GVector& vector, const int& col)
  *
  * @param[in] values Compressed array.
  * @param[in] rows Row indices of array.
- * @param[in] num Number of elements in array.
+ * @param[in] number Number of elements in array.
  * @param[in] col Column index (starting from 0).
  *
  * @exception GException::out_of_range
@@ -1860,7 +1860,7 @@ int GSparseMatrix::stack_push_column(const GVector& vector, const int& col)
  *
  * @param[in] values Compressed array.
  * @param[in] rows Row indices of array.
- * @param[in] num Number of elements in array.
+ * @param[in] number Number of elements in array.
  * @param[in] col Column index (starting from 0).
  *
  * @exception GException::out_of_range
@@ -3164,7 +3164,7 @@ void GSparseMatrix::mix_column(const double* src1_data, const int* src1_row,
 /***********************************************************************//**
  * @brief Return matrix with absolute values of all elements
  *
- * @param[in] m Matrix for which absolute values are to be returned.
+ * @param[in] matrix Matrix for which absolute values are to be returned.
  ***************************************************************************/
 GSparseMatrix abs(const GSparseMatrix& matrix)
 {
