@@ -18,6 +18,8 @@ sources = src/GCTASupport.cpp \
           src/GCTAResponse.cpp \
           src/GCTAResponse_helpers.cpp \
           src/GCTAResponseTable.cpp \
+          src/GCTAAeff.cpp \
+          src/GCTAAeff2D.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
@@ -41,6 +43,8 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTARoi.hpp \
                      include/GCTAResponse.hpp \
                      include/GCTAResponseTable.hpp \
+                     include/GCTAAeff.hpp \
+                     include/GCTAAeff2D.hpp \
                      include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
                      include/GCTAModelRadialGauss.hpp \

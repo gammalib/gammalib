@@ -58,6 +58,8 @@
 %include "GCTAPointing.i"
 %include "GCTAResponse.i"
 %include "GCTAResponseTable.i"
+%include "GCTAAeff.i"
+%include "GCTAAeff2D.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
 %include "GCTAModelRadial.i"
