@@ -248,30 +248,6 @@ void GCTAAeff2D::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save effective area into FITS file
- *
- * @param[in] filename FITS file.
- * @param[in] clobber Overwrite existing file?.
- *
- * This method saves the effective area information into a FITS file.
- ***************************************************************************/
-void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
-{
-    // Open FITS file
-    GFits fits(filename, true);
-
-    // Write effective area into file
-    write(fits);
-
-    // Close FITS file
-    fits.save(clobber);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Read effective area from FITS file
  *
  * @param[in] fits FITS file pointer.
@@ -301,20 +277,6 @@ void GCTAAeff2D::read(const GFits* fits)
     m_aeff.scale(0, 1.0e4);
     m_aeff.scale(1, 1.0e4);
 
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Write effective area into FITS file
- *
- * @param[in] fits FITS file.
- *
- * @todo Implement method.
- ***************************************************************************/
-void GCTAAeff2D::write(GFits& fits) const
-{
     // Return
     return;
 }

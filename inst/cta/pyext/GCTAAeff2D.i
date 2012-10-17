@@ -55,11 +55,9 @@ public:
     void        clear(void);
     GCTAAeff2D* clone(void) const;
     void        load(const std::string& filename);
-    void        save(const std::string& filename, const bool& clobber = false) const;
 
     // Methods
     void read(const GFits* file);
-    void write(GFits& file) const;
 };
 
 
