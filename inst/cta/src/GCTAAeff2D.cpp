@@ -154,10 +154,9 @@ GCTAAeff2D& GCTAAeff2D::operator= (const GCTAAeff2D& aeff)
 /***********************************************************************//**
  * @brief Return effective area in units of cm2
  *
- * @param[in] logE Log10 of the true photon energy (MeV).
+ * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle (rad). Defaults to 0.0.
- * @param[in] phi Azimuth angle (rad). Defaults to 0.0.
- *                Not used in this method.
+ * @param[in] phi Azimuth angle (rad). Not used in this method.
  * @param[in] etrue Use true energy (true/false). Defaults to true.
  *
  * Returns the effective area in units of cm2 for a given energy and
