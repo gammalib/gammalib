@@ -53,8 +53,6 @@ public:
     virtual void      clear(void) = 0;
     virtual GCTAAeff* clone(void) const = 0;
     virtual void      load(const std::string& filename) = 0;
-    virtual void      save(const std::string& filename,
-                           const bool&        clobber = false) const = 0;
 };
 
 

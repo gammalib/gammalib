@@ -64,7 +64,6 @@ public:
     void               clear(void);
     GCTAAeffPerfTable* clone(void) const;
     void               load(const std::string& filename);
-    void               save(const std::string& filename, const bool& clobber = false) const;
     std::string        print(void) const;
 
     // Methods

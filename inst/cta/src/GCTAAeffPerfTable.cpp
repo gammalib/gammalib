@@ -289,21 +289,6 @@ void GCTAAeffPerfTable::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save effective area into performance table
- *
- * @param[in] filename Performance table file name.
- * @param[in] clobber Overwrite existing file?
- *
- * @todo To be implemented.
- ***************************************************************************/
-void GCTAAeffPerfTable::save(const std::string& filename, const bool& clobber) const
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Print effective area information
  *
  * @return Content of effective area instance.
