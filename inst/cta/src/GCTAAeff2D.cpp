@@ -229,6 +229,50 @@ GCTAAeff2D* GCTAAeff2D::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Load effective area from FITS file
+ *
+ * @param[in] filename FITS file.
+ *
+ * This method loads the effective area information from a FITS file.
+ ***************************************************************************/
+void GCTAAeff2D::load(const std::string& filename)
+{
+    // Open FITS file
+    GFits fits(filename);
+
+    // Read effective area from file
+    read(&fits);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save effective area into FITS file
+ *
+ * @param[in] filename FITS file.
+ * @param[in] clobber Overwrite existing file?.
+ *
+ * This method saves the effective area information into a FITS file.
+ ***************************************************************************/
+void GCTAAeff2D::save(const std::string& filename, const bool& clobber) const
+{
+    // Open FITS file
+    GFits fits(filename, true);
+
+    // Write effective area into file
+    write(fits);
+
+    // Close FITS file
+    fits.save(clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Read effective area from FITS file
  *
  * @param[in] fits FITS file pointer.
