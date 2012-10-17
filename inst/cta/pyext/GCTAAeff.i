@@ -44,7 +44,10 @@ public:
     virtual ~GCTAAeff(void);
 
     // Pure virtual operators
-    virtual double operator()(const double& logE, const double& offset) const = 0;
+    virtual double operator()(const double& logE, 
+                              const double& theta = 0.0, 
+                              const double& phi = 0.0,
+                              const bool&   etrue = true) const = 0;
 
     // Pure virtual methods
     virtual void      clear(void) = 0;

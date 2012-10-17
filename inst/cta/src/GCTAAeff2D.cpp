@@ -155,25 +155,31 @@ GCTAAeff2D& GCTAAeff2D::operator= (const GCTAAeff2D& aeff)
  * @brief Return effective area in units of cm2
  *
  * @param[in] logE Log10 of the true photon energy (MeV).
- * @param[in] offset Offset angle (rad).
+ * @param[in] theta Offset angle (rad). Defaults to 0.0.
+ * @param[in] phi Azimuth angle (rad). Defaults to 0.0.
+ *                Not used in this method.
+ * @param[in] etrue Use true energy (true/false). Defaults to true.
  *
  * Returns the effective area in units of cm2 for a given energy and
  * offset angle. The effective area is bi-linearily interpolated in the
  * log10(energy) - offset angle plane. The method assures that the effective
  * area value never becomes negative.
  *
- * @todo We want a GCTAResponseTable operator that interpolates just the
- *       value we need
- * @todo We need a GCTAResponseTable method that scales a given table so that
- *       we can convert the stored values from m2 to cm2
+ * The method supports true and reconstructed energies for logE. To access
+ * the effective area as function of true energy, specify etrue=true
+ * (this is the default). The obtained the effective area as function of
+ * reconstructed energy, specify etrue=false.
  ***************************************************************************/
-double GCTAAeff2D::operator()(const double& logE, const double& offset) const
+double GCTAAeff2D::operator()(const double& logE, 
+                              const double& theta, 
+                              const double& phi,
+                              const bool&   etrue) const
 {
-    // Get effective area value
-    std::vector<double> aeff_array = m_aeff(logE, offset);
+    // Set parameter index
+    int index = (etrue) ? 0 : 1;
 
-    // Extract true energy effective area
-    double aeff = aeff_array[1] * 1.0e4;
+    // Get effective area value in cm2
+    double aeff = m_aeff(index, logE, theta);
 
     // Make sure that effective area is not negative
     if (aeff < 0.0) {
@@ -247,6 +253,10 @@ void GCTAAeff2D::read(const GFits* fits)
 
     // Set offset angle axis to radians
     m_aeff.axis_radians(1);
+
+    // Convert effective areas from m2 to cm2
+    m_aeff.scale(0, 1.0e4);
+    m_aeff.scale(1, 1.0e4);
 
     // Return
     return;
