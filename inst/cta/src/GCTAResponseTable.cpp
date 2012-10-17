@@ -989,6 +989,9 @@ void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
 
     } // endif: HDU was valid
 
+    // Store number of parameters
+    m_npars = m_colname_par.size();
+
     // Return
     return;
 }
@@ -1096,9 +1099,6 @@ void GCTAResponseTable::read_pars(const GFitsTable* hdu)
     
     // Continue only if HDU is valid
     if (hdu != NULL) {
-
-        // Store number of parameters
-        m_npars = m_colname_par.size();
 
         // Compute expected cube size
         m_nelements = axis(0);
