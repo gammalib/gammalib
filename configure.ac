@@ -659,8 +659,8 @@ if test "x$openmp_ok" = "xyes" ; then
   # dynamically
   if test "$OPENMP_CXXFLAGS" = "-fopenmp" -a "$ac_sys_system" = "Linux"; then
     AC_MSG_CHECKING(whether we can dynamically load libgomp)
-    SAVED_LDFLAGS=$LDFLAGS
-    LDFLAGS="$LDFLAGS -ldl"
+    SAVED_LIBS=$LIBS
+    LIBS="-ldl"
     AC_TRY_RUN(AC_LANG_PROGRAM([#include <dlfcn.h>],
                                [if (dlopen("libgomp.so.1", RTLD_NOW) == 0) return 1;]),
                [AC_MSG_RESULT(yes)],
@@ -668,7 +668,7 @@ if test "x$openmp_ok" = "xyes" ; then
                 AC_MSG_RESULT(no)
                 AC_MSG_WARN([OpenMP detected but shared libgomp.so.1 library cannot be dlopen()ed.])
                 AC_MSG_WARN([If you use a gcc 4.2.x compiler, this is a known feature. Try to use gcc >= 4.3.])])
-    LDFLAGS=$SAVED_LDFLAGS
+    LIBS=$SAVED_LIBS
   fi
 
   # Special Darwin test to see whether OpenMP compiles without adding the
