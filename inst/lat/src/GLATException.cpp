@@ -59,6 +59,24 @@ GLATException::file_open_error::file_open_error(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief Member not set.
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GLATException::no_member::no_member(const std::string& origin,
+                                    const std::string& message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief No sky pixels found.
  *
  * @param[in] origin Name of method that has thrown the exception.

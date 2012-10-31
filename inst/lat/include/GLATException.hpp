@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATException.hpp  - LAT exception handler               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATException.hpp
  * @brief LAT exception handler interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATEXCEPTION_HPP
@@ -63,6 +63,10 @@ public:
     public:
         file_open_error(std::string origin, std::string filename,
                         std::string message = "");
+    };
+    class no_member : public GLATExceptionHandler {
+    public:
+        no_member(const std::string& origin, const std::string& message);
     };
     class no_sky : public GLATExceptionHandler {
     public:

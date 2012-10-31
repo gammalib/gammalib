@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATEventBin.hpp  -  LAT event bin class                *
+ *                 GLATEventBin.hpp - LAT event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventBin.hpp
  * @brief Fermi-LAT event bin class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATEVENTBIN_HPP
@@ -62,18 +62,18 @@ public:
     virtual void               clear(void);
     virtual GLATEventBin*      clone(void) const;
     virtual double             size(void) const;
-    virtual const GLATInstDir& dir(void) const { return *m_dir; }
-    virtual const GEnergy&     energy(void) const { return *m_energy; }
-    virtual const GTime&       time(void) const { return *m_time; }
-    virtual double             counts(void) const { return *m_counts; }
+    virtual const GLATInstDir& dir(void) const;
+    virtual const GEnergy&     energy(void) const;
+    virtual const GTime&       time(void) const;
+    virtual double             counts(void) const;
     virtual double             error(void) const;
-    virtual void               counts(const double& counts) { *m_counts=counts; }
+    virtual void               counts(const double& counts);
     virtual std::string        print(void) const;
 
     // Other methods
-    const double&  omega(void) const { return *m_omega; }
-    const GEnergy& ewidth(void) const { return *m_ewidth; }
-    const double&  ontime(void) const { return *m_ontime; }
+    const double&  omega(void) const;
+    const GEnergy& ewidth(void) const;
+    const double&  ontime(void) const;
     const int&     index(void) const { return m_index; }
     const int&     ipix(void) const { return m_ipix; }
     const int&     ieng(void) const { return m_ieng; }
