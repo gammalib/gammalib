@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GNodeArray.cpp  -  Array of nodes class                 *
+ *                  GNodeArray.cpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -35,7 +35,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                                "GNodeArray::operator[](int)"
-#define G_INTERPOLATE "GNodeArray::interpolate(std::vector<double>&, double&"
+#define G_INTERPOLATE "GNodeArray::interpolate(double&,std::vector<double>&)"
+#define G_SET_VALUE                          "GNodeArray::set_value(double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -166,7 +167,8 @@ GNodeArray::~GNodeArray(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] array Instance that should be assigned.
+ * @param[in] array Node array.
+ * @return Node array.
  ***************************************************************************/
 GNodeArray& GNodeArray::operator= (const GNodeArray& array)
 {
@@ -193,6 +195,7 @@ GNodeArray& GNodeArray::operator= (const GNodeArray& array)
  * @brief Node access operator
  *
  * @param[in] index Node index [0,...,size()-1].
+ * @return Node value.
  *
  * @exception GException::out_of_range
  *            Node index is out of range.
@@ -201,8 +204,9 @@ double& GNodeArray::operator[](const int& index)
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS, index, size()-1);
+    }
     #endif
 
     // Return node
@@ -214,6 +218,7 @@ double& GNodeArray::operator[](const int& index)
  * @brief Node access operator (const version)
  *
  * @param[in] index Node index [0,...,size()-1].
+ * @return Node value.
  *
  * @exception GException::out_of_range
  *            Node index is out of range.
@@ -222,8 +227,9 @@ const double& GNodeArray::operator[](const int& index) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS, index, size()-1);
+    }
     #endif
 
     // Return node
@@ -255,7 +261,9 @@ void GNodeArray::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Deep copy of node array.
+ ***************************************************************************/
 GNodeArray* GNodeArray::clone(void) const
 {
     return new GNodeArray(*this);
@@ -267,6 +275,8 @@ GNodeArray* GNodeArray::clone(void) const
  *
  * @param[in] num Number of nodes
  * @param[in] array Node values \f$x_i\f$.
+ *
+ * Setup node array from an array of double precision values.
  ***************************************************************************/
 void GNodeArray::nodes(const int& num, const double* array)
 {
@@ -277,8 +287,9 @@ void GNodeArray::nodes(const int& num, const double* array)
     init_members();
     
     // Set node values
-    for (int i = 0; i < num; ++i)
+    for (int i = 0; i < num; ++i) {
         m_node.push_back(array[i]);
+    }
 
     // Setup node distances and linear array handling
     setup();
@@ -292,6 +303,8 @@ void GNodeArray::nodes(const int& num, const double* array)
  * @brief Set node array from vector
  *
  * @param[in] vector Vector from which node array will be built.
+ *
+ * Setup node array from a vector of values.
  ***************************************************************************/
 void GNodeArray::nodes(const GVector& vector)
 {
@@ -302,8 +315,9 @@ void GNodeArray::nodes(const GVector& vector)
     init_members();
     
     // Set node values
-    for (int i = 0; i < vector.size(); ++i)
+    for (int i = 0; i < vector.size(); ++i) {
         m_node.push_back(vector[i]);
+    }
 
     // Setup node distances and linear array handling
     setup();
@@ -317,6 +331,8 @@ void GNodeArray::nodes(const GVector& vector)
  * @brief Set node array from vector
  *
  * @param[in] vector Vector from which node array will be built.
+ *
+ * Setup node array from a vector of double precision values.
  ***************************************************************************/
 void GNodeArray::nodes(const std::vector<double>& vector)
 {
@@ -373,13 +389,15 @@ double GNodeArray::interpolate(const double& value,
                                const std::vector<double>& vector) const
 {
     // Throw exception if there are not enough nodes
-    if (m_node.size() < 2)
+    if (m_node.size() < 2) {
         throw GException::not_enough_nodes(G_INTERPOLATE, m_node.size());
+    }
 
     // Throw exception if vectors have not the same size
-    if (m_node.size() != vector.size())
+    if (m_node.size() != vector.size()) {
         throw GException::vector_mismatch(G_INTERPOLATE, m_node.size(),
                                           vector.size());
+    }
     
     // Set interpolation value (circumvent const correctness)
     const_cast<GNodeArray*>(this)->set_value(value);
@@ -398,6 +416,9 @@ double GNodeArray::interpolate(const double& value,
  *
  * @param[in] value Value for which the interpolation should be done.
  *
+ * @exception GException::not_enough_nodes
+ *            At least two nodes are required for setting up the factors
+ *
  * Set the indices that bound the specified value and the corresponding
  * weighting factors for linear interpolation. If the array has a linear
  * form (i.e. the nodes are equidistant), an analytic formula is used to
@@ -408,55 +429,60 @@ void GNodeArray::set_value(const double& value)
 {
     // Get number of nodes
     int nodes = m_node.size();
+
+    // Throw an exception if less than 2 nodes are available
+    if (nodes < 2) {
+        throw GException::not_enough_nodes(G_SET_VALUE, nodes);
+    }
     
-    // Continue only if we have at least 2 nodes
-    if (nodes > 1) {
+    // If array is linear then get left index from analytic formula
+    if (m_is_linear) {
+
+        // Set left index
+        m_inx_left = int(m_linear_slope * value + m_linear_offset);
+        
+        // Keep index in valid range
+        if (m_inx_left < 0)             m_inx_left = 0;
+        else if (m_inx_left >= nodes-1) m_inx_left = nodes - 2;
+
+    } // endif: array is linear
+
+    // ... otherwise search the relevant indices by bisection
+    else {
     
-        // If array is linear then get left index from analytic formula
-        if (m_is_linear) {
-
-            // Set left index
-            m_inx_left = int(m_linear_slope * value + m_linear_offset);
-
-            // Keep index in valid range
-            if (m_inx_left < 0)             m_inx_left = 0;
-            else if (m_inx_left >= nodes-1) m_inx_left = nodes - 2;
-
-        } // endif: array is linear
-
-        // ... otherwise search the relevant indices by bisection
-        else {
-            // Set left index if value is before first node
-            if (value < m_node[0])
-                m_inx_left = 0;
-
-            // Set left index if value is after last node
-            else if (value >  m_node[nodes-1])
-                m_inx_left = nodes - 2;
-
-            // Set left index by bisection
-            else {
-                int low  = 0;
-                int high = nodes - 1;
-                while ((high - low) > 1) {
-                    int mid = (low+high) / 2;
-                    if (m_node[mid] > value)
-                        high = mid;
-                    else if (m_node[mid] <= value)
-                        low = mid;
-                }
-                m_inx_left = low;
-            } // endelse: did bisection
+        // Set left index if value is before first node
+        if (value < m_node[0]) {
+            m_inx_left = 0;
         }
 
-        // Set right index
-        m_inx_right = m_inx_left + 1;
+        // Set left index if value is after last node
+        else if (value >  m_node[nodes-1]) {
+            m_inx_left = nodes - 2;
+        }
 
-        // Set weighting factors
-        m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
-        m_wgt_left  = 1.0 - m_wgt_right;
-    
-    } // endif: there were at least 2 nodes
+        // Set left index by bisection
+        else {
+            int low  = 0;
+            int high = nodes - 1;
+            while ((high - low) > 1) {
+                int mid = (low+high) / 2;
+                if (m_node[mid] > value) {
+                    high = mid;
+                }
+                else if (m_node[mid] <= value) {
+                    low = mid;
+                }
+            }
+            m_inx_left = low;
+        } // endelse: did bisection
+    }
+
+    // Set right index
+    m_inx_right = m_inx_left + 1;
+
+    // Set weighting factors
+    m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
+    m_wgt_left  = 1.0 - m_wgt_right;
 
     // Return
     return;
@@ -576,8 +602,9 @@ void GNodeArray::setup(void)
     if (nodes > 1) {
     
         // Setup distance array between subsequent nodes
-        for (int i = 0; i < nodes-1; ++i)
+        for (int i = 0; i < nodes-1; ++i) {
             m_step.push_back(m_node[i+1] - m_node[i]);
+        }
 
         // Evaluate linear slope and offset
         m_linear_slope  = double(nodes-1) / (m_node[nodes-1] - m_node[0]);
@@ -598,3 +625,4 @@ void GNodeArray::setup(void)
     // Return
     return;
 }
+
