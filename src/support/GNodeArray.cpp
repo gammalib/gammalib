@@ -520,7 +520,9 @@ std::string GNodeArray::print(void) const
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+parformat("Node "+str(i)));
         result.append(str(m_node[i]));
-        result.append(" (delta="+str(m_step[i])+")");
+        if (i < m_step.size()) {
+            result.append(" (delta="+str(m_step[i])+")");
+        }
     }
 
     // Return result
@@ -591,8 +593,10 @@ void GNodeArray::free_members(void)
 /***********************************************************************//**
  * @brief Compute distance array and linear slope/offset
  *
- * @exception GException::not_enough_nodes
- *            At least two nodes are required for node array.
+ * Precomputes values for fast interpolation. The precomputation requires
+ * at least 2 nodes to be present in the node array. If less then two
+ * nodes are present, the distance vector m_step will be empty and no
+ * computation is done.
  ***************************************************************************/
 void GNodeArray::setup(void)
 {
@@ -602,29 +606,29 @@ void GNodeArray::setup(void)
     // Get number of nodes
     int nodes = m_node.size();
 
-    // Throw an exception if less than 2 nodes are available
-    if (nodes < 2) {
-        throw GException::not_enough_nodes(G_SETUP, nodes);
-    }
-    
-    // Setup distance array between subsequent nodes
-    for (int i = 0; i < nodes-1; ++i) {
-        m_step.push_back(m_node[i+1] - m_node[i]);
-    }
+    // Continue only if there are at least 2 nodes
+    if (nodes > 1) {
 
-    // Evaluate linear slope and offset
-    m_linear_slope  = double(nodes-1) / (m_node[nodes-1] - m_node[0]);
-    m_linear_offset = -m_linear_slope * m_node[0];
-    
-    // Check if nodes form a linear array
-    m_is_linear = true;
-    for (int i = 0; i < nodes-1; ++i) {
-        double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
-        if (std::abs(eps) > 1.0e-6) {
-            m_is_linear = false;
-            break;
+        // Setup distance array between subsequent nodes
+        for (int i = 0; i < nodes-1; ++i) {
+            m_step.push_back(m_node[i+1] - m_node[i]);
         }
-    }
+
+        // Evaluate linear slope and offset
+        m_linear_slope  = double(nodes-1) / (m_node[nodes-1] - m_node[0]);
+        m_linear_offset = -m_linear_slope * m_node[0];
+    
+        // Check if nodes form a linear array
+        m_is_linear = true;
+        for (int i = 0; i < nodes-1; ++i) {
+            double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
+            if (std::abs(eps) > 1.0e-6) {
+                m_is_linear = false;
+                break;
+            }
+        }
+
+    } // endif: there were at least two nodes
 
     // Return
     return;
