@@ -546,28 +546,33 @@ void GFits::append(const GFitsHDU& hdu)
     // Clone FITS HDU
     GFitsHDU* ptr = hdu.clone();
 
-    // If FITS file exists then connect cloned HDU to FITS file
-    if (m_fitsfile != NULL) {
-        __fitsfile fptr  = *(FPTR(m_fitsfile));
-        fptr.HDUposition = n_hdu;
-        ptr->connect(&fptr);
-    }
-    else {
-        ptr->extno(n_hdu);
-    }
+    // Append HDU if it's valid
+    if (ptr != NULL) {
 
-    // Debug information
-    #if DEBUG
-    std::cout << "Append HDU (extno=" << n_hdu << ")." << std::endl;
-    #endif
+        // If FITS file exists then connect cloned HDU to FITS file
+        if (m_fitsfile != NULL) {
+            __fitsfile fptr  = *(FPTR(m_fitsfile));
+            fptr.HDUposition = n_hdu;
+            ptr->connect(&fptr);
+        }
+        else {
+            ptr->extno(n_hdu);
+        }
 
-    // Push back HDU
-    m_hdu.push_back(ptr);
+        // Debug information
+        #if DEBUG
+        std::cout << "Append HDU (extno=" << n_hdu << ")." << std::endl;
+        #endif
 
-    // Debug trailer
-    #if DEBUG
-    std::cout << "<-- GFits::append" << std::endl;
-    #endif
+        // Push back HDU
+        m_hdu.push_back(ptr);
+
+        // Debug trailer
+        #if DEBUG
+        std::cout << "<-- GFits::append" << std::endl;
+        #endif
+        
+    } // endif: HDU was valid
 
     // Return
     return;
