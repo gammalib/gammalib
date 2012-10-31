@@ -37,6 +37,7 @@
 #define G_ACCESS                                "GNodeArray::operator[](int)"
 #define G_INTERPOLATE "GNodeArray::interpolate(double&,std::vector<double>&)"
 #define G_SET_VALUE                          "GNodeArray::set_value(double&)"
+#define G_SETUP                                         "GNodeArray::setup()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -245,7 +246,7 @@ const double& GNodeArray::operator[](const int& index) const
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
+ ***************************************************************************/
 void GNodeArray::clear(void)
 {
     // Free class members
@@ -541,7 +542,7 @@ void GNodeArray::init_members(void)
     // Initialise members
     m_node.clear();
     m_step.clear();
-    m_is_linear     = 0;
+    m_is_linear     = false;
     m_linear_slope  = 0.0;
     m_linear_offset = 0.0;
     m_inx_left      = 0;
@@ -589,6 +590,9 @@ void GNodeArray::free_members(void)
 
 /***********************************************************************//**
  * @brief Compute distance array and linear slope/offset
+ *
+ * @exception GException::not_enough_nodes
+ *            At least two nodes are required for node array.
  ***************************************************************************/
 void GNodeArray::setup(void)
 {
@@ -597,30 +601,30 @@ void GNodeArray::setup(void)
     
     // Get number of nodes
     int nodes = m_node.size();
-    
-    // Continue only if we have nodes at least 2 nodes
-    if (nodes > 1) {
-    
-        // Setup distance array between subsequent nodes
-        for (int i = 0; i < nodes-1; ++i) {
-            m_step.push_back(m_node[i+1] - m_node[i]);
-        }
 
-        // Evaluate linear slope and offset
-        m_linear_slope  = double(nodes-1) / (m_node[nodes-1] - m_node[0]);
-        m_linear_offset = -m_linear_slope * m_node[0];
+    // Throw an exception if less than 2 nodes are available
+    if (nodes < 2) {
+        throw GException::not_enough_nodes(G_SETUP, nodes);
+    }
     
-        // Check if nodes form a linear array
-        m_is_linear = true;
-        for (int i = 0; i < nodes-1; ++i) {
-            double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
-            if (std::abs(eps) > 1.0e-6) {
-                m_is_linear = false;
-                break;
-            }
+    // Setup distance array between subsequent nodes
+    for (int i = 0; i < nodes-1; ++i) {
+        m_step.push_back(m_node[i+1] - m_node[i]);
+    }
+
+    // Evaluate linear slope and offset
+    m_linear_slope  = double(nodes-1) / (m_node[nodes-1] - m_node[0]);
+    m_linear_offset = -m_linear_slope * m_node[0];
+    
+    // Check if nodes form a linear array
+    m_is_linear = true;
+    for (int i = 0; i < nodes-1; ++i) {
+        double eps = m_linear_slope * m_node[i] + m_linear_offset - double(i);
+        if (std::abs(eps) > 1.0e-6) {
+            m_is_linear = false;
+            break;
         }
-        
-    } // endif: there were at least 2 nodes
+    }
 
     // Return
     return;
