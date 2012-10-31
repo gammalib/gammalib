@@ -578,7 +578,7 @@ GEnergy GEbounds::elogmean(int inx) const
  *
  * @param[in] eng Energy to be tested.
  ***************************************************************************/
-bool GEbounds::isin(const GEnergy& eng) const
+bool GEbounds::contains(const GEnergy& eng) const
 {
     // Initialise test
     bool found = false;
