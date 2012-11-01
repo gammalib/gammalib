@@ -255,7 +255,7 @@ GException::wcs_hpx_bad_ordering::wcs_hpx_bad_ordering(std::string origin,
  * @brief Singular matrix encountered
  *
  * @param[in] origin Method that throws the error.
- * @param[in] naxis Number of matrix axes.
+ * @param[in] naxis Matrix size (naxis*naxis).
  * @param[in] mat Matrix (stored in vector).
  ***************************************************************************/
 GException::wcs_singular_matrix::wcs_singular_matrix(std::string                origin,
@@ -266,13 +266,20 @@ GException::wcs_singular_matrix::wcs_singular_matrix(std::string                
     m_origin  = origin;
     m_message = "Singular matrix encountered: mat=[";
     for (int i = 0, ij = 0; i < naxis; ++i) {
-        if (i > 0)
+        if (i > 0) {
             m_message += ",";
+        }
         m_message += "[";
         for (int j = 0; j < naxis; ++j, ++ij) {
-            if (j > 0)
+            if (j > 0) {
                 m_message += ",";
-            m_message += str(mat[ij]);
+            }
+            if (ij < mat.size()) {
+                m_message += str(mat[ij]);
+            }
+            else {
+                m_message += " ... ";
+            }
         }
         m_message += "]";
     }

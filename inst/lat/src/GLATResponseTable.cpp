@@ -21,7 +21,7 @@
 /**
  * @file GLATResponseTable.cpp
  * @brief Fermi/LAT response table class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -159,7 +159,7 @@ void GLATResponseTable::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GLATResponseTable* GLATResponseTable::clone(void) const
 {
     return new GLATResponseTable(*this);
@@ -290,9 +290,10 @@ int GLATResponseTable::index(const int& ie, const int& ic) const
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
     if (ie < 0 || ie >= m_energy_num ||
-        ic < 0 || ic >= m_ctheta_num)
+        ic < 0 || ic >= m_ctheta_num) {
         throw GException::out_of_range(G_INDEX, ie, ic, 
                                        m_energy_num-1, m_ctheta_num-1);
+    }
     #endif
 
     // Compute index
@@ -323,8 +324,9 @@ double GLATResponseTable::energy(const int& ie) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (ie < 0 || ie >= m_energy_num)
+    if (ie < 0 || ie >= m_energy_num) {
         throw GException::out_of_range(G_ENERGY, ie, 0, m_energy_num-1);
+    }
     #endif
 
     // Determine mean energy of bin
@@ -462,8 +464,9 @@ double GLATResponseTable::energy_lo(const int& inx) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_energy_num)
+    if (inx < 0 || inx >= m_energy_num) {
         throw GException::out_of_range(G_ENERGY_LO, inx, 0, m_energy_num-1);
+    }
     #endif
 
     // Return mean energy
@@ -483,8 +486,9 @@ double GLATResponseTable::energy_hi(const int& inx) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_energy_num)
+    if (inx < 0 || inx >= m_energy_num) {
         throw GException::out_of_range(G_ENERGY_HI, inx, 0, m_energy_num-1);
+    }
     #endif
 
     // Return mean energy
@@ -504,8 +508,9 @@ double GLATResponseTable::costheta_lo(const int& inx) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_ctheta_num)
+    if (inx < 0 || inx >= m_ctheta_num) {
         throw GException::out_of_range(G_COSTHETA_LO, inx, 0, m_ctheta_num-1);
+    }
     #endif
 
     // Return mean energy
@@ -525,8 +530,9 @@ double GLATResponseTable::costheta_hi(const int& inx) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_ctheta_num)
+    if (inx < 0 || inx >= m_ctheta_num) {
         throw GException::out_of_range(G_COSTHETA_HI, inx, 0, m_ctheta_num-1);
+    }
     #endif
 
     // Return mean energy
@@ -562,10 +568,12 @@ std::vector<double> GLATResponseTable::energies(void) const
     std::vector<double> energies;
 
     // Push energies on vector
-    energies.push_back(m_energy[m_logE.inx_left()]);
-    energies.push_back(m_energy[m_logE.inx_left()]);
-    energies.push_back(m_energy[m_logE.inx_right()]);
-    energies.push_back(m_energy[m_logE.inx_right()]);
+    if (m_energy_num > 0) {
+        energies.push_back(m_energy[m_logE.inx_left()]);
+        energies.push_back(m_energy[m_logE.inx_left()]);
+        energies.push_back(m_energy[m_logE.inx_right()]);
+        energies.push_back(m_energy[m_logE.inx_right()]);
+    }
 
     // Return vector
     return energies;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GOptimizerLM.cpp  -  Levenberg Marquardt optimizer           *
+ *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GOptimizerLM.cpp
  * @brief Levenberg-Marquardt optimizer class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -948,108 +948,108 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
  ***************************************************************************/
 void GOptimizerLM::errors(GOptimizerFunction* fct, GOptimizerPars* pars)
 {
-    // Get number of parameters
-    int npars = pars->npars();
+    // Continue only if pointers are valid
+    if (fct != NULL && pars != NULL) {
 
-    // Perform final parameter evaluation
-    fct->eval(*pars);
+        // Get number of parameters
+        int npars = pars->npars();
 
-    // Fetch sparse matrix pointer. We have to do this after the eval()
-    // method since eval() will allocate new memory for the covariance
-    // matrix!
-    GSparseMatrix* covar = fct->covar();
+        // Perform final parameter evaluation
+        fct->eval(*pars);
 
-    // Save best fitting value
-    m_value = *(fct->value());
+        // Fetch sparse matrix pointer. We have to do this after the eval()
+        // method since eval() will allocate new memory for the covariance
+        // matrix!
+        GSparseMatrix* covar = fct->covar();
 
-    // Save covariance matrix
-    GSparseMatrix save_covar = GSparseMatrix(*covar);
+        // Save best fitting value
+        m_value = *(fct->value());
 
-    // Signal no diagonal element loading
-    bool diag_loaded = false;
+        // Save covariance matrix
+        GSparseMatrix save_covar = GSparseMatrix(*covar);
 
-    // Loop over error computation (maximum 2 turns)
-    for (int i = 0; i < 2; ++i) {
+        // Signal no diagonal element loading
+        bool diag_loaded = false;
 
-        // Solve: covar * X = unit
-        try {
-            covar->cholesky_decompose(1);
-            GVector unit(npars);
-            for (int ipar = 0; ipar < npars; ++ipar) {
-                unit[ipar] = 1.0;
-                GVector x  = covar->cholesky_solver(unit,1);
-                if (x[ipar] >= 0.0)
-                    pars->par(ipar).error(sqrt(x[ipar]));
-                else {
-                    pars->par(ipar).error(0.0);
-                    m_status = G_LM_BAD_ERRORS;
+        // Loop over error computation (maximum 2 turns)
+        for (int i = 0; i < 2; ++i) {
+
+            // Solve: covar * X = unit
+            try {
+                covar->cholesky_decompose(1);
+                GVector unit(npars);
+                for (int ipar = 0; ipar < npars; ++ipar) {
+                    unit[ipar] = 1.0;
+                    GVector x  = covar->cholesky_solver(unit,1);
+                    if (x[ipar] >= 0.0) {
+                        pars->par(ipar).error(sqrt(x[ipar]));
+                    }
+                    else {
+                        pars->par(ipar).error(0.0);
+                        m_status = G_LM_BAD_ERRORS;
+                    }
+                    unit[ipar] = 0.0;
                 }
-                unit[ipar] = 0.0;
             }
-        }
-        catch (GException::matrix_zero &e) {
-            m_status = G_LM_SINGULAR;
-            if (m_logger != NULL) {
-                *m_logger << "GOptimizerLM::terminate: "
-                          << "All curvature matrix elements are zero."
-                          << std::endl;
-            }
-            break;
-        }
-        catch (GException::matrix_not_pos_definite &e) {
-
-            // Load diagonal if this has not yet been tried
-            if (!diag_loaded) {
-
-                // Flag errors as inaccurate
-                m_status = G_LM_BAD_ERRORS;
+            catch (GException::matrix_zero &e) {
+                m_status = G_LM_SINGULAR;
                 if (m_logger != NULL) {
-                    *m_logger << "Non-Positive definite curvature matrix encountered."
+                    *m_logger << "GOptimizerLM::terminate: "
+                              << "All curvature matrix elements are zero."
                               << std::endl;
-                    *m_logger << "Load diagonal elements with 1e-10."
-                              << " Fit errors may be inaccurate."
-                              << std::endl;
-                }
-
-                // Try now with diagonal loaded matrix
-                *covar = save_covar;
-                for (int ipar = 0; ipar < npars; ++ipar)
-                    (*covar)(ipar,ipar) += 1.0e-10;
-
-                // Signal loading
-                diag_loaded = true;
-
-                // Try again
-                continue;
-
-            } // endif: diagonal has not yet been loaded
-
-            // ... otherwise signal an error
-            else {
-                m_status = G_LM_NOT_POSTIVE_DEFINITE;
-                if (m_logger != NULL) {
-                    *m_logger << "Non-Positive definite curvature matrix encountered,"
-                              << " even after diagonal loading." << std::endl;
                 }
                 break;
             }
-        }
-        catch (std::exception &e) {
-            throw;
-        }
+            catch (GException::matrix_not_pos_definite &e) {
 
-        // If no error occured then break now
-        break;
+                // Load diagonal if this has not yet been tried
+                if (!diag_loaded) {
 
-    } // endfor: looped over error computation
+                    // Flag errors as inaccurate
+                    m_status = G_LM_BAD_ERRORS;
+                    if (m_logger != NULL) {
+                        *m_logger << "Non-Positive definite curvature matrix encountered."
+                                  << std::endl;
+                        *m_logger << "Load diagonal elements with 1e-10."
+                                  << " Fit errors may be inaccurate."
+                                  << std::endl;
+                    }
+
+                    // Try now with diagonal loaded matrix
+                    *covar = save_covar;
+                    for (int ipar = 0; ipar < npars; ++ipar) {
+                        (*covar)(ipar,ipar) += 1.0e-10;
+                    }
+
+                    // Signal loading
+                    diag_loaded = true;
+
+                    // Try again
+                    continue;
+
+                } // endif: diagonal has not yet been loaded
+
+                // ... otherwise signal an error
+                else {
+                    m_status = G_LM_NOT_POSTIVE_DEFINITE;
+                    if (m_logger != NULL) {
+                        *m_logger << "Non-Positive definite curvature matrix encountered,"
+                                  << " even after diagonal loading." << std::endl;
+                    }
+                    break;
+                }
+            }
+            catch (std::exception &e) {
+                throw;
+            }
+
+            // If no error occured then break now
+            break;
+
+        } // endfor: looped over error computation
+
+    } // endif: pointers were valid
 
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

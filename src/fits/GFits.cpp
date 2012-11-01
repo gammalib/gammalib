@@ -1,5 +1,5 @@
 /***************************************************************************
- *                    GFits.cpp  - FITS file access class                  *
+ *                    GFits.cpp - FITS file access class                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -348,10 +348,13 @@ void GFits::open(const std::string& filename, bool create)
  * @exception GException::fits_file_exist
  *            Attemting to overwrite an existing file without having specified
  *            clobber=true.
+ * @exception GException::fits_file_not_open
+ *            FITS file needs to be opened before saving.
  *
- * Saves all HDUs to the FITS file by looping over the HDU's save() method.
- * Saving does not mean that the FITS file is closed. Call the close()
- * method if explicit closing is needed (de-allocation also closes the file).
+ * Saves all HDUs of an open FITS file to disk. After saving, the FITS file
+ * remains open. Invoke the close() method if explicit closing is needed.
+ * Note that de-allocation of the GFits object also closes the FITS file.
+ *
  * In the special case that no first HDU exists an empty primary image is
  * created.
  ***************************************************************************/
@@ -366,6 +369,12 @@ void GFits::save(bool clobber)
     // then throw an error
     if (!m_created && !clobber) {
         throw GException::fits_file_exist(G_SAVE, m_filename);
+    }
+
+    // If no FITS file has been opened then throw an error
+    if (m_fitsfile == NULL) {
+        throw GException::fits_file_not_open(G_SAVE, 
+              "Either open FITS file before saving or use saveto() method.");
     }
 
     // If no HDUs exist then save an empty primary image.
@@ -537,28 +546,33 @@ void GFits::append(const GFitsHDU& hdu)
     // Clone FITS HDU
     GFitsHDU* ptr = hdu.clone();
 
-    // If FITS file exists then connect cloned HDU to FITS file
-    if (m_fitsfile != NULL) {
-        __fitsfile fptr  = *(FPTR(m_fitsfile));
-        fptr.HDUposition = n_hdu;
-        ptr->connect(&fptr);
-    }
-    else {
-        ptr->extno(n_hdu);
-    }
+    // Append HDU if it's valid
+    if (ptr != NULL) {
 
-    // Debug information
-    #if DEBUG
-    std::cout << "Append HDU (extno=" << n_hdu << ")." << std::endl;
-    #endif
+        // If FITS file exists then connect cloned HDU to FITS file
+        if (m_fitsfile != NULL) {
+            __fitsfile fptr  = *(FPTR(m_fitsfile));
+            fptr.HDUposition = n_hdu;
+            ptr->connect(&fptr);
+        }
+        else {
+            ptr->extno(n_hdu);
+        }
 
-    // Push back HDU
-    m_hdu.push_back(ptr);
+        // Debug information
+        #if DEBUG
+        std::cout << "Append HDU (extno=" << n_hdu << ")." << std::endl;
+        #endif
 
-    // Debug trailer
-    #if DEBUG
-    std::cout << "<-- GFits::append" << std::endl;
-    #endif
+        // Push back HDU
+        m_hdu.push_back(ptr);
+
+        // Debug trailer
+        #if DEBUG
+        std::cout << "<-- GFits::append" << std::endl;
+        #endif
+        
+    } // endif: HDU was valid
 
     // Return
     return;

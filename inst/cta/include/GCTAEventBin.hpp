@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCTAEventBin.hpp  -  CTA event bin class                *
+ *                  GCTAEventBin.hpp - CTA event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GCTAEventBin.hpp
- * @brief GCTAEventBin class interface definition.
- * @author J. Knodlseder
+ * @brief CTA event bin class interface definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAEVENTBIN_HPP
@@ -67,18 +67,18 @@ public:
     virtual void               clear(void);
     virtual GCTAEventBin*      clone(void) const;
     virtual double             size(void) const;
-    virtual const GCTAInstDir& dir(void) const { return *m_dir; }
-    virtual const GEnergy&     energy(void) const { return *m_energy; }
-    virtual const GTime&       time(void) const { return *m_time; }
-    virtual double             counts(void) const { return *m_counts; }
+    virtual const GCTAInstDir& dir(void) const;
+    virtual const GEnergy&     energy(void) const;
+    virtual const GTime&       time(void) const;
+    virtual double             counts(void) const;
     virtual double             error(void) const;
-    virtual void               counts(const double& counts) { *m_counts=counts; }
+    virtual void               counts(const double& counts);
     virtual std::string        print(void) const;
 
     // Other methods
-    const double&  omega(void) const { return *m_omega; }
-    const GEnergy& ewidth(void) const { return *m_ewidth; }
-    const double&  ontime(void) const { return *m_ontime; }
+    const double&  omega(void) const;
+    const GEnergy& ewidth(void) const;
+    const double&  ontime(void) const;
 
 protected:
     // Protected methods

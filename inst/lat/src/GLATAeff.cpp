@@ -539,8 +539,8 @@ void GLATAeff::copy_members(const GLATAeff& aeff)
     m_back       = aeff.m_back;
 
     // Clone functors
-    m_eff_func1 = aeff.m_eff_func1->clone();
-    m_eff_func2 = aeff.m_eff_func2->clone();
+    m_eff_func1 = (aeff.m_eff_func1 != NULL) ? aeff.m_eff_func1->clone() : NULL;
+    m_eff_func2 = (aeff.m_eff_func2 != NULL) ? aeff.m_eff_func2->clone() : NULL;
 
     // Return
     return;

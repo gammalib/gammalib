@@ -228,7 +228,7 @@ double GEnergy::TeV(void) const
 double GEnergy::log10keV(void) const
 {
     // Return log10 energy
-    return (log10keV()+3.0); 
+    return (log10MeV()+3.0); 
 }
 
 

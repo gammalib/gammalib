@@ -312,8 +312,13 @@ GModels* GModels::clone(void) const
  ***************************************************************************/
 void GModels::append(const GModel& model)
 {
-    // Append model
-    m_models.push_back(model.clone());
+    // Make deep copy of model
+    GModel* model_copy = model.clone();
+
+    // If copy is valid, append it to the container
+    if (model_copy != NULL) {
+        m_models.push_back(model_copy);
+    }
 
     // Set parameter pointers
     set_pointers();

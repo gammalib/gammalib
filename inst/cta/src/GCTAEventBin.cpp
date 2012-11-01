@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GCTAEventBin.cpp  -  CTA event bin class                 *
+ *                 GCTAEventBin.cpp - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GCTAEventBin.cpp
- * @brief GCTAEventBin class implementation.
- * @author J. Knodlseder
+ * @brief CTA event bin class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,9 +31,18 @@
 #include <string>
 #include <cmath>
 #include "GCTAEventBin.hpp"
+#include "GCTAException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_DIR                                           "GCTAEventBin::dir()"
+#define G_ENERGY                                     "GCTAEventBin::energy()"
+#define G_TIME                                         "GCTAEventBin::time()"
+#define G_COUNTS_GET                                 "GCTAEventBin::counts()"
+#define G_COUNTS_SET                          "GCTAEventBin::counts(double&)"
+#define G_OMEGA                                       "GCTAEventBin::omega()"
+#define G_EWIDTH                                     "GCTAEventBin::ewidth()"
+#define G_ONTIME                                     "GCTAEventBin::ontime()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -185,7 +194,127 @@ double GCTAEventBin::size(void) const
 
 
 /***********************************************************************//**
+ * @brief Return instrument direction of event bin
+ *
+ * @return Instrument direction of event bin
+ *
+ * @exception GCTAException::no_member
+ *            Invalid instrument direction pointer.
+ *
+ * Returns reference to the instrument direction of the event bin.
+ ***************************************************************************/
+const GCTAInstDir& GCTAEventBin::dir(void) const
+{
+    // Throw an exception if instrument direction pointer is not valid
+    if (m_dir == NULL) {
+        throw GCTAException::no_member(G_DIR,
+                                       "Invalid instrument direction pointer.");
+    }
+
+    // Return instrument direction
+    return *m_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy of event bin
+ *
+ * @return Energy of event bin
+ *
+ * @exception GCTAException::no_member
+ *            Invalid energy pointer.
+ *
+ * Returns reference to the energy of the event bin.
+ ***************************************************************************/
+const GEnergy& GCTAEventBin::energy(void) const
+{
+    // Throw an exception if energy pointer is not valid
+    if (m_energy == NULL) {
+        throw GCTAException::no_member(G_ENERGY,
+                                       "Invalid energy pointer.");
+    }
+
+    // Return energy
+    return *m_energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time of event bin
+ *
+ * @return Time of event bin
+ *
+ * @exception GCTAException::no_member
+ *            Invalid time pointer.
+ *
+ * Returns reference to the time of the event bin.
+ ***************************************************************************/
+const GTime& GCTAEventBin::time(void) const
+{
+    // Throw an exception if time pointer is not valid
+    if (m_time == NULL) {
+        throw GCTAException::no_member(G_TIME,
+                                       "Invalid time pointer.");
+    }
+
+    // Return time
+    return *m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of counts in event bin
+ *
+ * @return Number of counts in event bin
+ *
+ * @exception GCTAException::no_member
+ *            Invalid counts pointer.
+ *
+ * Returns reference to the number of counts in the event bin.
+ ***************************************************************************/
+double GCTAEventBin::counts(void) const
+{
+    // Throw an exception if counts pointer is not valid
+    if (m_counts == NULL) {
+        throw GCTAException::no_member(G_COUNTS_GET,
+                                       "Invalid counts pointer.");
+    }
+
+    // Return counts
+    return *m_counts;
+}
+
+
+/***********************************************************************//**
+ * @brief Set number of counts in event bin
+ *
+ * @param[in] counts Number of counts.
+ *
+ * @exception GCTAException::no_member
+ *            Invalid counts pointer.
+ *
+ * Set the number of counts in the event bin.
+ ***************************************************************************/
+void GCTAEventBin::counts(const double& counts)
+{
+    // Throw an exception if counts pointer is not valid
+    if (m_counts == NULL) {
+        throw GCTAException::no_member(G_COUNTS_SET,
+                                       "Invalid counts pointer.");
+    }
+
+    // Set number of counts in event bin
+    *m_counts = counts;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return error in number of counts
+ *
+ * @return Error in number of counts in event bin
  *
  * Returns \f$\sqrt(counts+delta)\f$ as the uncertainty in the number of
  * counts in the bin. Adding delta avoids uncertainties of 0 which will
@@ -202,6 +331,75 @@ double GCTAEventBin::error(void) const
 
     // Return error
     return error;
+}
+
+
+/***********************************************************************//**
+ * @brief Return solid angle of event bin
+ *
+ * @return Solid angle of event bin
+ *
+ * @exception GCTAException::no_member
+ *            Invalid solid angle pointer.
+ *
+ * Returns reference to the solid angle of the event bin.
+ ***************************************************************************/
+const double& GCTAEventBin::omega(void) const
+{
+    // Throw an exception if solid angle pointer is not valid
+    if (m_omega == NULL) {
+        throw GCTAException::no_member(G_OMEGA,
+                                       "Invalid solid angle pointer.");
+    }
+
+    // Return solid angle
+    return *m_omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy width of event bin
+ *
+ * @return Energy width of event bin
+ *
+ * @exception GCTAException::no_member
+ *            Invalid energy width pointer.
+ *
+ * Returns reference to the energy width of the event bin.
+ ***************************************************************************/
+const GEnergy& GCTAEventBin::ewidth(void) const
+{
+    // Throw an exception if energy width pointer is not valid
+    if (m_ewidth == NULL) {
+        throw GCTAException::no_member(G_EWIDTH,
+                                       "Invalid energy width pointer.");
+    }
+
+    // Return energy width
+    return *m_ewidth;
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime of event bin
+ *
+ * @return Ontime of event bin
+ *
+ * @exception GCTAException::no_member
+ *            Invalid ontime pointer.
+ *
+ * Returns reference to the ontime of the event bin.
+ ***************************************************************************/
+const double& GCTAEventBin::ontime(void) const
+{
+    // Throw an exception if ontime pointer is not valid
+    if (m_ontime == NULL) {
+        throw GCTAException::no_member(G_ONTIME,
+                                       "Invalid ontime pointer.");
+    }
+
+    // Return ontime
+    return *m_ontime;
 }
 
 

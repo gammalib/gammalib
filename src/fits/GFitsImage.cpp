@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GFitsImage.cpp  - FITS image class                     *
+ *                   GFitsImage.cpp - FITS image class                     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -371,8 +371,9 @@ int GFitsImage::naxes(int axis) const
 {
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
-    if (axis < 0 || axis >= m_naxis)
+    if (axis < 0 || axis >= m_naxis) {
         throw GException::out_of_range(G_NAXES, axis, 0, m_naxis-1);
+    }
     #endif
 
     // Get axis dimension
@@ -448,9 +449,10 @@ std::string GFitsImage::print(void) const
     result.append(parformat("Image type")+typecode(type())+"\n");
     result.append(parformat("Number of dimensions")+str(naxis())+"\n");
     result.append(parformat("Number of image pixels")+str(size()));
-    for (int i = 0; i < naxis(); ++i)
+    for (int i = 0; i < naxis(); ++i) {
         result.append("\n"+parformat("Number of bins in "+str(i)) +
                       str(naxes(i)));
+    }
 
     // Append header information
     result.append(+"\n"+m_header.print());
@@ -577,6 +579,9 @@ void GFitsImage::init_image_header(void)
  *
  * @param[in] vptr FITS file void pointer.
  *
+ * @exception GException::fits_error
+ *            FITS error.
+ *
  * Open FITS image in FITS file. Opening means connecting the FITS file
  * pointer to the image and reading the image and axes dimensions.
  ***************************************************************************/
@@ -585,8 +590,9 @@ void GFitsImage::open_image(void* vptr)
     // Move to HDU
     int status = 0;
     status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_OPEN_IMAGE, status);
+    }
 
     // Save the FITS file pointer and the HDU number
     FPTR_COPY(m_fitsfile, vptr);
@@ -594,8 +600,9 @@ void GFitsImage::open_image(void* vptr)
 
     // Get the image dimensions
     status = __ffgidm(FPTR(m_fitsfile), &m_naxis, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_OPEN_IMAGE, status);
+    }
 
     // Reset number of image pixels
     m_num_pixels = 0;
@@ -609,13 +616,15 @@ void GFitsImage::open_image(void* vptr)
 
         // Get the axes dimensions
         status = __ffgisz(FPTR(m_fitsfile), m_naxis, m_naxes, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_OPEN_IMAGE, status);
+        }
 
         // Calculate number of image pixels
         m_num_pixels = 1;
-        for (int i = 0; i < m_naxis; ++i)
+        for (int i = 0; i < m_naxis; ++i) {
             m_num_pixels *= m_naxes[i];
+        }
 
     } // endif: there is an image
 
@@ -631,6 +640,9 @@ void GFitsImage::open_image(void* vptr)
  * @param[in] pixels Pixel array to be saved.
  * @param[in] nulval Pointer to pixel nul value.
  * @param[out] anynul Number of nul values encountered during loading.
+ *
+ * @exception GException::fits_error
+ *            FITS error.
  *
  * Load image pixels from FITS file.
  ***************************************************************************/
@@ -656,8 +668,9 @@ void GFitsImage::load_image(int datatype, const void* pixels,
         delete [] fpixel;
         delete [] lpixel;
         delete [] inc;
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_LOAD_IMAGE, status);
+        }
     }
 
     // Return
@@ -671,12 +684,23 @@ void GFitsImage::load_image(int datatype, const void* pixels,
  * @param[in] datatype Datatype of pixels to be saved
  * @param[in] pixels Pixel array to be saved
  *
+ * @exception GException::fits_file_not_open
+ *            No FITS file has been opened.
+ * @exception GException::fits_error
+ *            FITS error.
+ *
  * Save image pixels into FITS file. In case that the HDU does not exist it
  * is created. In case that the pixel array is empty no data are saved; all
  * image pixels will be empty in this case.
  ***************************************************************************/
 void GFitsImage::save_image(int datatype, const void* pixels)
 {
+    // Throw an exception if FITS file is not open
+    if (FPTR(m_fitsfile)->Fptr == NULL) {
+        throw GException::fits_file_not_open(G_SAVE_IMAGE, 
+              "Open file before saving the image.");
+    }
+
     // Move to HDU. We use here an explicit cfitsio moveto function since we
     // want to recover the error code ...
     int status = 0;
@@ -686,23 +710,27 @@ void GFitsImage::save_image(int datatype, const void* pixels)
     if (status == 107) {
         status = 0;
         status = __ffcrim(FPTR(m_fitsfile), m_bitpix, m_naxis, m_naxes, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_SAVE_IMAGE, status);
+        }
     }
-    else if (status != 0)
+    else if (status != 0) {
         throw GException::fits_error(G_SAVE_IMAGE, status);
+    }
 
     // If HDU seems to be empty then create it now. This is only needed for the
     // primary HDU, since __ffmahd gives no error if the primary HDU is empty.
     // By checking the number of keywords in the HDU we detect an empty HDU ...
     int num = 0;
     status  = __ffghsp(FPTR(m_fitsfile), &num, NULL, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_SAVE_IMAGE, status);
+    }
     if (num == 0) {
         status = __ffcrim(FPTR(m_fitsfile), m_bitpix, m_naxis, m_naxes, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_SAVE_IMAGE, status);
+        }
     }
 
     // Save the image pixels (if there are some ...)
@@ -717,8 +745,9 @@ void GFitsImage::save_image(int datatype, const void* pixels)
                          (void*)pixels, &status);
         delete [] fpixel;
         delete [] lpixel;
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_SAVE_IMAGE, status);
+        }
     }
 
     // Return
@@ -749,8 +778,9 @@ void GFitsImage::fetch_data(void)
         init_data();
 
         // If a FITS file is attached then load pixels from FITS file.
-        if (FPTR(m_fitsfile)->Fptr != NULL)
+        if (FPTR(m_fitsfile)->Fptr != NULL) {
             load_image(type(), ptr_data(), ptr_nulval(), &m_anynul);
+        }
 
     } // endif: there were pixels available
 
@@ -771,8 +801,9 @@ int GFitsImage::offset(const int& ix) const
 {
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
-    if (ix < 0 || ix >= m_num_pixels)
+    if (ix < 0 || ix >= m_num_pixels) {
         throw GException::out_of_range(G_OFFSET_1D, ix, 0, m_num_pixels-1);
+    }
     #endif
 
     // Return index
@@ -797,15 +828,18 @@ int GFitsImage::offset(const int& ix) const
 int GFitsImage::offset(const int& ix, const int& iy) const
 {
     // Operator is only valid for 2D images
-    if (m_naxis < 2)
+    if (m_naxis < 2) {
         throw GException::fits_wrong_image_operator(G_OFFSET_2D, m_naxis, 2);
+    }
 
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
-    if (ix < 0 || ix >= m_naxes[0])
+    if (ix < 0 || ix >= m_naxes[0]) {
         throw GException::out_of_range(G_OFFSET_2D, ix, 0, m_naxes[0]-1);
-    if (iy < 0 || iy >= m_naxes[1])
+    }
+    if (iy < 0 || iy >= m_naxes[1]) {
         throw GException::out_of_range(G_OFFSET_2D, iy, 0, m_naxes[1]-1);
+    }
     #endif
 
     // Return offset
@@ -831,17 +865,21 @@ int GFitsImage::offset(const int& ix, const int& iy) const
 int GFitsImage::offset(const int& ix, const int& iy, const int& iz) const
 {
     // Operator is only valid for 3D images
-    if (m_naxis < 3)
+    if (m_naxis < 3) {
         throw GException::fits_wrong_image_operator(G_OFFSET_3D, m_naxis, 3);
+    }
 
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
-    if (ix < 0 || ix >= m_naxes[0])
+    if (ix < 0 || ix >= m_naxes[0]) {
         throw GException::out_of_range(G_OFFSET_3D, ix, 0, m_naxes[0]-1);
-    if (iy < 0 || iy >= m_naxes[1])
+    }
+    if (iy < 0 || iy >= m_naxes[1]) {
         throw GException::out_of_range(G_OFFSET_3D, iy, 0, m_naxes[1]-1);
-    if (iz < 0 || iz >= m_naxes[2])
+    }
+    if (iz < 0 || iz >= m_naxes[2]) {
         throw GException::out_of_range(G_OFFSET_3D, iz, 0, m_naxes[2]-1);
+    }
     #endif
 
     // Return offset
@@ -869,19 +907,24 @@ int GFitsImage::offset(const int& ix, const int& iy, const int& iz,
                        const int& it) const
 {
     // Operator is only valid for 4D images
-    if (m_naxis < 4)
+    if (m_naxis < 4) {
         throw GException::fits_wrong_image_operator(G_OFFSET_4D, m_naxis, 4);
+    }
 
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
-    if (ix < 0 || ix >= m_naxes[0])
+    if (ix < 0 || ix >= m_naxes[0]) {
         throw GException::out_of_range(G_OFFSET_4D, ix, 0, m_naxes[0]-1);
-    if (iy < 0 || iy >= m_naxes[1])
+    }
+    if (iy < 0 || iy >= m_naxes[1]) {
         throw GException::out_of_range(G_OFFSET_4D, iy, 0, m_naxes[1]-1);
-    if (iz < 0 || iz >= m_naxes[2])
+    }
+    if (iz < 0 || iz >= m_naxes[2]) {
         throw GException::out_of_range(G_OFFSET_4D, iz, 0, m_naxes[2]-1);
-    if (it < 0 || it >= m_naxes[3])
+    }
+    if (it < 0 || it >= m_naxes[3]) {
         throw GException::out_of_range(G_OFFSET_4D, it, 0, m_naxes[3]-1);
+    }
     #endif
 
     // Return offset
@@ -929,8 +972,9 @@ void GFitsImage::copy_members(const GFitsImage& image)
     m_naxes = NULL;
     if (image.m_naxes != NULL && m_naxis > 0) {
         m_naxes = new long[m_naxis];
-        for (int i = 0; i < m_naxis; ++i)
+        for (int i = 0; i < m_naxis; ++i) {
             m_naxes[i] = image.m_naxes[i];
+        }
     }
 
     // Return

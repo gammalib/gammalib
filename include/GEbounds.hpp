@@ -76,7 +76,7 @@ public:
     GEnergy     emax(int inx) const;
     GEnergy     emean(int inx) const;
     GEnergy     elogmean(int inx) const;
-    bool        isin(const GEnergy& eng) const;
+    bool        contains(const GEnergy& eng) const;
     std::string print(void) const;
 
 
