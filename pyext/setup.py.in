@@ -33,6 +33,16 @@ pkg_name = 'gammalib'
 core_modules = ['app', 'base', 'fits', 'linalg', 'model', 'numerics', \
                 'obs', 'opt', 'sky', 'support', 'test', 'xml']
 
+# Detect execution mode
+is_build = True
+if (len(sys.argv) >= 2):
+	if (sys.argv[1] == 'install'):
+		is_build = False
+if is_build:
+	sys.stdout.write("Python extension module building:\n")
+else:
+	sys.stdout.write("Python extension module installation:\n")
+
 # Darwin MacPorts kluge: Remove -L/opt/local/lib path from LDSHARED as this
 # overrides the GammaLib settings. Otherwise, MacPorts libraries would be
 # used instead of the libraries selected by GammaLib
@@ -178,53 +188,54 @@ file.close()
 # "import XXX" statements into "from XXX import *" statements. Furthermore,
 # the module information is stripped from all base classes, e.g.
 # "gammalib.obs.GRoi" becomes "GRoi".
-for module in all_modules:
+if is_build:
+	for module in all_modules:
 
-	# Set file names
-	filename = pkg_name+"/"+module+".py"
-	origname = pkg_name+"/"+module+".py.orig"
+		# Set file names
+		filename = pkg_name+"/"+module+".py"
+		origname = pkg_name+"/"+module+".py.orig"
 
-	# Rename original file (for safety)
-	os.rename(filename,origname)
+		# Rename original file (for safety)
+		os.rename(filename,origname)
 
-	# Open files
-	infile  = open(origname, 'r')
-	outfile = open(filename, 'w')
+		# Open files
+		infile  = open(origname, 'r')
+		outfile = open(filename, 'w')
 
-	# Initialize reformulation statistics
-	n_import = 0
-	n_class  = 0
+		# Initialize reformulation statistics
+		n_import = 0
+		n_class  = 0
 
-	# Loop over all lines of input file
-	for line in infile:
+		# Loop over all lines of input file
+		for line in infile:
 
-		# Reformulate import statements
-		if line.find("import gammalib.") != -1:
-			pos      = line.find("gammalib.")
-			name     = line[pos:].rstrip('\n').strip(' ')
-			line     = "from "+name+" import *\n"
-			n_import = n_import + 1
+			# Reformulate import statements
+			if line.find("import gammalib.") != -1:
+				pos      = line.find("gammalib.")
+				name     = line[pos:].rstrip('\n').strip(' ')
+				line     = "from "+name+" import *\n"
+				n_import = n_import + 1
 
-		# Reformulate base class declarations
-		elif re.search("gammalib.+.G+", line):
-			start   = line.find("gammalib.")
-			pos     = line[start:].find("G")+start
-			pre     = line[0:start]
-			post    = line[pos:]
-			line    = pre+post
-			n_class = n_class + 1
+			# Reformulate base class declarations
+			elif re.search("gammalib.+.G+", line):
+				start   = line.find("gammalib.")
+				pos     = line[start:].find("G")+start
+				pre     = line[0:start]
+				post    = line[pos:]
+				line    = pre+post
+				n_class = n_class + 1
 
-		# Write line
-		outfile.write(line)
+			# Write line
+			outfile.write(line)
 
-	# Close files
-	infile.close()
-	outfile.close()
+		# Close files
+		infile.close()
+		outfile.close()
 
-	# Dump reformulation statistics for actual module
-	if n_import > 0 or n_class > 0:
-		sys.stdout.write(module+".py reformulation: "+str(n_import)+ \
-		      " imports, "+str(n_class)+" base class declarations.\n")
+		# Dump reformulation statistics for actual module
+		if n_import > 0 or n_class > 0:
+			sys.stdout.write(module+".py reformulation: "+str(n_import)+ \
+				" imports, "+str(n_class)+" base class declarations.\n")
 
 # Set data files to install.
 data_files=[('@prefix@/share/gammalib/swig', install_files)]
@@ -251,15 +262,16 @@ setup(name='@PACKAGE_NAME@',
 # Post-processing. A symbolic link is created to the directory containing the
 # shared wrapper libraries so that we can add this directory to the PYTHONPATH
 # for testing.
-try:
-	os.chdir('build')
-	os.remove('gammalib')
-	sys.stdout.write("Removed symbolic link build/gammalib.\n")
-except:
-	pass
-try:
-	path = glob.glob('lib.*/gammalib')
-	os.symlink(path[0], 'gammalib')
-	sys.stdout.write("Created symbolic link build/gammalib.\n")
-except:
-	sys.stdout.write("WARNING: Failed to create symbolic link build/gammalib.\n")
+if is_build:
+	try:
+		os.chdir('build')
+		os.remove('gammalib')
+		sys.stdout.write("Removed symbolic link build/gammalib.\n")
+	except:
+		pass
+	try:
+		path = glob.glob('lib.*/gammalib')
+		os.symlink(path[0], 'gammalib')
+		sys.stdout.write("Created symbolic link build/gammalib.\n")
+	except:
+		sys.stdout.write("WARNING: Failed to create symbolic link build/gammalib.\n")
