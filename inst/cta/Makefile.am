@@ -20,6 +20,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAResponseTable.cpp \
           src/GCTAAeff.cpp \
           src/GCTAAeffPerfTable.cpp \
+          src/GCTAAeffArf.cpp \
           src/GCTAAeff2D.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
@@ -46,6 +47,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAResponseTable.hpp \
                      include/GCTAAeff.hpp \
                      include/GCTAAeffPerfTable.hpp \
+                     include/GCTAAeffArf.hpp \
                      include/GCTAAeff2D.hpp \
                      include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
