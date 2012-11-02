@@ -40,7 +40,7 @@ class GCTAAeff : public GBase {
 public:
     // Constructors and destructors
     GCTAAeff(void);
-    GCTAAeff(const GCTAAeff& cta);
+    GCTAAeff(const GCTAAeff& aeff);
     virtual ~GCTAAeff(void);
 
     // Pure virtual operators
