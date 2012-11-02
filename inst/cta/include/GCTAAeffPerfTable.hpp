@@ -58,18 +58,21 @@ public:
     double operator()(const double& logE, 
                       const double& theta = 0.0, 
                       const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0,
                       const bool&   etrue = true) const;
 
     // Implemented pure virtual methods
     void               clear(void);
     GCTAAeffPerfTable* clone(void) const;
     void               load(const std::string& filename);
+    std::string        filename(void) const;
     std::string        print(void) const;
 
     // Methods
-    int            size(void) const { return m_logE.size(); }
-    void           offset_sigma(const double& sigma) { m_offset_sigma=sigma; }
-    const double&  offset_sigma(void) const { return m_offset_sigma; }
+    int           size(void) const { return m_logE.size(); }
+    void          sigma(const double& sigma) { m_sigma=sigma; }
+    const double& sigma(void) const { return m_sigma; }
 
 private:
     // Methods
@@ -78,9 +81,10 @@ private:
     void free_members(void);
 
     // Members
-    GNodeArray          m_logE;         //!< log(E) nodes for Aeff interpolation
-    std::vector<double> m_aeff;         //!< Effective area in cm2
-    double              m_offset_sigma; //!< Sigma for offset angle computation (0=none)
+    std::string         m_filename;  //!< Name of Aeff response file
+    GNodeArray          m_logE;      //!< log(E) nodes for Aeff interpolation
+    std::vector<double> m_aeff;      //!< Effective area in cm2
+    double              m_sigma;     //!< Sigma for offset angle computation (0=none)
 };
 
 #endif /* GCTAAEFFPERFTABLE_HPP */

@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <cmath>
 #include "GTools.hpp"
 #include "GFitsTable.hpp"
 #include "GCTAAeff2D.hpp"
@@ -155,8 +154,10 @@ GCTAAeff2D& GCTAAeff2D::operator= (const GCTAAeff2D& aeff)
  * @brief Return effective area in units of cm2
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle (rad). Defaults to 0.0.
- * @param[in] phi Azimuth angle (rad). Not used in this method.
+ * @param[in] theta Offset angle in camera system (rad). Defaults to 0.0.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
  * @param[in] etrue Use true energy (true/false). Defaults to true.
  *
  * Returns the effective area in units of cm2 for a given energy and
@@ -172,6 +173,8 @@ GCTAAeff2D& GCTAAeff2D::operator= (const GCTAAeff2D& aeff)
 double GCTAAeff2D::operator()(const double& logE, 
                               const double& theta, 
                               const double& phi,
+                              const double& zenith,
+                              const double& azimuth,
                               const bool&   etrue) const
 {
     // Set parameter index
@@ -242,8 +245,26 @@ void GCTAAeff2D::load(const std::string& filename)
     // Read effective area from file
     read(&fits);
 
+    // Close FITS file
+    fits.close();
+
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which effective area was loaded
+ ***************************************************************************/
+std::string GCTAAeff2D::filename(void) const
+{
+    // Return filename
+    return m_filename;
 }
 
 
@@ -258,8 +279,8 @@ void GCTAAeff2D::load(const std::string& filename)
  ***************************************************************************/
 void GCTAAeff2D::read(const GFits* fits)
 {
-    // Clear instance
-    clear();
+    // Clear response table
+    m_aeff.clear();
 
     // Get pointer to effective area HDU
     GFitsTable* hdu = fits->table("EFFECTIVE AREA");
@@ -302,6 +323,7 @@ std::string GCTAAeff2D::print(void) const
 
     // Append header
     result.append("=== GCTAAeff2D ===");
+    result.append("\n"+parformat("Filename")+m_filename);
     result.append("\n"+parformat("Number of energy bins")+str(m_aeff.axis(0)));
     result.append("\n"+parformat("Number of offset bins")+str(m_aeff.axis(1)));
     result.append("\n"+parformat("Log10(Energy) range"));
@@ -326,6 +348,7 @@ std::string GCTAAeff2D::print(void) const
 void GCTAAeff2D::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_aeff.clear();
 
     // Return
@@ -341,7 +364,8 @@ void GCTAAeff2D::init_members(void)
 void GCTAAeff2D::copy_members(const GCTAAeff2D& aeff)
 {
     // Copy members
-    m_aeff = aeff.m_aeff;
+    m_filename = aeff.m_filename;
+    m_aeff     = aeff.m_aeff;
 
     // Return
     return;

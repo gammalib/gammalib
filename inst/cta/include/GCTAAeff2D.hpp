@@ -56,12 +56,15 @@ public:
     double operator()(const double& logE, 
                       const double& theta = 0.0, 
                       const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0,
                       const bool&   etrue = true) const;
 
     // Implemented pure virtual methods
     void        clear(void);
     GCTAAeff2D* clone(void) const;
     void        load(const std::string& filename);
+    std::string filename(void) const;
     std::string print(void) const;
 
     // Methods
@@ -74,7 +77,8 @@ private:
     void free_members(void);
 
     // Members
-    GCTAResponseTable m_aeff;    //!< Aeff response table
+    std::string       m_filename;  //!< Name of Aeff response file
+    GCTAResponseTable m_aeff;      //!< Aeff response table
 };
 
 #endif /* GCTAAEFF2D_HPP */

@@ -47,6 +47,9 @@
 #include "GCTAException.hpp"
 #include "GCTASupport.hpp"
 #include "GCTADir.hpp"
+#include "GCTAAeff2D.hpp"
+#include "GCTAAeffArf.hpp"
+#include "GCTAAeffPerfTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GCTAResponse::caldb(std::string&)"
@@ -587,6 +590,9 @@ void GCTAResponse::load(const std::string& irfname)
     // Read performance table
     read_performance_table(filename);
 
+    // Read effective area
+    m_aeff = new GCTAAeffPerfTable(filename);
+
     // Store response name
     m_rspname = irfname;
 
@@ -599,29 +605,68 @@ void GCTAResponse::load(const std::string& irfname)
 
 
 /***********************************************************************//**
- * @brief Load CTA ARF vector
+ * @brief Load effective area
  *
- * @param[in] filename FITS file name.
+ * @param[in] filename Effective area filename.
  *
- * This method loads a CTA ARF vector from a FITS file. See the
- * GCTAResponse::read_arf method for more information on ARF vector reading.
+ * This method allocates an effective area instance and load the effective
+ * area information from a response file. The following response file formats
+ * are supported:
+ *
+ * (1) A CTA performance table. This is an ASCII file which specifies the
+ *     on-axis effective area as function of energy.
+ *
+ * (2) A ARF FITS file. This is a FITS file which stores the effective area
+ *     in a vector.
+ *
+ * (3) A CTA response table. This is a FITS file which specifies the
+ *     effective area as function of energy and offset angle.
+ *
+ * This method examines the file, and depending on the detected format,
+ * allocates the appropriate effective area class and loads the data.
+ *
+ * First, the method checks whether the file is a FITS file or not. If the
+ * file is not a FITS file, it is assumed that the file is an ASCII
+ * performance table. If the file is a FITS file, the number of rows found
+ * in the table is used to distinguish between an ARF (multiple rows) and
+ * a CTA response table (single row).
+ *
+ * @todo Implement a method that checks if a file is a FITS file instead
+ *       of using try-catch.
  ***************************************************************************/
-void GCTAResponse::load_arf(const std::string& filename)
+void GCTAResponse::load_aeff(const std::string& filename)
 {
-    // Open ARF FITS file
-    GFits file(filename);
+    // Free any existing effective area instance
+    if (m_aeff != NULL) delete m_aeff;
+    m_aeff = NULL;
+    
+    // Try opening the file as a FITS file
+    try {
+    
+        // Open FITS file
+        GFits file(filename);
 
-    // Get ARF table
-    GFitsTable* table = file.table("SPECRESP");
+        // If file contains an "EFFECTIVE AREA" extension then load it
+        // as CTA response table
+        if (file.hashdu("EFFECTIVE AREA")) {
+            file.close();
+            m_aeff = new GCTAAeff2D(filename);
+        }
 
-    // Read ARF
-    read_arf(table);
+        // ... else if file contains a "SPECRESP" extension then load it
+        // as ARF
+        else if (file.hashdu("SPECRESP")) {
+            file.close();
+            m_aeff = new GCTAAeffArf(filename);
+        }
 
-    // Close ARF FITS file
-    file.close();
+    }
 
-    // Store filename
-    m_arffile = filename;
+    // If FITS file opening failed then assume that we have a performance
+    // table
+    catch (GException::fits_open_error &e) {
+        m_aeff = new GCTAAeffPerfTable(filename);
+    }
 
     // Return
     return;
@@ -690,137 +735,6 @@ void GCTAResponse::load_psf(const std::string& filename)
 
     // Store filename
     m_psffile = filename;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Read CTA ARF vector
- *
- * @param[in] hdu FITS table pointer.
- *
- * This method reads a CTA ARF vector from the FITS HDU. Note that the
- * energies are converted to TeV and the effective area is converted to cm2.
- * Conversion is done based on the units provided for the energy and
- * effective area columns. Units that are recognized are 'keV', 'MeV', 'GeV',
- * 'TeV', 'm^2', 'm2', 'cm^2' and 'cm^2' (case independent).
- *
- * @todo Assign appropriate theta angle for PSF. So far we use onaxis.
- *       For appropriate theta angle assignment, we would need this
- *       information in the response header.
- ***************************************************************************/
-void GCTAResponse::read_arf(const GFitsTable* hdu)
-{
-    // Clear arrays
-    m_aeff_logE.clear();
-    m_aeff.clear();
-
-    // Get pointers to table columns
-    const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
-    const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
-    const GFitsTableCol* specresp  = &(*hdu)["SPECRESP"];
-
-    // Determine unit conversion factors (default: TeV and cm^2)
-    std::string u_energy_lo = tolower(strip_whitespace(energy_lo->unit()));
-    std::string u_energy_hi = tolower(strip_whitespace(energy_hi->unit()));
-    std::string u_specresp  = tolower(strip_whitespace(specresp->unit()));
-    double c_energy_lo = 1.0;
-    double c_energy_hi = 1.0;
-    double c_specresp  = 1.0;
-    if (u_energy_lo == "kev") {
-        c_energy_lo = 1.0e-9;
-    }
-    else if (u_energy_lo == "mev") {
-        c_energy_lo = 1.0e-6;
-    }
-    else if (u_energy_lo == "gev") {
-        c_energy_lo = 1.0e-3;
-    }
-    if (u_energy_hi == "kev") {
-        c_energy_hi = 1.0e-9;
-    }
-    else if (u_energy_hi == "mev") {
-        c_energy_hi = 1.0e-6;
-    }
-    else if (u_energy_hi == "gev") {
-        c_energy_hi = 1.0e-3;
-    }
-    if (u_specresp == "m^2" || u_specresp == "m2") {
-        c_specresp = 10000.0;
-    }
-
-    // Extract number of energy bins
-    int num = energy_lo->length();
-
-    // Set nodes
-    for (int i = 0; i < num; ++i) {
-    
-        // Compute log10 mean energy in TeV
-        double e_min = energy_lo->real(i) * c_energy_lo;
-        double e_max = energy_hi->real(i) * c_energy_hi;
-        double logE  = 0.5 * (log10(e_min) + log10(e_max));
-
-        // Initialise scale factor
-        double scale = m_arf_scale;
-
-        // Optionally compute scaling factor from thetacut. This is done
-        // by computing the containment fraction for the specified thetacut.
-        if (m_arf_thetacut > 0.0) {
-
-            // Get PSF parameters for node energy and theta angle
-            //TODO: Implement theta angle computation
-            GCTAPsfPars pars = psf_dummy_sigma(logE, 0.0);
-
-            // Get maximum integration radius
-            double rmax = m_arf_thetacut * deg2rad;
-
-            // Setup integration kernel
-            cta_npsf_kern_rad_azsym integrand(this,
-                                              rmax,
-                                              0.0,
-                                              pars);
-
-            // Setup integration
-            GIntegral integral(&integrand);
-            integral.eps(m_eps);
-
-            // Perform integration
-            double fraction = integral.romb(0.0, rmax);
-
-            // Update scale factor
-            if (fraction > 0.0) {
-                scale /= fraction;
-                #if defined(G_DEBUG_READ_ARF)
-                std::cout << "GCTAResponse::read_arf:";
-                std::cout << " e_min=" << e_min;
-                std::cout << " e_max=" << e_max;
-                std::cout << " logE=" << logE;
-                std::cout << " scale=" << scale;
-                std::cout << " fraction=" << fraction;
-                std::cout << std::endl;
-                #endif
-            }
-            else {
-                std::cout << "WARNING: GCTAResponse::read_arf:";
-                std::cout << " Non-positive integral occured in";
-                std::cout << " PSF integration in GCTAResponse::read_arf.";
-                std::cout << std::endl;
-            }
-        }
-
-        // Compute effective area in cm2
-        double aeff = specresp->real(i) * c_specresp * scale;
-        
-        // Store log10 mean energy and effective area value
-        m_aeff_logE.append(logE);
-        m_aeff.push_back(aeff);
-
-    } // endfor: looped over nodes
-    
-    // Disable offset angle dependence
-    m_offset_sigma = 0.0;
 
     // Return
     return;
@@ -925,25 +839,13 @@ std::string GCTAResponse::print(void) const
     result.append("=== GCTAResponse ===");
     result.append("\n"+parformat("Calibration database")+m_caldb);
     result.append("\n"+parformat("Response name")+m_rspname);
-    result.append("\n"+parformat("ARF file name")+m_arffile);
     result.append("\n"+parformat("RMF file name")+m_rmffile);
     result.append("\n"+parformat("PSF file name")+m_psffile);
-    result.append("\n"+parformat("ARF theta angle cut"));
-    if (m_arf_thetacut > 0) {
-        result.append(str(m_arf_thetacut));
+
+    // Append effective area information
+    if (m_aeff != NULL) {
+        result.append("\n"+m_aeff->print());
     }
-    else {
-        result.append("none");
-    }
-    result.append("\n"+parformat("ARF scaling")+str(m_arf_scale));
-    if (m_offset_sigma == 0) {
-        result.append("\n"+parformat("Offset angle dependence")+"none");
-    }
-    else {
-        std::string txt = "Fixed sigma="+str(m_offset_sigma);
-        result.append("\n"+parformat("Offset angle dependence")+txt);
-    }
-    result.append("\n"+parformat("Effective area nodes")+str(m_aeff_logE.size()));
     
     // Append PSF information
     result.append("\n"+parformat("PSF version"));
@@ -966,15 +868,6 @@ std::string GCTAResponse::print(void) const
     else {
         result.append("\n"+parformat("PSF nodes")+str(m_psf_logE.size()));
     }
-
-    // Debug option: Plot Aeff
-    #if defined(G_DEBUG_PRINT_AEFF)
-    result.append("\n"+parformat("Effective area"));
-    for (int i = 0; i < m_aeff_logE.size(); ++i) {
-        result.append("\n"+parformat("logE="+str(m_aeff_logE[i])));
-        result.append("Aeff="+str(m_aeff.at(i))+" m2");
-    }
-    #endif
 
     // Debug option: Plot PSF
     #if defined(G_DEBUG_PRINT_PSF)
@@ -1547,14 +1440,10 @@ double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
  * @param[in] zenith Zenith angle of telescope pointing (radians).
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
+ * @return Effective area in units fo cm2.
  *
- * A simple offset angle dependence has been implemented using a Gaussian
- * if theta^2 (similar to the radial acceptance model implemented for the
- * background). The width of the Gaussian is assumed independent of energy
- * and given by the fixed parameter m_offset_sigma.
- *
- * @todo Implement offset angle dependence from response file.
- * @todo So far the parameters phi, zenith, and azimuth are not used.
+ * Returns the effective area as function of position in the camera system
+ * and in the earth system.
  ***************************************************************************/
 double GCTAResponse::aeff(const double& theta,
                           const double& phi,
@@ -1562,19 +1451,10 @@ double GCTAResponse::aeff(const double& theta,
                           const double& azimuth,
                           const double& srcLogEng) const
 {
-    // Interpolate effective area using node array
-    double aeff = m_aeff_logE.interpolate(srcLogEng, m_aeff);
-    if (aeff < 0) {
-        aeff = 0.0;
-    }
-    
-    // Optionally add in offset angle dependence
-    if (m_offset_sigma != 0.0) {
-        double offset = theta * rad2deg;
-        double arg    = offset * offset / m_offset_sigma;
-        double scale  = exp(-0.5 * arg * arg);
-        aeff         *= scale;
-    }
+    // Get effective area
+    double aeff = (m_aeff != NULL)
+                  ? (*m_aeff)(srcLogEng, theta, phi, zenith, azimuth)
+                  : 0.0;
 
     // Return effective area
     return aeff;
@@ -2043,23 +1923,21 @@ void GCTAResponse::init_members(void)
     // Initialise members
     m_caldb.clear();
     m_rspname.clear();
-    m_arffile.clear();
     m_rmffile.clear();
     m_psffile.clear();
     m_psf_logE.clear();
-    m_aeff_logE.clear();
     m_logE.clear();
-    m_aeff.clear();
     m_r68.clear();
     m_r80.clear();
     m_eps          = 1.0e-5; // Precision for Romberg integration
     m_offset_sigma = 3.0;    // Default value for now ...
-    m_arf_thetacut = 0.0;    // Default: no thetacut
-    m_arf_scale    = 1.0;    // Default: ARF is unscaled
 
     // Initialise PSF information
     m_psf_version = -99; // Unknown PSF version
     m_psf_table.clear();
+
+    // New factorisation
+    m_aeff = NULL;
     
     // Return
     return;
@@ -2076,23 +1954,21 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     // Copy attributes
     m_caldb        = rsp.m_caldb;
     m_rspname      = rsp.m_rspname;
-    m_arffile      = rsp.m_arffile;
     m_rmffile      = rsp.m_rmffile;
     m_psffile      = rsp.m_psffile;
     m_psf_logE     = rsp.m_psf_logE;
-    m_aeff_logE    = rsp.m_aeff_logE;
     m_logE         = rsp.m_logE;
-    m_aeff         = rsp.m_aeff;
     m_r68          = rsp.m_r68;
     m_r80          = rsp.m_r80;
     m_eps          = rsp.m_eps;
     m_offset_sigma = rsp.m_offset_sigma;
-    m_arf_thetacut = rsp.m_arf_thetacut;
-    m_arf_scale    = rsp.m_arf_scale;
 
     // Copy PSF information
     m_psf_version = rsp.m_psf_version;
     m_psf_table   = rsp.m_psf_table;
+
+    // New factorisation
+    m_aeff = (rsp.m_aeff != NULL) ? rsp.m_aeff->clone() : NULL;
 
     // Return
     return;
@@ -2104,6 +1980,12 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
  ***************************************************************************/
 void GCTAResponse::free_members(void)
 {
+    // Free memory
+    if (m_aeff != NULL) delete m_aeff;
+
+    // Initialise pointers
+    m_aeff = NULL;
+
     // Return
     return;
 }
@@ -2125,9 +2007,9 @@ void GCTAResponse::read_performance_table(const std::string& filename)
 {
     // Clear arrays
     m_psf_logE.clear();
-    m_aeff_logE.clear();
+    //m_aeff_logE.clear();
     m_logE.clear();
-    m_aeff.clear();
+    //m_aeff.clear();
     m_r68.clear();
     m_r80.clear();
 
@@ -2164,7 +2046,7 @@ void GCTAResponse::read_performance_table(const std::string& filename)
 
         // Push elements in vectors
         m_logE.push_back(todouble(elements[0]));
-        m_aeff.push_back(todouble(elements[1])*10000.0);
+        //m_aeff.push_back(todouble(elements[1])*10000.0);
         m_r68.push_back(todouble(elements[2]));
         m_r80.push_back(todouble(elements[3]));
 
@@ -2175,7 +2057,7 @@ void GCTAResponse::read_performance_table(const std::string& filename)
     if (num > 0) {
         for (int i = 0; i < num; ++i) {
             m_psf_logE.append(m_logE.at(i));
-            m_aeff_logE.append(m_logE.at(i));
+            //m_aeff_logE.append(m_logE.at(i));
         }
     }
 

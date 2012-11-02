@@ -85,26 +85,20 @@ public:
                                  const GObservation&        obs) const;
 
     // Other Methods
-    GCTAEventAtom* mc(const double& area, const GPhoton& photon,
-                      const GObservation& obs, GRan& ran) const;
-    void           caldb(const std::string& caldb);
-    std::string    caldb(void) const;
-    void           load(const std::string& rspname);
-    void           eps(const double& eps);
-    const double&  eps(void) const;
-    void           offset_sigma(const double& sigma);
-    const double&  offset_sigma(void) const;
-    std::string    arffile(void) const;
-    std::string    rmffile(void) const;
-    std::string    psffile(void) const;
-    double         arf_thetacut(void) const;
-    double         arf_scale(void) const;
-    void           arf_thetacut(const double& value);
-    void           arf_scale(const double& value);
-    void           load_arf(const std::string& filename);
-    void           load_psf(const std::string& filename);
-    void           read_arf(const GFitsTable* hdu);
-    void           read_psf(const GFitsTable* hdu);
+    GCTAEventAtom*  mc(const double& area, const GPhoton& photon,
+                       const GObservation& obs, GRan& ran) const;
+    void            caldb(const std::string& caldb);
+    std::string     caldb(void) const;
+    void            load(const std::string& rspname);
+    void            eps(const double& eps);
+    const double&   eps(void) const;
+    void            offset_sigma(const double& sigma);
+    const double&   offset_sigma(void) const;
+    void            load_aeff(const std::string& filename);
+    void            load_psf(const std::string& filename);
+    void            load_edisp(const std::string& filename);
+    const GCTAAeff* aeff(void) const;
+    void            aeff(GCTAAeff* aeff);
 
     // Low-level response methods
     double aeff(const double& theta,

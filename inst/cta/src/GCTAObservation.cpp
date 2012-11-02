@@ -29,17 +29,21 @@
 #include <config.h>
 #endif
 #include "GObservationRegistry.hpp"
-#include "GCTAException.hpp"
-#include "GCTAObservation.hpp"
-#include "GCTAEventList.hpp"
-#include "GCTAEventCube.hpp"
-#include "GCTARoi.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
 #include "GIntegrand.hpp"
+#include "GCTAException.hpp"
+#include "GCTAObservation.hpp"
+#include "GCTAEventList.hpp"
+#include "GCTAEventCube.hpp"
+#include "GCTARoi.hpp"
+#include "GCTAAeff.hpp"
+#include "GCTAAeff2D.hpp"
+#include "GCTAAeffArf.hpp"
+#include "GCTAAeffPerfTable.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GCTAObservation      g_obs_cta_seed("CTA");
@@ -339,18 +343,18 @@ void GCTAObservation::pointing(const GCTAPointing& pointing)
  * for a binned observation.
  *
  * @todo Still supports old ARF, PSF and RMF parameter names.
+ * @todo PSF correction for ARF not yet implemented.
  ***************************************************************************/
 void GCTAObservation::read(const GXmlElement& xml)
 {
     // Clear observation
     clear();
 
-    // Initialise response parameters
-    std::string aeff;
-    std::string psf;
-    std::string rmf;
-    double      thetacut = 0.0;
-    double      scale    = 1.0;
+    // Delete old response function
+    if (m_response != NULL) delete m_response;
+
+    // Allocate new CTA response function
+    m_response = new GCTAResponse;
 
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
@@ -401,20 +405,53 @@ void GCTAObservation::read(const GXmlElement& xml)
         else if ((par->attribute("name") == "EffectiveArea") ||
                  (par->attribute("name") == "ARF")) {
 
-            // Store filename
-            aeff = par->attribute("file");
+            // Get filename
+            std::string filename = par->attribute("file");
 
-            // Optionally extract thetacut (0.0 if no thetacut)
-            std::string s_thetacut = par->attribute("thetacut");
-            if (s_thetacut.length() > 0) {
-                thetacut = todouble(s_thetacut);
-            }
+            // If filename is not empty then load effective area
+            if (strip_whitespace(filename).length() > 0) {
 
-            // Optionally extract scale factor (1.0 if no scale)
-            std::string s_scale = par->attribute("scale");
-            if (s_scale.length() > 0) {
-                scale = todouble(s_scale);
-            }
+                // Load effective area
+                m_response->load_aeff(filename);
+
+                // Optional attributes
+                double thetacut = 0.0;
+                double scale    = 1.0;
+                double sigma    = 0.0;
+
+                // Optionally extract thetacut (0.0 if no thetacut)
+                std::string s_thetacut = par->attribute("thetacut");
+                if (s_thetacut.length() > 0) {
+                    thetacut = todouble(s_thetacut);
+                }
+
+                // Optionally extract scale factor (1.0 if no scale)
+                std::string s_scale = par->attribute("scale");
+                if (s_scale.length() > 0) {
+                    scale = todouble(s_scale);
+                }
+
+                // Optionally extract sigma (0.0 if no sigma)
+                std::string s_sigma = par->attribute("sigma");
+                if (s_sigma.length() > 0) {
+                    sigma = todouble(s_sigma);
+                }
+
+                // If we have an ARF then set attributes
+                GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response->aeff()));
+                if (arf != NULL) {
+                    arf->thetacut(thetacut);
+                    arf->scale(scale);
+                    arf->sigma(sigma);
+                }
+
+                // If we have a performance table then set attributes
+                GCTAAeffPerfTable* perf = const_cast<GCTAAeffPerfTable*>(dynamic_cast<const GCTAAeffPerfTable*>(m_response->aeff()));
+                if (perf != NULL) {
+                    perf->sigma(sigma);
+                }
+
+            } // endif: effective area filename was valid
 
             // Increase number of parameters
             npar[1]++;
@@ -423,7 +460,16 @@ void GCTAObservation::read(const GXmlElement& xml)
         // Handle PSF
         else if ((par->attribute("name") == "PointSpreadFunction") ||
                  (par->attribute("name") == "PSF")) {
-            psf = par->attribute("file");
+
+            // Get filename
+            std::string filename = par->attribute("file");
+
+            // If filename is not empty then load point spread function
+            if (strip_whitespace(filename).length() > 0) {
+                m_response->load_psf(filename);
+            }
+
+            // Increase number of parameters
             npar[2]++;
         }
 
@@ -431,7 +477,16 @@ void GCTAObservation::read(const GXmlElement& xml)
         // Handle RMF
         else if ((par->attribute("name") == "EnergyDispersion") ||
                  (par->attribute("name") == "RMF")) {
-            rmf = par->attribute("file");
+
+            // Get filename
+            std::string filename = par->attribute("file");
+
+            // If filename is not empty then load energy dispersion
+            if (strip_whitespace(filename).length() > 0) {
+                m_response->load_edisp(filename);
+            }
+
+            // Increase number of parameters
             npar[3]++;
         }
 
@@ -444,22 +499,14 @@ void GCTAObservation::read(const GXmlElement& xml)
               ", \"PointSpreadFunction\" and \"EnergyDispersion\" parameters.");
     }
 
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new CTA response function
-    m_response = new GCTAResponse;
-
-    // Load PSF (need this before Aeff to handle thetacut)
-    if (strip_whitespace(psf).length() > 0) {
-        m_response->load_psf(psf);
-    }
-
-    // Load effective area
-    if (strip_whitespace(aeff).length() > 0) {
-        m_response->arf_thetacut(thetacut);
-        m_response->arf_scale(scale);
-        m_response->load_arf(aeff);
+    // If we have an ARF then apply effective area correction if necessary
+    GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response->aeff()));
+    if (arf != NULL) {
+        if (arf->thetacut() > 0.0) {
+            // TODO
+            // Loop over all energies in ARF vector, determine PSF integral,
+            // and perform correction
+        }
     }
 
     // Return
@@ -554,22 +601,51 @@ void GCTAObservation::write(GXmlElement& xml) const
             npar[0]++;
         }
 
-        // Handle ARF
+        // Handle effective area
         else if (par->attribute("name") == "EffectiveArea") {
-            std::string aeff     = "";
+
+            // Initialise attributes
+            std::string filename = "";
             double      thetacut = 0.0;
             double      scale    = 1.0;
+            double      sigma    = 0.0;
+
+            // Continue only if response and effective area are valid
             if (m_response != NULL) {
-                aeff     = m_response->arffile();
-                thetacut = m_response->arf_thetacut();
-                scale    = m_response->arf_scale();
-            }
-            par->attribute("file", aeff);
+                if (m_response->aeff() != NULL) {
+
+                    // Get filename
+                    filename = m_response->aeff()->filename();
+
+                    // Get optional ARF attributes
+                    const GCTAAeffArf* arf =
+                          dynamic_cast<const GCTAAeffArf*>(m_response->aeff());
+                    if (arf != NULL) {
+                        thetacut = arf->thetacut();
+                        scale    = arf->scale();
+                        sigma    = arf->sigma();
+                    }
+
+                    // Get optional performance table attributes
+                    const GCTAAeffPerfTable* perf =
+                          dynamic_cast<const GCTAAeffPerfTable*>(m_response->aeff());
+                    if (perf != NULL) {
+                        sigma    = arf->sigma();
+                    }
+                    
+                } // endif: effective area was valid
+            } // endif: response was valid
+
+            // Set attributes
+            par->attribute("file", filename);
             if (thetacut > 0.0) {
                 par->attribute("thetacut", str(thetacut));
             }
             if (scale != 1.0) {
                 par->attribute("scale", str(scale));
+            }
+            if (sigma > 0.0) {
+                par->attribute("sigma", str(sigma));
             }
             npar[1]++;
         }

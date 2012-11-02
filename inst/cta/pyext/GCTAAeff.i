@@ -47,12 +47,15 @@ public:
     virtual double operator()(const double& logE, 
                               const double& theta = 0.0, 
                               const double& phi = 0.0,
+                              const double& zenith = 0.0,
+                              const double& azimuth = 0.0,
                               const bool&   etrue = true) const = 0;
 
     // Pure virtual methods
-    virtual void      clear(void) = 0;
-    virtual GCTAAeff* clone(void) const = 0;
-    virtual void      load(const std::string& filename) = 0;
+    virtual void        clear(void) = 0;
+    virtual GCTAAeff*   clone(void) const = 0;
+    virtual void        load(const std::string& filename) = 0;
+    virtual std::string filename(void) const = 0;
 };
 
 

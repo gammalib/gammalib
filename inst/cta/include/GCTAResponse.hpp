@@ -55,6 +55,7 @@
 #include "GCTAEventAtom.hpp"
 #include "GCTADir.hpp"
 #include "GCTAResponseTable.hpp"
+#include "GCTAAeff.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 typedef std::vector<double> GCTAPsfPars;
@@ -136,26 +137,25 @@ public:
                                  const GObservation&        obs) const;
 
     // Other Methods
-    GCTAEventAtom* mc(const double& area, const GPhoton& photon,
-                      const GObservation& obs, GRan& ran) const;
-    void           caldb(const std::string& caldb);
-    std::string    caldb(void) const { return m_caldb; }
-    void           load(const std::string& rspname);
-    void           eps(const double& eps) { m_eps=eps; }
-    const double&  eps(void) const { return m_eps; }
-    void           offset_sigma(const double& sigma) { m_offset_sigma=sigma; }
-    const double&  offset_sigma(void) const { return m_offset_sigma; }
-    std::string    arffile(void) const { return m_arffile; }
-    std::string    rmffile(void) const { return m_rmffile; }
-    std::string    psffile(void) const { return m_psffile; }
-    double         arf_thetacut(void) const { return m_arf_thetacut; }
-    double         arf_scale(void) const { return m_arf_scale; }
-    void           arf_thetacut(const double& value) { m_arf_thetacut=value; }
-    void           arf_scale(const double& value) { m_arf_scale=value; }
-    void           load_arf(const std::string& filename);
-    void           load_psf(const std::string& filename);
-    void           read_arf(const GFitsTable* hdu);
-    void           read_psf(const GFitsTable* hdu);
+    GCTAEventAtom*  mc(const double& area, const GPhoton& photon,
+                       const GObservation& obs, GRan& ran) const;
+    void            caldb(const std::string& caldb);
+    std::string     caldb(void) const { return m_caldb; }
+    void            load(const std::string& rspname);
+    void            eps(const double& eps) { m_eps=eps; }
+    const double&   eps(void) const { return m_eps; }
+    void            offset_sigma(const double& sigma) { m_offset_sigma=sigma; }
+    const double&   offset_sigma(void) const { return m_offset_sigma; }
+    std::string     rmffile(void) const { return m_rmffile; }
+    std::string     psffile(void) const { return m_psffile; }
+    void            read_psf(const GFitsTable* hdu);
+    
+    // New factorisation
+    void            load_aeff(const std::string& filename);
+    void            load_psf(const std::string& filename);
+    void            load_edisp(const std::string& filename) {}
+    const GCTAAeff* aeff(void) const { return m_aeff; }
+    void            aeff(GCTAAeff* aeff) { m_aeff=aeff; }
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -208,15 +208,10 @@ private:
     // Private data members
     std::string         m_caldb;        //!< Name of or path to the calibration database
     std::string         m_rspname;      //!< Name of the instrument response
-    std::string         m_arffile;      //!< Name of ARF file
     std::string         m_rmffile;      //!< Name of RMF file
     std::string         m_psffile;      //!< Name of PSF file
-    double              m_arf_thetacut; //!< Theta cut for ARF
-    double              m_arf_scale;    //!< Scale for ARF
     GNodeArray          m_psf_logE;     //!< log(E) nodes for PSF interpolation
-    GNodeArray          m_aeff_logE;    //!< log(E) nodes for Aeff interpolation
     std::vector<double> m_logE;         //!< log(E) = log10(E/TeV) - bin centre
-    std::vector<double> m_aeff;         //!< Effective area in cm2 after all cuts
     std::vector<double> m_r68;          //!< 68% containment radius of PSF post cuts in degrees
     std::vector<double> m_r80;          //!< 80% containment radius of PSF post cuts in degrees
     double              m_eps;          //!< Integration precision
@@ -225,6 +220,9 @@ private:
     // New PSF handling
     int                 m_psf_version;  //!< PSF version
     GCTAResponseTable   m_psf_table;    //!< PSF response table
+
+    // New PSF factorisation
+    GCTAAeff*           m_aeff;         //!< Effective area component
 };
 
 #endif /* GCTARESPONSE_HPP */

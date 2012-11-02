@@ -157,8 +157,10 @@ GCTAAeffArf& GCTAAeffArf::operator= (const GCTAAeffArf& aeff)
  * @brief Return effective area in units of cm2
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle (rad). Defaults to 0.0.
- * @param[in] phi Azimuth angle (rad). Not used.
+ * @param[in] theta Offset angle in camera system (rad). Defaults to 0.0.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
  * @param[in] etrue Use true energy (true/false). Not used.
  *
  * Returns the effective area in units of cm2 for a given energy and
@@ -167,9 +169,11 @@ GCTAAeffArf& GCTAAeffArf::operator= (const GCTAAeffArf& aeff)
  * becomes negative.
  ***************************************************************************/
 double GCTAAeffArf::operator()(const double& logE, 
-                                     const double& theta, 
-                                     const double& phi,
-                                     const bool&   etrue) const
+                               const double& theta, 
+                               const double& phi,
+                               const double& zenith,
+                               const double& azimuth,
+                               const bool&   etrue) const
 {
     // Get effective area value in cm2
     double aeff = m_logE.interpolate(logE, m_aeff);
@@ -180,9 +184,9 @@ double GCTAAeffArf::operator()(const double& logE,
     }
 
     // Optionally add in Gaussian offset angle dependence
-    if (m_offset_sigma != 0.0) {
+    if (m_sigma != 0.0) {
         double offset = theta * rad2deg;
-        double arg    = offset * offset / m_offset_sigma;
+        double arg    = offset * offset / m_sigma;
         double scale  = exp(-0.5 * arg * arg);
         aeff         *= scale;
     }
@@ -242,10 +246,6 @@ GCTAAeffArf* GCTAAeffArf::clone(void) const
  ***************************************************************************/
 void GCTAAeffArf::load(const std::string& filename)
 {
-    // Clear arrays
-    m_logE.clear();
-    m_aeff.clear();
-
     // Open ARF FITS file
     GFits file(filename);
 
@@ -258,8 +258,23 @@ void GCTAAeffArf::load(const std::string& filename)
     // Close ARF FITS file
     file.close();
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which effective area was loaded
+ ***************************************************************************/
+std::string GCTAAeffArf::filename(void) const
+{
+    // Return filename
+    return m_filename;
 }
 
 
@@ -388,7 +403,7 @@ void GCTAAeffArf::read_arf(const GFitsTable* hdu)
     } // endfor: looped over nodes
     
     // Disable offset angle dependence
-    m_offset_sigma = 0.0;
+    m_sigma = 0.0;
 
     // Return
     return;
@@ -411,16 +426,17 @@ std::string GCTAAeffArf::print(void) const
 
     // Append information
     result.append("=== GCTAAeffArf ===");
+    result.append("\n"+parformat("Filename")+m_filename);
     result.append("\n"+parformat("Number of energy bins")+str(size()));
     result.append("\n"+parformat("Log10(Energy) range"));
     result.append(str(emin)+" - "+str(emax)+" TeV");
 
     // Append offset angle dependence
-    if (m_offset_sigma == 0) {
+    if (m_sigma == 0) {
         result.append("\n"+parformat("Offset angle dependence")+"none");
     }
     else {
-        std::string txt = "Fixed sigma="+str(m_offset_sigma);
+        std::string txt = "Fixed sigma="+str(m_sigma);
         result.append("\n"+parformat("Offset angle dependence")+txt);
     }
 
@@ -441,11 +457,12 @@ std::string GCTAAeffArf::print(void) const
 void GCTAAeffArf::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_logE.clear();
     m_aeff.clear();
-    m_offset_sigma = 3.0;
-    m_thetacut     = 0.0;
-    m_scale        = 1.0;
+    m_sigma    = 0.0;
+    m_thetacut = 0.0;
+    m_scale    = 1.0;
 
     // Return
     return;
@@ -460,11 +477,12 @@ void GCTAAeffArf::init_members(void)
 void GCTAAeffArf::copy_members(const GCTAAeffArf& aeff)
 {
     // Copy members
-    m_logE         = aeff.m_logE;
-    m_aeff         = aeff.m_aeff;
-    m_offset_sigma = aeff.m_offset_sigma;
-    m_thetacut     = aeff.m_thetacut;
-    m_scale        = aeff.m_scale;
+    m_filename = aeff.m_filename;
+    m_logE     = aeff.m_logE;
+    m_aeff     = aeff.m_aeff;
+    m_sigma    = aeff.m_sigma;
+    m_thetacut = aeff.m_thetacut;
+    m_scale    = aeff.m_scale;
 
     // Return
     return;

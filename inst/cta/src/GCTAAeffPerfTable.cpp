@@ -157,8 +157,10 @@ GCTAAeffPerfTable& GCTAAeffPerfTable::operator= (const GCTAAeffPerfTable& aeff)
  * @brief Return effective area in units of cm2
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
- * @param[in] theta Offset angle (rad). Defaults to 0.0.
- * @param[in] phi Azimuth angle (rad). Not used.
+ * @param[in] theta Offset angle in camera system (rad). Defaults to 0.0.
+ * @param[in] phi Azimuth angle in camera system (rad). Not used in this method.
+ * @param[in] zenith Zenith angle in Earth system (rad). Not used in this method.
+ * @param[in] azimuth Azimuth angle in Earth system (rad). Not used in this method.
  * @param[in] etrue Use true energy (true/false). Not used.
  *
  * Returns the effective area in units of cm2 for a given energy and
@@ -169,6 +171,8 @@ GCTAAeffPerfTable& GCTAAeffPerfTable::operator= (const GCTAAeffPerfTable& aeff)
 double GCTAAeffPerfTable::operator()(const double& logE, 
                                      const double& theta, 
                                      const double& phi,
+                                     const double& zenith,
+                                     const double& azimuth,
                                      const bool&   etrue) const
 {
     // Get effective area value in cm2
@@ -180,9 +184,9 @@ double GCTAAeffPerfTable::operator()(const double& logE,
     }
 
     // Optionally add in Gaussian offset angle dependence
-    if (m_offset_sigma != 0.0) {
+    if (m_sigma != 0.0) {
         double offset = theta * rad2deg;
-        double arg    = offset * offset / m_offset_sigma;
+        double arg    = offset * offset / m_sigma;
         double scale  = exp(-0.5 * arg * arg);
         aeff         *= scale;
     }
@@ -283,8 +287,23 @@ void GCTAAeffPerfTable::load(const std::string& filename)
 
     } // endwhile: looped over lines
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which effective area was loaded
+ ***************************************************************************/
+std::string GCTAAeffPerfTable::filename(void) const
+{
+    // Return filename
+    return m_filename;
 }
 
 
@@ -304,16 +323,17 @@ std::string GCTAAeffPerfTable::print(void) const
 
     // Append information
     result.append("=== GCTAAeffPerfTable ===");
+    result.append("\n"+parformat("Filename")+m_filename);
     result.append("\n"+parformat("Number of energy bins")+str(size()));
     result.append("\n"+parformat("Log10(Energy) range"));
     result.append(str(emin)+" - "+str(emax)+" TeV");
 
     // Append offset angle dependence
-    if (m_offset_sigma == 0) {
+    if (m_sigma == 0) {
         result.append("\n"+parformat("Offset angle dependence")+"none");
     }
     else {
-        std::string txt = "Fixed sigma="+str(m_offset_sigma);
+        std::string txt = "Fixed sigma="+str(m_sigma);
         result.append("\n"+parformat("Offset angle dependence")+txt);
     }
 
@@ -334,9 +354,10 @@ std::string GCTAAeffPerfTable::print(void) const
 void GCTAAeffPerfTable::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_logE.clear();
     m_aeff.clear();
-    m_offset_sigma = 3.0;
+    m_sigma = 3.0;
 
     // Return
     return;
@@ -351,9 +372,10 @@ void GCTAAeffPerfTable::init_members(void)
 void GCTAAeffPerfTable::copy_members(const GCTAAeffPerfTable& aeff)
 {
     // Copy members
-    m_logE         = aeff.m_logE;
-    m_aeff         = aeff.m_aeff;
-    m_offset_sigma = aeff.m_offset_sigma;
+    m_filename = aeff.m_filename;
+    m_logE     = aeff.m_logE;
+    m_aeff     = aeff.m_aeff;
+    m_sigma    = aeff.m_sigma;
 
     // Return
     return;

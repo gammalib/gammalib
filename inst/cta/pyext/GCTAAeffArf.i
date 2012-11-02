@@ -49,17 +49,20 @@ public:
     double operator()(const double& logE, 
                       const double& theta = 0.0, 
                       const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0,
                       const bool&   etrue = true) const;
 
     // Implemented pure virtual methods
     void         clear(void);
     GCTAAeffArf* clone(void) const;
     void         load(const std::string& filename);
+    std::string  filename(void) const;
 
     // Methods
     int           size(void) const;
-    void          offset_sigma(const double& sigma);
-    const double& offset_sigma(void) const;
+    void          sigma(const double& sigma);
+    const double& sigma(void) const;
     void          thetacut(const double& thetacut);
     const double& thetacut(void) const;
     void          scale(const double& scale);
