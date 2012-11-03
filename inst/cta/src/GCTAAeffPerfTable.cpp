@@ -287,6 +287,9 @@ void GCTAAeffPerfTable::load(const std::string& filename)
 
     } // endwhile: looped over lines
 
+    // Close file
+    std::fclose(fptr);
+
     // Store filename
     m_filename = filename;
 
