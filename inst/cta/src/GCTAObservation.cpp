@@ -652,21 +652,23 @@ void GCTAObservation::write(GXmlElement& xml) const
 
         // Handle PSF
         else if (par->attribute("name") == "PointSpreadFunction") {
-            std::string psf = "";
+            std::string filename = "";
             if (m_response != NULL) {
-                psf = m_response->psffile();
+                if (m_response->psf() != NULL) {
+                    filename = m_response->psf()->filename();
+                }
             }
-            par->attribute("file", psf);
+            par->attribute("file", filename);
             npar[2]++;
         }
 
         // Handle RMF
         else if (par->attribute("name") == "EnergyDispersion") {
-            std::string rmf = "";
+            std::string filename = "";
             if (m_response != NULL) {
-                rmf = m_response->rmffile();
+                filename = m_response->rmffile();
             }
-            par->attribute("file", rmf);
+            par->attribute("file", filename);
             npar[3]++;
         }
 
