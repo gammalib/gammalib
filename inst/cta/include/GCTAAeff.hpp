@@ -39,6 +39,13 @@
  * @brief Abstract base class for the CTA effective area
  *
  * This class implements the abstract base class for the CTA effective area.
+ * The effective area is accessed using the following arguments
+ *    logE - log10 of true (or measured) energy in TeV
+ *    theta - Offset angle of true photon direction in camera system (rad)
+ *    phi - Azimuth angle of true photon direction in camera system (rad)
+ *    zenith - Zenith angle of pointing in Earth system (rad)
+ *    azimuth - Azimuth angle of pointing in Earth system (rad)
+ *    etrue - Use true or measured energy
  ***************************************************************************/
 class GCTAAeff : public GBase {
 
