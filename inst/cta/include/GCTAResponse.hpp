@@ -21,7 +21,7 @@
 /**
  * @file GCTAResponse.hpp
  * @brief CTA instrument response function class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTARESPONSE_HPP
@@ -56,9 +56,9 @@
 #include "GCTADir.hpp"
 #include "GCTAResponseTable.hpp"
 #include "GCTAAeff.hpp"
+#include "GCTAPsf.hpp"
 
 /* __ Type definitions ___________________________________________________ */
-typedef std::vector<double> GCTAPsfPars;
 
 /* __ Forward declaration ________________________________________________ */
 class GCTAObservation;
@@ -68,19 +68,6 @@ class GCTAObservation;
  * @class GCTAResponse
  *
  * @brief Interface for the CTA instrument response function
- *
- * The CTA response is still in the prototyping stage. To for allow
- * evolutions in the response formats, versions numbers have been defined.
- *
- * For the PSF, versions are stored in the m_psf_version member. The
- * following versions numbers are actually defined:
- * -99 : Unknown PSF version
- * -10 : PSF is given by ASCII file
- * -9  : PSF is given by vector
- * -8  : PSF is given by response table
- * Note that negative values are used so far as we're still in the
- * prototyping stage for the IRF definition. Once the IRFs are defined we'll
- * start with positive version numbers.
  ***************************************************************************/
 class GCTAResponse : public GResponse {
 
@@ -144,18 +131,16 @@ public:
     void            load(const std::string& rspname);
     void            eps(const double& eps) { m_eps=eps; }
     const double&   eps(void) const { return m_eps; }
-    void            offset_sigma(const double& sigma) { m_offset_sigma=sigma; }
-    const double&   offset_sigma(void) const { return m_offset_sigma; }
     std::string     rmffile(void) const { return m_rmffile; }
-    std::string     psffile(void) const { return m_psffile; }
-    void            read_psf(const GFitsTable* hdu);
-    
-    // New factorisation
     void            load_aeff(const std::string& filename);
     void            load_psf(const std::string& filename);
     void            load_edisp(const std::string& filename) {}
+    void            offset_sigma(const double& sigma);
+    double          offset_sigma(void) const;
     const GCTAAeff* aeff(void) const { return m_aeff; }
     void            aeff(GCTAAeff* aeff) { m_aeff=aeff; }
+    const GCTAPsf*  psf(void) const { return m_psf; }
+    void            psf(GCTAPsf* psf) { m_psf=psf; }
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -191,38 +176,19 @@ public:
                   const GCTAPointing& pnt,
                   const GEbounds&     ebds) const;
 
-    // Analytical PSF implementation
-    double      psf_dummy(const double& delta,
-                          const GCTAPsfPars& pars) const;
-    GCTAPsfPars psf_dummy_sigma(const double& srcLogEng,
-                                const double& theta) const;
-    double      psf_dummy_max(const GCTAPsfPars& pars) const;
-
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GCTAResponse& rsp);
     void free_members(void);
-    void read_performance_table(const std::string& filename);
 
     // Private data members
     std::string         m_caldb;        //!< Name of or path to the calibration database
     std::string         m_rspname;      //!< Name of the instrument response
     std::string         m_rmffile;      //!< Name of RMF file
-    std::string         m_psffile;      //!< Name of PSF file
-    GNodeArray          m_psf_logE;     //!< log(E) nodes for PSF interpolation
-    std::vector<double> m_logE;         //!< log(E) = log10(E/TeV) - bin centre
-    std::vector<double> m_r68;          //!< 68% containment radius of PSF post cuts in degrees
-    std::vector<double> m_r80;          //!< 80% containment radius of PSF post cuts in degrees
     double              m_eps;          //!< Integration precision
-    double              m_offset_sigma; //!< Sigma for offset angle computation (0=none)
-
-    // New PSF handling
-    int                 m_psf_version;  //!< PSF version
-    GCTAResponseTable   m_psf_table;    //!< PSF response table
-
-    // New PSF factorisation
-    GCTAAeff*           m_aeff;         //!< Effective area component
+    GCTAAeff*           m_aeff;         //!< Effective area
+    GCTAPsf*            m_psf;          //!< Point spread function
 };
 
 #endif /* GCTARESPONSE_HPP */

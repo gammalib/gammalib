@@ -21,7 +21,7 @@
 /**
  * @file GCTAResponse.i
  * @brief CTA instrument response function Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -92,13 +92,16 @@ public:
     void            load(const std::string& rspname);
     void            eps(const double& eps);
     const double&   eps(void) const;
-    void            offset_sigma(const double& sigma);
-    const double&   offset_sigma(void) const;
+    std::string     rmffile(void) const;
     void            load_aeff(const std::string& filename);
     void            load_psf(const std::string& filename);
     void            load_edisp(const std::string& filename);
+    void            offset_sigma(const double& sigma);
+    double          offset_sigma(void) const;
     const GCTAAeff* aeff(void) const;
     void            aeff(GCTAAeff* aeff);
+    const GCTAPsf*  psf(void) const;
+    void            psf(GCTAPsf* psf);
 
     // Low-level response methods
     double aeff(const double& theta,
@@ -133,13 +136,6 @@ public:
                   const GTime&        srcTime,
                   const GCTAPointing& pnt,
                   const GEbounds&     ebds) const;
-
-    // Analytical PSF implementation
-    double      psf_dummy(const double& delta,
-                          const GCTAPsfPars& pars) const;
-    GCTAPsfPars psf_dummy_sigma(const double& srcLogEng,
-                                const double& theta) const;
-    double      psf_dummy_max(const GCTAPsfPars& pars) const;
 };
 
 

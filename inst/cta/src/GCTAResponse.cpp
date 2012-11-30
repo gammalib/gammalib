@@ -21,19 +21,19 @@
 /**
  * @file GCTAResponse.cpp
  * @brief CTA response class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <unistd.h>           // access() function
-#include <cstdio>             // std::fopen, std::fgets, and std::fclose
+//#include <unistd.h>           // access() function
+//#include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include <cmath>
 #include <vector>
 #include <string>
-#include "GModelSpatialPtsrc.hpp"
+//#include "GModelSpatialPtsrc.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"
@@ -50,6 +50,9 @@
 #include "GCTAAeff2D.hpp"
 #include "GCTAAeffArf.hpp"
 #include "GCTAAeffPerfTable.hpp"
+#include "GCTAPsf2D.hpp"
+#include "GCTAPsfVector.hpp"
+#include "GCTAPsfPerfTable.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GCTAResponse::caldb(std::string&)"
@@ -270,7 +273,7 @@ GCTAResponse* GCTAResponse::clone(void) const
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction.
  *
- * @todo Implement Phi dependence in CTA IRF
+ * @todo Set polar angle phi of photon in camera system
  ***************************************************************************/
 double GCTAResponse::irf(const GInstDir&     obsDir,
                          const GEnergy&      obsEng,
@@ -378,9 +381,7 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
  * @exception GException::no_list
  *            Observation does not contain a valid CTA event list.
  *
- * @todo Set polar angle of photon in camera system
- * @todo Set telescope zenith and azimuth angles
- * @todo Implement Phi dependence in CTA IRF
+ * @todo Set polar angle phi of photon in camera system
  * @todo Write method documentation
  ***************************************************************************/
 double GCTAResponse::npred(const GSkyDir&      srcDir,
@@ -471,9 +472,8 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
  * taking into account temporal deadtime variations. For this purpose, the
  * method makes use of the time dependent GObservation::deadc method.
  *
- * @todo Implement Phi dependence in CTA IRF
+ * @todo Set polar angle phi of photon in camera system
  * @todo Implement energy dispersion
- * @todo Implement the method for a 3 Gaussian PSF
  ***************************************************************************/
 GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
                                 const GObservation& obs, GRan& ran) const
@@ -492,12 +492,12 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
     double azimuth = pnt->azimuth();
 
     // Get radial offset and polar angles of true photon in camera [radians]
-    double theta_p = pnt->dir().dist(photon.dir());
-    double phi_p   = 0.0;  //TODO Implement Phi dependence
+    double theta = pnt->dir().dist(photon.dir());
+    double phi   = 0.0;  //TODO Implement Phi dependence
 
     // Compute effective area for photon
     double srcLogEng      = photon.energy().log10TeV();
-    double effective_area = aeff(theta_p, phi_p, zenith, azimuth, srcLogEng);
+    double effective_area = aeff(theta, phi, zenith, azimuth, srcLogEng);
 
     // Compute limiting value
     double ulimite = effective_area / area;
@@ -510,15 +510,12 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
         if (deadc >= 1.0 || ran.uniform() <= deadc) {
 
             // Simulate offset from photon arrival direction
-            //TODO: Make a proper implementation depending on the response
-            // version. For now, the first Gaussian is used.
-            GCTAPsfPars pars  = psf_dummy_sigma(srcLogEng, theta_p);
-            double      theta = pars[1] * ran.chisq2() * rad2deg;
-            double      phi   = 360.0 * ran.uniform();
+            double delta = psf()->mc(ran, srcLogEng, theta, phi, zenith, azimuth) * rad2deg;
+            double alpha = 360.0 * ran.uniform();
 
             // Rotate sky direction by offset
             GSkyDir sky_dir = photon.dir();
-            sky_dir.rotate_deg(phi, theta);
+            sky_dir.rotate_deg(alpha, delta);
 
             // Set measured photon arrival direction
             GCTAInstDir inst_dir;
@@ -567,11 +564,6 @@ void GCTAResponse::caldb(const std::string& caldb)
  * @brief Load CTA response.
  *
  * @param[in] irfname Name of CTA response (without any file extension).
- *
- * The actually dummy version of the CTA response loads a CTA performance
- * table given in ASCII format into memory.
- *
- * @todo Add support for other response versions.
  ***************************************************************************/
 void GCTAResponse::load(const std::string& irfname)
 {
@@ -587,17 +579,14 @@ void GCTAResponse::load(const std::string& irfname)
     // Build filename
     std::string filename = m_caldb + "/" + irfname + ".dat";
 
-    // Read performance table
-    read_performance_table(filename);
+    // Load effective area
+    load_aeff(filename);
 
-    // Read effective area
-    m_aeff = new GCTAAeffPerfTable(filename);
+    // Load point spread function
+    load_psf(filename);
 
     // Store response name
     m_rspname = irfname;
-
-    // Set PSF version
-    m_psf_version = -10;
 
     // Return
     return;
@@ -694,47 +683,42 @@ void GCTAResponse::load_aeff(const std::string& filename)
  * calls the relevant methods. Detection is done by the number of rows that
  * are found in the table. A single row means that we deal with a response
  * table, while multiple rows mean that we deal with a response vector.
+ *
+ * @todo Implement a method that checks if a file is a FITS file instead
+ *       of using try-catch.
  ***************************************************************************/
 void GCTAResponse::load_psf(const std::string& filename)
 {
-    // Open PSF FITS file
-    GFits file(filename);
-
-    // Get PSF table. We assure here that the PSF information is stored
-    // in extension number 1 (the second HDU of the FITS file)
-    GFitsTable* table = file.table(1);
-
-    // If the table has a single row we have a response table
-    if (table->nrows() == 1) {
-
-        // Read PSF table
-        m_psf_table.read(table);
-
-        // Set energy axis to logarithmic scale
-        m_psf_table.axis_log10(0);
-
-        // Set offset angle axis to radians
-        m_psf_table.axis_radians(1);
-
-        // Set PSF version
-        m_psf_version = -8;
-    }
-
-    // ... otherwise we have a response vector
-    else {
+    // Free any existing point spread function instance
+    if (m_psf != NULL) delete m_psf;
+    m_psf = NULL;
     
-        // Read PSF vector
-        read_psf(table);
-        
-        // Set PSF version
-        m_psf_version = -9;
+    // Try opening the file as a FITS file
+    try {
+    
+        // Open FITS file
+        GFits file(filename);
+
+        // If file contains a "POINT SPREAD FUNCTION" extension then load it
+        // as CTA response table
+        if (file.hashdu("POINT SPREAD FUNCTION")) {
+            file.close();
+            m_psf = new GCTAPsf2D(filename);
+        }
+
+        // ... else load it has PSF vector 
+        else {
+            file.close();
+            m_psf = new GCTAPsfVector(filename);
+        }
+
     }
 
-    // Close PSF FITS file
-    file.close();
-
-    // Store filename
-    m_psffile = filename;
+    // If FITS file opening failed then assume that we have a performance
+    // table
+    catch (GException::fits_open_error &e) {
+        m_psf = new GCTAPsfPerfTable(filename);
+    }
 
     // Return
     return;
@@ -742,88 +726,63 @@ void GCTAResponse::load_psf(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Read CTA PSF vector
+ * @brief Set offset angle dependence (degrees)
  *
- * @param[in] hdu FITS table pointer.
+ * @param[in] sigma Offset angle dependence value (degrees).
  *
- * This method reads a CTA PSF vector from the FITS HDU. Note that the
- * energies are converted to TeV. Conversion is done based on the units
- * provided for the energy columns. Units that are recognized are 'keV',
- * 'MeV', 'GeV', and 'TeV' (case independent).
- *
- * The Gaussian width parameter may be either given in 68% containment radius
- * (R68) or in sigma (ANGRES40; corresponding to a 38% containment radius).
- * The former format is used for CTA and H.E.S.S. data, the latter for
- * MAGIC data. All these things should be more uniform once we have a well
- * defined format.
+ * Set the offset angle dependence for 1D effective area functions. The
+ * method set the sigma value in case that the effective area function
+ * is of type GCTAAeffArf or GCTAAeffPerfTable. Otherwise, nothing will
+ * be done.
  ***************************************************************************/
-void GCTAResponse::read_psf(const GFitsTable* hdu)
+void GCTAResponse::offset_sigma(const double& sigma)
 {
-    // Clear arrays
-    m_psf_logE.clear();
-    m_r68.clear();
-
-    // Get pointers to table columns
-    const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
-    const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
-
-    // Handle various data formats (H.E.S.S. and MAGIC)
-    const GFitsTableCol* r68;
-    double               r68_scale = 1.0;
-    if (hdu->hascolumn("R68")) {
-        r68 = &(*hdu)["R68"];
-    }
-    else {
-        r68 = &(*hdu)["ANGRES40"];
-        r68_scale = 1.0 / 0.6624305; // MAGIC PSF is already 1 sigma
+    // If effective area is an ARF then set offset angle
+    GCTAAeffArf* arf = dynamic_cast<GCTAAeffArf*>(m_aeff);
+    if (arf != NULL) {
+        arf->sigma(sigma);
     }
 
-    // Determine unit conversion factors (default: TeV)
-    std::string u_energy_lo = tolower(strip_whitespace(energy_lo->unit()));
-    std::string u_energy_hi = tolower(strip_whitespace(energy_hi->unit()));
-    double c_energy_lo = 1.0;
-    double c_energy_hi = 1.0;
-    if (u_energy_lo == "kev") {
-        c_energy_lo = 1.0e-9;
-    }
-    else if (u_energy_lo == "mev") {
-        c_energy_lo = 1.0e-6;
-    }
-    else if (u_energy_lo == "gev") {
-        c_energy_lo = 1.0e-3;
-    }
-    if (u_energy_hi == "kev") {
-        c_energy_hi = 1.0e-9;
-    }
-    else if (u_energy_hi == "mev") {
-        c_energy_hi = 1.0e-6;
-    }
-    else if (u_energy_hi == "gev") {
-        c_energy_hi = 1.0e-3;
+    // If effective area is a performance table then set offset angle
+    GCTAAeffPerfTable* prf = dynamic_cast<GCTAAeffPerfTable*>(m_aeff);
+    if (prf != NULL) {
+        prf->sigma(sigma);
     }
 
-    // Extract number of energy bins
-    int num = energy_lo->length();
-
-    // Set nodes
-    for (int i = 0; i < num; ++i) {
-    
-        // Compute log10 mean energy in TeV
-        double e_min = energy_lo->real(i) * c_energy_lo;
-        double e_max = energy_hi->real(i) * c_energy_hi;
-        double logE  = 0.5 * (log10(e_min) + log10(e_max));
-        
-        // Extract r68 value and scale as required
-        double r68_value = r68->real(i) * r68_scale;
-        
-        // Store log10 mean energy and r68 value
-        m_psf_logE.append(logE);
-        m_r68.push_back(r68_value);
-
-    } // endfor: looped over nodes
-    
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return offset angle dependence (degrees)
+ *
+ * @return Offset angle dependence value (degrees).
+ *
+ * Return the offset angle dependence for 1D effective area functions. The
+ * method returns the sigma value in case that the effective area function
+ * is of type GCTAAeffArf or GCTAAeffPerfTable. Otherwise, 0.0 will be
+ * returned.
+ ***************************************************************************/
+double GCTAResponse::offset_sigma(void) const
+{
+    // Initialise value
+    double sigma = 0.0;
+
+    // If effective area is an ARF then get offset angle
+    GCTAAeffArf* arf = dynamic_cast<GCTAAeffArf*>(m_aeff);
+    if (arf != NULL) {
+        sigma = arf->sigma();
+    }
+
+    // If effective area is a performance table then get offset angle
+    GCTAAeffPerfTable* prf = dynamic_cast<GCTAAeffPerfTable*>(m_aeff);
+    if (prf != NULL) {
+        sigma = prf->sigma();
+    }
+
+    // Return sigma
+    return sigma;
 }
 
 
@@ -840,44 +799,17 @@ std::string GCTAResponse::print(void) const
     result.append("\n"+parformat("Calibration database")+m_caldb);
     result.append("\n"+parformat("Response name")+m_rspname);
     result.append("\n"+parformat("RMF file name")+m_rmffile);
-    result.append("\n"+parformat("PSF file name")+m_psffile);
 
     // Append effective area information
     if (m_aeff != NULL) {
         result.append("\n"+m_aeff->print());
     }
+
+    // Append point spread function information
+    if (m_psf != NULL) {
+        result.append("\n"+m_psf->print());
+    }
     
-    // Append PSF information
-    result.append("\n"+parformat("PSF version"));
-    if (m_psf_version == -8) {
-        result.append("Response table");
-    }
-    else if (m_psf_version == -9) {
-        result.append("Response vector");
-    }
-    else if (m_psf_version == -10) {
-        result.append("ASCII table");
-    }
-    else {
-        result.append("Unknown version");
-    }
-    result.append(" ("+str(m_psf_version)+")");
-    if (m_psf_version == -8) {
-        result += "\n" + m_psf_table.print();
-    }
-    else {
-        result.append("\n"+parformat("PSF nodes")+str(m_psf_logE.size()));
-    }
-
-    // Debug option: Plot PSF
-    #if defined(G_DEBUG_PRINT_PSF)
-    result.append("\n"+parformat("Point spread function"));
-    for (int i = 0; i < m_psf_logE.size(); ++i) {
-        result.append("\n"+parformat("logE="+str(m_psf_logE[i])));
-        result.append("r68="+str(m_r68.at(i))+" deg");
-    }
-    #endif
-
     // Return result
     return result;
 }
@@ -954,6 +886,10 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
         throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
     }
 
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt->zenith();
+    double azimuth = pnt->azimuth();
+
     // Determine angular distance between measured photon direction and model
     // centre [radians]
     double zeta = model.dir().dist(dir->skydir());
@@ -986,13 +922,14 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     // the psf_dummy_sigma down to the integration kernel, and we would
     // need to make sure that psf_delta_max really gives the absolute
     // maximum (this is certainly less critical)
-    double srcTheta = eta;
+    double theta = eta;
+    double phi   = 0.0; //TODO: Implement Phi dependence
 
     // Get PSF parameters.
-    GCTAPsfPars psf_parameters = psf_dummy_sigma(srcLogEng, srcTheta);
+    //GCTAPsfPars psf_parameters = psf_dummy_sigma(srcLogEng, srcTheta);
 
     // Get maximum PSF and source radius in radians.
-    double delta_max = psf_delta_max(srcTheta, 0.0, 0.0, 0.0, srcLogEng);
+    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
     double src_max   = model.radial()->theta_max();
 
     // Set radial model zenith angle range
@@ -1011,11 +948,10 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
         // Setup integration kernel
         cta_irf_radial_kern_rho integrand(this,
                                           model.radial(),
-                                          pnt->zenith(),
-                                          pnt->azimuth(),
+                                          zenith,
+                                          azimuth,
                                           srcLogEng,
                                           obsLogEng,
-                                          psf_parameters,
                                           zeta,
                                           lambda,
                                           omega0,
@@ -1108,6 +1044,10 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
         throw GCTAException::bad_instdir_type(G_IRF_DIFFUSE);
     }
 
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt->zenith();
+    double azimuth = pnt->azimuth();
+
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
     double eta = pnt->dir().dist(dir->skydir());
@@ -1123,13 +1063,14 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
     // the psf_dummy_sigma down to the integration kernel, and we would
     // need to make sure that psf_delta_max really gives the absolute
     // maximum (this is certainly less critical)
-    double srcTheta = eta;
+    double theta = eta;
+    double phi   = 0.0; //TODO: Implement Phi dependence
 
     // Get PSF parameters.
-    GCTAPsfPars pars = psf_dummy_sigma(srcLogEng, srcTheta);
+    //GCTAPsfPars pars = psf_dummy_sigma(srcLogEng, srcTheta);
 
     // Get maximum PSF radius in radians
-    double delta_max = psf_delta_max(srcTheta, 0.0, 0.0, 0.0, srcLogEng);
+    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 
     // Initialise IRF value
     double irf = 0.0;
@@ -1150,12 +1091,13 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
         // Setup integration kernel
         cta_irf_diffuse_kern_theta integrand(this,
                                              model.spatial(),
-                                             pnt->zenith(),
-                                             pnt->azimuth(),
+                                             theta,
+                                             phi,
+                                             zenith,
+                                             azimuth,
                                              srcLogEng,
                                              obsLogEng,
                                              &rot,
-                                             pars,
                                              eta);
 
         // Integrate over zenith angle
@@ -1220,11 +1162,21 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
         throw GCTAException::bad_observation_type(G_NPRED_EXTENDED);
     }
 
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing();
+    if (pnt == NULL) {
+        throw GCTAException::no_pointing(G_IRF_DIFFUSE);
+    }
+
     // Get pointer on CTA events list
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
     if (events == NULL) {
         throw GException::no_list(G_NPRED_EXTENDED);
     }
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt->zenith();
+    double azimuth = pnt->azimuth();
 
     // Get log10(E/TeV) of true photon energy
     double srcLogEng = srcEng.log10TeV();
@@ -1234,8 +1186,7 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
     // should be sufficient here, unless the offaxis PSF becomes much worse
     // than the onaxis PSF. In this case, we may add a safety factor here
     // to make sure we encompass the entire PSF.
-    GCTAPsfPars psf_parameters = psf_dummy_sigma(srcLogEng, 0.0);
-    double      psf_max_radius = psf_dummy_max(psf_parameters);
+    double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
     // Extract ROI radius (radians)
     double roi_radius = events->roi().radius() * deg2rad;
@@ -1349,11 +1300,21 @@ double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
         throw GCTAException::bad_observation_type(G_NPRED_DIFFUSE);
     }
 
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing();
+    if (pnt == NULL) {
+        throw GCTAException::no_pointing(G_IRF_DIFFUSE);
+    }
+
     // Get pointer on CTA events list
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
     if (events == NULL) {
         throw GException::no_list(G_NPRED_DIFFUSE);
     }
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt->zenith();
+    double azimuth = pnt->azimuth();
 
     // Get log10(E/TeV) of true photon energy
     double srcLogEng = srcEng.log10TeV();
@@ -1363,8 +1324,7 @@ double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
     // should be sufficient here, unless the offaxis PSF becomes much worse
     // than the onaxis PSF. In this case, we may add a safety factor here
     // to make sure we encompass the entire PSF.
-    GCTAPsfPars psf_parameters = psf_dummy_sigma(srcLogEng, 0.0);
-    double      psf_max_radius = psf_dummy_max(psf_parameters);
+    double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
     // Extract ROI radius (radians)
     double roi_radius = events->roi().radius() * deg2rad;
@@ -1435,15 +1395,17 @@ double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
 /***********************************************************************//**
  * @brief Return effective area (in units of cm2)
  *
- * @param[in] theta Radial offset angle in camera (radians).
- * @param[in] phi Polar angle in camera (radians).
+ * @param[in] theta Radial offset angle of photon in camera (radians).
+ * @param[in] phi Polar angle of photon in camera (radians).
  * @param[in] zenith Zenith angle of telescope pointing (radians).
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  * @return Effective area in units fo cm2.
  *
- * Returns the effective area as function of position in the camera system
- * and in the earth system.
+ * Returns the effective area as function of the true photon position in the
+ * camera system and the telescope pointing direction in the Earth system.
+ *
+ * If no effective area response is defined, 0.0 is returned.
  ***************************************************************************/
 double GCTAResponse::aeff(const double& theta,
                           const double& phi,
@@ -1466,13 +1428,17 @@ double GCTAResponse::aeff(const double& theta,
  *
  * @param[in] delta Angular separation between true and measured photon
  *            directions (radians).
- * @param[in] theta Radial offset angle in camera (radians).
- * @param[in] phi Polar angle in camera (radians).
+ * @param[in] theta Radial offset angle of photon in camera (radians).
+ * @param[in] phi Polar angle of photon in camera (radians).
  * @param[in] zenith Zenith angle of telescope pointing (radians).
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  *
- * @todo So far the parameters phi, zenith, and azimuth are not used.
+ * Returns the point spread function for a given offset angle as function
+ * of the true photon position in the camera system and the telescope
+ * pointing direction in the Earth system.
+ *
+ * If no point spread function is defined, 0.0 is returned.
  ***************************************************************************/
 double GCTAResponse::psf(const double& delta,
                          const double& theta,
@@ -1481,11 +1447,10 @@ double GCTAResponse::psf(const double& delta,
                          const double& azimuth,
                          const double& srcLogEng) const
 {
-    // Determine energy dependent PSF parameters
-    GCTAPsfPars psf_parameters = psf_dummy_sigma(srcLogEng, theta);
-
     // Compute PSF
-    double psf = psf_dummy(delta, psf_parameters);
+    double psf = (m_psf != NULL)
+                 ? (*m_psf)(delta, srcLogEng, theta, phi, zenith, azimuth)
+                 : 0.0;
 
     // Return PSF
     return psf;
@@ -1502,11 +1467,11 @@ double GCTAResponse::psf(const double& delta,
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  *
  * This method returns the maximum angular separation between true and
- * measured photon directions for which the PSF is non zero. The maximum
- * separation is actually fixed to 5 sigma, which corresponds to less than
- * 1e-5 of the central IRF value.
+ * measured photon directions for which the PSF is non zero as function
+ * of the true photon position in the camera system and the telescope
+ * pointing direction in the Earth system.
  *
- * @todo So far the parameters phi, zenith, and azimuth are not used.
+ * If no point spread function is defined, 0.0 is returned.
  ***************************************************************************/
 double GCTAResponse::psf_delta_max(const double& theta,
                                    const double& phi,
@@ -1514,11 +1479,10 @@ double GCTAResponse::psf_delta_max(const double& theta,
                                    const double& azimuth,
                                    const double& srcLogEng) const
 {
-    // Determine energy dependent width of PSF
-    GCTAPsfPars psf_parameters = psf_dummy_sigma(srcLogEng, theta);
-
-    // Set maximum angular separation
-    double delta_max = psf_dummy_max(psf_parameters);
+    // Compute PSF
+    double delta_max = (m_psf != NULL)
+                 ? m_psf->delta_max(srcLogEng, theta, phi, zenith, azimuth)
+                 : 0.0;
 
     // Return PSF
     return delta_max;
@@ -1535,7 +1499,8 @@ double GCTAResponse::psf_delta_max(const double& theta,
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
  *
- * @todo So far the parameters theta, phi, zenith, and azimuth are not used.
+ * Dummy energy dispersion method that implements a Dirac function. Returns
+ * 1 is true and observed energy are identical, 0 otherwise.
  ***************************************************************************/
 double GCTAResponse::edisp(const double& obsLogEng,
                            const double& theta,
@@ -1575,6 +1540,7 @@ double GCTAResponse::edisp(const double& obsLogEng,
  *
  * @todo Enhance romb() integration method for small integration regions
  *       (see comment about kluge below)
+ * @todo Implement phi dependence in camera system
  ***************************************************************************/
 double GCTAResponse::npsf(const GSkyDir&      srcDir,
                           const double&       srcLogEng,
@@ -1584,15 +1550,21 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
 {
     // Declare result
     double value = 0.0;
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
     
     // Compute offset angle of source direction in camera system
-    double srcTheta = pnt.dir().dist(srcDir);
+    double theta = pnt.dir().dist(srcDir);
+
+    // Compute azimuth angle of source direction in camera system
+    double phi = 0.0; //TODO: Implement phi dependence
 
     // Extract relevant parameters from arguments
-    double      roi_radius       = roi.radius() * deg2rad;
-    double      roi_psf_distance = roi.centre().dist(srcDir);
-    GCTAPsfPars psf_parameters   = psf_dummy_sigma(srcLogEng, srcTheta);
-    double      rmax             = psf_dummy_max(psf_parameters);
+    double roi_radius       = roi.radius() * deg2rad;
+    double roi_psf_distance = roi.centre().dist(srcDir);
+    double rmax             = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 
     // If PSF is fully enclosed by the ROI then skip the numerical
     // integration and assume that the integral is 1.0
@@ -1614,7 +1586,11 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
             cta_npsf_kern_rad_azsym integrand(this,
                                               roi_radius,
                                               roi_psf_distance,
-                                              psf_parameters);
+                                              srcLogEng,
+                                              theta,
+                                              phi,
+                                              zenith,
+                                              azimuth);
 
             // Setup integration
             GIntegral integral(&integrand);
@@ -1683,222 +1659,6 @@ double GCTAResponse::nedisp(const GSkyDir&      srcDir,
 
 /*==========================================================================
  =                                                                         =
- =                   Analytical CTA PSF implementation                     =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Return dummy point spread function (in units of sr^-1)
- *
- * @param[in] delta Angular separation between true and measured photon
- *            directions (radians).
- * @param[in] pars PSF parameters.
- *
- * The Point Spread Function defines the probability density 
- * \f$d^2P/d\theta d\phi\f$
- * that a photon coming from direction "srcDir" is measured towards direction
- * "obsDir". The actual method implements a simple 2D Gaussian in small
- * angle approximation for the PSF.
- * The performance table quotes the size of the PSF as the 68%
- * containment radius \f$r_{68}\f$ in degrees. 
- * The containment radius \f$r\f$ is related to the 2D Gaussian 
- * \f$\sigma\f$ by the relation \f$r=\sigma \sqrt{-2 \ln (1-P)}\f$, where
- * \f$P\f$ is the containment fraction. For 68% one obtains
- * \f$\sigma=0.6624 \times r_{68}\f$.
- *
- * @todo The actual PSF is only valid in the small angle approximation.
- * @todo Correct method documentation.
- ***************************************************************************/
-double GCTAResponse::psf_dummy(const double& delta, const GCTAPsfPars& pars) const
-{
-    // Initialise response value
-    double value = 0.0;
-
-    // Case A: Response is stored in a response table
-    if (m_psf_version == -8) {
-
-        // Compute distance squared
-        double delta2 = delta * delta;
-        
-        // Compute Psf value
-        value  = exp(pars[6] * delta2);
-        value += exp(pars[7] * delta2) * pars[2];
-        value += exp(pars[8] * delta2) * pars[4];
-        value *= pars[0];
-    }
-    
-    // Case B: Response is stored in a response vector
-    else {
-        
-        // Compute Psf value
-        value = pars[0] * exp(pars[2] * delta * delta);
-    }
-
-    // Return PSF value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Return PSF parameter vector
- *
- * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
- * @param[in] srcTheta  Offset angle of source in camera system (radians).
- *
- * This method returns the PSF parameter vector as function of incident
- * photon energy and offset angle. Two response types are supported.
- *
- * If the response is stored in a one dimensional vector, the PSF parameter
- * vector is composed of 3 parameters:
- * \f[{\tt SCALE} = \frac{1}{2 \pi \sigma^2}\f]
- * \f[{\tt SIGMA} = \sigma\f]
- * \f[{\tt WIDTH} = -\frac{1}{2 \sigma^2}\f]
- * where
- * \f$\sigma\f$ is the Gaussian sigma in radians.
- *
- * If the response is stored in a 2D response table, the PSF parameter
- * vector is composed of 9 parameters
- * \f[{\tt SCALE}\f]
- * \f[{\tt SIGMA\_1} = \sigma_1\f]
- * \f[{\tt AMPL\_2} = a_2\f]
- * \f[{\tt SIGMA\_2} = \sigma_2\f]
- * \f[{\tt AMPL\_3} = a_3\f]
- * \f[{\tt SIGMA\_3} = \sigma_3\f]
- * \f[{\tt WIDTH\_1} = -\frac{1}{2 \sigma_1^2}\f]
- * \f[{\tt WIDTH\_2} = -\frac{1}{2 \sigma_2^2}\f]
- * \f[{\tt WIDTH\_3} = -\frac{1}{2 \sigma_3^2}\f]
- * where
- * \f$\sigma_i\f$ are the Gaussian sigma values of the three components
- * in radians and
- * \f$a_i\f$ are the relative amplitudes of the 2nd and 3rd Gaussians (the
- * relative amplitude of the first Gaussian is by definition 1).
- *
- * @todo Convert sigma parameter to radians upon loading of the response
- *       table. This saves some operations here.
- * @todo Verify parameter validity. Interpolation may lead for example to
- *       negative sigmas or scales and amplitudes. This should be checked
- *       and avoided (if possible). We need to develop a strategy to deal
- *       with such cases.
- ***************************************************************************/
-GCTAPsfPars GCTAResponse::psf_dummy_sigma(const double& srcLogEng,
-                                          const double& srcTheta) const
-{
-    // Allocate PSF parameter vector
-    GCTAPsfPars pars;
-    
-    // Case A: Response is stored in a response table
-    if (m_psf_version == -8) {
-    
-        // Interpolate response parameters
-        pars = m_psf_table(srcLogEng, srcTheta);
-
-        // Convert sigma parameters to radians
-        pars[1] *= deg2rad;
-        pars[3] *= deg2rad;
-        pars[5] *= deg2rad;
-
-        // Compute normalization scale
-        double sigma1   = pars[1] * pars[1];
-        double sigma2   = pars[3] * pars[3];
-        double sigma3   = pars[5] * pars[5];
-        double integral = twopi * (sigma1 +
-                                   sigma2 * pars[2] +
-                                   sigma3 * pars[4]);
-        double scale = (integral > 0.0) ? 1.0 / integral : 0.0;
-
-        // Compile option: Show scaling results
-        #if defined(G_DEBUG_PSF_DUMMY_SIGMA)
-        std::cout << "GCTAResponse::psf_dummy_sigma:";
-        std::cout << " srcLogEng=" << srcLogEng;
-        std::cout << " srcTheta=" << srcTheta;
-        std::cout << " old scale=" << pars[0];
-        std::cout << " new scale=" << scale << std::endl;
-        #endif
-
-        // Update scale
-        pars[0] = scale;
-
-        // Compute widths
-        double width1 = -0.5 / sigma1;
-        double width2 = -0.5 / sigma2;
-        double width3 = -0.5 / sigma3;
-
-        // Append widths
-        pars.push_back(width1);
-        pars.push_back(width2);
-        pars.push_back(width3);
-    }
-    
-    // Case B: Response is stored in a response vector
-    else {
-
-        // Set conversion factor from 68% containment radius to 1 sigma
-        const double conv = 0.6624305 * deg2rad;
-
-        // Determine Gaussian sigma in radians
-        double sigma = m_psf_logE.interpolate(srcLogEng, m_r68) * conv;
-        
-        // Derive width=-0.5/(sigma*sigma) and scale=1/(twopi*sigma*sigma)
-        double sigma2 = sigma * sigma;
-        double scale  =  1.0 / (twopi * sigma2);
-        double width  = -0.5 / sigma2;
-        
-        // Store PSF parameters in vector (3 elements)
-        pars.reserve(3);
-        pars.push_back(scale);
-        pars.push_back(sigma);
-        pars.push_back(width);
-
-    }
-
-    // Return result
-    return pars;
-}
-
-
-/***********************************************************************//**
- * @brief Returns radius beyond which PSF is negligible (in radians)
- *
- * @param[in] pars PSF parameters.
- *
- * Determine the radius beyond which the PSF becomes negligible. This radius
- * is set by this method to \f$5 \times \sigma\f$, where \f$\sigma\f$ is the
- * Gaussian width of the largest PSF component.
- *
- * The method supports both response vectors and response tables. For a
- * response vector, the Gaussian width \f$\sigma\f$ is used for the
- * computation. For the response table, which is composed of 3 Gaussians,
- * the maximum
- * \f[\sigma = \max{ \sigma1, \sigma_2, \sigma_3 }\f]
- * is used.
- *
- * For a definition of the PSF parameter vector refer to the description of
- * the GCTAResponse::psf_dummy_sigma method.
- ***************************************************************************/
-double GCTAResponse::psf_dummy_max(const GCTAPsfPars& pars) const
-{
-    // Initialise size of PSF
-    double sigma = 0.0;
-    
-    // Case A: Response is stored in a response table
-    if (m_psf_version == -8) {
-        sigma = pars[1];
-        if (pars[3] > sigma) sigma = pars[3];
-        if (pars[5] > sigma) sigma = pars[5];
-    }
-
-    // Case B: Response is stored in a response vector
-    else {
-        sigma = pars[1];
-    }
-
-    // Return radius
-    return (5.0 * sigma);
-}
-
-
-/*==========================================================================
- =                                                                         =
  =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
@@ -1924,20 +1684,9 @@ void GCTAResponse::init_members(void)
     m_caldb.clear();
     m_rspname.clear();
     m_rmffile.clear();
-    m_psffile.clear();
-    m_psf_logE.clear();
-    m_logE.clear();
-    m_r68.clear();
-    m_r80.clear();
-    m_eps          = 1.0e-5; // Precision for Romberg integration
-    m_offset_sigma = 3.0;    // Default value for now ...
-
-    // Initialise PSF information
-    m_psf_version = -99; // Unknown PSF version
-    m_psf_table.clear();
-
-    // New factorisation
+    m_eps  = 1.0e-5; // Precision for Romberg integration
     m_aeff = NULL;
+    m_psf  = NULL;
     
     // Return
     return;
@@ -1951,24 +1700,15 @@ void GCTAResponse::init_members(void)
  ***************************************************************************/
 void GCTAResponse::copy_members(const GCTAResponse& rsp)
 {
-    // Copy attributes
-    m_caldb        = rsp.m_caldb;
-    m_rspname      = rsp.m_rspname;
-    m_rmffile      = rsp.m_rmffile;
-    m_psffile      = rsp.m_psffile;
-    m_psf_logE     = rsp.m_psf_logE;
-    m_logE         = rsp.m_logE;
-    m_r68          = rsp.m_r68;
-    m_r80          = rsp.m_r80;
-    m_eps          = rsp.m_eps;
-    m_offset_sigma = rsp.m_offset_sigma;
+    // Copy members
+    m_caldb   = rsp.m_caldb;
+    m_rspname = rsp.m_rspname;
+    m_rmffile = rsp.m_rmffile;
+    m_eps     = rsp.m_eps;
 
-    // Copy PSF information
-    m_psf_version = rsp.m_psf_version;
-    m_psf_table   = rsp.m_psf_table;
-
-    // New factorisation
+    // Clone members
     m_aeff = (rsp.m_aeff != NULL) ? rsp.m_aeff->clone() : NULL;
+    m_psf  = (rsp.m_psf  != NULL) ? rsp.m_psf->clone()  : NULL;
 
     // Return
     return;
@@ -1982,95 +1722,12 @@ void GCTAResponse::free_members(void)
 {
     // Free memory
     if (m_aeff != NULL) delete m_aeff;
+    if (m_psf  != NULL) delete m_psf;
 
     // Initialise pointers
     m_aeff = NULL;
+    m_psf  = NULL;
 
     // Return
     return;
 }
-
-
-/***********************************************************************//**
- * @brief Read CTA performance table
- *
- * @param[in] filename Filename of CTA performance table.
- *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
- *
- * This method reads a CTA performance table given in the format that is
- * distributed within the CTA collaboration. Note that the effective area
- * is converted from m2 to cm2 and stored in units of cm2.
- ***************************************************************************/
-void GCTAResponse::read_performance_table(const std::string& filename)
-{
-    // Clear arrays
-    m_psf_logE.clear();
-    //m_aeff_logE.clear();
-    m_logE.clear();
-    //m_aeff.clear();
-    m_r68.clear();
-    m_r80.clear();
-
-    // Allocate line buffer
-    const int n = 1000;
-    char  line[n];
-
-    // Open performance table readonly
-    FILE* fptr = std::fopen(filename.c_str(), "r");
-    if (fptr == NULL) {
-        throw GCTAException::file_open_error(G_READ, filename);
-    }
-
-    // Read lines
-    while (std::fgets(line, n, fptr) != NULL) {
-
-        // Split line in elements. Strip empty elements from vector.
-        std::vector<std::string> elements = split(line, " ");
-        for (int i = elements.size()-1; i >= 0; i--) {
-            if (strip_whitespace(elements[i]).length() == 0) {
-                elements.erase(elements.begin()+i);
-            }
-        }
-
-        // Skip header
-        if (elements[0].find("log(E)") != std::string::npos) {
-            continue;
-        }
-
-        // Break loop if end of data table has been reached
-        if (elements[0].find("----------") != std::string::npos) {
-            break;
-        }
-
-        // Push elements in vectors
-        m_logE.push_back(todouble(elements[0]));
-        //m_aeff.push_back(todouble(elements[1])*10000.0);
-        m_r68.push_back(todouble(elements[2]));
-        m_r80.push_back(todouble(elements[3]));
-
-    } // endwhile: looped over lines
-
-    // If we have nodes then setup node array
-    int num = m_logE.size();
-    if (num > 0) {
-        for (int i = 0; i < num; ++i) {
-            m_psf_logE.append(m_logE.at(i));
-            //m_aeff_logE.append(m_logE.at(i));
-        }
-    }
-
-    // Close file
-    std::fclose(fptr);
-
-    // Return
-    return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
