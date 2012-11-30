@@ -21,7 +21,7 @@
 /**
  * @file GCTAResponse_helpers.cpp
  * @brief CTA response hepler classes implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -55,28 +55,26 @@
 /***********************************************************************//**
  * @brief Integration kernel for npsf() method
  *
- * @param[in] theta Zenith angle with respect to PSF centre (radians).
+ * @param[in] delta Distance from PSF centre (radians).
  *
  * This method implements the integration kernel needed for the npsf()
  * method. It performs an azimuthal integration of the PSF for a given
- * offset angle theta (an offset angle of 0 corresponds to the centre of
+ * offset angle delta (an offset angle of 0 corresponds to the centre of
  * the PSF):
- * \f[\int_{0}^{\phi} PSF(\theta) d\phi\f]
+ * \f[\int_{0}^{\phi} PSF(\delta) d\phi\f]
  * 
  * The azimuthal integration is performed over an arclength given by
  * \f$\phi\f$. The method actually assumes that the PSF is azimuthally
  * symmetric, hence it just multiplies the PSF value by the arclength times
  * the sinus of the offset angle.
- *
- * @todo Pass pointer to PSF class for general CTA PSF handling.
  ***************************************************************************/
-double cta_npsf_kern_rad_azsym::eval(double theta)
+double cta_npsf_kern_rad_azsym::eval(double delta)
 {
     // Initialise PSF value
     double value = 0.0;
     
     // Get arclength for given radius in radians
-    double phi = cta_roi_arclength(theta,
+    double phi = cta_roi_arclength(delta,
                                    m_psf,
                                    m_cospsf,
                                    m_sinpsf,
@@ -87,16 +85,15 @@ double cta_npsf_kern_rad_azsym::eval(double theta)
     if (phi > 0) {
     
         // Compute PSF value
-        value = m_rsp->psf_dummy(theta, m_pars) * phi * std::sin(theta);
+        value = m_rsp->psf(delta, m_theta, m_phi, m_zenith, m_azimuth, m_logE) * phi * std::sin(delta);
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
         if (isnotanumber(value) || isinfinite(value)) {
             std::cout << "*** ERROR: cta_npsf_kern_rad_azsym::eval";
-            std::cout << "(theta=" << theta << ").";
             std::cout << " NaN/Inf encountered";
             std::cout << " (value=" << value;
-            std::cout << ", theta=" << theta;
+            std::cout << ", delta=" << delta;
             std::cout << ", phi=" << phi << ")";
             std::cout << std::endl;
         }
@@ -166,7 +163,6 @@ double cta_irf_radial_kern_rho::eval(double rho)
                                             m_azimuth,
                                             m_srcLogEng,
                                             m_obsLogEng,
-                                            m_pars,
                                             m_zeta,
                                             m_lambda,
                                             m_omega0,
@@ -242,7 +238,7 @@ double cta_irf_radial_kern_omega::eval(double omega)
 
     // Evaluate IRF
     double irf = m_rsp->aeff(offset, azimuth, m_zenith, m_azimuth, m_srcLogEng) *
-                 m_rsp->psf_dummy(delta, m_pars);
+                 m_rsp->psf(delta, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
 
     // Optionally take energy dispersion into account
     if (m_rsp->hasedisp() && irf > 0.0) {
@@ -422,7 +418,7 @@ double cta_irf_diffuse_kern_theta::eval(double theta)
         // integration as the PSF is so far azimuthally symmetric. Once
         // we introduce asymmetries, we have to move this done into the
         // Phi kernel method/
-        double psf = m_rsp->psf_dummy(theta, m_pars);
+        double psf = m_rsp->psf(theta, m_theta, m_phi, m_zenith, m_azimuth, m_srcLogEng);
 
         // Continue only if PSF is positive
         if (psf > 0.0) {
@@ -489,10 +485,10 @@ double cta_irf_diffuse_kern_theta::eval(double theta)
  *
  * It computes
  *
- * \f[irf = M(\theta, \phi) ARF(\theta, \phi) Edisp(\theta, \phi)\f]
+ * \f[irf = M(\theta, \phi) Aeff(\theta, \phi) Edisp(\theta, \phi)\f]
  *
  * where \f$M(\theta, \phi)\f$ is the spatial component of the diffuse
- * source model, \f$ARF(\theta, \phi)\f$ is the effective area, and
+ * source model, \f$Aeff(\theta, \phi)\f$ is the effective area, and
  * \f$Edisp(\theta, \phi)\f$ is the energy dispersion.
  *
  * As the coordinates \f$(\theta, \phi)\f$ are given in the reference frame
@@ -508,6 +504,7 @@ double cta_irf_diffuse_kern_theta::eval(double theta)
  *
  * @todo Optimize computation of sky direction in native coordinates
  * @todo Implement azimuth angle computation of true photon in camera
+ * @todo Replace (theta,phi) by (delta,alpha)
  ***************************************************************************/
 double cta_irf_diffuse_kern_phi::eval(double phi)
 {
