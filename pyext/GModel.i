@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.i - Abstract virtual model base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModel.i
  * @brief Abstract model base class python interface
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,8 @@
  *
  * @brief Abstract model base class python interface
  ***************************************************************************/
-class GModel {
+class GModel : public GBase {
+
 public:
     // Constructors and destructors
     GModel(void);

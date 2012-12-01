@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GFitsImageLong.i  - FITS long integer image class SWIG interface     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageLong.i
  * @brief GFitsImageLong class SWIG file.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -48,13 +48,14 @@ public:
     virtual ~GFitsImageLong(void);
 
     // Methods
+    void            clear(void);
+    GFitsImageLong* clone(void) const;
     double          pixel(const int& ix) const;
     double          pixel(const int& ix, const int& iy) const;
     double          pixel(const int& ix, const int& iy, const int& iz) const;
     double          pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*           pixels(void);
     int             type(void) const;
-    GFitsImageLong* clone(void) const;
 };
 
 
@@ -92,16 +93,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageLong type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageLong* cast_GFitsImageLong(GFitsImage* image) {
-        if (image->type() != 41)
-            throw GException::fits_invalid_type("cast_GFitsImageLong(GFitsImage*)",
-                                                "Expecting long integer image.");
-        return dynamic_cast<GFitsImageLong*>(image);
-    }
-%};

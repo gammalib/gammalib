@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GModelRegistry.i  -  Model registry class python I/F          *
+ *                 GModelRegistry.i - Model registry class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelRegistry.i
- * @brief GModelRegistry class python interface.
- * @author J. Knodlseder
+ * @brief Model registry class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -33,9 +33,10 @@
 /***********************************************************************//**
  * @class GModelRegistry
  *
- * @brief Interface definition for the model registry class.
+ * @brief Interface definition for the model registry class
  ***************************************************************************/
-class GModelRegistry {
+class GModelRegistry : public GRegistry {
+
 public:
     // Constructors and destructors
     GModelRegistry(void);
@@ -45,7 +46,7 @@ public:
 
     // Methods
     int         size(void) const { return m_number; }
-    GModel*     alloc(const std::string& type) const;
+    GModel*     alloc(const std::string& name) const;
     std::string name(const int& index) const;
 };
 

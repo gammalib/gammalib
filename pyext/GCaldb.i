@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCaldb.i  -  Calibration database class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Juergen Knoedlseder                              *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCaldb.i
  * @brief Calibration database class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,7 @@
  *
  * @brief Interface for the Calibration database class
  ***************************************************************************/
-class GCaldb {
+class GCaldb : public GBase {
 public:
     // Constructors and destructors
     GCaldb(void);

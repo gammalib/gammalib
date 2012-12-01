@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GOptimizerPars.hpp  -  Optimizer parameter container class       *
+ *     GOptimizerPars.hpp  -  Optimizer parameters abstract base class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GOptimizerPars.hpp
- * @brief Optimizer parameter container class interface definition
- * @author J. Knodlseder
+ * @brief Optimizer parameters abstract base class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GOPTIMIZERPARS_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GModelPar.hpp"
 
 
@@ -53,11 +52,7 @@
  *       very clean. We should think about how we can make this a clean
  *       thing ...
  ***************************************************************************/
-class GOptimizerPars {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GOptimizerPars& pars);
-    friend GLog&         operator<<(GLog& log,        const GOptimizerPars& pars);
+class GOptimizerPars : public GBase {
 
 public:
     // Constructors and destructors
@@ -69,11 +64,13 @@ public:
     virtual GOptimizerPars& operator=(const GOptimizerPars& pars);
 
     // Methods
-    int              npars(void) const { return m_pars.size(); }
-    int              nfree(void) const;
-    GModelPar&       par(const int& index);
-    const GModelPar& par(const int& index) const;
-    std::string      print(void) const;
+    virtual void             clear(void);
+    virtual GOptimizerPars*  clone(void) const;
+    virtual int              npars(void) const { return m_pars.size(); }
+    virtual int              nfree(void) const;
+    virtual GModelPar&       par(const int& index);
+    virtual const GModelPar& par(const int& index) const;
+    virtual std::string      print(void) const;
 
 protected:
     // Protected methods

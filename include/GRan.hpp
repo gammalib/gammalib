@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GRan.hpp - Randon number generator class                *
+ *                 GRan.hpp - Random number generator class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GRan.hpp
- * @brief Randon number generator class definition.
- * @author J. Knodlseder
+ * @brief Random number generator class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GRAN_HPP
@@ -29,23 +29,17 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
  * @class GRan
  *
  * @brief Random number generator class
+ *
+ * This class implements a random number generator.
  ***************************************************************************/
-class GRan {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GRan& ran);
-    friend GLog&         operator<< (GLog& log, const GRan& ran);
+class GRan : public GBase {
 
 public:
     // Constructors and destructors
@@ -65,6 +59,7 @@ public:
     unsigned long long int int64(void);
     double                 uniform(void);
     double                 exp(const double& lambda);
+    double                 poisson(const double& lambda);
     double                 chisq2(void);
     std::string            print(void) const;
   
@@ -79,6 +74,12 @@ protected:
     unsigned long long int m_u;     //!< u
     unsigned long long int m_v;     //!< v
     unsigned long long int m_w;     //!< w
+
+    // Poisson cache
+    double                 m_oldm;
+    double                 m_sq;
+    double                 m_alxm;
+    double                 m_g;
 };
 
 #endif /* GRAN_HPP */

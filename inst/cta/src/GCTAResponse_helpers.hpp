@@ -21,7 +21,7 @@
 /**
  * @file GCTAResponse_helpers.hpp
  * @brief CTA response hepler classes definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTARESPONSE_HELPERS_HPP
@@ -49,18 +49,26 @@
  ***************************************************************************/
 class cta_npsf_kern_rad_azsym : public GIntegrand {
 public:
-    cta_npsf_kern_rad_azsym(const       GCTAResponse* rsp,
-                            double      roi,
-                            double      psf,
-                            GCTAPsfPars pars) :
+    cta_npsf_kern_rad_azsym(const  GCTAResponse* rsp,
+                            double roi,
+                            double psf,
+                            double logE,
+                            double theta,
+                            double phi,
+                            double zenith,
+                            double azimuth) :
                             m_rsp(rsp),
                             m_roi(roi),
                             m_cosroi(std::cos(roi)),
                             m_psf(psf),
                             m_cospsf(std::cos(psf)),
                             m_sinpsf(std::sin(psf)),
-                            m_pars(pars) { }
-    double eval(double r);
+                            m_logE(logE),
+                            m_theta(theta),
+                            m_phi(phi),
+                            m_zenith(zenith),
+                            m_azimuth(azimuth) { }
+    double eval(double delta);
 protected:
     const GCTAResponse* m_rsp;     //!< Pointer to response function
     double              m_roi;     //!< ROI radius in radians
@@ -68,7 +76,11 @@ protected:
     double              m_psf;     //!< PSF-ROI centre distance in radians
     double              m_cospsf;  //!< Cosine of PSF-ROI centre distance
     double              m_sinpsf;  //!< Sine of PSF-ROI centre distance
-    GCTAPsfPars         m_pars;    //!< PSF parameters
+    double              m_logE;    //!< Log10 of true photon energy (E/TeV).
+    double              m_theta;   //!< Offset angle of source in camera system
+    double              m_phi;     //!< Azimuth angle of source in camera system
+    double              m_zenith;  //!< Zenith angle of source in Earth system
+    double              m_azimuth; //!< Azimuth angle of source in Earth system
 };
 
 
@@ -85,7 +97,6 @@ public:
                             double              azimuth,
                             double              srcLogEng,
                             double              obsLogEng,
-                            GCTAPsfPars         pars,
                             double              zeta,
                             double              lambda,
                             double              omega0,
@@ -96,7 +107,6 @@ public:
                             m_azimuth(azimuth),
                             m_srcLogEng(srcLogEng),
                             m_obsLogEng(obsLogEng),
-                            m_pars(pars),
                             m_zeta(zeta),
                             m_cos_zeta(std::cos(zeta)),
                             m_sin_zeta(std::sin(zeta)),
@@ -114,7 +124,6 @@ protected:
     double              m_azimuth;       //!< Pointing azimuth angle
     double              m_srcLogEng;     //!< True photon energy
     double              m_obsLogEng;     //!< Measured photon energy
-    GCTAPsfPars         m_pars;          //!< PSF parameters
     double              m_zeta;          //!< Distance model centre - measured photon
     double              m_cos_zeta;      //!< Cosine of zeta
     double              m_sin_zeta;      //!< Sine of zeta
@@ -139,7 +148,6 @@ public:
                               double              azimuth,
                               double              srcLogEng,
                               double              obsLogEng,
-                              GCTAPsfPars         pars,
                               double              zeta,
                               double              lambda,
                               double              omega0,
@@ -153,7 +161,6 @@ public:
                               m_azimuth(azimuth),
                               m_srcLogEng(srcLogEng),
                               m_obsLogEng(obsLogEng),
-                              m_pars(pars),
                               m_zeta(zeta),
                               m_lambda(lambda),
                               m_omega0(omega0),
@@ -169,7 +176,6 @@ protected:
     double              m_azimuth;       //!< Pointing azimuth angle
     double              m_srcLogEng;     //!< True photon energy
     double              m_obsLogEng;     //!< Measured photon energy
-    GCTAPsfPars         m_pars;          //!< PSF parameters
     double              m_zeta;          //!< Distance model centre - measured photon
     double              m_lambda;        //!< Distance model centre - pointing
     double              m_omega0;        //!< Azimuth of pointing in model system
@@ -270,33 +276,36 @@ class cta_irf_diffuse_kern_theta : public GIntegrand {
 public:
     cta_irf_diffuse_kern_theta(const GCTAResponse*  rsp,
                                const GModelSpatial* model,
+                               double               theta,
+                               double               phi,
                                double               zenith,
                                double               azimuth,
                                double               srcLogEng,
                                double               obsLogEng,
                                const GMatrix*       rot,
-                               GCTAPsfPars          pars,
                                double               eta) :
                                m_rsp(rsp),
                                m_model(model),
+                               m_theta(theta),
+                               m_phi(phi),
                                m_zenith(zenith),
                                m_azimuth(azimuth),
                                m_srcLogEng(srcLogEng),
                                m_obsLogEng(obsLogEng),
                                m_rot(rot),
-                               m_pars(pars),
                                m_sin_eta(std::sin(eta)),
                                m_cos_eta(std::cos(eta)) { }
     double eval(double theta);
 protected:
     const GCTAResponse*  m_rsp;        //!< Pointer to CTA response
     const GModelSpatial* m_model;      //!< Pointer to spatial model
+    double               m_theta;      //!< True photon offset angle
+    double               m_phi;        //!< True photon azimuth angle
     double               m_zenith;     //!< Pointing zenith angle
     double               m_azimuth;    //!< Pointing azimuth angle
     double               m_srcLogEng;  //!< True photon energy
     double               m_obsLogEng;  //!< Measured photon energy
     const GMatrix*       m_rot;        //!< Rotation matrix
-    GCTAPsfPars          m_pars;       //!< PSF parameters
     double               m_sin_eta;    //!< Sine of angular distance between
                                        //   observed photon direction and
                                        //   camera centre

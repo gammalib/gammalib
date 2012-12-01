@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableLongCol.cpp
  * @brief FITS table long integer column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -194,6 +194,35 @@ const long& GFitsTableLongCol::operator() (const int& row, const int& inx) const
  =                               Public methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableLongCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableLongCol* GFitsTableLongCol::clone(void) const
+{
+    return new GFitsTableLongCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -541,15 +570,6 @@ void GFitsTableLongCol::free_members(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableLongCol* GFitsTableLongCol::clone(void) const
-{
-    return new GFitsTableLongCol(*this);
 }
 
 

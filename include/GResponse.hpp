@@ -21,7 +21,7 @@
 /**
  * @file GResponse.hpp
  * @brief Abstract response base class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GRESPONSE_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GEvent.hpp"
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
@@ -60,11 +59,7 @@ class GObservation;
  * The npred method returns the integral of the instrument response function
  * over the dataspace. This method is only required for unbinned analysis.
  ***************************************************************************/
-class GResponse {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GResponse& rsp);
-    friend GLog&         operator<< (GLog& log, const GResponse& rsp);
+class GResponse : public GBase {
 
 public:
     // Constructors and destructors

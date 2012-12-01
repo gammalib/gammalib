@@ -443,6 +443,32 @@ GMatrix& GMatrix::operator*=(const GMatrix& matrix)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GMatrix::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+    
+    // Return
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GMatrix* GMatrix::clone(void) const
+{
+    // Clone this image
+    return new GMatrix(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Transpose matrix
  *
  * The transpose operation exchanges the number of rows against the number
@@ -1009,38 +1035,6 @@ void GMatrix::alloc_members(const int& rows, const int& cols)
  =                           Friend functions                              =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] matrix Matrix.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GMatrix& matrix)
-{
-     // Write matrix in output stream
-    os << matrix.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] matrix Matrix.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GMatrix& matrix)
-{
-    // Write matrix into logger
-    log << matrix.print();
-
-    // Return logger
-    return log;
-}
-
 
 /***********************************************************************//**
  * @brief Return matrix with absolute values of all elements

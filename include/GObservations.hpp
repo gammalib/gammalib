@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GObservations.hpp  -  Observation container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservations.hpp
  * @brief Observations container class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GOBSERVATIONS_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GObservation.hpp"
 #include "GEvent.hpp"
 #include "GOptimizer.hpp"
@@ -61,11 +60,7 @@
  * @todo Use std::vector for building a list of pointers to observations
  * instead of a proper memory handling implementation.
  ***************************************************************************/
-class GObservations {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GObservations& obs);
-    friend GLog&         operator<<(GLog& log,        const GObservations& obs);
+class GObservations : public GBase {
 
 public:
     // Constructors and destructors
@@ -80,19 +75,20 @@ public:
     const GObservation& operator[](const int& index) const;
 
     // Methods
-    void        clear(void);
-    int         size(void) const { return m_obs.size(); }
-    void        append(GObservation& obs);
-    void        load(const std::string& filename);
-    void        save(const std::string& filename) const;
-    void        read(const GXml& xml);
-    void        write(GXml& xml) const;
-    void        models(const GModels& models) { m_models=models;}
-    void        models(const std::string& filename);
-    GModels&    models(void) { return m_models; }
-    void        optimize(GOptimizer& opt);
-    double      npred(void) const { return m_npred; }
-    std::string print(void) const;
+    void           clear(void);
+    GObservations* clone(void) const;
+    int            size(void) const { return m_obs.size(); }
+    void           append(GObservation& obs);
+    void           load(const std::string& filename);
+    void           save(const std::string& filename) const;
+    void           read(const GXml& xml);
+    void           write(GXml& xml) const;
+    void           models(const GModels& models) { m_models=models;}
+    void           models(const std::string& filename);
+    GModels&       models(void) { return m_models; }
+    void           optimize(GOptimizer& opt);
+    double         npred(void) const { return m_npred; }
+    std::string    print(void) const;
 
     // Event iterator
     class iterator {
@@ -165,9 +161,9 @@ public:
 
 protected:
     // Protected methods
-    void           init_members(void);
-    void           copy_members(const GObservations& obs);
-    void           free_members(void);
+    void init_members(void);
+    void copy_members(const GObservations& obs);
+    void free_members(void);
 
     // Protected members
     std::vector<GObservation*> m_obs;      //!< List of observations

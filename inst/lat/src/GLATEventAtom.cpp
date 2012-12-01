@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GLATEventAtom.cpp  -  LAT event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventAtom.cpp
  * @brief GLATEventAtom class implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -166,8 +166,6 @@ GLATEventAtom* GLATEventAtom::clone(void) const
 
 /***********************************************************************//**
  * @brief Print event information
- *
- * @todo Implement and use GTime::print method.
  ***************************************************************************/
 std::string GLATEventAtom::print(void) const
 {
@@ -177,7 +175,7 @@ std::string GLATEventAtom::print(void) const
     // Append number of counts
     result.append("Dir="+m_dir.print());
     result.append(" Energy="+m_energy.print());
-    result.append(" Time="+str(m_time.met()));
+    result.append(" Time="+m_time.print());
 
     // Return result
     return result;

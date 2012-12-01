@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GEbounds.i  -  Energy boundary class python I/F             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEbounds.i
  * @brief GEbounds class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -37,7 +37,7 @@
  *
  * This class holds a list of energy intervals.
  ***************************************************************************/
-class GEbounds {
+class GEbounds : public GBase {
 public:
     // Constructors and destructors
     GEbounds(void);
@@ -46,26 +46,27 @@ public:
     virtual ~GEbounds(void);
 
     // Methods
-    void    clear(void);
-    void    append(const GEnergy& emin, const GEnergy& emax);
-    void    insert(const GEnergy& emin, const GEnergy& emax);
-    void    setlin(const GEnergy& emin, const GEnergy& emax, const int& num);
-    void    setlog(const GEnergy& emin, const GEnergy& emax, const int& num);
-	void    load(const std::string& filename,
-                 const std::string& extname);
-	void    save(const std::string& filename, bool clobber,
-                 const std::string& extname) const;
-    void    read(GFitsTable* hdu);
-    void    write(GFits* file, const std::string& extname) const;
-    int     index(const GEnergy& eng) const;
-    int     size(void) const { return m_num; }
-    GEnergy emin(void) const { return m_emin; }
-    GEnergy emax(void) const { return m_emax; }
-    GEnergy emin(int inx) const;
-    GEnergy emax(int inx) const;
-    GEnergy emean(int inx) const;
-    GEnergy elogmean(int inx) const;
-    bool    isin(const GEnergy& eng) const;
+    void      clear(void);
+    GEbounds* clone(void) const;
+    void      append(const GEnergy& emin, const GEnergy& emax);
+    void      insert(const GEnergy& emin, const GEnergy& emax);
+    void      setlin(const GEnergy& emin, const GEnergy& emax, const int& num);
+    void      setlog(const GEnergy& emin, const GEnergy& emax, const int& num);
+	void      load(const std::string& filename,
+                   const std::string& extname);
+	void      save(const std::string& filename, bool clobber,
+                   const std::string& extname) const;
+    void      read(GFitsTable* hdu);
+    void      write(GFits* file, const std::string& extname) const;
+    int       index(const GEnergy& eng) const;
+    int       size(void) const;
+    GEnergy   emin(void) const;
+    GEnergy   emax(void) const;
+    GEnergy   emin(int inx) const;
+    GEnergy   emax(int inx) const;
+    GEnergy   emean(int inx) const;
+    GEnergy   elogmean(int inx) const;
+    bool      contains(const GEnergy& eng) const;
 };
 
 

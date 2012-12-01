@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.i  -  Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GTime.i
  * @brief Time class python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -40,7 +40,8 @@
  * The GTime class stores a time value in seconds and its MJD reference in
  * days. The time can be retrieved in any MJD reference.
  ***************************************************************************/
-class GTime {
+class GTime : public GBase {
+
 public:
     // Constructors and destructors
     GTime(void);
@@ -60,6 +61,7 @@ public:
  
     // Methods
     void   clear(void);
+    GTime* clone(void) const;
     double jd(void) const;
     double mjd(void) const;
     double met(void) const;

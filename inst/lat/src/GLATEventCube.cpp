@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATEventCube.cpp  -  LAT event cube class               *
+ *                 GLATEventCube.cpp - LAT event cube class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventCube.cpp
  * @brief LAT event cube class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -111,6 +111,7 @@ GLATEventCube::~GLATEventCube(void)
  * @brief Assignment operator
  *
  * @param[in] cube LAT event cube.
+ * @return LAT event cube.
  ***************************************************************************/
 GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
 {
@@ -140,6 +141,7 @@ GLATEventCube& GLATEventCube::operator= (const GLATEventCube& cube)
  * @brief Event bin access operator
  *
  * @param[in] index Event index [0,...,size()-1].
+ * @return Pointer to event bin.
  *
  * Returns pointer to an event bin.
  ***************************************************************************/
@@ -157,6 +159,7 @@ GLATEventBin* GLATEventCube::operator[](const int& index)
  * @brief Event bin access operator (const version)
  *
  * @param[in] index Event index [0,...,size()-1].
+ * @return Pointer to event bin.
  *
  * Returns pointer to an event bin.
  ***************************************************************************/
@@ -200,6 +203,8 @@ void GLATEventCube::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Deep copy of LAT event cube.
  ***************************************************************************/
 GLATEventCube* GLATEventCube::clone(void) const
 {
@@ -209,6 +214,8 @@ GLATEventCube* GLATEventCube::clone(void) const
 
 /***********************************************************************//**
  * @brief Return number of bins in event cube
+ *
+ * @return Number of bins in event cube.
  ***************************************************************************/
 int GLATEventCube::size(void) const
 {
@@ -222,6 +229,8 @@ int GLATEventCube::size(void) const
 
 /***********************************************************************//**
  * @brief Return dimension of event cube
+ *
+ * @return Number of dimensions in event cube (either 2 or 3).
  ***************************************************************************/
 int GLATEventCube::dim(void) const
 {
@@ -236,7 +245,8 @@ int GLATEventCube::dim(void) const
 /***********************************************************************//**
  * @brief Return number of bins in axis
  *
- * @param[in] axis Axis.
+ * @param[in] axis Axis [0,...,dim()-1]
+ * @return Number of bins in specified axis
  *
  * @exception GException::out_of_range
  *            Axis is out of range.
@@ -247,8 +257,9 @@ int GLATEventCube::naxis(int axis) const
 {
     // Optionally check if the axis is valid
     #if defined(G_RANGE_CHECK)
-    if (axis < 0 || axis >= dim())
+    if (axis < 0 || axis >= dim()) {
         throw GException::out_of_range(G_NAXIS, axis, 0, dim()-1);
+    }
     #endif
 
     // Set result
@@ -368,6 +379,8 @@ void GLATEventCube::write(GFits& file) const
 
 /***********************************************************************//**
  * @brief Return number of events in cube
+ *
+ * @return Total number of events in event cube.
  ***************************************************************************/
 int GLATEventCube::number(void) const
 {
@@ -379,8 +392,9 @@ int GLATEventCube::number(void) const
 
     // Sum event cube
     if (size() > 0 && pixels != NULL) {
-        for (int i = 0; i < size(); ++i)
+        for (int i = 0; i < size(); ++i) {
             number += pixels[i];
+        }
     }
 
     // Return
@@ -406,6 +420,8 @@ void GLATEventCube::map(const GSkymap& map)
 
 /***********************************************************************//**
  * @brief Print event cube information
+ *
+ * @return String containing event cube information.
  ***************************************************************************/
 std::string GLATEventCube::print(void) const
 {
@@ -419,17 +435,29 @@ std::string GLATEventCube::print(void) const
     result.append(str(m_map.nx())+" x "+str(m_map.ny()));
     result.append("\n"+parformat("Number of energy bins")+str(ebins()));
     result.append("\n"+parformat("Number of events")+str(number()));
+
+    // Append time interval
     result.append("\n"+parformat("Time interval"));
-    if (gti().size() > 0)
+    if (gti().size() > 0) {
         result.append(str(tstart().met())+" - "+str(tstop().met()));
-    else
+    }
+    else {
         result.append("not defined");
+    }
+
+    // Append energy range
     result.append("\n"+parformat("Energy range"));
-    if (ebounds().size() > 0)
+    if (ebounds().size() > 0) {
         result.append(emin().print()+" - "+emax().print());
-    else
+    }
+    else {
         result.append("not defined");
-    result.append("\n"+m_map.wcs()->print());
+    }
+
+    // Append WCS
+    if (m_map.wcs() != NULL) {
+        result.append("\n"+m_map.wcs()->print());
+    }
 
     // Append source maps
     result.append("\n"+parformat("Number of source maps")+str(m_srcmap.size()));
@@ -450,7 +478,8 @@ std::string GLATEventCube::print(void) const
 /***********************************************************************//**
  * @brief Return name of diffuse model
  *
- * @param[in] index Diffuse model index (starting from 0).
+ * @param[in] index Diffuse model index [0,...,ndiffrsp()-1].
+ * @return Name of diffuse model.
  *
  * @exception GException::out_of_range
  *            Model index out of valid range.
@@ -461,8 +490,9 @@ std::string GLATEventCube::diffname(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= ndiffrsp())
+    if (index < 0 || index >= ndiffrsp()) {
         throw GException::out_of_range(G_DIFFNAME, index, 0, ndiffrsp()-1);
+    }
     #endif
 
     // Return
@@ -473,7 +503,8 @@ std::string GLATEventCube::diffname(const int& index) const
 /***********************************************************************//**
  * @brief Return diffuse response map
  *
- * @param[in] index Diffuse model index (starting from 0).
+ * @param[in] index Diffuse model index [0,...,ndiffrsp()-1].
+ * @return Pointer to diffuse response map.
  *
  * @exception GException::out_of_range
  *            Model index out of valid range.
@@ -484,8 +515,9 @@ GSkymap* GLATEventCube::diffrsp(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= ndiffrsp())
+    if (index < 0 || index >= ndiffrsp()) {
         throw GException::out_of_range(G_DIFFRSP, index, 0, ndiffrsp()-1);
+    }
     #endif
 
     // Return
@@ -498,6 +530,7 @@ GSkymap* GLATEventCube::diffrsp(const int& index) const
  *        direction that fits spatially into the event cube
  *
  * @param[in] srcDir Source direction.
+ * @return Maximum radius in degrees that fully fits into event cube.
  *
  * By computing the sky directions of the event cube boundaries, the maximum
  * radius is computed that fits fully within the event cube. This method is
@@ -513,8 +546,9 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     for (int ix = 0; ix < nx(); ++ix) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
         double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
-        if (distance < radius)
+        if (distance < radius) {
             radius = distance;
+        }
     }
 
     // Move along lower edge in longitude
@@ -522,8 +556,9 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     for (int ix = 0; ix < nx(); ++ix) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
         double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
-        if (distance < radius)
+        if (distance < radius) {
             radius = distance;
+        }
     }
 
     // Move along left edge in latitude
@@ -531,8 +566,9 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     for (int iy = 0; iy < ny(); ++iy) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
         double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
-        if (distance < radius)
+        if (distance < radius) {
             radius = distance;
+        }
     }
 
     // Move along right edge in latitude
@@ -540,8 +576,9 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     for (int iy = 0; iy < ny(); ++iy) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
         double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
-        if (distance < radius)
+        if (distance < radius) {
             radius = distance;
+        }
     }
 
     // Return radius
@@ -664,18 +701,21 @@ void GLATEventCube::read_srcmap(const GFitsImage* hdu)
         map->read(hdu);
 
         // Check that source map WCS is consistent with counts map WCS
-        if (*(m_map.wcs()) != *(map->wcs()))
+        if (*(m_map.wcs()) != *(map->wcs())) {
             throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());
+        }
 
         // Check that source map dimension is consistent with counts map
         // dimension
         if (m_map.nx() != map->nx() ||
-            m_map.ny() != map->ny())
+            m_map.ny() != map->ny()) {
             throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());
+        }
 
         // Check that source map has required number of energy bins
-        if (m_map.nmaps()+1 != map->nmaps())
+        if (m_map.nmaps()+1 != map->nmaps()) {
             throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());
+        }
 
         // Append source map to list of maps
         m_srcmap.push_back(map);
@@ -837,9 +877,10 @@ void GLATEventCube::set_energies(void)
 void GLATEventCube::set_times(void)
 {
     // Throw an error if GTI is empty
-    if (m_gti.size() < 1)
+    if (m_gti.size() < 1) {
         throw GLATException::no_gti(G_SET_TIMES, "Every LAT event cube needs"
                   " associated GTIs to allow the computation of the ontime.");
+    }
 
     // Compute mean time
     m_time = 0.5 * (gti().tstart() + gti().tstop());
@@ -874,17 +915,20 @@ void GLATEventCube::set_bin(const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_SET_BIN, index, 0, size()-1);
+    }
     #endif
 
     // Check for the existence of energies and energy widths
-    if (m_energies.size() != ebins() || m_ewidth.size() != ebins())
+    if (m_energies.size() != ebins() || m_ewidth.size() != ebins()) {
         throw GLATException::no_energies(G_SET_BIN);
+    }
 
     // Check for the existence of sky directions and solid angles
-    if (m_dirs.size() != npix() || m_omega.size() != npix())
+    if (m_dirs.size() != npix() || m_omega.size() != npix()) {
         throw GLATException::no_dirs(G_SET_BIN);
+    }
 
     // Get pixel and energy bin indices.
     m_bin.m_index = index;
@@ -904,10 +948,3 @@ void GLATEventCube::set_bin(const int& index)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

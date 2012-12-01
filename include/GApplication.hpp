@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GApplication.hpp
  * @brief GammaLib application base class
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GAPPLICATION_HPP
@@ -31,7 +31,7 @@
 #include <ctime>
 #include <vector>
 #include <string>
-#include <iostream>
+#include "GBase.hpp"
 #include "GLog.hpp"
 #include "GPars.hpp"
 
@@ -46,11 +46,7 @@
  * classes, and automatically have access to task parameters and the
  * application logger.
  ***************************************************************************/
-class GApplication {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GApplication& app);
-    friend GLog&         operator<< (GLog&        log, const GApplication& app);
+class GApplication : public GBase {
 
 public:
     // Constructors and destructors
@@ -67,33 +63,35 @@ public:
     const GPar&   operator[](const std::string& name) const;
 
     // Methods
-    std::string name(void) const;
-    std::string version(void) const;
-    double      telapse(void) const;
-    double      celapse(void) const;
-    void        logFileOpen(bool clobber = true);
-    bool        logTerse(void) const;
-    bool        logNormal(void) const;
-    bool        logExplicit(void) const;
-    bool        logVerbose(void) const;
-    bool        logDebug(void) const;
-    bool        clobber(void) const;
-    bool        haspar(const std::string& name) const;
-    std::string par_filename(void) const;
-    std::string log_filename(void) const;
-    void        log_header(void);
-    void        log_trailer(void);
-    void        log_parameters(void);
-    std::string print(void) const;
+    void          clear(void);
+    GApplication* clone(void) const;
+    std::string   name(void) const;
+    std::string   version(void) const;
+    double        telapse(void) const;
+    double        celapse(void) const;
+    void          logFileOpen(bool clobber = true);
+    bool          logTerse(void) const;
+    bool          logNormal(void) const;
+    bool          logExplicit(void) const;
+    bool          logVerbose(void) const;
+    bool          logDebug(void) const;
+    bool          clobber(void) const;
+    bool          haspar(const std::string& name) const;
+    std::string   par_filename(void) const;
+    std::string   log_filename(void) const;
+    void          log_header(void);
+    void          log_trailer(void);
+    void          log_parameters(void);
+    std::string   print(void) const;
 
     // Public members
-    GLog        log;                       //!< Application logger
+    GLog          log;                       //!< Application logger
     
 protected:
     // Protected methods
-    void        init_members(void);
-    void        copy_members(const GApplication& app);
-    void        free_members(void);
+    void init_members(void);
+    void copy_members(const GApplication& app);
+    void free_members(void);
 
     // Protected data members
     std::string              m_name;       //!< Application name

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GRoi.i  -  Region of interest abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GRoi.i
  * @brief GRoi class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -40,7 +40,8 @@
  * for an analysis. In particular, the definition of a region of interest
  * is required for an unbinned analysis.
  ***************************************************************************/
-class GRoi {
+class GRoi : public GBase {
+
 public:
     // Constructors and destructors
     GRoi(void);

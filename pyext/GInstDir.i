@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GInstDir.i  -  Instrument direction class python I/F          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GInstDir.i
  * @brief GInstDir class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -42,7 +42,8 @@
  * reconstructions for imaging devices or detector numbers etc. for
  * non-imaging devices.
  ***************************************************************************/
-class GInstDir {
+class GInstDir : public GBase {
+
 public:
     // Constructors and destructors
     GInstDir(void);

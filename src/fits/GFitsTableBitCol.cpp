@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableBitCol.cpp
  * @brief FITS table bit column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -216,6 +216,35 @@ const bool& GFitsTableBitCol::operator() (const int& row, const int& inx) const
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the object to an initial state.
+ ***************************************************************************/
+void GFitsTableBitCol::clear(void)
+{
+    // Free class members (base and derived classes, derived class first)
+    free_members();
+    this->GFitsTableCol::free_members();
+
+    // Initialise members
+    this->GFitsTableCol::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone column
+ ***************************************************************************/
+GFitsTableBitCol* GFitsTableBitCol::clone(void) const
+{
+    return new GFitsTableBitCol(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Get string value
@@ -590,15 +619,6 @@ void GFitsTableBitCol::free_members(void)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone column
- ***************************************************************************/
-GFitsTableBitCol* GFitsTableBitCol::clone(void) const
-{
-    return new GFitsTableBitCol(*this);
 }
 
 

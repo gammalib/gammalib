@@ -35,7 +35,8 @@
  *
  * @brief Abstract radial acceptance model class
  ***************************************************************************/
-class GCTAModelRadial {
+class GCTAModelRadial : public GBase {
+
 public:
     // Constructors and destructors
     GCTAModelRadial(void);

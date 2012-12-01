@@ -385,10 +385,10 @@ void GTestSuite::name(const std::string& name)
  *
  * Enables or disables logging into the standard output stream.
  ***************************************************************************/
-void GTestSuite::cout(bool cout)
+void GTestSuite::cout(const bool& flag)
 {
     // Enables or disables logging into the standard output stream
-    m_log.cout(cout);
+    m_log.cout(flag);
     
     // Return
     return;
@@ -706,7 +706,7 @@ void GTestSuite::test_try_failure(const std::string& message,
 /***********************************************************************//**
  * @brief Notice when a try block failed
  *
- * @param[in] exception Exception.
+ * @param[in] e Exception.
  *
  * @exception GException::test_nested_try_error
  *            Test case index is out of range.

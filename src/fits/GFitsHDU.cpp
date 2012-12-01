@@ -358,6 +358,8 @@ void GFitsHDU::connect(void* vptr)
 /***********************************************************************//**
  * @brief Move FITS file pointer to HDU
  *
+ * @exception GException::fits_file_not_open
+ *            No FITS file has been opened.
  * @exception GException::fits_hdu_not_found
  *            Requested HDU not found.
  *
@@ -366,6 +368,12 @@ void GFitsHDU::connect(void* vptr)
  ***************************************************************************/
 void GFitsHDU::move_to_hdu(void)
 {
+    // Throw an exception if FITS file is not open
+    if (FPTR(m_fitsfile)->Fptr == NULL) {
+        throw GException::fits_file_not_open(G_MOVE_TO_HDU, 
+              "Open file before moving file pointer to HDU.");
+    }
+
     // Move to HDU
     int status = 0;
     status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
@@ -382,13 +390,23 @@ void GFitsHDU::move_to_hdu(void)
 /***********************************************************************//**
  * @brief Get HDU type from FITS file
  *
+ * @exception GException::fits_file_not_open
+ *            No FITS file has been opened.
  * @exception GException::fits_hdu_not_found
  *            Requested HDU not found.
  ***************************************************************************/
 GFitsHDU::HDUType GFitsHDU::get_hdu_type(void) const
 {
+    // Initialise HDU type
+    int type = 0;
+
+    // Throw an exception if FITS file is not open
+    if (FPTR(m_fitsfile)->Fptr == NULL) {
+        throw GException::fits_file_not_open(G_GET_HDU_TYPE, 
+              "Open file before requesting HDU type.");
+    }
+
     // Get HDU type
-    int type   = 0;
     int status = 0;
     status     = __ffghdt(FPTR(m_fitsfile), &type, &status);
     if (status != 0) {

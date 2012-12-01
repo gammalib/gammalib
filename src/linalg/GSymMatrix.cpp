@@ -393,6 +393,32 @@ GSymMatrix& GSymMatrix::operator-= (const GSymMatrix& matrix)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GSymMatrix::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+    
+    // Return
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GSymMatrix* GSymMatrix::clone(void) const
+{
+    // Clone this image
+    return new GSymMatrix(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Invert matrix
  *
  * @exception GException::feature_not_implemented
@@ -1162,38 +1188,6 @@ void GSymMatrix::set_inx(void)
  =                           Friend functions                              =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] matrix Matrix.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GSymMatrix& matrix)
-{
-     // Write matrix in output stream
-    os << matrix.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] matrix Matrix.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GSymMatrix& matrix)
-{
-    // Write matrix into logger
-    log << matrix.print();
-
-    // Return logger
-    return log;
-}
-
 
 /***********************************************************************//**
  * @brief Return matrix of absolute values

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GSkyDir.hpp  -  Class that implements a sky direction          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GSkyDir.hpp
  * @brief Sky direction class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GSKYDIR_HPP
@@ -29,10 +29,8 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GVector.hpp"
-#include "GMatrix.hpp"
 
 
 /***********************************************************************//**
@@ -49,11 +47,7 @@
  * if requested. Coordinates can be given and returned in radians or in
  * degrees. Note that the epoch for celestial coordinates is fixed to J2000.
  ***************************************************************************/
-class GSkyDir {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GSkyDir& dir);
-    friend GLog&         operator<<(GLog& log,        const GSkyDir& dir);
+class GSkyDir : public GBase {
 
     // Operator friends
     friend bool operator==(const GSkyDir &a, const GSkyDir &b);
@@ -70,6 +64,7 @@ public:
 
     // Methods
     void        clear(void);
+    GSkyDir*    clone(void) const;
     void        radec(const double& ra, const double& dec);
     void        radec_deg(const double& ra, const double& dec);
     void        lb(const double& l, const double& b);

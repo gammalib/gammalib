@@ -221,11 +221,12 @@ void TestGMWL::test_optimizer(void)
         obs.optimize(opt);
         test_try_success();
         for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            GModel& model = obs.models()[i];
-            for (int k = 0; k < model.size(); ++k) {
-                std::string msg = "Verify optimization result for " + model[k].print();
-                test_value(model[k].real_value(), fit_results[j++], 1.0e-4, msg);
-                test_value(model[k].real_error(), fit_results[j++], 1.0e-3, msg);
+            GModel* model = obs.models()[i];
+            for (int k = 0; k < model->size(); ++k) {
+                GModelPar& par = (*model)[k];
+                std::string msg = "Verify optimization result for " + par.print();
+                test_value(par.real_value(), fit_results[j++], 1.0e-4, msg);
+                test_value(par.real_error(), fit_results[j++], 1.0e-3, msg);
             }
         }
     }

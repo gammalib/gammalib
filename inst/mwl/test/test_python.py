@@ -92,9 +92,10 @@ def fit_spectrum(filename, xmlname):
 		e.MeV(energy)
 		yval = 0.0
 		for model in obs.models():
-			crab = cast_GModelSky(model)
-			if crab != None:
-				yval += crab.value(d, e, t) * energy*energy*1.6021765e-6
+			if model.type() == "PointSource":
+			#crab = cast_GModelSky(model)
+			#if crab != None:
+				yval += model.value(d, e, t) * energy*energy*1.6021765e-6
 		y.append(yval)
 	plt.plot(x, y)
     

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporal.cpp  -  Abstract temporal model base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelTemporal.cpp
  * @brief Abstract temporal model base class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -265,42 +265,4 @@ void GModelTemporal::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] model Temporal model.
- ***************************************************************************/
-std::ostream& operator<<(std::ostream& os, const GModelTemporal& model)
-{
-     // Write model in output stream
-    os << model.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] model Temporal model.
- ***************************************************************************/
-GLog& operator<<(GLog& log, const GModelTemporal& model)
-{
-    // Write model into logger
-    log << model.print();
-
-    // Return logger
-    return log;
 }

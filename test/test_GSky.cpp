@@ -28,11 +28,11 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <stdlib.h>
-#include "GammaLib.hpp"
-#include "test_GSky.hpp"
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
+#include <stdlib.h>
+#include "test_GSky.hpp"
+#include "GTools.hpp"
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -258,8 +258,8 @@ void TestGSky::test_GWcslib(void)
         try {
 
             // Allocate projection CEL and GAL
-            GWcslib *cel = (GWcslib*)registry.alloc(registry.code(i));
-            GWcslib *gal = (GWcslib*)registry.alloc(registry.code(i));
+            GWcslib *cel = dynamic_cast<GWcslib*>(registry.alloc(registry.code(i)));
+            GWcslib *gal = dynamic_cast<GWcslib*>(registry.alloc(registry.code(i)));
 
             // Throw an error if allocation failed
             if (cel == NULL || gal == NULL) {

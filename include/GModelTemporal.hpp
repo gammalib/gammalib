@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporal.hpp  -  Abstract temporal model base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelTemporal.hpp
  * @brief Abstract temporal model base class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELTEMPORAL_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GModelPar.hpp"
 #include "GTime.hpp"
 #include "GRan.hpp"
@@ -48,11 +47,7 @@
  * that is given by the spectral component. Normally, this model will have
  * a mean value of 1.
  ***************************************************************************/
-class GModelTemporal {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GModelTemporal& model);
-    friend GLog&         operator<<(GLog& log,        const GModelTemporal& model);
+class GModelTemporal : public GBase {
 
 public:
     // Constructors and destructors

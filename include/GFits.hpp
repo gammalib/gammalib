@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.hpp  - FITS file access class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFits.hpp
  * @brief FITS file access class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITS_HPP
@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
@@ -47,11 +46,7 @@
  * which are implemented by the GFitsHDU class. Each HDU is composed of a
  * header (GFitsHeader) and some data (GFitsData).
  ***************************************************************************/
-class GFits {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GFits& fits);
-    friend GLog&         operator<<(GLog& log,        const GFits& fits);
+class GFits : public GBase {
 
 public:
     // Constructors and destructors
@@ -65,6 +60,7 @@ public:
 
     // Methods
     void        clear(void);
+    GFits*      clone(void) const;
     int         size(void) const;
     void        open(const std::string& filename, bool create = false);
     void        save(bool clobber = false);

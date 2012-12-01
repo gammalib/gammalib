@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableBoolCol.hpp  - FITS table boolean column class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableBoolCol.hpp
  * @brief FITS table Boolean column class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSTABLEBOOLCOL_HPP
@@ -58,11 +58,13 @@ public:
     const bool&        operator() (const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
-    virtual std::string string(const int& row, const int& col = 0) const;
-    virtual double      real(const int& row, const int& col = 0) const;
-    virtual int         integer(const int& row, const int& col = 0) const;
-    virtual void        insert(const int& rownum, const int& nrows);
-    virtual void        remove(const int& rownum, const int& nrows);
+    virtual void               clear(void);
+    virtual GFitsTableBoolCol* clone(void) const;
+    virtual std::string        string(const int& row, const int& col = 0) const;
+    virtual double             real(const int& row, const int& col = 0) const;
+    virtual int                integer(const int& row, const int& col = 0) const;
+    virtual void               insert(const int& rownum, const int& nrows);
+    virtual void               remove(const int& rownum, const int& nrows);
     
     // Other methods
     bool* data(void) { return m_data; }
@@ -71,22 +73,21 @@ public:
 
 private:
     // Private methods
-    void               init_members(void);
-    void               copy_members(const GFitsTableBoolCol& column);
-    void               free_members(void);
-    void               save(void);
-    GFitsTableBoolCol* clone(void) const;
-    std::string        ascii_format(void) const;
-    std::string        binary_format(void) const;
-    void               alloc_data(void);
-    void               release_data(void);
-    void               alloc_nulval(const bool* value);
-    void               init_data(void);
-    void               fetch_data(void) const;
-    void               alloc_buffer(void);
-    void               free_buffer(void);
-    void*              ptr_data(void) { return m_buffer; }
-    void*              ptr_nulval(void) { return m_nulval; }
+    void        init_members(void);
+    void        copy_members(const GFitsTableBoolCol& column);
+    void        free_members(void);
+    void        save(void);
+    std::string ascii_format(void) const;
+    std::string binary_format(void) const;
+    void        alloc_data(void);
+    void        release_data(void);
+    void        alloc_nulval(const bool* value);
+    void        init_data(void);
+    void        fetch_data(void) const;
+    void        alloc_buffer(void);
+    void        free_buffer(void);
+    void*       ptr_data(void) { return m_buffer; }
+    void*       ptr_nulval(void) { return m_nulval; }
 
     // Private data area
     bool* m_data;       //!< Data area

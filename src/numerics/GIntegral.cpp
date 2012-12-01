@@ -21,7 +21,7 @@
 /**
  * @file GIntegral.cpp
  * @brief Integration class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -506,42 +506,4 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double *dy)
 
     // Return
     return y;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] integral Integral.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GIntegral& integral)
-{
-    // Write integral in output stream
-    os << integral.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] integral Integral.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GIntegral& integral)
-{
-    // Write integral into logger
-    log << integral.print();
-
-    // Return logger
-    return log;
 }

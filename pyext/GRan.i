@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GRan.i  -  Random number generator class python I/F           *
+ *                  GRan.i - Random number generator class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GRan.i
- * @brief GRan class python interface
- * @author J. Knodlseder
+ * @brief Random number generator class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -38,7 +38,7 @@
  * The GRan class implements a random number generator that is inspired from
  * the Ran structure given in Numerical Recipes, Third Edition (p. 341ff).
  ***************************************************************************/
-class GRan {
+class GRan : public GBase {
 public:
     // Constructors and destructors
     GRan(void);
@@ -54,6 +54,7 @@ public:
     unsigned long long int int64(void);
     double                 uniform(void);
     double                 exp(const double& arg);
+    double                 poisson(const double& arg);
     double                 chisq2(void);
 };
 

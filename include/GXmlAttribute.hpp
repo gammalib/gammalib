@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlAttribute.hpp - XML attribute class definition            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlAttribute.hpp
  * @brief XML attribute class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GXMLATTRIBUTE_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <cstdio>             // FILE, std::fprintf
 #include <string>
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -41,7 +42,7 @@
  * consists of a name-value pair. Note that the hyphens are stored for the
  * attribute value. Allowed hyphens are " and '.
  ***************************************************************************/
-class GXmlAttribute {
+class GXmlAttribute : public GBase {
 
 public:
     // Constructors and destructors

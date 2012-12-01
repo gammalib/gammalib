@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GOptimizer.cpp  -  Abstract base class for optimizer          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GOptimizer.cpp
  * @brief GOptimizer abstract base class implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -160,42 +160,3 @@ void GOptimizer::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] opt Optimizer.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GOptimizer& opt)
-{
-     // Write optimizer in output stream
-    os << opt.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] opt Optimizer.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GOptimizer& opt)
-{
-    // Write optimizer into logger
-    log << opt.print();
-
-    // Return logger
-    return log;
-}
-

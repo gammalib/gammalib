@@ -325,7 +325,7 @@ GException::invalid_instrument::invalid_instrument(std::string origin,
             if (i > 0) {
                 m_message += ", ";
             }
-            m_message += "\"" + registry.instrument(i) + "\"";
+            m_message += "\"" + registry.name(i) + "\"";
         }
         m_message += ".";
     }

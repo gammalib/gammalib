@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GFitsImageLongLong.i  - FITS long long image class SWIG interface    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageLongLong.i
  * @brief GFitsImageLongLong class SWIG file.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -48,13 +48,14 @@ public:
     virtual ~GFitsImageLongLong(void);
 
     // Methods
+    void                clear(void);
+    GFitsImageLongLong* clone(void) const;
     double              pixel(const int& ix) const;
     double              pixel(const int& ix, const int& iy) const;
     double              pixel(const int& ix, const int& iy, const int& iz) const;
     double              pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*               pixels(void);
     int                 type(void) const;
-    GFitsImageLongLong* clone(void) const;
 };
 
 
@@ -92,16 +93,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageLongLong type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageLongLong* cast_GFitsImageLongLong(GFitsImage* image) {
-        if (image->type() != 81)
-            throw GException::fits_invalid_type("cast_GFitsImageLongLong(GFitsImage*)",
-                                                "Expecting long long integer image.");
-        return dynamic_cast<GFitsImageLongLong*>(image);
-    }
-%};

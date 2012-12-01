@@ -21,7 +21,7 @@
 /**
  * @file GXmlNode.cpp
  * @brief Abstract XML node base class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -312,6 +312,19 @@ GXmlNode* GXmlNode::element(const std::string& name, int index) const
 }
 
 
+/***********************************************************************//**
+ * @brief Print comment in string
+ ***************************************************************************/
+std::string GXmlNode::print(void) const
+{
+    // Set result string
+    std::string result = print(0);
+
+    // Return
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -367,42 +380,3 @@ void GXmlNode::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] node XML node.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GXmlNode& node)
-{
-     // Write node in output stream
-    os << node.print(0);
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] node XML node.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GXmlNode& node)
-{
-     // Write node into logger
-    log << node.print(0);
-
-    // Return logger
-    return log;
-}
-

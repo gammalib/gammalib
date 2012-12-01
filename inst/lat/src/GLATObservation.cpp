@@ -288,21 +288,21 @@ std::string GLATObservation::instrument(void) const
  * Reads information for a LAT observation from an XML element. The expected
  * format of the XML element is
  *
- *  <observation name="..." id="..." instrument="LAT">
- *    <parameter name="FT1" file="..."/>
- *    <parameter name="FT2" file="..."/>
- *    <parameter name="LiveTimeCube" file="..."/>
- *    <parameter name="IRF" file="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="LAT">
+ *       <parameter name="FT1" file="..."/>
+ *       <parameter name="FT2" file="..."/>
+ *       <parameter name="LiveTimeCube" file="..."/>
+ *       <parameter name="IRF" file="..."/>
+ *     </observation>
  *
  * for an unbinned observation and
  *
- *  <observation name="..." id="..." instrument="LAT">
- *    <parameter name="CountsMap" file="..."/>
- *    <parameter name="ExposureMap" file="..."/>
- *    <parameter name="LiveTimeCube" file="..."/>
- *    <parameter name="IRF" value="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="LAT">
+ *       <parameter name="CountsMap" file="..."/>
+ *       <parameter name="ExposureMap" file="..."/>
+ *       <parameter name="LiveTimeCube" file="..."/>
+ *       <parameter name="IRF" value="..."/>
+ *     </observation>
  *
  * for a binned observation.
  ***************************************************************************/
@@ -411,21 +411,21 @@ void GLATObservation::read(const GXmlElement& xml)
  * Writes information for a LAT observation into an XML element. The expected
  * format of the XML element is
  *
- *  <observation name="..." id="..." instrument="LAT">
- *    <parameter name="FT1" file="..."/>
- *    <parameter name="FT2" file="..."/>
- *    <parameter name="LiveTimeCube" file="..."/>
- *    <parameter name="IRF" file="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="LAT">
+ *       <parameter name="FT1" file="..."/>
+ *       <parameter name="FT2" file="..."/>
+ *       <parameter name="LiveTimeCube" file="..."/>
+ *       <parameter name="IRF" file="..."/>
+ *     </observation>
  *
  * for an unbinned observation and
  *
- *  <observation name="..." id="..." instrument="LAT">
- *    <parameter name="CountsMap" file="..."/>
- *    <parameter name="ExposureMap" file="..."/>
- *    <parameter name="LiveTimeCube" file="..."/>
- *    <parameter name="IRF" value="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="LAT">
+ *       <parameter name="CountsMap" file="..."/>
+ *       <parameter name="ExposureMap" file="..."/>
+ *       <parameter name="LiveTimeCube" file="..."/>
+ *       <parameter name="IRF" value="..."/>
+ *     </observation>
  *
  * for a binned observation.
  *

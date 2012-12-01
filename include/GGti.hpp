@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GGti.hpp  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GGti.hpp
  * @brief Good time interval class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GGTI_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GTime.hpp"
@@ -44,11 +43,7 @@
  * This class holds a list of Good Time Intervals, i.e. time intervals that
  * are valid for science analysis. Times are stored using the GTime class.
  ***************************************************************************/
-class GGti {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GGti& gti);
-    friend GLog&         operator<< (GLog& log,        const GGti& gti);
+class GGti : public GBase {
 
 public:
     // Constructors and destructors
@@ -61,6 +56,7 @@ public:
 
     // Methods
     void        clear(void);
+    GGti*       clone(void) const;
     int         size(void) const { return m_num; }
     void        add(const GTime& tstart, const GTime& tstop);
     void        append(const GTime& tstart, const GTime& tstop);
@@ -88,7 +84,6 @@ protected:
     void  copy_members(const GGti& gti);
     void  free_members(void);
     void  set_attributes(void);
-    GGti* clone(void) const;
     void  insert_gti(int inx, const GTime& tstart, const GTime& tstop);
     void  merge_gtis(void);
 

@@ -21,7 +21,7 @@
 /**
  * @file GTime.cpp
  * @brief Time class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -212,6 +212,17 @@ void GTime::clear(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GTime* GTime::clone(void) const
+{
+    // Clone this image
+    return new GTime(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Return time in JD (TT) (unit: days)
@@ -506,42 +517,4 @@ void GTime::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] time Time.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GTime& time)
-{
-     // Write time in output stream
-    os << time.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] time Time.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GTime& time)
-{
-    // Write time into logger
-    log << time.print();
-
-    // Return logger
-    return log;
 }

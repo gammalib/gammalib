@@ -43,7 +43,7 @@
  * saved into another file (using the 'save' method). Cards are added or
  * changed using the 'update' method.
  ***************************************************************************/
-class GFitsHeader {
+class GFitsHeader : public GBase {
 public:
     // Constructors and destructors
     GFitsHeader(void);

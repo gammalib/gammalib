@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GGti.i  -  Good time interval class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GGti.i
  * @brief Good time interval class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -38,7 +38,7 @@
  * This class holds a list of Good Time Intervals, i.e. time intervals that
  * are valid for science analysis. Times are stored using the GTime class.
  ***************************************************************************/
-class GGti {
+class GGti : public GBase {
 public:
     // Constructors and destructors
     GGti(void);
@@ -47,6 +47,7 @@ public:
 
     // Methods
     void   clear(void);
+    GGti*  clone(void) const;
     int    size(void) const;
     void   add(const GTime& tstart, const GTime& tstop);
     void   append(const GTime& tstart, const GTime& tstop);
@@ -64,7 +65,7 @@ public:
 	GTime  tstop(int inx) const;
 	double telapse(void) const;
 	double ontime(void) const;
-    double mjdref(void) const { return m_mjdref; }
+    double mjdref(void) const;
     bool   isin(const GTime& time) const;
 };
 

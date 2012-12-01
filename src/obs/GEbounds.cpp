@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GEbounds.cpp  -  Energy boundary class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEbounds.cpp
  * @brief Energy boundary class implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -61,7 +61,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GEbounds::GEbounds(void)
+GEbounds::GEbounds(void) : GBase()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -173,6 +173,19 @@ void GEbounds::clear(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone GEbounds
+ *
+ * Cloning provides a copy of the GEbounds. Cloning is used to allocate
+ * derived classes into a base class pointer.
+ ***************************************************************************/
+GEbounds* GEbounds::clone(void) const
+{
+    // Clone this image
+    return new GEbounds(*this);
 }
 
 
@@ -565,7 +578,7 @@ GEnergy GEbounds::elogmean(int inx) const
  *
  * @param[in] eng Energy to be tested.
  ***************************************************************************/
-bool GEbounds::isin(const GEnergy& eng) const
+bool GEbounds::contains(const GEnergy& eng) const
 {
     // Initialise test
     bool found = false;
@@ -708,19 +721,6 @@ void GEbounds::set_attributes(void)
 
 
 /***********************************************************************//**
- * @brief Clone GEbounds
- *
- * Cloning provides a copy of the GEbounds. Cloning is used to allocate
- * derived classes into a base class pointer.
- ***************************************************************************/
-GEbounds* GEbounds::clone(void) const
-{
-    // Clone this image
-    return new GEbounds(*this);
-}
-
-
-/***********************************************************************//**
  * @brief Insert energy interval
  *
  * @param[in] inx Index at which energy interval is to be inserted.
@@ -824,42 +824,4 @@ void GEbounds::merge_engs(void)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] ebds Energy boundaries.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GEbounds& ebds)
-{
-     // Write energy boundaries in output stream
-    os << ebds.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] ebds Energy boundaries.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GEbounds& ebds)
-{
-    // Write energy boundaries into logger
-    log << ebds.print();
-
-    // Return logger
-    return log;
 }

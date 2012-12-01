@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModelPar.cpp  -  Model parameter class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelPar.cpp
  * @brief GModelPar class implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -531,42 +531,4 @@ void GModelPar::free_members(void)
 {  
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] par Model parameter.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelPar& par)
-{
-     // Write spectrum in output stream
-    os << par.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] par Model parameter.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelPar& par)
-{
-    // Write spectrum into logger
-    log << par.print();
-
-    // Return logger
-    return log;
 }

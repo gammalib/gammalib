@@ -21,7 +21,7 @@
 /**
  * @file GLATLtCube.hpp
  * @brief Fermi/LAT livetime cube class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATLTCUBE_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GLATLtCubeMap.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
@@ -47,11 +46,7 @@
  * The livetime cube holds the livetime as function and zenith and azimuth
  * angles for a given observation. The azimuth dependence is optional. 
  ***************************************************************************/
-class GLATLtCube {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GLATLtCube& cube);
-    friend GLog&         operator<< (GLog& log, const GLATLtCube& cube);
+class GLATLtCube : public GBase {
 
 public:
     // Constructors and destructors

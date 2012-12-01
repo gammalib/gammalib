@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GOptimizerPars.i  -  Parameter container class SWIG interface      *
+ *      GOptimizerPars.i  -  Optimizer parameters abstract base class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GOptimizerPars.i
- * @brief Optimizer parameter container class Python interface
- * @author J. Knodlseder
+ * @brief Optimizer parameters abstract base class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,18 +35,19 @@
  *
  * @brief Optimizer parameter container class
  ***************************************************************************/
-class GOptimizerPars {
+class GOptimizerPars : public GBase {
 public:
     // Constructors and destructors
     GOptimizerPars(void);
     GOptimizerPars(const GOptimizerPars& pars);
     virtual ~GOptimizerPars(void);
 
-    // Methods
-    int              npars(void) const;
-    int              nfree(void) const;
-    GModelPar&       par(const int& index);
-    //const GModelPar& par(const int& index) const; // now overloaded by SWIG
+    // Virtual methods
+    virtual void            clear(void);
+    virtual GOptimizerPars* clone(void) const;
+    virtual int             npars(void) const;
+    virtual int             nfree(void) const;
+    virtual GModelPar&      par(const int& index);
 };
 
 

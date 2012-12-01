@@ -30,8 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GXmlElement.hpp"
@@ -47,11 +46,7 @@
  * source model. A typical example of a spatial component is a point source
  * (implemented by the derived class GModelSpatialPtsrc).
  ***************************************************************************/
-class GModelSpatial {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GModelSpatial& model);
-    friend GLog&         operator<<(GLog& log,        const GModelSpatial& model);
+class GModelSpatial : public GBase {
 
 public:
     // Constructors and destructors

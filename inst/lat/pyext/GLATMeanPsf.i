@@ -40,7 +40,8 @@
  * averaging is done using the livetime cube which holds the lifetime as
  * function and zenith and azimuth angles for an observation.
  ***************************************************************************/
-class GLATMeanPsf {
+class GLATMeanPsf : public GBase {
+
 public:
     // Constructors and destructors
     GLATMeanPsf(void);

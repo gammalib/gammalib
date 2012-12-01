@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelData.i  -  Abstract virtual data model class python I/F      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelData.i
  * @brief Abstract data model base class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -63,14 +63,3 @@ public:
  ***************************************************************************/
 %extend GModelData {
 };
-
-
-/***********************************************************************//**
- * @brief GModelData type casts
- ***************************************************************************/
-%inline %{
-    GModelData* cast_GModelData(GModel* model) {
-        return dynamic_cast<GModelData*>(model);
-    }
-%};
-

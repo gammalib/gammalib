@@ -590,6 +590,32 @@ GSparseMatrix& GSparseMatrix::operator*=(const GSparseMatrix& matrix)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear instance
+ ***************************************************************************/
+void GSparseMatrix::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise private members
+    init_members();
+    
+    // Return
+    return; 
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GSparseMatrix* GSparseMatrix::clone(void) const
+{
+    // Clone this image
+    return new GSparseMatrix(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Transpose matrix
  *
  * The transpose operation exchanges the number of rows against the number
@@ -745,7 +771,7 @@ void GSparseMatrix::add_col(const GVector& vector, const int& col)
  *
  * @param[in] values Compressed array.
  * @param[in] rows Row indices of array.
- * @param[in] num Number of elements in array.
+ * @param[in] number Number of elements in array.
  * @param[in] col Column index (starting from 0).
  *
  * @exception GException::out_of_range
@@ -1011,7 +1037,7 @@ void GSparseMatrix::insert_col(const GVector& vector, const int& col)
  *
  * @param[in] values Compressed array.
  * @param[in] rows Row indices of array.
- * @param[in] num Number of elements in array.
+ * @param[in] number Number of elements in array.
  * @param[in] col Column index (starting from 0).
  *
  * @exception GException::out_of_range
@@ -1587,24 +1613,6 @@ void GSparseMatrix::cholesky_invert(bool compress)
 
 
 /***********************************************************************//**
- * @brief Set all matrix elements to 0
- ***************************************************************************/
-void GSparseMatrix::clear(void)
-{
-    // Free memory
-    free_elements(0, m_elements);
-
-    // Initialise column start indices to 0
-    for (int col = 0; col <= m_cols; ++col) {
-         m_colstart[col] = 0;
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Returns fill of matrix
  *
  * The fill of a matrix is defined as the number non-zero elements devided
@@ -1852,7 +1860,7 @@ int GSparseMatrix::stack_push_column(const GVector& vector, const int& col)
  *
  * @param[in] values Compressed array.
  * @param[in] rows Row indices of array.
- * @param[in] num Number of elements in array.
+ * @param[in] number Number of elements in array.
  * @param[in] col Column index (starting from 0).
  *
  * @exception GException::out_of_range
@@ -3154,41 +3162,9 @@ void GSparseMatrix::mix_column(const double* src1_data, const int* src1_row,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] matrix Matrix.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GSparseMatrix& matrix)
-{
-     // Write matrix in output stream
-    os << matrix.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] matrix Matrix.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GSparseMatrix& matrix)
-{
-    // Write matrix into logger
-    log << matrix.print();
-
-    // Return logger
-    return log;
-}
-
-
-/***********************************************************************//**
  * @brief Return matrix with absolute values of all elements
  *
- * @param[in] m Matrix for which absolute values are to be returned.
+ * @param[in] matrix Matrix for which absolute values are to be returned.
  ***************************************************************************/
 GSparseMatrix abs(const GSparseMatrix& matrix)
 {

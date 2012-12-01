@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GSkyPixel.i  -  2D sky pixel index class SWIG definition        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GSkyPixel.i
- * @brief GSkyPixel class SWIG file.
- * @author J. Knodlseder
+ * @brief Sky pixel class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,8 @@
  *
  * @brief GSkyPixel class interface defintion
  ***************************************************************************/
-class GSkyPixel {
+class GSkyPixel : public GBase {
+
 public:
     // Constructors and destructors
     GSkyPixel(void);
@@ -44,10 +45,12 @@ public:
     virtual ~GSkyPixel(void);
 
     // Methods
-    void   x(const double& x);
-    void   y(const double& y);
-    double x(void) const;
-    double y(void) const;
+    void       clear(void);
+    GSkyPixel* clone(void) const;
+    void       x(const double& x);
+    void       y(const double& y);
+    double     x(void) const;
+    double     y(void) const;
 };
 
 
@@ -57,5 +60,8 @@ public:
 %extend GSkyPixel {
     char *__str__() {
         return tochar(self->print());
+    }
+    GSkyPixel copy() {
+        return (*self);
     }
 };

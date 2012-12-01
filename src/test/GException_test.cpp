@@ -35,6 +35,7 @@
 /***********************************************************************//**
  * @brief Test nested try error
  *
+ * @param[in] origin Method throwing the exception.
  * @param[in] message Optional error message.
  ***************************************************************************/
 GException::test_nested_try_error::test_nested_try_error(std::string origin, std::string message)
@@ -50,6 +51,7 @@ GException::test_nested_try_error::test_nested_try_error(std::string origin, std
 /***********************************************************************//**
  * @brief Failure test
  *
+ * @param[in] origin Method throwing the exception.
  * @param[in] message Optional error message.
  *
  * Use in unit tests to notice a fail in a try block
@@ -67,6 +69,7 @@ GException::test_failure::test_failure(std::string origin, std::string message)
 /***********************************************************************//**
  * @brief Failure test
  *
+ * @param[in] origin Method throwing the exception.
  * @param[in] message Optional error message.
  *
  * Use in unit tests to notice a fail in a try block

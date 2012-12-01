@@ -1,7 +1,7 @@
 /***************************************************************************
- *                        GEnergy.hpp - Energy class                       *
+ *                        GEnergy.cpp - Energy class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEnergy.cpp
  * @brief Energy value class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -147,6 +147,17 @@ void GEnergy::clear(void)
     return; 
 }
 
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GEnergy* GEnergy::clone(void) const
+{
+    // Clone this image
+    return new GEnergy(*this);
+}
+
+
 /***********************************************************************//**
  * @brief Return energy in erg
  ***************************************************************************/
@@ -217,7 +228,7 @@ double GEnergy::TeV(void) const
 double GEnergy::log10keV(void) const
 {
     // Return log10 energy
-    return (log10keV()+3.0); 
+    return (log10MeV()+3.0); 
 }
 
 
@@ -486,42 +497,4 @@ void GEnergy::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] eng Energy.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GEnergy& eng)
-{
-     // Write energy in output stream
-    os << eng.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] eng Energy.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GEnergy& eng)
-{
-    // Write energy into logger
-    log << eng.print();
-
-    // Return logger
-    return log;
 }

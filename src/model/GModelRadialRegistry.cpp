@@ -1,7 +1,7 @@
 /***************************************************************************
- *    GModelRadialRegistry.cpp  -  Radial spatial model registry class     *
+ *          GModelRadialRegistry.cpp - Radial model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelRadialRegistry.cpp
- * @brief Radial spatial model class interface implementation
- * @author J. Knodlseder
+ * @brief Radial model registry class interface implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -64,8 +64,9 @@ GModelRadialRegistry::GModelRadialRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelRadialRegistry(void): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -77,7 +78,7 @@ GModelRadialRegistry::GModelRadialRegistry(void)
 /***********************************************************************//**
  * @brief Model constructor
  *
- * @param[in] model Radial spatial model pointer.
+ * @param[in] model Radial model pointer.
  ***************************************************************************/
 GModelRadialRegistry::GModelRadialRegistry(const GModelRadial* model)
 {
@@ -118,8 +119,9 @@ GModelRadialRegistry::GModelRadialRegistry(const GModelRadial* model)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelRadialRegistry(const GModelRadial*): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -169,6 +171,7 @@ GModelRadialRegistry::~GModelRadialRegistry(void)
  * @brief Assignment operator
  *
  * @param[in] registry Registry.
+ * @return Reference to registry.
  ***************************************************************************/
 GModelRadialRegistry& GModelRadialRegistry::operator= (const GModelRadialRegistry& registry)
 {
@@ -198,22 +201,23 @@ GModelRadialRegistry& GModelRadialRegistry::operator= (const GModelRadialRegistr
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate radial model of given type
+ * @brief Allocate radial model of given name
  *
- * @param[in] type Radial model type.
+ * @param[in] name Radial model name.
+ * @return Pointer to model (NULL if name is not registered).
  *
- * Returns a pointer to a void radial spatial model instance of the specified
- * type. If the type has not been found in the registry, a NULL pointer is
+ * Returns a pointer to a void radial model instance of the specified name.
+ * If the name has not been found in the registry, a NULL pointer is
  * returned.
  ***************************************************************************/
-GModelRadial* GModelRadialRegistry::alloc(const std::string& type) const
+GModelRadial* GModelRadialRegistry::alloc(const std::string& name) const
 {
     // Initialise radial model
     GModelRadial* model = NULL;
 
     // Search for model in registry
     for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == type) {
+        if (m_names[i] == name) {
             model = m_models[i]->clone();
             break;
         }
@@ -228,6 +232,7 @@ GModelRadial* GModelRadialRegistry::alloc(const std::string& type) const
  * @brief Returns model name
  *
  * @param[in] index Model index [0,...,size()-1].
+ * @return Model name.
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -236,8 +241,9 @@ std::string GModelRadialRegistry::name(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_NAME, index, 0, size()-1);
+    }
     #endif
 
     // Return name
@@ -247,6 +253,8 @@ std::string GModelRadialRegistry::name(const int& index) const
 
 /***********************************************************************//**
  * @brief Print registry information
+ *
+ * @return Registry content.
  ***************************************************************************/
 std::string GModelRadialRegistry::print(void) const
 {
@@ -302,42 +310,4 @@ void GModelRadialRegistry::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] registry Radial spatial model registry.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GModelRadialRegistry& registry)
-{
-     // Write registry in output stream
-    os << registry.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] registry Radial spatial model registry.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GModelRadialRegistry& registry)
-{
-    // Write registry into logger
-    log << registry.print();
-
-    // Return logger
-    return log;
 }

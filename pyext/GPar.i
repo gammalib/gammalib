@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GPar.i - Application parameter class SWIG file            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GPar.i
  * @brief Application parameter class SWIG file.
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,7 @@
  *
  * @brief Application parameter class Python interface defintion
  ***************************************************************************/
-class GPar {
+class GPar : public GBase {
 public:
     // Constructors and destructors
     GPar(void);
@@ -47,6 +47,7 @@ public:
     virtual ~GPar(void);
  
     // Methods
+    void        clear(void);
     GPar*       clone(void) const;
     void        type(const std::string& type);
     void        mode(const std::string& mode);

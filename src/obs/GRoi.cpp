@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GRoi.cpp  -  Region of interest abstract base class          *
+ *             GRoi.cpp  -  Region of interest interface class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GRoi.cpp
- * @brief Region of interest abstract base class implementation
- * @author J. Knodlseder
+ * @brief Region of interest interface class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -164,42 +164,4 @@ void GRoi::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] roi Region of interest.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GRoi& roi)
-{
-     // Write region of interest in output stream
-    os << roi.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] roi Region of interest.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GRoi& roi)
-{
-    // Write region of interest into logger
-    log << roi.print();
-
-    // Return logger
-    return log;
 }

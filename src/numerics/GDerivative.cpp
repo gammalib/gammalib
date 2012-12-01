@@ -21,7 +21,7 @@
 /**
  * @file GDerivative.cpp
  * @brief GDerivative class implementation.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -657,42 +657,4 @@ double GDerivative::tiny::operator()(double eps) const
 
     // Return result
     return result;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] dx Derivative.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GDerivative& dx)
-{
-    // Write derivative in output stream
-    os << dx.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] dx Derivative.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GDerivative& dx)
-{
-    // Write derivative into logger
-    log << dx.print();
-
-    // Return logger
-    return log;
 }

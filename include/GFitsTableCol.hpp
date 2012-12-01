@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableCol.hpp  - FITS table column abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,17 +21,16 @@
 /**
  * @file GFitsTableCol.hpp
  * @brief FITS table column abstract base class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSTABLECOL_HPP
 #define GFITSTABLECOL_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
 #include <string>
 #include <vector>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -41,14 +40,10 @@
  *
  * This class implements a FITS table column. Vector columns are supported.
  ***************************************************************************/
-class GFitsTableCol {
+class GFitsTableCol : public GBase {
 
     // Friend classes
     friend class GFitsTable;
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsTableCol& column);
-    friend GLog&         operator<< (GLog& log, const GFitsTableCol& column);
 
 public:
     // Constructors and destructors
@@ -61,12 +56,14 @@ public:
     // Operators
     GFitsTableCol& operator= (const GFitsTableCol& column);
 
-    // Virtual Methods
-    virtual std::string string(const int& row, const int& inx = 0) const = 0;
-    virtual double      real(const int& row, const int& inx = 0) const = 0;
-    virtual int         integer(const int& row, const int& inx = 0) const = 0;
-    virtual void        insert(const int& rownum, const int& nrows) = 0;
-    virtual void        remove(const int& rownum, const int& nrows) = 0;
+    // Pure virtual Methods
+    virtual void           clear(void) = 0;
+    virtual GFitsTableCol* clone(void) const = 0;
+    virtual std::string    string(const int& row, const int& inx = 0) const = 0;
+    virtual double         real(const int& row, const int& inx = 0) const = 0;
+    virtual int            integer(const int& row, const int& inx = 0) const = 0;
+    virtual void           insert(const int& rownum, const int& nrows) = 0;
+    virtual void           remove(const int& rownum, const int& nrows) = 0;
 
     // Base class Methods
     void             name(const std::string& name);
@@ -105,24 +102,21 @@ protected:
     void*            m_fitsfile; //!< FITS file pointer associated with column
 
     // Protected pure virtual methods
-    virtual GFitsTableCol* clone(void) const = 0;
-    virtual std::string    ascii_format(void) const = 0;
-    virtual std::string    binary_format(void) const = 0;
-    virtual void           alloc_data(void) = 0;
-    virtual void           init_data(void) = 0;
-    virtual void*          ptr_data(void) = 0;
-    virtual void*          ptr_nulval(void) = 0;
+    virtual std::string ascii_format(void) const = 0;
+    virtual std::string binary_format(void) const = 0;
+    virtual void        alloc_data(void) = 0;
+    virtual void        init_data(void) = 0;
+    virtual void*       ptr_data(void) = 0;
+    virtual void*       ptr_nulval(void) = 0;
 
     // Protected virtual methods
-    virtual void           save(void);
-    virtual void           fetch_data(void) const;
-    virtual void           load_column(void);
-    virtual void           save_column(void);
-    virtual std::ostream&  dump_column(std::ostream& os) const;
-    virtual GLog&          dump_column(GLog& log) const;
-    virtual int            offset(const int& row, const int& inx) const;
+    virtual void        save(void);
+    virtual void        fetch_data(void) const;
+    virtual void        load_column(void);
+    virtual void        save_column(void);
+    virtual int         offset(const int& row, const int& inx) const;
 
-private:
+protected:
     // Private methods
     void init_members(void);
     void copy_members(const GFitsTableCol& column);

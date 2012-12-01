@@ -29,10 +29,12 @@
 #############################################################################
 # Initialisation                                                            #
 #############################################################################
-AC_INIT([gammalib], [0.6.2], [jurgen.knodlseder@irap.omp.eu], [gammalib])
+AC_INIT([gammalib], [0.7.0], [jurgen.knodlseder@irap.omp.eu], [gammalib])
 AC_CONFIG_SRCDIR([src/support/GTools.cpp])
 AC_CONFIG_MACRO_DIR([m4])
-AM_INIT_AUTOMAKE([gnu no-dependencies])
+#AM_INIT_AUTOMAKE([gnu no-dependencies])
+AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability])
+#AM_INIT_AUTOMAKE([gnu -Wno-portability])
 AM_CONFIG_HEADER([config.h])
 
 
@@ -670,8 +672,8 @@ if test "x$openmp_ok" = "xyes" ; then
   # dynamically
   if test "$OPENMP_CXXFLAGS" = "-fopenmp" -a "$ac_sys_system" = "Linux"; then
     AC_MSG_CHECKING(whether we can dynamically load libgomp)
-    SAVED_LDFLAGS=$LDFLAGS
-    LDFLAGS="$LDFLAGS -ldl"
+    SAVED_LIBS=$LIBS
+    LIBS="-ldl"
     AC_TRY_RUN(AC_LANG_PROGRAM([#include <dlfcn.h>],
                                [if (dlopen("libgomp.so.1", RTLD_NOW) == 0) return 1;]),
                [AC_MSG_RESULT(yes)],
@@ -679,7 +681,7 @@ if test "x$openmp_ok" = "xyes" ; then
                 AC_MSG_RESULT(no)
                 AC_MSG_WARN([OpenMP detected but shared libgomp.so.1 library cannot be dlopen()ed.])
                 AC_MSG_WARN([If you use a gcc 4.2.x compiler, this is a known feature. Try to use gcc >= 4.3.])])
-    LDFLAGS=$SAVED_LDFLAGS
+    LIBS=$SAVED_LIBS
   fi
 
   # Special Darwin test to see whether OpenMP compiles without adding the
@@ -850,6 +852,7 @@ else
   # Do we have Python wrappers
   has_wrappers="yes"
   AC_CHECK_FILES([pyext/gammalib/app_wrap.cpp pyext/gammalib/app.py
+                  pyext/gammalib/base_wrap.cpp pyext/gammalib/base.py
                   pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
                   pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
                   pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
@@ -1196,7 +1199,7 @@ if [test "x$add_gammalib_prefix" = "xyes"]; then
 fi
 if [test "x$add_opt_local" = "xyes"]; then
     LDFLAGS="$LDFLAGS -L/opt/local/lib"
-    TEST_ENV_DIR="$TEST_ENV_DIR:/opt/local/lib"
+    #TEST_ENV_DIR="$TEST_ENV_DIR:/opt/local/lib"
 fi
 if [test "x$add_usr_local" = "xyes"]; then
     LDFLAGS="$LDFLAGS -L/usr/local/lib"
@@ -1223,6 +1226,7 @@ DX_INIT_DOXYGEN([GammaLib], [doc/Doxyfile], [doc/doxygen])
 #############################################################################
 AC_CONFIG_FILES([Makefile
                  src/Makefile
+                 src/base/Makefile
                  src/support/Makefile
                  src/linalg/Makefile
                  src/numerics/Makefile

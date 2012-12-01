@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GObservation.i  -  Abstract observation abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservation.i
  * @brief Abstract observation base class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,8 @@
  *
  * @brief Abstract Python interface for the observation classes
  ***************************************************************************/
-class GObservation {
+class GObservation : public GBase {
+
 public:
     // Constructors and destructors
     GObservation(void);

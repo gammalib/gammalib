@@ -28,8 +28,6 @@
 #define GFITSIMAGE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GLog.hpp"
 #include "GFitsHDU.hpp"
 
 
@@ -41,10 +39,6 @@
  * This class defines the abstract interface for a FITS image.
  ***************************************************************************/
 class GFitsImage : public GFitsHDU {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GFitsImage& image);
-    friend GLog&         operator<< (GLog& log, const GFitsImage& image);
 
 public:
     // Constructors and destructors
@@ -61,13 +55,14 @@ public:
     GFitsImage& operator= (const GFitsImage& image);
 
     // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GFitsImage* clone(void) const = 0;
     virtual void*       pixels(void) = 0;
     virtual double      pixel(const int& ix) const = 0;
     virtual double      pixel(const int& ix, const int& iy) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz) const = 0;
     virtual double      pixel(const int& ix, const int& iy, const int& iz, const int& it) const = 0;
     virtual int         type(void) const = 0;
-    virtual GFitsImage* clone(void) const = 0;
 
     // Implemented pure virtual methods
     HDUType exttype(void) const { return HT_IMAGE; }
@@ -84,6 +79,9 @@ public:
 
 protected:
     // Protected methods
+    void  init_members(void);
+    void  copy_members(const GFitsImage& image);
+    void  free_members(void);
     void  data_open(void* vptr);
     void  data_save(void);
     void  data_close(void);
@@ -113,12 +111,6 @@ protected:
     long* m_naxes;       //!< Number of pixels in each dimension
     int   m_num_pixels;  //!< Number of image pixels
     int   m_anynul;      //!< Number of NULLs encountered
-
-private:
-    // Private methods
-    void init_members(void);
-    void copy_members(const GFitsImage& image);
-    void free_members(void);
 };
 
 #endif /* GFITSIMAGE_HPP */

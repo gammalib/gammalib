@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GWcs.i  -  World Coordinate System virtual base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcs.i
  * @brief World Coordinate System virtual base class Python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,8 @@
  *
  * @brief World Coordinate System virtual base class Python interface
  ***************************************************************************/
-class GWcs {
+class GWcs : public GBase {
+
 public:
     // Constructors and destructors
     GWcs(void);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GSkyDir.i  -  Sky direction class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GSkyDir.i
  * @brief Sky direction class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,7 @@
  *
  * @brief Sky direction class
  ***************************************************************************/
-class GSkyDir {
+class GSkyDir : public GBase {
 
 public:
     // Constructors and destructors
@@ -44,26 +44,27 @@ public:
     virtual ~GSkyDir(void);
 
     // Methods
-    void    clear(void);
-    void    radec(const double& ra, const double& dec);
-    void    radec_deg(const double& ra, const double& dec);
-    void    lb(const double& l, const double& b);
-    void    lb_deg(const double& l, const double& b);
-    void    celvector(const GVector& vector);
-    void    rotate_deg(const double& phi, const double& theta);
-    double  l(void) const;
-    double  l_deg(void) const;
-    double  b(void) const;
-    double  b_deg(void) const;
-    double  ra(void) const;
-    double  ra_deg(void) const;
-    double  dec(void) const;
-    double  dec_deg(void) const;
-    GVector celvector(void) const;
-    double  dist(const GSkyDir& dir) const;
-    double  dist_deg(const GSkyDir& dir) const;
-    double  posang(const GSkyDir& dir) const;
-    double  posang_deg(const GSkyDir& dir) const;
+    void     clear(void);
+    GSkyDir* clone(void) const;
+    void     radec(const double& ra, const double& dec);
+    void     radec_deg(const double& ra, const double& dec);
+    void     lb(const double& l, const double& b);
+    void     lb_deg(const double& l, const double& b);
+    void     celvector(const GVector& vector);
+    void     rotate_deg(const double& phi, const double& theta);
+    double   l(void) const;
+    double   l_deg(void) const;
+    double   b(void) const;
+    double   b_deg(void) const;
+    double   ra(void) const;
+    double   ra_deg(void) const;
+    double   dec(void) const;
+    double   dec_deg(void) const;
+    GVector  celvector(void) const;
+    double   dist(const GSkyDir& dir) const;
+    double   dist_deg(const GSkyDir& dir) const;
+    double   posang(const GSkyDir& dir) const;
+    double   posang_deg(const GSkyDir& dir) const;
 };
 
 

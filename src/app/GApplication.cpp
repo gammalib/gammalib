@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GApplication.cpp
  * @brief GammaLib application base class
- * @author Jurgen Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -213,6 +213,31 @@ const GPar& GApplication::operator[](const std::string& name) const
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear object
+ ***************************************************************************/
+void GApplication::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GApplication* GApplication::clone(void) const
+{
+    return new GApplication(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Return application name
@@ -597,42 +622,4 @@ void GApplication::log_parameters(void)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] app Application.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GApplication& app)
-{
-     // Write application in output stream
-    os << app.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] app Application.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GApplication& app)
-{
-    // Write application into logger
-    log << app.print();
-
-    // Return logger
-    return log;
 }

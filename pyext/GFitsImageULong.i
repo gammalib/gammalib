@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GFitsImageULong.i  - FITS unsigned long image class SWIG interface    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageULong.i
  * @brief GFitsImageULong class SWIG file.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -48,13 +48,14 @@ public:
     virtual ~GFitsImageULong(void);
 
     // Methods
+    void             clear(void);
+    GFitsImageULong* clone(void) const;
     double           pixel(const int& ix) const;
     double           pixel(const int& ix, const int& iy) const;
     double           pixel(const int& ix, const int& iy, const int& iz) const;
     double           pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*            pixels(void);
     int              type(void) const;
-    GFitsImageULong* clone(void) const;
 };
 
 
@@ -92,16 +93,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageULong type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageULong* cast_GFitsImageULong(GFitsImage* image) {
-        if (image->type() != 40)
-            throw GException::fits_invalid_type("cast_GFitsImageULong(GFitsImage*)",
-                                                "Expecting unsigned long integer image.");
-        return dynamic_cast<GFitsImageULong*>(image);
-    }
-%};

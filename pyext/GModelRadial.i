@@ -72,13 +72,3 @@ public:
  ***************************************************************************/
 %extend GModelRadial {
 };
-
-
-/***********************************************************************//**
- * @brief GModelRadial type casts
- ***************************************************************************/
-%inline %{
-    GModelRadial* cast_GModelRadial(GModelSpatial* model) {
-        return dynamic_cast<GModelRadial*>(model);
-    }
-%};

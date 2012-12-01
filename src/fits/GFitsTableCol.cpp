@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableCol.cpp
  * @brief Abstract FITS table column class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -568,36 +568,6 @@ void GFitsTableCol::save_column(void)
 
 
 /***********************************************************************//**
- * @brief Write column in output stream
- *
- * @param[in] os Output stream.
- ***************************************************************************/
-std::ostream& GFitsTableCol::dump_column(std::ostream& os) const
-{
-    // Write column in output stream
-    os << print();
-
-    // Return stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Write column in logger
- *
- * @param[in] log Logger.
- ***************************************************************************/
-GLog& GFitsTableCol::dump_column(GLog& log) const
-{
-    // Write column in logger
-    log << print();
-
-    // Return logger
-    return log;
-}
-
-
-/***********************************************************************//**
  * @brief Convert row and vector index into column offset
  *
  * @param[in] row Row of column.
@@ -721,36 +691,4 @@ void GFitsTableCol::connect(void* vptr)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] column FITS table column.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GFitsTableCol& column)
-{
-    // Return output stream
-    return (column.dump_column(os));
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] column FITS table column.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GFitsTableCol& column)
-{
-    // Return logger
-    return (column.dump_column(log));
 }

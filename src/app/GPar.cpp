@@ -182,6 +182,22 @@ GPar& GPar::operator= (const GPar& par)
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Clear object
+ ***************************************************************************/
+void GPar::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Clone instance
  ***************************************************************************/
 GPar* GPar::clone(void) const
@@ -1032,42 +1048,4 @@ std::string GPar::par_type_string(const std::string& type) const
 
     // Return type string
     return type_string;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Put object in output stream
- *
- * @param[in] os Output stream.
- * @param[in] par Parameter.
- ***************************************************************************/
-std::ostream& operator<<(std::ostream& os, const GPar& par)
-{
-    // Write parameter in output stream
-    os << par.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Write parameter into logger
- *
- * @param[in] log Logger.
- * @param[in] par Parameter.
- ***************************************************************************/
-GLog& operator<<(GLog& log, const GPar& par)
-{
-    // Write parameter in logger stream
-    log << par.print();
-
-    // Return logger
-    return log;
 }

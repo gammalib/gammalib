@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GFitsTableULongCol.hpp  - FITS table unsigned long column class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsTableULongCol.hpp
  * @brief FITS table unsigned long integer column class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSTABLEULONGCOL_HPP
@@ -55,11 +55,13 @@ public:
     const unsigned long& operator() (const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
-    virtual std::string string(const int& row, const int& col = 0) const;
-    virtual double      real(const int& row, const int& col = 0) const;
-    virtual int         integer(const int& row, const int& col = 0) const;
-    virtual void        insert(const int& rownum, const int& nrows);
-    virtual void        remove(const int& rownum, const int& nrows);
+    virtual void                clear(void);
+    virtual GFitsTableULongCol* clone(void) const;
+    virtual std::string         string(const int& row, const int& col = 0) const;
+    virtual double              real(const int& row, const int& col = 0) const;
+    virtual int                 integer(const int& row, const int& col = 0) const;
+    virtual void                insert(const int& rownum, const int& nrows);
+    virtual void                remove(const int& rownum, const int& nrows);
     
     // Other methods
     unsigned long* data(void) { return m_data; }
@@ -71,7 +73,6 @@ private:
     void                init_members(void);
     void                copy_members(const GFitsTableULongCol& column);
     void                free_members(void);
-    GFitsTableULongCol* clone(void) const;
     std::string         ascii_format(void) const;
     std::string         binary_format(void) const;
     void                alloc_data(void);

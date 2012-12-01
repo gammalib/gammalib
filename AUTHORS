@@ -1,3 +1,4 @@
 Juergen Knoedlseder (jurgen.knodlseder@irap.omp.eu) - overall design
 Christoph Deil (Christoph.Deil@mpi-hd.mpg.de)       - radial models
 Jean-Baptiste Cayrou (cayrou@etud.insa-toulouse.fr) - openmp support, test suite
+Mathieu De Naurois (denauroi@in2p3.fr)              - HESS support

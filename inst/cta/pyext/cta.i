@@ -27,6 +27,10 @@
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 
+/* __ Include interface classes __________________________________________ */
+%import(module="gammalib.base") "GBase.i";
+%import(module="gammalib.base") "GRegistry.i";
+
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
 
@@ -54,6 +58,15 @@
 %include "GCTAPointing.i"
 %include "GCTAResponse.i"
 %include "GCTAResponseTable.i"
+%include "GCTAAeff.i"
+%include "GCTAAeffPerfTable.i"
+%include "GCTAAeffArf.i"
+%include "GCTAAeff2D.i"
+%include "GCTAPsf.i"
+%include "GCTAPsfPerfTable.i"
+%include "GCTAPsfVector.i"
+%include "GCTAPsf2D.i"
+%include "GCTAEdisp.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
 %include "GCTAModelRadial.i"

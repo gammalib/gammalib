@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GRoi.hpp  -  Region of interest abstract base class           *
+ *             GRoi.hpp  -  Region of interest interface class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GRoi.hpp
- * @brief Region of interest abstract base class definition
- * @author J. Knodlseder
+ * @brief Region of interest interface class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GROI_HPP
@@ -29,28 +29,23 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
  * @class GRoi
  *
- * @brief Abstract interface for the region of interest classes
+ * @brief Interface for the region of interest classes
  *
  * The region of interest class holds instrument specific information about
  * the spatial region in detector or telescopes coordinates that is used
  * for an analysis. In particular, the definition of a region of interest
  * is required for an unbinned analysis.
  ***************************************************************************/
-class GRoi {
+class GRoi : public GBase {
 
-  // Friend classes
-  friend class GObservation;
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GRoi& roi);
-    friend GLog&         operator<<(GLog& log,        const GRoi& roi);
+    // Friend classes
+    friend class GObservation;
 
 public:
     // Constructors and destructors

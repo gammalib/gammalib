@@ -32,10 +32,14 @@
 #include <cmath>
 #include "GModelData.hpp"
 #include "GModelPar.hpp"
+#include "GModelSpectral.hpp"
+#include "GModelTemporal.hpp"
 #include "GEvent.hpp"
 #include "GObservation.hpp"
 #include "GXmlElement.hpp"
+#include "GIntegrand.hpp"
 #include "GCTAEventList.hpp"
+#include "GCTAModelRadial.hpp"
 
 
 /***********************************************************************//**

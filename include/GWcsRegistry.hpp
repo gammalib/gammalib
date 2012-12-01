@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GWcsRegistry.hpp  -  World Coordinate Projection registry class     *
+ *      GWcsRegistry.hpp - World Coordinate Projection registry class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsRegistry.hpp
  * @brief World Coordinate Projection registry class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GWCSREGISTRY_HPP
@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GRegistry.hpp"
 #include "GWcslib.hpp"
 
 
@@ -44,16 +43,14 @@
  * m_number, m_codes, m_names, and m_prjs which are allocated globally to keep
  * track of projections that are available throughout all linked libraries. To
  * register a projection it is sufficient to add
- *  const GWcsXXX      g_wcs_XXX_seed;
- *  const GWcsRegistry g_wcs_XXX_registry(&g_wcs_XXX_seed);
+ *
+ *     const GWcsXXX      g_wcs_XXX_seed;
+ *     const GWcsRegistry g_wcs_XXX_registry(&g_wcs_XXX_seed);
+ *
  * at the top of the .cpp file of the projection. Here, XXX is a unique
  * code that describes the projection.
  ***************************************************************************/
-class GWcsRegistry {
-
-    // I/O friends
-    friend std::ostream& operator<<(std::ostream& os, const GWcsRegistry& registry);
-    friend GLog&         operator<<(GLog& log,        const GWcsRegistry& registry);
+class GWcsRegistry : public GRegistry {
 
 public:
     // Constructors and destructors

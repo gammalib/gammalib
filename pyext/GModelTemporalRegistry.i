@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GModelTemporalRegistry.i  -  Temporal model registry class python I/F  *
+ *        GModelTemporalRegistry.i - Temporal model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelTemporalRegistry.i
- * @brief GModelTemporalRegistry class python interface.
- * @author J. Knodlseder
+ * @brief Temporal model registry class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -33,9 +33,10 @@
 /***********************************************************************//**
  * @class GModelTemporalRegistry
  *
- * @brief Interface definition for the temporal model registry class.
+ * @brief Interface definition for the temporal model registry class
  ***************************************************************************/
-class GModelTemporalRegistry {
+class GModelTemporalRegistry : public GRegistry {
+
 public:
     // Constructors and destructors
     GModelTemporalRegistry(void);
@@ -45,7 +46,7 @@ public:
 
     // Methods
     int             size(void) const { return m_number; }
-    GModelTemporal* alloc(const std::string& type) const;
+    GModelTemporal* alloc(const std::string& name) const;
     std::string     name(const int& index) const;
 };
 

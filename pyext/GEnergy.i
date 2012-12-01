@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GEnergy.i  -  Energy class python I/F                 *
+ *                         GEnergy.i - Energy class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEnergy.i
  * @brief GEnergy class python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -40,7 +40,7 @@
  * units. This makes instrument specific implementations more robust and
  * reduces the risk of unit errors.
  ***************************************************************************/
-class GEnergy {
+class GEnergy : public GBase {
 public:
     // Constructors and destructors
     GEnergy(void);
@@ -52,25 +52,26 @@ public:
     GEnergy& operator-= (const GEnergy& eng);
 
     // Methods
-    void   clear(void);
-    double erg(void) const;
-    double keV(void) const;
-    double MeV(void) const;
-    double GeV(void) const;
-    double TeV(void) const;
-    double log10keV(void) const;
-    double log10MeV(void) const;
-    double log10GeV(void) const;
-    double log10TeV(void) const;
-    void   erg(const double& eng);
-    void   keV(const double& eng);
-    void   MeV(const double& eng);
-    void   GeV(const double& eng);
-    void   TeV(const double& eng);
-    void   log10keV(const double& eng);
-    void   log10MeV(const double& eng);
-    void   log10GeV(const double& eng);
-    void   log10TeV(const double& eng);
+    void     clear(void);
+    GEnergy* clone(void) const;
+    double   erg(void) const;
+    double   keV(void) const;
+    double   MeV(void) const;
+    double   GeV(void) const;
+    double   TeV(void) const;
+    double   log10keV(void) const;
+    double   log10MeV(void) const;
+    double   log10GeV(void) const;
+    double   log10TeV(void) const;
+    void     erg(const double& eng);
+    void     keV(const double& eng);
+    void     MeV(const double& eng);
+    void     GeV(const double& eng);
+    void     TeV(const double& eng);
+    void     log10keV(const double& eng);
+    void     log10MeV(const double& eng);
+    void     log10GeV(const double& eng);
+    void     log10TeV(const double& eng);
 };
 
 

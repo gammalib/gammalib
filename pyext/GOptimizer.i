@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GOptimizer.i  -  Optimizer class Python interface            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GOptimizer.i
  * @brief Optimizer abstract base class Python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -37,7 +37,8 @@
  *
  * This class defines the abstract interface for the optimizer class.
  ***************************************************************************/
-class GOptimizer {
+class GOptimizer : public GBase {
+
 public:
     // Constructors and destructors
     GOptimizer(void);

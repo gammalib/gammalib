@@ -21,7 +21,7 @@
 /**
  * @file GResponse.hpp
  * @brief Abstract response base class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -583,42 +583,4 @@ double GResponse::npred_kern_phi::eval(double phi)
 
     // Return Npred
     return npred;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] rsp Response.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GResponse& rsp)
-{
-     // Write response in output stream
-    os << rsp.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] rsp Response.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GResponse& rsp)
-{
-    // Write response into logger
-    log << rsp.print();
-
-    // Return logger
-    return log;
 }

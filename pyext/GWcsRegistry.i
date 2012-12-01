@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GWcsRegistry.i  -  Temporal model registry class python I/F  *
+ *       GWcsRegistry.i - World Coordinate Projection registry class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsRegistry.i
  * @brief World Coordinate Projection registry class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,8 @@
  *
  * @brief Interface definition for the WCS registry class
  ***************************************************************************/
-class GWcsRegistry {
+class GWcsRegistry : public GRegistry {
+
 public:
     // Constructors and destructors
     GWcsRegistry(void);

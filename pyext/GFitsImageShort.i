@@ -1,7 +1,7 @@
 /***************************************************************************
  *   GFitsImageShort.i  - FITS short integer image class SWIG interface    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageShort.i
  * @brief GFitsImageShort class SWIG file.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -48,13 +48,14 @@ public:
     virtual ~GFitsImageShort(void);
 
     // Methods
+    void             clear(void);
+    GFitsImageShort* clone(void) const;
     double           pixel(const int& ix) const;
     double           pixel(const int& ix, const int& iy) const;
     double           pixel(const int& ix, const int& iy, const int& iz) const;
     double           pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*            pixels(void);
     int              type(void) const;
-    GFitsImageShort* clone(void) const;
 };
 
 
@@ -92,16 +93,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GFitsImageShort type casts
- ***************************************************************************/
-%inline %{
-    GFitsImageShort* cast_GFitsImageShort(GFitsImage* image) {
-        if (image->type() != 21)
-            throw GException::fits_invalid_type("cast_GFitsImageShort(GFitsImage*)",
-                                                "Expecting short integer image.");
-        return dynamic_cast<GFitsImageShort*>(image);
-    }
-%};

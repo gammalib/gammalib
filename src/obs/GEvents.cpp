@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GEvents.cpp  -  Abstract Event container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEvents.cpp
  * @brief Abstract event container class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -290,42 +290,4 @@ void GEvents::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] events Event container.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GEvents& events)
-{
-     // Write events in output stream
-    os << events.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] events Event container.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GEvents& events)
-{
-    // Write events into logger
-    log << events.print();
-
-    // Return logger
-    return log;
 }

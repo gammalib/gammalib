@@ -49,7 +49,8 @@
  *
  * @brief FITS table column abstract Python base class definition
  ***************************************************************************/
-class GFitsTableCol {
+class GFitsTableCol : public GBase {
+
 public:
     // Constructors and destructors
     GFitsTableCol(void);
@@ -58,12 +59,14 @@ public:
     GFitsTableCol(const GFitsTableCol& column);
     virtual ~GFitsTableCol(void);
 
-    // Virtual Methods
-    virtual std::string string(const int& row, const int& inx = 0) const = 0;
-    virtual double      real(const int& row, const int& inx = 0) const = 0;
-    virtual int         integer(const int& row, const int& inx = 0) const = 0;
-    virtual void        insert(const int& rownum, const int& nrows) = 0;
-    virtual void        remove(const int& rownum, const int& nrows) = 0;
+    // Pure virtual Methods
+    virtual void           clear(void) = 0;
+    virtual GFitsTableCol* clone(void) const = 0;
+    virtual std::string    string(const int& row, const int& inx = 0) const = 0;
+    virtual double         real(const int& row, const int& inx = 0) const = 0;
+    virtual int            integer(const int& row, const int& inx = 0) const = 0;
+    virtual void           insert(const int& rownum, const int& nrows) = 0;
+    virtual void           remove(const int& rownum, const int& nrows) = 0;
 
     // Base class Methods
     void             name(const std::string& name);

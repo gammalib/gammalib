@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GFits.i  - FITS file access class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,13 +21,30 @@
 /**
  * @file GFits.i
  * @brief Fits file access class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GFits.hpp"
 #include "GTools.hpp"
+#include "GFits.hpp"
+#include "GFitsHDU.hpp"
+#include "GFitsImage.hpp"
+#include "GFitsImageByte.hpp"
+#include "GFitsImageDouble.hpp"
+#include "GFitsImageFloat.hpp"
+#include "GFitsImageLong.hpp"
+#include "GFitsImageLongLong.hpp"
+#include "GFitsImageSByte.hpp"
+#include "GFitsImageShort.hpp"
+#include "GFitsImageULong.hpp"
+#include "GFitsImageUShort.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsAsciiTable.hpp"
 %}
+
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
 
 
 /***********************************************************************//**
@@ -39,7 +56,7 @@
  * via members of GFits. A FITS file is composed of Header Data Units (HDU)
  * which are implemented by the GFitsHDU class.
  ***************************************************************************/
-class GFits {
+class GFits : public GBase {
 
 public:
     // Constructors and destructors
@@ -50,6 +67,7 @@ public:
 
     // Methods
     void        clear(void);
+    GFits*      clone(void) const;
     int         size(void) const;
     void        open(const std::string& filename, bool create = false);
     void        save(bool clobber = false);

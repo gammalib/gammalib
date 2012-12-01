@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "test_GXml.hpp"
+#include "GTools.hpp"
 
 
 /***********************************************************************//**

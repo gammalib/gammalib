@@ -52,7 +52,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
-#define G_LOCK_PARFILE                         //!< Enables parfile locking
+#define G_LOCK_PARFILE                //!< Enables parfile locking
+//#define G_CHECK_LOCK_PARFILE          //!< Enables check of parfile locking
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -849,7 +850,8 @@ std::string GPars::outpath(const std::string& filename) const
  *            Unable to open parameter file (read access requested).
  *
  * Read all lines of the parameter file. Each line is terminated by a newline
- * character.
+ * character. The file will be locked to avoid simultaneous access by another
+ * process.
  ***************************************************************************/
 void GPars::read(const std::string& filename)
 {
@@ -870,10 +872,14 @@ void GPars::read(const std::string& filename)
         throw GException::par_file_open_error(G_READ, filename,
               "Could not open file for locking.");
     }
+    #if defined(G_CHECK_LOCK_PARFILE)
     if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
         throw GException::par_file_open_error(G_READ, filename,
               "Could not get a lock on the file.");
     }
+    #else
+    fcntl(fd, F_SETLKW, &lock);
+    #endif
     #endif
 
     // Open parameter file
@@ -894,10 +900,14 @@ void GPars::read(const std::string& filename)
     #if defined(G_LOCK_PARFILE)
     if (fd != -1) {
         lock.l_type = F_UNLCK;
+        #if defined(G_CHECK_LOCK_PARFILE)
         if (fcntl(fd, F_SETLK, &lock) == -1) {
             throw GException::par_file_open_error(G_READ, filename,
                   "Could not unlock the file.");
         }
+        #else
+        fcntl(fd, F_SETLK, &lock);
+        #endif
         close(fd);
     }
     #endif
@@ -915,8 +925,8 @@ void GPars::read(const std::string& filename)
  * @exception GException::par_file_open_error
  *            Unable to open parameter file (write access requested).
  *
- * Writes all lines of the parameter file. Optionally, the file will be
- * locked to avoid simultaneous access by another process.
+ * Writes all lines of the parameter file. The file will be locked to avoid
+ * simultaneous access by another process.
  ***************************************************************************/
 void GPars::write(const std::string& filename) const
 {
@@ -932,10 +942,14 @@ void GPars::write(const std::string& filename) const
     lock.l_pid    = getpid(); // Current process ID
     int  fd;
     if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
+        #if defined(G_CHECK_LOCK_PARFILE)
         if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
             throw GException::par_file_open_error(G_WRITE, filename,
                   "Could not get a lock on the file.");
         }
+        #else
+        fcntl(fd, F_SETLKW, &lock);
+        #endif
     }
     #endif
 
@@ -949,11 +963,15 @@ void GPars::write(const std::string& filename) const
     #if defined(G_LOCK_PARFILE)
     if (fd == -1) {
         if ((fd = open(filename.c_str(), O_WRONLY)) != -1) {
+            #if defined(G_CHECK_LOCK_PARFILE)
             if (fcntl(fd, F_SETLKW, &lock) == -1) { // F_SETLKW: wait until unlocked
                 fclose(fptr);
                 throw GException::par_file_open_error(G_WRITE, filename,
                       "Could not get a lock on the file.");
             }
+            #else
+            fcntl(fd, F_SETLKW, &lock);
+            #endif
         }
     }
     #endif
@@ -970,10 +988,14 @@ void GPars::write(const std::string& filename) const
     #if defined(G_LOCK_PARFILE)
     if (fd != -1) {
         lock.l_type = F_UNLCK;
+        #if defined(G_CHECK_LOCK_PARFILE)
         if (fcntl(fd, F_SETLK, &lock) == -1) {
             throw GException::par_file_open_error(G_WRITE, filename,
                   "Could not unlock the file.");
         }
+        #else
+        fcntl(fd, F_SETLK, &lock);
+        #endif
         close(fd);
     }
     #endif
@@ -1142,42 +1164,4 @@ void GPars::update(void)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] pars Parameters.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GPars& pars)
-{
-    // Write parameters in output stream
-    os << pars.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] pars Parameters.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GPars& pars)
-{
-    // Write parameters into logger
-    log << pars.print();
-
-    // Return logger
-    return log;
 }

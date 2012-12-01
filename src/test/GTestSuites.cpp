@@ -28,8 +28,10 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include<ctime>
+#include <ctime>
 #include "GTestSuites.hpp"
+#include "GTestCase.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                           "GTestSuites::operator[](int&)"
@@ -204,6 +206,16 @@ void GTestSuites::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone object
+ ***************************************************************************/
+GTestSuites* GTestSuites::clone(void) const
+{
+    // Clone object
+    return new GTestSuites(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Return number of test suite in container
  ***************************************************************************/
 int GTestSuites::size(void) const
@@ -319,10 +331,10 @@ void GTestSuites::name(const std::string& name)
  *
  * Enables or disables logging into the standard output stream.
  ***************************************************************************/
-void GTestSuites::cout(bool cout)
+void GTestSuites::cout(const bool& flag)
 {
     // Enables or disables logging into the standard output stream
-    m_log.cout(cout);
+    m_log.cout(flag);
     
     //Return
     return;
@@ -451,7 +463,7 @@ void GTestSuites::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] testsuites Test suites container.
+ * @param[in] suites Test suites container.
  *
  * This method just clone the container not the test suite.
  ***************************************************************************/

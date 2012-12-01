@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GObservations.i  -  Observations container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservations.i
  * @brief Observation container class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,7 +35,7 @@
  *
  * @brief Observation container class
  ***************************************************************************/
-class GObservations {
+class GObservations : public GBase {
 public:
     // Constructors and destructors
     GObservations(void);
@@ -44,18 +44,19 @@ public:
     virtual ~GObservations(void);
 
     // Methods
-    void     clear(void);
-    int      size(void) const;
-    void     append(GObservation &obs);
-    void     load(const std::string& filename);
-    void     save(const std::string& filename) const;
-    void     read(const GXml& xml);
-    void     write(GXml& xml) const;
-    void     models(const GModels& models);
-    void     models(const std::string& filename);
-    GModels& models(void);
-    void     optimize(GOptimizer& opt);
-    double   npred(void) const;
+    void           clear(void);
+    GObservations* clone(void) const;
+    int            size(void) const;
+    void           append(GObservation& obs);
+    void           load(const std::string& filename);
+    void           save(const std::string& filename) const;
+    void           read(const GXml& xml);
+    void           write(GXml& xml) const;
+    void           models(const GModels& models);
+    void           models(const std::string& filename);
+    GModels&       models(void) { return m_models; }
+    void           optimize(GOptimizer& opt);
+    double         npred(void) const;
 };
 
 

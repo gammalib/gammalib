@@ -1,5 +1,7 @@
 # Define package included headers (to be installed)
 pkginclude_HEADERS = GammaLib.hpp \
+                     GBase.hpp \
+                     GRegistry.hpp \
                      GException.hpp \
                      GNodeArray.hpp \
                      GTools.hpp \
@@ -118,6 +120,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GIntegrand.hpp \
                      GDerivative.hpp \
                      GFunction.hpp \
+                     GNumerics.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
                      GOptimizerPars.hpp \

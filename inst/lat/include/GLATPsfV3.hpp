@@ -59,13 +59,14 @@ public:
     GLATPsfV3& operator= (const GLATPsfV3& psf);
 
     // Methods
-    void       clear(void);
-    GLATPsfV3* clone(void) const;
-    void       read(const GFitsTable* hdu);
-    void       write(GFits& file) const;
-    double     psf(const double& offset, const double& logE,
-                   const double& ctheta);
-    int        version(void) const { return 3; }
+    void        clear(void);
+    GLATPsfV3*  clone(void) const;
+    void        read(const GFitsTable* hdu);
+    void        write(GFits& file) const;
+    double      psf(const double& offset, const double& logE,
+                    const double& ctheta);
+    int         version(void) const { return 3; }
+    std::string print(void) const;
 
 private:
     // Methods

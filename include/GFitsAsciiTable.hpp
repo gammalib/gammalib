@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GFitsAsciiTable.hpp  - FITS ASCII table class               *
+ *             GFitsAsciiTable.hpp - FITS ASCII table class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GFitsAsciiTable.hpp
- * @brief GFitsAsciiTable class definition.
- * @author J. Knodlseder
+ * @brief FITS ASCII table class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSASCIITABLE_HPP
@@ -34,9 +34,9 @@
 /***********************************************************************//**
  * @class GFitsAsciiTable
  *
- * @brief Interface for FITS binary table
+ * @brief Interface for FITS ASCII table
  *
- * The following ASCII tables are supported: 
+ * The following ASCII table columns are supported: 
  * TSTRING (A),
  * TLONG (I),
  * TDOUBLE (F,D)
@@ -54,19 +54,16 @@ public:
     // Operators
     GFitsAsciiTable& operator= (const GFitsAsciiTable& table);
 
-    // Implemented pure virtual methods
-    HDUType exttype(void) const { return HT_ASCII_TABLE; }
-
     // Methods
+    virtual void             clear(void);
+    virtual GFitsAsciiTable* clone(void) const;
+    HDUType                  exttype(void) const { return HT_ASCII_TABLE; }
 
 private:
     // Private methods
-    void             init_members(void);
-    void             copy_members(const GFitsAsciiTable& table);
-    void             free_members(void);
-    GFitsAsciiTable* clone(void) const;
-
-    // Private data area
+    void init_members(void);
+    void copy_members(const GFitsAsciiTable& table);
+    void free_members(void);
 };
 
 #endif /* GFITSASCIITABLE_HPP */

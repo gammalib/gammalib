@@ -1,7 +1,7 @@
 /***************************************************************************
- * GCTAModelRadialRegistry.i  -  CTA Radial model registry class python I/F*
+ *       GCTAModelRadialRegistry.i - CTA Radial model registry class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialRegistry.i
- * @brief GCTAModelRadialRegistry class python interface.
- * @author J. Knodlseder
+ * @brief CTA radial model registry class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -33,9 +33,10 @@
 /***********************************************************************//**
  * @class GCTAModelRadialRegistry
  *
- * @brief Interface definition for the spatial model registry class.
+ * @brief Interface definition for the CTA radial model registry class
  ***************************************************************************/
-class GCTAModelRadialRegistry {
+class GCTAModelRadialRegistry : public GRegistry {
+
 public:
     // Constructors and destructors
     GCTAModelRadialRegistry(void);
@@ -45,7 +46,7 @@ public:
 
     // Methods
     int              size(void) const;
-    GCTAModelRadial* alloc(const std::string& type) const;
+    GCTAModelRadial* alloc(const std::string& name) const;
     std::string      name(const int& index) const;
 };
 

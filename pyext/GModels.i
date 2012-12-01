@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.i  -  Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModels.i
  * @brief GModels class SWIG interface.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -29,8 +29,8 @@
 #include "GTools.hpp"
 %}
 
-/* __ Inform about base classes ___________________________________________*/
-%import(module="opt") "GOptimizerPars.i";
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
 
 
 /***********************************************************************//**
@@ -67,25 +67,30 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GModel& __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+    GModel* __getitem__(const int& index) {
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", index,
+                                           0, self->size()-1);
+        }
     }
-    GModel& __getitem__(const std::string& name) {
+    GModel* __getitem__(const std::string& name) {
         return (*self)[name];
     }
     void __setitem__(const int& index, const GModel& val) {
-        if (index>=0 && index < self->size()) {
-            (*self)[index] = val;
+        if (index >= 0 && index < self->size()) {
+            self->set(index, val);
             return;
         }
-        else
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+        else {
+            throw GException::out_of_range("__setitem__(int)", index,
+                                           0, self->size()-1);
+        }
     }
     void __setitem__(const std::string& name, const GModel& val) {
-        (*self)[name] = val;
+        self->set(name, val);
         return;
     }
     GModels copy() {

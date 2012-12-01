@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageDouble.hpp
  * @brief GFitsImageDouble class definition.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSIMAGEDOUBLE_HPP
@@ -61,6 +61,8 @@ public:
     const double&     operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
+    void              clear(void);
+    GFitsImageDouble* clone(void) const;
     double&           at(const int& ix);
     double&           at(const int& ix, const int& iy);
     double&           at(const int& ix, const int& iy, const int& iz);
@@ -75,7 +77,6 @@ public:
     double            pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*             pixels(void);
     int               type(void) const;
-    GFitsImageDouble* clone(void) const;
 
 private:
     // Private methods

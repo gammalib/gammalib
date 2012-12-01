@@ -21,7 +21,7 @@
 /**
  * @file GSkymap.cpp
  * @brief Sky map class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -1021,7 +1021,7 @@ bool GSkymap::isinmap(const GSkyDir& dir) const
 /***********************************************************************//**
  * @brief Verifies if sky pixel falls in map
  *
- * @param[in] dir Sky direction.
+ * @param[in] pixel Sky pixel.
  *
  * This method checks if the specified sky pixel is within the skymap.
  ***************************************************************************/
@@ -1613,42 +1613,4 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
 
     // Return HDU
     return hdu;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] map Sky map.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GSkymap& map)
-{
-     // Write map in output stream
-    os << map.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] map Sky map.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GSkymap& map)
-{
-    // Write map into logger
-    log << map.print();
-
-    // Return logger
-    return log;
 }

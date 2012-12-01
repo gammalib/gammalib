@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GFitsHDU.i  - FITS HDU handling class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsHDU.i
  * @brief FITS HDU class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -40,7 +40,7 @@
  * the GFitsHeader class. The data are is either an image or a table and
  * is implemented by the abstract GFitsData base class.
  ***************************************************************************/
-class GFitsHDU {
+class GFitsHDU : public GBase {
 
 public:
     // Constructors and destructors
@@ -56,8 +56,9 @@ public:
     };
 
     // Pure virtual methods
-    virtual HDUType   exttype(void) const = 0;
+    virtual void      clear(void) = 0;
     virtual GFitsHDU* clone(void) const = 0;
+    virtual HDUType   exttype(void) const = 0;
 
     // Implemented methods
     int              size(void) const;

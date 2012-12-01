@@ -985,7 +985,7 @@ void TestGSparseMatrix::matrix_cholesky(void)
         vector = chol_test.cholesky_solver(vector);
         test_try_failure("Expected GException::matrix_not_factorised exception.");
     }
-    catch (GException::matrix_not_factorised) {
+    catch (GException::matrix_not_factorised &e) {
         test_try_success();
     }
     catch (std::exception &e) {

@@ -52,6 +52,7 @@ INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
 # We use this here to make sure that all these targets are build by swig before we
 # start compiling the Python modules.
 BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
+                gammalib/base_wrap.cpp gammalib/base.py \
                 gammalib/fits_wrap.cpp gammalib/fits.py \
                 gammalib/linalg_wrap.cpp gammalib/linalg.py \
                 gammalib/model_wrap.cpp gammalib/model.py \
@@ -64,12 +65,19 @@ BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
                 gammalib/test_wrap.cpp gammalib/test.py \
                 $(INST_SWIG_TARGETS)
 
+# Dependencies. Obtain the list of dependencies by executing ls.
+DEPFILES = $(shell ls gammalib/*.Pi 2> /dev/null)
+include $(DEPFILES)
+
 # Set files to be removed in clean. We remove only the SWIG interface files if SWIG
 # is available to rebuild them. 
 if HAVE_SWIG
   CLEAN_FILES = $(BUILT_SOURCES)
 endif
-CLEANFILES = $(CLEAN_FILES)
+CLEANFILES = $(CLEAN_FILES) $(DEPFILES)
+
+# Set SWIG compile command
+SWIGCOMPILE = $(SWIG) -c++ -python -Wall
 
 # Things we want to do when 'make' is invoked.
 all-local: build
@@ -100,24 +108,31 @@ swig: $(BUILT_SOURCES)
 
 # General rule for core modules
 %_wrap.cpp %.py: %.i
-	$(SWIG) -c++ -python -Wall -o $@ -outdir gammalib $<
+	if $(SWIGCOMPILE) -MMD -MF "$*.Tpi" -o $@ -outdir gammalib $<; \
+	then mv -f "$*.Tpi" "$*.Pi"; else rm -f "$*.Tpi"; exit 1; fi
 
 # Rule for MWL module
 if WITH_INST_MWL
-gammalib/mwl_wrap.cpp gammalib/mwl.py: $(top_srcdir)/inst/mwl/pyext/mwl.i
-	$(SWIG) -c++ -python -Wall -o gammalib/mwl_wrap.cpp -outdir gammalib $<
+gammalib/mwl.py: gammalib/mwl_wrap.cpp
+gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/mwl.Tpi" "gammalib/mwl.Pi"; else rm -f "gammalib/mwl.Tpi"; exit 1; fi
 endif
 
 # Rule for CTA module
 if WITH_INST_CTA
-gammalib/cta_wrap.cpp gammalib/cta.py: $(top_srcdir)/inst/cta/pyext/cta.i
-	$(SWIG) -c++ -python -Wall -o gammalib/cta_wrap.cpp -outdir gammalib $<
+gammalib/cta.py: gammalib/cta_wrap.cpp
+gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/cta.Tpi" "gammalib/cta.Pi"; else rm -f "gammalib/cta.Tpi"; exit 1; fi
 endif
 
 # Rule for LAT module
 if WITH_INST_LAT
-gammalib/lat_wrap.cpp gammalib/lat.py: $(top_srcdir)/inst/lat/pyext/lat.i
-	$(SWIG) -c++ -python -Wall -o gammalib/lat_wrap.cpp -outdir gammalib $<
+gammalib/lat.py: gammalib/lat_wrap.cpp
+gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/lat.Tpi" "gammalib/lat.Pi"; else rm -f "gammalib/lat.Tpi"; exit 1; fi
 endif
 
 # Rule for COM module

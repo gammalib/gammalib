@@ -21,7 +21,7 @@
 /**
  * @file GFitsImageUShort.hpp
  * @brief GFitsImageUShort class definition.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSIMAGEUSHORT_HPP
@@ -61,6 +61,8 @@ public:
     const unsigned short& operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
+    void                  clear(void);
+    GFitsImageUShort*     clone(void) const;
     unsigned short&       at(const int& ix);
     unsigned short&       at(const int& ix, const int& iy);
     unsigned short&       at(const int& ix, const int& iy, const int& iz);
@@ -75,7 +77,6 @@ public:
     double                pixel(const int& ix, const int& iy, const int& iz, const int& it) const;
     void*                 pixels(void);
     int                   type(void) const;
-    GFitsImageUShort*     clone(void) const;
 
 private:
     // Private methods

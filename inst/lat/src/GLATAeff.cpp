@@ -539,8 +539,8 @@ void GLATAeff::copy_members(const GLATAeff& aeff)
     m_back       = aeff.m_back;
 
     // Clone functors
-    m_eff_func1 = aeff.m_eff_func1->clone();
-    m_eff_func2 = aeff.m_eff_func2->clone();
+    m_eff_func1 = (aeff.m_eff_func1 != NULL) ? aeff.m_eff_func1->clone() : NULL;
+    m_eff_func2 = (aeff.m_eff_func2 != NULL) ? aeff.m_eff_func2->clone() : NULL;
 
     // Return
     return;
@@ -749,42 +749,4 @@ void GLATAeff::write_efficiency(GFits& file) const
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] aeff Effective area.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GLATAeff& aeff)
-{
-     // Write effective area in output stream
-    os << aeff.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] aeff Effective area.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GLATAeff& aeff)
-{
-    // Write effective area into logger
-    log << aeff.print();
-
-    // Return logger
-    return log;
 }

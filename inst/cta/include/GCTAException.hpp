@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GCTAException.hpp  - CTA exception handler               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAException.hpp
  * @brief CTA exception handler interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAEXCEPTION_HPP
@@ -63,6 +63,12 @@ public:
     public:
         file_open_error(std::string origin, std::string filename,
                         std::string message = "");
+    };
+
+    // Event bin exceptions
+    class no_member : public GCTAExceptionHandler {
+    public:
+        no_member(const std::string& origin, const std::string& message);
     };
 
     // Observation exceptions

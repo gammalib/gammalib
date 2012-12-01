@@ -83,13 +83,3 @@ public:
         return self->GModelRadial::eval_gradients(srcDir);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GModelRadialDisk type casts
- ***************************************************************************/
-%inline %{
-    GModelRadialDisk* cast_GModelRadialDisk(GModelSpatial* model) {
-        return dynamic_cast<GModelRadialDisk*>(model);
-    }
-%};

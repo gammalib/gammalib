@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATEventBin.cpp  -  LAT event bin class                 *
+ *                 GLATEventBin.cpp - LAT event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATEventBin.cpp
- * @brief GLATEventBin class implementation.
- * @author J. Knodlseder
+ * @brief Fermi-LAT event bin class implementation
+ * @author Juergen Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,9 +31,18 @@
 #include <string>
 #include <cmath>
 #include "GLATEventBin.hpp"
+#include "GLATException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_DIR                                           "GLATEventBin::dir()"
+#define G_ENERGY                                     "GLATEventBin::energy()"
+#define G_TIME                                         "GLATEventBin::time()"
+#define G_COUNTS_GET                                 "GLATEventBin::counts()"
+#define G_COUNTS_SET                          "GLATEventBin::counts(double&)"
+#define G_OMEGA                                       "GLATEventBin::omega()"
+#define G_EWIDTH                                     "GLATEventBin::ewidth()"
+#define G_ONTIME                                     "GLATEventBin::ontime()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -101,7 +110,8 @@ GLATEventBin::~GLATEventBin(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] bin Event bin which should be assigned.
+ * @param[in] bin LAT event bin.
+ * @return Lat event bin.
  ***************************************************************************/
 GLATEventBin& GLATEventBin::operator= (const GLATEventBin& bin)
 {
@@ -157,7 +167,9 @@ void GLATEventBin::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Deep copy of LAT event bin.
+ ***************************************************************************/
 GLATEventBin* GLATEventBin::clone(void) const
 {
     return new GLATEventBin(*this);
@@ -166,6 +178,8 @@ GLATEventBin* GLATEventBin::clone(void) const
 
 /***********************************************************************//**
  * @brief Return size of event bin
+ *
+ * @return Size of event bin in units of sr MeV s.
  *
  * The size of the event bin (units sr MeV s) is given by
  * \f[size = \Omega \times \Delta E \times \Delta T\f]
@@ -185,7 +199,127 @@ double GLATEventBin::size(void) const
 
 
 /***********************************************************************//**
+ * @brief Return instrument direction of event bin
+ *
+ * @return Instrument direction of event bin.
+ *
+ * @exception GLATException::no_member
+ *            Invalid instrument direction pointer.
+ *
+ * Returns reference to the instrument direction of the event bin.
+ ***************************************************************************/
+const GLATInstDir& GLATEventBin::dir(void) const
+{
+    // Throw an exception if instrument direction pointer is not valid
+    if (m_dir == NULL) {
+        throw GLATException::no_member(G_DIR,
+                                       "Invalid instrument direction pointer.");
+    }
+
+    // Return instrument direction
+    return *m_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy of event bin
+ *
+ * @return Energy of event bin.
+ *
+ * @exception GLATException::no_member
+ *            Invalid energy pointer.
+ *
+ * Returns reference to the energy of the event bin.
+ ***************************************************************************/
+const GEnergy& GLATEventBin::energy(void) const
+{
+    // Throw an exception if energy pointer is not valid
+    if (m_energy == NULL) {
+        throw GLATException::no_member(G_ENERGY,
+                                       "Invalid energy pointer.");
+    }
+
+    // Return energy
+    return *m_energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time of event bin
+ *
+ * @return Time of event bin.
+ *
+ * @exception GLATException::no_member
+ *            Invalid time pointer.
+ *
+ * Returns reference to the time of the event bin.
+ ***************************************************************************/
+const GTime& GLATEventBin::time(void) const
+{
+    // Throw an exception if time pointer is not valid
+    if (m_time == NULL) {
+        throw GLATException::no_member(G_TIME,
+                                       "Invalid time pointer.");
+    }
+
+    // Return time
+    return *m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of counts in event bin
+ *
+ * @return Number of counts in event bin.
+ *
+ * @exception GLATException::no_member
+ *            Invalid counts pointer.
+ *
+ * Returns reference to the number of counts in the event bin.
+ ***************************************************************************/
+double GLATEventBin::counts(void) const
+{
+    // Throw an exception if counts pointer is not valid
+    if (m_counts == NULL) {
+        throw GLATException::no_member(G_COUNTS_GET,
+                                       "Invalid counts pointer.");
+    }
+
+    // Return counts
+    return *m_counts;
+}
+
+
+/***********************************************************************//**
+ * @brief Set number of counts in event bin
+ *
+ * @param[in] counts Number of counts.
+ *
+ * @exception GLATException::no_member
+ *            Invalid counts pointer.
+ *
+ * Set the number of counts in the event bin.
+ ***************************************************************************/
+void GLATEventBin::counts(const double& counts)
+{
+    // Throw an exception if counts pointer is not valid
+    if (m_counts == NULL) {
+        throw GLATException::no_member(G_COUNTS_SET,
+                                       "Invalid counts pointer.");
+    }
+
+    // Set number of counts in event bin
+    *m_counts = counts;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return error in number of counts
+ *
+ * @return Error in number of counts in event bin.
  *
  * Returns \f$\sqrt(counts+delta)\f$ as the uncertainty in the number of
  * counts in the bin. Adding delta avoids uncertainties of 0 which will
@@ -206,7 +340,78 @@ double GLATEventBin::error(void) const
 
 
 /***********************************************************************//**
+ * @brief Return solid angle of event bin
+ *
+ * @return Solid angle of event bin.
+ *
+ * @exception GLATException::no_member
+ *            Invalid solid angle pointer.
+ *
+ * Returns reference to the solid angle of the event bin.
+ ***************************************************************************/
+const double& GLATEventBin::omega(void) const
+{
+    // Throw an exception if solid angle pointer is not valid
+    if (m_omega == NULL) {
+        throw GLATException::no_member(G_OMEGA,
+                                       "Invalid solid angle pointer.");
+    }
+
+    // Return solid angle
+    return *m_omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy width of event bin
+ *
+ * @return Energy width of event bin.
+ *
+ * @exception GLATException::no_member
+ *            Invalid energy width pointer.
+ *
+ * Returns reference to the energy width of the event bin.
+ ***************************************************************************/
+const GEnergy& GLATEventBin::ewidth(void) const
+{
+    // Throw an exception if energy width pointer is not valid
+    if (m_ewidth == NULL) {
+        throw GLATException::no_member(G_EWIDTH,
+                                       "Invalid energy width pointer.");
+    }
+
+    // Return energy width
+    return *m_ewidth;
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime of event bin
+ *
+ * @return Ontime of event bin.
+ *
+ * @exception GLATException::no_member
+ *            Invalid ontime pointer.
+ *
+ * Returns reference to the ontime of the event bin.
+ ***************************************************************************/
+const double& GLATEventBin::ontime(void) const
+{
+    // Throw an exception if ontime pointer is not valid
+    if (m_ontime == NULL) {
+        throw GLATException::no_member(G_ONTIME,
+                                       "Invalid ontime pointer.");
+    }
+
+    // Return ontime
+    return *m_ontime;
+}
+
+
+/***********************************************************************//**
  * @brief Print event information
+ *
+ * @return String containing number of counts in event bin.
  ***************************************************************************/
 std::string GLATEventBin::print(void) const
 {
@@ -283,10 +488,3 @@ void GLATEventBin::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
