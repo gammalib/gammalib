@@ -66,6 +66,7 @@
 %include "GCTAPsfPerfTable.i"
 %include "GCTAPsfVector.i"
 %include "GCTAPsf2D.i"
+%include "GCTAEdisp.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
 %include "GCTAModelRadial.i"

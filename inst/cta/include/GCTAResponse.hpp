@@ -57,6 +57,7 @@
 #include "GCTAResponseTable.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAPsf.hpp"
+#include "GCTAEdisp.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -189,6 +190,7 @@ private:
     double              m_eps;          //!< Integration precision
     GCTAAeff*           m_aeff;         //!< Effective area
     GCTAPsf*            m_psf;          //!< Point spread function
+    GCTAEdisp*          m_edisp;        //!< Energy dispersion
 };
 
 #endif /* GCTARESPONSE_HPP */

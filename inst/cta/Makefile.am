@@ -26,6 +26,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAPsfPerfTable.cpp \
           src/GCTAPsfVector.cpp \
           src/GCTAPsf2D.cpp \
+          src/GCTAEdisp.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
@@ -57,6 +58,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAPsfPerfTable.hpp \
                      include/GCTAPsfVector.hpp \
                      include/GCTAPsf2D.hpp \
+                     include/GCTAEdisp.hpp \
                      include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
                      include/GCTAModelRadialGauss.hpp \

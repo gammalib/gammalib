@@ -28,12 +28,9 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <unistd.h>           // access() function
-//#include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include <cmath>
 #include <vector>
 #include <string>
-//#include "GModelSpatialPtsrc.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GIntegral.hpp"
@@ -1684,9 +1681,10 @@ void GCTAResponse::init_members(void)
     m_caldb.clear();
     m_rspname.clear();
     m_rmffile.clear();
-    m_eps  = 1.0e-5; // Precision for Romberg integration
-    m_aeff = NULL;
-    m_psf  = NULL;
+    m_eps   = 1.0e-5; // Precision for Romberg integration
+    m_aeff  = NULL;
+    m_psf   = NULL;
+    m_edisp = NULL;
     
     // Return
     return;
@@ -1707,8 +1705,9 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     m_eps     = rsp.m_eps;
 
     // Clone members
-    m_aeff = (rsp.m_aeff != NULL) ? rsp.m_aeff->clone() : NULL;
-    m_psf  = (rsp.m_psf  != NULL) ? rsp.m_psf->clone()  : NULL;
+    m_aeff  = (rsp.m_aeff  != NULL) ? rsp.m_aeff->clone()  : NULL;
+    m_psf   = (rsp.m_psf   != NULL) ? rsp.m_psf->clone()   : NULL;
+    m_edisp = (rsp.m_edisp != NULL) ? rsp.m_edisp->clone() : NULL;
 
     // Return
     return;
@@ -1721,12 +1720,14 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
 void GCTAResponse::free_members(void)
 {
     // Free memory
-    if (m_aeff != NULL) delete m_aeff;
-    if (m_psf  != NULL) delete m_psf;
+    if (m_aeff  != NULL) delete m_aeff;
+    if (m_psf   != NULL) delete m_psf;
+    if (m_edisp != NULL) delete m_edisp;
 
     // Initialise pointers
-    m_aeff = NULL;
-    m_psf  = NULL;
+    m_aeff  = NULL;
+    m_psf   = NULL;
+    m_edisp = NULL;
 
     // Return
     return;
