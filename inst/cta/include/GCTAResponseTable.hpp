@@ -63,8 +63,9 @@ public:
     // Methods
     void               clear(void);
     GCTAResponseTable* clone(void) const;
-    int                size(void) const { return m_npars; }
-    int                elements(void) const { return m_nelements; }
+    int                size(void) const;
+    int                elements(void) const;
+    int                axes(void) const;
     int                axis(const int& index) const;
     double             axis_lo(const int& index, const int& bin) const;
     double             axis_hi(const int& index, const int& bin) const;
@@ -88,6 +89,7 @@ private:
     void update(const double& arg1, const double& arg2) const;
 
     // Table information
+    int                               m_naxes;       //!< Number of axes
     int                               m_npars;       //!< Number of parameters
     int                               m_nelements;   //!< Number of elements per parameter
     std::vector<std::string>          m_colname_lo;  //!< Column names for lower boundaries

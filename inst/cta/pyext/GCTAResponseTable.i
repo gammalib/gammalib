@@ -61,6 +61,7 @@ public:
     GCTAResponseTable* clone(void) const;
     int                size(void) const;
     int                elements(void) const;
+    int                axes(void) const;
     int                axis(const int& index) const;
     double             axis_lo(const int& index, const int& bin) const;
     double             axis_hi(const int& index, const int& bin) const;
