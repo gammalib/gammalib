@@ -175,17 +175,29 @@ double GCTAPsf2D::operator()(const double& delta,
                              const double& azimuth,
                              const bool&   etrue) const
 {
+    // Initialise PSF value
+    double psf = 0.0;
+
     // Update the parameter cache
     update(logE, theta);
 
-    // Compute distance squared
-    double delta2 = delta * delta;
+    // Continue only if normalization is positive
+    if (m_norm > 0.0) {
 
-    // Compute Psf value
-    double psf = std::exp(m_width1 * delta2);
-    psf += std::exp(m_width2 * delta2) * m_norm2;
-    psf += std::exp(m_width3 * delta2) * m_norm3;
-    psf *= m_norm;
+        // Compute distance squared
+        double delta2 = delta * delta;
+
+        // Compute Psf value
+        psf = std::exp(m_width1 * delta2);
+        if (m_norm2 > 0.0) {
+            psf += std::exp(m_width2 * delta2) * m_norm2;
+        }
+        if (m_norm3 > 0.0) {
+            psf += std::exp(m_width3 * delta2) * m_norm3;
+        }
+        psf *= m_norm;
+
+    } // endif: normalization was positive
     
     // Return PSF
     return psf;
@@ -473,13 +485,34 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
         double sigma1 = m_sigma1 * m_sigma1;
         double sigma2 = m_sigma2 * m_sigma2;
         double sigma3 = m_sigma3 * m_sigma3;
-        m_width1 = -0.5 / sigma1;
-        m_width2 = -0.5 / sigma2;
-        m_width3 = -0.5 / sigma3;
 
-        // Set normalizations for Gaussian 2 and 3
-        m_norm2  = pars[2];
-        m_norm3  = pars[4];
+        // Compute Gaussian 1
+        if (sigma1 > 0.0) {
+            m_width1 = -0.5 / sigma1;
+        }
+        else {
+            m_width1 = 0.0;
+        }
+
+        // Compute Gaussian 2
+        if (sigma2 > 0.0) {
+            m_width2 = -0.5 / sigma2;
+            m_norm2  = pars[2];
+        }
+        else {
+            m_width2 = 0.0;
+            m_norm2  = 0.0;
+        }
+
+        // Compute Gaussian 3
+        if (sigma3 > 0.0) {
+            m_width3 = -0.5 / sigma3;
+            m_norm3  = pars[4];
+        }
+        else {
+            m_width3 = 0.0;
+            m_norm3  = 0.0;
+        }
 
         // Compute global normalization parameter
         double integral = twopi * (sigma1 + sigma2*m_norm2 + sigma3*m_norm3);
