@@ -308,7 +308,7 @@ std::string GCTAPsf2D::filename(void) const
  * @param[in] azimuth Azimuth angle in Earth system (rad). Not used.
  * @param[in] etrue Use true energy (true/false). Not used.
  *
- * @todo Implement the method for a 3 Gaussian PSF
+ * Draws a random offset for a three component Gaussian PSF.
  ***************************************************************************/
 double GCTAPsf2D::mc(GRan&         ran,
                      const double& logE,
@@ -321,10 +321,22 @@ double GCTAPsf2D::mc(GRan&         ran,
     // Update the parameter cache
     update(logE, theta);
 
-    //TODO: For the moment use only sigma1. We should implement this
-    //correctly: first select in which Gaussian we are, then draw random
-    //number using the selected Gaussian.
-    double delta = m_sigma1 * ran.chisq2();
+    // Select in which Gaussian we are
+    double sigma = m_sigma1;
+    double sum1  = m_sigma1;
+    double sum2  = m_sigma2 * m_norm2;
+    double sum3  = m_sigma3 * m_norm3;
+    double sum   = sum1 + sum2 + sum3;
+    double u     = ran.uniform() * sum;
+    if (u >= sum2) {
+        sigma = m_sigma3;
+    }
+    else if (u >= sum1) {
+        sigma = m_sigma2;
+    }
+
+    // Now draw from the selected Gaussian
+    double delta = sigma * ran.chisq2();
     
     // Return PSF offset
     return delta;
