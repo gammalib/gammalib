@@ -176,66 +176,61 @@ for module in inst_modules:
 	ext_modules.append(ext_module)
 	py_modules.append(pkg_name+'.'+module)
 
+# Build list of class names
+classes = []
+casts   = []
+for module in all_modules:
+
+	# Set file names
+	filename = pkg_name+"/"+module+".py"
+	infile  = open(filename, 'r')
+
+	# Loop over all lines of input file
+	for line in infile:
+
+		# Search class names
+		if line.find("class G") != -1:
+			pos  = line.find("(")
+			name = line[6:pos]
+			classes.append(name)
+
+		# Search casts
+		elif line.find("def cast_") != -1:
+			pos     = line.find("(")
+			name    = line[4:pos]
+			casts.append(name)
+
+	# Close file
+	infile.close()
+
+# Sort
+classes.sort()
+casts.sort()
+
+# Build names string
+names   = ""
+n_names = 0
+for name in classes:
+	if n_names > 0:
+		names += ", "
+	names   += "'"+name+"'"
+	n_names += 1
+for name in casts:
+	if n_names > 0:
+		names += ", "
+	names   += "'"+name+"'"
+	n_names += 1
+
 # Create gammalib/__init__.py file
 file = open(pkg_name+'/__init__.py', 'w')
 file.write('# This file is created automatically by setup.py\n')
 file.write('# Please do not modify, unless you exactly know what you do.\n')
+file.write('__all__ = [')
+file.write(names)
+file.write(']\n')
 for module in all_modules:
 	file.write('from gammalib.'+module+' import *\n')
 file.close()
-
-# Post-process swig files. This post-processing is needed to transform
-# "import XXX" statements into "from XXX import *" statements. Furthermore,
-# the module information is stripped from all base classes, e.g.
-# "gammalib.obs.GRoi" becomes "GRoi".
-if is_build:
-	for module in all_modules:
-
-		# Set file names
-		filename = pkg_name+"/"+module+".py"
-		origname = pkg_name+"/"+module+".py.orig"
-
-		# Rename original file (for safety)
-		os.rename(filename,origname)
-
-		# Open files
-		infile  = open(origname, 'r')
-		outfile = open(filename, 'w')
-
-		# Initialize reformulation statistics
-		n_import = 0
-		n_class  = 0
-
-		# Loop over all lines of input file
-		for line in infile:
-
-			# Reformulate import statements
-			if line.find("import gammalib.") != -1:
-				pos      = line.find("gammalib.")
-				name     = line[pos:].rstrip('\n').strip(' ')
-				line     = "from "+name+" import *\n"
-				n_import = n_import + 1
-
-			# Reformulate base class declarations
-			elif re.search("gammalib.+.G+", line):
-				start   = line.find("gammalib.")
-				pos     = line[start:].find("G")+start
-				pre     = line[0:start]
-				post    = line[pos:]
-				line    = pre+post
-				n_class = n_class + 1
-
-			# Write line
-			outfile.write(line)
-
-		# Close files
-		infile.close()
-		outfile.close()
-
-		# Dump reformulation statistics for actual module
-		if n_import > 0 or n_class > 0:
-			sys.stdout.write(module+".py reformulation: "+str(n_import)+ \
-				" imports, "+str(n_class)+" base class declarations.\n")
 
 # Set data files to install.
 data_files=[('@prefix@/share/gammalib/swig', install_files)]
