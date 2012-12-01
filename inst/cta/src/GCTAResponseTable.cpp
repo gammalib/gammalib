@@ -321,6 +321,7 @@ double GCTAResponseTable::operator()(const int& index, const double& arg) const
 /***********************************************************************//**
  * @brief Bilinear interpolation operator for 2D tables
  *
+ * @param[in] index Table index [0,...,size()-1].
  * @param[in] arg1 Value for first axis.
  * @param[in] arg2 Value for second axis.
  * @return Bilinearly interpolated response parameter vector.
@@ -401,9 +402,51 @@ GCTAResponseTable* GCTAResponseTable::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return number of parameters in response table
+ *
+ * @return Number of parameters in response table.
+ *
+ * Returns the number of parameters in response table.
+ ***************************************************************************/
+int GCTAResponseTable::size(void) const
+{
+    // Return number of parameters
+    return m_npars;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of elements per parameter
+ *
+ * @return Number of elements per parameter.
+ *
+ * Returns the number of elements per parameter.
+ ***************************************************************************/
+int GCTAResponseTable::elements(void) const
+{
+    // Return number of elements
+    return m_nelements;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of axes in response table
+ *
+ * @return Number of axes in response table.
+ *
+ * Returns the number of axes in response table.
+ ***************************************************************************/
+int GCTAResponseTable::axes(void) const
+{
+    // Return number of axes
+    return m_naxes;
+}
+
+
+/***********************************************************************//**
  * @brief Return axis length
  *
- * @param[in] index Axis index [0,...,size()-1]
+ * @param[in] index Axis index [0,...,axes()-1].
  * @return Number of bins along the specified axis.
  *
  * @exception GException::out_of_range
@@ -415,8 +458,8 @@ int GCTAResponseTable::axis(const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AXIS, index, size()-1);
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS, index, axes()-1);
     }
     #endif
 
@@ -428,7 +471,7 @@ int GCTAResponseTable::axis(const int& index) const
 /***********************************************************************//**
  * @brief Return lower bin boundary for bin in axis
  *
- * @param[in] index Axis index (starting from 0).
+ * @param[in] index Axis index [0,...,axes()-1].
  * @param[in] bin Bin index (starting from 0).
  * @return Lower bin boundary.
  *
@@ -441,10 +484,10 @@ double GCTAResponseTable::axis_lo(const int& index, const int& bin) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size() ||
+    if (index < 0 || index >= axes() ||
         bin   < 0 || bin   >= m_axis_lo[index].size()) {
         throw GException::out_of_range(G_AXIS_LO, index, bin,
-                                       size()-1, m_axis_lo[index].size()-1);
+                                       axes()-1, m_axis_lo[index].size()-1);
     }
     #endif
 
@@ -456,7 +499,7 @@ double GCTAResponseTable::axis_lo(const int& index, const int& bin) const
 /***********************************************************************//**
  * @brief Return upper bin boundary for bin in axis
  *
- * @param[in] index Axis index (starting from 0).
+ * @param[in] index Axis index [0,...,axes()-1].
  * @param[in] bin Bin index (starting from 0).
  * @return Uppser bin boundary.
  *
@@ -469,10 +512,10 @@ double GCTAResponseTable::axis_hi(const int& index, const int& bin) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size() ||
+    if (index < 0 || index >= axes() ||
         bin   < 0 || bin   >= m_axis_hi[index].size()) {
         throw GException::out_of_range(G_AXIS_HI, index, bin,
-                                       size()-1, m_axis_hi[index].size()-1);
+                                       axes()-1, m_axis_hi[index].size()-1);
     }
     #endif
 
@@ -484,7 +527,7 @@ double GCTAResponseTable::axis_hi(const int& index, const int& bin) const
 /***********************************************************************//**
  * @brief Set nodes for a linear axis
  *
- * @param[in] index Axis index (starting from 0).
+ * @param[in] index Axis index [0,...,axes()-1].
  *
  * @exception GException::out_of_range
  *            Axis index out of range.
@@ -501,8 +544,8 @@ void GCTAResponseTable::axis_linear(const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AXIS_LINEAR, index, size()-1);
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_LINEAR, index, axes()-1);
     }
     #endif
 
@@ -528,7 +571,7 @@ void GCTAResponseTable::axis_linear(const int& index)
 /***********************************************************************//**
  * @brief Set nodes for a logarithmic (base 10) axis
  *
- * @param[in] index Axis index (starting from 0).
+ * @param[in] index Axis index [0,...,axes()-1].
  *
  * @exception GException::out_of_range
  *            Axis index out of range.
@@ -547,8 +590,8 @@ void GCTAResponseTable::axis_log10(const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AXIS_LINEAR, index, size()-1);
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_LINEAR, index, axes()-1);
     }
     #endif
 
@@ -575,7 +618,7 @@ void GCTAResponseTable::axis_log10(const int& index)
 /***********************************************************************//**
  * @brief Set nodes for a radians axis
  *
- * @param[in] index Axis index (starting from 0).
+ * @param[in] index Axis index [0,...,axes()-1].
  *
  * @exception GException::out_of_range
  *            Axis index out of range.
@@ -592,8 +635,8 @@ void GCTAResponseTable::axis_radians(const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AXIS_RADIANS, index, size()-1);
+    if (index < 0 || index >= axes()) {
+        throw GException::out_of_range(G_AXIS_RADIANS, index, axes()-1);
     }
     #endif
 
@@ -619,7 +662,7 @@ void GCTAResponseTable::axis_radians(const int& index)
 /***********************************************************************//**
  * @brief Set nodes for a radians axis
  *
- * @param[in] index Axis index [0,...,size()-1].
+ * @param[in] index Parameter index [0,...,size()-1].
  * @param[in] scale Scaling factor.
  *
  * @exception GException::out_of_range
@@ -746,10 +789,10 @@ std::string GCTAResponseTable::print(void) const
 
     // Append header
     result.append("=== GCTAResponseTable ===");
-    result.append("\n"+parformat("Dimension")+str(size()));
+    result.append("\n"+parformat("Dimension")+str(axes()));
     
     // Append axes information
-    for (int i = 0; i < size(); ++i) {
+    for (int i = 0; i < axes(); ++i) {
         result.append("\n"+parformat("Axis "+str(i)));
         result.append(str(axis(i)));
         result.append(" ["+m_colname_lo[i]);
@@ -758,7 +801,7 @@ std::string GCTAResponseTable::print(void) const
     }
 
     // Append parameter information
-    for (int i = 0; i < m_colname_par.size(); ++i) {
+    for (int i = 0; i < size(); ++i) {
         result.append("\n"+parformat("Parameter "+str(i)));
         result.append(m_colname_par[i]);
     }
@@ -782,6 +825,7 @@ std::string GCTAResponseTable::print(void) const
 void GCTAResponseTable::init_members(void)
 {
     // Initialise members
+    m_naxes     = 0;
     m_npars     = 0;
     m_nelements = 0;
     m_colname_lo.clear();
@@ -821,6 +865,7 @@ void GCTAResponseTable::init_members(void)
 void GCTAResponseTable::copy_members(const GCTAResponseTable& table)
 {
     // Copy number of bins
+    m_naxes       = table.m_naxes;
     m_npars       = table.m_npars;
     m_nelements   = table.m_nelements;
     m_colname_lo  = table.m_colname_lo;
@@ -879,6 +924,13 @@ void GCTAResponseTable::free_members(void)
  * bin boundaries are assumed to follow immediately the lower bin boundaires
  * and are designated by the "_HI" termination.
  *
+ * This method sets the following members:
+ *    m_colname_lo - Column names of lower boundaries
+ *    m_colname_hi - Column names of upper boundaries
+ *    m_colname_par - Column names of parameters
+ *    m_naxes - Number of axes
+ *    m_npars - Number of parameters
+ *
  * In case that the HDU pointer is not valid (NULL), this method clears the
  * column names and does nothing else.
  *
@@ -887,6 +939,8 @@ void GCTAResponseTable::free_members(void)
 void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
 {
     // Clear column name arrays
+    m_naxes = 0;
+    m_npars = 0;
     m_colname_lo.clear();
     m_colname_hi.clear();
     m_colname_par.clear();
@@ -989,6 +1043,9 @@ void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
 
     } // endif: HDU was valid
 
+    // Store number of axes
+    m_naxes = m_colname_lo.size();
+
     // Store number of parameters
     m_npars = m_colname_par.size();
 
@@ -1016,6 +1073,11 @@ void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
  * logarithmic scale. The axis_linear() can be used to switch back to a
  * linear scale.
  *
+ * This method sets the following members:
+ *    m_axis_lo - Axes lower boundaries
+ *    m_axis_hi - Axes upper boundaries
+ *    m_axis_nodes - Axes mean values
+ *
  * In case that the HDU pointer is not valid (NULL), this method clears the
  * axes boundaries and does nothing else.
  ***************************************************************************/
@@ -1030,7 +1092,7 @@ void GCTAResponseTable::read_axes(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Loop over all dimensions
-        for (int i = 0; i < size(); ++i) {
+        for (int i = 0; i < axes(); ++i) {
 
             // Get pointers to table columns
             const GFitsTableCol* col_lo = &(*hdu)[m_colname_lo[i]];
@@ -1089,6 +1151,10 @@ void GCTAResponseTable::read_axes(const GFitsTable* hdu)
  * the data members m_npars (number of parameters) and m_nelements (number
  * of elements per parameter).
  *
+ * This method sets the following members:
+ *    m_pars - Parameter values
+ *    m_nelements - Number of elements per parameter
+ *
  * In case that the HDU pointer is not valid (NULL), this method clears the
  * axes boundaries and does nothing else.
  ***************************************************************************/
@@ -1102,12 +1168,12 @@ void GCTAResponseTable::read_pars(const GFitsTable* hdu)
 
         // Compute expected cube size
         m_nelements = axis(0);
-        for (int i = 1; i < size(); ++i) {
+        for (int i = 1; i < axes(); ++i) {
             m_nelements *= axis(i);
         }
     
         // Loop over all parameter cubes
-        for (int i = 0; i < m_npars; ++i) {
+        for (int i = 0; i < size(); ++i) {
 
             // Get pointer to table column
             const GFitsTableCol* col = &(*hdu)[m_colname_par[i]];
