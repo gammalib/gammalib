@@ -14,7 +14,8 @@ sources = src/GCOMException.cpp \
           src/GCOMInstDir.cpp \
           src/GCOMPointing.cpp \
           src/GCOMResponse.cpp \
-          src/GCOMObservation.cpp
+          src/GCOMObservation.cpp \
+          src/GCOMModelDRBFitting.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCOMException.hpp \
@@ -24,6 +25,7 @@ pkginclude_HEADERS = include/GCOMException.hpp \
                      include/GCOMPointing.hpp \
                      include/GCOMResponse.hpp \
                      include/GCOMObservation.hpp \
+                     include/GCOMModelDRBFitting.hpp \
                      include/GCOMLib.hpp
 
 # Calibration files to distribute
