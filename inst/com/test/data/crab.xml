@@ -1,0 +1,20 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="Crab" type="PointSource">
+    <spectrum type="PowerLaw">
+       <parameter name="Prefactor" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="0"/>
+       <parameter name="Index"     scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="0"/>
+       <parameter name="Scale"     scale="1e6"   value="0.3"  min="0.01"  max="1000.0" free="0"/>
+    </spectrum>
+    <spatialModel type="SkyDirFunction">
+      <parameter name="RA"  scale="1.0" value="83.6331" min="-360" max="360" free="0"/>
+      <parameter name="DEC" scale="1.0" value="22.0145" min="-90"  max="90"  free="0"/>
+    </spatialModel>
+  </source>
+  <source name="Background" type="DRBFitting" instrument="COM">
+    <node>
+      <parameter name="Phibar"        scale="1.0" value="0.0"  min="0.0" max="50.0"   free="0"/>
+      <parameter name="Normalization" scale="1.0" value="1.0"  min="0.0" max="1000.0" free="1"/>
+    </node>
+  </source>
+</source_library>
