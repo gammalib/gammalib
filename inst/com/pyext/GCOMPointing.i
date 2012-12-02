@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  com - COMPTEL support python bindings                  *
+ *                GCOMPointing.i  -  COMPTEL pointing class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -17,39 +17,46 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * Usage:                                                                  *
- * swig -c++ -python -Wall com.i                                           *
  ***************************************************************************/
-%module com
-%feature("autodoc", "1");
+/**
+ * @file GCOMPointing.hpp
+ * @brief COMPTEL pointing class interface definition
+ * @author Juergen Knoedlseder
+ */
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GCOMPointing.hpp"
+%}
 
-/* __ Include standard typemaps for vectors and strings __________________ */
-%include stl.i
 
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
-%import(module="gammalib.base") "GRegistry.i";
+/***********************************************************************//**
+ * @class GCOMPointing
+ *
+ * @brief Interface for the COMPTEL pointing class.
+ ***************************************************************************/
+class GCOMPointing : public GPointing {
+public:
+    // Constructors and destructors
+    GCOMPointing(void);
+    explicit GCOMPointing(const GSkyDir& dir);
+    GCOMPointing(const GCOMPointing& pnt);
+    virtual ~GCOMPointing(void);
 
-/* __ Make sure that exceptions are catched ______________________________ */
-%import(module="support") "GException.i";
+    // Implemented pure virtual methods
+    virtual void           clear(void);
+    virtual GCOMPointing*  clone(void) const;
+    virtual const GSkyDir& dir(void) const;
 
-/* __ Inform about base classes __________________________________________ */
-%import(module="obs") "GObservation.i";
-%import(module="obs") "GEvent.i";
-%import(module="obs") "GEventBin.i";
-%import(module="obs") "GEvents.i";
-%import(module="obs") "GEventCube.i";
-%import(module="obs") "GPointing.i";
-%import(module="obs") "GResponse.i";
-%import(module="obs") "GInstDir.i";
+    // Other methods
+    void dir(const GSkyDir& dir);
+};
 
-/* __ COMPTEL _____________________________________________________________ */
-%include "GCOMEventBin.i"
-%include "GCOMEventCube.i"
-%include "GCOMInstDir.i"
-%include "GCOMModelDRBFitting.i"
-%include "GCOMObservation.i"
-%include "GCOMPointing.i"
-%include "GCOMResponse.i"
 
+/***********************************************************************//**
+ * @brief GCOMPointing class extension
+ ***************************************************************************/
+%extend GCOMPointing {
+    GCOMPointing copy() {
+        return (*self);
+    }
+};
