@@ -485,6 +485,9 @@ void GCOMObservation::write(GXmlElement& xml) const
  * @param[in] drbname Background cube name.
  * @param[in] drgname Geometry cube name.
  * @param[in] drxname Exposure map name.
+ *
+ * Load event cube from DRE file, background model from DRB file, geometry
+ * factors from DRG file and the exposure map from the DRX file.
  ***************************************************************************/
 void GCOMObservation::load(const std::string& drename,
                            const std::string& drbname,
@@ -493,6 +496,15 @@ void GCOMObservation::load(const std::string& drename,
 {
     // Load DRE
     load_dre(drename);
+
+    // Load DRB
+    load_drb(drbname);
+
+    // Load DRG
+    load_drg(drgname);
+
+    // Load DRX
+    load_drx(drxname);
 
     // Return
     return;
@@ -563,12 +575,15 @@ void GCOMObservation::init_members(void)
     m_drbname.clear();
     m_drgname.clear();
     m_drxname.clear();
-    m_pointing   = NULL;
-    m_response   = NULL;
-    m_obs_id     = 0;
-    m_ontime     = 0.0;
-    m_livetime   = 0.0;
-    m_deadc      = 0.0;
+    m_drb.clear();
+    m_drg.clear();
+    m_drx.clear();
+    m_pointing = NULL;
+    m_response = NULL;
+    m_obs_id   = 0;
+    m_ontime   = 0.0;
+    m_livetime = 0.0;
+    m_deadc    = 0.0;
 
     // Return
     return;
@@ -592,6 +607,9 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_drbname    = obs.m_drbname;
     m_drgname    = obs.m_drgname;
     m_drxname    = obs.m_drxname;
+    m_drb        = obs.m_drb;
+    m_drg        = obs.m_drg;
+    m_drx        = obs.m_drx;
     m_obs_id     = obs.m_obs_id;
     m_ontime     = obs.m_ontime;
     m_livetime   = obs.m_livetime;
@@ -650,6 +668,103 @@ void GCOMObservation::load_dre(const std::string& drename)
 
     // Store event filename
     m_drename = drename;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load background model from DRB file
+ *
+ * @param[in] drbname DRB filename.
+ *
+ * Load the background model from the primary image of the specified FITS
+ * file.
+ *
+ * @todo Check compatibility of DRB cube with event cube
+ ***************************************************************************/
+void GCOMObservation::load_drb(const std::string& drbname)
+{
+    // Open FITS file
+    GFits file(drbname);
+
+    // Get HDU
+    GFitsImage* hdu = file.image("Primary");
+
+    // Load background model as sky map
+    m_drb.read(hdu);
+
+    // Close FITS file
+    file.close();
+
+    //TODO: Check dimensions
+
+    // Store DRB filename
+    m_drbname = drbname;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load geometry factors from DRG file
+ *
+ * @param[in] drgname DRG filename.
+ *
+ * Load the geometry factors from the primary image of the specified FITS
+ * file.
+ *
+ * @todo Check compatibility of DRB cube with event cube
+ ***************************************************************************/
+void GCOMObservation::load_drg(const std::string& drgname)
+{
+    // Open FITS file
+    GFits file(drgname);
+
+    // Get HDU
+    GFitsImage* hdu = file.image("Primary");
+
+    // Load geometry factors as sky map
+    m_drg.read(hdu);
+
+    // Close FITS file
+    file.close();
+
+    //TODO: Check dimensions
+
+    // Store DRG filename
+    m_drgname = drgname;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load exposure from DRX file
+ *
+ * @param[in] drxname DRX filename.
+ *
+ * Load the exposure map from the primary image of the specified FITS file.
+ ***************************************************************************/
+void GCOMObservation::load_drx(const std::string& drxname)
+{
+    // Open FITS file
+    GFits file(drxname);
+
+    // Get HDU
+    GFitsImage* hdu = file.image("Primary");
+
+    // Load exposure map as sky map
+    m_drx.read(hdu);
+
+    // Close FITS file
+    file.close();
+
+    // Store DRX filename
+    m_drxname = drxname;
 
     // Return
     return;
@@ -779,10 +894,3 @@ void GCOMObservation::write_attributes(GFitsHDU* hdu) const
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
