@@ -856,7 +856,6 @@ else
                   pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
                   pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
                   pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
-                  pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py
                   pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
                   pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
                   pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
