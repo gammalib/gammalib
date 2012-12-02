@@ -38,5 +38,6 @@
 #include "GCOMPointing.hpp"
 #include "GCOMResponse.hpp"
 #include "GCOMObservation.hpp"
+#include "GCOMModelDRBFitting.hpp"
 
 #endif /* GCOMLIB_HPP */
