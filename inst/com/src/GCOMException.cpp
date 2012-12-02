@@ -21,7 +21,7 @@
 /**
  * @file GCOMException.cpp
  * @brief COMPTEL exception handler interface implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -161,6 +161,52 @@ GCOMException::no_dirs::no_dirs(const std::string& origin,
                 " Cannot access event information.";
 
     // Append optional message
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Observation is not a COMPTEL observation
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCOMException::bad_observation_type::bad_observation_type(const std::string& origin,
+                                                          const std::string& message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Observation is not of type GCOMObservation.";
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Event is not a COMPTEL event
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCOMException::bad_event_type::bad_event_type(const std::string& origin,
+                                              const std::string& message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Event is not of type GCOMEventAtom or GCOMEventBin.";
     if (message.length() > 0) {
         m_message += " "+message;
     }

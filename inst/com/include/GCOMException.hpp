@@ -87,7 +87,18 @@ public:
         no_dirs(const std::string& origin,
                 const std::string& message = "");
     };
-    
+
+    // Response exceptions
+    class bad_observation_type : public GCOMExceptionHandler {
+    public:
+        bad_observation_type(const std::string& origin,
+                             const std::string& message = "");
+    };
+    class bad_event_type : public GCOMExceptionHandler {
+    public:
+        bad_event_type(const std::string& origin,
+                       const std::string& message = "");
+    };
 };
 
 #endif /* GCOMEXCEPTION_HPP */
