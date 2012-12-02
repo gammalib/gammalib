@@ -21,7 +21,7 @@
 /**
  * @file GCOMEventBin.cpp
  * @brief COMPTEL event bin class implementation.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -239,6 +239,7 @@ void GCOMEventBin::init_members(void)
 {
     // Allocate members
     m_alloc  = true;
+    m_index  = -1;   // Signals that event bin does not correspond to cube
     m_counts = new double;
     m_dir    = new GCOMInstDir;
     m_omega  = new double;
@@ -270,6 +271,7 @@ void GCOMEventBin::copy_members(const GCOMEventBin& bin)
 {
     // Copy members by cloning
     m_alloc  = true;
+    m_index  = bin.m_index;
     m_counts = new double(*bin.m_counts);
     m_dir    = new GCOMInstDir(*bin.m_dir);
     m_omega  = new double(*bin.m_omega);

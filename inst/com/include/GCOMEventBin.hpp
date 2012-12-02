@@ -21,7 +21,7 @@
 /**
  * @file GCOMEventBin.hpp
  * @brief COMPTEL event bin class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCOMEVENTBIN_HPP
@@ -73,6 +73,7 @@ public:
     virtual std::string        print(void) const;
 
     // Other methods
+    const int&     index(void) const { return m_index; }
     const double&  omega(void) const { return *m_omega; }
     const GEnergy& ewidth(void) const { return *m_ewidth; }
     const double&  ontime(void) const { return *m_ontime; }
@@ -85,6 +86,7 @@ protected:
 
     // Protected members
     bool         m_alloc;       //!< Signals proper memory allocation
+    int          m_index;       //!< Dataspace index
     double*      m_counts;      //!< Pointer to number of counts
     GCOMInstDir* m_dir;         //!< Pointer to bin direction
     double*      m_omega;       //!< Pointer to solid angle of pixel (sr)
