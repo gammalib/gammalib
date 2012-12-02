@@ -45,7 +45,6 @@ public:
     virtual ~GCTAAeffPerfTable(void);
 
     // Operators
-    GCTAAeffPerfTable& operator=(const GCTAAeffPerfTable& aeff);
     double operator()(const double& logE, 
                       const double& theta = 0.0, 
                       const double& phi = 0.0,

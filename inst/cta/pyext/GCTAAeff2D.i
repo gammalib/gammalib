@@ -45,7 +45,6 @@ public:
     virtual ~GCTAAeff2D(void);
 
     // Operators
-    GCTAAeff2D& operator=(const GCTAAeff2D& aeff);
     double operator()(const double& logE, 
                       const double& theta = 0.0, 
                       const double& phi = 0.0,

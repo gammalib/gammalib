@@ -45,7 +45,6 @@ public:
     virtual ~GCTAPsfPerfTable(void);
 
     // Operators
-    GCTAPsfPerfTable& operator=(const GCTAPsfPerfTable& psf);
     double operator()(const double& delta,
                       const double& logE, 
                       const double& theta = 0.0, 
