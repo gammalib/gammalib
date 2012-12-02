@@ -73,4 +73,23 @@ public:
     void         test_event_cube(void);
 };
 
+
+/***********************************************************************//**
+ * @class TestGCOMOptimize
+ *
+ * @brief Test suite for COMPTEL optimizer testing
+ *
+ * This class defines a unit test suite for testing of COMPTEL optimizers.
+ ***************************************************************************/
+class TestGCOMOptimize : public GTestSuite {
+public:
+    // Constructors and destructors
+    TestGCOMOptimize(void) : GTestSuite() {}
+    virtual ~TestGCOMOptimize(void) {}
+
+    // Methods
+    virtual void set(void);
+    void         test_binned_optimizer(void);
+};
+
 #endif /* TEST_COM_HPP */

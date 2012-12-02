@@ -21,7 +21,7 @@
 /**
  * @file test_COM.cpp
  * @brief Testing of COM classes
- * @author <author>
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -46,6 +46,8 @@ const std::string com_drb       = datadir+"/m34997_drg.fits";
 const std::string com_drg       = datadir+"/m34997_drg.fits";
 const std::string com_drx       = datadir+"/m32171_drx.fits";
 const std::string com_obs       = datadir+"/obs.xml";
+//const std::string com_model     = datadir+"/crab.xml";
+const std::string com_model     = datadir+"/crab_phibar.xml";
 
 
 /***********************************************************************//**
@@ -84,6 +86,20 @@ void TestGCOMObservation::set(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Set COMPTEL optimizer test methods
+ ***************************************************************************/
+void TestGCOMOptimize::set(void)
+{
+    // Set test name
+    name("COMPTEL optimizers");
+
+    // Append tests to test suite
+    append(static_cast<pfunction>(&TestGCOMOptimize::test_binned_optimizer), "Test binned optimizer");
+
+    // Return
+    return;
+}
 
 
 /***********************************************************************//**
@@ -502,6 +518,74 @@ void TestGCOMObservation::test_event_cube(void)
 }
 
 
+/***********************************************************************//**
+ * @brief Test binned optimizer
+ ***************************************************************************/
+void TestGCOMOptimize::test_binned_optimizer(void)
+{
+    // Declare observations
+    GObservations   obs;
+    GCOMObservation run;
+
+    // Load binned COMPTEL observation
+    test_try("Load binned COMPTEL observation");
+    try {
+        run.load(com_dre, com_drb, com_drg, com_drx);
+        run.response(com_iaq, com_caldb);
+        obs.append(run);
+//std::cout << obs << std::endl;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Load models from XML file
+    obs.models(com_model);
+//std::cout << obs << std::endl;
+
+    // Perform LM optimization
+    double fit_results[] = {83.6331, 0,
+                            22.0145, 0,
+                            5.616410411e-16, 1.904730785e-17,
+                            -2.481781246, -0.02580905077,
+                            300000, 0,
+                            1, 0,
+                            2.933677595, 0.06639644824,
+                            6.550723074e-05, 1.945714239e-06,
+                            -1.833781187, -0.0161464076,
+                            1000000, 0,
+                            1, 0};
+    test_try("Perform LM optimization");
+    try {
+        GOptimizerLM opt;
+        opt.max_iter(100);
+        obs.optimize(opt);
+//std::cout << obs << std::endl;
+//std::cout << opt << std::endl;
+        test_try_success();
+/*
+        for (int i = 0, j = 0; i < obs.models().size(); ++i) {
+            GModel* model = obs.models()[i];
+            for (int k = 0; k < model->size(); ++k) {
+                GModelPar& par  = (*model)[k];
+                std::string msg = "Verify optimization result for " + par.print();
+                test_value(par.real_value(), fit_results[j++], 5.0e-5, msg);
+                test_value(par.real_error(), fit_results[j++], 5.0e-5, msg);
+            }
+        }
+*/
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+
+}
+
+
 /***************************************************************************
  * @brief Main entry point for test executable
  ***************************************************************************/
@@ -520,8 +604,10 @@ int main(void)
     // Create test suites and append them to the container
     TestGCOMResponse    rsp;
     TestGCOMObservation obs;
+    TestGCOMOptimize    opt;
     testsuites.append(rsp);
     testsuites.append(obs);
+    testsuites.append(opt);
 
     // Run the testsuites
     success = testsuites.run();
