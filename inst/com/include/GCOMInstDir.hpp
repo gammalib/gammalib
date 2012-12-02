@@ -21,7 +21,7 @@
 /**
  * @file GCOMInstDir.hpp
  * @brief COMPTEL instrument direction class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCOMINSTDIR_HPP
