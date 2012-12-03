@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsCfitsio.hpp  - CFITSIO interface header              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsCfitsio.hpp
  * @brief CFITSIO interface header
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSCFITSIO_HPP
@@ -63,6 +63,8 @@
 #define __ffghdt(A, B, C) ffghdt(A, B, C)
 #define __ffghsp(A, B, C, D) ffghsp(A, B, C, D)
 #define __ffgidm(A, B, C) ffgidm(A, B, C)
+#define __ffgidt(A, B, C) ffgidt(A, B, C)
+#define __ffgiet(A, B, C) ffgiet(A, B, C)
 #define __ffgipr(A, B, C, D, E, F) ffgipr(A, B, C, D, E, F)
 #define __ffgisz(A, B, C, D) ffgisz(A, B, C, D)
 #define __ffgky(A, B, C, D, E, F) ffgky(A, B, C, D, E, F)
@@ -128,6 +130,8 @@ typedef fitsfile __fitsfile;
 #define __ffghdt(A, B, C) __dummy()
 #define __ffghsp(A, B, C, D) __dummy()
 #define __ffgidm(A, B, C) __dummy()
+#define __ffgidt(A, B, C) __dummy()
+#define __ffgiet(A, B, C) __dummy()
 #define __ffgipr(A, B, C, D, E, F) __dummy()
 #define __ffgisz(A, B, C, D) __dummy()
 #define __ffgky(A, B, C, D, E, F) __dummy()
