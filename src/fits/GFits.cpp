@@ -989,7 +989,9 @@ GFitsImage* GFits::new_image(void)
     // Get number of bits per pixel
     int status =   0;
     int bitpix = -64;
-    status     = __ffgipr(FPTR(m_fitsfile), 0, &bitpix, NULL, NULL, &status);
+    //status     = __ffgipr(FPTR(m_fitsfile), 0, &bitpix, NULL, NULL, &status);
+    //status     = __ffgidt(FPTR(m_fitsfile), &bitpix, &status);
+    status     = __ffgiet(FPTR(m_fitsfile), &bitpix, &status);
     if (status != 0) {
         throw GException::fits_error(G_NEW_IMAGE, status);
     }
