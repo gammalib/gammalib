@@ -8,7 +8,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/inst/com/src
 
 # Define sources for this directory
-sources = src/GCOMException.cpp \
+sources = src/GCOMSupport.cpp \
+          src/GCOMException.cpp \
           src/GCOMEventCube.cpp \
           src/GCOMEventBin.cpp \
           src/GCOMInstDir.cpp \
