@@ -21,7 +21,7 @@
 /**
  * @file GCOMException.hpp
  * @brief COMPTEL exception handler interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCOMEXCEPTION_HPP
@@ -86,6 +86,13 @@ public:
     public:
         no_dirs(const std::string& origin,
                 const std::string& message = "");
+    };
+
+    // Observation exceptions
+    class incompatible_dataspace : public GCOMExceptionHandler {
+    public:
+        incompatible_dataspace(const std::string& origin,
+                               const std::string& message = "");
     };
 
     // Response exceptions

@@ -171,6 +171,31 @@ GCOMException::no_dirs::no_dirs(const std::string& origin,
 
 
 /***********************************************************************//**
+ * @brief Incompatible COMPTEL dataspace
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCOMException::incompatible_dataspace::incompatible_dataspace(const std::string& origin,
+                                                              const std::string& message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Dataspace incompatibility.";
+
+    // Append optional message
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Observation is not a COMPTEL observation
  *
  * @param[in] origin Name of method that has thrown the exception.
@@ -184,6 +209,8 @@ GCOMException::bad_observation_type::bad_observation_type(const std::string& ori
 
     // Set message
     m_message = "Observation is not of type GCOMObservation.";
+
+    // Append optional message
     if (message.length() > 0) {
         m_message += " "+message;
     }
@@ -207,6 +234,8 @@ GCOMException::bad_event_type::bad_event_type(const std::string& origin,
 
     // Set message
     m_message = "Event is not of type GCOMEventAtom or GCOMEventBin.";
+
+    // Append optional message
     if (message.length() > 0) {
         m_message += " "+message;
     }
@@ -232,6 +261,8 @@ GCOMException::bad_instdir_type::bad_instdir_type(const std::string& origin,
 
     // Set message
     m_message = "Instrument direction is not of type GCOMInstDir.";
+
+    // Append optional message
     if (message.length() > 0) {
         m_message += " "+message;
     }
