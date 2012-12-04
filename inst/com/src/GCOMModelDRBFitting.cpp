@@ -495,17 +495,17 @@ GCOMEventCube* GCOMModelDRBFitting::mc(const GObservation& obs,
  * The model is composed of nodes that define the normalization value as
  * function of Phibar value. The following XML file syntax is expected:
  *
- *    <source name="Background" type="DRBFitting" instrument="COM">
- *      <node>
- *        <parameter name="Phibar"        .../>
- *        <parameter name="Normalization" .../>
- *      </node>
- *      ...
- *      <node>
- *        <parameter name="Phibar"        .../>
- *        <parameter name="Normalization" .../>
- *      </node>
- *    </source>
+ *     <source name="Background" type="DRBFitting" instrument="COM">
+ *       <node>
+ *         <parameter name="Phibar"        .../>
+ *         <parameter name="Normalization" .../>
+ *       </node>
+ *       ...
+ *       <node>
+ *         <parameter name="Phibar"        .../>
+ *         <parameter name="Normalization" .../>
+ *       </node>
+ *     </source>
  ***************************************************************************/
 void GCOMModelDRBFitting::read(const GXmlElement& xml)
 {
@@ -620,17 +620,17 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
  * The model is composed of nodes that define the normalization value as
  * function of Phibar value. The following XML file syntax is expected:
  *
- *    <source name="Background" type="DRBFitting" instrument="COM">
- *      <node>
- *        <parameter name="Phibar"        .../>
- *        <parameter name="Normalization" .../>
- *      </node>
- *      ...
- *      <node>
- *        <parameter name="Phibar"        .../>
- *        <parameter name="Normalization" .../>
- *      </node>
- *    </source>
+ *     <source name="Background" type="DRBFitting" instrument="COM">
+ *       <node>
+ *         <parameter name="Phibar"        .../>
+ *         <parameter name="Normalization" .../>
+ *       </node>
+ *       ...
+ *       <node>
+ *         <parameter name="Phibar"        .../>
+ *         <parameter name="Normalization" .../>
+ *       </node>
+ *     </source>
  ***************************************************************************/
 void GCOMModelDRBFitting::write(GXmlElement& xml) const
 {
@@ -763,8 +763,6 @@ std::string GCOMModelDRBFitting::print(void) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * @todo Document method.
  ***************************************************************************/
 void GCOMModelDRBFitting::init_members(void)
 {
@@ -787,8 +785,6 @@ void GCOMModelDRBFitting::init_members(void)
  * @brief Copy class members
  *
  * @param[in] model Model.
- *
- * @todo Document method.
  ***************************************************************************/
 void GCOMModelDRBFitting::copy_members(const GCOMModelDRBFitting& model)
 {
@@ -812,8 +808,6 @@ void GCOMModelDRBFitting::copy_members(const GCOMModelDRBFitting& model)
 
 /***********************************************************************//**
  * @brief Delete class members
- *
- * @todo Document method.
  ***************************************************************************/
 void GCOMModelDRBFitting::free_members(void)
 {
@@ -903,8 +897,6 @@ void GCOMModelDRBFitting::set_cache(void) const
  *
  * Updates the evaluation cache by computing the 
  * changed.
- *
- * @todo Check that all energies and intensities are > 0
  ***************************************************************************/
 void GCOMModelDRBFitting::update_cache(void) const
 {
