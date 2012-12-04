@@ -55,10 +55,10 @@ public:
     virtual std::string  print(void) const;
 
     // Other methods
-    void           skydir(const GSkyDir& dir) { m_dir=dir; }
-    void           phi(const double& phi) { m_phi=phi; }
-    const GSkyDir& skydir(void) const { return m_dir; }
-    const double&  phi(void) const { return m_phi; }
+    void           dir(const GSkyDir& dir) { m_dir=dir; }
+    const GSkyDir& dir(void) const { return m_dir; }
+    void           phibar(const double& phibar) { m_phibar=phibar; }
+    const double&  phibar(void) const { return m_phibar; }
 
 protected:
     // Protected methods
@@ -67,8 +67,8 @@ protected:
     void free_members(void);
 
     // Protected members
-    GSkyDir   m_dir;   //!< Observed scatter direction of event
-    double    m_phi;   //!< Observed scatter angle of event
+    GSkyDir   m_dir;     //!< Observed scatter direction of event
+    double    m_phibar;  //!< Observed scatter angle of event
 };
 
 #endif /* GCOMINSTDIR_HPP */

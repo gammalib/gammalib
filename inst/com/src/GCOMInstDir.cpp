@@ -101,6 +101,7 @@ GCOMInstDir::~GCOMInstDir(void)
  * @brief Assignment operator
  *
  * @param[in] dir Instrument direction.
+ * @return Instrument direction.
  ***************************************************************************/
 GCOMInstDir& GCOMInstDir::operator= (const GCOMInstDir& dir)
 {
@@ -152,6 +153,8 @@ void GCOMInstDir::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of instrument direction.
  ***************************************************************************/
 GCOMInstDir* GCOMInstDir::clone(void) const
 {
@@ -161,6 +164,8 @@ GCOMInstDir* GCOMInstDir::clone(void) const
 
 /***********************************************************************//**
  * @brief Print instrument direction information
+ *
+ * @return String containing instrument direction information.
  ***************************************************************************/
 std::string GCOMInstDir::print(void) const
 {
@@ -170,7 +175,7 @@ std::string GCOMInstDir::print(void) const
     // Append header
     result.append("=== GCOMInstDir ===");
     result.append("\n"+parformat("Sky direction (Chi,Psi)")+m_dir.print());
-    result.append("\n"+parformat("Scatter angle (Phi)")+str(m_phi));
+    result.append("\n"+parformat("Scatter angle (Phibar)")+str(m_phibar));
 
     // Return result
     return result;
@@ -190,7 +195,7 @@ void GCOMInstDir::init_members(void)
 {
     // Initialise members
     m_dir.clear();
-    m_phi = 0.0;
+    m_phibar = 0.0;
 
     // Return
     return;
@@ -205,8 +210,8 @@ void GCOMInstDir::init_members(void)
 void GCOMInstDir::copy_members(const GCOMInstDir& dir)
 {
     // Copy members
-    m_dir = dir.m_dir;
-    m_phi = dir.m_phi;
+    m_dir    = dir.m_dir;
+    m_phibar = dir.m_phibar;
 
     // Return
     return;
@@ -221,10 +226,3 @@ void GCOMInstDir::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

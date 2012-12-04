@@ -46,10 +46,10 @@ public:
     virtual GCOMInstDir* clone(void) const;
 
     // Other methods
-    void    skydir(const GSkyDir& dir);
-    void    phi(const double& phi);
-    GSkyDir skydir(void) const;
-    double  phi(void) const;
+    void    dir(const GSkyDir& dir);
+    GSkyDir dir(void) const;
+    void    phibar(const double& phibar);
+    double  phibar(void) const;
 };
 
 
