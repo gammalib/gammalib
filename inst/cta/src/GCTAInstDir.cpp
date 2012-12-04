@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAInstDir.cpp  -  CTA instrument direction class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAInstDir.cpp
  * @brief GCTAInstDir class implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -194,13 +194,13 @@ GCTAInstDir* GCTAInstDir::clone(void) const
 void GCTAInstDir::rotate_deg(const double& phi, const double& theta)
 {
     // Convert instrument direction into sky direction
-    GSkyDir sky = skydir();
+    GSkyDir sky = dir();
 
     // Rotate sky direction
     sky.rotate_deg(phi, theta);
 
     // Convert sky direction to instrument direction
-    skydir(sky);
+    dir(sky);
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GCTADir.cpp  -  CTA direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTADir.cpp
  * @brief CTA camera direction class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -222,7 +222,7 @@ void GCTADir::dir(const GSkyDir& dir, const GCTAPointing& pnt)
 void GCTADir::dir(const GCTAInstDir& dir, const GCTAPointing& pnt)
 {
     // Use sky direction method
-    this->dir(dir.skydir(), pnt);
+    this->dir(dir.dir(), pnt);
 
     // Return
     return;
