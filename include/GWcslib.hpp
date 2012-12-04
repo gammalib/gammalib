@@ -77,10 +77,13 @@ public:
     virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
 
     // Other methods
-    void set(const std::string& coords,
-             const double& crval1, const double& crval2,
-             const double& crpix1, const double& crpix2,
-             const double& cdelt1, const double& cdelt2);
+    void   set(const std::string& coords,
+               const double& crval1, const double& crval2,
+               const double& crpix1, const double& crpix2,
+               const double& cdelt1, const double& cdelt2);
+    double crval(const int& inx) const;
+    double crpix(const int& inx) const;
+    double cdelt(const int& inx) const;
 
 private:
     // Static constants (set in GWcslib.cpp)

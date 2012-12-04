@@ -21,7 +21,7 @@
 /**
  * @file GWcslib.cpp
  * @brief Implementation of virtual base class for wcslib based WCS
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -39,6 +39,9 @@
 #define G_OMEGA                                        "GWcslib::omega(int&)"
 #define G_PIX2DIR                                    "GWcslib::pix2dir(int&)"
 #define G_DIR2PIX                                "GWcslib::dir2pix(GSkyDir&)"
+#define G_CRVAL                                        "GWcslib::crval(int&)"
+#define G_CRPIX                                        "GWcslib::crpix(int&)"
+#define G_CDELT                                        "GWcslib::cdelt(int&)"
 #define G_WCS_SET_CTYPE                            "GWcslib::wcs_set_ctype()"
 #define G_WCS_P2S "GWcslib::wcs_s2p(int,int,double*,double*,double*,double*,"\
                                                               "double*,int*)"
@@ -656,7 +659,6 @@ void GWcslib::set(const std::string& coords,
                   const double& crval1, const double& crval2,
                   const double& crpix1, const double& crpix2,
                   const double& cdelt1, const double& cdelt2)
-
 {
     // Clear any existing information
     clear();
@@ -669,6 +671,75 @@ void GWcslib::set(const std::string& coords,
     
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return value of reference pixel
+ *
+ * @param[in] inx Coordinate index.
+ * @return Value of reference pixel.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of valid range.
+ ***************************************************************************/
+double GWcslib::crval(const int& inx) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_naxis) {
+        throw GException::out_of_range(G_CRVAL, inx, m_naxis-1);
+    }
+    #endif
+
+    // Return crval
+    return (m_crval[inx]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference pixel
+ *
+ * @param[in] inx Coordinate index.
+ * @return Reference pixel.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of valid range.
+ ***************************************************************************/
+double GWcslib::crpix(const int& inx) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_naxis) {
+        throw GException::out_of_range(G_CRPIX, inx, m_naxis-1);
+    }
+    #endif
+
+    // Return crpix
+    return (m_crpix[inx]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pixel size
+ *
+ * @param[in] inx Coordinate index.
+ * @return Pixel size.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of valid range.
+ ***************************************************************************/
+double GWcslib::cdelt(const int& inx) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (inx < 0 || inx >= m_naxis) {
+        throw GException::out_of_range(G_CDELT, inx, m_naxis-1);
+    }
+    #endif
+
+    // Return cdelt
+    return (m_cdelt[inx]);
 }
 
 
@@ -1020,9 +1091,10 @@ void GWcslib::wcs_set(void) const
 void GWcslib::wcs_set_ctype(void) const
 {
     // Check on correct type length
-    if (code().length() != 3)
+    if (code().length() != 3) {
         throw GException::wcs_invalid(G_WCS_SET_CTYPE, code(),
               "3-character type required.");
+    }
     
     // Set longitude keyword
     if (m_lng >= 0) {
