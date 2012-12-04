@@ -54,9 +54,11 @@ public:
     const GSkyDir& dir(void) const;
     const GEnergy& energy(void) const;
     const GTime&   time(void) const;
+    const int&     mcid(void) const;
     void           dir(const GSkyDir& dir);
     void           energy(const GEnergy& energy);
     void           time(const GTime& time);
+    void           mcid(const int& mcid);
 };
 
 

@@ -66,7 +66,7 @@ public:
     const GSkyDir& dir(void) const { return m_dir; }
     const GEnergy& energy(void) const { return m_energy; }
     const GTime&   time(void) const { return m_time; }
-    int            mcid(void) { return m_mc_id; }
+    const int&     mcid(void) const { return m_mc_id; }
     void           dir(const GSkyDir& dir) { m_dir=dir; }
     void           energy(const GEnergy& energy) { m_energy=energy; }
     void           time(const GTime& time) { m_time=time; }
