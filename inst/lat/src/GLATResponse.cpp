@@ -21,7 +21,7 @@
 /**
  * @file GLATResponse.cpp
  * @brief Fermi/LAT response class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -217,12 +217,8 @@ void GLATResponse::caldb(const std::string& caldb)
 /***********************************************************************//**
  * @brief Return value of point source IRF
  *
- * @param[in] obsDir Measured photon arrival direction.
- * @param[in] obsEng Measured photon energy.
- * @param[in] obsTime Measured photon arrival time.
- * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] event Observed event.
+ * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
  * @exception GLATException::bad_instdir_type
@@ -231,19 +227,19 @@ void GLATResponse::caldb(const std::string& caldb)
  * @todo The IRF value is not devided by ontime of the event, but it is
  *       already time integrated.
  ***************************************************************************/
-double GLATResponse::irf(const GInstDir&     obsDir,
-                         const GEnergy&      obsEng,
-                         const GTime&        obsTime,
-                         const GSkyDir&      srcDir,
-                         const GEnergy&      srcEng,
-                         const GTime&        srcTime,
+double GLATResponse::irf(const GEvent&       event,
+                         const GPhoton&      photon,
                          const GObservation& obs) const
 {
-    // Get LAT instrument direction
-    const GLATInstDir* dir = dynamic_cast<const GLATInstDir*>(&obsDir);
+    // Get pointer to LAT instrument direction
+    const GLATInstDir* dir = dynamic_cast<const GLATInstDir*>(&(event.dir()));
     if (dir == NULL) {
         throw GLATException::bad_instdir_type(G_IRF);
     }
+
+    // Get photon attributes
+    const GSkyDir& srcDir = photon.dir();
+    const GEnergy& srcEng = photon.energy();
 
     // Search for mean PSF
     int ipsf = -1;
@@ -489,15 +485,12 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
 /***********************************************************************//**
  * @brief Return integral of instrument response function.
  *
- * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-double GLATResponse::npred(const GSkyDir& srcDir, const GEnergy& srcEng,
-                           const GTime& srcTime,
+double GLATResponse::npred(const GPhoton&      photon,
                            const GObservation& obs) const
 {
     // Initialise

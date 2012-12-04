@@ -21,7 +21,7 @@
 /**
  * @file GLATResponse.hpp
  * @brief Fermi/LAT Response class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATRESPONSE_HPP
@@ -63,18 +63,12 @@ public:
     virtual GLATResponse* clone(void) const;
     virtual bool          hasedisp(void) const { return false; }
     virtual bool          hastdisp(void) const { return false; }
-    virtual double        irf(const GInstDir&     obsDir,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GSkyDir&      srcDir,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
+    virtual double        irf(const GEvent&       event,
+                              const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double       npred(const GSkyDir& srcDir,
-                               const GEnergy& srcEng,
-                               const GTime& srcTime,
-                               const GObservation& obs) const;
-    virtual std::string  print(void) const;
+    virtual double        npred(const GPhoton&      photon,
+                                const GObservation& obs) const;
+    virtual std::string   print(void) const;
 
     // Implemented virtual methods
     virtual double       irf(const GEvent& event, const GModelSky& model,

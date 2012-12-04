@@ -87,16 +87,10 @@ public:
     virtual GCTAResponse* clone(void) const;
     virtual bool          hasedisp(void) const { return false; }
     virtual bool          hastdisp(void) const { return false; }
-    virtual double        irf(const GInstDir&     obsDir,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GSkyDir&      srcDir,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
+    virtual double        irf(const GEvent&       event,
+                              const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        npred(const GSkyDir&      srcDir,
-                                const GEnergy&      srcEng,
-                                const GTime&        srcTime,
+    virtual double        npred(const GPhoton&      photon,
                                 const GObservation& obs) const;
     virtual std::string   print(void) const;
 

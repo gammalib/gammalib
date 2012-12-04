@@ -255,12 +255,8 @@ GCTAResponse* GCTAResponse::clone(void) const
 /***********************************************************************//**
  * @brief Return value of instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] event Observed event.
+ * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
  * @exception GCTAException::bad_observation_type
@@ -272,12 +268,8 @@ GCTAResponse* GCTAResponse::clone(void) const
  *
  * @todo Set polar angle phi of photon in camera system
  ***************************************************************************/
-double GCTAResponse::irf(const GInstDir&     obsDir,
-                         const GEnergy&      obsEng,
-                         const GTime&        obsTime,
-                         const GSkyDir&      srcDir,
-                         const GEnergy&      srcEng,
-                         const GTime&        srcTime,
+double GCTAResponse::irf(const GEvent&       event,
+                         const GPhoton&      photon,
                          const GObservation& obs) const
 {
     // Get pointer on CTA observation
@@ -293,10 +285,18 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
     }
 
     // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
     if (dir == NULL) {
         throw GCTAException::bad_instdir_type(G_IRF);
     }
+
+    // Get event attributes
+    const GSkyDir& obsDir = dir->dir();
+    const GEnergy& obsEng = event.energy();
+
+    // Get photon attributes
+    const GSkyDir& srcDir = photon.dir();
+    const GEnergy& srcEng = photon.energy();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -311,7 +311,7 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
 
     // Determine angular separation between true and measured photon
     // direction in radians
-    double delta = dir->dist(srcDir);
+    double delta = obsDir.dist(srcDir);
 
     // Get maximum angular separation for which PSF is significant
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
@@ -366,9 +366,7 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
 /***********************************************************************//**
  * @brief Return spatial integral of point spread function
  *
- * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
  * @exception GCTAException::bad_observation_type
@@ -381,9 +379,7 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
  * @todo Set polar angle phi of photon in camera system
  * @todo Write method documentation
  ***************************************************************************/
-double GCTAResponse::npred(const GSkyDir&      srcDir,
-                           const GEnergy&      srcEng,
-                           const GTime&        srcTime,
+double GCTAResponse::npred(const GPhoton&      photon,
                            const GObservation& obs) const
 {
     // Get pointer on CTA observation
@@ -403,6 +399,11 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
     if (events == NULL) {
         throw GException::no_list(G_NPRED);
     }
+
+    // Get photon attributes
+    const GSkyDir& srcDir  = photon.dir();
+    const GEnergy& srcEng  = photon.energy();
+    const GTime&   srcTime = photon.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -516,7 +517,7 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
             // Set measured photon arrival direction
             GCTAInstDir inst_dir;
-            inst_dir.skydir(sky_dir);
+            inst_dir.dir(sky_dir);
 
             // Allocate event
             event = new GCTAEventAtom;
@@ -889,11 +890,11 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 
     // Determine angular distance between measured photon direction and model
     // centre [radians]
-    double zeta = model.dir().dist(dir->skydir());
+    double zeta = model.dir().dist(dir->dir());
 
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
-    double eta = pnt->dir().dist(dir->skydir());
+    double eta = pnt->dir().dist(dir->dir());
 
     // Determine angular distance between model centre and pointing direction
     // [radians]
@@ -1047,7 +1048,7 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
 
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
-    double eta = pnt->dir().dist(dir->skydir());
+    double eta = pnt->dir().dist(dir->dir());
 
     // Get log10(E/TeV) of true and measured photon energies
     double srcLogEng = srcEng.log10TeV();
@@ -1217,7 +1218,7 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
         
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
-        double phi = model.radial()->dir().posang(events->roi().centre().skydir());
+        double phi = model.radial()->dir().posang(events->roi().centre().dir());
 
         // Setup integration kernel
         cta_npred_radial_kern_theta integrand(this,
