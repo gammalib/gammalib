@@ -69,10 +69,13 @@ public:
     void           ontime(const double& ontime);
     void           livetime(const double& livetime);
     void           deadc(const double& deadc);
-    double         obs_id(void) const;
+    void           ewidth(const double& ewidth);
+    const double&  obs_id(void) const;
+    const double&  ewidth(void) const;
     const GSkymap& drb(void) const;
     const GSkymap& drg(void) const;
     const GSkymap& drx(void) const;
+    double         drx(const GSkyDir& dir) const;
 };
 
 
