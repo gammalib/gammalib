@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.hpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLResponse.hpp
  * @brief Multi-wavelength response class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMWLRESPONSE_HPP
@@ -59,18 +59,12 @@ public:
     virtual GMWLResponse* clone(void) const;
     virtual bool          hasedisp(void) const { return false; }
     virtual bool          hastdisp(void) const { return false; }
-    virtual double        irf(const GInstDir&     obsDir,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GSkyDir&      srcDir,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
+    virtual double        irf(const GEvent&       event,
+                              const GPhoton&      photon,
                               const GObservation& obs) const { return 1.0; }
-    virtual double       npred(const GSkyDir& srcDir,
-                               const GEnergy& srcEng,
-                               const GTime& srcTime,
-                               const GObservation& obs) const { return 1.0; }
-    virtual std::string  print(void) const;
+    virtual double        npred(const GPhoton&      photon,
+                                const GObservation& obs) const { return 1.0; }
+    virtual std::string   print(void) const;
 
 protected:
     // Protected methods

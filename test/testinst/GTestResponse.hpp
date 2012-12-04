@@ -18,9 +18,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
- 
-#ifndef GTestRESPONSE_HPP
-#define GTestRESPONSE_HPP
+/**
+ * @file GTestResponse.hpp
+ * @brief Test response class interface definition
+ * @author Jean-Baptiste Cayrou
+ */
+
+#ifndef GTESTRESPONSE_HPP
+#define GTESTRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GResponse.hpp"
@@ -53,7 +58,7 @@ public:
     }
 
     // Operators
-    virtual GTestResponse& operator= (const GTestResponse& rsp)
+    virtual GTestResponse& operator=(const GTestResponse& rsp)
     {
         // Execute only if object is not identical
         if (this != &rsp) {
@@ -96,18 +101,12 @@ public:
     
     virtual bool          hasedisp(void) const { return false; }
     virtual bool          hastdisp(void) const { return false; }
-    virtual double        irf(const GInstDir&     obsDir,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GSkyDir&      srcDir,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
+    virtual double        irf(const GEvent&       event,
+                              const GPhoton&      photon,
                               const GObservation& obs) const { return 1.0; }
-    virtual double       npred(const GSkyDir& srcDir,
-                               const GEnergy& srcEng,
-                               const GTime& srcTime,
-                               const GObservation& obs) const { return 1.0; }
-    virtual std::string  print(void) const{ return "=== GTestReponse ==="; }
+    virtual double        npred(const GPhoton&      photon,
+                                const GObservation& obs) const { return 1.0; }
+    virtual std::string   print(void) const{ return "=== GTestReponse ==="; }
 
 protected:
     // Protected methods
@@ -116,4 +115,4 @@ protected:
     void free_members(void){ return; }
 };
 
-#endif /* GTestRESPONSE_HPP */
+#endif /* GTESTRESPONSE_HPP */
