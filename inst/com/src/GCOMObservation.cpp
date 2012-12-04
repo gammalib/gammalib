@@ -512,6 +512,56 @@ void GCOMObservation::load(const std::string& drename,
 
 
 /***********************************************************************//**
+ * @brief Return exposure value
+ *
+ * @param[in] dir Sky direction.
+ * @return Exposure (seconds).
+ *
+ * Returns the exposure as extracted from the DRX dataset. We use here a
+ * kluge as the WCS of the COMPTEL data from GSFC are incorrect (they
+ * pretend to be in Mercator projection, yet they are in cartesian
+ * coordinates).
+ ***************************************************************************/
+double GCOMObservation::drx(const GSkyDir& dir) const
+{
+    // Get longitude index
+    int nx = m_drx.nx();
+    int ix = int((dir.l_deg() - m_drx_min1) / m_drx_cdelt1 + 0.5);
+    if (ix < 0) {
+        ix += nx;
+    }
+    else if (ix >= nx) {
+        ix -= nx;
+    }
+    if (ix < 0) {
+        ix = 0;
+    }
+    else if (ix >= nx) {
+        ix = nx-1;
+    }
+
+    // Get latitude index
+    int ny = m_drx.ny();
+    int iy = int((dir.b_deg() - m_drx_min2) / m_drx_cdelt2 + 0.5);
+    if (iy < 0) {
+        iy = 0;
+    }
+    else if (iy >= ny) {
+        iy = ny-1;
+    }
+
+    // Get pixel index
+    int inx = ix + iy * nx;
+
+    // Get exposure value
+    double drx = (m_drx.pixels())[inx];
+
+    // Return
+    return drx;
+}
+
+
+/***********************************************************************//**
  * @brief Print COM observation information
  ***************************************************************************/
 std::string GCOMObservation::print(void) const
@@ -525,9 +575,10 @@ std::string GCOMObservation::print(void) const
     result.append("\n"+parformat("Identifier")+id());
     result.append("\n"+parformat("Instrument")+instrument());
     result.append("\n"+parformat("Statistics")+statistics());
-    result.append("\n"+parformat("Ontime")+str(ontime()));
-    result.append("\n"+parformat("Livetime")+str(livetime()));
+    result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
+    result.append("\n"+parformat("Livetime")+str(livetime())+" sec");
     result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
+    result.append("\n"+parformat("Energy band")+str(ewidth())+" MeV");
 
     // Append pointing
     if (m_pointing != NULL) {
@@ -578,12 +629,21 @@ void GCOMObservation::init_members(void)
     m_drb.clear();
     m_drg.clear();
     m_drx.clear();
-    m_pointing = NULL;
-    m_response = NULL;
-    m_obs_id   = 0;
-    m_ontime   = 0.0;
-    m_livetime = 0.0;
-    m_deadc    = 0.0;
+    m_pointing   = NULL;
+    m_response   = NULL;
+    m_obs_id     = 0;
+    m_ontime     = 0.0;
+    m_livetime   = 0.0;
+    m_deadc      = 0.0;
+    m_ewidth     = 0.0;
+    m_drx_cdelt1 = 0.0;
+    m_drx_cdelt2 = 0.0;
+    m_drx_crval1 = 0.0;
+    m_drx_crval2 = 0.0;
+    m_drx_crpix1 = 0.0;
+    m_drx_crpix2 = 0.0;
+    m_drx_min1   = 0.0;
+    m_drx_min2   = 0.0;
 
     // Return
     return;
@@ -614,6 +674,15 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_ontime     = obs.m_ontime;
     m_livetime   = obs.m_livetime;
     m_deadc      = obs.m_deadc;
+    m_ewidth     = obs.m_ewidth;
+    m_drx_cdelt1 = obs.m_drx_cdelt1;
+    m_drx_cdelt2 = obs.m_drx_cdelt2;
+    m_drx_crval1 = obs.m_drx_crval1;
+    m_drx_crval2 = obs.m_drx_crval2;
+    m_drx_crpix1 = obs.m_drx_crpix1;
+    m_drx_crpix2 = obs.m_drx_crpix2;
+    m_drx_min1   = obs.m_drx_min1;
+    m_drx_min2   = obs.m_drx_min2;
 
     // Return
     return;
@@ -716,7 +785,7 @@ void GCOMObservation::load_drb(const std::string& drbname)
  * Load the geometry factors from the primary image of the specified FITS
  * file.
  *
- * @todo Check compatibility of DRB cube with event cube
+ * @todo Check compatibility of DRG cube with event cube
  ***************************************************************************/
 void GCOMObservation::load_drg(const std::string& drgname)
 {
@@ -760,6 +829,18 @@ void GCOMObservation::load_drx(const std::string& drxname)
     // Load exposure map as sky map
     m_drx.read(hdu);
 
+    // Save some attributes for DRX access kluge
+    m_drx_cdelt1 = hdu->real("CDELT1");
+    m_drx_cdelt2 = hdu->real("CDELT2");
+    m_drx_crval1 = hdu->real("CRVAL1");
+    m_drx_crval2 = hdu->real("CRVAL2");
+    m_drx_crpix1 = hdu->real("CRPIX1");
+    m_drx_crpix2 = hdu->real("CRPIX2");
+
+    // Derive some attributes
+    m_drx_min1 = m_drx_crval1 + (1.0-m_drx_crpix1) * m_drx_cdelt1;
+    m_drx_min2 = m_drx_crval2 + (1.0-m_drx_crpix2) * m_drx_cdelt2;
+
     // Close FITS file
     file.close();
 
@@ -778,29 +859,24 @@ void GCOMObservation::load_drx(const std::string& drxname)
  *
  * Reads COM observation attributes from HDU. Mandatory attributes are
  *
- * RA_PNT   - Right Ascension of pointing
- * DEC_PNT  - Declination of pointing
- * ONTIME   - Exposure time
- * LIVETIME - Livetime
+ * RA_SCZ   - Right Ascension of pointing
+ * DEC_SCZ  - Declination of pointing
+ * TSTART   - Start time (days)
+ * TSTOP    - Stop time (days)
+ * E_MIN    - Minimum energy (MeV)
+ * E_MAX    - Maximum energy (MeV)
  *
  * and optional attributes are
  *
- * OBJECT   - Name of observed object
- * DEADC    - Deadtime correction
- * RA_OBJ   - Right Ascension of observed object,
- * DEC_OBJ  - Declination of observed object,
  * OBS_ID   - Observation identifier
- * ALT_PNT  - Altitude of pointing above horizon
- * AZ_PNT   - Azimuth of pointing
+ * OBJECT   - Object
  *
- * Based on RA_PNT and DEC_PNT, the COM pointing direction is set. Note that
- * DEADC is computed using DEADC=LIVETIME/ONTIME
+ * Based on TSTART and TSTOP the ontime is computed. The deadtime fraction
+ * is fixed to 15%, hence DEADC=0.85. The livetime is then computed by
+ * multiplying the deadtime correction by the ontime, i.e.
+ * LIVETIME = ONTIME * DEADC.
  *
  * Nothing is done if the HDU pointer is NULL.
- *
- * @todo The actual reader is a minimal reader to accomodate as many
- *       different datasets as possible. Once the COM data format is fixed
- *       the reader should have more mandatory attributes.
  ***************************************************************************/
 void GCOMObservation::read_attributes(const GFitsHDU* hdu)
 {
@@ -808,13 +884,20 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
     if (hdu != NULL) {
 
         // Read observation information
-        m_name   = (hdu->hascard("OBJECT"))   ? hdu->string("OBJECT") : "unknown";
-        m_obs_id = (hdu->hascard("OBS_ID"))   ? hdu->real("OBS_ID") : 0;
+        m_obs_id = (hdu->hascard("OBS_ID")) ? hdu->real("OBS_ID") : 0;
+        m_name   = (hdu->hascard("OBJECT")) ? hdu->string("OBJECT") : "unknown";
 
-        // Read ontime, livetime, deadtime correction
-        m_ontime   = (hdu->hascard("ONTIME"))   ? hdu->real("ONTIME") : 0.0;
-        m_livetime = (hdu->hascard("LIVETIME")) ? hdu->real("LIVETIME") : 0.0;
-        m_deadc    = (hdu->hascard("DEADC"))    ? hdu->real("DEADC") : 0.0;
+        // Compute ontime
+        double tstart = hdu->real("TSTART");
+        double tstop  = hdu->real("TSTOP");
+        m_ontime   = (tstop - tstart) * 86400.0;
+        m_deadc    = 0.85;
+        m_livetime = m_deadc * m_ontime;
+
+        // Compute energy width
+        double emin = hdu->real("E_MIN");
+        double emax = hdu->real("E_MAX");
+        m_ewidth = emax - emin;
 
         // Set pointing information
         GSkyDir pnt;
@@ -838,56 +921,13 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
  * @param[in] hdu FITS HDU pointer
  *
  * Nothing is done if the HDU pointer is NULL.
+ *
+ * @todo Implement method.
  ***************************************************************************/
 void GCOMObservation::write_attributes(GFitsHDU* hdu) const
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
-
-        // Compute some attributes
-        double ra_scz  = (m_pointing != NULL) ? m_pointing->dir().ra_deg() : 0.0;
-        double dec_scz = (m_pointing != NULL) ? m_pointing->dir().dec_deg() : 0.0;
-        double tstart  = events()->tstart().met();
-        double tstop   = events()->tstop().met();
-        double telapse = events()->gti().telapse();
-        double ontime  = events()->gti().ontime();
-        double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
-
-        // Set observation information
-        hdu->card("CREATOR",  "GammaLib",   "Program which created the file");
-        hdu->card("TELESCOP", instrument(), "Telescope");
-        hdu->card("OBS_ID",   obs_id(),     "Observation identifier");
-        hdu->card("DATE_OBS", "string",     "Observation start date");
-        hdu->card("TIME_OBS", "string",     "Observation start time");
-        hdu->card("DATE_END", "string",     "Observation end date");
-        hdu->card("TIME_END", "string",     "Observation end time");
-
-        // Set observation time information
-        hdu->card("TSTART",   tstart, "[s] Mission time of start of observation");
-        hdu->card("TSTOP",    tstop, "[s] Mission time of end of observation");
-        hdu->card("MJDREFI",  51910, "[days] Integer part of mission time reference MJD");
-        hdu->card("MJDREFF",  7.428703703703703e-14, "[days] Fractional part of mission time reference MJD");
-        hdu->card("TIMEUNIT", "s", "Time unit");
-        hdu->card("TIMESYS",  "TT", "Time system");
-        hdu->card("TIMEREF",  "LOCAL", "Time reference");
-        hdu->card("TELAPSE",  telapse, "[s] Mission elapsed time");
-        hdu->card("ONTIME",   ontime, "[s] Total good time including deadtime");
-        hdu->card("LIVETIME", livetime(), "[s] Total livetime");
-        hdu->card("DEADC",    deadc, "Deadtime correction factor");
-        hdu->card("TIMEDEL",  1.0, "Time resolution");
-
-        // Set pointing information
-        hdu->card("OBJECT",   name(),    "Observed object");
-        hdu->card("RA_OBJ",   0.0,  "[deg] Target Right Ascension");
-        hdu->card("DEC_OBJ",  0.0, "[deg] Target Declination");
-        hdu->card("RA_SCZ",   ra_scz,    "[deg] Pointing Right Ascension");
-        hdu->card("DEC_SCZ",  dec_scz,   "[deg] Pointing Declination");
-        hdu->card("RADECSYS", "FK5",     "Coordinate system");
-        hdu->card("EQUINOX",  2000.0,    "Epoch");
-        hdu->card("OBSERVER", "string",  "Observer");
-
-        // Other information
-        hdu->card("EUNIT",    "MeV",    "Energy unit");
 
     } // endif: HDU was valid
 

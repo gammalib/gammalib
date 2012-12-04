@@ -85,10 +85,13 @@ public:
     void           ontime(const double& ontime) { m_ontime=ontime; }
     void           livetime(const double& livetime) { m_livetime=livetime; }
     void           deadc(const double& deadc) { m_deadc=deadc; }
-    double         obs_id(void) const { return m_obs_id; }
+    void           ewidth(const double& ewidth) { m_ewidth=ewidth; }
+    const double&  obs_id(void) const { return m_obs_id; }
+    const double&  ewidth(void) const { return m_ewidth; }
     const GSkymap& drb(void) const { return m_drb; }
     const GSkymap& drg(void) const { return m_drg; }
     const GSkymap& drx(void) const { return m_drx; }
+    double         drx(const GSkyDir& dir) const;
 
 protected:
     // Protected methods
@@ -111,12 +114,21 @@ protected:
     GSkymap       m_drb;         //!< Background model
     GSkymap       m_drg;         //!< Geometry factors
     GSkymap       m_drx;         //!< Exposure map
+    double        m_drx_cdelt1;  //!< DRX file CDELT1 keyword
+    double        m_drx_cdelt2;  //!< DRX file CDELT2 keyword
+    double        m_drx_crval1;  //!< DRX file CRVAL1 keyword
+    double        m_drx_crval2;  //!< DRX file CRVAL2 keyword
+    double        m_drx_crpix1;  //!< DRX file CRPIX1 keyword
+    double        m_drx_crpix2;  //!< DRX file CRPIX2 keyword
+    double        m_drx_min1;    //!< DRX file axis1 minimum
+    double        m_drx_min2;    //!< DRX file axis2 minimum
     GCOMPointing* m_pointing;    //!< Pointer to pointing direction
     GCOMResponse* m_response;    //!< Pointer to response functions
     double        m_obs_id;      //!< Observation ID
-    double        m_ontime;      //!< Ontime
-    double        m_livetime;    //!< Livetime
+    double        m_ontime;      //!< Ontime (sec)
+    double        m_livetime;    //!< Livetime (sec)
     double        m_deadc;       //!< Deadtime correction
+    double        m_ewidth;      //!< Energy width (MeV)
 };
 
 #endif /* GCOMOBSERVATION_HPP */
