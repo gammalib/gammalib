@@ -28,11 +28,12 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <typeinfo> 
+//#include <typeinfo> 
 #include "GObservationRegistry.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
+#include "GCOMException.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventCube.hpp"
 #include "GCOMSupport.hpp"
@@ -45,6 +46,8 @@ const GObservationRegistry g_obs_com_registry(&g_obs_com_seed);
 #define G_RESPONSE                    "GCOMObservation::response(GResponse&)"
 #define G_READ                          "GCOMObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCOMObservation::write(GXmlElement&)"
+#define G_LOAD_DRB                  "GCOMObservation::load_drb(std::string&)"
+#define G_LOAD_DRG                  "GCOMObservation::load_drg(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -82,7 +85,14 @@ GCOMObservation::GCOMObservation(void) : GObservation()
  * @param[in] drgname Geometry cube name.
  * @param[in] drxname Exposure map name.
  *
- * Creates COMPTEL observation by loading the relevant FITS files.
+ * Creates COMPTEL observation by loading the following FITS files:
+ *
+ *     DRE - Events cube
+ *     DRB - Background model cube
+ *     DRG - Geometry factors cube
+ *     DRX - Exposure map
+ *
+ * Each of the four files is mandatory.
  ***************************************************************************/
 GCOMObservation::GCOMObservation(const std::string& drename,
                                  const std::string& drbname,
@@ -143,6 +153,7 @@ GCOMObservation::~GCOMObservation(void)
  * @brief Assignment operator
  *
  * @param[in] obs COMPTEL observation.
+ * @return COMPTEL observation.
  *
  * Assign COMPTEL observation to this object.
  ***************************************************************************/
@@ -196,7 +207,9 @@ void GCOMObservation::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Pointer to deep copy of COMPTEL observation.
+ ***************************************************************************/
 GCOMObservation* GCOMObservation::clone(void) const
 {
     return new GCOMObservation(*this);
@@ -235,10 +248,13 @@ void GCOMObservation::response(const GResponse& rsp)
 
 
 /***********************************************************************//**
- * @brief Set COM response function
+ * @brief Set response function
  *
- * @param[in] iaqname Name of COMPTEL IAQ response function.
+ * @param[in] iaqname Name of COMPTEL IAQ response file.
  * @param[in] caldb Optional name of calibration database.
+ *
+ * Sets the response function by loading the response information from an
+ * IAQ file.
  ***************************************************************************/
 void GCOMObservation::response(const std::string& iaqname,
                                const std::string& caldb)
@@ -261,7 +277,9 @@ void GCOMObservation::response(const std::string& iaqname,
 
 
 /***********************************************************************//**
- * @brief Returns pointer to COMPTEL response function
+ * @brief Returns pointer to response function
+ *
+ * @return Pointer to response function.
  ***************************************************************************/
 GCOMResponse* GCOMObservation::response(void) const
 {
@@ -271,36 +289,15 @@ GCOMResponse* GCOMObservation::response(void) const
 
 
 /***********************************************************************//**
- * @brief Returns pointer to COMPTEL pointing direction
+ * @brief Returns pointer to pointing direction
  *
- * Returns pointer to pointing direction.
+ * @return Pointer to pointing direction.
  ***************************************************************************/
 GCOMPointing* GCOMObservation::pointing(void) const
 {
     // Return pointing pointer
     return m_pointing;
 }
-
-
-/***********************************************************************//**
- * @brief Set COMPTEL pointing direction
- *
- * @param[in] pointing Pointing.
- ***************************************************************************/
-/*
-void GCOMObservation::pointing(const GCOMPointing& pointing)
-{
-    // Free any existing pointing
-    if (m_pointing != NULL) delete m_pointing;
-    m_pointing = NULL;
-
-    // Clone pointing
-    m_pointing = pointing.clone();
-
-    // Return
-    return;
-}
-*/
 
 
 /***********************************************************************//**
@@ -316,12 +313,12 @@ void GCOMObservation::pointing(const GCOMPointing& pointing)
  * Reads information for a COMPTEL observation from an XML element.
  * The expected format of the XML element is
  *
- *  <observation name="..." id="..." instrument="...">
- *    <parameter name="DRE" file="..."/>
- *    <parameter name="DRB" file="..."/>
- *    <parameter name="DRG" file="..."/>
- *    <parameter name="DRX" file="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="DRE" file="..."/>
+ *       <parameter name="DRB" file="..."/>
+ *       <parameter name="DRG" file="..."/>
+ *       <parameter name="DRX" file="..."/>
+ *     </observation>
  *
  * for a binned observation.
  ***************************************************************************/
@@ -409,12 +406,12 @@ void GCOMObservation::read(const GXmlElement& xml)
  * Writes information for a COMPTEL observation into an XML element. The
  * expected format of the XML element is
  *
- *  <observation name="..." id="..." instrument="...">
- *    <parameter name="DRE" file="..."/>
- *    <parameter name="DRB" file="..."/>
- *    <parameter name="DRG" file="..."/>
- *    <parameter name="DRX" file="..."/>
- *  </observation>
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="DRE" file="..."/>
+ *       <parameter name="DRB" file="..."/>
+ *       <parameter name="DRG" file="..."/>
+ *       <parameter name="DRX" file="..."/>
+ *     </observation>
  *
  * for a binned observation.
  ***************************************************************************/
@@ -488,7 +485,8 @@ void GCOMObservation::write(GXmlElement& xml) const
  * @param[in] drxname Exposure map name.
  *
  * Load event cube from DRE file, background model from DRB file, geometry
- * factors from DRG file and the exposure map from the DRX file.
+ * factors from DRG file and the exposure map from the DRX file. All files
+ * are mandatory.
  ***************************************************************************/
 void GCOMObservation::load(const std::string& drename,
                            const std::string& drbname,
@@ -513,7 +511,9 @@ void GCOMObservation::load(const std::string& drename,
 
 
 /***********************************************************************//**
- * @brief Print COM observation information
+ * @brief Print observation information
+ *
+ * @return String containing observation information.
  ***************************************************************************/
 std::string GCOMObservation::print(void) const
 {
@@ -592,14 +592,6 @@ void GCOMObservation::init_members(void)
     m_livetime   = 0.0;
     m_deadc      = 0.0;
     m_ewidth     = 0.0;
-    m_drx_cdelt1 = 0.0;
-    m_drx_cdelt2 = 0.0;
-    m_drx_crval1 = 0.0;
-    m_drx_crval2 = 0.0;
-    m_drx_crpix1 = 0.0;
-    m_drx_crpix2 = 0.0;
-    m_drx_min1   = 0.0;
-    m_drx_min2   = 0.0;
 
     // Return
     return;
@@ -631,14 +623,6 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_livetime   = obs.m_livetime;
     m_deadc      = obs.m_deadc;
     m_ewidth     = obs.m_ewidth;
-    m_drx_cdelt1 = obs.m_drx_cdelt1;
-    m_drx_cdelt2 = obs.m_drx_cdelt2;
-    m_drx_crval1 = obs.m_drx_crval1;
-    m_drx_crval2 = obs.m_drx_crval2;
-    m_drx_crpix1 = obs.m_drx_crpix1;
-    m_drx_crpix2 = obs.m_drx_crpix2;
-    m_drx_min1   = obs.m_drx_min1;
-    m_drx_min2   = obs.m_drx_min2;
 
     // Return
     return;
@@ -704,10 +688,11 @@ void GCOMObservation::load_dre(const std::string& drename)
  *
  * @param[in] drbname DRB filename.
  *
+ * @exception GCOMException::incompatible_dataspace
+ *            DRB data space incompatible with DRE data space.
+ *
  * Load the background model from the primary image of the specified FITS
  * file.
- *
- * @todo Check compatibility of DRB cube with event cube
  ***************************************************************************/
 void GCOMObservation::load_drb(const std::string& drbname)
 {
@@ -726,7 +711,11 @@ void GCOMObservation::load_drb(const std::string& drbname)
     // Close FITS file
     file.close();
 
-    //TODO: Check dimensions
+    // Check map dimensions
+    if (!check_map(m_drb)) {
+        throw GCOMException::incompatible_dataspace(G_LOAD_DRB,
+              "DRB data cube incompatible with DRE data cube.");
+    }
 
     // Store DRB filename
     m_drbname = drbname;
@@ -741,10 +730,11 @@ void GCOMObservation::load_drb(const std::string& drbname)
  *
  * @param[in] drgname DRG filename.
  *
+ * @exception GCOMException::incompatible_dataspace
+ *            DRG data space incompatible with DRE data space.
+ *
  * Load the geometry factors from the primary image of the specified FITS
  * file.
- *
- * @todo Check compatibility of DRG cube with event cube
  ***************************************************************************/
 void GCOMObservation::load_drg(const std::string& drgname)
 {
@@ -763,7 +753,11 @@ void GCOMObservation::load_drg(const std::string& drgname)
     // Close FITS file
     file.close();
 
-    //TODO: Check dimensions
+    // Check map dimensions
+    if (!check_map(m_drg)) {
+        throw GCOMException::incompatible_dataspace(G_LOAD_DRG,
+              "DRG data cube incompatible with DRE data cube.");
+    }
 
     // Store DRG filename
     m_drgname = drgname;
@@ -794,18 +788,6 @@ void GCOMObservation::load_drx(const std::string& drxname)
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_drx);
 
-    // Save some attributes for DRX access kluge
-    m_drx_cdelt1 = hdu->real("CDELT1");
-    m_drx_cdelt2 = hdu->real("CDELT2");
-    m_drx_crval1 = hdu->real("CRVAL1");
-    m_drx_crval2 = hdu->real("CRVAL2");
-    m_drx_crpix1 = hdu->real("CRPIX1");
-    m_drx_crpix2 = hdu->real("CRPIX2");
-
-    // Derive some attributes
-    m_drx_min1 = m_drx_crval1 + (1.0-m_drx_crpix1) * m_drx_cdelt1;
-    m_drx_min2 = m_drx_crval2 + (1.0-m_drx_crpix2) * m_drx_cdelt2;
-
     // Close FITS file
     file.close();
 
@@ -818,23 +800,50 @@ void GCOMObservation::load_drx(const std::string& drxname)
 
 
 /***********************************************************************//**
+ * @brief Check if sky map is compatible with event cube
+ *
+ * @param[in] map Sky map.
+ * @return True if map is compatible, false otherwise.
+ *
+ * Compares the dimension and the WCS definition of a sky map to that of the
+ * event cube. If both are identical, true is returned, false otherwise.
+ ***************************************************************************/
+bool GCOMObservation::check_map(const GSkymap& map) const
+{
+    // Get pointer on event cube map
+    const GSkymap& ref = dynamic_cast<GCOMEventCube*>(m_events)->map();
+
+    // Compare dimensions
+    bool same_dimension = ((map.nx()    == ref.nx()) &&
+                           (map.ny()    == ref.ny()) &&
+                           (map.nmaps() == ref.nmaps()));
+
+    // Compare WCS
+    bool same_wcs = (*(map.wcs()) == *(ref.wcs()));
+
+    // Return
+    return (same_dimension && same_wcs);
+}
+
+
+/***********************************************************************//**
  * @brief Read observation attributes
  *
  * @param[in] hdu FITS HDU pointer
  *
  * Reads COM observation attributes from HDU. Mandatory attributes are
  *
- * RA_SCZ   - Right Ascension of pointing
- * DEC_SCZ  - Declination of pointing
- * TSTART   - Start time (days)
- * TSTOP    - Stop time (days)
- * E_MIN    - Minimum energy (MeV)
- * E_MAX    - Maximum energy (MeV)
+ *     RA_SCZ   - Right Ascension of pointing
+ *     DEC_SCZ  - Declination of pointing
+ *     TSTART   - Start time (days)
+ *     TSTOP    - Stop time (days)
+ *     E_MIN    - Minimum energy (MeV)
+ *     E_MAX    - Maximum energy (MeV)
  *
  * and optional attributes are
  *
- * OBS_ID   - Observation identifier
- * OBJECT   - Object
+ *     OBS_ID   - Observation identifier
+ *     OBJECT   - Object
  *
  * Based on TSTART and TSTOP the ontime is computed. The deadtime fraction
  * is fixed to 15%, hence DEADC=0.85. The livetime is then computed by

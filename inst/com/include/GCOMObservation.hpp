@@ -101,6 +101,7 @@ protected:
     void load_drb(const std::string& drbname);
     void load_drg(const std::string& drgname);
     void load_drx(const std::string& drxname);
+    bool check_map(const GSkymap& map) const;
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
 
@@ -113,14 +114,6 @@ protected:
     GSkymap       m_drb;         //!< Background model
     GSkymap       m_drg;         //!< Geometry factors
     GSkymap       m_drx;         //!< Exposure map
-    double        m_drx_cdelt1;  //!< DRX file CDELT1 keyword
-    double        m_drx_cdelt2;  //!< DRX file CDELT2 keyword
-    double        m_drx_crval1;  //!< DRX file CRVAL1 keyword
-    double        m_drx_crval2;  //!< DRX file CRVAL2 keyword
-    double        m_drx_crpix1;  //!< DRX file CRPIX1 keyword
-    double        m_drx_crpix2;  //!< DRX file CRPIX2 keyword
-    double        m_drx_min1;    //!< DRX file axis1 minimum
-    double        m_drx_min2;    //!< DRX file axis2 minimum
     GCOMPointing* m_pointing;    //!< Pointer to pointing direction
     GCOMResponse* m_response;    //!< Pointer to response functions
     double        m_obs_id;      //!< Observation ID
