@@ -172,6 +172,7 @@ GCOMEventCube::~GCOMEventCube(void)
  * @brief Assignment operator
  *
  * @param[in] cube Event cube.
+ * @return Event cube.
  ***************************************************************************/
 GCOMEventCube& GCOMEventCube::operator= (const GCOMEventCube& cube)
 {
@@ -201,6 +202,7 @@ GCOMEventCube& GCOMEventCube::operator= (const GCOMEventCube& cube)
  * @brief Event bin access operator
  *
  * @param[in] index Event index [0,...,size()-1].
+ * @return Pointer to event bin.
  *
  * Returns pointer to an event bin. Note that the returned pointer is in
  * fact always the same, but the method sets the pointers within the
@@ -220,6 +222,7 @@ GCOMEventBin* GCOMEventCube::operator[](const int& index)
  * @brief Event bin access operator (const version)
  *
  * @param[in] index Event index [0,...,size()-1].
+ * @return Const pointer to event bin.
  *
  * Returns pointer to an event bin. Note that the returned pointer is in
  * fact always the same, but the method sets the pointers within the
@@ -265,6 +268,8 @@ void GCOMEventCube::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of event cube.
  ***************************************************************************/
 GCOMEventCube* GCOMEventCube::clone(void) const
 {
@@ -274,6 +279,8 @@ GCOMEventCube* GCOMEventCube::clone(void) const
 
 /***********************************************************************//**
  * @brief Return number of bins in event cube
+ *
+ * @return Number of bins in event cube.
  *
  * The number of bins in the event cube is the product of the number of bins
  * along the three cube axes.
@@ -290,6 +297,8 @@ int GCOMEventCube::size(void) const
 
 /***********************************************************************//**
  * @brief Return dimension of event cube
+ *
+ * @return Number of dimensions in event cube.
  *
  * The dimension of the cube is either 2 or 3, depending on whether several
  * scatter angle layers exist or not.
@@ -308,6 +317,7 @@ int GCOMEventCube::dim(void) const
  * @brief Return number of bins in axis
  *
  * @param[in] axis Axis.
+ * @return Number of bins in axis.
  *
  * @exception GException::out_of_range
  *            Axis is out of range.
@@ -483,6 +493,8 @@ void GCOMEventCube::write(GFits& file) const
 /***********************************************************************//**
  * @brief Return number of events in cube
  *
+ * @return Number of events in event cube.
+ *
  * This method returns the number of events in the event cube rounded to the
  * nearest integer.
  ***************************************************************************/
@@ -538,7 +550,7 @@ void GCOMEventCube::map(const GSkymap& map, const double& phimin,
 /***********************************************************************//**
  * @brief Print event cube information
  *
- * @todo Append scatter angle definiton
+ * @return String containing event cube information.
  ***************************************************************************/
 std::string GCOMEventCube::print(void) const
 {
@@ -649,6 +661,9 @@ void GCOMEventCube::free_members(void)
 
 /***********************************************************************//**
  * @brief Set sky directions and solid angles of events cube
+ *
+ * @exception GCOMException::no_sky
+ *            No sky pixels have been defined.
  *
  * This method computes the sky directions and solid angles for all (Chi,Psi)
  * values of the event cube. Sky directions are stored in an array of GSkyDir
@@ -844,10 +859,3 @@ void GCOMEventCube::set_bin(const int& index)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

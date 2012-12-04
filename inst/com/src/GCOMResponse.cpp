@@ -146,6 +146,7 @@ GCOMResponse::~GCOMResponse(void)
  * @brief Assignment operator
  *
  * @param[in] rsp COMPTEL response.
+ * @return COMPTEL response.
  *
  * Assigns COMPTEL response object to another COMPTEL response object. The
  * assignment performs a deep copy of all information, hence the original
@@ -206,7 +207,7 @@ void GCOMResponse::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  *
- * Creates a clone (deep copy) of a COMPTEL response object.
+ * @return Pointer to deep copy of COMPTEL response.
  ***************************************************************************/
 GCOMResponse* GCOMResponse::clone(void) const
 {
@@ -327,6 +328,7 @@ double GCOMResponse::irf(const GInstDir&     obsDir,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
+ * @return 1.0
  *
  * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
@@ -379,6 +381,8 @@ void GCOMResponse::caldb(const std::string& caldb)
 
 /***********************************************************************//**
  * @brief Return path to the calibration database
+ *
+ * @return Path to calibration database.
  ***************************************************************************/
 std::string GCOMResponse::caldb(void) const
 {
@@ -491,6 +495,8 @@ void GCOMResponse::read_iaq(const GFitsImage* hdu)
 
 /***********************************************************************//**
  * @brief Print COMPTEL response information
+ *
+ * @return String containing COMPTEL response information.
  ***************************************************************************/
 std::string GCOMResponse::print(void) const
 {

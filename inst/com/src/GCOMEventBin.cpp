@@ -102,6 +102,7 @@ GCOMEventBin::~GCOMEventBin(void)
  * @brief Assignment operator
  *
  * @param[in] bin Event bin.
+ * @return Event bin.
  ***************************************************************************/
 GCOMEventBin& GCOMEventBin::operator= (const GCOMEventBin& bin)
 {
@@ -157,7 +158,9 @@ void GCOMEventBin::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Pointer to deep copy of event bin.
+ ***************************************************************************/
 GCOMEventBin* GCOMEventBin::clone(void) const
 {
     return new GCOMEventBin(*this);
@@ -167,7 +170,9 @@ GCOMEventBin* GCOMEventBin::clone(void) const
 /***********************************************************************//**
  * @brief Return size of event bin
  *
- * The size of the event bin (units sr MeV s) is given by
+ * @return Size of event bin (sr MeV s)
+ *
+ * The size of the event bin (units: sr MeV s) is given by
  * \f[size = \Omega \times \Delta E \times \Delta T\f]
  * where
  * \f$\Omega\f$ is the size of the spatial bin in sr,
@@ -186,6 +191,8 @@ double GCOMEventBin::size(void) const
 
 /***********************************************************************//**
  * @brief Return error in number of counts
+ *
+ * @return Error in number of counts in event bin.
  *
  * Returns \f$\sqrt(counts+delta)\f$ as the uncertainty in the number of
  * counts in the bin. Adding delta avoids uncertainties of 0 which will
@@ -207,6 +214,8 @@ double GCOMEventBin::error(void) const
 
 /***********************************************************************//**
  * @brief Print event information
+ *
+ * @return String containing event information.
  ***************************************************************************/
 std::string GCOMEventBin::print(void) const
 {
@@ -324,10 +333,3 @@ void GCOMEventBin::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
