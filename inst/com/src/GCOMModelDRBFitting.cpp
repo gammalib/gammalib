@@ -280,7 +280,7 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
         else {
 
             // Get Phibar value
-            double phibar = bin->dir().phi();
+            double phibar = bin->dir().phibar();
 
             // Update evaluation cache
             update_cache();
@@ -386,7 +386,7 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
         else {
 
             // Get Phibar value
-            double phibar = bin->dir().phi();
+            double phibar = bin->dir().phibar();
 
             // Update evaluation cache
             update_cache();
