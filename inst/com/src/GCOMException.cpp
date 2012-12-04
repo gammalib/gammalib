@@ -214,3 +214,28 @@ GCOMException::bad_event_type::bad_event_type(const std::string& origin,
     // Return
     return;
 }
+
+
+
+
+/***********************************************************************//**
+ * @brief Instrument direction is not a COMPTEL instrument direction
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCOMException::bad_instdir_type::bad_instdir_type(const std::string& origin,
+                                                  const std::string& message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Instrument direction is not of type GCOMInstDir.";
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
+    return;
+}

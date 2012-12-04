@@ -99,6 +99,11 @@ public:
         bad_event_type(const std::string& origin,
                        const std::string& message = "");
     };
+    class bad_instdir_type : public GCOMExceptionHandler {
+    public:
+        bad_instdir_type(const std::string& origin,
+                         const std::string& message = "");
+    };
 };
 
 #endif /* GCOMEXCEPTION_HPP */
