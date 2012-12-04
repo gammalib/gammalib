@@ -35,6 +35,7 @@
 #include "GTools.hpp"
 #include "GCOMObservation.hpp"
 #include "GCOMEventCube.hpp"
+#include "GCOMSupport.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GCOMObservation      g_obs_com_seed;
@@ -604,6 +605,11 @@ std::string GCOMObservation::print(void) const
         result.append("\n"+parformat("Events")+"undefined");
     }
 
+    // Append DRB, DRG and DRX
+    //result.append("\n"+m_drb.print());
+    //result.append("\n"+m_drg.print());
+    //result.append("\n"+m_drx.print());
+
     // Return result
     return result;
 }
@@ -764,6 +770,9 @@ void GCOMObservation::load_drb(const std::string& drbname)
     // Load background model as sky map
     m_drb.read(hdu);
 
+    // Correct WCS projection (HEASARC data format kluge)
+    com_wcs_mer2car(m_drb);
+
     // Close FITS file
     file.close();
 
@@ -798,6 +807,9 @@ void GCOMObservation::load_drg(const std::string& drgname)
     // Load geometry factors as sky map
     m_drg.read(hdu);
 
+    // Correct WCS projection (HEASARC data format kluge)
+    com_wcs_mer2car(m_drg);
+
     // Close FITS file
     file.close();
 
@@ -828,6 +840,9 @@ void GCOMObservation::load_drx(const std::string& drxname)
 
     // Load exposure map as sky map
     m_drx.read(hdu);
+
+    // Correct WCS projection (HEASARC data format kluge)
+    com_wcs_mer2car(m_drx);
 
     // Save some attributes for DRX access kluge
     m_drx_cdelt1 = hdu->real("CDELT1");

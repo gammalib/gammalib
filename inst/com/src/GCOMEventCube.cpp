@@ -21,7 +21,7 @@
 /**
  * @file GCOMEventCube.cpp
  * @brief COMPTEL event bin container class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,6 +31,7 @@
 #include "GTools.hpp"
 #include "GFits.hpp"
 #include "GCOMException.hpp"
+#include "GCOMSupport.hpp"
 #include "GCOMEventCube.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -411,6 +412,9 @@ void GCOMEventCube::read(const GFits& file)
 
     // Load counts map as sky map
     m_map.read(hdu);
+
+    // Correct WCS projection (HEASARC data format kluge)
+    com_wcs_mer2car(m_map);
 
     // Set scatter directions
     set_scatter_directions();
