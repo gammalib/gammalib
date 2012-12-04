@@ -179,16 +179,13 @@ double GResponse::irf(const GEvent&       event,
 
     // Call model dependent method
     if (ptsrc != NULL) {
-        irf = irf_ptsrc(event.dir(), event.energy(), event.time(),
-                        *ptsrc, srcEng, srcTime, obs);
+        irf = irf_ptsrc(event, *ptsrc, srcEng, srcTime, obs);
     }
     else if (extsrc != NULL) {
-        irf = irf_extended(event.dir(), event.energy(), event.time(),
-                           *extsrc, srcEng, srcTime, obs);
+        irf = irf_extended(event, *extsrc, srcEng, srcTime, obs);
     }
     else if (difsrc != NULL) {
-        irf = irf_diffuse(event.dir(), event.energy(), event.time(),
-                          *difsrc, srcEng, srcTime, obs);
+        irf = irf_diffuse(event, *difsrc, srcEng, srcTime, obs);
     }
 
     // Apply deadtime correction
@@ -202,27 +199,23 @@ double GResponse::irf(const GEvent&       event,
 /***********************************************************************//**
  * @brief Return value of point source instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
+ * @param[in] event Observed event.
  * @param[in] model Point source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
  ***************************************************************************/
-double GResponse::irf_ptsrc(const GInstDir&          obsDir,
-                            const GEnergy&           obsEng,
-                            const GTime&             obsTime,
+double GResponse::irf_ptsrc(const GEvent&            event,
                             const GModelPointSource& model,
                             const GEnergy&           srcEng,
                             const GTime&             srcTime,
                             const GObservation&      obs) const
 {
-    // Get point source location
-    GSkyDir srcDir = model.dir();
-
+    // Set Photon
+    GPhoton photon(model.dir(), srcEng, srcTime);
+    
     // Compute IRF
-    double irf = this->irf(obsDir, obsEng, obsTime, srcDir, srcEng, srcTime, obs);
+    double irf = this->irf(event, photon, obs);
 
     // Return IRF
     return irf;
@@ -232,9 +225,7 @@ double GResponse::irf_ptsrc(const GInstDir&          obsDir,
 /***********************************************************************//**
  * @brief Return value of extended source instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
+ * @param[in] event Observed event.
  * @param[in] model Exteded source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -242,9 +233,7 @@ double GResponse::irf_ptsrc(const GInstDir&          obsDir,
  *
  * @todo Generic method is not yet implemented.
  ***************************************************************************/
-double GResponse::irf_extended(const GInstDir&             obsDir,
-                               const GEnergy&              obsEng,
-                               const GTime&                obsTime,
+double GResponse::irf_extended(const GEvent&               event,
                                const GModelExtendedSource& model,
                                const GEnergy&              srcEng,
                                const GTime&                srcTime,
@@ -262,9 +251,7 @@ double GResponse::irf_extended(const GInstDir&             obsDir,
 /***********************************************************************//**
  * @brief Return value of diffuse source instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
+ * @param[in] event Observed event.
  * @param[in] model Diffuse source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -272,9 +259,7 @@ double GResponse::irf_extended(const GInstDir&             obsDir,
  *
  * @todo Generic method is not yet implemented.
  ***************************************************************************/
-double GResponse::irf_diffuse(const GInstDir&            obsDir,
-                              const GEnergy&             obsEng,
-                              const GTime&               obsTime,
+double GResponse::irf_diffuse(const GEvent&              event,
                               const GModelDiffuseSource& model,
                               const GEnergy&             srcEng,
                               const GTime&               srcTime,
@@ -352,11 +337,11 @@ double GResponse::npred_ptsrc(const GModelPointSource& model,
                               const GTime&             srcTime,
                               const GObservation&      obs) const
 {
-    // Get point source location
-    GSkyDir srcDir = model.dir();
+    // Set photon
+    GPhoton photon(model.dir(), srcEng, srcTime);
 
     // Compute Npred
-    double npred = this->npred(srcDir, srcEng, srcTime, obs);
+    double npred = this->npred(photon, obs);
 
     // Return Npred
     return npred;
@@ -565,8 +550,11 @@ double GResponse::npred_kern_phi::eval(double phi)
     GSkyDir srcDir;
     srcDir.celvector(cel);
 
+    // Set photon
+    GPhoton photon(srcDir, *m_srcEng, *m_srcTime);
+
     // Compute Npred for this sky direction
-    double npred = m_rsp->npred(srcDir, *m_srcEng, *m_srcTime, *m_obs);
+    double npred = m_rsp->npred(photon, *m_obs);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
