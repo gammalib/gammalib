@@ -293,7 +293,7 @@ double GCOMResponse::irf(const GInstDir&     obsDir,
     double drg = observation->drg()(dir->skydir(), iphibar);
 
     // Get DRX value (units: sec)
-    double drx = observation->drx(srcDir);
+    double drx = observation->drx()(srcDir);
 
     // Get ontime
     double ontime = observation->ontime(); // sec
