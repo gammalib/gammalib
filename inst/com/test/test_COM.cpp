@@ -46,8 +46,7 @@ const std::string com_drb       = datadir+"/m34997_drg.fits";
 const std::string com_drg       = datadir+"/m34997_drg.fits";
 const std::string com_drx       = datadir+"/m32171_drx.fits";
 const std::string com_obs       = datadir+"/obs.xml";
-//const std::string com_model     = datadir+"/crab.xml";
-const std::string com_model     = datadir+"/crab_phibar.xml";
+const std::string com_model     = datadir+"/crab.xml";
 
 
 /***********************************************************************//**
@@ -533,7 +532,6 @@ void TestGCOMOptimize::test_binned_optimizer(void)
         run.load(com_dre, com_drb, com_drg, com_drx);
         run.response(com_iaq, com_caldb);
         obs.append(run);
-//std::cout << obs << std::endl;
         test_try_success();
     }
     catch (std::exception &e) {
@@ -542,20 +540,64 @@ void TestGCOMOptimize::test_binned_optimizer(void)
 
     // Load models from XML file
     obs.models(com_model);
-//std::cout << obs << std::endl;
 
     // Perform LM optimization
-    double fit_results[] = {83.6331, 0,
-                            22.0145, 0,
-                            5.616410411e-16, 1.904730785e-17,
-                            -2.481781246, -0.02580905077,
-                            300000, 0,
+    double fit_results[] = {83.4258, 0.157307,
+                            21.5953, 0.143873,
+                            0.001907, 8.31055e-05,
+                            -2.05, 0,
                             1, 0,
-                            2.933677595, 0.06639644824,
-                            6.550723074e-05, 1.945714239e-06,
-                            -1.833781187, -0.0161464076,
-                            1000000, 0,
-                            1, 0};
+                            1, 0,
+                            1, 0,
+                            0, 0,
+                            3, 0,
+                            0, 0,
+                            5, 0,
+                            3.15461, 0.0904736,
+                            7, 0,
+                            27.8763, 0.272976,
+                            9, 0,
+                            43.6555, 0.348297,
+                            11, 0,
+                            54.1233, 0.396509,
+                            13, 0,
+                            60.9322, 0.431667,
+                            15, 0,
+                            65.1235, 0.457003,
+                            17, 0,
+                            64.8946, 0.466807,
+                            19, 0,
+                            60.7385, 0.458565,
+                            21, 0,
+                            57.5857, 0.451466,
+                            23, 0,
+                            54.447,  0.441844,
+                            25, 0,
+                            51.9042, 0.433244,
+                            27, 0,
+                            49.0977, 0.422531,
+                            29, 0,
+                            47.1811, 0.416003,
+                            31, 0,
+                            44.2415, 0.406013,
+                            33, 0,
+                            43.1503, 0.40499,
+                            35, 0,
+                            41.7076, 0.403297,
+                            37, 0,
+                            39.92,   0.39994,
+                            39, 0,
+                            37.602,  0.39392,
+                            41, 0,
+                            36.7116, 0.395238,
+                            43, 0,
+                            35.8177, 0.397315,
+                            45, 0,
+                            33.7205, 0.392628,
+                            47, 0,
+                            29.9617, 0.377506,
+                            49, 0,
+                            27.9992, 0.372667};
     test_try("Perform LM optimization");
     try {
         GOptimizerLM opt;
@@ -564,7 +606,6 @@ void TestGCOMOptimize::test_binned_optimizer(void)
 //std::cout << obs << std::endl;
 //std::cout << opt << std::endl;
         test_try_success();
-/*
         for (int i = 0, j = 0; i < obs.models().size(); ++i) {
             GModel* model = obs.models()[i];
             for (int k = 0; k < model->size(); ++k) {
@@ -574,7 +615,6 @@ void TestGCOMOptimize::test_binned_optimizer(void)
                 test_value(par.real_error(), fit_results[j++], 5.0e-5, msg);
             }
         }
-*/
     }
     catch (std::exception &e) {
         test_try_failure(e);
