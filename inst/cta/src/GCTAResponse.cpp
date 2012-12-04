@@ -822,9 +822,7 @@ std::string GCTAResponse::print(void) const
 /***********************************************************************//**
  * @brief Return value of extended source instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
+ * @param[in] event Observed event.
  * @param[in] model Extended source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -858,9 +856,7 @@ std::string GCTAResponse::print(void) const
  * view, this approximation should be fine. It helps in fact a lot in
  * speeding up the computations.
  ***************************************************************************/
-double GCTAResponse::irf_extended(const GInstDir&             obsDir,
-                                  const GEnergy&              obsEng,
-                                  const GTime&                obsTime,
+double GCTAResponse::irf_extended(const GEvent&               event,
                                   const GModelExtendedSource& model,
                                   const GEnergy&              srcEng,
                                   const GTime&                srcTime,
@@ -879,10 +875,14 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     }
 
     // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
     if (dir == NULL) {
         throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
     }
+
+    // Get event attributes
+    const GSkyDir& obsDir = dir->dir();
+    const GEnergy& obsEng = event.energy();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -990,9 +990,7 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 /***********************************************************************//**
  * @brief Return value of diffuse source instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
+ * @param[in] event Observed event.
  * @param[in] model Diffuse source model.
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
@@ -1016,9 +1014,7 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
  * The integration kernels for this method are implemented by the response
  * helper classes cta_irf_diffuse_kern_theta and cta_irf_diffuse_kern_phi.
  ***************************************************************************/
-double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
-                                 const GEnergy&             obsEng,
-                                 const GTime&               obsTime,
+double GCTAResponse::irf_diffuse(const GEvent&              event,
                                  const GModelDiffuseSource& model,
                                  const GEnergy&             srcEng,
                                  const GTime&               srcTime,
@@ -1037,10 +1033,14 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
     }
 
     // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
     if (dir == NULL) {
         throw GCTAException::bad_instdir_type(G_IRF_DIFFUSE);
     }
+
+    // Get event attributes
+    const GSkyDir& obsDir = dir->dir();
+    const GEnergy& obsEng = event.energy();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -1063,9 +1063,6 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
     // maximum (this is certainly less critical)
     double theta = eta;
     double phi   = 0.0; //TODO: Implement Phi dependence
-
-    // Get PSF parameters.
-    //GCTAPsfPars pars = psf_dummy_sigma(srcLogEng, srcTheta);
 
     // Get maximum PSF radius in radians
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);

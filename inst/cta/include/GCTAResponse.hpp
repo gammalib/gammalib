@@ -95,16 +95,12 @@ public:
     virtual std::string   print(void) const;
 
     // Overload virtual base class methods
-    virtual double irf_extended(const GInstDir&             obsDir,
-                                const GEnergy&              obsEng,
-                                const GTime&                obsTime,
+    virtual double irf_extended(const GEvent&               event,
                                 const GModelExtendedSource& model,
                                 const GEnergy&              srcEng,
                                 const GTime&                srcTime,
                                 const GObservation&         obs) const;
-    virtual double irf_diffuse(const GInstDir&            obsDir,
-                               const GEnergy&             obsEng,
-                               const GTime&               obsTime,
+    virtual double irf_diffuse(const GEvent&              event,
                                const GModelDiffuseSource& model,
                                const GEnergy&             srcEng,
                                const GTime&               srcTime,
