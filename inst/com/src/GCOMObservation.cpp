@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <typeinfo> 
+#include <typeinfo> 
 #include "GObservationRegistry.hpp"
 #include "GException.hpp"
 #include "GFits.hpp"
