@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-07-00
 
 Author(s) : Juergen Knoedlseder
 
-October, 14th, 2012
+December, 3rd, 2012
 
 
 1. Introduction
@@ -36,7 +36,9 @@ to be used by a GammaLib user.
 
 5. FITS I/O Interface
 ---------------------
-None
+FITS images are now opened using their equivalent data type. This
+ensures that the class that will be used to hold the data has the
+correct precision that avoids data truncation.
 
 
 6. Linear algebra module
@@ -97,4 +99,10 @@ None
 17. CTA interface
 -----------------
 None
+
+
+18. COMPTEL interface
+-----------------
+An interface has been added to deal with data from the COMPTEL telescope
+aboard CGRO.
 
