@@ -45,6 +45,7 @@ class GPhoton : public GBase {
 public:
     // Constructors and destructors
     GPhoton(void);
+    explicit GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
     GPhoton(const GPhoton& ph);
     virtual ~GPhoton(void);
  

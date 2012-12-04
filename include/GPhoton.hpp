@@ -48,12 +48,13 @@
 class GPhoton : public GBase {
 
     // Operator friends
-    friend bool operator== (const GPhoton &a, const GPhoton &b);
-    friend bool operator!= (const GPhoton &a, const GPhoton &b);
+    friend bool operator==(const GPhoton &a, const GPhoton &b);
+    friend bool operator!=(const GPhoton &a, const GPhoton &b);
 
 public:
     // Constructors and destructors
     GPhoton(void);
+    explicit GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
     GPhoton(const GPhoton& ph);
     virtual ~GPhoton(void);
  
