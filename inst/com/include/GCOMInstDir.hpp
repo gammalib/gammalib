@@ -55,10 +55,10 @@ public:
     virtual std::string  print(void) const;
 
     // Other methods
-    void    skydir(const GSkyDir& dir) { m_dir=dir; }
-    void    phi(const double& phi) { m_phi=phi; }
-    GSkyDir skydir(void) const { return m_dir; }
-    double  phi(void) const { return m_phi; }
+    void           skydir(const GSkyDir& dir) { m_dir=dir; }
+    void           phi(const double& phi) { m_phi=phi; }
+    const GSkyDir& skydir(void) const { return m_dir; }
+    const double&  phi(void) const { return m_phi; }
 
 protected:
     // Protected methods
