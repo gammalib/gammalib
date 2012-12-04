@@ -91,7 +91,6 @@ public:
     const GSkymap& drb(void) const { return m_drb; }
     const GSkymap& drg(void) const { return m_drg; }
     const GSkymap& drx(void) const { return m_drx; }
-    double         drx(const GSkyDir& dir) const;
 
 protected:
     // Protected methods

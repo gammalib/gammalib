@@ -513,56 +513,6 @@ void GCOMObservation::load(const std::string& drename,
 
 
 /***********************************************************************//**
- * @brief Return exposure value
- *
- * @param[in] dir Sky direction.
- * @return Exposure (seconds).
- *
- * Returns the exposure as extracted from the DRX dataset. We use here a
- * kluge as the WCS of the COMPTEL data from GSFC are incorrect (they
- * pretend to be in Mercator projection, yet they are in cartesian
- * coordinates).
- ***************************************************************************/
-double GCOMObservation::drx(const GSkyDir& dir) const
-{
-    // Get longitude index
-    int nx = m_drx.nx();
-    int ix = int((dir.l_deg() - m_drx_min1) / m_drx_cdelt1 + 0.5);
-    if (ix < 0) {
-        ix += nx;
-    }
-    else if (ix >= nx) {
-        ix -= nx;
-    }
-    if (ix < 0) {
-        ix = 0;
-    }
-    else if (ix >= nx) {
-        ix = nx-1;
-    }
-
-    // Get latitude index
-    int ny = m_drx.ny();
-    int iy = int((dir.b_deg() - m_drx_min2) / m_drx_cdelt2 + 0.5);
-    if (iy < 0) {
-        iy = 0;
-    }
-    else if (iy >= ny) {
-        iy = ny-1;
-    }
-
-    // Get pixel index
-    int inx = ix + iy * nx;
-
-    // Get exposure value
-    double drx = (m_drx.pixels())[inx];
-
-    // Return
-    return drx;
-}
-
-
-/***********************************************************************//**
  * @brief Print COM observation information
  ***************************************************************************/
 std::string GCOMObservation::print(void) const

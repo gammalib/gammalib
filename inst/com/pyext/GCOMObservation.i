@@ -75,7 +75,6 @@ public:
     const GSkymap& drb(void) const;
     const GSkymap& drg(void) const;
     const GSkymap& drx(void) const;
-    double         drx(const GSkyDir& dir) const;
 };
 
 
