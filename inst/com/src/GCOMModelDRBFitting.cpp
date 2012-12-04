@@ -149,6 +149,7 @@ GCOMModelDRBFitting::~GCOMModelDRBFitting(void)
  * @brief Assignment operator
  *
  * @param[in] model COMPTEL DRB fitting model.
+ * @return COMPTEL DRB fitting model
  *
  * Assigns the information from a COMPTEL DRB fitting model to the actual
  * object. Note that a deep copy of the information is performed, so the
@@ -211,6 +212,8 @@ void GCOMModelDRBFitting::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  *
+ * @return Pointer to deep copy of COMPTEL DRB fitting model.
+ *
  * Clone a COMPTEL DRB fitting model. Cloning performs a deep copy of the
  * information, so the original object can be destroyed after cloning without
  * any loss of information.
@@ -226,6 +229,7 @@ GCOMModelDRBFitting* GCOMModelDRBFitting::clone(void) const
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @return Background model value.
  *
  * @exception GCOMException::bad_observation_type
  *            Observation is not a COMPTEL observation.
@@ -317,13 +321,15 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @return Background model value.
  *
  * @exception GCOMException::bad_observation_type
  *            Observation is not a COMPTEL observation.
  * @exception GCOMException::bad_event_type
  *            Event is not a COMPTEL event bin.
  *
- * Evaluates the COMPTEL DRB fitting model value and parameter gradients.
+ * Evaluates the COMPTEL DRB fitting model value and sets the parameter
+ * gradients.
  ***************************************************************************/
 double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
                                            const GObservation& obs) const
