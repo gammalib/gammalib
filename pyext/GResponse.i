@@ -48,16 +48,10 @@ public:
     virtual GResponse*  clone(void) const = 0;
     virtual bool        hasedisp(void) const = 0;
     virtual bool        hastdisp(void) const = 0;
-    virtual double      irf(const GInstDir&     obsDir,
-                            const GEnergy&      obsEng,
-                            const GTime&        obsTime,
-                            const GSkyDir&      srcDir,
-                            const GEnergy&      srcEng,
-                            const GTime&        srcTime,
+    virtual double      irf(const GEvent&       event,
+                            const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      npred(const GSkyDir&      srcDir,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
+    virtual double      npred(const GPhoton&      photon,
                               const GObservation& obs) const = 0;
 
     // Virtual methods
