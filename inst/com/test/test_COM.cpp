@@ -128,38 +128,38 @@ void TestGCOMResponse::test_inst_dir(void)
     // skydir method
     GSkyDir sky;
     sky.radec_deg(37.0, 45.3);
-    dir.skydir(sky);
-    test_assert(dir.skydir() == sky, "Test skydir() method.",
-                "Expected "+sky.print()+", found "+dir.skydir().print());
+    dir.dir(sky);
+    test_assert(dir.dir() == sky, "Test skydir() method.",
+                "Expected "+sky.print()+", found "+dir.dir().print());
 
-    // phi method
-    dir.phi(27.2);
-    test_value(dir.phi(), 27.2, 1.0e-10, "Test phi() method.");
+    // phibar method
+    dir.phibar(27.2);
+    test_value(dir.phibar(), 27.2, 1.0e-10, "Test phibar() method.");
 
     // copy constructor
     GCOMInstDir dir_copy(dir);
-    test_assert(dir_copy.skydir() == sky, "Test copy constructor method.",
-                "Expected "+sky.print()+", found "+dir_copy.skydir().print());
-    test_value(dir_copy.phi(), 27.2, 1.0e-10, "Test copy constructor method.");
+    test_assert(dir_copy.dir() == sky, "Test copy constructor method.",
+                "Expected "+sky.print()+", found "+dir_copy.dir().print());
+    test_value(dir_copy.phibar(), 27.2, 1.0e-10, "Test copy constructor method.");
 
     // assignment operator
     GCOMInstDir dir_assign = dir;
-    test_assert(dir_assign.skydir() == sky, "Test assignment operator method.",
-                "Expected "+sky.print()+", found "+dir_assign.skydir().print());
-    test_value(dir_assign.phi(), 27.2, 1.0e-10, "Test assignment operator method.");
+    test_assert(dir_assign.dir() == sky, "Test assignment operator method.",
+                "Expected "+sky.print()+", found "+dir_assign.dir().print());
+    test_value(dir_assign.phibar(), 27.2, 1.0e-10, "Test assignment operator method.");
 
     // clone
     GCOMInstDir* dir_clone = dir.clone();
-    test_assert(dir_clone->skydir() == sky, "Test clone() method.",
-                "Expected "+sky.print()+", found "+dir_clone->skydir().print());
-    test_value(dir_clone->phi(), 27.2, 1.0e-10, "Test clone() method.");
+    test_assert(dir_clone->dir() == sky, "Test clone() method.",
+                "Expected "+sky.print()+", found "+dir_clone->dir().print());
+    test_value(dir_clone->phibar(), 27.2, 1.0e-10, "Test clone() method.");
 
     // clear
     dir.clear();
     sky.clear();
-    test_assert(dir.skydir() == sky, "Test clear() method.",
-                "Expected "+sky.print()+", found "+dir.skydir().print());
-    test_value(dir.phi(), 0.0, 1.0e-10, "Test clean() method.");
+    test_assert(dir.dir() == sky, "Test clear() method.",
+                "Expected "+sky.print()+", found "+dir.dir().print());
+    test_value(dir.phibar(), 0.0, 1.0e-10, "Test clean() method.");
 
     // Return
     return;
