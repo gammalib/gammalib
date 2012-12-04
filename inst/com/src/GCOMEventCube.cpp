@@ -849,8 +849,8 @@ void GCOMEventCube::set_bin(const int& index)
     m_bin.m_index = index;
 
     // Set instrument direction
-    m_dir.skydir(m_dirs[ipix]);
-    m_dir.phi(m_phi[iphi]);
+    m_dir.dir(m_dirs[ipix]);
+    m_dir.phibar(m_phi[iphi]);
     
     // Set pointers
     m_bin.m_counts = &(m_map.pixels()[index]);
