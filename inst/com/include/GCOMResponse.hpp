@@ -28,12 +28,10 @@
 #define GCOMRESPONSE_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include "GEvent.hpp"
+#include "GPhoton.hpp"
 #include "GObservation.hpp"
 #include "GResponse.hpp"
-#include "GInstDir.hpp"
-#include "GSkyDir.hpp"
-#include "GEnergy.hpp"
-#include "GTime.hpp"
 #include "GFitsImage.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -63,16 +61,10 @@ public:
     virtual GCOMResponse* clone(void) const;
     virtual bool          hasedisp(void) const { return false; }
     virtual bool          hastdisp(void) const { return false; }
-    virtual double        irf(const GInstDir&     obsDir,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GSkyDir&      srcDir,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
+    virtual double        irf(const GEvent&       event,
+                              const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        npred(const GSkyDir&      srcDir,
-                                const GEnergy&      srcEng,
-                                const GTime&        srcTime,
+    virtual double        npred(const GPhoton&      photon,
                                 const GObservation& obs) const;
     virtual std::string   print(void) const;
 

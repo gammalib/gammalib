@@ -34,6 +34,7 @@
 #include "GCaldb.hpp"
 #include "GCOMResponse.hpp"
 #include "GCOMObservation.hpp"
+#include "GCOMEventBin.hpp"
 #include "GCOMInstDir.hpp"
 #include "GCOMException.hpp"
 
@@ -218,12 +219,8 @@ GCOMResponse* GCOMResponse::clone(void) const
 /***********************************************************************//**
  * @brief Return value of instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon (not used).
- * @param[in] obsTime Observed photon arrival time (not used).
- * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon (not used).
- * @param[in] srcTime True photon arrival time (not used).
+ * @param[in] event Observed event.
+ * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  * @return Instrument response function (cm2 sr-1)
  *
@@ -248,12 +245,8 @@ GCOMResponse* GCOMResponse::clone(void) const
  * (Chi,Psi) is the scatter direction of the event, given in sky coordinates.
  * Phibar is the Compton scatter angle, computed from the energy deposits.
  ***************************************************************************/
-double GCOMResponse::irf(const GInstDir&     obsDir,
-                         const GEnergy&      obsEng,
-                         const GTime&        obsTime,
-                         const GSkyDir&      srcDir,
-                         const GEnergy&      srcEng,
-                         const GTime&        srcTime,
+double GCOMResponse::irf(const GEvent&       event,
+                         const GPhoton&      photon,
                          const GObservation& obs) const
 {
     // Extract COMPTEL observation
@@ -262,18 +255,24 @@ double GCOMResponse::irf(const GInstDir&     obsDir,
         throw GCOMException::bad_observation_type(G_IRF);
     }
 
-    // Extract COMPTEL instrument direction
-    const GCOMInstDir* dir = dynamic_cast<const GCOMInstDir*>(&obsDir);
-    if (dir == NULL) {
-        throw GCOMException::bad_instdir_type(G_IRF);
+    // Extract COMPTEL event bin
+    const GCOMEventBin* bin = dynamic_cast<const GCOMEventBin*>(&event);
+    if (bin == NULL) {
+        throw GCOMException::bad_event_type(G_IRF);
     }
+
+    // Extract event parameters
+    const GCOMInstDir& obsDir = bin->dir();
+
+    // Extract photon parameters
+    const GSkyDir& srcDir = photon.dir();
 
     // Compute angle between true photon arrival direction and scatter
     // direction (Chi,Psi)
-    double phigeo = srcDir.dist_deg(dir->skydir());
+    double phigeo = srcDir.dist_deg(obsDir.dir());
 
     // Compute scatter angle index
-    int iphibar = int(dir->phi() / m_phibar_bin_size);
+    int iphibar = int(obsDir.phibar() / m_phibar_bin_size);
 
     // Extract IAQ value by linear inter/extrapolation in Phigeo
     double phirat  = phigeo / m_phigeo_bin_size; // 0.5 at bin centre
@@ -291,7 +290,7 @@ double GCOMResponse::irf(const GInstDir&     obsDir,
     }
 
     // Get DRG value (units: cm2)
-    double drg = observation->drg()(dir->skydir(), iphibar);
+    double drg = observation->drg()(obsDir.dir(), iphibar);
 
     // Get DRX value (units: sec)
     double drx = observation->drx()(srcDir);
@@ -324,17 +323,13 @@ double GCOMResponse::irf(const GInstDir&     obsDir,
 /***********************************************************************//**
  * @brief Return spatial integral of point spread function
  *
- * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  * @return 1.0
  *
  * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
-double GCOMResponse::npred(const GSkyDir&      srcDir,
-                           const GEnergy&      srcEng,
-                           const GTime&        srcTime,
+double GCOMResponse::npred(const GPhoton&      photon,
                            const GObservation& obs) const
 {
     // Set dummp Npred value
