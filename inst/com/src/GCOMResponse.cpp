@@ -33,6 +33,9 @@
 #include "GFits.hpp"
 #include "GCaldb.hpp"
 #include "GCOMResponse.hpp"
+#include "GCOMObservation.hpp"
+#include "GCOMInstDir.hpp"
+#include "GCOMException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF         "GCOMResponse::irf(GInstDir&,GEnergy&,GTime&,GSkyDir&,"\
@@ -215,12 +218,34 @@ GCOMResponse* GCOMResponse::clone(void) const
  * @brief Return value of instrument response function
  *
  * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
+ * @param[in] obsEng Observed energy of photon (not used).
+ * @param[in] obsTime Observed photon arrival time (not used).
  * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] srcEng True energy of photon (not used).
+ * @param[in] srcTime True photon arrival time (not used).
  * @param[in] obs Observation.
+ * @return Instrument response function (cm2 sr-1)
+ *
+ * @exception GCOMException::bad_observation_type
+ *            Observation is not a COMPTEL observation.
+ * @exception GCOMException::bad_instdir_type
+ *            Instrument direction is not a COMPTEL instrument direction.
+ *
+ * Returns the instrument response function for a given observed photon
+ * direction as function of the assumed true photon direction. The result
+ * is given by
+ * \f[IRF = \frac{IAQ \times DRG \times DRX}{ontime \times ewidth}\f]
+ * where
+ * \f$IRF\f$ is the instrument response function,
+ * \f$IAQ\f$ is the COMPTEL response matrix (sr-1),
+ * \f$DRG\f$ is the geometry factor (cm2),
+ * \f$DRX\f$ is the exposure (s),
+ * \f$ontime\f$ is the ontime (s), and
+ * \f$ewidth\f$ is the energy width (MeV).
+ *
+ * The observed photon direction is spanned by the 3 values (Chi,Psi,Phibar).
+ * (Chi,Psi) is the scatter direction of the event, given in sky coordinates.
+ * Phibar is the Compton scatter angle, computed from the energy deposits.
  ***************************************************************************/
 double GCOMResponse::irf(const GInstDir&     obsDir,
                          const GEnergy&      obsEng,
@@ -230,16 +255,61 @@ double GCOMResponse::irf(const GInstDir&     obsDir,
                          const GTime&        srcTime,
                          const GObservation& obs) const
 {
-    // Initialise IRF value
-    double irf = 0.0;
+    // Extract COMPTEL observation
+    const GCOMObservation* observation = dynamic_cast<const GCOMObservation*>(&obs);
+    if (observation == NULL) {
+        throw GCOMException::bad_observation_type(G_IRF);
+    }
+
+    // Extract COMPTEL instrument direction
+    const GCOMInstDir* dir = dynamic_cast<const GCOMInstDir*>(&obsDir);
+    if (dir == NULL) {
+        throw GCOMException::bad_instdir_type(G_IRF);
+    }
+
+    // Compute angle between true photon arrival direction and scatter
+    // direction (Chi,Psi)
+    double phigeo = srcDir.dist_deg(dir->skydir());
+
+    // Compute scatter angle index
+    int iphibar = int(dir->phi() / m_phibar_bin_size);
+
+    // Extract IAQ value by linear inter/extrapolation in Phigeo
+    double phirat  = phigeo / m_phigeo_bin_size; // 0.5 at bin centre
+    int    iphigeo = int(phirat);                // index into which Phigeo falls
+    double eps     = phirat - iphigeo - 0.5;     // 0.0 at bin centre
+    double iaq     = 0.0;
+    if (iphigeo < m_phigeo_bins) {
+        int i = iphibar * m_phigeo_bins + iphigeo;
+        if (eps < 0.0 && iphigeo > 0) { // interpolate towards left
+            iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
+        }
+        else {                          // interpolate towards right
+            iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
+        }
+    }
+
+    // Get DRG value (units: cm2)
+    double drg = observation->drg()(dir->skydir(), iphibar);
+
+    // Get DRX value (units: sec)
+    double drx = observation->drx(srcDir);
+
+    // Get ontime
+    double ontime = observation->ontime(); // sec
+
+    // Compute IRF value
+    double irf = iaq * drg * drx / ontime;
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(irf) || isinfinite(irf)) {
         std::cout << "*** ERROR: GCOMResponse::irf:";
         std::cout << " NaN/Inf encountered";
-        std::cout << " (";
-        std::cout << "irf=" << irf;
+        std::cout << " (irf=" << irf;
+        std::cout << ", iaq=" << iaq;
+        std::cout << ", drg=" << drg;
+        std::cout << ", drx=" << drx;
         std::cout << ")";
         std::cout << std::endl;
     }
@@ -257,6 +327,8 @@ double GCOMResponse::irf(const GInstDir&     obsDir,
  * @param[in] srcEng True energy of photon.
  * @param[in] srcTime True photon arrival time.
  * @param[in] obs Observation.
+ *
+ * @todo Implement method (is maybe not really needed)
  ***************************************************************************/
 double GCOMResponse::npred(const GSkyDir&      srcDir,
                            const GEnergy&      srcEng,
@@ -361,7 +433,8 @@ void GCOMResponse::load(const std::string& iaqname)
  *
  * @param[in] hdu FITS Image HDU.
  *
- * @todo Implement method
+ * Read the COMPTEL response from IAQ FITS file and convert the IAQ values
+ * into a probability per steradian.
  ***************************************************************************/
 void GCOMResponse::read_iaq(const GFitsImage* hdu)
 {
@@ -380,6 +453,10 @@ void GCOMResponse::read_iaq(const GFitsImage* hdu)
         m_phibar_ref_pixel = hdu->real("CRPIX2");
         m_phibar_bin_size  = hdu->real("CDELT2");
 
+        // Get axes minima (values of first bin)
+        m_phigeo_min = m_phigeo_ref_value + (1.0-m_phigeo_ref_pixel) * m_phigeo_bin_size;
+        m_phibar_min = m_phibar_ref_value + (1.0-m_phibar_ref_pixel) * m_phibar_bin_size;
+
         // Compute IAQ size. Continue only if size is positive
         int size = m_phigeo_bins * m_phibar_bins;
         if (size > 0) {
@@ -393,6 +470,17 @@ void GCOMResponse::read_iaq(const GFitsImage* hdu)
             }
 
         } // endif: size was positive
+
+        // Convert IAQ matrix from probability per Phigeo bin into a
+        // probability per steradian
+        double omega0 = fourpi * std::sin(0.5 * m_phigeo_bin_size * deg2rad);
+        for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
+            double phigeo = iphigeo * m_phigeo_bin_size + m_phigeo_min;
+            double omega  = omega0 * std::sin(phigeo * deg2rad);
+            for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
+                m_iaq[iphigeo+iphibar*m_phigeo_bins] /= omega;
+            }
+        }
 
     } // endif: HDU was valid
 
@@ -418,9 +506,11 @@ std::string GCOMResponse::print(void) const
     result.append("\n"+parformat("Phigeo reference value")+str(m_phigeo_ref_value)+" deg");
     result.append("\n"+parformat("Phigeo reference pixel")+str(m_phigeo_ref_pixel));
     result.append("\n"+parformat("Phigeo bin size")+str(m_phigeo_bin_size)+" deg");
+    result.append("\n"+parformat("Phigeo first bin value")+str(m_phigeo_min)+" deg");
     result.append("\n"+parformat("Phibar reference value")+str(m_phibar_ref_value)+" deg");
     result.append("\n"+parformat("Phibar reference pixel")+str(m_phibar_ref_pixel));
     result.append("\n"+parformat("Phibar bin size")+str(m_phibar_bin_size)+" deg");
+    result.append("\n"+parformat("Phibar first bin value")+str(m_phibar_min)+" deg");
 
     // Return result
     return result;
@@ -447,9 +537,11 @@ void GCOMResponse::init_members(void)
     m_phigeo_ref_value = 0.0;
     m_phigeo_ref_pixel = 0.0;
     m_phigeo_bin_size  = 0.0;
+    m_phigeo_min       = 0.0;
     m_phibar_ref_value = 0.0;
     m_phibar_ref_pixel = 0.0;
     m_phibar_bin_size  = 0.0;
+    m_phibar_min       = 0.0;
     
     // Return
     return;
@@ -472,9 +564,11 @@ void GCOMResponse::copy_members(const GCOMResponse& rsp)
     m_phigeo_ref_value = rsp.m_phigeo_ref_value;
     m_phigeo_ref_pixel = rsp.m_phigeo_ref_pixel;
     m_phigeo_bin_size  = rsp.m_phigeo_bin_size;
+    m_phigeo_min       = rsp.m_phigeo_min;
     m_phibar_ref_value = rsp.m_phibar_ref_value;
     m_phibar_ref_pixel = rsp.m_phibar_ref_pixel;
     m_phibar_bin_size  = rsp.m_phibar_bin_size;
+    m_phibar_min       = rsp.m_phibar_min;
 
     // Return
     return;
@@ -489,10 +583,3 @@ void GCOMResponse::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

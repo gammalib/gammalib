@@ -97,9 +97,11 @@ private:
     double              m_phigeo_ref_value;  //!< Phigeo reference value (deg)
     double              m_phigeo_ref_pixel;  //!< Phigeo reference pixel (starting from 1)
     double              m_phigeo_bin_size;   //!< Phigeo binsize (deg)
+    double              m_phigeo_min;        //!< Phigeo value of first bin (deg)
     double              m_phibar_ref_value;  //!< Phigeo reference value (deg)
     double              m_phibar_ref_pixel;  //!< Phigeo reference pixel (starting from 1)
     double              m_phibar_bin_size;   //!< Phigeo binsize (deg)
+    double              m_phibar_min;        //!< Phigeo value of first bin (deg)
 };
 
 #endif /* GCOMRESPONSE_HPP */
