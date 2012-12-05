@@ -634,8 +634,8 @@ int main(void)
     // Allocate test suit container
     GTestSuites testsuites("COMPTEL instrument specific class testing");
 
-    // Set CALDB environment variable
-    std::string caldb = "CALDB="+com_caldb;
+    // Set GAMMALIB_CALDB environment variable
+    std::string caldb = "GAMMALIB_CALDB="+com_caldb;
     putenv((char*)caldb.c_str());
 
     // Initially assume that we pass all tests
