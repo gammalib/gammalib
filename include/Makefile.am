@@ -38,6 +38,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GInstDir.hpp \
                      GResponse.hpp \
                      GPhoton.hpp \
+                     GSource.hpp \
                      GModelPar.hpp \
                      GModels.hpp \
                      GModel.hpp \

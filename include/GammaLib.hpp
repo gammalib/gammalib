@@ -149,6 +149,7 @@
 #include "GPointing.hpp"
 #include "GResponse.hpp"
 #include "GPhoton.hpp"
+#include "GSource.hpp"
 
 /* __ Model handling _____________________________________________________ */
 #include "GModelPar.hpp"
