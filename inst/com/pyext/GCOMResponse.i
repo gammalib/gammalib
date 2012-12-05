@@ -56,6 +56,7 @@ public:
     // Other Methods
     void        caldb(const std::string& caldb);
     std::string caldb(void) const;
+    std::string iaqname(void) const;
     void        load(const std::string& iaqname);
     void        read_iaq(const GFitsImage* hdu);
 };

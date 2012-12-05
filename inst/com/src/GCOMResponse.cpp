@@ -381,8 +381,20 @@ void GCOMResponse::caldb(const std::string& caldb)
  ***************************************************************************/
 std::string GCOMResponse::caldb(void) const
 {
-    // Return
+    // Return path to calibration database
     return m_caldb;
+}
+
+
+/***********************************************************************//**
+ * @brief Return IAQ filename
+ *
+ * @return IAQ filename.
+ ***************************************************************************/
+std::string GCOMResponse::iaqname(void) const
+{
+    // Return IAQ name
+    return m_iaqname;
 }
 
 
