@@ -3,6 +3,7 @@ doc/html
 doc/man
 html
 latex
+depcomp
 pyext/build/
 pyext/gammalib
 pyext/setup.py
@@ -18,8 +19,11 @@ pyext/setup.py
 *.aux
 *.pdf
 *.toc
+*.Pi
+*.synctex.gz
 .DS_Store
 .libs
+.deps
 Makefile
 stamp-h1
 Makefile.in
@@ -43,7 +47,6 @@ configure
 src/gammalib-setup
 
 # Binaries
-test/test_CTA
 test/test_GApplication
 test/test_GFits
 test/test_GMatrix
@@ -59,4 +62,5 @@ test/test_GVector
 test/test_GXml
 test/test_LAT
 test/test_MWL
-
+test/test_CTA
+test/test_COM
