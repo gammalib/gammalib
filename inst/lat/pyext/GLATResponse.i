@@ -54,9 +54,9 @@ public:
                                 const GObservation& obs) const;
 
     // Implemented virtual methods
-    virtual double       irf(const GEvent& event, const GModelSky& model,
-                             const GEnergy& srcEng, const GTime& srcTime,
-                             const GObservation& obs) const;
+    virtual double irf(const GEvent&       event,
+                       const GSource&      source,
+                       const GObservation& obs) const;
 
     // Other Methods
     void        caldb(const std::string& caldb);
@@ -72,11 +72,11 @@ public:
     void        force_mean(const bool& value);
 
     // Reponse methods
-    double irf(const GLATEventAtom& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
-    double irf(const GLATEventBin& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
+    double irf(const GLATEventAtom& event,
+               const GSource&       source,
+               const GObservation&  obs) const;
+    double irf(const GLATEventBin& event,
+               const GSource&      source,
                const GObservation& obs) const;
 };
 

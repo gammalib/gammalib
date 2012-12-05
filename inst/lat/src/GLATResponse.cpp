@@ -287,27 +287,23 @@ double GLATResponse::irf(const GEvent&       event,
  * @brief Return value of model instrument response function
  *
  * @param[in] event Event.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
  * This method returns the response of the instrument to a specific source
  * model. The method handles both event atoms and event bins.
  ***************************************************************************/
-double GLATResponse::irf(const GEvent& event, const GModelSky& model,
-                         const GEnergy& srcEng, const GTime& srcTime,
+double GLATResponse::irf(const GEvent&       event,
+                         const GSource&      source,
                          const GObservation& obs) const
 {
     // Get IRF value
     double rsp;
     if (event.isatom()) {
-        rsp = irf(static_cast<const GLATEventAtom&>(event), model,
-                  srcEng, srcTime, obs);
+        rsp = irf(static_cast<const GLATEventAtom&>(event), source, obs);
     }
     else {
-        rsp = irf(static_cast<const GLATEventBin&>(event), model,
-                  srcEng, srcTime, obs);
+        rsp = irf(static_cast<const GLATEventBin&>(event), source, obs);
     }
 
     // Return IRF value
@@ -319,16 +315,17 @@ double GLATResponse::irf(const GEvent& event, const GModelSky& model,
  * @brief Return value of model IRF for event atom
  *
  * @param[in] event Event atom.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observations.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented.
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-double GLATResponse::irf(const GLATEventAtom& event, const GModelSky& model,
-                         const GEnergy& srcEng, const GTime& srcTime,
-                         const GObservation& obs) const
+double GLATResponse::irf(const GLATEventAtom& event,
+                         const GSource&       source,
+                         const GObservation&  obs) const
 {
     // Initialise IRF with "no response"
     double irf = 0.0;
@@ -345,9 +342,7 @@ double GLATResponse::irf(const GLATEventAtom& event, const GModelSky& model,
  * @brief Return value of model IRF for event bin
  *
  * @param[in] event Event bin.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
  * @exception GLATException::diffuse_not_found
@@ -369,8 +364,8 @@ double GLATResponse::irf(const GLATEventAtom& event, const GModelSky& model,
  *       quite some time since the distance computation is time
  *       consuming.
  ***************************************************************************/
-double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
-                         const GEnergy& srcEng, const GTime& srcTime,
+double GLATResponse::irf(const GLATEventBin& event,
+                         const GSource&      source,
                          const GObservation& obs) const
 {
     // Initialise response value
@@ -380,12 +375,16 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
     GLATEventCube* cube = event.cube();
 
     // Get pointer on point source spatial model
-    GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(model.spatial());
+    const GModelSpatialPtsrc* ptsrc =
+          dynamic_cast<const GModelSpatialPtsrc*>(source.model());
+
+    // Get source energy
+    GEnergy srcEng = source.energy();
 
     // Search for diffuse response in event cube
     int idiff = -1;
     for (int i = 0; i < cube->ndiffrsp(); ++i) {
-        if (cube->diffname(i) == model.name()) {
+        if (cube->diffname(i) == source.name()) {
             idiff = i;
             break;
         }
@@ -417,7 +416,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
         // Search for mean PSF
         int ipsf = -1;
         for (int i = 0; i < m_ptsrc.size(); ++i) {
-            if (m_ptsrc[i]->name() == model.name()) {
+            if (m_ptsrc[i]->name() == source.name()) {
                 ipsf = i;
                 break;
             }
@@ -431,7 +430,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
                 new GLATMeanPsf(ptsrc->dir(), static_cast<const GLATObservation&>(obs));
 
             // Set source name
-            psf->name(model.name());
+            psf->name(source.name());
 
             // Push mean PSF on stack
             const_cast<GLATResponse*>(this)->m_ptsrc.push_back(psf);
@@ -441,7 +440,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
 
             // Debug option: dump mean PSF
             #if G_DUMP_MEAN_PSF 
-            std::cout << "Added new mean PSF \""+model.name() << "\"" << std::endl;
+            std::cout << "Added new mean PSF \""+source.name() << "\"" << std::endl;
             std::cout << *psf << std::endl;
             #endif
 
@@ -474,7 +473,7 @@ double GLATResponse::irf(const GLATEventBin& event, const GModelSky& model,
 
     // ... otherwise throw an exception
     if ((idiff == -1) && ptsrc == NULL) {
-        throw GLATException::diffuse_not_found(G_IRF_BIN, model.name());
+        throw GLATException::diffuse_not_found(G_IRF_BIN, source.name());
     }
 
     // Return IRF value
