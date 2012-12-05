@@ -318,6 +318,7 @@ GCOMPointing* GCOMObservation::pointing(void) const
  *       <parameter name="DRB" file="..."/>
  *       <parameter name="DRG" file="..."/>
  *       <parameter name="DRX" file="..."/>
+ *       <parameter name="IAQ" file="..."/>
  *     </observation>
  *
  * for a binned observation.
@@ -332,6 +333,7 @@ void GCOMObservation::read(const GXmlElement& xml)
     std::string drbname;
     std::string drgname;
     std::string drxname;
+    std::string iaqname;
 
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
@@ -339,14 +341,14 @@ void GCOMObservation::read(const GXmlElement& xml)
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || npars != 4) {
+    // Verify that XML element has exactly 5 parameters
+    if (xml.elements() != 5 || npars != 5) {
         throw GException::xml_invalid_parnum(G_READ, xml,
-              "COMPTEL observation requires exactly 4 parameters.");
+              "COMPTEL observation requires exactly 5 parameters.");
     }
 
     // Extract parameters
-    int npar[] = {0, 0, 0, 0};
+    int npar[] = {0, 0, 0, 0, 0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
@@ -370,23 +372,32 @@ void GCOMObservation::read(const GXmlElement& xml)
             npar[2]++;
         }
 
-        // Handle PSF
+        // Handle DRX
         else if (par->attribute("name") == "DRX") {
             drxname = par->attribute("file");
             npar[3]++;
         }
 
+        // Handle IAQ
+        else if (par->attribute("name") == "IAQ") {
+            iaqname = par->attribute("file");
+            npar[4]++;
+        }
+
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
         throw GException::xml_invalid_parnames(G_READ, xml,
-              "Require \"DRE\", \"DRB\", \"DRG\" and \"DRX\""
+              "Require \"DRE\", \"DRB\", \"DRG\", \"DRX\"  and \"IAQ\""
               " parameters.");
     }
 
     // Load observation
     load(drename, drbname, drgname, drxname);
+
+    // Load IAQ
+    response(iaqname);
 
     // Return
     return;
@@ -411,29 +422,31 @@ void GCOMObservation::read(const GXmlElement& xml)
  *       <parameter name="DRB" file="..."/>
  *       <parameter name="DRG" file="..."/>
  *       <parameter name="DRX" file="..."/>
+ *       <parameter name="IAQ" file="..."/>
  *     </observation>
  *
  * for a binned observation.
  ***************************************************************************/
 void GCOMObservation::write(GXmlElement& xml) const
 {
-    // If XML element has 0 nodes then append 4 parameter nodes
+    // If XML element has 0 nodes then append 5 parameter nodes
     if (xml.elements() == 0) {
         xml.append(new GXmlElement("parameter name=\"DRE\""));
         xml.append(new GXmlElement("parameter name=\"DRB\""));
         xml.append(new GXmlElement("parameter name=\"DRG\""));
         xml.append(new GXmlElement("parameter name=\"DRX\""));
+        xml.append(new GXmlElement("parameter name=\"IAQ\""));
     }
 
-    // Verify that XML element has exactly 4 parameters
-    if (xml.elements() != 4 || xml.elements("parameter") != 4) {
+    // Verify that XML element has exactly 5 parameters
+    if (xml.elements() != 5 || xml.elements("parameter") != 5) {
         throw GException::xml_invalid_parnum(G_WRITE, xml,
-              "COMPTEL observation requires exactly 4 parameters.");
+              "COMPTEL observation requires exactly 5 parameters.");
     }
 
     // Set or update parameter attributes
-    int npar[] = {0, 0, 0, 0};
-    for (int i = 0; i < 4; ++i) {
+    int npar[] = {0, 0, 0, 0, 0};
+    for (int i = 0; i < 5; ++i) {
 
         // Get parameter element
         GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
@@ -462,12 +475,22 @@ void GCOMObservation::write(GXmlElement& xml) const
             npar[3]++;
         }
 
+        // Handle IAQ
+        else if (par->attribute("name") == "IAQ") {
+            std::string iaqname = "";
+            if (m_response != NULL) {
+                iaqname = m_response->iaqname();
+            }
+            par->attribute("file", iaqname);
+            npar[4]++;
+        }
+
     } // endfor: looped over all parameters
 
     // Verify that all required parameters are present
-    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
+    if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1) {
         throw GException::xml_invalid_parnames(G_WRITE, xml,
-              "Require \"DRE\", \"DRB\", \"DRG\" and \"DRX\""
+              "Require \"DRE\", \"DRB\", \"DRG\", \"DRX\"  and \"IAQ\""
               " parameters.");
     }
 
