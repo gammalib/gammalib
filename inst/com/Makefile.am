@@ -30,8 +30,10 @@ pkginclude_HEADERS = include/GCOMException.hpp \
                      include/GCOMLib.hpp
 
 # Calibration files to distribute
-irfs = caldb/u47569_iaq.fits.gz \
-       caldb/u47741_iaq.fits.gz
+irfs = caldb/u47512_iaq.fits.gz \
+       caldb/u47569_iaq.fits.gz \
+       caldb/u47741_iaq.fits.gz \
+       caldb/u48091_iaq.fits.gz
 
 # Build libtool library
 noinst_LTLIBRARIES = libcom.la
