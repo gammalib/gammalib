@@ -21,7 +21,7 @@
 /**
  * @file GModelExtendedSource.cpp
  * @brief Extended source model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -74,8 +74,8 @@ GModelExtendedSource::GModelExtendedSource(void) : GModelSky()
  *
  * @param[in] xml XML element.
  ***************************************************************************/
-GModelExtendedSource::GModelExtendedSource(const GXmlElement& xml)
-                                           : GModelSky()
+GModelExtendedSource::GModelExtendedSource(const GXmlElement& xml) :
+                      GModelSky()
 {
     // Initialise members
     init_members();
@@ -107,8 +107,8 @@ GModelExtendedSource::GModelExtendedSource(const GXmlElement& xml)
  * @param[in] spectral Spectral model component.
  ***************************************************************************/
 GModelExtendedSource::GModelExtendedSource(const GModelRadial&   radial,
-                                           const GModelSpectral& spectral)
-                                           : GModelSky()
+                                           const GModelSpectral& spectral) :
+                      GModelSky()
 {
     // Initialise members
     init_members();
@@ -137,8 +137,8 @@ GModelExtendedSource::GModelExtendedSource(const GModelRadial&   radial,
  * @param[in] spectral Spectral XML element.
  ***************************************************************************/
 GModelExtendedSource::GModelExtendedSource(const GXmlElement& radial,
-                                           const GXmlElement& spectral)
-                                           : GModelSky(radial, spectral)
+                                           const GXmlElement& spectral) :
+                      GModelSky(radial, spectral)
 {
     // Initialise members
     init_members();
@@ -164,8 +164,8 @@ GModelExtendedSource::GModelExtendedSource(const GXmlElement& radial,
  *
  * @param[in] model Extended source model.
  ***************************************************************************/
-GModelExtendedSource::GModelExtendedSource(const GModelExtendedSource& model)
-                                           : GModelSky(model)
+GModelExtendedSource::GModelExtendedSource(const GModelExtendedSource& model) :
+                      GModelSky(model)
 {
     // Initialise members
     init_members();
@@ -201,6 +201,7 @@ GModelExtendedSource::~GModelExtendedSource(void)
  * @brief Assignment operator
  *
  * @param[in] model Extended source model.
+ * @return Extended source model.
  ***************************************************************************/
 GModelExtendedSource& GModelExtendedSource::operator=(const GModelExtendedSource& model)
 {
@@ -256,6 +257,8 @@ void GModelExtendedSource::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of extended source model.
  ***************************************************************************/
 GModelExtendedSource* GModelExtendedSource::clone(void) const
 {
@@ -302,7 +305,7 @@ void GModelExtendedSource::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief Write extended model into XML element
  *
- * @param[in] xml Source library.
+ * @param[in] xml XML element.
  ***************************************************************************/
 void GModelExtendedSource::write(GXmlElement& xml) const
 {
@@ -324,7 +327,7 @@ void GModelExtendedSource::write(GXmlElement& xml) const
         src = new GXmlElement("source");
         src->attribute("name") = name();
         if (spectral() != NULL) src->append(new GXmlElement("spectrum"));
-        if (radial()   != NULL) src->append(new GXmlElement("spatialModel"));
+        if (spatial()  != NULL) src->append(new GXmlElement("spatialModel"));
         xml.append(src);
     }
 
@@ -343,9 +346,9 @@ void GModelExtendedSource::write(GXmlElement& xml) const
     }
 
     // Write spatial model
-    if (radial() != NULL) {
+    if (spatial() != NULL) {
         GXmlElement* rad = static_cast<GXmlElement*>(src->element("spatialModel", 0));
-        radial()->write(*rad);
+        spatial()->write(*rad);
     }
 
     // Return
@@ -354,43 +357,9 @@ void GModelExtendedSource::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Return pointer to radial component
- *
- * This method returns NULL is the spatial component is not a radial model.
- ***************************************************************************/
-GModelRadial* GModelExtendedSource::radial(void) const
-{
-    // Get pointer on radial component
-    GModelRadial* ptr = dynamic_cast<GModelRadial*>(m_spatial);
-
-    // Return pointer
-    return ptr;
-}
-
-
-/***********************************************************************//**
- * @brief Return source location
- *
- * @exception GException::no_extended_source
- *            No extended source model component found.
- ***************************************************************************/
-GSkyDir GModelExtendedSource::dir(void) const
-{
-    // Get pointer on point radial model
-    GModelRadial* ptr = dynamic_cast<GModelRadial*>(m_spatial);
-
-    // Throw an exception if the spatial model is not a point source
-    if (ptr == NULL) {
-        GException::no_extended_source(G_DIR, name());
-    }
-
-    // Return source location
-    return (ptr->dir());
-}
-
-
-/***********************************************************************//**
  * @brief Print model information
+ *
+ * @return String containing model information.
  ***************************************************************************/
 std::string GModelExtendedSource::print(void) const
 {
@@ -427,7 +396,7 @@ void GModelExtendedSource::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model Point source model.
+ * @param[in] model Extended source model.
  ***************************************************************************/
 void GModelExtendedSource::copy_members(const GModelExtendedSource& model)
 {
@@ -452,7 +421,7 @@ void GModelExtendedSource::free_members(void)
  * @param[in] radial XML element.
  *
  * @exception GException::model_invalid_spatial
- *            Invalid radial spatial model type encountered.
+ *            Invalid radial model type encountered.
  ***************************************************************************/
 GModelRadial* GModelExtendedSource::xml_radial(const GXmlElement& radial) const
 {
@@ -476,10 +445,3 @@ GModelRadial* GModelExtendedSource::xml_radial(const GXmlElement& radial) const
     // Return pointer
     return ptr;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
