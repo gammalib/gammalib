@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-07-00
 
 Author(s) : Juergen Knoedlseder
 
-December, 3rd, 2012
+December, 5rd, 2012
 
 
 1. Introduction
@@ -13,7 +13,9 @@ changes made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-None
+Dependency tracking has been enabled for the Python interface files,
+so that the Python wrappers will be regenerated automatically upon
+modification of the interface files.
 
 
 3. Application module
@@ -33,6 +35,9 @@ not need to implement the output streamers anymore. Classes that do not
 derive from GBase are essentially internal classes that are not expected
 to be used by a GammaLib user.
 
+Another fundamental class is GRegistry, from which all registries are
+derived.
+
 
 5. FITS I/O Interface
 ---------------------
@@ -48,7 +53,7 @@ None
 
 7. Model module
 ---------------
-None
+The GSkyModel class has been adapted to the new IRF interface.
 
 
 8. Numerics module
@@ -58,7 +63,18 @@ None
 
 9. Observation module
 ---------------------
-None
+Added the class GSource which defines a gamma-ray source. This class was
+mainly introduced to simplify the instrument response interface, and
+regroups all attributes that are relative to a gamma-ray source. For the
+moment those comprise the source name, the spatial model, the photon
+energy and the photon arrival time.
+
+A new interface has been defined for all public response function that
+replaces all observed attributes in the interface by the GEvent class
+and all true source attributes by either GPhoton or GSource. This
+considerably reduces the number of interface parameters, allows for an
+easy and transparent interface extension, and prepares the path for
+optimizations.
 
 
 10. Optimization module
@@ -88,21 +104,27 @@ None
 
 15. Multi-wavelength interface
 ------------------------------
-None
+The MWL response was adapted to the new response interface.
 
 
 16. Fermi-LAT interface
 ----------------------
-None
+The Fermi-LAT response was adapted to the new response interface.
 
 
 17. CTA interface
 -----------------
-None
+The CTA response class was refactored. Separate classes have been defined
+to deal with the effective area (GCTAAeff), the point spread function
+(GCTAPsf) and the energy dispersion (GCTAEdisp). Various response formats
+are implemented by derived classes from these abstract base classes.
+This allows now an easy adaption and extension of the response classes.
+
+The CTA response was also adapted to the new response interface.
 
 
 18. COMPTEL interface
 -----------------
 An interface has been added to deal with data from the COMPTEL telescope
-aboard CGRO.
+aboard CGRO. The interface reads the FITS files provides from HEASARC.
 
