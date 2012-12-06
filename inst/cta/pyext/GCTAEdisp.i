@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GCTAResponseTable.i - CTA response table class             *
+ *                GCTAEdisp.i - CTA energy dispersion base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,69 +19,53 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAResponseTable.i
- * @brief CTA response table class definition
+ * @file GCTAEdisp.i
+ * @brief CTA energy dispersion base class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GCTAEdisp.hpp"
 #include "GTools.hpp"
-#include "GCTAResponseTable.hpp"
 %}
-
-/* Define std::vector<double> as valid return type (otherwise a memory leak
-   occurs. */
-%include "std_vector.i"
-%template(VecDouble) std::vector<double>;
 
 
 /***********************************************************************//**
- * @class GCTAResponseTable
+ * @class GCTAEdisp
  *
- * @brief Interface for the CTA response table class
+ * @brief Abstract base class for the CTA energy dispersion
  ***************************************************************************/
-class GCTAResponseTable : public GBase {
+class GCTAEdisp : public GBase {
 
 public:
     // Constructors and destructors
-    GCTAResponseTable(void);
-    GCTAResponseTable(const GCTAResponseTable& table);
-    GCTAResponseTable(const GFitsTable* hdu);
-    virtual ~GCTAResponseTable(void);
+    GCTAEdisp(void);
+    GCTAEdisp(const GCTAEdisp& edisp);
+    virtual ~GCTAEdisp(void);
 
-    // Interpolation operators
-    std::vector<double> operator()(const double& arg) const;
-    std::vector<double> operator()(const double& arg1, const double& arg2) const;
-    double              operator()(const int& index, const double& arg) const;
-    double              operator()(const int& index, const double& arg1,
-                                   const double& arg2) const;
+    // Pure virtual operators
+    /*
+    virtual double operator()(const double& logE, 
+                              const double& theta = 0.0, 
+                              const double& phi = 0.0,
+                              const double& zenith = 0.0,
+                              const double& azimuth = 0.0,
+                              const bool&   etrue = true) const = 0;
+    */
 
-    // Methods
-    void               clear(void);
-    GCTAResponseTable* clone(void) const;
-    int                size(void) const;
-    int                elements(void) const;
-    int                axes(void) const;
-    int                axis(const int& index) const;
-    double             axis_lo(const int& index, const int& bin) const;
-    double             axis_hi(const int& index, const int& bin) const;
-    void               axis_linear(const int& index);
-    void               axis_log10(const int& index);
-    void               axis_radians(const int& index);
-    void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable* hdu);
-    void               write(GFitsTable* hdu) const;
+    // Pure virtual methods
+    virtual void        clear(void) = 0;
+    virtual GCTAEdisp*  clone(void) const = 0;
+    virtual void        load(const std::string& filename) = 0;
+    virtual std::string filename(void) const = 0;
 };
 
 
 /***********************************************************************//**
- * @brief GCTAResponse class extension
+ * @brief GCTAEdisp class extension
  ***************************************************************************/
-%extend GCTAResponseTable {
+%extend GCTAEdisp {
     char *__str__() {
         return tochar(self->print());
-    }
-    GCTAResponseTable copy() {
-        return (*self);
     }
 };

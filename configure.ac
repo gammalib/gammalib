@@ -1182,7 +1182,7 @@ if [test "x$add_gammalib_prefix" = "xyes"]; then
 fi
 if [test "x$add_opt_local" = "xyes"]; then
     LDFLAGS="$LDFLAGS -L/opt/local/lib"
-    TEST_ENV_DIR="$TEST_ENV_DIR:/opt/local/lib"
+    #TEST_ENV_DIR="$TEST_ENV_DIR:/opt/local/lib"
 fi
 if [test "x$add_usr_local" = "xyes"]; then
     LDFLAGS="$LDFLAGS -L/usr/local/lib"

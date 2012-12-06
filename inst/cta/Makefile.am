@@ -18,6 +18,15 @@ sources = src/GCTASupport.cpp \
           src/GCTAResponse.cpp \
           src/GCTAResponse_helpers.cpp \
           src/GCTAResponseTable.cpp \
+          src/GCTAAeff.cpp \
+          src/GCTAAeffPerfTable.cpp \
+          src/GCTAAeffArf.cpp \
+          src/GCTAAeff2D.cpp \
+          src/GCTAPsf.cpp \
+          src/GCTAPsfPerfTable.cpp \
+          src/GCTAPsfVector.cpp \
+          src/GCTAPsf2D.cpp \
+          src/GCTAEdisp.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
@@ -41,6 +50,15 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTARoi.hpp \
                      include/GCTAResponse.hpp \
                      include/GCTAResponseTable.hpp \
+                     include/GCTAAeff.hpp \
+                     include/GCTAAeffPerfTable.hpp \
+                     include/GCTAAeffArf.hpp \
+                     include/GCTAAeff2D.hpp \
+                     include/GCTAPsf.hpp \
+                     include/GCTAPsfPerfTable.hpp \
+                     include/GCTAPsfVector.hpp \
+                     include/GCTAPsf2D.hpp \
+                     include/GCTAEdisp.hpp \
                      include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
                      include/GCTAModelRadialGauss.hpp \

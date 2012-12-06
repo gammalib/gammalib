@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GCTAResponseTable.i - CTA response table class             *
+ *            GCTAPsf2D.i - CTA 2D point spread function class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,69 +19,66 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAResponseTable.i
- * @brief CTA response table class definition
+ * @file GCTAPsf2D.i
+ * @brief CTA 2D point spread function class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GCTAPsf2D.hpp"
 #include "GTools.hpp"
-#include "GCTAResponseTable.hpp"
 %}
-
-/* Define std::vector<double> as valid return type (otherwise a memory leak
-   occurs. */
-%include "std_vector.i"
-%template(VecDouble) std::vector<double>;
 
 
 /***********************************************************************//**
- * @class GCTAResponseTable
+ * @class GCTAPsf2D
  *
- * @brief Interface for the CTA response table class
+ * @brief CTA 2D point spread function class
  ***************************************************************************/
-class GCTAResponseTable : public GBase {
+class GCTAPsf2D : public GCTAPsf {
 
 public:
     // Constructors and destructors
-    GCTAResponseTable(void);
-    GCTAResponseTable(const GCTAResponseTable& table);
-    GCTAResponseTable(const GFitsTable* hdu);
-    virtual ~GCTAResponseTable(void);
+    GCTAPsf2D(void);
+    GCTAPsf2D(const std::string& filename);
+    GCTAPsf2D(const GCTAPsf2D& psf);
+    virtual ~GCTAPsf2D(void);
 
-    // Interpolation operators
-    std::vector<double> operator()(const double& arg) const;
-    std::vector<double> operator()(const double& arg1, const double& arg2) const;
-    double              operator()(const int& index, const double& arg) const;
-    double              operator()(const int& index, const double& arg1,
-                                   const double& arg2) const;
+    // Operators
+    double operator()(const double& delta,
+                      const double& logE, 
+                      const double& theta = 0.0, 
+                      const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0,
+                      const bool&   etrue = true) const;
 
-    // Methods
-    void               clear(void);
-    GCTAResponseTable* clone(void) const;
-    int                size(void) const;
-    int                elements(void) const;
-    int                axes(void) const;
-    int                axis(const int& index) const;
-    double             axis_lo(const int& index, const int& bin) const;
-    double             axis_hi(const int& index, const int& bin) const;
-    void               axis_linear(const int& index);
-    void               axis_log10(const int& index);
-    void               axis_radians(const int& index);
-    void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable* hdu);
-    void               write(GFitsTable* hdu) const;
+    // Implemented pure virtual methods
+    void        clear(void);
+    GCTAPsf2D*  clone(void) const;
+    void        load(const std::string& filename);
+    std::string filename(void) const;
+    double      mc(GRan&         ran,
+                   const double& logE, 
+                   const double& theta = 0.0, 
+                   const double& phi = 0.0,
+                   const double& zenith = 0.0,
+                   const double& azimuth = 0.0,
+                   const bool&   etrue = true) const;
+    double      delta_max(const double& logE, 
+                          const double& theta = 0.0, 
+                          const double& phi = 0.0,
+                          const double& zenith = 0.0,
+                          const double& azimuth = 0.0,
+                          const bool&   etrue = true) const;
 };
 
 
 /***********************************************************************//**
- * @brief GCTAResponse class extension
+ * @brief GCTAPsf2D class extension
  ***************************************************************************/
-%extend GCTAResponseTable {
+%extend GCTAPsf2D {
     char *__str__() {
         return tochar(self->print());
-    }
-    GCTAResponseTable copy() {
-        return (*self);
     }
 };

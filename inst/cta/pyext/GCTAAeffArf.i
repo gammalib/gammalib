@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GCTAResponseTable.i - CTA response table class             *
+ *                 GCTAAeffArf.i - CTA ARF effective area class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,69 +19,65 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAResponseTable.i
- * @brief CTA response table class definition
+ * @file GCTAAeffArf.hpp
+ * @brief CTA ARF effective area class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GCTAAeffArf.hpp"
 #include "GTools.hpp"
-#include "GCTAResponseTable.hpp"
 %}
-
-/* Define std::vector<double> as valid return type (otherwise a memory leak
-   occurs. */
-%include "std_vector.i"
-%template(VecDouble) std::vector<double>;
 
 
 /***********************************************************************//**
- * @class GCTAResponseTable
+ * @class GCTAAeffArf
  *
- * @brief Interface for the CTA response table class
+ * @brief CTA performance table effective area class
  ***************************************************************************/
-class GCTAResponseTable : public GBase {
+class GCTAAeffArf : public GCTAAeff {
 
 public:
     // Constructors and destructors
-    GCTAResponseTable(void);
-    GCTAResponseTable(const GCTAResponseTable& table);
-    GCTAResponseTable(const GFitsTable* hdu);
-    virtual ~GCTAResponseTable(void);
+    GCTAAeffArf(void);
+    GCTAAeffArf(const std::string& filename);
+    GCTAAeffArf(const GCTAAeffArf& cta);
+    virtual ~GCTAAeffArf(void);
 
-    // Interpolation operators
-    std::vector<double> operator()(const double& arg) const;
-    std::vector<double> operator()(const double& arg1, const double& arg2) const;
-    double              operator()(const int& index, const double& arg) const;
-    double              operator()(const int& index, const double& arg1,
-                                   const double& arg2) const;
+    // Operators
+    double operator()(const double& logE, 
+                      const double& theta = 0.0, 
+                      const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0,
+                      const bool&   etrue = true) const;
+
+    // Implemented pure virtual methods
+    void         clear(void);
+    GCTAAeffArf* clone(void) const;
+    void         load(const std::string& filename);
+    std::string  filename(void) const;
 
     // Methods
-    void               clear(void);
-    GCTAResponseTable* clone(void) const;
-    int                size(void) const;
-    int                elements(void) const;
-    int                axes(void) const;
-    int                axis(const int& index) const;
-    double             axis_lo(const int& index, const int& bin) const;
-    double             axis_hi(const int& index, const int& bin) const;
-    void               axis_linear(const int& index);
-    void               axis_log10(const int& index);
-    void               axis_radians(const int& index);
-    void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable* hdu);
-    void               write(GFitsTable* hdu) const;
+    int           size(void) const;
+    void          sigma(const double& sigma);
+    const double& sigma(void) const;
+    void          thetacut(const double& thetacut);
+    const double& thetacut(void) const;
+    void          scale(const double& scale);
+    const double& scale(void) const;
+    void          read_arf(const GFitsTable* hdu);
 };
 
 
 /***********************************************************************//**
- * @brief GCTAResponse class extension
+ * @brief GCTAAeffArf class extension
  ***************************************************************************/
-%extend GCTAResponseTable {
+%extend GCTAAeffArf {
     char *__str__() {
         return tochar(self->print());
     }
-    GCTAResponseTable copy() {
+    GCTAAeffArf copy() {
         return (*self);
     }
 };

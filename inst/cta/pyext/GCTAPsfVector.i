@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GCTAResponseTable.i - CTA response table class             *
+ *        GCTAPsfVector.i - CTA point spread function vector class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,69 +19,72 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAResponseTable.i
- * @brief CTA response table class definition
+ * @file GCTAPsfVector.i
+ * @brief CTA point spread function vector class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
+#include "GCTAPsfVector.hpp"
 #include "GTools.hpp"
-#include "GCTAResponseTable.hpp"
 %}
-
-/* Define std::vector<double> as valid return type (otherwise a memory leak
-   occurs. */
-%include "std_vector.i"
-%template(VecDouble) std::vector<double>;
 
 
 /***********************************************************************//**
- * @class GCTAResponseTable
+ * @class GCTAPsfVector
  *
- * @brief Interface for the CTA response table class
+ * @brief CTA vector point spread function class
+ *
+ * This class implements the CTA point spread function response as function
+ * of energy as determined from a FITS table.
  ***************************************************************************/
-class GCTAResponseTable : public GBase {
+class GCTAPsfVector : public GCTAPsf {
 
 public:
     // Constructors and destructors
-    GCTAResponseTable(void);
-    GCTAResponseTable(const GCTAResponseTable& table);
-    GCTAResponseTable(const GFitsTable* hdu);
-    virtual ~GCTAResponseTable(void);
+    GCTAPsfVector(void);
+    GCTAPsfVector(const std::string& filename);
+    GCTAPsfVector(const GCTAPsfVector& psf);
+    virtual ~GCTAPsfVector(void);
 
-    // Interpolation operators
-    std::vector<double> operator()(const double& arg) const;
-    std::vector<double> operator()(const double& arg1, const double& arg2) const;
-    double              operator()(const int& index, const double& arg) const;
-    double              operator()(const int& index, const double& arg1,
-                                   const double& arg2) const;
+    // Operators
+    double operator()(const double& delta,
+                      const double& logE, 
+                      const double& theta = 0.0, 
+                      const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0,
+                      const bool&   etrue = true) const;
 
-    // Methods
-    void               clear(void);
-    GCTAResponseTable* clone(void) const;
-    int                size(void) const;
-    int                elements(void) const;
-    int                axes(void) const;
-    int                axis(const int& index) const;
-    double             axis_lo(const int& index, const int& bin) const;
-    double             axis_hi(const int& index, const int& bin) const;
-    void               axis_linear(const int& index);
-    void               axis_log10(const int& index);
-    void               axis_radians(const int& index);
-    void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable* hdu);
-    void               write(GFitsTable* hdu) const;
+    // Implemented pure virtual methods
+    void           clear(void);
+    GCTAPsfVector* clone(void) const;
+    void           load(const std::string& filename);
+    std::string    filename(void) const;
+    double         mc(GRan&         ran,
+                      const double& logE, 
+                      const double& theta = 0.0, 
+                      const double& phi = 0.0,
+                      const double& zenith = 0.0,
+                      const double& azimuth = 0.0,
+                      const bool&   etrue = true) const;
+    double         delta_max(const double& logE, 
+                             const double& theta = 0.0, 
+                             const double& phi = 0.0,
+                             const double& zenith = 0.0,
+                             const double& azimuth = 0.0,
+                             const bool&   etrue = true) const;
+
+    // Other methods
+    void read(const GFitsTable* hdu);
 };
 
 
 /***********************************************************************//**
- * @brief GCTAResponse class extension
+ * @brief GCTAPsfVector class extension
  ***************************************************************************/
-%extend GCTAResponseTable {
+%extend GCTAPsfVector {
     char *__str__() {
         return tochar(self->print());
-    }
-    GCTAResponseTable copy() {
-        return (*self);
     }
 };
