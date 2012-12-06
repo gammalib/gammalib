@@ -122,7 +122,7 @@ if '@WITH_INST_LAT_TRUE@' != '#':
 	sys.stdout.write("Include Fermi/LAT instrument interface in gammalib Python bindings.\n")
 	inst_modules.append('lat')
 if '@WITH_INST_COM_TRUE@' != '#':
-	print "Include COMPTEL instrument interface in gammalib Python bindings."
+	sys.stdout.write("Include COMPTEL instrument interface in gammalib Python bindings.\n")
 	inst_modules.append('com')
 
 # Set extension definition for core modules
