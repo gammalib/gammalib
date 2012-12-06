@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GResponse.cpp  -  Response abstract base class            *
+ *                GResponse.cpp - Response abstract base class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -37,6 +37,8 @@
 #include "GSkyDir.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GModelSpatialPtsrc.hpp"
+#include "GModelRadial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF_EXTENDED         "GResponse::irf_extended(GInstDir&, GEnergy&,"\
@@ -148,48 +150,40 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  * @brief Return value of instrument response function
  *
  * @param[in] event Event.
- * @param[in] model Source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * Returns the instrument response function for a given event, given a sky
- * model, the incident photon energy, the photon arrival time, and an
+ * Returns the instrument response function for a given event, source and
  * observation.
  *
  * Note that this method applies the deadtime correction, so that the
  * response function can be directly multiplied by the exposure time (also
  * known as ontime).
- *
- * @todo Throw exception if model pointer is invalid.
  ***************************************************************************/
 double GResponse::irf(const GEvent&       event,
-                      const GModelSky&    model,
-                      const GEnergy&      srcEng,
-                      const GTime&        srcTime,
+                      const GSource&      source,
                       const GObservation& obs) const
 {
     // Initialise IRF value
     double irf = 0.0;
 
-    // Get model pointers
-    const GModelPointSource*    ptsrc  = dynamic_cast<const GModelPointSource*>(&model);
-    const GModelExtendedSource* extsrc = dynamic_cast<const GModelExtendedSource*>(&model);
-    const GModelDiffuseSource*  difsrc = dynamic_cast<const GModelDiffuseSource*>(&model);
+    // Is model a point source?
+    if (dynamic_cast<const GModelSpatialPtsrc*>(source.model()) != NULL) {
+        irf = irf_ptsrc(event, source, obs);
+    }
 
-    // Call model dependent method
-    if (ptsrc != NULL) {
-        irf = irf_ptsrc(event, *ptsrc, srcEng, srcTime, obs);
+    // Is model an extended source?
+    else if (dynamic_cast<const GModelRadial*>(source.model()) != NULL) {
+        irf = irf_extended(event, source, obs);
     }
-    else if (extsrc != NULL) {
-        irf = irf_extended(event, *extsrc, srcEng, srcTime, obs);
-    }
-    else if (difsrc != NULL) {
-        irf = irf_diffuse(event, *difsrc, srcEng, srcTime, obs);
+
+    // ... otherwise we have a diffuse model
+    else {
+        irf = irf_diffuse(event, source, obs);
     }
 
     // Apply deadtime correction
-    irf *= obs.deadc(srcTime);
+    irf *= obs.deadc(source.time());
 
     // Return IRF value
     return irf;
@@ -200,22 +194,34 @@ double GResponse::irf(const GEvent&       event,
  * @brief Return value of point source instrument response function
  *
  * @param[in] event Observed event.
- * @param[in] model Point source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
+ * @return Value of instrument response function for a point source.
+ *
+ * This method returns the value of the instrument response function for a
+ * point source. If the source is not a point source, the method returns 0.
  ***************************************************************************/
-double GResponse::irf_ptsrc(const GEvent&            event,
-                            const GModelPointSource& model,
-                            const GEnergy&           srcEng,
-                            const GTime&             srcTime,
-                            const GObservation&      obs) const
+double GResponse::irf_ptsrc(const GEvent&       event,
+                            const GSource&      source,
+                            const GObservation& obs) const
 {
-    // Set Photon
-    GPhoton photon(model.dir(), srcEng, srcTime);
+    // Initialise IRF
+    double irf = 0.0;
+
+    // Get point source spatial model
+    const GModelSpatialPtsrc* src =
+          dynamic_cast<const GModelSpatialPtsrc*>(source.model());
+
+    // Continue only if model is valid
+    if (src != NULL) {
     
-    // Compute IRF
-    double irf = this->irf(event, photon, obs);
+        // Set Photon
+        GPhoton photon(src->dir(), source.energy(), source.time());
+    
+        // Compute IRF
+        irf = this->irf(event, photon, obs);
+
+    }
 
     // Return IRF
     return irf;
@@ -226,22 +232,19 @@ double GResponse::irf_ptsrc(const GEvent&            event,
  * @brief Return value of extended source instrument response function
  *
  * @param[in] event Observed event.
- * @param[in] model Exteded source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @todo Generic method is not yet implemented.
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
  ***************************************************************************/
-double GResponse::irf_extended(const GEvent&               event,
-                               const GModelExtendedSource& model,
-                               const GEnergy&              srcEng,
-                               const GTime&                srcTime,
-                               const GObservation&         obs) const
+double GResponse::irf_extended(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const
 {
     // Feature not yet implemented
     throw GException::feature_not_implemented(G_IRF_EXTENDED,
-          "Extended IRF not yet implemented.");
+          "Extended IRF not implemented for this class.");
 
     // Return IRF
     return 0.0;
@@ -252,22 +255,19 @@ double GResponse::irf_extended(const GEvent&               event,
  * @brief Return value of diffuse source instrument response function
  *
  * @param[in] event Observed event.
- * @param[in] model Diffuse source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @todo Generic method is not yet implemented.
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
  ***************************************************************************/
-double GResponse::irf_diffuse(const GEvent&              event,
-                              const GModelDiffuseSource& model,
-                              const GEnergy&             srcEng,
-                              const GTime&               srcTime,
-                              const GObservation&        obs) const
+double GResponse::irf_diffuse(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const
 {
     // Feature not yet implemented
     throw GException::feature_not_implemented(G_IRF_DIFFUSE,
-          "Diffuse IRF not yet implemented.");
+          "Diffuse IRF not implemented for this class.");
 
     // Return IRF
     return 0.0;
@@ -277,47 +277,37 @@ double GResponse::irf_diffuse(const GEvent&              event,
 /***********************************************************************//**
  * @brief Return data space integral of instrument response function
  *
- * @param[in] model Source model.
- * @param[in] srcEng True photon energy.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
  * Returns the data space integral of the instrument response function for
- * a given sky model, given the incident photon energy, the photon arrival
- * time, and an observations.
+ * a given source and a particular observation.
  *
- * Note that this method applies the deadtime correction, so that the
- * result can be directly multiplied by the exposure time (also known as
- * ontime).
- *
- * @todo Throw exception if model pointer is invalid.
+ * The method applies the deadtime correction, so that the result can be
+ * directly multiplied by the exposure time (also known as ontime).
  ***************************************************************************/
-double GResponse::npred(const GModelSky&    model,
-                        const GEnergy&      srcEng,
-                        const GTime&        srcTime,
-                        const GObservation& obs) const
+double GResponse::npred(const GSource& source, const GObservation& obs) const
 {
     // Initialise Npred value
     double npred = 0.0;
 
-    // Get model pointers
-    const GModelPointSource*    ptsrc  = dynamic_cast<const GModelPointSource*>(&model);
-    const GModelExtendedSource* extsrc = dynamic_cast<const GModelExtendedSource*>(&model);
-    const GModelDiffuseSource*  difsrc = dynamic_cast<const GModelDiffuseSource*>(&model);
+    // Is model a point source?
+    if (dynamic_cast<const GModelSpatialPtsrc*>(source.model()) != NULL) {
+        npred = npred_ptsrc(source, obs);
+    }
 
-    // Call model dependent method
-    if (ptsrc != NULL) {
-        npred = npred_ptsrc(*ptsrc, srcEng, srcTime, obs);
+    // Is model an extended source?
+    else if (dynamic_cast<const GModelRadial*>(source.model()) != NULL) {
+        npred = npred_extended(source, obs);
     }
-    else if (extsrc != NULL) {
-        npred = npred_extended(*extsrc, srcEng, srcTime, obs);
-    }
-    else if (difsrc != NULL) {
-        npred = npred_diffuse(*difsrc, srcEng, srcTime, obs);
+
+    // ... otherwise we have a diffuse model
+    else {
+        npred = npred_diffuse(source, obs);
     }
 
     // Apply deadtime correction
-    npred *= obs.deadc(srcTime);
+    npred *= obs.deadc(source.time());
 
     // Return response value
     return npred;
@@ -325,23 +315,36 @@ double GResponse::npred(const GModelSky&    model,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of point source model
+ * @brief Return ROI integral of point source model
  *
- * @param[in] model Point source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
+ * @return Integral of point source model over ROI.
+ *
+ * This method returns the spatial integral of a point source model over the
+ * region of interest. If the source is not a point source, the method
+ * returns 0.
  ***************************************************************************/
-double GResponse::npred_ptsrc(const GModelPointSource& model,
-                              const GEnergy&           srcEng,
-                              const GTime&             srcTime,
-                              const GObservation&      obs) const
+double GResponse::npred_ptsrc(const GSource& source,
+                              const GObservation& obs) const
 {
-    // Set photon
-    GPhoton photon(model.dir(), srcEng, srcTime);
+    // Initialise Npred
+    double npred = 0.0;
 
-    // Compute Npred
-    double npred = this->npred(photon, obs);
+    // Get point source spatial model
+    const GModelSpatialPtsrc* src =
+          dynamic_cast<const GModelSpatialPtsrc*>(source.model());
+
+    // Continue only if model is valid
+    if (src != NULL) {
+    
+        // Set Photon
+        GPhoton photon(src->dir(), source.energy(), source.time());
+
+        // Compute Npred
+        npred = this->npred(photon, obs);
+
+    }
 
     // Return Npred
     return npred;
@@ -349,70 +352,79 @@ double GResponse::npred_ptsrc(const GModelPointSource& model,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of extended source model
+ * @brief Return ROI integral of extended source model
  *
- * @param[in] model Extended source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
+ * @return Integral of extended source model over ROI.
+ *
+ * This method returns the spatial integral of an extended source model over
+ * the region of interest. If the source is not a point source, the method
+ * returns 0.
  ***************************************************************************/
-double GResponse::npred_extended(const GModelExtendedSource& model,
-                                 const GEnergy&              srcEng,
-                                 const GTime&                srcTime,
-                                 const GObservation&         obs) const
+double GResponse::npred_extended(const GSource& source,
+                                 const GObservation& obs) const
 {
     // Initialise Npred value
     double npred = 0.0;
+
+    // Get radial model
+    const GModelRadial* src = dynamic_cast<const GModelRadial*>(source.model());
+
+    // Continue only if model is valid
+    if (src != NULL) {
     
-    // Compute rotation matrix to convert from native coordinates given by
-    // (theta,phi) into celestial coordinates.
-    GMatrix ry;
-    GMatrix rz;
-    GMatrix rot;
-    ry.eulery(model.radial()->dec() - 90.0);
-    rz.eulerz(-model.radial()->ra());
-    rot = transpose(ry * rz);
+        // Compute rotation matrix to convert from native coordinates given
+        // by (theta,phi) into celestial coordinates.
+        GMatrix ry;
+        GMatrix rz;
+        GMatrix rot;
+        ry.eulery(src->dec() - 90.0);
+        rz.eulerz(-src->ra());
+        rot = transpose(ry * rz);
 
-    // Set offset angle integration range
-    double theta_min = 0.0;
-    double theta_max = model.radial()->theta_max();
+        // Set offset angle integration range
+        double theta_min = 0.0;
+        double theta_max = src->theta_max();
 
-    // Perform offset angle integration if interval is valid
-    if (theta_max > theta_min) {
+        // Perform offset angle integration if interval is valid
+        if (theta_max > theta_min) {
 
-        // Setup integration kernel
-        GResponse::npred_kern_theta integrand(this,
-                                              model.radial(),
-                                              &srcEng,
-                                              &srcTime,
-                                              &obs,
-                                              &rot);
+            // Setup integration kernel
+            GResponse::npred_kern_theta integrand(this,
+                                                  src,
+                                                  &(source.energy()),
+                                                  &(source.time()),
+                                                  &obs,
+                                                  &rot);
 
-        // Integrate over theta
-        GIntegral integral(&integrand);
-        npred = integral.romb(theta_min, theta_max);
+            // Integrate over theta
+            GIntegral integral(&integrand);
+            npred = integral.romb(theta_min, theta_max);
 
-        // Compile option: Show integration results
-        #if defined(G_DEBUG_NPRED_EXTENDED)
-        std::cout << "GResponse::npred_extended:";
-        std::cout << " theta_min=" << theta_min;
-        std::cout << " theta_max=" << theta_max;
-        std::cout << " npred=" << npred << std::endl;
+            // Compile option: Show integration results
+            #if defined(G_DEBUG_NPRED_EXTENDED)
+            std::cout << "GResponse::npred_extended:";
+            std::cout << " theta_min=" << theta_min;
+            std::cout << " theta_max=" << theta_max;
+            std::cout << " npred=" << npred << std::endl;
+            #endif
+
+        } // endif: offset angle range was valid
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(npred) || isinfinite(npred)) {
+            std::cout << "*** ERROR: GResponse::npred_extended:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (npred=" << npred;
+            std::cout << ", theta_min=" << theta_min;
+            std::cout << ", theta_max=" << theta_max;
+            std::cout << ")" << std::endl;
+        }
         #endif
 
-    } // endif: offset angle range was valid
-
-    // Debug: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
-        std::cout << "*** ERROR: GResponse::npred_extended:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (npred=" << npred;
-        std::cout << ", theta_min=" << theta_min;
-        std::cout << ", theta_max=" << theta_max;
-        std::cout << ")" << std::endl;
-    }
-    #endif
+    } // endif: radial model was valid
 
     // Return Npred
     return npred;
@@ -422,24 +434,18 @@ double GResponse::npred_extended(const GModelExtendedSource& model,
 /***********************************************************************//**
  * @brief Return spatial integral of diffuse source model
  *
- * @param[in] model Diffuse source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
  * @exception GException::feature_not_implemented
  *            Method not yet implemented.
- *
- * @todo Implement method.
  ***************************************************************************/
-double GResponse::npred_diffuse(const GModelDiffuseSource& model,
-                                const GEnergy&             srcEng,
-                                const GTime&               srcTime,
-                                const GObservation&        obs) const
+double GResponse::npred_diffuse(const GSource& source,
+                                const GObservation& obs) const
 {
     // Feature not yet implemented
     throw GException::feature_not_implemented(G_NPRED_DIFFUSE,
-                      "Method for extended source not yet implemented.");
+          "Method for extended source not implemented for this class.");
 
     // Return Npred
     return 0.0;

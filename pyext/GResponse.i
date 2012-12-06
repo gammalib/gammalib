@@ -44,53 +44,37 @@ public:
     virtual ~GResponse(void);
 
     // Pure virtual methods
-    virtual void        clear(void) = 0;
-    virtual GResponse*  clone(void) const = 0;
-    virtual bool        hasedisp(void) const = 0;
-    virtual bool        hastdisp(void) const = 0;
-    virtual double      irf(const GEvent&       event,
-                            const GPhoton&      photon,
+    virtual void       clear(void) = 0;
+    virtual GResponse* clone(void) const = 0;
+    virtual bool       hasedisp(void) const = 0;
+    virtual bool       hastdisp(void) const = 0;
+    virtual double     irf(const GEvent&       event,
+                           const GPhoton&      photon,
+                           const GObservation& obs) const = 0;
+    virtual double     npred(const GPhoton&      photon,
                             const GObservation& obs) const = 0;
-    virtual double      npred(const GPhoton&      photon,
-                              const GObservation& obs) const = 0;
 
     // Virtual methods
     virtual double irf(const GEvent&       event,
-                       const GModelSky&    model,
-                       const GEnergy&      srcEng,
-                       const GTime&        srcTime,
+                       const GSource&      source,
                        const GObservation& obs) const;
-    virtual double irf_ptsrc(const GEvent&            event,
-                             const GModelPointSource& model,
-                             const GEnergy&           srcEng,
-                             const GTime&             srcTime,
-                             const GObservation&   obs) const;
-    virtual double irf_extended(const GEvent&               event,
-                                const GModelExtendedSource& model,
-                                const GEnergy&              srcEng,
-                                const GTime&                srcTime,
-                                const GObservation&         obs) const;
-    virtual double irf_diffuse(const GEvent&              event,
-                               const GModelDiffuseSource& model,
-                               const GEnergy&             srcEng,
-                               const GTime&               srcTime,
-                               const GObservation&        obs) const;
-    virtual double npred(const GModelSky&    model,
-                         const GEnergy&      srcEng,
-                         const GTime&        srcTime,
+    virtual double irf_ptsrc(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const;
+    virtual double irf_extended(const GEvent&       event,
+                                const GSource&      source,
+                                const GObservation& obs) const;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
+    virtual double npred(const GSource&      source,
                          const GObservation& obs) const;
-    virtual double npred_ptsrc(const GModelPointSource& model,
-                               const GEnergy&           srcEng,
-                               const GTime&             srcTime,
-                               const GObservation&      obs) const;
-    virtual double npred_extended(const GModelExtendedSource& model,
-                                  const GEnergy&              srcEng,
-                                  const GTime&                srcTime,
-                                  const GObservation&         obs) const;
-    virtual double npred_diffuse(const GModelDiffuseSource& model,
-                                 const GEnergy&             srcEng,
-                                 const GTime&               srcTime,
-                                 const GObservation&        obs) const;
+    virtual double npred_ptsrc(const GSource&      source,
+                               const GObservation& obs) const;
+    virtual double npred_extended(const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double npred_diffuse(const GSource&      source,
+                                 const GObservation& obs) const;
 };
 
 

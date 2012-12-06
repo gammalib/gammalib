@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GResponse.hpp  -  Abstract response base class             *
+ *               GResponse.hpp - Abstract response base class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -32,14 +32,10 @@
 #include "GBase.hpp"
 #include "GEvent.hpp"
 #include "GPhoton.hpp"
-//
-#include "GSkyDir.hpp"
+#include "GSource.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GModelSky.hpp"
-#include "GModelPointSource.hpp"
-#include "GModelExtendedSource.hpp"
-#include "GModelDiffuseSource.hpp"
+#include "GModelRadial.hpp"
 #include "GIntegrand.hpp"
 #include "GMatrix.hpp"
 
@@ -86,41 +82,25 @@ public:
 
     // Virtual methods
     virtual double irf(const GEvent&       event,
-                       const GModelSky&    model,
-                       const GEnergy&      srcEng,
-                       const GTime&        srcTime,
+                       const GSource&      source,
                        const GObservation& obs) const;
-    virtual double irf_ptsrc(const GEvent&            event,
-                             const GModelPointSource& model,
-                             const GEnergy&           srcEng,
-                             const GTime&             srcTime,
-                             const GObservation&      obs) const;
-    virtual double irf_extended(const GEvent&               event,
-                                const GModelExtendedSource& model,
-                                const GEnergy&              srcEng,
-                                const GTime&                srcTime,
-                                const GObservation&         obs) const;
-    virtual double irf_diffuse(const GEvent&              event,
-                               const GModelDiffuseSource& model,
-                               const GEnergy&             srcEng,
-                               const GTime&               srcTime,
-                               const GObservation&        obs) const;
-    virtual double npred(const GModelSky&    model,
-                         const GEnergy&      srcEng,
-                         const GTime&        srcTime,
+    virtual double irf_ptsrc(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const;
+    virtual double irf_extended(const GEvent&       event,
+                                const GSource&      source,
+                                const GObservation& obs) const;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
+    virtual double npred(const GSource&      source,
                          const GObservation& obs) const;
-    virtual double npred_ptsrc(const GModelPointSource& model,
-                               const GEnergy&           srcEng,
-                               const GTime&             srcTime,
-                               const GObservation&      obs) const;
-    virtual double npred_extended(const GModelExtendedSource& model,
-                                  const GEnergy&              srcEng,
-                                  const GTime&                srcTime,
-                                  const GObservation&         obs) const;
-    virtual double npred_diffuse(const GModelDiffuseSource& model,
-                                 const GEnergy&             srcEng,
-                                 const GTime&               srcTime,
-                                 const GObservation&        obs) const;
+    virtual double npred_ptsrc(const GSource&      source,
+                               const GObservation& obs) const;
+    virtual double npred_extended(const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double npred_diffuse(const GSource&      source,
+                                 const GObservation& obs) const;
 
 protected:
     // Protected methods
@@ -142,7 +122,7 @@ protected:
                          m_srcEng(srcEng),
                          m_srcTime(srcTime),
                          m_obs(obs),
-                         m_rot(rot) { return; }
+                         m_rot(rot) { }
         double eval(double theta);
     protected:
         const GResponse*    m_rsp;           //!< Pointer to response
@@ -150,7 +130,7 @@ protected:
         const GEnergy*      m_srcEng;        //!< Pointer to true photon energy
         const GTime*        m_srcTime;       //!< Pointer to true photon arrival time
         const GObservation* m_obs;           //!< Pointer to observation
-        const GMatrix*      m_rot;           //!< Rotation matrix
+        const GMatrix*      m_rot;           //!< Pointer to rotation matrix
     };
 
     // Npred phi integration kernel
@@ -170,14 +150,14 @@ protected:
                        m_rot(rot),
                        m_theta(theta),
                        m_cos_theta(std::cos(theta)),
-                       m_sin_theta(sin_theta) { return; }
+                       m_sin_theta(sin_theta) { }
         double eval(double phi);
     protected:
         const GResponse*    m_rsp;           //!< Pointer to response
         const GEnergy*      m_srcEng;        //!< Pointer to true photon energy
         const GTime*        m_srcTime;       //!< Pointer to true photon arrival time
         const GObservation* m_obs;           //!< Pointer to observation
-        const GMatrix*      m_rot;           //!< Rotation matrix
+        const GMatrix*      m_rot;           //!< Pointer to rotation matrix
         double              m_theta;         //!< Offset angle (radians)
         double              m_cos_theta;     //!< cosine of offset angle
         double              m_sin_theta;     //!< Sine of offset angle
