@@ -21,7 +21,7 @@
 /**
  * @file GModel.cpp
  * @brief Abstract model base class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -66,6 +66,9 @@ GModel::GModel(void)
  * @brief XML constructor
  *
  * @param[in] xml XML element.
+ *
+ * Construct model from XML element. The method extracts the "name",
+ * "instrument" and "id" attributes from the model node.
  ***************************************************************************/
 GModel::GModel(const GXmlElement& xml)
 {
@@ -77,6 +80,9 @@ GModel::GModel(const GXmlElement& xml)
 
     // Set instruments
     instruments(xml.attribute("instrument"));
+
+    // Set observation identifiers
+    ids(xml.attribute("id"));
 
     // Return
     return;
@@ -124,6 +130,7 @@ GModel::~GModel(void)
  * @brief Assignment operator
  *
  * @param[in] model Model.
+ * @return Model.
  ***************************************************************************/
 GModel& GModel::operator=(const GModel& model)
 {
@@ -147,9 +154,10 @@ GModel& GModel::operator=(const GModel& model)
 
 
 /***********************************************************************//**
- * @brief Returns reference to model parameter
+ * @brief Returns reference to model parameter by index
  *
  * @param[in] index Parameter index [0,...,size()-1].
+ * @return Reference to model parameter.
  *
  * @exception GException::out_of_range
  *            Parameter index is out of range.
@@ -169,9 +177,10 @@ GModelPar& GModel::operator[](const int& index)
 
 
 /***********************************************************************//**
- * @brief Returns reference to model parameter (const version)
+ * @brief Returns reference to model parameter by index (const version)
  *
  * @param[in] index Parameter index [0,...,size()-1].
+ * @return Const reference to model parameter.
  *
  * @exception GException::out_of_range
  *            Parameter index is out of range.
@@ -191,9 +200,10 @@ const GModelPar& GModel::operator[](const int& index) const
 
 
 /***********************************************************************//**
- * @brief Returns reference to model parameter
+ * @brief Returns reference to model parameter by name
  *
  * @param[in] name Parameter name.
+ * @return Reference to model parameter.
  *
  * @exception GException::par_not_found
  *            Parameter with specified name not found in container.
@@ -219,9 +229,10 @@ GModelPar& GModel::operator[](const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Returns reference to model parameter (const version)
+ * @brief Returns reference to model parameter by name const version)
  *
  * @param[in] name Parameter name.
+ * @return Reference to model parameter.
  *
  * @exception GException::par_not_found
  *            Parameter with specified name not found in container.
@@ -253,6 +264,30 @@ const GModelPar& GModel::operator[](const std::string& name) const
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Returns instruments to which model applies
+ *
+ * Returns a comma separated list of instruments to which model applies. If
+ * no instrument exists then an empty string is returned.
+ ***************************************************************************/
+std::string GModel::instruments(void) const
+{
+    // Initialise string
+    std::string result;
+
+    // Attach all instruments
+    for (int i = 0; i < m_instruments.size(); ++i) {
+        if (i > 0) {
+            result += ",";
+        }
+        result += m_instruments[i];
+    }
+
+    // Return
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Set instruments to which model applies
  *
  * @param[in] instruments String of instruments.
@@ -280,22 +315,23 @@ void GModel::instruments(const std::string& instruments)
 
 
 /***********************************************************************//**
- * @brief Returns instruments to which model applies
+ * @brief Returns observation identifiers to which model applies
  *
- * Returns a comma separated list of instruments to which model applies. If
- * no instruments exist then an empty list is returned.
+ * Returns a comma separated list of observation identifiers to which model
+ * applies. If no observation identifier exists then an empty string is
+ * returned.
  ***************************************************************************/
-std::string GModel::instruments(void) const
+std::string GModel::ids(void) const
 {
     // Initialise string
     std::string result;
 
-    // Attach all instruments
-    for (int i = 0; i < m_instruments.size(); ++i) {
+    // Attach all observation identifiers
+    for (int i = 0; i < m_ids.size(); ++i) {
         if (i > 0) {
             result += ",";
         }
-        result += m_instruments[i];
+        result += m_ids[i];
     }
 
     // Return
@@ -304,15 +340,48 @@ std::string GModel::instruments(void) const
 
 
 /***********************************************************************//**
- * @brief Verifies if model is valid for a given instrument
+ * @brief Set observation identifiers to which model applies
  *
- * @param[in] name Instrument name.
+ * @param[in] ids String of observation identifiers.
  *
- * Checks if specified instrument name is in list of applicable instruments.
- * If the list of applicable instruments is empty the model applies to all
- * possible instruments.
+ * Sets the observation identifiers to which the model applies from a comma
+ * separated list of strings. If the observation identifier string is empty,
+ * the model is considered to apply to all observation identifiers.
  ***************************************************************************/
-bool GModel::isvalid(const std::string& name) const
+void GModel::ids(const std::string& ids)
+{
+    // Clear observation identifier vector
+    m_ids.clear();
+
+    // Extract observation identifiers
+    std::vector<std::string> id = split(ids, ",");
+
+    // Attach all observation identifiers
+    for (int i = 0; i < id.size(); ++i) {
+        m_ids.push_back(toupper(strip_whitespace(id[i])));
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Verifies if model is valid for a given instrument and identifier
+ *
+ * @param[in] instrument Instrument name.
+ * @param[in] id Observation identifier.
+ * @return Validity flag
+ *
+ * Checks if specified instrument name and observation identifier is in list
+ * of applicable instruments and identifiers. The check is case insensitive.
+ *
+ * If the list of applicable instruments is empty, the model applies to all
+ * possible instruments. If the list of applicable observation identifiers
+ * is empty, the model applies to all identifiers.
+ ***************************************************************************/
+bool GModel::isvalid(const std::string& instrument,
+                     const std::string& id) const
 {
     // Initialise validity
     bool valid = true;
@@ -321,14 +390,33 @@ bool GModel::isvalid(const std::string& name) const
     if (!m_instruments.empty()) {
 
         // Convert instrument name to upper case
-        std::string uname = toupper(name);
+        std::string uinstrument = toupper(instrument);
+
+        // Initialise validity flag
+        valid = false;
+
+        // Check if instrument is in list
+        for (int i = 0; i < m_instruments.size(); ++i) {
+            if (uinstrument == m_instruments[i]) {
+                valid = true;
+                break;
+            }
+        }
+
+    }
+
+    // Check if model applies to observation identifier
+    if (valid && !m_ids.empty()) {
+
+        // Convert observation identifier to upper case
+        std::string uid = toupper(id);
 
         // Initialise validity flag
         valid = false;
 
         // Check if name is in list
-        for (int i = 0; i < m_instruments.size(); ++i) {
-            if (uname == m_instruments[i]) {
+        for (int i = 0; i < m_ids.size(); ++i) {
+            if (uid == m_ids[i]) {
                 valid = true;
                 break;
             }
@@ -355,6 +443,7 @@ void GModel::init_members(void)
     // Initialise members
     m_name.clear();
     m_instruments.clear();
+    m_ids.clear();
     m_pars.clear();
 
     // Return
@@ -372,6 +461,7 @@ void GModel::copy_members(const GModel& model)
     // Copy members
     m_name        = model.m_name;
     m_instruments = model.m_instruments;
+    m_ids         = model.m_ids;
     m_pars        = model.m_pars;
 
     // Return
@@ -406,6 +496,18 @@ std::string GModel::print_name_instrument(void) const
                 result.append(", ");
             }
             result.append(m_instruments[i]);
+        }
+    }
+    else {
+        result.append("all");
+    }
+    result.append("\n"+parformat("Observation identifiers"));
+    if (!m_ids.empty()) {
+        for (int i = 0; i < m_ids.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(m_ids[i]);
         }
     }
     else {

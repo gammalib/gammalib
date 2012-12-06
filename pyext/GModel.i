@@ -58,12 +58,15 @@ public:
     virtual void        write(GXmlElement& xml) const = 0;
 
     // Implemented methods
-    int         size(void) const;
-    std::string name(void) const;
-    void        name(const std::string& name);
-    void        instruments(const std::string& instruments);
-    std::string instruments(void) const;
-    bool        isvalid(const std::string& name) const;
+    int                 size(void) const;
+    std::string         name(void) const;
+    void                name(const std::string& name);
+    std::string         instruments(void) const;
+    void                instruments(const std::string& instruments);
+    std::string         ids(void) const;
+    void                ids(const std::string& ids);
+    bool                isvalid(const std::string& instruments,
+                                const std::string& ids) const;
 };
 
 
@@ -75,10 +78,12 @@ public:
         return tochar(self->print());
     }
     GModelPar& __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     GModelPar& __getitem__(const std::string& name) {
         return (*self)[name];
@@ -88,8 +93,9 @@ public:
             (*self)[index] = val;
             return;
         }
-        else
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
     void __setitem__(const std::string& name, const GModelPar& val) {
         (*self)[name] = val;

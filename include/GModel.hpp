@@ -95,9 +95,12 @@ public:
     int                 size(void) const { return m_pars.size(); }
     std::string         name(void) const { return m_name; }
     void                name(const std::string& name) { m_name=name; }
-    void                instruments(const std::string& instruments);
     std::string         instruments(void) const;
-    bool                isvalid(const std::string& name) const;
+    void                instruments(const std::string& instruments);
+    std::string         ids(void) const;
+    void                ids(const std::string& ids);
+    bool                isvalid(const std::string& instruments,
+                                const std::string& ids) const;
 
 protected:
     // Protected methods
@@ -109,6 +112,7 @@ protected:
     // Proteced members
     std::string              m_name;         //!< Model name
     std::vector<std::string> m_instruments;  //!< Instruments to which model applies
+    std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
 };
 
