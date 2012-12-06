@@ -36,7 +36,7 @@ def loadtxt(filename):
 	data = []
 
 	# Loop over all rows in file
-	for row in [_.split() for _ in file(filename)]:
+	for row in [_.split() for _ in open(filename)]:
 		row_data = []
 		for item in row:
 			row_data.append(float(item))
