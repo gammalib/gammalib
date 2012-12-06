@@ -554,6 +554,19 @@ if test "x$with_lat" = "xyes"; then
 fi
 AM_CONDITIONAL(WITH_INST_LAT, test "x$with_lat" = "xyes")
 
+# Checks for COMPTEL interface
+AC_ARG_WITH([com],
+            [AS_HELP_STRING([--with-com],
+                            [compile in COMPTEL specific interface [default=yes]])],
+            [],
+            [with_com=yes])
+if test "x$with_com" = "xyes"; then
+  AC_CHECK_FILE([inst/com/Makefile.am],
+                [with_com=yes],
+                [with_com=no])
+fi
+AM_CONDITIONAL(WITH_INST_COM, test "x$with_com" = "xyes")
+
 
 #############################################################################
 # Checks for header files                                                   #
@@ -843,7 +856,6 @@ else
                   pyext/gammalib/fits_wrap.cpp pyext/gammalib/fits.py
                   pyext/gammalib/linalg_wrap.cpp pyext/gammalib/linalg.py
                   pyext/gammalib/model_wrap.cpp pyext/gammalib/model.py
-                  pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py
                   pyext/gammalib/numerics_wrap.cpp pyext/gammalib/numerics.py
                   pyext/gammalib/obs_wrap.cpp pyext/gammalib/obs.py
                   pyext/gammalib/opt_wrap.cpp pyext/gammalib/opt.py
@@ -852,21 +864,25 @@ else
                   pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
                   pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py],,
                  [has_wrappers="no"])
-  if test "x$with_mwl" = "xyes"; then
-    AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
-                   [has_wrappers="no"])
-  fi
-  if test "x$with_lat" = "xyes"; then
-    AC_CHECK_FILES([pyext/gammalib/lat_wrap.cpp pyext/gammalib/lat.py],,
-                   [has_wrappers="no"])
-  fi
-  if test "x$with_cta" = "xyes"; then
-    AC_CHECK_FILES([pyext/gammalib/cta_wrap.cpp pyext/gammalib/cta.py],,
-                   [has_wrappers="no"])
-  fi
-  if test "x$has_wrappers" = "xno"; then
-    AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
-  fi
+if test "x$with_mwl" = "xyes"; then
+  AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
+                 [has_wrappers="no"])
+fi
+if test "x$with_lat" = "xyes"; then
+  AC_CHECK_FILES([pyext/gammalib/lat_wrap.cpp pyext/gammalib/lat.py],,
+                 [has_wrappers="no"])
+fi
+if test "x$with_cta" = "xyes"; then
+  AC_CHECK_FILES([pyext/gammalib/cta_wrap.cpp pyext/gammalib/cta.py],,
+                 [has_wrappers="no"])
+fi
+if test "x$with_com" = "xyes"; then
+  AC_CHECK_FILES([pyext/gammalib/com_wrap.cpp pyext/gammalib/com.py],,
+                 [has_wrappers="no"])
+fi
+if test "x$has_wrappers" = "xno"; then
+  AC_MSG_WARN([Python wrapper(s) missing. Requires swig for wrapper generation.])
+fi
 
   # Do we have wrappers or can we created wrappers?
   can_wrappers="no"
@@ -1239,6 +1255,9 @@ fi
 if test "x$with_lat" = "xyes"; then
   AC_CONFIG_FILES([inst/lat/Makefile])
 fi
+if test "x$with_com" = "xyes"; then
+  AC_CONFIG_FILES([inst/com/Makefile])
+fi
 AC_OUTPUT
 
 
@@ -1326,6 +1345,11 @@ if test "x$with_cta" = "xyes"; then
   echo "  * CTA interface                (yes)"
 else
   echo "  - CTA interface                (no)"
+fi
+if test "x$with_com" = "xyes"; then
+  echo "  * COMPTEL interface            (yes)"
+else
+  echo "  - COMPTEL interface            (no)"
 fi
 
 # Dump Doxygen information

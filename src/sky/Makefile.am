@@ -14,6 +14,7 @@ sources = GSkyDir.cpp \
           GWcslib.cpp \
           GWcsAZP.cpp \
           GWcsCAR.cpp \
+          GWcsMER.cpp \
           GWcsTAN.cpp \
           GWcsSTG.cpp \
           GWcsHPX.cpp \

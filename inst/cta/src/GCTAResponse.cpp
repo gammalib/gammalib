@@ -255,12 +255,8 @@ GCTAResponse* GCTAResponse::clone(void) const
 /***********************************************************************//**
  * @brief Return value of instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] event Observed event.
+ * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
  * @exception GCTAException::bad_observation_type
@@ -272,12 +268,8 @@ GCTAResponse* GCTAResponse::clone(void) const
  *
  * @todo Set polar angle phi of photon in camera system
  ***************************************************************************/
-double GCTAResponse::irf(const GInstDir&     obsDir,
-                         const GEnergy&      obsEng,
-                         const GTime&        obsTime,
-                         const GSkyDir&      srcDir,
-                         const GEnergy&      srcEng,
-                         const GTime&        srcTime,
+double GCTAResponse::irf(const GEvent&       event,
+                         const GPhoton&      photon,
                          const GObservation& obs) const
 {
     // Get pointer on CTA observation
@@ -293,10 +285,18 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
     }
 
     // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
     if (dir == NULL) {
         throw GCTAException::bad_instdir_type(G_IRF);
     }
+
+    // Get event attributes
+    const GSkyDir& obsDir = dir->dir();
+    const GEnergy& obsEng = event.energy();
+
+    // Get photon attributes
+    const GSkyDir& srcDir = photon.dir();
+    const GEnergy& srcEng = photon.energy();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -311,7 +311,7 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
 
     // Determine angular separation between true and measured photon
     // direction in radians
-    double delta = dir->dist(srcDir);
+    double delta = obsDir.dist(srcDir);
 
     // Get maximum angular separation for which PSF is significant
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
@@ -366,9 +366,7 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
 /***********************************************************************//**
  * @brief Return spatial integral of point spread function
  *
- * @param[in] srcDir True photon arrival direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
  * @exception GCTAException::bad_observation_type
@@ -381,9 +379,7 @@ double GCTAResponse::irf(const GInstDir&     obsDir,
  * @todo Set polar angle phi of photon in camera system
  * @todo Write method documentation
  ***************************************************************************/
-double GCTAResponse::npred(const GSkyDir&      srcDir,
-                           const GEnergy&      srcEng,
-                           const GTime&        srcTime,
+double GCTAResponse::npred(const GPhoton&      photon,
                            const GObservation& obs) const
 {
     // Get pointer on CTA observation
@@ -403,6 +399,11 @@ double GCTAResponse::npred(const GSkyDir&      srcDir,
     if (events == NULL) {
         throw GException::no_list(G_NPRED);
     }
+
+    // Get photon attributes
+    const GSkyDir& srcDir  = photon.dir();
+    const GEnergy& srcEng  = photon.energy();
+    const GTime&   srcTime = photon.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -516,7 +517,7 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
             // Set measured photon arrival direction
             GCTAInstDir inst_dir;
-            inst_dir.skydir(sky_dir);
+            inst_dir.dir(sky_dir);
 
             // Allocate event
             event = new GCTAEventAtom;
@@ -821,12 +822,8 @@ std::string GCTAResponse::print(void) const
 /***********************************************************************//**
  * @brief Return value of extended source instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] model Extended source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] event Observed event.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
  * @exception GCTAException::bad_observation_type
@@ -835,6 +832,8 @@ std::string GCTAResponse::print(void) const
  *            No valid CTA pointing found.
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction.
+ * @exception GCTAException::bad_model_type
+ *            Model is not a radial model.
  *
  * Performs integration of the model times IRF over the true photon arrival
  * direction in the coordinate system of the source model for azimuthally
@@ -857,13 +856,9 @@ std::string GCTAResponse::print(void) const
  * view, this approximation should be fine. It helps in fact a lot in
  * speeding up the computations.
  ***************************************************************************/
-double GCTAResponse::irf_extended(const GInstDir&             obsDir,
-                                  const GEnergy&              obsEng,
-                                  const GTime&                obsTime,
-                                  const GModelExtendedSource& model,
-                                  const GEnergy&              srcEng,
-                                  const GTime&                srcTime,
-                                  const GObservation&         obs) const
+double GCTAResponse::irf_extended(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
@@ -878,10 +873,24 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     }
 
     // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
     if (dir == NULL) {
         throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
     }
+
+    // Get pointer on radial model
+    const GModelRadial* model = dynamic_cast<const GModelRadial*>(source.model());
+    if (model == NULL) {
+        throw GCTAException::bad_model_type(G_IRF_EXTENDED);
+    }
+
+    // Get event attributes
+    const GSkyDir& obsDir = dir->dir();
+    const GEnergy& obsEng = event.energy();
+
+    // Get source attributes
+    const GSkyDir& centre = model->dir();
+    const GEnergy& srcEng = source.energy();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -889,15 +898,15 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 
     // Determine angular distance between measured photon direction and model
     // centre [radians]
-    double zeta = model.dir().dist(dir->skydir());
+    double zeta = centre.dist(dir->dir());
 
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
-    double eta = pnt->dir().dist(dir->skydir());
+    double eta = pnt->dir().dist(dir->dir());
 
     // Determine angular distance between model centre and pointing direction
     // [radians]
-    double lambda = model.dir().dist(pnt->dir());
+    double lambda = centre.dist(pnt->dir());
 
     // Compute azimuth angle of pointing in model system [radians]
     // Will be comprised in interval [0,pi]
@@ -922,12 +931,9 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
     double theta = eta;
     double phi   = 0.0; //TODO: Implement Phi dependence
 
-    // Get PSF parameters.
-    //GCTAPsfPars psf_parameters = psf_dummy_sigma(srcLogEng, srcTheta);
-
     // Get maximum PSF and source radius in radians.
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
-    double src_max   = model.radial()->theta_max();
+    double src_max   = model->theta_max();
 
     // Set radial model zenith angle range
     double rho_min = (zeta > delta_max) ? zeta - delta_max : 0.0;
@@ -944,7 +950,7 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 
         // Setup integration kernel
         cta_irf_radial_kern_rho integrand(this,
-                                          model.radial(),
+                                          model,
                                           zenith,
                                           azimuth,
                                           srcLogEng,
@@ -989,12 +995,8 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
 /***********************************************************************//**
  * @brief Return value of diffuse source instrument response function
  *
- * @param[in] obsDir Observed photon direction.
- * @param[in] obsEng Observed energy of photon.
- * @param[in] obsTime Observed photon arrival time.
- * @param[in] model Diffuse source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] event Observed event.
+ * @param[in] source Source.
  * @param[in] obs Observation.
  *
  * Performs integration of the spatial component of the diffuse source model
@@ -1015,13 +1017,9 @@ double GCTAResponse::irf_extended(const GInstDir&             obsDir,
  * The integration kernels for this method are implemented by the response
  * helper classes cta_irf_diffuse_kern_theta and cta_irf_diffuse_kern_phi.
  ***************************************************************************/
-double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
-                                 const GEnergy&             obsEng,
-                                 const GTime&               obsTime,
-                                 const GModelDiffuseSource& model,
-                                 const GEnergy&             srcEng,
-                                 const GTime&               srcTime,
-                                 const GObservation&        obs) const
+double GCTAResponse::irf_diffuse(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
@@ -1036,10 +1034,23 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
     }
 
     // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&obsDir);
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
     if (dir == NULL) {
         throw GCTAException::bad_instdir_type(G_IRF_DIFFUSE);
     }
+
+    // Get pointer on spatial model
+    const GModelSpatial* model = dynamic_cast<const GModelSpatial*>(source.model());
+    if (model == NULL) {
+        throw GCTAException::bad_model_type(G_IRF_EXTENDED);
+    }
+
+    // Get event attributes
+    const GSkyDir& obsDir = dir->dir();
+    const GEnergy& obsEng = event.energy();
+
+    // Get source attributes
+    const GEnergy& srcEng = source.energy();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -1047,7 +1058,7 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
 
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
-    double eta = pnt->dir().dist(dir->skydir());
+    double eta = pnt->dir().dist(dir->dir());
 
     // Get log10(E/TeV) of true and measured photon energies
     double srcLogEng = srcEng.log10TeV();
@@ -1062,9 +1073,6 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
     // maximum (this is certainly less critical)
     double theta = eta;
     double phi   = 0.0; //TODO: Implement Phi dependence
-
-    // Get PSF parameters.
-    //GCTAPsfPars pars = psf_dummy_sigma(srcLogEng, srcTheta);
 
     // Get maximum PSF radius in radians
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
@@ -1087,7 +1095,7 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
 
         // Setup integration kernel
         cta_irf_diffuse_kern_theta integrand(this,
-                                             model.spatial(),
+                                             model,
                                              theta,
                                              phi,
                                              zenith,
@@ -1132,10 +1140,17 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
 /***********************************************************************//**
  * @brief Return spatial integral of extended source model
  *
- * @param[in] model Extended source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_observation_type
+ *            Observation is not a CTA observation.
+ * @exception GCTAException::no_pointing
+ *            Pointing is not a CTA pointing.
+ * @exception GException::no_list
+ *            Observation contains no event list.
+ * @exception GCTAException::bad_model_type
+ *            Model is not a radial model.
  *
  * Note that we estimate the integration radius based on the size of the
  * onaxis PSF in this method. This should be fine as long as the offaxis
@@ -1145,10 +1160,8 @@ double GCTAResponse::irf_diffuse(const GInstDir&            obsDir,
  * @todo Verify that offaxis PSF is not considerably larger than onaxis
  *       PSF. 
  ***************************************************************************/
-double GCTAResponse::npred_extended(const GModelExtendedSource& model,
-                                    const GEnergy&              srcEng,
-                                    const GTime&                srcTime,
-                                    const GObservation&         obs) const
+double GCTAResponse::npred_extended(const GSource& source,
+                                    const GObservation& obs) const
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -1171,6 +1184,16 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
         throw GException::no_list(G_NPRED_EXTENDED);
     }
 
+    // Get pointer on radial model
+    const GModelRadial* model = dynamic_cast<const GModelRadial*>(source.model());
+    if (model == NULL) {
+        throw GCTAException::bad_model_type(G_IRF_EXTENDED);
+    }
+
+    // Get source attributes
+    const GSkyDir& centre = model->dir();
+    const GEnergy& srcEng = source.energy();
+
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
     double azimuth = pnt->azimuth();
@@ -1189,7 +1212,7 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
     double roi_radius = events->roi().radius() * deg2rad;
 
     // Compute distance between ROI and model centre (radians)
-    double roi_model_distance = events->roi().centre().dist(model.radial()->dir());
+    double roi_model_distance = events->roi().centre().dist(centre);
 
     // Compute the ROI radius plus maximum PSF radius (radians). Any photon
     // coming from beyond this radius will not make it in the dataspace and
@@ -1201,7 +1224,7 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
     // contribution drops to zero.
     double theta_min = (roi_model_distance > roi_psf_radius)
                        ? roi_model_distance - roi_psf_radius: 0.0;
-    double theta_max = model.radial()->theta_max();
+    double theta_max = model->theta_max();
 
     // Perform offset angle integration only if interval is valid
     if (theta_max > theta_min) {
@@ -1211,19 +1234,19 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
         GMatrix ry;
         GMatrix rz;
         GMatrix rot;
-        ry.eulery(model.radial()->dec() - 90.0);
-        rz.eulerz(-model.radial()->ra());
+        ry.eulery(model->dec() - 90.0);
+        rz.eulerz(-model->ra());
         rot = transpose(ry * rz);
         
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
-        double phi = model.radial()->dir().posang(events->roi().centre().skydir());
+        double phi = centre.posang(events->roi().centre().dir());
 
         // Setup integration kernel
         cta_npred_radial_kern_theta integrand(this,
-                                              model.radial(),
-                                              &srcEng,
-                                              &srcTime,
+                                              model,
+                                              &(source.energy()),
+                                              &(source.time()),
                                               ctaobs,
                                               &rot,
                                               roi_model_distance,
@@ -1264,10 +1287,17 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
 /***********************************************************************//**
  * @brief Return spatial integral of diffuse source model
  *
- * @param[in] model Diffuse source model.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
+ * @param[in] source Source.
  * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_observation_type
+ *            Observation is not a CTA observation.
+ * @exception GCTAException::no_pointing
+ *            Pointing is not a CTA pointing.
+ * @exception GException::no_list
+ *            Observation contains no event list.
+ * @exception GCTAException::bad_model_type
+ *            Model is not a radial model.
  *
  * This method provides the intergal of the diffuse source model over the
  * region of interest. The integration is performed in the ROI system.
@@ -1283,10 +1313,8 @@ double GCTAResponse::npred_extended(const GModelExtendedSource& model,
  *
  * @todo Verify that offaxis PSF is not considerably larger than onaxis PSF.
  ***************************************************************************/
-double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
-                                   const GEnergy&             srcEng,
-                                   const GTime&               srcTime,
-                                   const GObservation&        obs) const
+double GCTAResponse::npred_diffuse(const GSource& source,
+                                   const GObservation& obs) const
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -1308,6 +1336,15 @@ double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
     if (events == NULL) {
         throw GException::no_list(G_NPRED_DIFFUSE);
     }
+
+    // Get pointer on spatial model
+    const GModelSpatial* model = dynamic_cast<const GModelSpatial*>(source.model());
+    if (model == NULL) {
+        throw GCTAException::bad_model_type(G_IRF_EXTENDED);
+    }
+
+    // Get source attributes
+    const GEnergy& srcEng = source.energy();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -1345,9 +1382,9 @@ double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
         
         // Setup integration kernel
         cta_npred_diffuse_kern_theta integrand(this,
-                                               model.spatial(),
-                                               &srcEng,
-                                               &srcTime,
+                                               model,
+                                               &(source.energy()),
+                                               &(source.time()),
                                                ctaobs,
                                                &rot);
 
@@ -1359,8 +1396,6 @@ double GCTAResponse::npred_diffuse(const GModelDiffuseSource& model,
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_DIFFUSE)
         std::cout << "GCTAResponse::npred_diffuse:";
-        std::cout << " srcEng=" << srcEng;
-        std::cout << " srcTime=" << srcTime;
         std::cout << " roi_psf_radius=" << roi_psf_radius;
         std::cout << " npred=" << npred << std::endl;
         #endif

@@ -21,7 +21,7 @@
 /**
  * @file GLATResponse.hpp
  * @brief Fermi/LAT Response class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATRESPONSE_HPP
@@ -63,23 +63,17 @@ public:
     virtual GLATResponse* clone(void) const;
     virtual bool          hasedisp(void) const { return false; }
     virtual bool          hastdisp(void) const { return false; }
-    virtual double        irf(const GInstDir&     obsDir,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GSkyDir&      srcDir,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
+    virtual double        irf(const GEvent&       event,
+                              const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double       npred(const GSkyDir& srcDir,
-                               const GEnergy& srcEng,
-                               const GTime& srcTime,
-                               const GObservation& obs) const;
-    virtual std::string  print(void) const;
+    virtual double        npred(const GPhoton&      photon,
+                                const GObservation& obs) const;
+    virtual std::string   print(void) const;
 
     // Implemented virtual methods
-    virtual double       irf(const GEvent& event, const GModelSky& model,
-                             const GEnergy& srcEng, const GTime& srcTime,
-                             const GObservation& obs) const;
+    virtual double irf(const GEvent&       event,
+                       const GSource&      source,
+                       const GObservation& obs) const;
 
     // Other Methods
     void        caldb(const std::string& caldb);
@@ -95,11 +89,11 @@ public:
     void        force_mean(const bool& value) { m_force_mean=value; }
 
     // Reponse methods
-    double irf(const GLATEventAtom& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
-               const GObservation& obs) const;
-    double irf(const GLATEventBin& event, const GModelSky& model,
-               const GEnergy& srcEng, const GTime& srcTime,
+    double irf(const GLATEventAtom& event,
+               const GSource&       source,
+               const GObservation&  obs) const;
+    double irf(const GLATEventBin& event,
+               const GSource&      source,
                const GObservation& obs) const;
 
 private:

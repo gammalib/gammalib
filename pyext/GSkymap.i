@@ -140,6 +140,7 @@ public:
     int       xy2pix(const GSkyPixel& pix) const;
     GSkyPixel pix2xy(const int& pix) const;
     GWcs*     wcs(void) const;
+    void      wcs(const GWcs& wcs);
     double*   pixels(void) const;
     bool      isinmap(const GSkyDir& dir) const;
     bool      isinmap(const GSkyPixel& pixel) const;

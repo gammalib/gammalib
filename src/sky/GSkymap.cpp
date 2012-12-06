@@ -999,6 +999,28 @@ GSkyPixel GSkymap::pix2xy(const int& pix) const
 
 
 /***********************************************************************//**
+ * @brief Set WCS skymap
+ *
+ * @param[in] wcs World Coordinate System.
+ *
+ * Sets the World Coordinate System of sky map. The method performs a deep
+ * copy of the input argument, allowing to destroy the argument after using
+ * the method. 
+ ***************************************************************************/
+void GSkymap::wcs(const GWcs& wcs)
+{
+    // Free any existing WCS
+    if (m_wcs != NULL) delete m_wcs;
+
+    // Clone input WCS
+    m_wcs = wcs.clone();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Verifies if sky direction falls in map
  *
  * @param[in] dir Sky direction.

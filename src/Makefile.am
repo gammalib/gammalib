@@ -39,6 +39,9 @@ endif
 if WITH_INST_LAT
   INST_LAT = ../inst/lat/liblat.la
 endif
+if WITH_INST_COM
+  INST_COM = ../inst/com/libcom.la
+endif
 
 # Scripts to be distributed
 scripts = gammalib-setup \
@@ -62,7 +65,8 @@ libgamma_la_LIBADD = base/libbase.la \
                      test/libtest.la \
                      $(INST_MWL) \
                      $(INST_CTA) \
-                     $(INST_LAT)
+                     $(INST_LAT) \
+                     $(INST_COM)
 libgamma_la_LDFLAGS = -version-info $(GAMMALIB_LT_VERSION) @OPENMP_LIB_LDFLAGS@
 
 # Distribute scripts

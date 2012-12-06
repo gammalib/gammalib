@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GWcslib.i  -  Virtual base class for wcslib based WCS         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcslib.i
  * @brief Python interface for virtual base class for wcslib based WCS
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -63,10 +63,13 @@ public:
     virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
 
     // Other methods
-    void set(const std::string& coords,
-             const double& crval1, const double& crval2,
-             const double& crpix1, const double& crpix2,
-             const double& cdelt1, const double& cdelt2);
+    void   set(const std::string& coords,
+               const double& crval1, const double& crval2,
+               const double& crpix1, const double& crpix2,
+               const double& cdelt1, const double& cdelt2);
+    double crval(const int& inx) const;
+    double crpix(const int& inx) const;
+    double cdelt(const int& inx) const;
 };
 
 

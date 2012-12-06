@@ -16,6 +16,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsAZP.hpp \
                      GWcsCAR.hpp \
                      GWcsTAN.hpp \
+                     GWcsMER.hpp \
                      GWcsSTG.hpp \
                      GWcsHPX.hpp \
                      GEnergy.hpp \
@@ -37,6 +38,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GInstDir.hpp \
                      GResponse.hpp \
                      GPhoton.hpp \
+                     GSource.hpp \
                      GModelPar.hpp \
                      GModels.hpp \
                      GModel.hpp \

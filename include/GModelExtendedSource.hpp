@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelExtendedSource.hpp  -  Extended source model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelExtendedSource.hpp
  * @brief Extended source model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELEXTENDEDSOURCE_HPP
@@ -63,10 +63,6 @@ public:
     virtual void                  read(const GXmlElement& xml);
     virtual void                  write(GXmlElement& xml) const;
     virtual std::string           print(void) const;
-
-    // Other methods
-    GModelRadial* radial(void) const;
-    GSkyDir       dir(void) const;
 
 protected:
     // Protected methods

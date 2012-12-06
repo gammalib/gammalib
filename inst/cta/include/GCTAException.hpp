@@ -131,6 +131,11 @@ public:
         model_invalid_radial(std::string origin, std::string type,
                              std::string message = "");
     };
+    class bad_model_type : public GCTAExceptionHandler {
+    public:
+        bad_model_type(const std::string& origin,
+                       const std::string& message = "");
+    };
 
     // Response table exceptions
     class bad_rsp_table_dim : public GCTAExceptionHandler {

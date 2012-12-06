@@ -1,4 +1,4 @@
-2012-10-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2012-12-03  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.7.0 released
         ========================
@@ -6,6 +6,8 @@
         Add base module for interface classes
         Introduce GBase from which almost all classes derive
         Add dependency tracking for Python interface
+        Add COMPTEL instrument interface
+        Open FITS image using the equivalent data type
 
 2012-09-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

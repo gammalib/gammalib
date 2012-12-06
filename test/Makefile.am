@@ -32,6 +32,15 @@ if WITH_INST_LAT
   test_LAT_CPPFLAGS = @CPPFLAGS@
   test_LAT_LDADD = $(top_srcdir)/src/libgamma.la
 endif
+if WITH_INST_COM
+  INST_COM = test_COM
+  INCL_COM = -I$(top_srcdir)/inst/com/include
+  TEST_COM = :$(top_srcdir)/inst/com/test
+  test_COM_SOURCES = $(top_srcdir)/inst/com/test/test_COM.cpp
+  test_COM_LDFLAGS = @LDFLAGS@
+  test_COM_CPPFLAGS = @CPPFLAGS@
+  test_COM_LDADD = $(top_srcdir)/src/libgamma.la
+endif
 
 # Optional python bindings
 if WITH_PYTHON
@@ -49,7 +58,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support \
            $(INCL_MWL) \
            $(INCL_CTA) \
-           $(INCL_LAT)
+           $(INCL_LAT) \
+           $(INCL_COM)
 
 # Test programs (those will be compiled)
 check_PROGRAMS = test_GSupport \
@@ -65,7 +75,7 @@ check_PROGRAMS = test_GSupport \
                  test_GSky \
                  test_GOptimizer \
                  test_GObservation \
-                 $(INST_MWL) $(INST_CTA) $(INST_LAT)
+                 $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM)
 
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
@@ -85,7 +95,7 @@ TESTS = test_GSupport \
         test_GSky \
         test_GOptimizer \
         test_GObservation \
-        $(INST_MWL) $(INST_CTA) $(INST_LAT) \
+        $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) \
         $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links

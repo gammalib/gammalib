@@ -21,7 +21,7 @@
 /**
  * @file GModelSky.cpp
  * @brief Abstract sky model base class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -37,6 +37,7 @@
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
 #include "GEvent.hpp"
+#include "GSource.hpp"
 #include "GPointing.hpp"
 #include "GResponse.hpp"
 #include "GObservation.hpp"
@@ -366,8 +367,11 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
         GEnergy srcEng  = obsEng;
         GTime   srcTime = obsTime;
 
+        // Set source
+        GSource source(this->name(), *m_spatial, srcEng, srcTime);
+
         // Compute response components
-        double npred_spatial  = rsp->npred(*this, srcEng, srcTime, obs);
+        double npred_spatial  = rsp->npred(source, obs);
         double npred_spectral = spectral()->eval(srcEng);
         double npred_temporal = temporal()->eval(srcTime);
                 
@@ -825,9 +829,12 @@ double GModelSky::spatial(const GEvent& event,
             throw GException::no_response(G_SPATIAL);
         }
 
+        // Set source
+        GSource source(this->name(), *m_spatial, srcEng, srcTime);
+        
         // Get IRF value. This method returns the spatial component of the
         // source model.
-        double irf = rsp->irf(event, *this, srcEng, srcTime, obs);
+        double irf = rsp->irf(event, source, obs);
 
         // Case A: evaluate gradients
         if (grad) {

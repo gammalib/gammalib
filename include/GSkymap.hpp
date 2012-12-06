@@ -67,12 +67,12 @@ public:
     GSkymap(void);
     explicit GSkymap(const std::string& filename);
     explicit GSkymap(const std::string& wcs, const std::string& coords,
-            const int& nside, const std::string& order,
-            const int nmaps = 1);
+                     const int& nside, const std::string& order,
+                     const int nmaps = 1);
     explicit GSkymap(const std::string& wcs, const std::string& coords,
-            double const& x, double const& y,
-            double const& dx, double const& dy,
-            const int& nx, const int& ny, const int nmaps = 1);
+                     double const& x, double const& y,
+                     double const& dx, double const& dy,
+                     const int& nx, const int& ny, const int nmaps = 1);
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
 
@@ -80,15 +80,15 @@ public:
     GSkymap& operator= (const GSkymap& map);
 
     // 1D pixel methods
-    double&       operator() (const int& pixel, const int& map = 0);
-    const double& operator() (const int& pixel, const int& map = 0) const;
+    double&       operator()(const int& pixel, const int& map = 0);
+    const double& operator()(const int& pixel, const int& map = 0) const;
     GSkyDir       pix2dir(const int& pix) const;
     int           dir2pix(const GSkyDir& dir) const;
     double        omega(const int& pix) const;
 
     // 2D pixel methods
-    double&       operator() (const GSkyPixel& pixel, const int& map = 0);
-    const double& operator() (const GSkyPixel& pixel, const int& map = 0) const;
+    double&       operator()(const GSkyPixel& pixel, const int& map = 0);
+    const double& operator()(const GSkyPixel& pixel, const int& map = 0) const;
     GSkyDir       xy2dir(const GSkyPixel& pix) const;
     GSkyPixel     dir2xy(const GSkyDir& dir) const;
     double        omega(const GSkyPixel& pix) const;
@@ -110,6 +110,7 @@ public:
     int           xy2pix(const GSkyPixel& pix) const;
     GSkyPixel     pix2xy(const int& pix) const;
     GWcs*         wcs(void) const { return m_wcs; }
+    void          wcs(const GWcs& wcs);
     double*       pixels(void) const { return m_pixels; }
     bool          isinmap(const GSkyDir& dir) const;
     bool          isinmap(const GSkyPixel& pixel) const;

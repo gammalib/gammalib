@@ -62,6 +62,28 @@ GPhoton::GPhoton(void)
 
 
 /***********************************************************************//**
+ * @brief Photon constructor
+ *
+ * @param[in] dir Sky direction.
+ * @param[in] energy Energy.
+ * @param[in] time Time.
+ ***************************************************************************/
+GPhoton::GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time)
+{ 
+    // Initialise private members
+    init_members();
+
+    // Set members
+    m_dir    = dir;
+    m_energy = energy;
+    m_time   = time;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] ph Photon.

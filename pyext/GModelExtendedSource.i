@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelExtendedSource.i  -  Extended source model class          *
+ *          GModelExtendedSource.i - Extended source model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelExtendedSource.i
  * @brief Extended source model class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -51,10 +51,6 @@ public:
     virtual std::string           type(void) const;
     virtual void                  read(const GXmlElement& xml);
     virtual void                  write(GXmlElement& xml) const;
-
-    // Other methods
-    GModelRadial* radial(void) const;
-    GSkyDir       dir(void) const;
 };
 
 

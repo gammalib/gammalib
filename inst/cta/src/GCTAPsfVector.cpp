@@ -364,7 +364,7 @@ std::string GCTAPsfVector::filename(void) const
 /***********************************************************************//**
  * @brief Simulate PSF offset (radians)
  *
- * @param[in] GRan Random number generator.
+ * @param[in] ran Random number generator.
  * @param[in] logE Log10 of the true photon energy (TeV).
  * @param[in] theta Offset angle in camera system (rad). Not used.
  * @param[in] phi Azimuth angle in camera system (rad). Not used.

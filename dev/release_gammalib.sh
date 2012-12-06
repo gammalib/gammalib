@@ -7,7 +7,10 @@ makedoc="no"
 
 echo "Checkout latest GammaLib"
 rm -rf gammalib
-cvs -Q -d /home/cvs export -N -r HEAD "gammalib"
+#cvs -Q -d /home/cvs export -N -r HEAD "gammalib"
+#git clone https://cta-git.irap.omp.eu/gammalib
+git clone -b release https://cta-git.irap.omp.eu/gammalib
+rm -rf gammalib/.git
 
 # Extract version number
 version=`cat gammalib/configure.ac | grep 'AC_INIT' | awk -F"[" '{print $3}' | sed 's/],//' | sed 's/\./ /g'`
@@ -42,7 +45,7 @@ cd $sourcedir
 ./autogen.sh
 rm -f gammalib.sh
 rm -rf dev
-rm -rf autom4te.cache    
+rm -rf autom4te.cache
 cd $basedir
 
 # Create Doxygen documentation
@@ -62,10 +65,12 @@ fi
 echo "Create LaTeX documentation"
 cd $sourcedir/doc
 #
+cd um/latex
 latex gammalib_um.tex
 dvips gammalib_um.dvi -o gammalib_um.ps
 ps2pdf gammalib_um.ps
-rm -f gammalib_um.dvi gammalib_um.aux gammalib_um.log gammalib_um.tex gammalib_um.toc manual.sty gammalib_um.ps
+cd ../..
+mv um/latex/gammalib_um.pdf .
 #
 cd dev/coding
 latex gammalib_coding.tex

@@ -356,8 +356,11 @@ double cta_npred_radial_kern_phi::eval(double phi)
     GSkyDir srcDir;
     srcDir.celvector(cel);
 
+    // Set Photon
+    GPhoton photon(srcDir, *m_srcEng, *m_srcTime);
+
     // Compute Npred for this sky direction
-    double npred = m_rsp->npred(srcDir, *m_srcEng, *m_srcTime, *m_obs);
+    double npred = m_rsp->npred(photon, *m_obs);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
@@ -662,9 +665,11 @@ double cta_npred_diffuse_kern_phi::eval(double phi)
     // Continue only if sky intensity is positive
     if (intensity > 0.0) {
 
+        // Set Photon
+        GPhoton photon(srcDir, *m_srcEng, *m_srcTime);
+
         // Compute Npred for this sky direction
-        npred = m_rsp->npred(srcDir, *m_srcEng, *m_srcTime, *m_obs) *
-                intensity;
+        npred = m_rsp->npred(photon, *m_obs) * intensity;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)

@@ -48,41 +48,23 @@ public:
     virtual GCTAResponse* clone(void) const;
     virtual bool          hasedisp(void) const;
     virtual bool          hastdisp(void) const;
-    virtual double        irf(const GInstDir&     obsDir,
-                              const GEnergy&      obsEng,
-                              const GTime&        obsTime,
-                              const GSkyDir&      srcDir,
-                              const GEnergy&      srcEng,
-                              const GTime&        srcTime,
+    virtual double        irf(const GEvent&       event,
+                              const GPhoton&      photon,
                               const GObservation& obs) const;
-    virtual double        npred(const GSkyDir&      srcDir,
-                                const GEnergy&      srcEng,
-                                const GTime&        srcTime,
+    virtual double        npred(const GPhoton&      photon,
                                 const GObservation& obs) const;
 
     // Overload virtual base class methods
-    virtual double irf_extended(const GInstDir&             obsDir,
-                                const GEnergy&              obsEng,
-                                const GTime&                obsTime,
-                                const GModelExtendedSource& model,
-                                const GEnergy&              srcEng,
-                                const GTime&                srcTime,
-                                const GObservation&         obs) const;
-    virtual double irf_diffuse(const GInstDir&            obsDir,
-                               const GEnergy&             obsEng,
-                               const GTime&               obsTime,
-                               const GModelDiffuseSource& model,
-                               const GEnergy&             srcEng,
-                               const GTime&               srcTime,
-                               const GObservation&        obs) const;
-    virtual double npred_extended(const GModelExtendedSource& model,
-                                  const GEnergy&              srcEng,
-                                  const GTime&                srcTime,
-                                  const GObservation&         obs) const;
-    virtual double npred_diffuse(const GModelDiffuseSource& model,
-                                 const GEnergy&             srcEng,
-                                 const GTime&               srcTime,
-                                 const GObservation&        obs) const;
+    virtual double irf_extended(const GEvent&       event,
+                                const GSource&      source,
+                                const GObservation& obs) const;
+    virtual double irf_diffuse(const GEvent&       event,
+                               const GSource&      source,
+                               const GObservation& obs) const;
+    virtual double npred_extended(const GSource&      source,
+                                  const GObservation& obs) const;
+    virtual double npred_diffuse(const GSource&      source,
+                                 const GObservation& obs) const;
 
     // Other Methods
     GCTAEventAtom*  mc(const double& area, const GPhoton& photon,
@@ -150,6 +132,7 @@ public:
     GCTAResponse copy() {
         return (*self);
     }
+/*
     double irf(const GEvent&       event,
                const GModelSky&    model,
                const GEnergy&      srcEng,
@@ -163,6 +146,7 @@ public:
                  const GObservation& obs) const {
         return self->GResponse::npred(model, srcEng, srcTime, obs);
     }
+*/
 };
 
 

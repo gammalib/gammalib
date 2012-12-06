@@ -364,6 +364,31 @@ GCTAException::model_invalid_radial::model_invalid_radial(std::string origin,
 
 
 /***********************************************************************//**
+ * @brief Response is not a CTA response
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GCTAException::bad_model_type::bad_model_type(const std::string& origin,
+                                              const std::string& message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    m_message = "Model is not of expected type.";
+
+    // Optional message
+    if (message.length() > 0) {
+        m_message += " "+message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Bad response table dimension
  *
  * @param[in] origin Name of method that has thrown the exception.

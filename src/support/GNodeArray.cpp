@@ -210,6 +210,9 @@ double& GNodeArray::operator[](const int& index)
     }
     #endif
 
+    // Signal that setup needs to be called
+    m_need_setup = false;
+
     // Return node
     return m_node[index];
 }
@@ -232,6 +235,9 @@ const double& GNodeArray::operator[](const int& index) const
         throw GException::out_of_range(G_ACCESS, index, size()-1);
     }
     #endif
+
+    // Signal that setup needs to be called
+    m_need_setup = false;
 
     // Return node
     return m_node[index];
@@ -401,7 +407,7 @@ double GNodeArray::interpolate(const double& value,
     }
     
     // Set interpolation value (circumvent const correctness)
-    const_cast<GNodeArray*>(this)->set_value(value);
+    set_value(value);
 
     // Interpolate
     double y = vector[inx_left()]  * wgt_left() +
@@ -426,7 +432,7 @@ double GNodeArray::interpolate(const double& value,
  * determine the boundary indices. If the nodes are not equidistant the
  * boundary indices are searched by bisection.
  ***************************************************************************/
-void GNodeArray::set_value(const double& value)
+void GNodeArray::set_value(const double& value) const
 {
     // Get number of nodes
     int nodes = m_node.size();
@@ -434,6 +440,11 @@ void GNodeArray::set_value(const double& value)
     // Throw an exception if less than 2 nodes are available
     if (nodes < 2) {
         throw GException::not_enough_nodes(G_SET_VALUE, nodes);
+    }
+
+    // Update cache if required
+    if (m_need_setup) {
+        setup();
     }
     
     // If array is linear then get left index from analytic formula
@@ -551,6 +562,7 @@ void GNodeArray::init_members(void)
     m_inx_right     = 0;
     m_wgt_left      = 0.0;
     m_wgt_right     = 0.0;
+    m_need_setup    = false;
 
     // Return
     return;
@@ -574,6 +586,7 @@ void GNodeArray::copy_members(const GNodeArray& array)
     m_inx_right     = array.m_inx_right;
     m_wgt_left      = array.m_wgt_left;
     m_wgt_right     = array.m_wgt_right;
+    m_need_setup    = array.m_need_setup;
 
     // Return
     return;
@@ -598,7 +611,7 @@ void GNodeArray::free_members(void)
  * nodes are present, the distance vector m_step will be empty and no
  * computation is done.
  ***************************************************************************/
-void GNodeArray::setup(void)
+void GNodeArray::setup(void) const
 {
     // Reset distance vector
     m_step.clear();
@@ -629,6 +642,9 @@ void GNodeArray::setup(void)
         }
 
     } // endif: there were at least two nodes
+
+    // Signal that setup has been called
+    m_need_setup = false;
 
     // Return
     return;

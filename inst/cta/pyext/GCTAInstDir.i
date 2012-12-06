@@ -45,13 +45,13 @@ public:
     // Methods
     void         clear(void);
     GCTAInstDir* clone(void) const;
-    void         skydir(const GSkyDir& dir);
+    void         dir(const GSkyDir& dir);
     void         radec(const double& ra, const double& dec);
     void         radec_deg(const double& ra, const double& dec);
     void         lb(const double& l, const double& b);
     void         lb_deg(const double& l, const double& b);
     void         rotate_deg(const double& phi, const double& theta);
-    GSkyDir      skydir(void) const;
+    GSkyDir      dir(void) const;
     double       l(void) const;
     double       l_deg(void) const;
     double       b(void) const;

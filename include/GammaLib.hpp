@@ -126,6 +126,7 @@
 #include "GWcslib.hpp"
 #include "GWcsAZP.hpp"
 #include "GWcsCAR.hpp"
+#include "GWcsMER.hpp"
 #include "GWcsTAN.hpp"
 #include "GWcsSTG.hpp"
 #include "GWcsHPX.hpp"
@@ -148,6 +149,7 @@
 #include "GPointing.hpp"
 #include "GResponse.hpp"
 #include "GPhoton.hpp"
+#include "GSource.hpp"
 
 /* __ Model handling _____________________________________________________ */
 #include "GModelPar.hpp"

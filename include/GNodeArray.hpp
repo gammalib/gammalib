@@ -78,7 +78,7 @@ public:
     void          append(const double& node);
     double        interpolate(const double& value,
                               const std::vector<double>& vector) const;
-    void          set_value(const double& value);
+    void          set_value(const double& value) const;
     const int&    inx_left(void) const { return m_inx_left; }
     const int&    inx_right(void) const { return m_inx_right; }
     const double& wgt_left(void) const { return m_wgt_left; }
@@ -90,18 +90,21 @@ private:
     void init_members(void);
     void copy_members(const GNodeArray& array);
     void free_members(void);
-    void setup(void);
+    void setup(void) const;
     
-    // Data
-    std::vector<double> m_node;          //!< Array of nodes
-    std::vector<double> m_step;          //!< Distance to next node
-    bool                m_is_linear;     //!< Nodes form a linear array
-    double              m_linear_slope;  //!< Slope for linear array
-    double              m_linear_offset; //!< Offset for linear array
-    int                 m_inx_left;      //!< Index of left node for linear interpolation
-    int                 m_inx_right;     //!< Index of right node for linear interpolation
-    double              m_wgt_left;      //!< Weight for left node for linear interpolation
-    double              m_wgt_right;     //!< Weight for right node for linear interpolation
+    // Node values
+    std::vector<double> m_node;                  //!< Array of nodes
+
+    // Evaluation cache
+    mutable bool                m_need_setup;    //!< Call of setup is required
+    mutable bool                m_is_linear;     //!< Nodes form a linear array
+    mutable std::vector<double> m_step;          //!< Distance to next node
+    mutable double              m_linear_slope;  //!< Slope for linear array
+    mutable double              m_linear_offset; //!< Offset for linear array
+    mutable int                 m_inx_left;      //!< Index of left node for linear interpolation
+    mutable int                 m_inx_right;     //!< Index of right node for linear interpolation
+    mutable double              m_wgt_left;      //!< Weight for left node for linear interpolation
+    mutable double              m_wgt_right;     //!< Weight for right node for linear interpolation
 };
 
 #endif /* GNODEARRAY_HPP */
