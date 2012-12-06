@@ -26,40 +26,38 @@ import os
 # Test class for GammaLib observation module #
 # ========================================== #
 class Test(GPythonTestSuite):
-	"""
-	Test class for GammaLib observation module.
-	"""
-	# Constructor
-	def __init__(self):
-		"""
-		Constructor.
-		"""
-		# Call base class constructor
-		GPythonTestSuite.__init__(self)
+    """
+    Test class for GammaLib observation module.
+    """
+    # Constructor
+    def __init__(self):
+        """
+        Constructor.
+        """
+        # Call base class constructor
+        GPythonTestSuite.__init__(self)
 
-		# Return
-		return
+        # Return
+        return
 
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name("obs")
 
-	# Set test functions
-	def set(self):
-		"""
-		Set all test functions.
-		"""
-		# Set test name
-		self.name("obs")
+        # Append tests
+        self.append(self.test, "Observation module dummy test")
 
-		# Append tests
-		self.append(self.test, "Observation module dummy test")
+        # Return
+        return
 
-		# Return
-		return
-
-
-	# Test function
-	def test(self):
-		"""
-		Test function.
-		"""
-		# Return
-		return
+    # Test function
+    def test(self):
+        """
+        Test function.
+        """
+        # Return
+        return

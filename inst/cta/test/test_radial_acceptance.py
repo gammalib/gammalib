@@ -30,55 +30,55 @@ from math import *
 # Show model #
 # ========== #
 def show_model(xmlfile):
-	"""
-	Show radial acceptance model from the XML file using matplotlib.
-	"""
-	# Load the model
-	models = GModels(xmlfile)
-	
-	# Extract radial acceptance model
-	radial = cast_GCTAModelRadialAcceptance(models["Background"]).radial()
-	
-	# Create angular axis (from 0 to 4 deg)
-	thetas = [i*0.05 for i in range(80)]
-	
-	# Get model values
-	values      = [radial.eval(theta) for theta in thetas]
-	values_grad = [radial.eval_gradients(theta) for theta in thetas]
-	
-	# Create figure
-	plt.figure(1)
-	plt.title("Radial acceptance model ("+radial.type()+")")
-				
-	# Plot data
-	plt.plot(thetas, values,      'r-')
-	plt.plot(thetas, values_grad, 'ro')
-		
-	# Set axes
-	plt.xlabel("Offset angle (deg)")
-	plt.ylabel("Function value")
-		
-	# Show plot
-	plt.show()
+    """
+    Show radial acceptance model from the XML file using matplotlib.
+    """
+    # Load the model
+    models = GModels(xmlfile)
 
-	# Return
-	return
+    # Extract radial acceptance model
+    radial = cast_GCTAModelRadialAcceptance(models["Background"]).radial()
+
+    # Create angular axis (from 0 to 4 deg)
+    thetas = [i * 0.05 for i in range(80)]
+
+    # Get model values
+    values = [radial.eval(theta) for theta in thetas]
+    values_grad = [radial.eval_gradients(theta) for theta in thetas]
+
+    # Create figure
+    plt.figure(1)
+    plt.title("Radial acceptance model (" + radial.type() + ")")
+
+    # Plot data
+    plt.plot(thetas, values, 'r-')
+    plt.plot(thetas, values_grad, 'ro')
+
+    # Set axes
+    plt.xlabel("Offset angle (deg)")
+    plt.ylabel("Function value")
+
+    # Show plot
+    plt.show()
+
+    # Return
+    return
 
 
 #==========================#
 # Main routine entry point #
 #==========================#
 if __name__ == '__main__':
-	"""
-	Show radial acceptance models.
-	"""
-	# Dump header
-	print
-	print "*********************************"
-	print "* Show radial acceptance models *"
-	print "*********************************"
+    """
+    Show radial acceptance models.
+    """
+    # Dump header
+    print
+    print "*********************************"
+    print "* Show radial acceptance models *"
+    print "*********************************"
 
-    # Display various models
-	show_model("data/crab.xml")
-	show_model("data/crab_poly.xml")
-	show_model("data/crab_profile.xml")
+# Display various models
+    show_model("data/crab.xml")
+    show_model("data/crab_poly.xml")
+    show_model("data/crab_profile.xml")

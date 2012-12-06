@@ -26,37 +26,36 @@ import math
 # Evaluate model #
 # ============== #
 def eval_model(model, binsz=0.01, nbins=1000):
-	"""
-	This function uses the eval method of the GModelSpatialMap class to
-	interpolate the skymap into a finer grid.
-	"""
-	# Create CAR skymap
-	map = GSkymap("CAR", "CEL", 201.3651, -43.0191, binsz, binsz, nbins, nbins)
+    """
+    This function uses the eval method of the GModelSpatialMap class to
+    interpolate the skymap into a finer grid.
+    """
+    # Create CAR skymap
+    map = GSkymap("CAR", "CEL", 201.3651, -43.0191, binsz, binsz, nbins, nbins)
 
-	# Fill map
-	for i in range(map.npix()):
-		dir       = map.pix2dir(i)
-		intensity = model.eval(dir)
-		map[i]    = intensity
+    # Fill map
+    for i in range(map.npix()):
+        dir = map.pix2dir(i)
+        intensity = model.eval(dir)
+        map[i] = intensity
 
-	# Save map
-	map.save("test_model_spatial_map.fits")
+    # Save map
+    map.save("test_model_spatial_map.fits")
 
-	# Return
-	return
-    
+    # Return
+    return
+
 
 # ================ #
 # Main entry point #
 # ================ #
 if __name__ == '__main__':
-	"""
-	Main entry point
-	"""
-	# Allocate spatial map model
-	model = GModelSpatialMap("data/cena_lobes_parkes.fits")
-	print model
+    """
+    Main entry point
+    """
+    # Allocate spatial map model
+    model = GModelSpatialMap("data/cena_lobes_parkes.fits")
+    print model
 
-	# Evaluate skymap
-	eval_model(model)
-	
+    # Evaluate skymap
+    eval_model(model)

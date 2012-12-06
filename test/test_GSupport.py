@@ -26,64 +26,64 @@ import os
 # Test class for GammaLib support #
 # =============================== #
 class Test(GPythonTestSuite):
-	"""
-	Test class for GammaLib support.
-	"""
-	# Constructor
-	def __init__(self):
-		"""
-		Constructor.
-		"""
-		# Call base class constructor
-		GPythonTestSuite.__init__(self)
+    """
+    Test class for GammaLib support.
+    """
+    # Constructor
+    def __init__(self):
+        """
+        Constructor.
+        """
+        # Call base class constructor
+        GPythonTestSuite.__init__(self)
 
-		# Return
-		return
+        # Return
+        return
 
-	# Set all test functions
-	def set(self):
-		"""
-		Set all test functions.
-		"""
-		# Set test name
-		self.name("support")
+    # Set all test functions
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name("support")
 
-		# Append tests
-		self.append(self.test_node_array, "Test GNodeArray")
+        # Append tests
+        self.append(self.test_node_array, "Test GNodeArray")
 
-		# Return
-		return
+        # Return
+        return
 
-	# Test GNodeArray class
-	def test_node_array(self):
-		"""
-		Test GNodeArray class.
-		"""
-		# Set-up vector and data array. Test all vector elements.
-		vector = GVector(20)
-		data   = GVector(20)
-		for i in range(20):
-			vector[i] = 10.0 + i*5.0
-			data[i]   = sin(0.15*(vector[i]-10.0))
-			self.test_value(data[i], sin(0.15*i*5.0))
+    # Test GNodeArray class
+    def test_node_array(self):
+        """
+        Test GNodeArray class.
+        """
+        # Set-up vector and data array. Test all vector elements.
+        vector = GVector(20)
+        data = GVector(20)
+        for i in range(20):
+            vector[i] = 10.0 + i * 5.0
+            data[i] = sin(0.15 * (vector[i] - 10.0))
+            self.test_value(data[i], sin(0.15 * i * 5.0))
 
-		# Set-up node array
-		array = GNodeArray()
-		array.nodes(vector)
+        # Set-up node array
+        array = GNodeArray()
+        array.nodes(vector)
 
-		# Get values
-		x_val = []
-		y_val = []
-		for i in range(100):
-			x = i-10
-			array.set_value(x)
-			inx_left  = array.inx_left()
-			inx_right = array.inx_right()
-			wgt_left  = array.wgt_left()
-			wgt_right = array.wgt_right()
-			y         = wgt_left*data[inx_left] + wgt_right*data[inx_right]
-			x_val.append(x)
-			y_val.append(y)
+        # Get values
+        x_val = []
+        y_val = []
+        for i in range(100):
+            x = i - 10
+            array.set_value(x)
+            inx_left = array.inx_left()
+            inx_right = array.inx_right()
+            wgt_left = array.wgt_left()
+            wgt_right = array.wgt_right()
+            y = wgt_left * data[inx_left] + wgt_right * data[inx_right]
+            x_val.append(x)
+            y_val.append(y)
 
-		# Return
-		return
+        # Return
+        return

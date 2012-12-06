@@ -26,40 +26,38 @@ import os
 # Test class for GammaLib xml module #
 # ================================== #
 class Test(GPythonTestSuite):
-	"""
-	Test class for GammaLib xml module.
-	"""
-	# Constructor
-	def __init__(self):
-		"""
-		Constructor.
-		"""
-		# Call base class constructor
-		GPythonTestSuite.__init__(self)
+    """
+    Test class for GammaLib xml module.
+    """
+    # Constructor
+    def __init__(self):
+        """
+        Constructor.
+        """
+        # Call base class constructor
+        GPythonTestSuite.__init__(self)
 
-		# Return
-		return
+        # Return
+        return
 
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name("xml")
 
-	# Set test functions
-	def set(self):
-		"""
-		Set all test functions.
-		"""
-		# Set test name
-		self.name("xml")
+        # Append tests
+        self.append(self.test, "XML module dummy test")
 
-		# Append tests
-		self.append(self.test, "XML module dummy test")
+        # Return
+        return
 
-		# Return
-		return
-
-
-	# Test function
-	def test(self):
-		"""
-		Test function.
-		"""
-		# Return
-		return
+    # Test function
+    def test(self):
+        """
+        Test function.
+        """
+        # Return
+        return

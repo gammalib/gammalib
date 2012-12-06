@@ -25,149 +25,149 @@ import sys
 # ========================================== #
 # Test class for GammaLib application module #
 # ========================================== #
+
+
 class Test(GPythonTestSuite):
-	"""
-	Test class for GammaLib application module.
-	"""
-	# Constructor
-	def __init__(self):
-		"""
-		Constructor.
-		"""
-		# Call base class constructor
-		GPythonTestSuite.__init__(self)
+    """
+    Test class for GammaLib application module.
+    """
+    # Constructor
+    def __init__(self):
+        """
+        Constructor.
+        """
+        # Call base class constructor
+        GPythonTestSuite.__init__(self)
 
-		# Set members
-		self.logfile = "test_logger.log"
+        # Set members
+        self.logfile = "test_logger.log"
 
-		# Return
-		return
+        # Return
+        return
 
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name("app")
 
-	# Set test functions
-	def set(self):
-		"""
-		Set all test functions.
-		"""
-		# Set test name
-		self.name("app")
+        # Append tests
+        self.append(self.test_log, "Test GLog")
+        self.append(self.test_pars, "Test GPars")
 
-		# Append tests
-		self.append(self.test_log, "Test GLog")
-		self.append(self.test_pars, "Test GPars")
+        # Return
+        return
 
-		# Return
-		return
+    # Test GLog
+    def test_log(self):
+        """
+        Test GLog.
+        """
+        # Allocate logger
+        log = GLog(self.logfile, True)
 
+        # Test print methods
+        log("Test __call__(std::string)")
+        log("\n")
+        log(True)
+        log("\n")
+        log(41)
+        log("\n")
+        log(3.1415)
+        log("\n")
+        log.parformat("This is a parameter")
+        log("\n")
+        log.toupper("upper case")
+        log("\n")
+        log.tolower("LOWER CASE")
+        log("\n")
+        log.fill("Higgs", 3)
+        log("\n")
+        log.left("Left", 10)
+        log("\n")
+        log.right("Right", 10)
+        log("\n")
+        log.center("Center", 10)
+        log("\n")
+        log.header0("Header 0")
+        log("\n")
+        log.header1("Header 1")
+        log.header2("Header 2")
+        log.header3("Header 3")
 
-	# Test GLog
-	def test_log(self):
-		"""
-		Test GLog.
-		"""
-		# Allocate logger
-		log = GLog(self.logfile, True)
-		
-		# Test print methods
-		log("Test __call__(std::string)")
-		log("\n")
-		log(True)
-		log("\n")
-		log(41)
-		log("\n")
-		log(3.1415)
-		log("\n")
-		log.parformat("This is a parameter")
-		log("\n")
-		log.toupper("upper case")
-		log("\n")
-		log.tolower("LOWER CASE")
-		log("\n")
-		log.fill("Higgs", 3)
-		log("\n")
-		log.left("Left", 10)
-		log("\n")
-		log.right("Right", 10)
-		log("\n")
-		log.center("Center", 10)
-		log("\n")
-		log.header0("Header 0")
-		log("\n")
-		log.header1("Header 1")
-		log.header2("Header 2")
-		log.header3("Header 3")
-		
-		# Close logger
-		log.close()
-		
-		# Set reference
-		ref = []
-		ref.append("Test __call__(std::string)\n")
-		ref.append("1\n")
-		ref.append("41\n")
-		ref.append("3.1415\n")
-		ref.append(" This is a parameter .......: \n")
-		ref.append("UPPER CASE\n")
-		ref.append("lower case\n")
-		ref.append("HiggsHiggsHiggs\n")
-		ref.append("Left      \n")
-		ref.append("     Right\n")
-		ref.append("  Center  \n")
-		ref.append("\n")
-		ref.append("+==========+\n")
-		ref.append("| Header 1 |\n")
-		ref.append("+==========+\n")
-		ref.append("+----------+\n")
-		ref.append("| Header 2 |\n")
-		ref.append("+----------+\n")
-		ref.append("=== Header 3 ===\n")
+        # Close logger
+        log.close()
 
-		# Set calls for error messages
-		calls = []
-		calls.append("__call__(std::string)")
-		calls.append("__call__(bool)")
-		calls.append("__call__(int)")
-		calls.append("__call__(double)")
-		calls.append("parformat()")
-		calls.append("toupper()")
-		calls.append("tolower()")
-		calls.append("fill()")
-		calls.append("left()")
-		calls.append("right()")
-		calls.append("center()")
-		calls.append("header0()")
-		calls.append("header1()")
-		calls.append("header1()")
-		calls.append("header1()")
-		calls.append("header2()")
-		calls.append("header2()")
-		calls.append("header2()")
-		calls.append("header3()")
-	
-		# Check file
-		file  = open(self.logfile, "r")
-		lines = file.readlines()
-		file.close()
-		for i, line in enumerate(lines):
-			self.test_assert(line == ref[i], "Test "+calls[i])
+        # Set reference
+        ref = []
+        ref.append("Test __call__(std::string)\n")
+        ref.append("1\n")
+        ref.append("41\n")
+        ref.append("3.1415\n")
+        ref.append(" This is a parameter .......: \n")
+        ref.append("UPPER CASE\n")
+        ref.append("lower case\n")
+        ref.append("HiggsHiggsHiggs\n")
+        ref.append("Left      \n")
+        ref.append("     Right\n")
+        ref.append("  Center  \n")
+        ref.append("\n")
+        ref.append("+==========+\n")
+        ref.append("| Header 1 |\n")
+        ref.append("+==========+\n")
+        ref.append("+----------+\n")
+        ref.append("| Header 2 |\n")
+        ref.append("+----------+\n")
+        ref.append("=== Header 3 ===\n")
 
-		# Return
-		return
+        # Set calls for error messages
+        calls = []
+        calls.append("__call__(std::string)")
+        calls.append("__call__(bool)")
+        calls.append("__call__(int)")
+        calls.append("__call__(double)")
+        calls.append("parformat()")
+        calls.append("toupper()")
+        calls.append("tolower()")
+        calls.append("fill()")
+        calls.append("left()")
+        calls.append("right()")
+        calls.append("center()")
+        calls.append("header0()")
+        calls.append("header1()")
+        calls.append("header1()")
+        calls.append("header1()")
+        calls.append("header2()")
+        calls.append("header2()")
+        calls.append("header2()")
+        calls.append("header3()")
 
-	# Test GPars
-	def test_pars(self):
-		"""
-		Test GPars.
-		"""
-		# Test GPars constructor with bad filename.
-		self.test_try("Test GPars constructor with bad filename")
-		try:
-			pars = GPars("testme.par")
-			self.test_try_failure("Exception not thrown.")
-		except:
-			self.test_try_success()
-		else:
-			self.test_try_failure("This should never happen.")
+        # Check file
+        file = open(self.logfile, "r")
+        lines = file.readlines()
+        file.close()
+        for i, line in enumerate(lines):
+            self.test_assert(line == ref[i], "Test " + calls[i])
 
-		# Return
-		return
+        # Return
+        return
+
+    # Test GPars
+    def test_pars(self):
+        """
+        Test GPars.
+        """
+        # Test GPars constructor with bad filename.
+        self.test_try("Test GPars constructor with bad filename")
+        try:
+            pars = GPars("testme.par")
+            self.test_try_failure("Exception not thrown.")
+        except:
+            self.test_try_success()
+        else:
+            self.test_try_failure("This should never happen.")
+
+        # Return
+        return
