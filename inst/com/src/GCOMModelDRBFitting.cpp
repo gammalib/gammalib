@@ -640,41 +640,61 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
  ***************************************************************************/
 void GCOMModelDRBFitting::write(GXmlElement& xml) const
 {
-    // Determine number of nodes
-    int nodes = m_phibars.size();
+    // Initialise pointer on source
+    GXmlElement* src = NULL;
 
-    // Set model type
-    if (xml.attribute("type") == "") {
-        xml.attribute("type", type());
+    // Search corresponding source
+    int n = xml.elements("source");
+    for (int k = 0; k < n; ++k) {
+        GXmlElement* element = static_cast<GXmlElement*>(xml.element("source", k));
+        if (element->attribute("name") == name()) {
+            src = element;
+            break;
+        }
+    }
+
+    // If no source with corresponding name was found then append one.
+    // Set also the type and the instrument.
+    if (src == NULL) {
+        src = new GXmlElement("source");
+        src->attribute("name", name());
+        src->attribute("type", type());
+        if (instruments().length() > 0) {
+            src->attribute("instrument", instruments());
+        }
+        xml.append(src);
     }
 
     // Verify model type
-    if (xml.attribute("type") != type()) {
-        throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
+    if (src->attribute("type") != type()) {
+        throw GException::model_invalid_spectral(G_WRITE, src->attribute("type"),
               "DRB fitting model is not of type \""+type()+"\".");
     }
 
+    // Determine number of nodes
+    int nodes = m_phibars.size();
+
     // If XML element has 0 nodes then append nodes
-    if (xml.elements() == 0) {
+    if (src->elements() == 0) {
         for (int i = 0; i < nodes; ++i) {
-            xml.append(new GXmlElement("node"));
+            src->append(new GXmlElement("node"));
         }
     }
 
     // Verify that XML element has the required number of nodes
-    if (xml.elements() != nodes || xml.elements("node") != nodes) {
+    if (src->elements() != nodes || src->elements("node") != nodes) {
         std::string message = "DRB fitting model requires exactly " +
                               str(nodes) + " nodes.";
-        throw GException::model_invalid_parnum(G_WRITE, xml, message);
+        throw GException::model_invalid_parnum(G_WRITE, *src, message);
     }
 
     // Loop over all nodes
     for (int i = 0; i < nodes; ++i) {
 
         // Get node
-        GXmlElement* node = static_cast<GXmlElement*>(xml.element("node", i));
+        GXmlElement* node = static_cast<GXmlElement*>(src->element("node", i));
 
-        // If XML element has 0 leafes then append energy and intensity
+        // If XML element has 0 leafs then append energy and intensity
         // element
         if (node->elements() == 0) {
             node->append(new GXmlElement("parameter name=\"Phibar\""));
@@ -683,7 +703,7 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
 
         // Verify that node XML element has exactly 2 parameters
         if (node->elements() != 2 || node->elements("parameter") != 2) {
-            throw GException::model_invalid_parnum(G_WRITE, xml,
+            throw GException::model_invalid_parnum(G_WRITE, *src,
                   "Node requires exactly 2 parameters.");
         }
 
@@ -710,7 +730,7 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
 
         // Check of all required parameters are present
         if (npar[0] != 1 || npar[1] != 1) {
-            throw GException::model_invalid_parnames(G_WRITE, xml,
+            throw GException::model_invalid_parnames(G_WRITE, *src,
                   "Require \"Phibar\" and \"Normalization\" parameters.");
         }
 
