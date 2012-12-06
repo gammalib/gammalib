@@ -480,9 +480,9 @@ void GModel::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Print model name and instrument
+ * @brief Print model attributes
  ***************************************************************************/
-std::string GModel::print_name_instrument(void) const
+std::string GModel::print_attributes(void) const
 {
     // Initialise result string
     std::string result;
