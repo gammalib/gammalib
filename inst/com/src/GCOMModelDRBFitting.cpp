@@ -754,20 +754,8 @@ std::string GCOMModelDRBFitting::print(void) const
     // Append header
     result.append("=== GCOMModelDRBFitting ===");
 
-    // Append name and instruments
-    result.append("\n"+parformat("Name")+name());
-    result.append("\n"+parformat("Instruments"));
-    if (m_instruments.size() > 0) {
-        for (int i = 0; i < m_instruments.size(); ++i) {
-            if (i > 0) {
-                result.append(", ");
-            }
-            result.append(m_instruments[i]);
-        }
-    }
-    else {
-        result.append("all");
-    }
+    // Append attributes
+    result.append("\n"+print_attributes());
 
     // Append node summary
     result.append("\n"+parformat("Number of nodes")+str(m_phibars.size()));

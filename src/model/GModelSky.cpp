@@ -1065,19 +1065,8 @@ std::string GModelSky::print_model(void) const
     int n_spectral = (m_spectral != NULL) ? m_spectral->size() : 0;
     int n_temporal = (m_temporal != NULL) ? m_temporal->size() : 0;
 
-    // Append header
-    result.append(parformat("Name")+name());
-    result.append("\n"+parformat("Instruments"));
-    if (m_instruments.size() > 0) {
-        for (int i = 0; i < m_instruments.size(); ++i) {
-            if (i > 0) {
-                result.append(", ");
-            }
-            result.append(m_instruments[i]);
-        }
-    }
-    else
-        result.append("all");
+    // Append attributes
+    result.append(print_attributes());
 
     // Append model type
     result.append("\n"+parformat("Model type"));
