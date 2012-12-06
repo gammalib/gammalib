@@ -21,18 +21,30 @@ from gammalib import *
 from math import *
 import os
 
+
+# =========== #
+# Text parser #
+# =========== #
 def loadtxt(filename):
-	"""Parse text file with columns of floats.
+	"""
+	Parse text file with columns of floats.
 
 	We have files with multiple spaces as delimiter,
-	which I think csv.reader can't handle."""
+	which I think csv.reader can't handle.
+	"""
+	# Initialise result array
 	data = []
+
+	# Loop over all rows in file
 	for row in [_.split() for _ in file(filename)]:
 		row_data = []
 		for item in row:
 			row_data.append(float(item))
 		data.append(row_data)
+
+	# Return result
 	return data
+
 
 # ================================== #
 # Test class for GammaLib sky module #
@@ -222,6 +234,7 @@ class Test(GPythonTestSuite):
 		# Return
 		return
 
+	# FK5 J2000 to Galactic coordinate tranformations
 	def test_fk5_to_galactic(self):
 		"""
 		Test precision of FK5 J2000 to Galactic coordinate tranformations
@@ -231,14 +244,17 @@ class Test(GPythonTestSuite):
 		Test txt files taken from:
 		See https://github.com/astropy/coordinates-benchmark
 		"""
-		fk5_filename = "data/initial_coords.txt"
-		galactic_filename = "data/fk5_to_galactic.txt"
-		fk5_coordinates = loadtxt(fk5_filename)
+		# Set parameters
+		fk5_filename         = "data/initial_coords.txt"
+		galactic_filename    = "data/fk5_to_galactic.txt"
+		fk5_coordinates      = loadtxt(fk5_filename)
 		galactic_coordinates = loadtxt(galactic_filename)
-		coordinates = zip(fk5_coordinates, galactic_coordinates)
-		max_dist = 0
+		coordinates          = zip(fk5_coordinates, galactic_coordinates)
+		max_dist             = 0
 
+		# Loop over coordinates
 		for (ra, dec), (glon, glat) in coordinates:
+
 			# Create point A in FK5 J2000 coordinates
 			input_point = GSkyDir()
 			input_point.radec_deg(ra, dec)
@@ -256,7 +272,9 @@ class Test(GPythonTestSuite):
 			this_dist = actual_point.dist_deg(reference_point)
 			max_dist = max(max_dist, this_dist)
 
-		max_dist *= 1e3 * 3600 # convert max_dist from deg to milli-arcsec
+		# Convert max_dist from deg to milli-arcsec
+		max_dist *= 1e3 * 3600
+
 		# Results match within 10 milli-arcsec on my machine,
 		# I put 20 arcsec here to avoid test failures on machines with
 		# slightly different numerical results
@@ -264,4 +282,5 @@ class Test(GPythonTestSuite):
 		err = ''
 		self.test_assert(max_dist < 20, msg, err)
 
+		# Return
 		return
