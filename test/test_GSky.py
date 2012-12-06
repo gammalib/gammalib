@@ -29,21 +29,21 @@ def loadtxt(filename):
 	"""
 	Parse text file with columns of floats.
 
-	We have files with multiple spaces as delimiter,
-	which I think csv.reader can't handle.
-	"""
-	# Initialise result array
-	data = []
+    We have files with multiple spaces as delimiter,
+    which I think csv.reader can't handle.
+    """
+    # Initialise result array
+    data = []
 
-	# Loop over all rows in file
-	for row in [_.split() for _ in open(filename)]:
-		row_data = []
-		for item in row:
-			row_data.append(float(item))
-		data.append(row_data)
+    # Loop over all rows in file
+    for row in [_.split() for _ in file(filename)]:
+        row_data = []
+        for item in row:
+            row_data.append(float(item))
+        data.append(row_data)
 
-	# Return result
-	return data
+    # Return result
+    return data
 
 
 # ================================== #
