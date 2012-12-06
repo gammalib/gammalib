@@ -169,10 +169,12 @@ GObservation& GObservation::operator= (const GObservation& obs)
  * Implements generic model and gradient evaluation for an observation. The
  * model gives the probability for an event to occur with a given instrument
  * direction, at a given energy and at a given time. The gradient is the
- * parameter derivative of this probability.
+ * parameter derivative of this probability. If NULL is passed for the
+ * gradient vector, then gradients will not be computed.
  *
- * If NULL is passed for the gradient vector, then gradients will not be
- * computed.
+ * The method will only operate on models for which the list of instruments
+ * and observation identifiers matches those of the observation. Models that
+ * do not match will be skipped.
  ***************************************************************************/
 double GObservation::model(const GModels& models, const GEvent& event,
                            GVector* gradient) const
@@ -204,8 +206,9 @@ double GObservation::model(const GModels& models, const GEvent& event,
         const GModel* mptr = models[i];
         if (mptr != NULL) {
 
-            // Check if model applies to specific instrument
-            if (mptr->isvalid(instrument())) {
+            // Continue only if model applies to specific instrument and
+            // observation identifier
+            if (mptr->isvalid(instrument(), id())) {
 
                 // Compute value and add to model
                 model += mptr->eval_gradients(event, *this);
@@ -244,6 +247,10 @@ double GObservation::model(const GModels& models, const GEvent& event,
  * Returns the total number of predicted counts within the analysis region.
  * If NULL is passed for the gradient vector then gradients will not be
  * computed.
+ *
+ * The method will only operate on models for which the list of instruments
+ * and observation identifiers matches those of the observation. Models that
+ * do not match will be skipped.
  ***************************************************************************/
 double GObservation::npred(const GModels& models, GVector* gradient) const
 {
@@ -274,9 +281,9 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
         const GModel* mptr = models[i];
         if (mptr != NULL) {
 
-            // Handle only components that are relevant for the actual
-            // instrument
-            if (mptr->isvalid(instrument())) {
+            // Continue only if model applies to specific instrument and
+            // observation identifier
+            if (mptr->isvalid(instrument(), id())) {
 
                 // Determine Npred for model
                 npred += npred_temp(*mptr);
