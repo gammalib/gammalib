@@ -368,7 +368,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
         GTime   srcTime = obsTime;
 
         // Set source
-        GSource source(*m_spatial, srcEng, srcTime);
+        GSource source(this->name(), *m_spatial, srcEng, srcTime);
 
         // Compute response components
         double npred_spatial  = rsp->npred(source, obs);
@@ -830,7 +830,7 @@ double GModelSky::spatial(const GEvent& event,
         }
 
         // Set source
-        GSource source(*m_spatial, srcEng, srcTime);
+        GSource source(this->name(), *m_spatial, srcEng, srcTime);
         
         // Get IRF value. This method returns the spatial component of the
         // source model.
