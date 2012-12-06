@@ -428,6 +428,9 @@ void GModelSky::read(const GXmlElement& xml)
     // Set instruments
     instruments(xml.attribute("instrument"));
 
+    // Set observation identifiers
+    ids(xml.attribute("id"));
+
     // Set parameter pointers
     set_pointers();
 

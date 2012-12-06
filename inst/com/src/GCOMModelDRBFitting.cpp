@@ -598,6 +598,9 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
     // Set instruments
     instruments(xml.attribute("instrument"));
 
+    // Set observation identifiers
+    ids(xml.attribute("id"));
+
     // Set pointers
     set_pointers();
 
