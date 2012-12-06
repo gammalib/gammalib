@@ -20,7 +20,7 @@
 \documentclass{article}[12pt,a4]
 \usepackage{epsfig}
 \usepackage{manual}
-
+\usepackage{url}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Begin of document body
@@ -142,6 +142,32 @@ some systems.
 \item Use C++ casts instead of C-style casts.
 \end{itemize}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Python rules}
+
+\begin{itemize}
+\item All code must be compatible with Python 2.4, 2.5, 2.6, 2.7 as well as 3.2 or later.
+\item In the future we might drop support for Python 2.4 and 2.5. Python 2.6 was released in 2008 and
+is much more modern and Python 3 compatible that Python 2.4 and 2.5.\\
+\url{http://docs.python.org/2/whatsnew/2.6.html}
+\item Python code should follow the official PEP8 Python style:\\
+\url{http://www.python.org/dev/peps/pep-0008/}\\
+It says (among many other things) that you should indent with four spaces, not tabs.
+Following PEP8 is simple, because there's a {\tt pep8} tool (\url{https://github.com/jcrocholl/pep8}) that you should
+run on your Python code before committing, e.g. like so:
+\begin{verbatim}
+$ pep8 test/test_python.py
+...
+test/test_python.py:156:1: W191 indentation contains tabs
+test/test_python.py:156:1: W391 blank line at end of file
+test/test_python.py:156:1: W293 blank line contains whitespace
+$
+\end{verbatim}
+If you want you can even use the {\tt autopep8} tool (\url{https://github.com/hhatto/autopep8}) which can
+automatically fix the formatting for almost all cases. Run {\tt pep8 -h} and {\tt autopep8 -h} to see
+the options you can use.
+PEP8 compliance is automatically checked by the continuous integration system.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Coding conventions
