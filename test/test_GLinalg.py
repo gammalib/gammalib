@@ -26,114 +26,110 @@ import os
 # Test class for GammaLib linalg module #
 # ===================================== #
 class Test(GPythonTestSuite):
-	"""
-	Test class for GammaLib linalg module.
-	"""
-	# Constructor
-	def __init__(self):
-		"""
-		Constructor.
-		"""
-		# Call base class constructor
-		GPythonTestSuite.__init__(self)
+    """
+    Test class for GammaLib linalg module.
+    """
+    # Constructor
+    def __init__(self):
+        """
+        Constructor.
+        """
+        # Call base class constructor
+        GPythonTestSuite.__init__(self)
 
-		# Return
-		return
+        # Return
+        return
 
+    # Set test functions
+    def set(self):
+        """
+        Set all test functions.
+        """
+        # Set test name
+        self.name("linalg")
 
-	# Set test functions
-	def set(self):
-		"""
-		Set all test functions.
-		"""
-		# Set test name
-		self.name("linalg")
+        # Append tests
+        self.append(self.test_matrix, "Test GMatrix")
+        self.append(self.test_sym_matrix, "Test GSymMatrix")
+        self.append(self.test_sparse_matrix, "Test GSparseMatrix")
 
-		# Append tests
-		self.append(self.test_matrix, "Test GMatrix")
-		self.append(self.test_sym_matrix, "Test GSymMatrix")
-		self.append(self.test_sparse_matrix, "Test GSparseMatrix")
+        # Return
+        return
 
-		# Return
-		return
+    # Test GMatrix class
+    def test_matrix(self):
+        """
+        Test GMatrix class.
+        """
+        # Set matrix size
+        nrows = 3
+        ncols = 5
 
+        # Allocate matrix
+        m = GMatrix(nrows, ncols)
 
-	# Test GMatrix class
-	def test_matrix(self):
-		"""
-		Test GMatrix class.
-		"""
-		# Set matrix size
-		nrows = 3
-		ncols = 5
-		
-		# Allocate matrix
-		m = GMatrix(nrows,ncols)
-		
-		# Fill elements
-		for i in range(nrows):
-			for j in range(ncols):
-				m[i,j] = i+j
-		
-		# Check elements
-		for i in range(nrows):
-			for j in range(ncols):
-				ref = i+j
-				self.test_value(m[i,j],ref,0.0,"Test matrix element access")
-		
-		# Return
-		return
+        # Fill elements
+        for i in range(nrows):
+            for j in range(ncols):
+                m[i, j] = i + j
 
+        # Check elements
+        for i in range(nrows):
+            for j in range(ncols):
+                ref = i + j
+                self.test_value(m[i, j], ref, 0.0, "Test matrix element access")
 
-	# Test GSymMatrix class
-	def test_sym_matrix(self):
-		"""
-		Test GSymMatrix class.
-		"""
-		# Set matrix size
-		nrows = 3
-		ncols = 3
-		
-		# Allocate matrix
-		m = GSymMatrix(nrows,ncols)
-		
-		# Fill elements
-		for i in range(nrows):
-			for j in range(ncols):
-				m[i,j] = i+j
-		
-		# Check elements
-		for i in range(nrows):
-			for j in range(ncols):
-				ref = i+j
-				self.test_value(m[i,j],ref,0.0,"Test matrix element access")
-		
-		# Return
-		return
+        # Return
+        return
 
+    # Test GSymMatrix class
+    def test_sym_matrix(self):
+        """
+        Test GSymMatrix class.
+        """
+        # Set matrix size
+        nrows = 3
+        ncols = 3
 
-	# Test GSparseMatrix class
-	def test_sparse_matrix(self):
-		"""
-		Test GSparseMatrix class.
-		"""
-		# Set matrix size
-		nrows = 5
-		ncols = 3
-		
-		# Allocate matrix
-		m = GSparseMatrix(nrows,ncols)
-		
-		# Fill elements
-		for i in range(nrows):
-			for j in range(ncols):
-				m[i,j] = i+j
-		
-		# Check elements
-		for i in range(nrows):
-			for j in range(ncols):
-				ref = i+j
-				self.test_value(m[i,j],ref,0.0,"Test matrix element access")
-		
-		# Return
-		return
+        # Allocate matrix
+        m = GSymMatrix(nrows, ncols)
+
+        # Fill elements
+        for i in range(nrows):
+            for j in range(ncols):
+                m[i, j] = i + j
+
+        # Check elements
+        for i in range(nrows):
+            for j in range(ncols):
+                ref = i + j
+                self.test_value(m[i, j], ref, 0.0, "Test matrix element access")
+
+        # Return
+        return
+
+    # Test GSparseMatrix class
+    def test_sparse_matrix(self):
+        """
+        Test GSparseMatrix class.
+        """
+        # Set matrix size
+        nrows = 5
+        ncols = 3
+
+        # Allocate matrix
+        m = GSparseMatrix(nrows, ncols)
+
+        # Fill elements
+        for i in range(nrows):
+            for j in range(ncols):
+                m[i, j] = i + j
+
+        # Check elements
+        for i in range(nrows):
+            for j in range(ncols):
+                ref = i + j
+                self.test_value(m[i, j], ref, 0.0, "Test matrix element access")
+
+        # Return
+        return

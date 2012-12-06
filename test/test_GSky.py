@@ -80,7 +80,6 @@ class Test(GPythonTestSuite):
 		# Return
 		return
 
-
 	# Generic skymap pixel transformation test
 	def test_skymap_pixels(self, pixels, map):
 		"""
@@ -112,7 +111,6 @@ class Test(GPythonTestSuite):
 		# Return
 		return
 
-
 	# Generic skymap projection test
 	def test_skymap_proj(self, proj):
 		"""
@@ -139,7 +137,6 @@ class Test(GPythonTestSuite):
 
 		# Return
 		return
-
 
 	# Test HEALPix projection
 	def test_skymap_healpix(self):
@@ -186,7 +183,6 @@ class Test(GPythonTestSuite):
 		# Return
 		return
 
-
 	# Test CAR projection
 	def test_skymap_car(self):
 		"""
@@ -197,7 +193,6 @@ class Test(GPythonTestSuite):
 
 		# Return
 		return
-
 
 	# Test TAN projection
 	def test_skymap_tan(self):
@@ -210,7 +205,6 @@ class Test(GPythonTestSuite):
 		# Return
 		return
 
-
 	# Test STG projection
 	def test_skymap_stg(self):
 		"""
@@ -221,7 +215,6 @@ class Test(GPythonTestSuite):
 
 		# Return
 		return
-
 
 	# Test AZP projection
 	def test_skymap_azp(self):

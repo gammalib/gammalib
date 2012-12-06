@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 def set_ebds(ebins=20):
     """
     Setup energy boundaries.
-    
+
     Keywords:
      ebins - Number of energy bins
     """
@@ -35,24 +35,24 @@ def set_ebds(ebins=20):
 def int_analytical(ebds, gamma):
     """
     Perform analytical integration.
-    
+
     Parameters:
      ebds  - Energy boundaries
      gamma - Power law index
     """
     # Initialise result array
     integral = []
-    
+
     # Loop over energy bins
     for i in range(ebds.size()):
 
         # Perform analytical integration
-        int = pow(100.0, gamma)/(1.0-gamma) * \
-              (pow(ebds.emax(i).MeV(), 1.0-gamma) - pow(ebds.emin(i).MeV(), 1.0-gamma))
-        
+        int = pow(100.0, gamma) / (1.0 - gamma) * \
+            (pow(ebds.emax(i).MeV(), 1.0 - gamma) - pow(ebds.emin(i).MeV(), 1.0 - gamma))
+
         # Append integral to array
         integral.append(int)
-    
+
     # Return array
     return integral
 
@@ -63,24 +63,24 @@ def int_analytical(ebds, gamma):
 def int_trapezoid(ebds, gamma):
     """
     Perform Trapezoid integration.
-    
+
     Parameters:
      ebds  - Energy boundaries
      gamma - Power law index
     """
     # Initialise result array
     integral = []
-    
+
     # Loop over energy bins
     for i in range(ebds.size()):
 
         # Perform integration
         int = 0.5 * (ebds.emax(i).MeV() - ebds.emin(i).MeV()) * \
-              (pow(ebds.emin(i).MeV()/100.0, -gamma) + pow(ebds.emax(i).MeV()/100.0, -gamma))
-        
+            (pow(ebds.emin(i).MeV() / 100.0, -gamma) + pow(ebds.emax(i).MeV() / 100.0, -gamma))
+
         # Append integral to array
         integral.append(int)
-    
+
     # Return array
     return integral
 
@@ -91,25 +91,25 @@ def int_trapezoid(ebds, gamma):
 def int_log_trapezoid(ebds, gamma):
     """
     Perform logarithmic Trapezoid integration.
-    
+
     Parameters:
      ebds  - Energy boundaries
      gamma - Power law index
     """
     # Initialise result array
     integral = []
-    
+
     # Loop over energy bins
     for i in range(ebds.size()):
 
         # Perform integration
-        int = 0.5 * (ebds.emin(i).MeV() * pow(ebds.emin(i).MeV()/100.0, -gamma) + \
-                     ebds.emax(i).MeV() * pow(ebds.emax(i).MeV()/100.0, -gamma)) * \
-                     log(ebds.emax(i).MeV()/ebds.emin(i).MeV())
-        
+        int = 0.5 * (ebds.emin(i).MeV() * pow(ebds.emin(i).MeV() / 100.0, -gamma) +
+                     ebds.emax(i).MeV() * pow(ebds.emax(i).MeV() / 100.0, -gamma)) * \
+                    log(ebds.emax(i).MeV() / ebds.emin(i).MeV())
+
         # Append integral to array
         integral.append(int)
-    
+
     # Return array
     return integral
 
@@ -120,7 +120,7 @@ def int_log_trapezoid(ebds, gamma):
 def int_mean(ebds, gamma):
     """
     Perform arithmetic mean energy integration.
-    
+
     Parameters:
      ebds  - Energy boundaries
      gamma - Power law index
@@ -132,12 +132,12 @@ def int_mean(ebds, gamma):
     for i in range(ebds.size()):
 
         # Perform integration
-        energy = 0.5*(ebds.emax(i).MeV() + ebds.emin(i).MeV())
-        int    = pow(energy/100.0, -gamma) * (ebds.emax(i).MeV() - ebds.emin(i).MeV())
-        
+        energy = 0.5 * (ebds.emax(i).MeV() + ebds.emin(i).MeV())
+        int = pow(energy / 100.0, -gamma) * (ebds.emax(i).MeV() - ebds.emin(i).MeV())
+
         # Append integral to array
         integral.append(int)
-    
+
     # Return array
     return integral
 
@@ -148,7 +148,7 @@ def int_mean(ebds, gamma):
 def int_logmean(ebds, gamma):
     """
     Perform logaritmhic mean energy integration.
-    
+
     Parameters:
      ebds  - Energy boundaries
      gamma - Power law index
@@ -161,11 +161,11 @@ def int_logmean(ebds, gamma):
 
         # Perform integration
         energy = ebds.elogmean(i).MeV()
-        int    = pow(energy/100.0, -gamma) * (ebds.emax(i).MeV() - ebds.emin(i).MeV())
-        
+        int = pow(energy / 100.0, -gamma) * (ebds.emax(i).MeV() - ebds.emin(i).MeV())
+
         # Append integral to array
         integral.append(int)
-    
+
     # Return array
     return integral
 
@@ -176,7 +176,7 @@ def int_logmean(ebds, gamma):
 def int_geometric(ebds, gamma):
     """
     Perform geometric mean energy integration.
-    
+
     Parameters:
      ebds  - Energy boundaries
      gamma - Power law index
@@ -188,12 +188,12 @@ def int_geometric(ebds, gamma):
     for i in range(ebds.size()):
 
         # Perform integration
-        energy = sqrt(ebds.emin(i).MeV()*ebds.emax(i).MeV())
-        int    = pow(energy/100.0, -gamma) * (ebds.emax(i).MeV() - ebds.emin(i).MeV())
-        
+        energy = sqrt(ebds.emin(i).MeV() * ebds.emax(i).MeV())
+        int = pow(energy / 100.0, -gamma) * (ebds.emax(i).MeV() - ebds.emin(i).MeV())
+
         # Append integral to array
         integral.append(int)
-    
+
     # Return array
     return integral
 
@@ -221,29 +221,29 @@ if __name__ == '__main__':
         energy.append(ebds.elogmean(i).MeV())
 
     # Perform integrations
-    analytical    = int_analytical(ebds, gamma)
-    trapezoid     = int_trapezoid(ebds, gamma)
+    analytical = int_analytical(ebds, gamma)
+    trapezoid = int_trapezoid(ebds, gamma)
     log_trapezoid = int_log_trapezoid(ebds, gamma)
-    mean          = int_mean(ebds, gamma)
-    logmean       = int_logmean(ebds, gamma)
-    geometric     = int_geometric(ebds, gamma)
-    
+    mean = int_mean(ebds, gamma)
+    logmean = int_logmean(ebds, gamma)
+    geometric = int_geometric(ebds, gamma)
+
     # Compute differences
-    diff_trapezoid     = []
+    diff_trapezoid = []
     diff_log_trapezoid = []
-    diff_mean          = []
-    diff_logmean       = []
-    diff_geometric     = []
+    diff_mean = []
+    diff_logmean = []
+    diff_geometric = []
     for i in range(ebds.size()):
-        diff_trapezoid.append(trapezoid[i]/analytical[i])
-        diff_log_trapezoid.append(log_trapezoid[i]/analytical[i])
-        diff_mean.append(mean[i]/analytical[i])
-        diff_logmean.append(logmean[i]/analytical[i])
-        diff_geometric.append(geometric[i]/analytical[i])
-    
+        diff_trapezoid.append(trapezoid[i] / analytical[i])
+        diff_log_trapezoid.append(log_trapezoid[i] / analytical[i])
+        diff_mean.append(mean[i] / analytical[i])
+        diff_logmean.append(logmean[i] / analytical[i])
+        diff_geometric.append(geometric[i] / analytical[i])
+
     # Open plot
     plt.figure(1)
-    plt.title('Binned integration (Gamma='+str(gamma)+', ebins='+str(ebins)+', 0.1-20 GeV)')
+    plt.title('Binned integration (Gamma=' + str(gamma) + ', ebins=' + str(ebins) + ', 0.1-20 GeV)')
 
     # Plot
     plt.semilogx(energy, diff_trapezoid, 'r-', label="Trapezoid")
@@ -251,11 +251,10 @@ if __name__ == '__main__':
     plt.semilogx(energy, diff_mean, 'b-', label="Arithmetic mean")
     plt.semilogx(energy, diff_logmean, 'y-', label="Log mean")
     plt.semilogx(energy, diff_geometric, 'g.', label="Geometric mean")
-    #plt.ylim(0.9,1.1)
+    # plt.ylim(0.9,1.1)
     plt.xlabel('Energy (MeV)')
     plt.ylabel('Computed / analytical integral')
     plt.legend(loc="upper right")
 
     # Show plot
     plt.show()
-

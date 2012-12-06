@@ -35,122 +35,120 @@ import test_GXml
 
 # Try importing MWL tests
 try:
-	import test_MWL
-	has_mwl = True
+    import test_MWL
+    has_mwl = True
 except:
-	has_mwl = False
+    has_mwl = False
 
 # Try importing CTA tests
 try:
-	import test_CTA
-	has_cta = True
+    import test_CTA
+    has_cta = True
 except:
-	has_cta = False
+    has_cta = False
 
 # Try importing LAT tests
 try:
-	import test_LAT
-	has_lat = True
+    import test_LAT
+    has_lat = True
 except:
-	has_lat = False
+    has_lat = False
 
 # Try importing COMPTEL tests
 try:
-	import test_COM
-	has_com = True
+    import test_COM
+    has_com = True
 except:
-	has_com = False
-
+    has_com = False
 
 
 # ======================== #
 # Main routine entry point #
 # ======================== #
 if __name__ == '__main__':
-	"""
-	Perform unit testing for Python interface.
-	"""
-	# Allocate test suites
-	suites = GTestSuites("Python interface testing")
+    """
+    Perform unit testing for Python interface.
+    """
+    # Allocate test suites
+    suites = GTestSuites("Python interface testing")
 
-	# Allocate test suites and append them to the container
-	suite1  = test_GApplication.Test()
-	suite2  = test_GFits.Test()
-	suite3  = test_GLinalg.Test()
-	suite4  = test_GModel.Test()
-	suite5  = test_GNumerics.Test()
-	suite6  = test_GObservation.Test()
-	suite7  = test_GOptimizer.Test()
-	suite8  = test_GSky.Test()
-	suite9  = test_GSupport.Test()
-	suite10 = test_GTest.Test()
-	suite11 = test_GXml.Test()
+    # Allocate test suites and append them to the container
+    suite1 = test_GApplication.Test()
+    suite2 = test_GFits.Test()
+    suite3 = test_GLinalg.Test()
+    suite4 = test_GModel.Test()
+    suite5 = test_GNumerics.Test()
+    suite6 = test_GObservation.Test()
+    suite7 = test_GOptimizer.Test()
+    suite8 = test_GSky.Test()
+    suite9 = test_GSupport.Test()
+    suite10 = test_GTest.Test()
+    suite11 = test_GXml.Test()
 
-	# Setup unit tests
-	suite1.set()
-	suite2.set()
-	suite3.set()
-	suite4.set()
-	suite5.set()
-	suite6.set()
-	suite7.set()
-	suite8.set()
-	suite9.set()
-	suite10.set()
-	suite11.set()
+    # Setup unit tests
+    suite1.set()
+    suite2.set()
+    suite3.set()
+    suite4.set()
+    suite5.set()
+    suite6.set()
+    suite7.set()
+    suite8.set()
+    suite9.set()
+    suite10.set()
+    suite11.set()
 
-	# Append tests to container
-	suites.append(suite1)
-	suites.append(suite2)
-	suites.append(suite3)
-	suites.append(suite4)
-	suites.append(suite5)
-	suites.append(suite6)
-	suites.append(suite7)
-	suites.append(suite8)
-	suites.append(suite9)
-	suites.append(suite10)
-	suites.append(suite11)
+    # Append tests to container
+    suites.append(suite1)
+    suites.append(suite2)
+    suites.append(suite3)
+    suites.append(suite4)
+    suites.append(suite5)
+    suites.append(suite6)
+    suites.append(suite7)
+    suites.append(suite8)
+    suites.append(suite9)
+    suites.append(suite10)
+    suites.append(suite11)
 
-	# Optionally handle MWL suite
-	if has_mwl:
-		suite_mwl = test_MWL.Test()
-		suite_mwl.set()
-		suites.append(suite_mwl)
+    # Optionally handle MWL suite
+    if has_mwl:
+        suite_mwl = test_MWL.Test()
+        suite_mwl.set()
+        suites.append(suite_mwl)
 
-	# Optionally handle CTA suite
-	if has_cta:
-		suite_cta = test_CTA.Test()
-		suite_cta.set()
-		suites.append(suite_cta)
+    # Optionally handle CTA suite
+    if has_cta:
+        suite_cta = test_CTA.Test()
+        suite_cta.set()
+        suites.append(suite_cta)
 
-	# Optionally handle LAT suite
-	if has_lat:
-		suite_lat = test_LAT.Test()
-		suite_lat.set()
-		suites.append(suite_lat)
+    # Optionally handle LAT suite
+    if has_lat:
+        suite_lat = test_LAT.Test()
+        suite_lat.set()
+        suites.append(suite_lat)
 
-	# Optionally handle COMPTEL suite
-	if has_com:
-		suite_com = test_COM.Test()
-		suite_com.set()
-		suites.append(suite_com)
+    # Optionally handle COMPTEL suite
+    if has_com:
+        suite_com = test_COM.Test()
+        suite_com.set()
+        suites.append(suite_com)
 
-	# Run test suite
-	success = suites.run()
+    # Run test suite
+    success = suites.run()
 
-	# Save test results
-	suites.save("reports/GPython.xml")
+    # Save test results
+    suites.save("reports/GPython.xml")
 
-	# Set return code
-	if success:
-		rc = 0
-	else:
-		rc = 1
+    # Set return code
+    if success:
+        rc = 0
+    else:
+        rc = 1
 
-	# Print a linefeed
-	#sys.stdout.write("\n")
+    # Print a linefeed
+    # sys.stdout.write("\n")
 
-	# Exit with return code
-	sys.exit(rc)
-	
+    # Exit with return code
+    sys.exit(rc)

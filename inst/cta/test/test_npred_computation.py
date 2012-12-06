@@ -26,101 +26,101 @@ import sys
 
 # Optionally import matplotlib if available
 try:
-	import matplotlib.pyplot as plt
-	has_matplotlib = True
+    import matplotlib.pyplot as plt
+    has_matplotlib = True
 except ImportError:
-	print "WARNING: Matplotlib not available for plotting."
-	has_matplotlib = False
+    print "WARNING: Matplotlib not available for plotting."
+    has_matplotlib = False
 
 
 # ======================================== #
 # Compute NPsf as function of PSF position #
 # ======================================== #
 def npsf(caldb, irf, radius=1.0, energy=0.5):
-	"""
-	Compute NPsf as function of PSF position.
-	"""
-	# Setup CTA response. If no calibration database is given we directly
-	# load the PSF from the file specified using the irf parameter.
-	if caldb == "":
-		rsp = GCTAResponse()
-		rsp.load_psf(irf)
-	else:
-		rsp = GCTAResponse(irf, caldb)
-	
-	# Setup ROI
-	instDir = GCTAInstDir()
-	instDir.radec_deg(0.0, 0.0)
-	roi = GCTARoi()
-	roi.centre(instDir)
-	roi.radius(radius)
-	
-	# Setup source energy
-	srcEng = GEnergy()
-	srcEng.TeV(energy)
+    """
+    Compute NPsf as function of PSF position.
+    """
+    # Setup CTA response. If no calibration database is given we directly
+    # load the PSF from the file specified using the irf parameter.
+    if caldb == "":
+        rsp = GCTAResponse()
+        rsp.load_psf(irf)
+    else:
+        rsp = GCTAResponse(irf, caldb)
 
-	# Setup dummy time and pointing
-	srcTime = GTime()
-	pnt     = GCTAPointing()
-	
-	# Compute PSF as function of offset
-	x    = []
-	y    = []
-	rmax = int(radius*150.0)
-	for i in range(rmax):
-		
-		# Compute offset angle
-		offset = i*radius/100.0
-		
-		# Set PSF position
-		srcDir = GSkyDir()
-		srcDir.radec_deg(0.0, offset)
-		
-		# Compute NPsf
-		npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi)
+    # Setup ROI
+    instDir = GCTAInstDir()
+    instDir.radec_deg(0.0, 0.0)
+    roi = GCTARoi()
+    roi.centre(instDir)
+    roi.radius(radius)
 
-		# Store results
-		x.append(offset)
-		y.append(npsf)
-		#print offset, npsf
-	
-	# Optionally plot results
-	if has_matplotlib:
-		
-		# Create figure
-		plt.figure(1)
-		plt.title("NPsf")
+    # Setup source energy
+    srcEng = GEnergy()
+    srcEng.TeV(energy)
 
-		# Plot data
-		plt.plot(x, y, 'r-')
-		plt.plot([radius,radius], [0.0,1.0], 'b-')
-				
-		# Set axes
-		plt.xlabel("Offset angle (deg)")
-		plt.ylabel("Npsf")
-		
-		# Show plot
-		plt.show()
+    # Setup dummy time and pointing
+    srcTime = GTime()
+    pnt = GCTAPointing()
 
-	# Return
-	return
-	
+    # Compute PSF as function of offset
+    x = []
+    y = []
+    rmax = int(radius * 150.0)
+    for i in range(rmax):
+
+        # Compute offset angle
+        offset = i * radius / 100.0
+
+        # Set PSF position
+        srcDir = GSkyDir()
+        srcDir.radec_deg(0.0, offset)
+
+        # Compute NPsf
+        npsf = rsp.npsf(srcDir, srcEng.log10TeV(), srcTime, pnt, roi)
+
+        # Store results
+        x.append(offset)
+        y.append(npsf)
+        # print offset, npsf
+
+    # Optionally plot results
+    if has_matplotlib:
+
+        # Create figure
+        plt.figure(1)
+        plt.title("NPsf")
+
+        # Plot data
+        plt.plot(x, y, 'r-')
+        plt.plot([radius, radius], [0.0, 1.0], 'b-')
+
+        # Set axes
+        plt.xlabel("Offset angle (deg)")
+        plt.ylabel("Npsf")
+
+        # Show plot
+        plt.show()
+
+    # Return
+    return
+
 
 #==========================#
 # Main routine entry point #
 #==========================#
 if __name__ == '__main__':
-	"""
-	Test NPsf computation 
-	"""
-	# Set response information
-	caldb = "$GAMMALIB/share/caldb/cta"
-	irf   = "kb_E_50h_v3"
-	#file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023523_std_psf.fits"
-	#file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023526_std_psf.fits"
-	#file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023559_std_psf.fits"
-	#file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023592_std_psf.fits"
-	
-	# Compute NPsf
-	npsf(caldb, irf, radius=1.0)
-	#npsf("", file, radius=1.0, energy=1.0)
+    """
+    Test NPsf computation
+    """
+    # Set response information
+    caldb = "$GAMMALIB/share/caldb/cta"
+    irf = "kb_E_50h_v3"
+    # file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023523_std_psf.fits"
+    # file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023526_std_psf.fits"
+    # file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023559_std_psf.fits"
+    # file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023592_std_psf.fits"
+
+    # Compute NPsf
+    npsf(caldb, irf, radius=1.0)
+    # npsf("", file, radius=1.0, energy=1.0)
