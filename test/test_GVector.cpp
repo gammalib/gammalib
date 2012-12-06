@@ -20,11 +20,10 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-#include "test_GVector.hpp"
 #include <cmath>
 #include <iostream>
 #include <stdexcept>                          // std::exception
+#include "test_GVector.hpp"
 
 void TestGVector::set(void){
     // Test name

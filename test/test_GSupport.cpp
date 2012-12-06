@@ -1,7 +1,7 @@
 /***************************************************************************
  *    test_GSupport.cpp  -  test GSupport classes and GTools functions     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file test_GSupport.cpp
  * @brief Testing of support module
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,7 +31,6 @@
 #include <cstdlib>
 #include <iostream>                           // cout, cerr
 #include <stdexcept>                          // std::exception
-#include "GammaLib.hpp"
 #include "GTools.hpp"
 #include "test_GSupport.hpp"
 

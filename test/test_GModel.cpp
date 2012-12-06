@@ -32,7 +32,6 @@
 #include <ostream>
 #include <stdexcept>
 #include <stdlib.h>
-#include "GammaLib.hpp"
 #include "test_GModel.hpp"
 
 /***********************************************************************//**
