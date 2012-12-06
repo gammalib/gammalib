@@ -103,12 +103,13 @@ def int_log_trapezoid(ebds, gamma):
     for i in range(ebds.size()):
 
         # Perform integration
-        int = 0.5 * (ebds.emin(i).MeV() * pow(ebds.emin(i).MeV() / 100.0, -gamma) +
-                     ebds.emax(i).MeV() * pow(ebds.emax(i).MeV() / 100.0, -gamma)) * \
-                    log(ebds.emax(i).MeV() / ebds.emin(i).MeV())
+        temp1 = ebds.emin(i).MeV() * pow(ebds.emin(i).MeV() / 100.0, -gamma)
+        temp2 = ebds.emax(i).MeV() * pow(ebds.emax(i).MeV() / 100.0, -gamma)
+        temp3 = log(ebds.emax(i).MeV() / ebds.emin(i).MeV())
+        int_ = 0.5 * (temp1 + temp2) * temp3
 
         # Append integral to array
-        integral.append(int)
+        integral.append(int_)
 
     # Return array
     return integral

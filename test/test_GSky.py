@@ -90,7 +90,7 @@ class Test(GPythonTestSuite):
             dir = pixels.pix2dir(i)
             ipix = pixels.dir2pix(dir)
             msg = map + " pix2dir/dir2pix check for pixel " + str(i)
-            err  = map + " GSkymap trouble with pixel " + str(i) + " (" + str(ipix) + \
+            err = map + " GSkymap trouble with pixel " + str(i) + " (" + str(ipix) + \
                 "), RA=" + str(dir.ra() * 180 / pi) + ", Dec=" + str(dir.dec() * 180 / pi)
             self.test_assert(i == ipix, msg, err)
 
@@ -104,7 +104,7 @@ class Test(GPythonTestSuite):
                 dra -= 2.0 * pi
             ddec = abs(dir.dec() - dir_new.dec())
             msg = map + " dir check for pixel " + str(i)
-            err  = map + " GSkymap trouble with pixel " + str(i) + " (" + str(dra) + \
+            err = map + " GSkymap trouble with pixel " + str(i) + " (" + str(dra) + \
                 "," + str(ddec) + ")"
             self.test_assert(not (dra > 1.0e-9 or ddec > 1.0e-9), msg, err)
 
