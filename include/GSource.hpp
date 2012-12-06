@@ -45,14 +45,18 @@
  * source model), the photon energy, and the photon arrival time. The class
  * is very similar to the GPhoton class, yet instead of a given photon
  * arrival direction it contains a sky model member.
+ *
+ * Each source also has a name so that it can be identified.
  ***************************************************************************/
 class GSource : public GBase {
 
 public:
     // Constructors and destructors
     GSource(void);
-    explicit GSource(const GModelSpatial& model, const GEnergy& energy,
-                     const GTime& time);
+    explicit GSource(const std::string&   name,
+                     const GModelSpatial& model,
+                     const GEnergy&       energy,
+                     const GTime&         time);
     GSource(const GSource& src);
     virtual ~GSource(void);
  
@@ -62,9 +66,11 @@ public:
     // Methods
     void                 clear(void);
     GSource*             clone(void) const;
+    std::string          name(void) const { return m_name; }
     const GModelSpatial* model(void) const { return m_model; }
     const GEnergy&       energy(void) const { return m_energy; }
     const GTime&         time(void) const { return m_time; }
+    void                 name(const std::string& name) { m_name=name; }
     void                 model(GModelSpatial* model) { m_model=model; }
     void                 energy(const GEnergy& energy) { m_energy=energy; }
     void                 time(const GTime& time) { m_time=time; }
@@ -77,6 +83,7 @@ protected:
     void free_members(void);
 
     // Protected data members
+    std::string    m_name;     //!< Source name
     GModelSpatial* m_model;    //!< Spatial model
     GEnergy        m_energy;   //!< Photon energy
     GTime          m_time;     //!< Photon arrival time

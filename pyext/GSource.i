@@ -39,17 +39,21 @@ class GSource : public GBase {
 public:
     // Constructors and destructors
     GSource(void);
-    explicit GSource(const GModelSpatial& model, const GEnergy& energy,
-                     const GTime& time);
+    explicit GSource(const std::string&   name,
+                     const GModelSpatial& model,
+                     const GEnergy&       energy,
+                     const GTime&         time);
     GSource(const GSource& src);
     virtual ~GSource(void);
 
     // Methods
     void                 clear(void);
     GSource*             clone(void) const;
+    std::string          name(void) const;
     const GModelSpatial* model(void) const;
     const GEnergy&       energy(void) const;
     const GTime&         time(void) const;
+    void                 name(const std::string& name);
     void                 model(GModelSpatial* model);
     void                 energy(const GEnergy& energy);
     void                 time(const GTime& time);

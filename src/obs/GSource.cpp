@@ -64,17 +64,21 @@ GSource::GSource(void)
 /***********************************************************************//**
  * @brief Source constructor
  *
+ * @param[in] name Source name.
  * @param[in] model Spatial model.
  * @param[in] energy Energy.
  * @param[in] time Time.
  ***************************************************************************/
-GSource::GSource(const GModelSpatial& model, const GEnergy& energy,
-                 const GTime& time)
+GSource::GSource(const std::string&   name,
+                 const GModelSpatial& model,
+                 const GEnergy&       energy,
+                 const GTime&         time)
 { 
     // Initialise private members
     init_members();
 
     // Set members
+    m_name   = name;
     m_model  = model.clone();
     m_energy = energy;
     m_time   = time;
@@ -125,6 +129,7 @@ GSource::~GSource(void)
  * @brief Assignment operator
  *
  * @param[in] src Source.
+ * @return Source.
  ***************************************************************************/
 GSource& GSource::operator= (const GSource& src)
 { 
@@ -193,7 +198,8 @@ std::string GSource::print(void) const
 
     // Build photon string
     result.append("GSource(");
-    result.append(m_model->type());
+    result.append(m_name);
+    result.append(", "+m_model->type());
     result.append(", E="+m_energy.print());
     result.append(", MET="+m_time.print());
     result.append(")");
@@ -215,6 +221,7 @@ std::string GSource::print(void) const
 void GSource::init_members(void)
 {
     // Initialise members
+    m_name.clear();
     m_model = NULL;
     m_energy.clear();
     m_time.clear();
@@ -235,6 +242,7 @@ void GSource::copy_members(const GSource& src)
     m_model = (src.m_model != NULL) ? src.m_model->clone() : NULL;
 
     // Copy members
+    m_name   = src.m_name;
     m_energy = src.m_energy;
     m_time   = src.m_time;
     
