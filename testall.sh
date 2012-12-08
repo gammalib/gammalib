@@ -2,7 +2,7 @@
 #
 # Run all test and example scripts that come with the package
 #
-# Copyright (C) 2011 Jurgen Knodlseder
+# Copyright (C) 2011 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
