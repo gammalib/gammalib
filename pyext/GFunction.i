@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   numerics module  -  Python bindings                   *
+ *       GFunction.i - Single parameter function abstract base class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -17,25 +17,31 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * Usage:                                                                  *
- * swig -c++ -python -Wall numerics.i                                      *
  ***************************************************************************/
-%module numerics
-%feature("autodoc", "1");
+/**
+ * @file GFunction.i
+ * @brief Single parameter function abstract base class interface definition
+ * @author Juergen Knoedlseder
+ */
+%{
+/* Put headers and other declarations here that are needed for compilation */
+#include "GFunction.hpp"
+#include "GTools.hpp"
+%}
 
-/* __ Include standard typemaps for vectors and strings __________________ */
-%include stl.i
 
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
+/***********************************************************************//**
+ * @class GFunction
+ *
+ * @brief Single parameter function abstract base class
+ ***************************************************************************/
+class GFunction {
+public:
+    // Constructors and destructors
+    GFunction(void);
+    GFunction(const GFunction& func);
+    virtual ~GFunction(void);
 
-/* __ Make sure that exceptions are catched ______________________________ */
-//%import(module="gammalib.support") "GException.i"; 
-// Does not compile! Because not needed?
-
-/* __ Numerics module ____________________________________________________ */
-%include "GDerivative.i"
-%include "GFunction.i"
-%include "GIntegral.i"
-%include "GIntegrand.i"
+    // Methods
+    virtual double eval(double x) = 0;
+};
