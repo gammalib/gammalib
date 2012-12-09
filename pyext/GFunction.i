@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GFunction.hpp"
-#include "GTools.hpp"
 %}
 
 
