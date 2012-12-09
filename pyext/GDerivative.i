@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GDerivative.i
- * @brief Derivative class interface definition.
+ * @brief Derivative class interface definition
  * @author Juergen Knoedlseder
  */
 %{
