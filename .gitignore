@@ -3,7 +3,6 @@ doc/man
 doc/html/doxygen
 depcomp
 pyext/build/
-m4
 .libs
 .deps
 
