@@ -1,14 +1,16 @@
 # Folders
-doc/html
 doc/man
-html
-latex
+doc/html/doxygen
 depcomp
 pyext/build/
-pyext/gammalib
-pyext/setup.py
+m4
+.libs
+.deps
 
 # Generated files
+pyext/gammalib/*.py
+pyext/gammalib/*.cpp
+pyext/setup.py
 *.pyc
 *.o
 *.lo
@@ -21,6 +23,9 @@ pyext/setup.py
 *.toc
 *.Pi
 *.synctex.gz
+*.dvi
+*.idx
+*.out
 .DS_Store
 .libs
 .deps
@@ -29,7 +34,6 @@ stamp-h1
 Makefile.in
 gammalib.pc
 missing
-m4
 ltmain.sh
 libtool
 install-sh
