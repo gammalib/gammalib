@@ -2,22 +2,29 @@
 <html><head>
 <meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Home</title>
 
-<link rel="stylesheet" type="text/css" media="screen,print" href="gammalib.css"></head>
+<link rel="stylesheet" type="text/css" media="screen,print" href="gammalib.css">
+</head>
 <body>
 <p class="Header">GammaLib</p>
-<p style="padding-top: 0pt; text-align: left;" class="Body">
-The GammaLib is a versatile toolbox for the high-level analysis of
-astronomical gamma-ray data. It is implemented as a C++ library
-that is fully scriptable using Python. The library
-provides core functionalities such as data input and output, interfaces
-for parameter specifications, and a reporting and logging interface.
-It implements instruments specific functionalities such as instrument
-response functions and data formats. Instrument specific
-functionalities
-share a common interface to allow for extension of the GammaLib to
-include new gamma-ray instruments. The GammaLib provides an abstract
-data analysis framework that enables simultaneous multi-mission
-analysis. So far, GammaLib supports analysis of COMPTEL, Fermi-LAT, and Cherenkov telescope data (H.E.S.S., MAGIC, CTA).</p>
+<p style="padding-top: 0pt; text-align: left;" class="Body">GammaLib
+is a self-contained, instrument independent, open source,
+multi-platform C++ library that implements all code required for
+high-level science analysis of astronomical gamma-ray data. GammaLib is
+also wrapped into a Python module.<br>
+<br>
+GammaLib does not rely on any third-party software, except of HEASARC's
+cfitsio library that is used to implement the FITS interface. Large
+parts of the code treat gamma-ray observations in an abstract
+representation, and do neither depend on the characteristics of the
+employed instrument, nor on the particular formats in which data and
+instrument response functions are delivered. Instrument specific
+aspects are implemented as isolated and well defined modules that
+interact with the rest of the library through a common interface. This
+philosophy also enables the joint analysis of data from different
+instruments, providing a framework that allows for consistent
+broad-band spectral fitting or imaging. So far, GammaLib supports
+analysis of COMPTEL, Fermi-LAT, and Cherenkov telescope data (H.E.S.S.,
+MAGIC, CTA).</p>
 <br>
 <p style="padding-top: 0pt; text-align: left;" class="Body">GammaLib
 is free software distributed under the <a href="http://www.gnu.org/licenses/gpl.html" target="_blank">GNU
