@@ -93,18 +93,20 @@ private:
     void setup(void) const;
     
     // Node values
-    std::vector<double> m_node;                  //!< Array of nodes
+    std::vector<double> m_node;                   //!< Array of nodes
 
     // Evaluation cache
-    mutable bool                m_need_setup;    //!< Call of setup is required
-    mutable bool                m_is_linear;     //!< Nodes form a linear array
-    mutable std::vector<double> m_step;          //!< Distance to next node
-    mutable double              m_linear_slope;  //!< Slope for linear array
-    mutable double              m_linear_offset; //!< Offset for linear array
-    mutable int                 m_inx_left;      //!< Index of left node for linear interpolation
-    mutable int                 m_inx_right;     //!< Index of right node for linear interpolation
-    mutable double              m_wgt_left;      //!< Weight for left node for linear interpolation
-    mutable double              m_wgt_right;     //!< Weight for right node for linear interpolation
+    mutable bool                m_need_setup;     //!< Call of setup is required
+    mutable bool                m_is_linear;      //!< Nodes form a linear array
+    mutable bool                m_has_last_value; //!< Last value is valid
+    mutable std::vector<double> m_step;           //!< Distance to next node
+    mutable double              m_last_value;     //!< Last requested value
+    mutable double              m_linear_slope;   //!< Slope for linear array
+    mutable double              m_linear_offset;  //!< Offset for linear array
+    mutable int                 m_inx_left;       //!< Index of left node for linear interpolation
+    mutable int                 m_inx_right;      //!< Index of right node for linear interpolation
+    mutable double              m_wgt_left;       //!< Weight for left node for linear interpolation
+    mutable double              m_wgt_right;      //!< Weight for right node for linear interpolation
 };
 
 #endif /* GNODEARRAY_HPP */

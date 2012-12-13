@@ -442,59 +442,82 @@ void GNodeArray::set_value(const double& value) const
         throw GException::not_enough_nodes(G_SET_VALUE, nodes);
     }
 
-    // Update cache if required
+    // Initialize computation flag
+    bool compute = true;
+
+    // Update cache if required. If cache was updated, computation is
+    // enforced. Otherwise we check if the value has changed. The value
+    // check is only done when a last value has been recorded.
     if (m_need_setup) {
         setup();
     }
-    
-    // If array is linear then get left index from analytic formula
-    if (m_is_linear) {
-
-        // Set left index
-        m_inx_left = int(m_linear_slope * value + m_linear_offset);
-        
-        // Keep index in valid range
-        if (m_inx_left < 0)             m_inx_left = 0;
-        else if (m_inx_left >= nodes-1) m_inx_left = nodes - 2;
-
-    } // endif: array is linear
-
-    // ... otherwise search the relevant indices by bisection
     else {
-    
-        // Set left index if value is before first node
-        if (value < m_node[0]) {
-            m_inx_left = 0;
+        if (m_has_last_value && value == m_last_value) {
+            compute = false;
         }
-
-        // Set left index if value is after last node
-        else if (value >  m_node[nodes-1]) {
-            m_inx_left = nodes - 2;
-        }
-
-        // Set left index by bisection
-        else {
-            int low  = 0;
-            int high = nodes - 1;
-            while ((high - low) > 1) {
-                int mid = (low+high) / 2;
-                if (m_node[mid] > value) {
-                    high = mid;
-                }
-                else if (m_node[mid] <= value) {
-                    low = mid;
-                }
-            }
-            m_inx_left = low;
-        } // endelse: did bisection
     }
 
-    // Set right index
-    m_inx_right = m_inx_left + 1;
+    // Continue only if computation is required
+    if (compute) {
 
-    // Set weighting factors
-    m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
-    m_wgt_left  = 1.0 - m_wgt_right;
+        // If array is linear then get left index from analytic formula
+        if (m_is_linear) {
+
+            // Set left index
+            m_inx_left = int(m_linear_slope * value + m_linear_offset);
+        
+            // Keep index in valid range
+            if (m_inx_left < 0) {
+                m_inx_left = 0;
+            }
+            else if (m_inx_left >= nodes-1) {
+                m_inx_left = nodes - 2;
+            }
+
+        } // endif: array is linear
+
+        // ... otherwise search the relevant indices by bisection
+        else {
+    
+            // Set left index if value is before first node
+            if (value < m_node[0]) {
+                m_inx_left = 0;
+            }
+
+            // Set left index if value is after last node
+            else if (value >  m_node[nodes-1]) {
+                m_inx_left = nodes - 2;
+            }
+
+            // Set left index by bisection
+            else {
+                int low  = 0;
+                int high = nodes - 1;
+                while ((high - low) > 1) {
+                    int mid = (low+high) / 2;
+                    if (m_node[mid] > value) {
+                        high = mid;
+                    }
+                    else {
+                        low = mid;
+                    }
+                }
+                m_inx_left = low;
+            } // endelse: did bisection
+        }
+
+        // Set right index
+        m_inx_right = m_inx_left + 1;
+
+        // Set weighting factors
+        m_wgt_right = (value - m_node[m_inx_left]) / m_step[m_inx_left];
+        m_wgt_left  = 1.0 - m_wgt_right;
+
+    } // endif: computation was required
+
+    // Store last value and signal availability
+    m_last_value     = value;
+    m_has_last_value = true;
 
     // Return
     return;
@@ -555,14 +578,16 @@ void GNodeArray::init_members(void)
     // Initialise members
     m_node.clear();
     m_step.clear();
-    m_is_linear     = false;
-    m_linear_slope  = 0.0;
-    m_linear_offset = 0.0;
-    m_inx_left      = 0;
-    m_inx_right     = 0;
-    m_wgt_left      = 0.0;
-    m_wgt_right     = 0.0;
-    m_need_setup    = false;
+    m_is_linear      = false;
+    m_has_last_value = false;
+    m_last_value     = 0.0;
+    m_linear_slope   = 0.0;
+    m_linear_offset  = 0.0;
+    m_inx_left       = 0;
+    m_inx_right      = 0;
+    m_wgt_left       = 0.0;
+    m_wgt_right      = 0.0;
+    m_need_setup     = false;
 
     // Return
     return;
@@ -577,16 +602,18 @@ void GNodeArray::init_members(void)
 void GNodeArray::copy_members(const GNodeArray& array)
 {
     // Copy number of bins
-    m_node          = array.m_node;
-    m_step          = array.m_step;
-    m_is_linear     = array.m_is_linear;
-    m_linear_slope  = array.m_linear_slope;
-    m_linear_offset = array.m_linear_offset;
-    m_inx_left      = array.m_inx_left;
-    m_inx_right     = array.m_inx_right;
-    m_wgt_left      = array.m_wgt_left;
-    m_wgt_right     = array.m_wgt_right;
-    m_need_setup    = array.m_need_setup;
+    m_node           = array.m_node;
+    m_step           = array.m_step;
+    m_is_linear      = array.m_is_linear;
+    m_has_last_value = array.m_has_last_value;
+    m_last_value     = array.m_last_value;
+    m_linear_slope   = array.m_linear_slope;
+    m_linear_offset  = array.m_linear_offset;
+    m_inx_left       = array.m_inx_left;
+    m_inx_right      = array.m_inx_right;
+    m_wgt_left       = array.m_wgt_left;
+    m_wgt_right      = array.m_wgt_right;
+    m_need_setup     = array.m_need_setup;
 
     // Return
     return;
