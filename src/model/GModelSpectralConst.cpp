@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralConst.cpp
  * @brief Constant spectral model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -79,8 +79,8 @@ GModelSpectralConst::GModelSpectralConst(void) : GModelSpectral()
  * from an XML element. See GModelSpectralConst::read() for more information
  * about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml)
-                                         : GModelSpectral()
+GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
+                     GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -98,8 +98,8 @@ GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml)
  *
  * @param[in] model Spectral constant model.
  ***************************************************************************/
-GModelSpectralConst::GModelSpectralConst(const GModelSpectralConst& model)
-                                         : GModelSpectral(model)
+GModelSpectralConst::GModelSpectralConst(const GModelSpectralConst& model) :
+                     GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -135,8 +135,9 @@ GModelSpectralConst::~GModelSpectralConst(void)
  * @brief Assignment operator
  *
  * @param[in] model Spectral constant model.
+ * @return Spectral model.
  ***************************************************************************/
-GModelSpectralConst& GModelSpectralConst::operator= (const GModelSpectralConst& model)
+GModelSpectralConst& GModelSpectralConst::operator=(const GModelSpectralConst& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -186,7 +187,9 @@ void GModelSpectralConst::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Pointer to deep copy of spectral model.
+ ***************************************************************************/
 GModelSpectralConst* GModelSpectralConst::clone(void) const
 {
     return new GModelSpectralConst(*this);
@@ -197,6 +200,7 @@ GModelSpectralConst* GModelSpectralConst::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] srcEng True energy of photon.
+ * @return Model value.
  *
  * The spectral model is defined as
  * \f[I(E)=norm\f]
@@ -217,6 +221,7 @@ double GModelSpectralConst::eval(const GEnergy& srcEng) const
  * @brief Evaluate function and gradients
  *
  * @param[in] srcEng True energy of photon.
+ * @return Model value.
  *
  * The spectral model is defined as
  * \f[I(E)=norm\f]
@@ -250,6 +255,7 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Photon flux (ph/cm2/s).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
@@ -274,6 +280,7 @@ double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Energy flux (erg/cm2/s).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
@@ -302,8 +309,10 @@ double GModelSpectralConst::eflux(const GEnergy& emin, const GEnergy& emax) cons
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
  * @param[in] ran Random number generator.
+ * @return Energy.
  *
- * @todo To be implemented
+ * Returns Monte Carlo energy by randomly drawing from a constant between
+ * the minimum and maximum photon energy.
  ***************************************************************************/
 GEnergy GModelSpectralConst::mc(const GEnergy& emin, const GEnergy& emax,
                                 GRan& ran) const
@@ -311,8 +320,11 @@ GEnergy GModelSpectralConst::mc(const GEnergy& emin, const GEnergy& emax,
     // Allocate energy
     GEnergy energy;
 
-    // Dump warning that method is not yet implemented
-    throw GException::feature_not_implemented(G_MC);
+    // Get uniform value between 0 and 1
+    double u = ran.uniform();
+
+    // Map into [emin,emax] range
+    energy.MeV((emax.MeV() - emin.MeV()) * u + emin.MeV());
 
     // Return energy
     return energy;
@@ -423,7 +435,9 @@ void GModelSpectralConst::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Print spectral model information
+ *
+ * @return String containing spectral model information.
  ***************************************************************************/
 std::string GModelSpectralConst::print(void) const
 {
@@ -432,6 +446,8 @@ std::string GModelSpectralConst::print(void) const
 
     // Append header
     result.append("=== GModelSpectralConst ===\n");
+
+    // Append model content
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
@@ -499,10 +515,3 @@ void GModelSpectralConst::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
