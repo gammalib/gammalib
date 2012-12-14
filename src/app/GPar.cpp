@@ -638,6 +638,36 @@ bool GPar::isfilename(void) const
 
 
 /***********************************************************************//**
+ * @brief Signals if parameter is valid
+ ***************************************************************************/
+bool GPar::isvalid(void) const
+{
+    // Return validity
+    return (m_status == ST_VALID);
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if parameter is undefined
+ ***************************************************************************/
+bool GPar::isundefined(void) const
+{
+    // Return validity
+    return (m_status == ST_UNDEFINED);
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if parameter is not a number
+ ***************************************************************************/
+bool GPar::isnotanumber(void) const
+{
+    // Return validity
+    return (m_status == ST_NAN);
+}
+
+
+/***********************************************************************//**
  * @brief Print parameter
  *
  * @todo Implement writing of parameter options. I guess that parameter
@@ -650,7 +680,23 @@ std::string GPar::print(void) const
     std::string result = parformat(name());
 
     // Write value (use m_value here to avoid querying when printing)
-    result.append(m_value);
+    switch (m_status) {
+    case ST_VALID:
+        result.append(m_value);
+        break;
+    case ST_UNDEFINED:
+        result.append("undefined");
+        break;
+    case ST_NAN:
+        result.append("nan");
+        break;
+    case ST_UNDERFLOW:
+        result.append(m_value+" (underflow)");
+        break;
+    case ST_OVERFLOW:
+        result.append(m_value+" (overflow)");
+        break;
+    }
 
     // Write limits
     if (min().length() > 0 && max().length() > 0) {
@@ -691,6 +737,7 @@ void GPar::init_members(void)
     m_min.clear();
     m_max.clear();
     m_prompt.clear();
+    m_status = ST_VALID;
 
     // Return
     return;
@@ -700,7 +747,7 @@ void GPar::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] par Object from which members which should be copied.
+ * @param[in] par Parameter.
  ***************************************************************************/
 void GPar::copy_members(const GPar& par)
 {
@@ -713,6 +760,7 @@ void GPar::copy_members(const GPar& par)
     m_min    = par.m_min;
     m_max    = par.m_max;
     m_prompt = par.m_prompt;
+    m_status = par.m_status;
 
     // Return
     return;
@@ -922,12 +970,70 @@ void GPar::check_value_filename(const std::string& value) const
  *
  * Set parameter value, signal it for update and disable parameter querying.
  *
+ * The method also sets the parameter status, depending on the content of the
+ * value field. In case that we deal with an integer parameter, INDEF, NONE,
+ * UNDEF or UNDEFINED will result in a status of "undefined". INF, INFINITY
+ * or NAN will be transformed in the maximum long number. In case we dead
+ * with a floating point parameter, INDEF, NONE, UNDEF or UNDEFINED will
+ * result in a status of "undefined", while INF, INFINITY or NAN will result
+ * in a status of "nan".
+ *
  * @todo Implement parameter verification (min, max, options)
  ***************************************************************************/
 void GPar::set_value(const std::string& value)
 {
-    // Set value
-    m_value = value;
+    // Set integer value. Catch the special values that signal that a
+    // parameter is undefined. Any infinity or nan is set to the maximum
+    // long value (APE standard)
+    if (m_type == "i") {
+        std::string lvalue = tolower(value);
+        if (lvalue == "indef" ||
+            lvalue == "none"  ||
+            lvalue == "undef" ||
+            lvalue == "undefined") {
+            m_value  = "0";
+            m_status = ST_UNDEFINED;
+        }
+        else if (lvalue == "inf" ||
+                 lvalue == "infinity" ||
+                 lvalue == "nan") {
+            m_value  = str(LONG_MAX);
+            m_status = ST_VALID;
+        }
+        else {
+            m_value  = value;
+            m_status = ST_VALID;
+        }
+    }
+
+    // Set real value. Catch the special values that signal that a
+    // parameter is undefined, infinity or nan (APE standard).
+    else if (m_type == "r") {
+        std::string lvalue = tolower(value);
+        if (lvalue == "indef" ||
+            lvalue == "none"  ||
+            lvalue == "undef" ||
+            lvalue == "undefined") {
+            m_value  = "0";
+            m_status = ST_UNDEFINED;
+        }
+        else if (lvalue == "inf" ||
+                 lvalue == "infinity" ||
+                 lvalue == "nan") {
+            m_value  = "0.0";
+            m_status = ST_NAN;
+        }
+        else {
+            m_value  = value;
+            m_status = ST_VALID;
+        }
+    }
+
+    // Set other value
+    else {
+        m_value  = value;
+        m_status = ST_VALID;
+    }
 
     // Signal update
     m_update = true;
