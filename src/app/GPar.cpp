@@ -30,6 +30,7 @@
 #endif
 #ifdef HAVE_LIBREADLINE
 #include <cstdio>             //!< Needed for declaration of FILE in readline
+#include <climits>            //!< Needed for declaration of LONG_MAX
 #include <readline/readline.h>
 #endif
 #include "GPar.hpp"
