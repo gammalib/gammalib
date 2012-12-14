@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-07-00
 
 Author(s) : Juergen Knoedlseder
 
-December, 8rd, 2012
+December, 14th, 2012
 
 
 1. Introduction
@@ -23,6 +23,13 @@ modification of the interface files.
 File locking failures do no longer throw exceptions. This allows to
 operate GammaLib also on systems that do not support file locking.
 Unsupported file locking may occur on some file systems.
+
+The GPar class now handles special values for integer and floating point
+parameters, such as INDEF, NONE, UNDEF, UNDEFINED (for an undefined value)
+and INF, INFINITY, NAN (for values that are not a number). If presence
+of these values can be checked using the isundefined() and the
+isnotanumber() methods. An isvalid() method has been added to check also
+if a parameter value is valid.
 
 
 4. Base module
@@ -91,7 +98,14 @@ None
 
 12. Support module
 ------------------
-None
+GNodeArray computations have been optimized in that the last interpolation
+result is cached, and reused if the same value is requested in a subsequent
+call. An unnecessary if statement has also been removed from the bi-section
+method.
+
+Unit tests have been added to check the GNodeArray class. In particular,
+the linear and non-linear interpolation and extrapolation code is now
+validated.
 
 
 13. XML module

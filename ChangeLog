@@ -1,4 +1,4 @@
-2012-12-10  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2012-12-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.7.0 released
         ========================
@@ -12,6 +12,8 @@
         Define new instrument response interface
         Add GSource class
         File locking failures do no longer throw exceptions
+        Optimize GNodeArray computations and add unit tests
+        Add handling of undefined and NaN values to GPar class
  
 2012-09-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
