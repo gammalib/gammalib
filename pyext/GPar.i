@@ -74,7 +74,7 @@ public:
     bool        isfilename(void) const;
     bool        isvalid(void) const;
     bool        isundefined(void) const;
-    bool        isnan(void) const;
+    bool        isnotanumber(void) const;
 };
 
 
