@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>   // getenv
 #include <vector>
 #include "GTools.hpp"
 #include "test_GSupport.hpp"
