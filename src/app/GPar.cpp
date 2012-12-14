@@ -515,8 +515,12 @@ bool GPar::boolean(void)
     // Query parameter
     query();
 
+    // Convert boolean value to upper case
+    std::string uvalue = toupper(m_value);
+
     // Set result
-    bool result = (toupper(m_value) == "YES" || toupper(m_value) == "TRUE");
+    bool result = (uvalue == "YES"  || uvalue == "Y" ||
+                   uvalue == "TRUE" || uvalue == "T");
 
     // Return result
     return result;
@@ -816,7 +820,7 @@ void GPar::check_value(const std::string& value) const
  * @exception GException::par_error
  *            Boolean value string is not valid.
  *
- * The Boolean value string has to be one of y,n,yes,no,true,false
+ * The Boolean value string has to be one of y,yes,true,t or n,no,false,f
  * (case insensitive).
  ***************************************************************************/
 void GPar::check_value_bool(const std::string& value) const
@@ -825,8 +829,8 @@ void GPar::check_value_bool(const std::string& value) const
     std::string lvalue = tolower(value);
 
     // Test for validity
-    if (lvalue != "y" && lvalue != "yes" && lvalue != "true" &&
-        lvalue != "n" && lvalue != "no"  && lvalue != "false") {
+    if (lvalue != "y" && lvalue != "yes" && lvalue != "true"  && lvalue != "t" &&
+        lvalue != "n" && lvalue != "no"  && lvalue != "false" && lvalue != "f") {
         throw GException::par_error(G_CHECK_VALUE_BOOL, name(),
               "invalid Boolean value \""+value+"\"; use y/n/yes/no/true/false");
     }
