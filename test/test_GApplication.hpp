@@ -1,5 +1,5 @@
 /***************************************************************************
- *              test_GApplication.hpp  -   test GApplication class         *
+ *               test_GApplication.hpp - test GApplication class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -48,6 +48,7 @@ public:
     void         test_constructor(void);
     void         test_stream_logger(void);
     void         test_C_logger(void);
+    void         test_GPar(void);
 };
 
 #endif /* TEST_GAPPLICATION_HPP */
