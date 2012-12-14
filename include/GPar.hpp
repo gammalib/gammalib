@@ -82,9 +82,21 @@ public:
     bool        islearn(void) const;
     bool        isquery(void) const;
     bool        isfilename(void) const;
+    bool        isvalid(void) const;
+    bool        isundefined(void) const;
+    bool        isnan(void) const;
     std::string print(void) const;
   
 protected:
+    // Protected enumerators
+    enum Status {
+        ST_VALID,
+        ST_UNDEFINED,
+        ST_NAN,
+        ST_UNDERFLOW,
+        ST_OVERFLOW
+    };
+
     // Protected methods
     void        init_members(void);
     void        copy_members(const GPar& par);
@@ -111,6 +123,7 @@ protected:
     std::string m_min;     //!< Parameter minimum
     std::string m_max;     //!< Parameter maximum
     std::string m_prompt;  //!< Parameter prompt
+    Status      m_status;  //!< Parameter status
 };
 
 #endif /* GPAR_HPP */
