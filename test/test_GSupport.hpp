@@ -1,5 +1,5 @@
 /***************************************************************************
- *              test_GSupport.hpp  -   test support class                  *
+ *                test_GSupport.hpp - test support module                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,27 +18,40 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GSupport.hpp
+ * @brief Testing of support module
+ * @author Jean-Baptiste Cayrou
+ */
 
 #ifndef TEST_GSUPPORT_HPP
 #define TEST_GSUPPORT_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
 
-class TestGSupport : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGSupport(void) : GTestSuite(){ return; }
-        virtual ~TestGSupport(void){ return; }
 
-        // Methods
-        virtual void set(void);
-        void test_expand_env(void);
 
-    // Private members
-    private:
+/***********************************************************************//**
+ * @class TestGSupport
+ *
+ * @brief Test suite for support module
+ ***************************************************************************/
+class TestGSupport : public GTestSuite {
+
+public:
+    // Constructors and destructors
+    TestGSupport(void) : GTestSuite(){ }
+    virtual ~TestGSupport(void){ }
+
+    // Methods
+    virtual void set(void);
+    void         test_expand_env(void);
+    void         test_node_array(void);
+
+private:
+    // Private methods
+    void test_node_array_interpolation(const int& num, const double* nodes);
 };
 
 #endif /* TEST_GSUPPORT_HPP */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *    test_GSupport.cpp  -  test GSupport classes and GTools functions     *
+ *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -28,9 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdlib>
-#include <iostream>                           // cout, cerr
-#include <stdexcept>                          // std::exception
+#include <vector>
 #include "GTools.hpp"
 #include "test_GSupport.hpp"
 
@@ -44,13 +42,15 @@
  * @brief Set parameters and tests
  ***************************************************************************/
 void TestGSupport::set(void){
-    // Test name
+
+    // Set test name
     name("GSupport");
 
+    // Add tests
+    add_test(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
+    add_test(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
 
-    //add tests
-    add_test(static_cast<pfunction>(&TestGSupport::test_expand_env),"Test Environment variable");
-
+    // Return
     return;
 }
 
@@ -164,27 +164,156 @@ void TestGSupport::test_expand_env(void)
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Test GNodeArray class
+ *
+ * Test the GNodeArray class.
+ ***************************************************************************/
+void TestGSupport::test_node_array(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GNodeArray array;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test copy constructor
+    test_try("Copy constructor");
+    try {
+        GNodeArray array;
+        GNodeArray array2(array);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test array constructor
+    test_try("Array constructor");
+    try {
+        double array[] = {0.0, 1.0, 2.0, 3.0, 5.0};
+        GNodeArray array2(5, array);
+        test_try_success();
+        for (int i = 0; i < 5; ++i) {
+            test_value(array2[i], array[i]);
+        }
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GVector constructor
+    test_try("GVector constructor");
+    try {
+        double array[] = {0.0, 1.0, 2.0, 3.0, 5.0};
+        GVector vector(5);
+        for (int i = 0; i < 5; ++i) {
+            vector[i] = array[i];
+        }
+        GNodeArray array2(vector);
+        test_try_success();
+        for (int i = 0; i < 5; ++i) {
+            test_value(array2[i], vector[i]);
+        }
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test std::vector constructor
+    test_try("std::vector constructor");
+    try {
+        double array[] = {0.0, 1.0, 2.0, 3.0, 5.0};
+        std::vector<double> vector;
+        for (int i = 0; i < 5; ++i) {
+            vector.push_back(array[i]);
+        }
+        GNodeArray array2(vector);
+        test_try_success();
+        for (int i = 0; i < 5; ++i) {
+            test_value(array2[i], vector[i]);
+        }
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test linear interpolation
+    double array_lin[] = {-1.0, 0.0, 1.0};
+    test_node_array_interpolation(3, array_lin);
+
+    // Test non-linear interpolation
+    double array_nonlin[] = {-1.3, 0.0, 1.7};
+    test_node_array_interpolation(3, array_nonlin);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GNodeArray class interpolation
+ *
+ * @param[in] num Number of nodes.
+ * @param[in] nodes Nodes.
+ *
+ * Test the GNodeArray class interpolation method by comparing the
+ * interpolation results for a linear function to the expected result.
+ ***************************************************************************/
+void TestGSupport::test_node_array_interpolation(const int&    num,
+                                                 const double* nodes)
+{
+    // Setup function parameters
+    const double slope  = 3.1;
+    const double offset = 7.9;
+
+    // Initialise node array
+    GNodeArray array(num, nodes);
+
+    // Setup node values
+    std::vector<double> values;
+    for (int i = 0; i < 3; ++i) {
+        values.push_back(nodes[i] * slope + offset);
+    }
+
+    // Test values
+    for (double value = -2.0; value <= +2.0; value += 0.2) {
+        double expected = value * slope + offset;
+        double result   = array.interpolate(value, values);
+        test_value(result, expected);
+    }
+
+    // Return
+    return;
+}
+
+
 /***********************************************************************//**
  * @brief Main test entry point
  ***************************************************************************/
 int main(void)
 {
-    GTestSuites testsuites("GSupport");
+    // Allocate test suite container
+    GTestSuites testsuites("Support module");
 
-    bool was_successful=true;
+    // Initially assume that we pass all tests
+    bool success = true;
 
-    //Create a test suite
+    // Create and append test suite
     TestGSupport test;
-
-    //Append to the container
     testsuites.append(test);
 
-    //Run
-    was_successful=testsuites.run();
+    // Run the testsuites
+    success = testsuites.run();
 
-    //save xml report
+    // Save test report
     testsuites.save("reports/GSupport.xml");
 
-    // Return
-    return was_successful ? 0:1;
+    // Return success status
+    return (success ? 0 : 1);
 }
