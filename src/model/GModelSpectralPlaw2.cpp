@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralPlaw2.cpp  -  Spectral power law model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralPlaw2.cpp
  * @brief Flux normalized power law spectral model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -43,6 +43,7 @@ const GModelSpectralRegistry g_spectral_plaw2_registry(&g_spectral_plaw2_seed);
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                "GModelSpectralPlaw2::flux(GEnergy&, GEnergy&)"
 #define G_EFLUX              "GModelSpectralPlaw2::eflux(GEnergy&, GEnergy&)"
+#define G_MC             "GModelSpectralPlaw2::mc(GEnergy&, GEnergy&, GRan&)"
 #define G_READ                      "GModelSpectralPlaw2::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralPlaw2::write(GXmlElement&)"
 
@@ -345,6 +346,10 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Minimum photon energy.
+ * @return Photon flux (ph/cm2/s).
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
@@ -357,11 +362,39 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng) const
  ***************************************************************************/
 double GModelSpectralPlaw2::flux(const GEnergy& emin, const GEnergy& emax) const
 {
-    // Dump warning that method is not yet implemented
-    throw GException::feature_not_implemented(G_FLUX);
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
+    // Initialise flux
+    double flux = 0.0;
+
+    // Case A: Index is not -1
+    if (index() != -1.0) {
+        double gamma        = index() + 1.0;
+        double pow_emin     = std::pow(emin.MeV(), gamma);
+        double pow_emax     = std::pow(emax.MeV(), gamma);
+        double pow_ref_emin = std::pow(this->emin(), gamma);
+        double pow_ref_emax = std::pow(this->emax(), gamma);
+        double factor       = (pow_emax - pow_emin) / (pow_ref_emax - pow_ref_emin);
+        flux                = integral() * factor;
+    }
+
+    // Case B: Index is -1
+    else {
+        double log_emin     = std::log(emin.MeV());
+        double log_emax     = std::log(emax.MeV());
+        double log_ref_emin = std::log(this->emin());
+        double log_ref_emax = std::log(this->emax());
+        double factor       = (log_emax - log_emin) / (log_ref_emax - log_ref_emin);
+        flux                = integral() * factor;
+    }
 
     // Return flux
-    return 0.0;
+    return flux;
 }
 
 
@@ -370,6 +403,10 @@ double GModelSpectralPlaw2::flux(const GEnergy& emin, const GEnergy& emax) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Minimum photon energy.
+ * @return Photon flux (ph/cm2/s).
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
@@ -382,11 +419,50 @@ double GModelSpectralPlaw2::flux(const GEnergy& emin, const GEnergy& emax) const
  ***************************************************************************/
 double GModelSpectralPlaw2::eflux(const GEnergy& emin, const GEnergy& emax) const
 {
-    // Dump warning that method is not yet implemented
-    throw GException::feature_not_implemented(G_EFLUX);
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
+    // Initialise flux
+    double eflux = 0.0;
+
+    // Compute power law normalization
+    double norm;
+    if (index() != -1.0) {
+        double gamma        = index() + 1.0;
+        double pow_ref_emin = std::pow(this->emin(), gamma);
+        double pow_ref_emax = std::pow(this->emax(), gamma);
+        norm = integral() * gamma / (pow_ref_emax - pow_ref_emin);
+    }
+    else {
+        double log_ref_emin = std::log(this->emin());
+        double log_ref_emax = std::log(this->emax());
+        norm = integral() / (log_ref_emax - log_ref_emin);
+    }
+
+    // Compute energy flux
+    if (index() != -2.0) {
+        double gamma    = index() + 2.0;
+        double pow_emin = std::pow(emin.MeV(), gamma);
+        double pow_emax = std::pow(emax.MeV(), gamma);
+        eflux = norm / gamma * (pow_emax - pow_emin);
+    }
+
+    // Case B: Index is -2
+    else {
+        double log_emin = std::log(emin.MeV());
+        double log_emax = std::log(emax.MeV());
+        eflux = norm * (log_emax - log_emin);
+    }
+
+    // Convert from MeV/cm2/s to erg/cm2/s
+    eflux *= MeV2erg;
 
     // Return flux
-    return 0.0;
+    return eflux;
 }
 
 
@@ -396,12 +472,23 @@ double GModelSpectralPlaw2::eflux(const GEnergy& emin, const GEnergy& emax) cons
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
  * @param[in] ran Random number generator.
+ * @return Energy.
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
  *
  * Returns Monte Carlo energy by randomly drawing from a power law.
  ***************************************************************************/
 GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin, const GEnergy& emax,
                                 GRan& ran) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Allocate energy
     GEnergy energy;
 
