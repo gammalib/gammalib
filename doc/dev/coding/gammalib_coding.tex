@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{CDC}}
 \newcommand{\doctype}{\mbox{Coding and Design Conventions}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{7 December 2012}}
+\newcommand{\calendar}{\mbox{15 December 2012}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 
 
@@ -933,6 +933,7 @@ Method & Usage & Implementation \\
 {\tt extend()} & Append container elements to list of elements & container classes (see section \ref{sec:containers}) \\
 {\tt insert()} & Insert element to list of elements & container classes (see section \ref{sec:containers}) \\
 {\tt pop()} & Remove element from list of elements & container classes (see section \ref{sec:containers}) \\
+{\tt reserve()} & Reserve memory for a number of elements (see section \ref{sec:containers}) \\
 \noalign{\smallskip}
 \hline
 \noalign{\smallskip}
@@ -1141,6 +1142,7 @@ Method & Usage \\
 {\tt void insert(const int\&, const e\&)} & Insert an element into the container \\
 {\tt void extend(const C\&)} & Append another container to the container \\
 {\tt void pop(const int\&)} & Removes an element from the container \\
+{\tt void reserve(const int\&)} & Reserve memory space in a container \\
 {\tt std::string print()} & Print container (see section \ref{sec:output}) \\
 \noalign{\smallskip}
 \hline
