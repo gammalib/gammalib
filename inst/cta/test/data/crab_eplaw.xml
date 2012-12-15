@@ -1,7 +1,7 @@
 <?xml version="1.0" standalone="no"?>
 <source_library title="source library">
   <source name="MAGIC Crab" type="PointSource">
-    <spectrum type="PowerLaw">
+    <spectrum type="ExpCutoff">
        <parameter name="Prefactor" scale="1e-16" value="5.7"  min="1e-07" max="1000.0" free="1"/>
        <parameter name="Index"     scale="-1"    value="2.48" min="0.0"   max="+5.0"   free="1"/>
        <parameter name="Cutoff"    scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="1"/>
