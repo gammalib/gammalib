@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralFunc.cpp
  * @brief Spectral function model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -317,6 +317,10 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Photon flux (ph/cm2/s).
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
@@ -327,6 +331,13 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng) const
  ***************************************************************************/
 double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Initialise flux
     double flux = 0.0;
     
@@ -401,6 +412,10 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Energy flux (erg/cm2/s).
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
@@ -411,6 +426,13 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
  ***************************************************************************/
 double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Initialise flux
     double flux = 0.0;
     
@@ -486,10 +508,24 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
  * @param[in] ran Random number generator.
+ * @return Energy.
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
+ *
+ * Simulates a random energy in the interval [emin, emax] for a spectral
+ * function.
  ***************************************************************************/
 GEnergy GModelSpectralFunc::mc(const GEnergy& emin, const GEnergy& emax,
                                GRan& ran) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Allocate energy
     GEnergy energy;
     

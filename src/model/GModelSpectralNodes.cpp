@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralNodes.cpp
  * @brief Spectral nodes model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -171,7 +171,7 @@ GModelSpectralNodes& GModelSpectralNodes::operator= (const GModelSpectralNodes& 
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
+ ***************************************************************************/
 void GModelSpectralNodes::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
@@ -335,6 +335,10 @@ double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Photon flux (ph/cm2/s).
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
@@ -345,6 +349,13 @@ double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng) const
  ***************************************************************************/
 double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Update flux cache
     update_flux_cache();
 
@@ -419,6 +430,10 @@ double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Energy flux (erg/cm2/s).
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
@@ -429,6 +444,13 @@ double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
  ***************************************************************************/
 double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Update flux cache
     update_flux_cache();
 
@@ -504,10 +526,21 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
  * @param[in] ran Random number generator.
+ * @return Energy.
+ *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
  ***************************************************************************/
 GEnergy GModelSpectralNodes::mc(const GEnergy& emin, const GEnergy& emax,
                                GRan& ran) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Allocate energy
     GEnergy energy;
     

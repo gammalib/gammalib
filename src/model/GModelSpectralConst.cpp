@@ -40,6 +40,8 @@ const GModelSpectralConst    g_spectral_const_seed;
 const GModelSpectralRegistry g_spectral_const_registry(&g_spectral_const_seed);
 
 /* __ Method name definitions ____________________________________________ */
+#define G_FLUX                "GModelSpectralConst::flux(GEnergy&, GEnergy&)"
+#define G_EFLUX              "GModelSpectralConst::eflux(GEnergy&, GEnergy&)"
 #define G_MC             "GModelSpectralConst::mc(GEnergy&, GEnergy&, GRan&)"
 #define G_READ                      "GModelSpectralConst::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralConst::write(GXmlElement&)"
@@ -169,7 +171,7 @@ GModelSpectralConst& GModelSpectralConst::operator=(const GModelSpectralConst& m
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
+ ***************************************************************************/
 void GModelSpectralConst::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
@@ -257,6 +259,9 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
  * @param[in] emax Maximum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
+ *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
  * where
@@ -267,6 +272,13 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
  ***************************************************************************/
 double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Compute flux for a constant model
     double flux = norm() * (emax.MeV() - emin.MeV());
 
@@ -282,6 +294,9 @@ double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] emax Maximum photon energy.
  * @return Energy flux (erg/cm2/s).
  *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
+ *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
  * where
@@ -292,6 +307,13 @@ double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
  ***************************************************************************/
 double GModelSpectralConst::eflux(const GEnergy& emin, const GEnergy& emax) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Compute flux for a constant model
     double flux = norm() * 0.5 * (emax.MeV()*emax.MeV() - emin.MeV()*emin.MeV());
 
@@ -311,12 +333,22 @@ double GModelSpectralConst::eflux(const GEnergy& emin, const GEnergy& emax) cons
  * @param[in] ran Random number generator.
  * @return Energy.
  *
+ * @exception GException::erange_invalid
+ *            Energy range is invalid (emin < emax required).
+ *
  * Returns Monte Carlo energy by randomly drawing from a constant between
  * the minimum and maximum photon energy.
  ***************************************************************************/
 GEnergy GModelSpectralConst::mc(const GEnergy& emin, const GEnergy& emax,
                                 GRan& ran) const
 {
+    // Throw an exception if energy range is invalid
+    if (emin >= emax) {
+        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
+              "Minimum energy < maximum energy required.");
+        
+    }
+
     // Allocate energy
     GEnergy energy;
 
