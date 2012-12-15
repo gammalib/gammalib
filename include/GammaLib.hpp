@@ -148,6 +148,7 @@
 #include "GInstDir.hpp"
 #include "GPointing.hpp"
 #include "GResponse.hpp"
+#include "GPhotons.hpp"
 #include "GPhoton.hpp"
 #include "GSource.hpp"
 
