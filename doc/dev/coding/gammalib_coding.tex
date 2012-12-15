@@ -484,7 +484,7 @@ For code checked into the repository, all debug options should be commented out.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Python classes}
+\subsection{Python interface for C++ classes}
 \label{sec:pyhton}
 
 The Python interface for C++ classes is defined by a so-called SWIG interface file.
@@ -1243,12 +1243,33 @@ exception.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsection{Python classes}
+\subsection{Python interface for C++ classes}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsubsection{Container classes}
+\subsubsection{Container classes}
 
-%TBW
+The Python interface for container classes should implement the following class extensions:
+
+%%% Mandatory methods for container classes %%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{center}
+\begin{tabular}{lll}
+\hline
+\hline
+\noalign{\smallskip}
+Extension & Method & Usage \\
+\noalign{\smallskip}
+\hline
+\noalign{\smallskip}
+{\tt \_\_str\_\_()} & print() & Convert object to string \\
+{\tt \_\_getitem\_\_()} & operator[] & Element access (get) \\
+{\tt \_\_setitem\_\_()} & operator[] & Element access (set) \\
+{\tt \_\_len\_\_()} & size() & Container size \\
+\noalign{\smallskip}
+\hline
+\end{tabular}
+\end{center}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
