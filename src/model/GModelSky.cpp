@@ -591,7 +591,7 @@ GPhotons GModelSky::mc(const double& area,
                 photon.energy(m_spectral->mc(emin, emax, ran));
 
                 // Append photon
-                photons.push_back(photon);
+                photons.append(photon);
 
             } // endfor: looped over photons
 
