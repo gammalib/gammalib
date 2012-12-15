@@ -28,7 +28,6 @@
 #define GPHOTON_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <vector>
 #include <string>
 #include "GBase.hpp"
 #include "GSkyDir.hpp"
@@ -59,7 +58,7 @@ public:
     virtual ~GPhoton(void);
  
     // Operators
-    GPhoton& operator= (const GPhoton& ph);
+    GPhoton& operator=(const GPhoton& ph);
 
     // Methods
     void           clear(void);
@@ -103,11 +102,5 @@ bool operator!= (const GPhoton &a, const GPhoton &b)
     return (a.m_energy != b.m_energy ||  a.m_time != b.m_time ||
             a.m_dir.dist(b.m_dir) > 0.0);
 }
-
-
-/***************************************************************************
- *                                 Typedefs                                *
- ***************************************************************************/
-typedef std::vector<GPhoton> GPhotons;
 
 #endif /* GPHOTON_HPP */
