@@ -1,7 +1,7 @@
 /***************************************************************************
- *    GModelSpectralExpPlaw.hpp  -  Exponential cut off power law model    *
+ *     GModelSpectralExpPlaw.hpp - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralExpPlaw.hpp
  * @brief Exponential cut off power law spectral class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSPECTRALEXPPLAW_HPP
@@ -33,6 +33,7 @@
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
 #include "GXmlElement.hpp"
+#include "GIntegrand.hpp"
 
 
 /***********************************************************************//**
@@ -87,12 +88,58 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpectralExpPlaw& model);
     void free_members(void);
+    void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
+
+    // Photon flux integration kernel
+    class flux_kernel : public GIntegrand {
+    public:
+        flux_kernel(const double& norm,
+                    const double& index,
+                    const double& pivot,
+                    const double& ecut) :
+                    m_norm(norm),
+                    m_index(index),
+                    m_pivot(pivot),
+                    m_ecut(ecut) {}
+        double eval(double eng);
+    protected:
+        double m_norm;   //!< Normalization
+        double m_index;  //!< Index
+        double m_pivot;  //!< Pivot energy
+        double m_ecut;   //!< Cut off energy
+    };
+
+    // Energy flux integration kernel
+    class eflux_kernel : public GIntegrand {
+    public:
+        eflux_kernel(const double& norm,
+                     const double& index,
+                     const double& pivot,
+                     const double& ecut) :
+                     m_norm(norm),
+                     m_index(index),
+                     m_pivot(pivot),
+                     m_ecut(ecut) {}
+        double eval(double eng);
+    protected:
+        double m_norm;   //!< Normalization
+        double m_index;  //!< Index
+        double m_pivot;  //!< Pivot energy
+        double m_ecut;   //!< Cut off energy
+    };
 
     // Protected members
-    GModelPar m_norm;            //!< Normalization factor
-    GModelPar m_index;           //!< Spectral index
-    GModelPar m_ecut;            //!< Exponential cut off energy
-    GModelPar m_pivot;           //!< Pivot energy
+    GModelPar m_norm;               //!< Normalization factor
+    GModelPar m_index;              //!< Spectral index
+    GModelPar m_ecut;               //!< Exponential cut off energy
+    GModelPar m_pivot;              //!< Pivot energy
+
+    // Cached members used for pre-computations
+    mutable double m_mc_emin;       //!< Minimum energy
+    mutable double m_mc_emax;       //!< Maximum energy
+    mutable double m_mc_exponent;   //!< Exponent (index+1)
+    mutable double m_mc_pow_emin;   //!< Power of minimum energy
+    mutable double m_mc_pow_ewidth; //!< Power of energy width
 };
 
 #endif /* GMODELSPECTRALEXPPLAW_HPP */
