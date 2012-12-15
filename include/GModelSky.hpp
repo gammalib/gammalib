@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GModelSky.hpp  -  Abstract virtual sky model class           *
+ *              GModelSky.hpp - Abstract sky model base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelSky.hpp
- * @brief Abstract sky model class interface definition
- * @author J. Knodlseder
+ * @brief Abstract sky model base class interface definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSKY_HPP
@@ -39,6 +39,7 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GPhoton.hpp"
+#include "GPhotons.hpp"
 #include "GRan.hpp"
 #include "GVector.hpp"
 #include "GXmlElement.hpp"
