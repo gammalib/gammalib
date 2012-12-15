@@ -45,9 +45,8 @@ def simulate(xmlname, e_min, e_max, area, duration):
     photons = model.mc(area, dir, radius, emin, emax, tmin, tmax, ran)
 
     # Print photons
-    # for photon in photons:
-    #	print photon
     print str(len(photons)) + " photons simulated."
+    #print str(photons.size()) + " photons simulated."
 
     # Return photons
     return photons
@@ -144,14 +143,15 @@ if __name__ == '__main__':
 
     # Set XML names
     xmlnames = ["data/crab.xml",
+                "data/crab_eplaw.xml",
                 "data/crab_file_function.xml",
                 "data/crab_file_function_mod.xml"]
 
     # Set simulation parameters
-    e_min = 0.1                # 0.1 TeV
-    e_max = 100.0              # 100 TeV
-    area = 3200000.0 * 1.0e4  # 3200000.0 m^2
-    duration = 3600 * 5           # 5 hours
+    e_min    = 0.1                # 0.1 TeV
+    e_max    = 100.0              # 100 TeV
+    area     = 3200000.0 * 1.0e4  # 3200000.0 m^2
+    duration = 3600.0 * 5         # 5 hours
 
     # Loop over models
     for xmlname in xmlnames:
