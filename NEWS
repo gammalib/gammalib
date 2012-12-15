@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-07-00
 
 Author(s) : Juergen Knoedlseder
 
-December, 14th, 2012
+December, 15th, 2012
 
 
 1. Introduction
@@ -64,6 +64,12 @@ None
 ---------------
 The GSkyModel class has been adapted to the new IRF interface.
 
+The mc(), flux() and eflux() methods have been implement now for all
+spectral models. In particular, simulation of an exponentially cut
+off power law is now possible. The methods now also verify that the
+minimum energy is smaller than the maximum energy. Otherwise, an
+exception is thrown.
+
 
 8. Numerics module
 ------------------
@@ -84,6 +90,10 @@ and all true source attributes by either GPhoton or GSource. This
 considerably reduces the number of interface parameters, allows for an
 easy and transparent interface extension, and prepares the path for
 optimizations.
+
+The GPhotons photon container class has been added. It replaces the
+old std::vector<GPhoton> GPhotons typedef that was used formerly to
+implement a photon container.
 
 
 10. Optimization module

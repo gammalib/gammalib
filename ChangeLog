@@ -1,4 +1,4 @@
-2012-12-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2012-12-15  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.7.0 released
         ========================
@@ -14,6 +14,8 @@
         File locking failures do no longer throw exceptions
         Optimize GNodeArray computations and add unit tests
         Add handling of undefined and NaN values to GPar class
+        Add GPhotons photon container class
+        Implement mc(), flux() and eflux() for all spectral models
  
 2012-09-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
