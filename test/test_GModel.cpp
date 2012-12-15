@@ -47,12 +47,12 @@ void TestGModel::set(void)
     m_xml_model_point_nodes = "data/model_point_nodes.xml";
     m_xml_model_spatial_map = "data/model_spatial_map.xml";
 
-    //Unbinned
+    // Add tests
     add_test(static_cast<pfunction>(&TestGModel::test_model_par),"Test model parameter handling");
     add_test(static_cast<pfunction>(&TestGModel::test_model),"Test model handling");
     add_test(static_cast<pfunction>(&TestGModel::test_models),"Test models");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model),"Test spectral model");
-    add_test(static_cast<pfunction>(&TestGModel::test_spacial_model),"Test spacial model");
+    add_test(static_cast<pfunction>(&TestGModel::test_spacial_model),"Test spatial model");
 
     return;
 }
