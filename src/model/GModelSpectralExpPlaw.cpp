@@ -359,6 +359,7 @@ double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Photon flux (ph/cm2/s).
  *
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
@@ -378,6 +379,7 @@ double GModelSpectralExpPlaw::flux(const GEnergy& emin, const GEnergy& emax) con
               "Minimum energy < maximum energy required.");
         
     }
+
     // Setup integration kernel
     flux_kernel integrand(norm(), index(), pivot(), ecut());
     GIntegral integral(&integrand);
@@ -399,6 +401,7 @@ double GModelSpectralExpPlaw::flux(const GEnergy& emin, const GEnergy& emax) con
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Energy flux (erg/cm2/s).
  *
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
@@ -444,6 +447,7 @@ double GModelSpectralExpPlaw::eflux(const GEnergy& emin, const GEnergy& emax) co
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
  * @param[in] ran Random number generator.
+ * @return Energy.
  *
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
