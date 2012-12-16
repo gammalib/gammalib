@@ -20,6 +20,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsSTG.hpp \
                      GWcsHPX.hpp \
                      GEnergy.hpp \
+                     GTimes.hpp \
                      GTime.hpp \
                      GCaldb.hpp \
                      GObservations.hpp \
