@@ -185,10 +185,4 @@ bool operator>= (const GTime &a, const GTime &b)
     return (a.m_time >= b.m_time);
 }
 
-
-/***************************************************************************
- *                                 Typedefs                                *
- ***************************************************************************/
-typedef std::vector<GTime> GTimes;
-
 #endif /* GTIME_HPP */
