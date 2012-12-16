@@ -33,6 +33,7 @@
 #include "GBase.hpp"
 #include "GModelPar.hpp"
 #include "GTime.hpp"
+#include "GTimes.hpp"
 #include "GRan.hpp"
 
 

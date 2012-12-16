@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelTemporalConst.hpp  -  Temporal constant model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelTemporalConst.hpp
  * @brief Constant temporal model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELTEMPORALCONST_HPP
@@ -32,6 +32,7 @@
 #include "GModelPar.hpp"
 #include "GModelTemporal.hpp"
 #include "GTime.hpp"
+#include "GTimes.hpp"
 #include "GXmlElement.hpp"
 
 
