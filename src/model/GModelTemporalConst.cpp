@@ -21,7 +21,7 @@
 /**
  * @file GModelTemporalConst.cpp
  * @brief Constant temporal model class interface implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -251,7 +251,7 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
         if (time <= tstop) {
             GTime event;
             event.met(time);
-            times.push_back(event);
+            times.append(event);
         }
 
     } // endwhile: loop until stop time is reached
