@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GGti.cpp  -  Good time interval class                   *
+ *                  GGti.cpp - Good time interval class                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -37,8 +37,8 @@
 #include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_TSTART                                          "GGti::tstart(int)"
-#define G_TSTOP                                            "GGti::tstop(int)"
+#define G_TSTART                                         "GGti::tstart(int&)"
+#define G_TSTOP                                           "GGti::tstop(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -59,7 +59,7 @@
  ***************************************************************************/
 GGti::GGti(void)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Return
@@ -74,11 +74,29 @@ GGti::GGti(void)
  ***************************************************************************/
 GGti::GGti(const GGti& gti)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
     copy_members(gti);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Time reference constructor
+ *
+ * @param[in] ref Time reference.
+ ***************************************************************************/
+GGti::GGti(const GTimeReference& ref)
+{
+    // Initialise class members
+    init_members();
+
+    // Set time reference
+    this->ref(ref);
 
     // Return
     return;
@@ -108,6 +126,7 @@ GGti::~GGti(void)
  * @brief Assignment operator
  *
  * @param[in] gti Good Time Intervals.
+ * @return Good Time Intervals.
  ***************************************************************************/
 GGti& GGti::operator= (const GGti& gti)
 {
@@ -117,7 +136,7 @@ GGti& GGti::operator= (const GGti& gti)
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise private members
         init_members();
 
         // Copy members
@@ -153,6 +172,32 @@ void GGti::clear(void)
 
 
 /***********************************************************************//**
+ * @brief Clone Good Time Intervals
+ *
+ * @return Pointer to deep copy of GTIs.
+ ***************************************************************************/
+GGti* GGti::clone(void) const
+{
+    // Clone this image
+    return new GGti(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of intervals
+ *
+ * @return Number of intervals.
+ *
+ * Returns number of intervals.
+ ***************************************************************************/
+int GGti::size(void) const
+{
+    // Return number of intervals
+    return m_num;
+}
+
+
+/***********************************************************************//**
  * @brief Add one Good Time Interval
  *
  * @param[in] tstart Start time of interval.
@@ -165,9 +210,6 @@ void GGti::clear(void)
  * interval will be inserted, respecting the time ordering of the intervals.
  *
  * If the time interval is not valid (tstop <= tstart), nothing is done.
- *
- * @todo Verify that both times have the same MJD reference, and that this
- *       reference corrsponds to the reference of the GTI.
  ***************************************************************************/
 void GGti::add(const GTime& tstart, const GTime& tstop)
 {
@@ -177,8 +219,9 @@ void GGti::add(const GTime& tstart, const GTime& tstop)
         // Determine index at which GTI should be inserted
         int inx = 0;
         for (int i = 0; i < m_num; ++i) {
-            if (tstart < m_start[i])
+            if (tstart < m_start[i]) {
                 break;
+            }
         }
 
         // Insert GTI
@@ -205,9 +248,6 @@ void GGti::add(const GTime& tstart, const GTime& tstop)
  * done.
  *
  * If the time interval is not valid (tstop <= tstart), nothing is done.
- *
- * @todo Verify that both times have the same MJD reference, and that this
- *       reference corrsponds to the reference of the GTI.
  ***************************************************************************/
 void GGti::append(const GTime& tstart, const GTime& tstop)
 {
@@ -235,9 +275,6 @@ void GGti::append(const GTime& tstart, const GTime& tstop)
  * No check for interval overlap will be done.
  *
  * If the time interval is not valid (tstop <= tstart), nothing is done.
- *
- * @todo Verify that both times have the same MJD reference, and that this
- *       reference corrsponds to the reference of the GTI.
  ***************************************************************************/
 void GGti::insert(const GTime& tstart, const GTime& tstop)
 {
@@ -247,8 +284,9 @@ void GGti::insert(const GTime& tstart, const GTime& tstop)
         // Determine index at which GTI should be inserted
         int inx = 0;
         for (int i = 0; i < m_num; ++i) {
-            if (tstart < m_start[i])
+            if (tstart < m_start[i]) {
                 break;
+            }
         }
 
         // Insert GTI
@@ -272,9 +310,6 @@ void GGti::insert(const GTime& tstart, const GTime& tstop)
  * and GTIs will be limited to within the interval if they overlap.
  *
  * If the time interval is not valid (tstop <= tstart), nothing is done.
- *
- * @todo Verify that both times have the same MJD reference, and that this
- *       reference corrsponds to the reference of the GTI.
  ***************************************************************************/
 void GGti::reduce(const GTime& tstart, const GTime& tstop)
 {
@@ -398,20 +433,23 @@ void GGti::save(const std::string& filename, bool clobber,
 
 
 /***********************************************************************//**
- * @brief Read GTI intervals from file.
+ * @brief Read GTI time reference and intervals from FITS table
  *
  * @param[in] hdu Pointer to FITS table.
  *
- * @todo Method assumes that times are in MET.
- * @todo Read header keywords.
+ * Read the GTI time reference and time intervals from a FITS table
+ * extension.
  ***************************************************************************/
-void GGti::read(GFitsTable* hdu)
+void GGti::read(const GFitsTable* hdu)
 {
     // Free members
     free_members();
 
     // Initialise attributes
     init_members();
+
+    // Read time reference
+    m_reference.read(hdu);
 
     // Extract GTI information from FITS file
     m_num = hdu->integer("NAXIS2");
@@ -421,8 +459,8 @@ void GGti::read(GFitsTable* hdu)
         m_start = new GTime[m_num];
         m_stop  = new GTime[m_num];
         for (int i = 0; i < m_num; ++i) {
-            m_start[i].met((*hdu)["START"].real(i));
-            m_stop[i].met((*hdu)["STOP"].real(i));
+            m_start[i].set((*hdu)["START"].real(i), m_reference);
+            m_stop[i].set((*hdu)["STOP"].real(i), m_reference);
         }
 
         // Set attributes
@@ -436,7 +474,7 @@ void GGti::read(GFitsTable* hdu)
 
 
 /***********************************************************************//**
- * @brief Write GTI intervals into FITS file.
+ * @brief Write GTI time reference and intervals into FITS file
  *
  * @param[in] file Pointer to FITS file.
  * @param[in] extname GTI extension name (default is "GTI")
@@ -445,8 +483,6 @@ void GGti::read(GFitsTable* hdu)
  * created. If the file exists the GTI is appended as extension. If another
  * GTI exists already it is overwritten if clobber=true.
  *
- * @todo Method assumes that times are in MET.
- * @todo Write header keywords.
  * @todo Implement clobber method for overwriting of existing GTIs.
  ***************************************************************************/
 void GGti::write(GFits* file, const std::string& extname) const
@@ -455,10 +491,10 @@ void GGti::write(GFits* file, const std::string& extname) const
     GFitsTableDoubleCol cstart = GFitsTableDoubleCol("START", m_num);
     GFitsTableDoubleCol cstop  = GFitsTableDoubleCol("STOP", m_num);
 
-    // Fill GTI columns
+    // Fill GTI columns in specified time reference
     for (int i = 0; i < m_num; ++i) {
-        cstart(i) = m_start[i].met();
-        cstop(i)  = m_stop[i].met();
+        cstart(i) = m_start[i].convert(m_reference);
+        cstop(i)  = m_stop[i].convert(m_reference);
     }
 
     // Create GTI table
@@ -466,6 +502,9 @@ void GGti::write(GFits* file, const std::string& extname) const
     table->append_column(cstart);
     table->append_column(cstop);
     table->extname(extname);
+
+    // Write time reference
+    m_reference.write(table);
 
     // Write to FITS file
     file->append(*table);
@@ -479,6 +518,30 @@ void GGti::write(GFits* file, const std::string& extname) const
 
 
 /***********************************************************************//**
+ * @brief Returns earliest start time of GTI
+ *
+ * @return Earliest start time of GTI.
+ ***************************************************************************/
+const GTime& GGti::tstart(void) const
+{
+    // Return
+    return m_tstart;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns latest stop time of GTI
+ *
+ * @return Latest stop time of GTI.
+ ***************************************************************************/
+const GTime& GGti::tstop(void) const
+{
+    // Return
+    return m_tstop;
+}
+
+
+/***********************************************************************//**
  * @brief Returns start time of specific GTI
  *
  * @param[in] inx Index of GTI (0 ... size()-1).
@@ -486,12 +549,13 @@ void GGti::write(GFits* file, const std::string& extname) const
  * @exception GException::out_of_range
  *            Specified index is out of range.
  ***************************************************************************/
-GTime GGti::tstart(int inx) const
+const GTime& GGti::tstart(const int& inx) const
 {
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
-    if (inx < 0 || inx >= m_num)
+    if (inx < 0 || inx >= m_num) {
         throw GException::out_of_range(G_TSTART, inx, 0, m_num-1);
+    }
     #endif
 
     // Return
@@ -507,12 +571,13 @@ GTime GGti::tstart(int inx) const
  * @exception GException::out_of_range
  *            Specified index is out of range.
  ***************************************************************************/
-GTime GGti::tstop(int inx) const
+const GTime& GGti::tstop(const int& inx) const
 {
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
-    if (inx < 0 || inx >= m_num)
+    if (inx < 0 || inx >= m_num) {
         throw GException::out_of_range(G_TSTOP, inx, 0, m_num-1);
+    }
     #endif
 
     // Return
@@ -521,11 +586,71 @@ GTime GGti::tstop(int inx) const
 
 
 /***********************************************************************//**
- * @brief Tests whether time is within GTI intervals
+ * @brief Returns elapsed time
  *
- * @param[in] time Time to be tested.
+ * @return Elapsed time [secs].
  ***************************************************************************/
-bool GGti::isin(const GTime& time) const
+const double& GGti::telapse(void) const
+{
+    // Return
+    return m_telapse;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns ontime
+ *
+ * @return Ontime [secs].
+ ***************************************************************************/
+const double& GGti::ontime(void) const
+{
+    // Return
+    return m_ontime;
+}
+
+
+/***********************************************************************//**
+ * @brief Set GTI time reference
+ *
+ * @param[in] ref Time reference.
+ *
+ * Sets the time reference of the Good Time Intervals.
+ ***************************************************************************/
+void GGti::ref(const GTimeReference& ref)
+{
+    // Set time reference
+    m_reference = ref;
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return GTI time reference
+ *
+ * @return Time reference.
+ *
+ * Returns the time reference of the Good Time Intervals.
+ ***************************************************************************/
+const GTimeReference& GGti::ref(void) const
+{
+    // Return time reference
+    return m_reference;
+}
+
+
+/***********************************************************************//**
+ * @brief Tests whether GTI intervals contain the specified time
+ *
+ * @param[in] time Time.
+ *
+ * This methods checks whether a given time is contained within any of the
+ * GTI intervals. The method returns true once the first GTI interval
+ * comprising the time is found. It returns false if none of the intervals
+ * contains the time.
+ ***************************************************************************/
+bool GGti::contains(const GTime& time) const
 {
     // Initialise test
     bool found = false;
@@ -553,12 +678,16 @@ std::string GGti::print(void) const
 
     // Append header
     result.append("=== GGti ===");
+
+    // Append GTI information
     result.append("\n"+parformat("Number of intervals")+str(size()));
     result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
     result.append("\n"+parformat("Elapsed time")+str(telapse())+" sec");
-    result.append("\n"+parformat("MJD reference date")+str(mjdref())+" days");
     result.append("\n"+parformat("Time range"));
     result.append(tstart().print()+" - "+tstop().print());
+
+    // Append time reference information
+    result.append("\n"+m_reference.print());
 
     // Return result
     return result;
@@ -582,9 +711,9 @@ void GGti::init_members(void)
     m_tstop.clear();
     m_ontime  = 0.0;
     m_telapse = 0.0;
-    m_mjdref  = 0.0;
     m_start   = NULL;
     m_stop    = NULL;
+    m_reference.clear();
 
     // Return
     return;
@@ -599,12 +728,12 @@ void GGti::init_members(void)
 void GGti::copy_members(const GGti& gti)
 {
     // Copy attributes
-    m_num     = gti.m_num;
-    m_tstart  = gti.m_tstart;
-    m_tstop   = gti.m_tstop;
-    m_ontime  = gti.m_ontime;
-    m_telapse = gti.m_telapse;
-    m_mjdref  = gti.m_mjdref;
+    m_num       = gti.m_num;
+    m_tstart    = gti.m_tstart;
+    m_tstop     = gti.m_tstop;
+    m_ontime    = gti.m_ontime;
+    m_telapse   = gti.m_telapse;
+    m_reference = gti.m_reference;
 
     // Copy start/stop times
     if (m_num > 0) {
@@ -641,6 +770,13 @@ void GGti::free_members(void)
 
 /***********************************************************************//**
  * @brief Set class attributes
+ *
+ * Compute the following class attributes:
+ *
+ *     m_tstart  - Earliest start time of GTIs
+ *     m_stop    - Latest stop time of GTIs
+ *     m_telapse - Latest stop time minus earliest start time of GTIs [sec]
+ *     m_ontime  - Sum of all intervals [sec]
  ***************************************************************************/
 void GGti::set_attributes(void)
 {
@@ -650,29 +786,16 @@ void GGti::set_attributes(void)
         // Set attributes
         m_tstart  = m_start[0];
         m_tstop   = m_stop[m_num-1];
-        m_telapse = m_tstop.met() - m_tstart.met();
+        m_telapse = m_tstop.secs() - m_tstart.secs();
         m_ontime  = 0.0;
         for (int i = 0; i < m_num; ++i) {
-            m_ontime += (m_stop[i].met() - m_start[i].met());
+            m_ontime += (m_stop[i].secs() - m_start[i].secs());
         }
 
     } // endif: there were GTIs
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone GTI
- *
- * Cloning provides a copy of the GTIs. Cloning is used to allocate
- * derived classes into a base class pointer.
- ***************************************************************************/
-GGti* GGti::clone(void) const
-{
-    // Clone this image
-    return new GGti(*this);
 }
 
 

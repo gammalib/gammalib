@@ -33,6 +33,7 @@
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GTime.hpp"
+#include "GTimeReference.hpp"
 
 
 /***********************************************************************//**
@@ -42,6 +43,9 @@
  *
  * This class holds a list of Good Time Intervals, i.e. time intervals that
  * are valid for science analysis. Times are stored using the GTime class.
+ * The class also holds information about the time reference, which will
+ * be retained when reading and used when writing, so that GTIs are always
+ * written in the specified time reference.
  ***************************************************************************/
 class GGti : public GBase {
 
@@ -49,34 +53,37 @@ public:
     // Constructors and destructors
     GGti(void);
     GGti(const GGti& gti);
+    explicit GGti(const GTimeReference& ref);
     virtual ~GGti(void);
 
     // Operators
     GGti& operator= (const GGti& gti);
 
     // Methods
-    void        clear(void);
-    GGti*       clone(void) const;
-    int         size(void) const { return m_num; }
-    void        add(const GTime& tstart, const GTime& tstop);
-    void        append(const GTime& tstart, const GTime& tstop);
-    void        insert(const GTime& tstart, const GTime& tstop);
-    void        reduce(const GTime& tstart, const GTime& tstop);
-    void        load(const std::string& filename,
-                     const std::string& extname = "GTI");
-    void        save(const std::string& filename, bool clobber,
-                     const std::string& extname = "GTI") const;
-    void        read(GFitsTable* hdu);
-    void        write(GFits* file, const std::string& extname = "GTI") const;
-    GTime       tstart(void) const { return m_tstart; }
-    GTime       tstop(void) const { return m_tstop; }
-    GTime       tstart(int inx) const;
-    GTime       tstop(int inx) const;
-    double      telapse(void) const { return m_telapse; }
-    double      ontime(void) const { return m_ontime; }
-    double      mjdref(void) const { return m_mjdref; }
-    bool        isin(const GTime& time) const;
-    std::string print(void) const;
+    void                  clear(void);
+    GGti*                 clone(void) const;
+    int                   size(void) const;
+    void                  add(const GTime& tstart, const GTime& tstop);
+    void                  append(const GTime& tstart, const GTime& tstop);
+    void                  insert(const GTime& tstart, const GTime& tstop);
+    void                  reduce(const GTime& tstart, const GTime& tstop);
+    void                  load(const std::string& filename,
+                               const std::string& extname = "GTI");
+    void                  save(const std::string& filename, bool clobber,
+                               const std::string& extname = "GTI") const;
+    void                  read(const GFitsTable* hdu);
+    void                  write(GFits* file,
+                                const std::string& extname = "GTI") const;
+    const GTime&          tstart(void) const;
+    const GTime&          tstop(void) const;
+    const GTime&          tstart(const int& inx) const;
+    const GTime&          tstop(const int& inx) const;
+    const double&         telapse(void) const;
+    const double&         ontime(void) const;
+    void                  ref(const GTimeReference& ref);
+    const GTimeReference& ref(void) const;
+    bool                  contains(const GTime& time) const;
+    std::string           print(void) const;
 
 protected:
     // Protected methods
@@ -88,16 +95,14 @@ protected:
     void  merge_gtis(void);
 
     // Protected data area
-    int     m_num;      //!< Number of intervals
-    GTime   m_tstart;   //!< Start of observation
-    GTime   m_tstop;    //!< Stop of observation
-    double  m_ontime;   //!< Sum of GTI durations (in seconds)
-    double  m_telapse;  //!< Time between start of first GTI and stop of last GTI (in seconds)
-    double  m_mjdref;   //!< MJD reference
-    GTime  *m_start;    //!< Array of start times
-    GTime  *m_stop;     //!< Array of stop times
-
-private:
+    int             m_num;       //!< Number of intervals
+    GTime           m_tstart;    //!< Start of observation
+    GTime           m_tstop;     //!< Stop of observation
+    double          m_ontime;    //!< Sum of GTI durations (in seconds)
+    double          m_telapse;   //!< Time between start of first GTI and stop of last GTI (in seconds)
+    GTime          *m_start;     //!< Array of start times
+    GTime          *m_stop;      //!< Array of stop times
+    GTimeReference  m_reference; //!< Time reference
 };
 
 #endif /* GGTI_HPP */
