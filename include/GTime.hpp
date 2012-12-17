@@ -65,22 +65,23 @@ public:
     virtual ~GTime(void);
  
     // Operators
-    GTime& operator= (const GTime& time);
+    GTime& operator=(const GTime& time);
 
     // Methods
-    void        clear(void);
-    GTime*      clone(void) const;
-    double      jd(void) const;
-    double      mjd(void) const;
-    double      secs(void) const;
-    double      days(void) const;
-    double      convert(const GTimeReference& ref) const;
-    void        jd(const double& time);
-    void        mjd(const double& time);
-    void        secs(const double& seconds);
-    void        days(const double& days);
-    void        set(const double& time, const GTimeReference& ref);
-    std::string print(void) const;
+    void           clear(void);
+    GTime*         clone(void) const;
+    double         jd(void) const;
+    double         mjd(void) const;
+    double         secs(void) const;
+    double         days(void) const;
+    double         convert(const GTimeReference& ref) const;
+    void           jd(const double& time);
+    void           mjd(const double& time);
+    void           secs(const double& seconds);
+    void           days(const double& days);
+    void           set(const double& time, const GTimeReference& ref);
+    GTimeReference reference(void) const;
+    std::string    print(void) const;
   
 protected:
     // Protected methods

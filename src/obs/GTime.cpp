@@ -388,6 +388,23 @@ void GTime::set(const double& time, const GTimeReference& ref)
 
 
 /***********************************************************************//**
+ * @brief Returns native time reference
+ *
+ * @return Native time reference.
+ *
+ * Returns the native GammaLib time reference.
+ ***************************************************************************/
+GTimeReference GTime::reference(void) const
+{
+    // Allocate native time reference
+    GTimeReference reference(mjd_ref, "s", "TT", "LOCAL");
+
+    // Return reference
+    return reference;
+}
+
+
+/***********************************************************************//**
  * @brief Print time
  *
  * @return String containing time in seconds in native reference.
