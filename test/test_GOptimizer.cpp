@@ -1,5 +1,5 @@
 /***************************************************************************
- *             test_GOptimizer.cpp  -  test GOptimizer class               *
+ *              test_GOptimizer.cpp - test GOptimizer class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <stdlib.h>
 #include "test_GOptimizer.hpp"
 #include "testinst/GTestLib.hpp"
 
@@ -71,9 +70,9 @@ GModelPar& TestGOptimizer::test_optimizer(int mode)
     GModels models;
     models.append(model);
 
-    // Time iterval
-    GTime tmin(0,0,   "sec");
-    GTime tmax(1800,0,"sec");
+    // Set time iterval
+    GTime tmin(0.0);
+    GTime tmax(1800.0);
 
     // Rate : events/sec
     double rate = RATE;

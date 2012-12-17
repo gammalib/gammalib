@@ -1,5 +1,5 @@
 /***************************************************************************
- *             test_GObservation.cpp  -  Test observation module           *
+ *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -21,7 +21,7 @@
 /**
  * @file test_GObservation.cpp
  * @brief Test observation module
- * @author J.-B. Cayrou
+ * @author Jean-Baptiste Cayrou
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -86,8 +86,8 @@ GModelPar& TestOpenMP::test_observations_optimizer(int mode)
     models.append(model);
 
     // Time iterval
-    GTime tmin(0,0,   "sec");
-    GTime tmax(1800,0,"sec");
+    GTime tmin(0.0);
+    GTime tmax(1800.0);
 
     // Rate : events/sec
     double rate = RATE;
