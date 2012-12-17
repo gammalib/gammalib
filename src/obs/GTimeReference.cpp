@@ -303,7 +303,11 @@ void GTimeReference::read(const GFitsHDU* hdu)
  * Depending of whether the keyword "MJDREF" or the pair of keywords "MJDREFI"
  * and "MJDREFF" exist already in the header, the method either writes the
  * reference MJD as floating point value, or split into an integer and a
- * fractional part. The following additional keywords are written:
+ * fractional part. If nothing has been written yet, splitting into an
+ * integer and fractional part will be used as this preserves the highest
+ * possible accuracy.
+ *
+ * The following additional keywords are written:
  *     TIMEUNIT
  *     TIMESYS
  *     TIMEREF
@@ -315,8 +319,16 @@ void GTimeReference::write(GFitsHDU* hdu) const
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
-        // Case A: use fractional reference MJD
-        if (hdu->hascard("MJDREFI") && hdu->hascard("MJDREFF")) {
+        // Case A: use floating point reference MJD
+        if (hdu->hascard("MJDREF")) {
+            hdu->card("MJDREF",   mjdref(),   "[days] Time reference MJD");
+            hdu->card("TIMEUNIT", timeunit(), "Time unit");
+            hdu->card("TIMESYS",  timesys(),  "Time system");
+            hdu->card("TIMEREF",  timeref(),  "Time reference");
+        }
+
+        // Case B: use fractional reference MJD
+        else {
             hdu->card("MJDREFI",  mjdrefi(),  "[days] Integer part of time reference MJD");
             hdu->card("MJDREFF",  mjdreff(),  "[days] Fractional part of time reference MJD");
             hdu->card("TIMEUNIT", timeunit(), "Time unit");
@@ -324,13 +336,6 @@ void GTimeReference::write(GFitsHDU* hdu) const
             hdu->card("TIMEREF",  timeref(),  "Time reference");
         }
 
-        // Case B: use floating point reference MJD
-        else {
-            hdu->card("MJDREF",   mjdref(),   "[days] Time reference MJD");
-            hdu->card("TIMEUNIT", timeunit(), "Time unit");
-            hdu->card("TIMESYS",  timesys(),  "Time system");
-            hdu->card("TIMEREF",  timeref(),  "Time reference");
-        }
 
     } // endif: HDU was valid
 
