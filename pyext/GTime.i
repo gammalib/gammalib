@@ -28,8 +28,6 @@
 #include "GTime.hpp"
 #include "GTools.hpp"
 %}
-// Required for template vector
-%include stl.i
 
 
 /***********************************************************************//**
@@ -46,43 +44,23 @@ public:
     // Constructors and destructors
     GTime(void);
     GTime(const GTime& time);
-    explicit GTime(const double&      time,
-                   const double&      mrdref,
-                   const std::string& timeunit,
-                   const std::string& timesys = "TT",
-                   const std::string& timeref = "local");
-    explicit GTime(const double&      time,
-                   const int&         mjdrefi,
-                   const double&      mrdreff,
-                   const std::string& timeunit,
-                   const std::string& timesys = "TT",
-                   const std::string& timeref = "local");
+    explicit GTime(const double& time, const std::string& unit = "sec");
+    explicit GTime(const double& time, const GTimeReference& ref);
     virtual ~GTime(void);
  
     // Methods
-    void   clear(void);
-    GTime* clone(void) const;
-    double jd(void) const;
-    double mjd(void) const;
-    double met(void) const;
-    void   jd(const double& time);
-    void   mjd(const double& time);
-    void   met(const double& time);
-    void   time(const double&      time,
-                const double&      mrdref,
-                const std::string& timeunit,
-                const std::string& timesys = "TT",
-                const std::string& timeref = "local");
-    void   time(const double&      time,
-                const int&         mjdrefi,
-                const double&      mrdreff,
-                const std::string& timeunit,
-                const std::string& timesys = "TT",
-                const std::string& timeref = "local");
-    double time(void) const;
-    double time(const double& mrdref) const;
-    double time(const int& mjdrefi, const double& mrdreff) const;
-    double mjdref(void) const;
+    void        clear(void);
+    GTime*      clone(void) const;
+    double      jd(void) const;
+    double      mjd(void) const;
+    double      secs(void) const;
+    double      days(void) const;
+    double      convert(const GTimeReference& ref) const;
+    void        jd(const double& time);
+    void        mjd(const double& time);
+    void        secs(const double& seconds);
+    void        days(const double& days);
+    void        set(const double& time, const GTimeReference& ref);
 };
 
 

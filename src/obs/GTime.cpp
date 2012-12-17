@@ -33,13 +33,11 @@
 #include "GException.hpp"
 
 /* __ Constants __________________________________________________________ */
-const double sec_in_day = 86400.0;                     // Seconds in TT day
-//const double mjd_ref    = 51910.0;                     // MJD of MET=0
-//const double jd_ref     = 2451910.5;                   // JD seconds of MET=0
-const double mjd_ref    = 51910.0007428703703703703;   // MJD of Fermi MET=0
-const double jd_ref     = 2451910.5007428703703703703; // JD seconds of Fermi MET=0
+const double mjd_ref = 51910.0;                           //!< MJD of time=0
+const double jd_ref  = mjd_ref + 2400000.5;               //!< JD of time=0
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCT                     "GTime::GTime(double&, std::string&)"
 #define G_TIME                 "GTime::time(double&, double&, std::string&, " \
                                                  "std::string&, std::string&"
 
@@ -61,7 +59,7 @@ const double jd_ref     = 2451910.5007428703703703703; // JD seconds of Fermi ME
  ***************************************************************************/
 GTime::GTime(void)
 {
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
   
     // Return
@@ -72,11 +70,11 @@ GTime::GTime(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] time Object from which the instance should be built.
+ * @param[in] time Time.
  ***************************************************************************/
 GTime::GTime(const GTime& time)
 { 
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
 
     // Copy members
@@ -90,26 +88,33 @@ GTime::GTime(const GTime& time)
 /***********************************************************************//**
  * @brief Time constructor
  *
- * @param[in] time Time value.
- * @param[in] mjdref Reference MJD (days).
- * @param[in] timeunit Time unit ("sec(s)", "day(s)").
- * @param[in] timesys Time system (ignored so far).
- * @param[in] timeref Time reference (ignored so far).
+ * @param[in] time Time value (seconds or days).
+ * @param[in] unit Time unit (default: "secs").
  *
- * Sets the time for arbitrary units and MJD reference date. The MJD
- * reference day is specified as floating point value.
+ * @exception GException::time_invalid_unit
+ *            Invalid time unit specified.
+ *
+ * Constructs a GTime object by setting the time in the native reference
+ * in units of seconds (default) or days.
  ***************************************************************************/
-GTime::GTime(const double&      time,
-             const double&      mjdref,
-             const std::string& timeunit,
-             const std::string& timesys,
-             const std::string& timeref)
+GTime::GTime(const double& time, const std::string& unit)
 {
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
 
-    // Set time
-    this->time(time, mjdref, timeunit, timesys, timeref);
+    // Set time according to timeunit string
+    std::string timeunit = tolower(unit);
+    if (timeunit == "d" || timeunit == "day" || timeunit == "days") {
+        days(time);
+    }
+    else if (timeunit == "s" || timeunit == "sec" || timeunit == "secs") {
+        secs(time);
+    }
+    else {
+        throw GException::time_invalid_unit(G_CONSTRUCT, unit,
+              "Valid timeunit values are: \"d\", \"day\", \"days\","
+              " \"s\", \"sec\" or \"secs\"");
+    }
 
     // Return
     return;
@@ -119,28 +124,19 @@ GTime::GTime(const double&      time,
 /***********************************************************************//**
  * @brief Time constructor
  *
- * @param[in] time Time value.
- * @param[in] mjdrefi Integer part of reference MJD (days).
- * @param[in] mjdreff Fractional part of reference MJD (days).
- * @param[in] timeunit Time unit (sec, days).
- * @param[in] timesys Time system (TT).
- * @param[in] timeref Local time reference.
+ * @param[in] time Time in given reference system.
+ * @param[in] ref Reference system.
  *
- * Sets the time for arbitrary units and MJD reference date. The MJD
- * reference day is specified as integer part and floating point fraction.
+ * Constructs a GTime object by setting the time to a value given in a
+ * specific reference system.
  ***************************************************************************/
-GTime::GTime(const double&      time,
-             const int&         mjdrefi,
-             const double&      mjdreff,
-             const std::string& timeunit,
-             const std::string& timesys,
-             const std::string& timeref)
+GTime::GTime(const double& time, const GTimeReference& ref)
 {
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
 
     // Set time
-    this->time(time, mjdrefi, mjdreff, timeunit, timesys, timeref);
+    set(time, ref);
 
     // Return
     return;
@@ -216,6 +212,8 @@ void GTime::clear(void)
 
 /***********************************************************************//**
  * @brief Clone object
+ *
+ * @return Pointer to deep copy of time.
  ***************************************************************************/
 GTime* GTime::clone(void) const
 {
@@ -225,7 +223,9 @@ GTime* GTime::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in JD (TT) (unit: days)
+ * @brief Return time in Julian Days (TT) (unit: days)
+ *
+ * @return Time in Julian Days [days].
  ***************************************************************************/
 double GTime::jd(void) const
 {
@@ -238,12 +238,14 @@ double GTime::jd(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in MJD (unit: days)
+ * @brief Return time in Modified Julian Days (unit: days)
+ *
+ * @return Time in Modified Julian Days
  ***************************************************************************/
 double GTime::mjd(void) const
 {
     // Convert time to MJD
-    double mjd = m_time / sec_in_day + m_mjdref;
+    double mjd = m_time / sec_in_day + mjd_ref;
     
     // Return MJD
     return mjd;
@@ -251,9 +253,11 @@ double GTime::mjd(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in MET (unit: seconds)
+ * @brief Return time in native reference in seconds
+ *
+ * @return Time in native reference [seconds].
  ***************************************************************************/
-double GTime::met(void) const
+double GTime::secs(void) const
 {
     // Return time
     return m_time;
@@ -261,13 +265,52 @@ double GTime::met(void) const
 
 
 /***********************************************************************//**
- * @brief Set time in JD (TT) (unit: days)
+ * @brief Return time in native reference in days
  *
- * @param[in] time Time in JD (TT).
+ * @return Time in native reference [days].
+ ***************************************************************************/
+double GTime::days(void) const
+{
+    // Return time
+    return m_time / sec_in_day;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time in specified reference
+ *
+ * @return Time in specified reference.
+ *
+ * Convert the time from the native reference system into the specified
+ * reference system.
+ ***************************************************************************/
+double GTime::convert(const GTimeReference& ref) const
+{
+    // Retrieve time in native reference (seconds)
+    double time = m_time;
+    
+    // Compute time offset in seconds
+    double offset = (mjd_ref - ref.mjdref()) * sec_in_day;
+        
+    // Add time offset in seconds
+    time += offset;
+
+    // Convert to specified time unit
+    time /= ref.unitseconds();
+
+    // Return time
+    return time;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time in Julian Days (TT) (unit: days)
+ *
+ * @param[in] time Time in Julian Days (TT) [days].
  ***************************************************************************/
 void GTime::jd(const double& time)
 {
-    // Convert time from JD to MET
+    // Convert time from JD to native (seconds)
     m_time = (time - jd_ref) * sec_in_day;
     
     // Return
@@ -276,13 +319,13 @@ void GTime::jd(const double& time)
 
 
 /***********************************************************************//**
- * @brief Set time in MJD (TT) (unit: days)
+ * @brief Set time in Modified Julian Days (TT) (unit: days)
  *
- * @param[in] time Time in MJD (TT).
+ * @param[in] time Time in Modified Julian Days (TT) [days].
  ***************************************************************************/
 void GTime::mjd(const double& time)
 {
-    // Convert time from MJD to MET
+    // Convert time from MJD to native (seconds)
     m_time = (time - mjd_ref) * sec_in_day;
     
     // Return
@@ -291,14 +334,14 @@ void GTime::mjd(const double& time)
 
 
 /***********************************************************************//**
- * @brief Set time in MET (unit: seconds)
+ * @brief Set time in native reference in seconds
  *
- * @param[in] time Time in MET.
+ * @param[in] seconds Time [seconds].
  ***************************************************************************/
-void GTime::met(const double& time)
+void GTime::secs(const double& seconds)
 {
     // Set time
-    m_time = time;
+    m_time = seconds;
     
     // Return
     return;
@@ -306,156 +349,50 @@ void GTime::met(const double& time)
 
 
 /***********************************************************************//**
- * @brief Set time
+ * @brief Set time in native reference in days
  *
- * @param[in] time Time value.
- * @param[in] mjdref Reference MJD (days).
- * @param[in] timeunit Time unit ("s", "d", "sec(s)", "day(s)").
- * @param[in] timesys Time system (ignored so far).
- * @param[in] timeref Time reference (ignored so far).
- *
- * @exception GException::time_invalid_unit
- *            Invalid valid for "timeunit" encountered.
- *
- * Sets the time for arbitrary units and MJD reference date. The MJD
- * reference day is specified as floating point value.
- *
- * @todo Implement interpretation of "timesys" and "timeref" parameters.
+ * @param[in] days Time [days].
  ***************************************************************************/
-void GTime::time(const double&      time,
-                 const double&      mjdref,
-                 const std::string& timeunit,
-                 const std::string& timesys,
-                 const std::string& timeref)
+void GTime::days(const double& days)
 {
-    // Convert time to seconds
-    double time_in_seconds;
-    std::string u_timeunit = toupper(timeunit);
-    if (u_timeunit == "D" || u_timeunit == "DAY" || u_timeunit == "DAYS") {
-        time_in_seconds = time * sec_in_day;
-    }
-    else if (u_timeunit == "S" || u_timeunit == "SEC" || u_timeunit == "SECS") {
-        time_in_seconds = time;
-    }
-    else {
-        throw GException::time_invalid_unit(G_TIME, timeunit,
-              "Valid units are \"d(ay(s))\" and \"s(ec(s))\"");
-    }
-
-    // Store time and reference
-    m_time   = time_in_seconds;
-    m_mjdref = mjdref;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set time
- *
- * @param[in] time Time value.
- * @param[in] mjdrefi Integer part of reference MJD (days).
- * @param[in] mjdreff Fractional part of reference MJD (days).
- * @param[in] timeunit Time unit (sec, days).
- * @param[in] timesys Time system (TT).
- * @param[in] timeref Local time reference.
- *
- * Sets the time for arbitrary units and MJD reference date. The MJD
- * reference day is specified as integer part and floating point fraction.
- ***************************************************************************/
-void GTime::time(const double&      time,
-                 const int&         mjdrefi,
-                 const double&      mjdreff,
-                 const std::string& timeunit,
-                 const std::string& timesys,
-                 const std::string& timeref)
-{
-    // Compute reference MJD
-    double mjdref = double(mjdrefi) + mjdreff;
-    
     // Set time
-    this->time(time, mjdref, timeunit, timesys, timeref);
-
+    m_time = days * sec_in_day;
+    
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Get time in seconds
+ * @brief Set time given in specified reference
  *
- * Returns time in seconds in the native MJD reference.
+ * @param[in] time Time in given reference system.
+ * @param[in] ref Reference system.
+ *
+ * Set the time to a value given in a specific reference system.
  ***************************************************************************/
-double GTime::time(void) const
+void GTime::set(const double& time, const GTimeReference& ref)
 {
-    // Return time
-    return m_time;
-}
-
-
-/***********************************************************************//**
- * @brief Get time in seconds for a specific MJD
- *
- * @param[in] mjdref Reference MJD (days).
- *
- * Returns time in seconds in the specified MJD reference.
- ***************************************************************************/
-double GTime::time(const double& mjdref) const
-{
-    // Retrieve time in seconds
-    double time = m_time;
+    // Convert time to specified time unit
+    m_time = time * ref.unitseconds();
     
-    // Add offset due to MJD differences
-    if (m_mjdref != mjdref) {
-
-        // Compute time offset
-        double offset = (m_mjdref - mjdref) * sec_in_day;
+    // Compute time offset in seconds
+    double offset = (mjd_ref - ref.mjdref()) * sec_in_day;
         
-        // Add offset
-        time += offset;
+    // Subtract time offset in seconds
+    m_time -= offset;
 
-    }
-
-    // Return time
-    return time;
-}
-
-
-/***********************************************************************//**
- * @brief Get time in seconds for a specific MJD
- *
- * @param[in] mjdrefi Integer part of reference MJD (days).
- * @param[in] mjdreff Fractional part of reference MJD (days).
- *
- * Returns time in seconds in the specified MJD reference.
- ***************************************************************************/
-double GTime::time(const int& mjdrefi, const double& mjdreff) const
-{
-    // Compute reference MJD
-    double mjdref = double(mjdrefi) + mjdreff;
-    
-    // Return time
-    return (time(mjdref));
-}
-
-
-/***********************************************************************//**
- * @brief Get MJD reference in days
- *
- * Returns MJD reference in days.
- ***************************************************************************/
-double GTime::mjdref(void) const
-{
-    // Return MJD reference
-    return m_mjdref;
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
  * @brief Print time
  *
- * Prints time in seconds in the native MJD reference.
+ * @return String containing time in seconds in native reference.
+ *
+ * Prints time in seconds in the native reference.
  ***************************************************************************/
 std::string GTime::print(void) const
 {
@@ -463,7 +400,7 @@ std::string GTime::print(void) const
     std::string result;
 
     // Append time
-    result.append(str(time())+" s");
+    result.append(str(m_time)+" s");
 
     // Return
     return result;
@@ -478,14 +415,11 @@ std::string GTime::print(void) const
 
 /***********************************************************************//**
  * @brief Initialise class members
- *
- * Initialises time to 0 and MJD reference to 2001-01-01 00:00:00.000 UTC.
  ***************************************************************************/
 void GTime::init_members(void)
 {
     // Initialise members
-    m_time   = 0.0;
-    m_mjdref = mjd_ref;
+    m_time = 0.0;
   
     // Return
     return;
@@ -496,14 +430,11 @@ void GTime::init_members(void)
  * @brief Copy class members
  *
  * @param[in] time Time.
- *
- * Copies the time and the MJD reference.
  ***************************************************************************/
 void GTime::copy_members(const GTime& time)
 {
     // Copy time
-    m_time   = time.m_time;
-    m_mjdref = time.m_mjdref;
+    m_time = time.m_time;
     
     // Return
     return;

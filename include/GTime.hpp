@@ -28,9 +28,9 @@
 #define GTIME_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <vector>
 #include <string>
 #include "GBase.hpp"
+#include "GTimeReference.hpp"
 
 
 /***********************************************************************//**
@@ -38,10 +38,8 @@
  *
  * @brief Class that handles times in a system independent way
  *
- * The GTime class stores a time value in seconds and its MJD reference in
- * days. The time can be retrieved in any MJD reference.
- *
- * @todo Make use of MJD reference in operators.
+ * The GTime class stores a time value in seconds in a GammaLib native time
+ * reference system.
  ***************************************************************************/
 class GTime : public GBase {
 
@@ -62,17 +60,8 @@ public:
     // Constructors and destructors
     GTime(void);
     GTime(const GTime& time);
-    explicit GTime(const double&      time,
-                   const double&      mrdref,
-                   const std::string& timeunit,
-                   const std::string& timesys = "TT",
-                   const std::string& timeref = "local");
-    explicit GTime(const double&      time,
-                   const int&         mjdrefi,
-                   const double&      mrdreff,
-                   const std::string& timeunit,
-                   const std::string& timesys = "TT",
-                   const std::string& timeref = "local");
+    explicit GTime(const double& time, const std::string& unit = "sec");
+    explicit GTime(const double& time, const GTimeReference& ref);
     virtual ~GTime(void);
  
     // Operators
@@ -83,25 +72,14 @@ public:
     GTime*      clone(void) const;
     double      jd(void) const;
     double      mjd(void) const;
-    double      met(void) const;
+    double      secs(void) const;
+    double      days(void) const;
+    double      convert(const GTimeReference& ref) const;
     void        jd(const double& time);
     void        mjd(const double& time);
-    void        met(const double& time);
-    void        time(const double& time,
-                     const double&      mrdref,
-                     const std::string& timeunit,
-                     const std::string& timesys = "TT",
-                     const std::string& timeref = "local");
-    void        time(const double&      time,
-                     const int&         mjdrefi,
-                     const double&      mrdreff,
-                     const std::string& timeunit,
-                     const std::string& timesys = "TT",
-                     const std::string& timeref = "local");
-    double      time(void) const;
-    double      time(const double& mrdref) const;
-    double      time(const int& mjdrefi, const double& mrdreff) const;
-    double      mjdref(void) const;
+    void        secs(const double& seconds);
+    void        days(const double& days);
+    void        set(const double& time, const GTimeReference& ref);
     std::string print(void) const;
   
 protected:
@@ -111,8 +89,7 @@ protected:
     void free_members(void);
 
     // Protected data members
-    double m_time;          //!< Time in seconds
-    double m_mjdref;        //!< Time reference
+    double m_time;   //!< Time in seconds in native reference
 };
 
 
