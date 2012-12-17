@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-07-00
 
 Author(s) : Juergen Knoedlseder
 
-December, 15th, 2012
+December, 17th, 2012
 
 
 1. Introduction
@@ -95,6 +95,18 @@ The GPhotons photon container class has been added. It replaces the
 old std::vector<GPhoton> GPhotons typedef that was used formerly to
 implement a photon container.
 
+The GTime interface has been reworked. GTime now stores time in a reference
+that is native to GammaLib. The zero point of GammaLib's time has been
+defined as January 1, 2010, 00:00:00 (TT). Times are stored in seconds,
+and the time system is Terrestrial Time (TT). Conversion methods are
+provided to transform GTime times into any arbitrary time reference. A
+time reference is implemented using the GTimeReference class. 
+
+The GGti class now stores the time reference, so that GTI's can be read
+and written in any arbitrary time reference. In storage, however, GGti
+stores all time using GTime objects, i.e. storage is in the native
+GammaLib time reference.
+
 
 10. Optimization module
 -----------------------
@@ -137,6 +149,9 @@ The MWL response was adapted to the new response interface.
 ----------------------
 The Fermi-LAT response was adapted to the new response interface.
 
+The event list reader now takes care of the time conversion from the
+Fermi-LAT time reference to the GammaLib time reference.
+
 
 17. CTA interface
 -----------------
@@ -147,6 +162,9 @@ are implemented by derived classes from these abstract base classes.
 This allows now an easy adaption and extension of the response classes.
 
 The CTA response was also adapted to the new response interface.
+
+The CTA event list reader now takes care of the time conversion from the
+CTA time reference to the GammaLib time reference.
 
 
 18. COMPTEL interface
