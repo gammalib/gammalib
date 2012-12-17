@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventList.cpp  -  LAT event list class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventList.cpp
  * @brief LAT Event list class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -279,7 +279,7 @@ void GLATEventList::read(const GFits& file)
     // Get HDU
     GFitsTable* hdu = file.table("EVENTS");
 
-    // Continue only if valid
+    // Continue only if event HDU is valid
     if (hdu != NULL) {
 
         // Read event data
@@ -289,6 +289,35 @@ void GLATEventList::read(const GFits& file)
         read_ds_keys(*hdu);
     
     } // endif: HDU was valid
+
+    // If we have a GTI extension, then read Good Time Intervals from that
+    // extension
+    if (file.hashdu("GTI")) {
+        GFitsTable* gti = file.table("GTI");
+        m_gti.read(gti);
+    }
+
+    // ... otherwise build GTI from TSTART and TSTOP
+    else if (hdu != NULL) {
+
+        // Read start and stop time
+        double tstart = hdu->real("TSTART");
+        double tstop  = hdu->real("TSTOP");
+
+        // Create time reference from header information
+        GTimeReference timeref(hdu);
+        
+        // Set start and stop time
+        GTime start(tstart);
+        GTime stop(tstop);
+
+        // Append start and stop time as single time interval to GTI
+        m_gti.append(start, stop);
+
+        // Set GTI time reference
+        m_gti.reference(timeref);
+
+    } // endelse: GTI built from TSTART and TSTOP
 
     // Return
     return;
@@ -471,7 +500,7 @@ void GLATEventList::read_events(const GFitsTable& table)
         // Copy data from columns into GLATEventAtom objects
         GLATEventAtom event;
         for (int i = 0; i < num; ++i) {
-            event.m_time.met((*ptr_time)(i));
+            event.m_time.set((*ptr_time)(i), m_gti.reference());
             event.m_energy.MeV((*ptr_energy)(i));
             event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
             event.m_theta               = (*ptr_theta)(i);
@@ -512,7 +541,7 @@ void GLATEventList::read_events(const GFitsTable& table)
 
                 // Get DIFRSP label
                 try {
-                    GFitsTable* ptr = (GFitsTable*)&table; // Kluge to const
+                    GFitsTable* ptr = const_cast<GFitsTable*>(&table); // Kluge to const
                     m_difrsp_label.push_back(ptr->card(std::string(keyword))->string());
                 }
                 catch (GException::fits_key_not_found &e) {
@@ -520,7 +549,8 @@ void GLATEventList::read_events(const GFitsTable& table)
                 }
 
                 // Get column pointer
-                GFitsTableFloatCol* ptr_dif = (GFitsTableFloatCol*)&table[std::string(keyword)];
+                GFitsTableFloatCol* ptr_dif = 
+                    static_cast<GFitsTableFloatCol*>(const_cast<GFitsTableCol*>(&table[std::string(keyword)]));
 
                 // Copy data from columns into GLATEventAtom objects
                 for (int i = 0; i < num; ++i) {
