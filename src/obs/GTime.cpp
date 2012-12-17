@@ -33,7 +33,7 @@
 #include "GException.hpp"
 
 /* __ Constants __________________________________________________________ */
-const double mjd_ref = 51910.0;                           //!< MJD of time=0
+const double mjd_ref = 55197.000766018518519;             //!< MJD of time=0
 const double jd_ref  = mjd_ref + 2400000.5;               //!< JD of time=0
 
 /* __ Method name definitions ____________________________________________ */
@@ -165,7 +165,8 @@ GTime::~GTime(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] time Object which should be assigned.
+ * @param[in] time Time.
+ * @return Time.
  ***************************************************************************/
 GTime& GTime::operator= (const GTime& time)
 { 
@@ -211,7 +212,7 @@ void GTime::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone time
  *
  * @return Pointer to deep copy of time.
  ***************************************************************************/
@@ -225,7 +226,9 @@ GTime* GTime::clone(void) const
 /***********************************************************************//**
  * @brief Return time in Julian Days (TT) (unit: days)
  *
- * @return Time in Julian Days [days].
+ * @return Time in Julian Days (TT) [days].
+ *
+ * Returns the time in Julian Days (JD) in the Terrestrial Time (TT) system.
  ***************************************************************************/
 double GTime::jd(void) const
 {
@@ -238,9 +241,12 @@ double GTime::jd(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in Modified Julian Days (unit: days)
+ * @brief Return time in Modified Julian Days (TT) (unit: days)
  *
- * @return Time in Modified Julian Days
+ * @return Time in Modified Julian Days (TT) [days].
+ *
+ * Returns the time in Modified Julian Days (MJD) in the Terrestrial Time
+ * (TT) system.
  ***************************************************************************/
 double GTime::mjd(void) const
 {
@@ -253,7 +259,7 @@ double GTime::mjd(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in native reference in seconds
+ * @brief Return time in native reference (TT) (unit: seconds)
  *
  * @return Time in native reference [seconds].
  ***************************************************************************/
@@ -265,7 +271,7 @@ double GTime::secs(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in native reference in days
+ * @brief Return time in native reference (TT) (unit: days)
  *
  * @return Time in native reference [days].
  ***************************************************************************/
@@ -283,6 +289,9 @@ double GTime::days(void) const
  *
  * Convert the time from the native reference system into the specified
  * reference system.
+ *
+ * @todo Implement TT-UTC conversion if required. This requires
+ *       implementation of leap seconds.
  ***************************************************************************/
 double GTime::convert(const GTimeReference& ref) const
 {
@@ -334,9 +343,9 @@ void GTime::mjd(const double& time)
 
 
 /***********************************************************************//**
- * @brief Set time in native reference in seconds
+ * @brief Set time in native reference in seconds (TT)
  *
- * @param[in] seconds Time [seconds].
+ * @param[in] seconds Time (TT) [seconds].
  ***************************************************************************/
 void GTime::secs(const double& seconds)
 {
@@ -349,9 +358,9 @@ void GTime::secs(const double& seconds)
 
 
 /***********************************************************************//**
- * @brief Set time in native reference in days
+ * @brief Set time in native reference in days (TT)
  *
- * @param[in] days Time [days].
+ * @param[in] days Time (TT) [days].
  ***************************************************************************/
 void GTime::days(const double& days)
 {
@@ -370,6 +379,9 @@ void GTime::days(const double& days)
  * @param[in] ref Reference system.
  *
  * Set the time to a value given in a specific reference system.
+ *
+ * @todo Implement TT-UTC conversion if required. This requires
+ *       implementation of leap seconds.
  ***************************************************************************/
 void GTime::set(const double& time, const GTimeReference& ref)
 {
@@ -392,7 +404,9 @@ void GTime::set(const double& time, const GTimeReference& ref)
  *
  * @return Native time reference.
  *
- * Returns the native GammaLib time reference.
+ * Returns the native GammaLib time reference. The GammaLib native time
+ * reference (i.e. time=0) is defined as January 1, 2010, 00:00:00 (TT).
+ * The time system is Terrestrial Time (TT). Time is stored in seconds.
  ***************************************************************************/
 GTimeReference GTime::reference(void) const
 {
@@ -417,7 +431,7 @@ std::string GTime::print(void) const
     std::string result;
 
     // Append time
-    result.append(str(m_time)+" s");
+    result.append(str(m_time)+" s (TT)");
 
     // Return
     return result;

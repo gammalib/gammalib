@@ -36,10 +36,18 @@
 /***********************************************************************//**
  * @class GTime
  *
- * @brief Class that handles times in a system independent way
+ * @brief Handles times in a system independent way
  *
  * The GTime class stores a time value in seconds in a GammaLib native time
- * reference system.
+ * reference system. The GammaLib native time reference (i.e. time=0) is
+ * defined as 
+ *
+ *                     January 1, 2010, 00:00:00 (TT)
+ *
+ * The time system is Terrestrial Time (TT). With respect to Coordinated
+ * Universal Time (UTC), TT time is greater than UTC time by 66.184 sec at
+ * January 1, 2010, 00:00:00. The difference is due to the introduction of
+ * leap seconds that synchronize TT with the Earth rotation (UTC).
  ***************************************************************************/
 class GTime : public GBase {
 
