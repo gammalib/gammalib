@@ -96,7 +96,7 @@ GGti::GGti(const GTimeReference& ref)
     init_members();
 
     // Set time reference
-    this->ref(ref);
+    this->reference(ref);
 
     // Return
     return;
@@ -616,7 +616,7 @@ const double& GGti::ontime(void) const
  *
  * Sets the time reference of the Good Time Intervals.
  ***************************************************************************/
-void GGti::ref(const GTimeReference& ref)
+void GGti::reference(const GTimeReference& ref)
 {
     // Set time reference
     m_reference = ref;
@@ -633,7 +633,7 @@ void GGti::ref(const GTimeReference& ref)
  *
  * Returns the time reference of the Good Time Intervals.
  ***************************************************************************/
-const GTimeReference& GGti::ref(void) const
+const GTimeReference& GGti::reference(void) const
 {
     // Return time reference
     return m_reference;

@@ -80,8 +80,8 @@ public:
     const GTime&          tstop(const int& inx) const;
     const double&         telapse(void) const;
     const double&         ontime(void) const;
-    void                  ref(const GTimeReference& ref);
-    const GTimeReference& ref(void) const;
+    void                  reference(const GTimeReference& ref);
+    const GTimeReference& reference(void) const;
     bool                  contains(const GTime& time) const;
     std::string           print(void) const;
 
