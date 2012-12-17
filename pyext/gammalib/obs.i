@@ -38,6 +38,7 @@
 %include "GEnergy.i"
 %include "GTimes.i"
 %include "GTime.i"
+%include "GTimeReference.i"
 %include "GEbounds.i"
 %include "GGti.i"
 %include "GCaldb.i"
