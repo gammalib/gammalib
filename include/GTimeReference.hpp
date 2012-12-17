@@ -58,12 +58,12 @@ public:
     explicit GTimeReference(const double&      mrdref,
                             const std::string& timeunit,
                             const std::string& timesys = "TT",
-                            const std::string& timeref = "local");
+                            const std::string& timeref = "LOCAL");
     explicit GTimeReference(const int&         mjdrefi,
                             const double&      mrdreff,
                             const std::string& timeunit,
                             const std::string& timesys = "TT",
-                            const std::string& timeref = "local");
+                            const std::string& timeref = "LOCAL");
     explicit GTimeReference(const GFitsHDU* hdu);
     virtual ~GTimeReference(void);
  
@@ -78,12 +78,12 @@ public:
     void               set(const double&      mrdref,
                            const std::string& timeunit,
                            const std::string& timesys = "TT",
-                           const std::string& timeref = "local");
+                           const std::string& timeref = "LOCAL");
     void               set(const int&         mjdrefi,
                            const double&      mjdreff,
                            const std::string& timeunit,
                            const std::string& timesys = "TT",
-                           const std::string& timeref = "local");
+                           const std::string& timeref = "LOCAL");
     const double&      mjdref(void) const;
     int                mjdrefi(void) const;
     double             mjdreff(void) const;
