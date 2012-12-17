@@ -1,7 +1,7 @@
 /***************************************************************************
- *                       GTools.hpp  -  GammaLib tools                     *
+ *                        GTools.hpp - GammaLib tools                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GTools.hpp
  * @brief Gammalib tools definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GTOOLS_HPP
@@ -56,6 +56,7 @@ const double sqrt_two     = sqrt(2.0);
 const double MeV2erg      =  1.6021765e-6;
 const double erg2MeV      =  624150.96;
 const double pc2cm        =  3.08568025e18;
+const double sec_in_day   = 86400.0;
 
 /* __ Prototypes ________________________________________________________ */
 std::string              strip_whitespace(const std::string& arg);
