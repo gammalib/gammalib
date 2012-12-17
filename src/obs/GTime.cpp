@@ -305,7 +305,10 @@ double GTime::convert(const GTimeReference& ref) const
     time += offset;
 
     // Convert to specified time unit
-    time /= ref.unitseconds();
+    double to_unit = ref.unitseconds();
+    if (to_unit != 1.0) {
+        time /= to_unit;
+    }
 
     // Return time
     return time;
