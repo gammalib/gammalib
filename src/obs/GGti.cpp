@@ -713,7 +713,10 @@ void GGti::init_members(void)
     m_telapse = 0.0;
     m_start   = NULL;
     m_stop    = NULL;
-    m_reference.clear();
+
+    // Initialise time reference with native reference
+    GTime time;
+    m_reference = time.reference();
 
     // Return
     return;
