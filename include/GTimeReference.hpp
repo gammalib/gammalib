@@ -48,6 +48,7 @@
  *
  * References:
  * http://aa.usno.navy.mil/publications/docs/Circular_179.php
+ * http://hpiers.obspm.fr/eop-pc/index.php?index=TAI-UTC_tab&lang=en
  ***************************************************************************/
 class GTimeReference : public GBase {
 
