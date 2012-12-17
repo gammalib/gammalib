@@ -355,7 +355,7 @@ void TestGCOMObservation::test_event_bin(void)
         GCOMEventBin* bin4 = bin.clone();
 
         // size method
-        test_value(bin.size(), 0.0, "Test size() method.");
+        test_value(bin.size(), 0.0, 1.0e-10, "Test size() method.");
 
         // dir method
         GCOMInstDir dir = bin.dir();
