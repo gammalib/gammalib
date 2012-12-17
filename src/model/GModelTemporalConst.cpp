@@ -237,9 +237,9 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
     // Compute event rate (in events per seconds)
     double lambda = rate * norm();
 
-    // Initialise start and stop times (using MET)
-    double time  = tmin.met();
-    double tstop = tmax.met();
+    // Initialise start and stop times in seconds
+    double time  = tmin.secs();
+    double tstop = tmax.secs();
 
     // Generate events until maximum event time is exceeded
     while (time <= tstop) {
@@ -250,7 +250,7 @@ GTimes GModelTemporalConst::mc(const double& rate, const GTime&  tmin,
         // Add time if it is not beyod the stop time
         if (time <= tstop) {
             GTime event;
-            event.met(time);
+            event.secs(time);
             times.append(event);
         }
 

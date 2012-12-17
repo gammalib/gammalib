@@ -439,7 +439,7 @@ std::string GLATEventCube::print(void) const
     // Append time interval
     result.append("\n"+parformat("Time interval"));
     if (gti().size() > 0) {
-        result.append(str(tstart().met())+" - "+str(tstop().met()));
+        result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
     }
     else {
         result.append("not defined");

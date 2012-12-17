@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GMWLSpectrum.cpp  -  Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLSpectrum.cpp
  * @brief Multi-wavelength spectrum class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -40,8 +40,9 @@
 #define G_OPERATOR                           "GMWLSpectrum::operator[](int&)"
 #define G_READ                             "GMWLSpectrum::read(GFits&, int&)"
 #define G_READ_FITS                    "GMWLSpectrum::read_fits(GFitsTable*)"
-#define G_CONV_ENERGY       "GMWLSpectrum::conv_energy(double&,std::string&)"
-#define G_CONV_FLUX  "GMWLSpectrum::conv_flux(GEnergy&,double&,std::string&)"
+#define G_CONV_ENERGY      "GMWLSpectrum::conv_energy(double&, std::string&)"
+#define G_CONV_FLUX             "GMWLSpectrum::conv_flux(GEnergy&, double&, "\
+                                                              "std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -471,7 +472,7 @@ std::string GMWLSpectrum::print(void) const
     result.append("\n"+parformat("Number of points")+str(size()));
     result.append("\n"+parformat("Time interval"));
     if (m_gti.size() > 0) {
-        result.append(str(tstart().met())+" - "+str(tstop().met()));
+        result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
     }
     else {
         result.append("not defined");

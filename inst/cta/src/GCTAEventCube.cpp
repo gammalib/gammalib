@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventCube.cpp
  * @brief CTA event bin container class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -467,16 +467,20 @@ std::string GCTAEventCube::print(void) const
     
     // Append GTI intervals
     result.append("\n"+parformat("Time interval"));
-    if (gti().size() > 0)
-        result.append(str(tstart().met())+" - "+str(tstop().met())+" sec");
-    else
+    if (gti().size() > 0) {
+        result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
+    }
+    else {
         result.append("not defined");
+    }
     
     // Append energy intervals
-    if (ebounds().size() > 0)
+    if (ebounds().size() > 0) {
         result.append("\n"+ebounds().print());
-    else
+    }
+    else {
         result.append("\n"+parformat("Energy intervals")+"not defined");
+    }
 
     // Return result
     return result;

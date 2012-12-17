@@ -806,9 +806,9 @@ double GObservation::npred_temp(const GModel& model) const
     // Loop over GTIs
     for (int i = 0; i < events()->gti().size(); ++i) {
 
-        // Set integration interval in MET
-        double tstart = events()->gti().tstart(i).met();
-        double tstop  = events()->gti().tstop(i).met();
+        // Set integration interval in seconds
+        double tstart = events()->gti().tstart(i).secs();
+        double tstop  = events()->gti().tstop(i).secs();
 
         // Throw exception if time interval is not valid
         if (tstop <= tstart) {
@@ -834,15 +834,12 @@ double GObservation::npred_temp(const GModel& model) const
  * @brief Integration kernel for npred_temp() method
  *
  * @param[in] x Function value.
- *
- * Note that MET is used for the time conversion. This, however, is no
- * specialisation since npred_grad_temp() hands MET.
  ***************************************************************************/
 double GObservation::npred_temp_kern::eval(double x)
 {
-    // Convert argument in MET
+    // Convert argument in native reference in seconds
     GTime time;
-    time.met(x);
+    time.secs(x);
 
     // Return value
     return (m_parent->npred_spec(*m_model, time));

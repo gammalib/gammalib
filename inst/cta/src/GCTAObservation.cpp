@@ -21,7 +21,7 @@
 /**
  * @file GCTAObservation.cpp
  * @brief CTA observation class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -1020,8 +1020,8 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         // Compute some attributes
         double ra_pnt  = (m_pointing != NULL) ? m_pointing->dir().ra_deg() : 0.0;
         double dec_pnt = (m_pointing != NULL) ? m_pointing->dir().dec_deg() : 0.0;
-        double tstart  = events()->tstart().met();
-        double tstop   = events()->tstop().met();
+        double tstart  = events()->tstart().secs();
+        double tstop   = events()->tstop().secs();
         double telapse = events()->gti().telapse();
         double ontime  = events()->gti().ontime();
         double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
