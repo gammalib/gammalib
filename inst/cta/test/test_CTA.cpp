@@ -1,5 +1,5 @@
 /***************************************************************************
- *                      test_CTA.cpp  -  Test CTA classes                  *
+ *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -245,10 +245,8 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
 
     // Setup time interval
     GGti  gti;
-    GTime tstart;
-    GTime tstop;
-    tstart.met(0.0);
-    tstop.met(1800.0);
+    GTime tstart(0.0);
+    GTime tstop(1800.0);
     gti.append(tstart, tstop);
 
     // Setup energy boundaries
@@ -331,12 +329,10 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     // Setup dummy event list
     GGti     gti;
     GEbounds ebounds;
-    GTime    tstart;
-    GTime    tstop;
+    GTime    tstart(0.0);
+    GTime    tstop(1800.0);
     GEnergy  emin;
     GEnergy  emax;
-    tstart.met(0.0);
-    tstop.met(1800.0);
     emin.TeV(0.1);
     emax.TeV(100.0);
     gti.append(tstart, tstop);

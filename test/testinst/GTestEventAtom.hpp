@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GTestEventAtom.hpp  -  Test event atom class             *
+ *                 GTestEventAtom.hpp - Test event atom class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GTestEventAtom.hpp
+ * @brief Test data atom definition
+ * @author Jean-Baptiste Cayrou
+ */
 
 #ifndef GTESTEVENTATOM_HPP
 #define GTESTEVENTATOM_HPP
@@ -100,7 +105,7 @@ class GTestEventAtom : public GEventAtom {
         std::string         print(void) const{
             std::string result("== GTestEventAtom == \n");
             result.append("Direction : "+m_dir.print()+"\n");
-            result.append("Time : "+str(m_time.met())+"\n");
+            result.append("Time : "+str(m_time.secs())+"\n");
             result.append("Energy : "+m_energy.print()+"\n");
             return result;
         }

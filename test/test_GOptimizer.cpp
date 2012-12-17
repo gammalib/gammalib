@@ -103,7 +103,7 @@ GModelPar& TestGOptimizer::test_optimizer(int mode)
 
         // Add events to the observation
         ob.events(events);
-        ob.ontime(tmax.met()-tmin.met());
+        ob.ontime(tmax.secs()-tmin.secs());
         obs.append(ob);
     }
 
