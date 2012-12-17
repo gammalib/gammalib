@@ -229,7 +229,7 @@ void TestGObservation::test_time(void)
     test_value(time.convert(GTimeReference(55197.000766018518519, "days", "TT", "LOCAL")),
                t/86400.0);
     test_value(time.convert(GTimeReference(0.0, "s", "TT", "LOCAL")),
-               t + mjd_ref*86400.0);
+               t + mjd_ref*86400.0, 1.0e-6); //!< Poor precision on OpenSolaris
 
     // Test set method
     time.set(12.3, GTimeReference(55197.000766018518519, "days", "TT", "LOCAL"));
