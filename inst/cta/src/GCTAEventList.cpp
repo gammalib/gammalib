@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventList.cpp
  * @brief CTA event atom container class implementation.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -38,6 +38,8 @@
 #include "GFitsTableULongCol.hpp"
 #include "GFitsTableShortCol.hpp"
 #include "GFitsTableStringCol.hpp"
+#include "GTime.hpp"
+#include "GTimeReference.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR                          "GCTAEventList::operator[](int&)"
@@ -326,22 +328,22 @@ void GCTAEventList::read(const GFits& file)
     // ... otherwise build GTI from TSTART and TSTOP
     else {
 
-        // Read start and stop time, MJD reference and time unit, system,
-        // and reference
-        double tstart        = events->real("TSTART");
-        double tstop         = events->real("TSTOP");
-        int    mjdrefi       = events->integer("MJDREFI");
-        double mjdreff       = events->real("MJDREFF");
-        std::string timeunit = events->string("TIMEUNIT");
-        std::string timesys  = events->string("TIMESYS");
-        std::string timeref  = events->string("TIMEREF");
+        // Read start and stop time
+        double tstart = events->real("TSTART");
+        double tstop  = events->real("TSTOP");
+
+        // Create time reference from header information
+        GTimeReference timeref(events);
         
         // Set start and stop time
-        GTime start(tstart, mjdrefi, mjdreff, timeunit, timesys, timeref);
-        GTime stop(tstop, mjdrefi, mjdreff, timeunit, timesys, timeref);
+        GTime start(tstart);
+        GTime stop(tstop);
 
         // Append start and stop time as single time interval to GTI
         m_gti.append(start, stop);
+
+        // Set GTI time reference
+        m_gti.reference(timeref);
 
     } // endelse: GTI built from TSTART and TSTOP
 
@@ -626,7 +628,7 @@ void GCTAEventList::read_events_v0(const GFitsTable* table)
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom event;
             for (int i = 0; i < num; ++i) {
-                event.m_time.met((*ptr_time)(i));
+                event.m_time.set((*ptr_time)(i), m_gti.reference());
                 event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
                 event.m_energy.TeV((*ptr_energy)(i));
                 event.m_event_id    = (*ptr_eid)(i);
@@ -709,7 +711,7 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom event;
             for (int i = 0; i < num; ++i) {
-                event.m_time.met((*ptr_time)(i));
+                event.m_time.set((*ptr_time)(i), m_gti.reference());
                 event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
                 event.m_energy.TeV((*ptr_energy)(i));
                 event.m_event_id    = (*ptr_eid)(i);
@@ -1035,7 +1037,7 @@ void GCTAEventList::write_events(GFitsBinTable* hdu) const
             for (int i = 0; i < size(); ++i) {
                 col_eid(i)         = m_events[i].m_event_id;
                 col_oid(i)         = m_events[i].m_obs_id;
-                col_time(i)        = m_events[i].time().met();
+                col_time(i)        = m_events[i].time().convert(m_gti.reference());
                 col_live(i)        = 0.0;
                 col_multip(i)      = 0;
                 //col_telmask
