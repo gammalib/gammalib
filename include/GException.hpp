@@ -532,8 +532,14 @@ public:
     };
     class time_invalid_unit : public GExceptionHandler {
     public:
-        time_invalid_unit(std::string origin, std::string unit,
-                          std::string message = "");
+        time_invalid_unit(const std::string& origin,
+                          const std::string& unit,
+                          const std::string& message = "");
+    };
+    class no_valid_time_ref : public GExceptionHandler {
+    public:
+        no_valid_time_ref(const std::string& origin,
+                          const std::string& message = "");
     };
 
 

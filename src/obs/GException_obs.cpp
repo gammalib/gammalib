@@ -345,13 +345,34 @@ GException::invalid_instrument::invalid_instrument(std::string origin,
  * @param[in] unit Time unit.
  * @param[in] message Optional error message.
  ***************************************************************************/
-GException::time_invalid_unit::time_invalid_unit(std::string origin,
-                                                 std::string unit,
-                                                 std::string message)
+GException::time_invalid_unit::time_invalid_unit(const std::string& origin,
+                                                 const std::string& unit,
+                                                 const std::string& message)
 {
     // Set origin and message
     m_origin  = origin;
     m_message = "Invalid time unit \""+unit+"\" encountered.";
+    if (message.length() > 0) {
+        m_message += " " + message;
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief No valid reference MJD found
+ *
+ * @param[in] origin Method that throws the error.
+ * @param[in] message Optional error message.
+ ***************************************************************************/
+GException::no_valid_time_ref::no_valid_time_ref(const std::string& origin,
+                                                 const std::string& message)
+{
+    // Set origin and message
+    m_origin  = origin;
+    m_message = "No valid time reference Modified Julian Day found.";
     if (message.length() > 0) {
         m_message += " " + message;
     }
