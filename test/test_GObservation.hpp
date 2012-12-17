@@ -1,5 +1,5 @@
 /***************************************************************************
- *             test_GObservation.hpp  -  Test observation module           *
+ *              test_GObservation.hpp - Test observation module            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
@@ -21,7 +21,7 @@
 /**
  * @file test_GObservation.hpp
  * @brief Test observation module
- * @author J.-B. Cayrou
+ * @author Jean-Baptiste Cayrou
  */
 
 #ifndef TEST_GOBSERVATION_HPP
@@ -29,6 +29,25 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
+
+
+/***********************************************************************//**
+ * @class TestGObservation
+ *
+ * @brief Test suite for observation module testing
+ ***************************************************************************/
+class TestGObservation : public GTestSuite {
+
+public:
+    // Constructors and destructors
+    TestGObservation(void) : GTestSuite() {}
+    virtual ~TestGObservation(void) {}
+
+    // Methods
+    virtual void set(void);
+    void         test_time_reference(void);
+    void         test_time(void);
+};
 
 
 #ifdef _OPENMP
