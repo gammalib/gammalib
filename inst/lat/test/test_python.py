@@ -17,8 +17,8 @@ def analyse_unbinned(xmlname):
 
     # Load LAT observation
     lat = GLATObservation()
-    lat.load_unbinned("data/ft1.fits", "data/ft2.fits", "data/ltcube.fits")
-    lat.response("P6_v3_diff", "/usr/local/gamma/share/caldb/lat")
+    lat.load_unbinned("data/p7v6/ft1.fits", "data/p7v6/ft2.fits", "data/p7v6/ltcube.fits")
+    lat.response("P6_v3_diff", "../caldb")
 
     # Setup ROI covered by data
     instDir = GLATInstDir()
@@ -59,8 +59,8 @@ def analyse_binned(xmlname):
 
     # Load LAT observation
     lat = GLATObservation()
-    lat.load_binned("data/srcmap.fits", "data/binned_expmap.fits", "data/ltcube.fits")
-    lat.response("P6_v3_diff", "/usr/local/gamma/share/caldb/lat")
+    lat.load_binned("data/p7v6/srcmap.fits", "data/p7v6/binned_expmap.fits", "data/p7v6/ltcube.fits")
+    lat.response("P6_v3_diff", "../caldb")
     lat.response().force_mean(True)
 
     # Append LAT observation to container
@@ -106,11 +106,11 @@ def plot_residuals(obs):
     for run in obs:
 
         # Get event cube
-        cube = cast_GLATEventCube(run.events())
+        cube = run.events()
 
         # Create energy axis
         energy = []
-        ebds = cube.ebounds()
+        ebds   = cube.ebounds()
         for i in range(ebds.size()):
             energy.append(ebds.elogmean(i).MeV())
 
@@ -171,9 +171,5 @@ if __name__ == '__main__':
     success = 0
 
     # Analyse data
-    # analyse_unbinned("data/source_model.xml")
-    analyse_binned("data/source_model.xml")   # Original
-    # analyse_binned("data/source_model2.xml")  # Powerlaw for extragal. diffuse
-    # analyse_binned("data/source_model3.xml")  # No Crab, Powerlaw for extragal. diffuse
-    # analyse_binned("data/source_model4.xml")  # No Crab, no extragal. diffuse
-    # analyse_binned("data/source_model5.xml")  # No Crab, no galactic diffuse
+    # analyse_unbinned("data/p7v6/crab_model.xml")
+    analyse_binned("data/p7v6/crab_model.xml")
