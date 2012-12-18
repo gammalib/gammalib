@@ -1,16 +1,36 @@
-/*
- * GModelSpectralLogParabola.hpp
- *
- *  Created on: Nov 30, 2012
- *      Author: mmayer
+/***************************************************************************
+ *    GModelSpectralLogParabola.hpp - Log parabola spectral model class    *
+ * ----------------------------------------------------------------------- *
+ *  copyright (C) 2012 by Michael Mayer                                    *
+ * ----------------------------------------------------------------------- *
+ *                                                                         *
+ *  This program is free software: you can redistribute it and/or modify   *
+ *  it under the terms of the GNU General Public License as published by   *
+ *  the Free Software Foundation, either version 3 of the License, or      *
+ *  (at your option) any later version.                                    *
+ *                                                                         *
+ *  This program is distributed in the hope that it will be useful,        *
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ *  GNU General Public License for more details.                           *
+ *                                                                         *
+ *  You should have received a copy of the GNU General Public License      *
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
+ *                                                                         *
+ ***************************************************************************/
+/**
+ * @file GModelSpectralLogParabola.hpp
+ * @brief Log parabola spectral model class definition
+ * @author Michael Mayer 
  */
 
-#ifndef GMODELSPECTRALLOGPARABOLA_HPP_
-#define GMODELSPECTRALLOGPARABOLA_HPP_
+#ifndef GMODELSPECTRALLOGPARABOLA_HPP
+#define GMODELSPECTRALLOGPARABOLA_HPP
 
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cmath>
 #include "GModelPar.hpp"
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
@@ -46,17 +66,20 @@ public:
     virtual GModelSpectralLogParabola& operator=(const GModelSpectralLogParabola& model);
 
     // Implemented pure virtual methods
-    virtual void                clear(void);
+    virtual void                       clear(void);
     virtual GModelSpectralLogParabola* clone(void) const;
-    virtual std::string         type(void) const { return "LogParabola"; }
-    virtual double              eval(const GEnergy& srcEng) const;
-    virtual double              eval_gradients(const GEnergy& srcEng) const;
-    virtual double              flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double              eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
-    virtual std::string         print(void) const;
+    virtual std::string                type(void) const { return "LogParabola"; }
+    virtual double                     eval(const GEnergy& srcEng) const;
+    virtual double                     eval_gradients(const GEnergy& srcEng) const;
+    virtual double                     flux(const GEnergy& emin,
+                                            const GEnergy& emax) const;
+    virtual double                     eflux(const GEnergy& emin,
+                                             const GEnergy& emax) const;
+    virtual GEnergy                    mc(const GEnergy& emin,
+                                          const GEnergy& emax, GRan& ran) const;
+    virtual void                       read(const GXmlElement& xml);
+    virtual void                       write(GXmlElement& xml) const;
+    virtual std::string                print(void) const;
 
     // Other methods
     void   autoscale(void);
@@ -71,42 +94,45 @@ protected:
     void copy_members(const GModelSpectralLogParabola& model);
     void free_members(void);
 
-    //class to determine to the integral photon flux
-    class flux_kern: public GIntegrand{
+    // Class to determine to the integral photon flux
+    class flux_kern : public GIntegrand{
     public:
-    	//Constructor
-    	flux_kern(double norm, double index, double curvature, double pivot):
-    		m_norm(norm),m_index(index),m_curvature(curvature),m_pivot(pivot){};
+    	// Constructor
+    	flux_kern(double norm, double index, double curvature, double pivot) :
+    		m_norm(norm), m_index(index), m_curvature(curvature), m_pivot(pivot) {};
 
-    	//Method
-    	double eval(double x){return m_norm*std::pow(x/m_pivot,m_index+m_curvature*std::log(x/m_pivot));}
+    	// Method
+    	double eval(double x) {
+            return m_norm*std::pow(x/m_pivot,m_index+m_curvature*std::log(x/m_pivot));
+        }
 
-    	//Members
+    	// Members
     protected:
-    	double m_norm; 				//!< Normalization
-    	double m_index;					//!< Spectral index at pivot
-    	double m_curvature; 			//!< Curvature
-    	double m_pivot;					//!< Pivot energy
+    	double m_norm;        //!< Normalization
+    	double m_index;	      //!< Spectral index at pivot
+    	double m_curvature;   //!< Curvature
+    	double m_pivot;	      //!< Pivot energy
     };
 
-    // class to determine the integral energyflux, derviation of flux_kern
-    class eflux_kern: public flux_kern{
+    // Class to determine the integral energyflux, derviation of flux_kern
+    class eflux_kern : public flux_kern {
     public:
     	//Constructor
-    	eflux_kern(double norm, double index, double curvature, double pivot):flux_kern(norm,index,curvature,pivot){};
+    	eflux_kern(double norm, double index, double curvature, double pivot) :
+            flux_kern(norm,index,curvature,pivot) {};
 
-    	//Method
-    	double eval(double x){return x*flux_kern::eval(x);}
+    	// Method
+    	double eval(double x) {
+            return x*flux_kern::eval(x);
+        }
     };
 
 
     // Protected members
-    GModelPar m_norm;            //!< Normalization factor
-    GModelPar m_index;           //!< Spectral index
-    GModelPar m_curvature;     //!< Curvature
-    GModelPar m_pivot;            //!< Pivot energy
+    GModelPar m_norm;         //!< Normalization factor
+    GModelPar m_index;        //!< Spectral index
+    GModelPar m_curvature;    //!< Curvature
+    GModelPar m_pivot;        //!< Pivot energy
 };
 
-
-
-#endif /* GMODELSPECTRALLOGPARABOLA_HPP_ */
+#endif /* GMODELSPECTRALLOGPARABOLA_HPP */

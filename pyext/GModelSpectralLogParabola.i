@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralLogParabola.i  -  LogParabola model class         *
+ *     GModelSpectralLogParabola.i - Log parabola spectral model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2012 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralLogParabola.i
- * @brief LogParabola spectral model class Python interface definition
- * @author M. Mayer
+ * @brief Log parabola spectral model class definition
+ * @author Michael Mayer 
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -45,16 +45,19 @@ public:
     virtual ~GModelSpectralLogParabola(void);
 
     // Implemented pure virtual methods
-    virtual void                clear(void);
+    virtual void                       clear(void);
     virtual GModelSpectralLogParabola* clone(void) const;
-    virtual std::string         type(void) const;
-    virtual double              eval(const GEnergy& srcEng) const;
-    virtual double              eval_gradients(const GEnergy& srcEng) const;
-    virtual double              flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double              eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
+    virtual std::string                type(void) const;
+    virtual double                     eval(const GEnergy& srcEng) const;
+    virtual double                     eval_gradients(const GEnergy& srcEng) const;
+    virtual double                     flux(const GEnergy& emin,
+                                            const GEnergy& emax) const;
+    virtual double                     eflux(const GEnergy& emin,
+                                             const GEnergy& emax) const;
+    virtual GEnergy                    mc(const GEnergy& emin,
+                                          const GEnergy& emax, GRan& ran) const;
+    virtual void                       read(const GXmlElement& xml);
+    virtual void                       write(GXmlElement& xml) const;
 
     // Other methods
     void   autoscale(void);

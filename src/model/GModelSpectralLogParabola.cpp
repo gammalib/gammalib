@@ -1,15 +1,7 @@
-/*
- * GModelSpectralLogParabola.cpp
- *
- *  Created on: Nov 30, 2012
- *      Author: mimayer
- */
-
-
 /***************************************************************************
- *        GModelSpectralLogParabola.cpp  -  Spectral LogParabola model class        *
+ *    GModelSpectralLogParabola.cpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2012 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -27,9 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpectralPlaw.cpp
- * @brief LogParabola spectral model class implementation
- * @author M. Mayer
+ * @file GModelSpectralLogParabola.cpp
+ * @brief Log parabola spectral model class definition
+ * @author Michael Mayer 
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -45,15 +37,15 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpectralLogParabola     g_spectral_logparabola_seed;
-const GModelSpectralRegistry g_spectral_logparabola_registry(&g_spectral_logparabola_seed);
+const GModelSpectralLogParabola g_spectral_logparabola_seed;
+const GModelSpectralRegistry    g_spectral_logparabola_registry(&g_spectral_logparabola_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_FLUX              "GModelSpectralLogParabola::flux(GEnergy&, GEnergy&)"
-#define G_EFLUX            "GModelSpectralLogParabola::eflux(GEnergy&, GEnergy&)"
-#define G_MC           "GModelSpectralLogParabola::mc(GEnergy&, GEnergy&, GRan&)"
-#define G_READ                       "GModelSpectralLogParabola::read(GXmlElement&)"
-#define G_WRITE                     "GModelSpectralLogParabola::write(GXmlElement&)"
+#define G_FLUX          "GModelSpectralLogParabola::flux(GEnergy&, GEnergy&)"
+#define G_EFLUX        "GModelSpectralLogParabola::eflux(GEnergy&, GEnergy&)"
+#define G_MC       "GModelSpectralLogParabola::mc(GEnergy&, GEnergy&, GRan&)"
+#define G_READ                "GModelSpectralLogParabola::read(GXmlElement&)"
+#define G_WRITE              "GModelSpectralLogParabola::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -73,7 +65,7 @@ const GModelSpectralRegistry g_spectral_logparabola_registry(&g_spectral_logpara
  ***************************************************************************/
 GModelSpectralLogParabola::GModelSpectralLogParabola(void) : GModelSpectral()
 {
-    // Initialise private members for clean destruction
+    // Initialise private members
     init_members();
 
     // Return
@@ -86,13 +78,15 @@ GModelSpectralLogParabola::GModelSpectralLogParabola(void) : GModelSpectral()
  *
  * @param[in] norm Power law normalization.
  * @param[in] index Power law index.
- * @param[in] curvature
+ * @param[in] curvature Curvature.
  *
  * Construct a LogParabola model from a normalization value, a spectral
  * index and a curvature
  ***************************************************************************/
 GModelSpectralLogParabola::GModelSpectralLogParabola(const double& norm,
-                                       const double& index, const double& curvature) : GModelSpectral()
+                                                     const double& index,
+                                                     const double& curvature) :
+                           GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -116,7 +110,8 @@ GModelSpectralLogParabola::GModelSpectralLogParabola(const double& norm,
  * from an XML element. See GModelSpectralLogParabola::read() for more information
  * about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralLogParabola::GModelSpectralLogParabola(const GXmlElement& xml) : GModelSpectral()
+GModelSpectralLogParabola::GModelSpectralLogParabola(const GXmlElement& xml) : 
+                           GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -134,8 +129,8 @@ GModelSpectralLogParabola::GModelSpectralLogParabola(const GXmlElement& xml) : G
  *
  * @param[in] model LogParabola model.
  ***************************************************************************/
-GModelSpectralLogParabola::GModelSpectralLogParabola(const GModelSpectralLogParabola& model)
-                                       : GModelSpectral(model)
+GModelSpectralLogParabola::GModelSpectralLogParabola(const GModelSpectralLogParabola& model) :
+                           GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -171,6 +166,7 @@ GModelSpectralLogParabola::~GModelSpectralLogParabola(void)
  * @brief Assignment operator
  *
  * @param[in] model LogParabola model.
+ * @return LogParabola model.
  ***************************************************************************/
 GModelSpectralLogParabola& GModelSpectralLogParabola::operator=(const GModelSpectralLogParabola& model)
 {
@@ -204,7 +200,7 @@ GModelSpectralLogParabola& GModelSpectralLogParabola::operator=(const GModelSpec
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
+ ***************************************************************************/
 void GModelSpectralLogParabola::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
@@ -222,7 +218,9 @@ void GModelSpectralLogParabola::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Pointer to deep copy of log parabola spectrum.
+ ***************************************************************************/
 GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
 {
     return new GModelSpectralLogParabola(*this);
@@ -233,6 +231,7 @@ GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] srcEng True energy of photon.
+ * @return Function value.
  *
  * The logparabola function is defined as
  * \f[I(E)=norm (E/pivot)^{index-curvature*log(E/pivot)}\f]
@@ -250,15 +249,15 @@ GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
 double GModelSpectralLogParabola::eval(const GEnergy& srcEng) const
 {
     // Compute function value
-    double energy = srcEng.MeV() / pivot();
+    double energy   = srcEng.MeV() / pivot();
     double exponent = index() + curvature()*log(energy);
-    double power = std::pow(energy,exponent);
-    double value  = norm() * power;
+    double power    = std::pow(energy,exponent);
+    double value    = norm() * power;
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralPlaw::eval";
+        std::cout << "*** ERROR: GModelSpectralLogParabola::eval";
         std::cout << "(srcEng=" << srcEng << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -280,6 +279,7 @@ double GModelSpectralLogParabola::eval(const GEnergy& srcEng) const
  * @brief Evaluate function and gradients
  *
  * @param[in] srcEng True energy of photon.
+ * @return Function value.
  *
  * The logparabol function is defined as
  * \f[I(E)=norm (E/pivot)^{index-curvature\ln(E/pivot)}\f]
@@ -303,16 +303,25 @@ double GModelSpectralLogParabola::eval(const GEnergy& srcEng) const
 double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng) const
 {
     // Compute function value
-    double energy = srcEng.MeV() / pivot();
+    double energy   = srcEng.MeV() / pivot();
     double exponent = index() + curvature()*std::log(energy);
-    double power = std::pow(energy,exponent);
-    double value  = norm() * power;
+    double power    = std::pow(energy,exponent);
+    double value    = norm() * power;
 
     // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.isfree())  ? m_norm.scale() * power : 0.0;
-    double g_index = (m_index.isfree()) ? value * m_index.scale() * std::log(energy) : 0.0;
-    double g_curvature = (m_curvature.isfree()) ? value * m_curvature.scale() * std::pow(std::log(energy),2) : 0.0;
-    double g_pivot = (m_pivot.isfree()) ? -value/m_pivot.value() * (exponent + curvature()*std::log(energy)) : 0.0;
+    double log_energy  = std::log(energy);
+    
+    double g_norm      = (m_norm.isfree())  ? m_norm.scale() * power : 0.0;
+    double g_index     = (m_index.isfree())
+                         ? value * m_index.scale() * log_energy : 0.0;
+    double g_curvature = (m_curvature.isfree())
+                         ? value * m_curvature.scale() * log_energy * 
+                           log_energy
+                         : 0.0;
+    double g_pivot     = (m_pivot.isfree())
+                         ? -value/m_pivot.value() * (exponent + curvature() *
+                           log_energy)
+                         : 0.0;
 
     // Set gradients (circumvent const correctness)
     const_cast<GModelSpectralLogParabola*>(this)->m_norm.gradient(g_norm);
@@ -323,7 +332,7 @@ double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng) const
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
-        std::cout << "*** ERROR: GModelSpectralPlaw::eval_gradients";
+        std::cout << "*** ERROR: GModelSpectralLogParabola::eval_gradients";
         std::cout << "(srcEng=" << srcEng << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -350,6 +359,7 @@ double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Photon flux (ph/cm2/s).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
@@ -359,18 +369,19 @@ double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng) const
  * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
  * The integration is done numerically.
  ***************************************************************************/
-double GModelSpectralLogParabola::flux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralLogParabola::flux(const GEnergy& emin,
+                                       const GEnergy& emax) const
 {
-	//Initialise function to integrate
+	// Initialise function to integrate
     flux_kern flux(norm(),index(),curvature(),pivot());
 
-    //Initialise integral class with function
+    // Initialise integral class with function
     GIntegral integral(&flux);
 
-    //Set integration precision
+    // Set integration precision
     integral.eps(1.0e-8);
 
-    //Calculate integral between emin and emax
+    // Calculate integral between emin and emax
     double photonflux = integral.romb(emin.MeV(), emax.MeV());
 
     //Return value
@@ -383,6 +394,7 @@ double GModelSpectralLogParabola::flux(const GEnergy& emin, const GEnergy& emax)
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @return Energy flux (erg/cm2/s).
  *
  * Computes
  * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
@@ -392,21 +404,22 @@ double GModelSpectralLogParabola::flux(const GEnergy& emin, const GEnergy& emax)
  * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
  * The integration is done numerically.
  ***************************************************************************/
-double GModelSpectralLogParabola::eflux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralLogParabola::eflux(const GEnergy& emin,
+                                        const GEnergy& emax) const
 {
-	//Initialise function to integrate
+	// Initialise function to integrate
     eflux_kern eflux(norm(),index(),curvature(),pivot());
 
-    //Initialise integral class with function
+    // Initialise integral class with function
     GIntegral integral(&eflux);
 
-    //Set integration precision
+    // Set integration precision
     integral.eps(1.0e-8);
 
-    //Calculate integral between emin and emax
+    // Calculate integral between emin and emax
     double energyflux = integral.romb(emin.MeV(), emax.MeV());
 
-    //Return value
+    // Return value
     return energyflux;
 }
 
@@ -417,20 +430,27 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin, const GEnergy& emax
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
  * @param[in] ran Random number generator.
+ * @return Energy.
+ *
+ * @exception GException::feature_not_implemented
+ *            Feature not yet implemented.
  *
  * Returns Monte Carlo energy by randomly drawing from a power law.
+ *
+ * @todo To be implemented.
  ***************************************************************************/
-GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin, const GEnergy& emax,
-                               GRan& ran) const
+GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
+                                      const GEnergy& emax,
+                                      GRan& ran) const
 {
-	  // Allocate energy
-	    GEnergy energy;
+    // Allocate energy
+    GEnergy energy;
 
-	    // Dump warning that method is not yet implemented
-	    throw GException::feature_not_implemented(G_MC);
+    // Throw exception signalling that method is not yet implemented
+    throw GException::feature_not_implemented(G_MC);
 
-	    // Return energy
-	    return energy;
+    // Return energy
+    return energy;
 }
 
 
@@ -479,9 +499,24 @@ void GModelSpectralLogParabola::autoscale(void)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the logparabola information from an XML element. The XML
- * element is required to have 4 parameters with names "Prefactor", "Index",
- * "Curvature" and "Scale".
+ * Read the spectral log parabola information from an XML element. The format
+ * of the XML elements is
+ *
+ *     <spectrum type="LogParabola">
+ *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Curvature" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
+ *
+ * or for compliance with Fermi-LAT
+ *
+ *     <spectrum type="LogParabola">
+ *       <parameter name="norm"  scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="alpha" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="beta"  scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Eb"    scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
  *
  * @todo Add parameter validity check
  ***************************************************************************/
@@ -502,28 +537,28 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor" ||
-        		par->attribute("name")=="norm") {
+        	par->attribute("name") == "norm") {
             m_norm.read(*par);
             npar[0]++;
         }
 
         // Handle index
         else if (par->attribute("name") == "Index" ||
-        		par->attribute("name")=="alpha") {
+        		 par->attribute("name") == "alpha") {
             m_index.read(*par);
             npar[1]++;
         }
 
         // Handle index
         else if (par->attribute("name") == "Curvature" ||
-        		par->attribute("name")=="beta") {
+        		 par->attribute("name") == "beta") {
             m_curvature.read(*par);
             npar[2]++;
         }
 
         // Handle pivot energy
         else if (par->attribute("name") == "Scale" ||
-			par->attribute("name") == "Eb") {
+			     par->attribute("name") == "Eb") {
             m_pivot.read(*par);
             npar[3]++;
         }
@@ -533,7 +568,9 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
     // Verify that all parameters were found
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3]  != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
-              "LogParabola requires \"Prefactor\" or \"norm\", \"Index\" or \"alpha\",\"Curvature\" or \"beta\" and \"Scale\" or \"Eb\" parameters.");
+              "LogParabola requires \"Prefactor\" or \"norm\","
+              " \"Index\" or \"alpha\", \"Curvature\" or \"beta\""
+              " and \"Scale\" or \"Eb\" parameters.");
     }
 
     // Return
@@ -553,24 +590,30 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the LogParabola model information into an XML element. The XML
- * element has to be of type "LogParabola" and will have 4 parameter leafs
- * named "Prefactor", "Index", "Curvature" and "Scale".
+ * Write the LogParabola model information into an XML element. The format
+ * of the XML elements is
+ *
+ *     <spectrum type="LogParabola">
+ *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Curvature" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
  ***************************************************************************/
 void GModelSpectralLogParabola::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
-        xml.attribute("type", "LogParabola");
+        xml.attribute("type", type());
     }
 
     // Verify model type
-    if (xml.attribute("type") != "LogParabola") {
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spectral(G_WRITE, xml.attribute("type"),
-              "Spectral model is not of type \"LogParabola\".");
+              "Spectral model is not of type \""+type()+"\".");
     }
 
-    // If XML element has 0 nodes then append 3 parameter nodes
+    // If XML element has 0 nodes then append 4 parameter nodes
     if (xml.elements() == 0) {
         xml.append(new GXmlElement("parameter name=\"Prefactor\""));
         xml.append(new GXmlElement("parameter name=\"Index\""));
@@ -578,7 +621,7 @@ void GModelSpectralLogParabola::write(GXmlElement& xml) const
         xml.append(new GXmlElement("parameter name=\"Scale\""));
     }
 
-    // Verify that XML element has exactly 3 parameters
+    // Verify that XML element has exactly 4 parameters
     if (xml.elements() != 4 || xml.elements("parameter") != 4) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "LogParabola law model requires exactly 4 parameters.");
@@ -620,7 +663,8 @@ void GModelSpectralLogParabola::write(GXmlElement& xml) const
     // Check of all required parameters are present
     if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"Prefactor\", \"Index\" , \"Curvature\" and \"Scale\" parameters.");
+              "LogParabola requires \"Prefactor\", \"Index\", \"Curvature\""
+              " and \"Scale\" parameters.");
     }
 
     // Return
@@ -638,6 +682,8 @@ std::string GModelSpectralLogParabola::print(void) const
 
     // Append header
     result.append("=== GModelSpectralLogParabola ===\n");
+
+    // Append information
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
@@ -744,12 +790,3 @@ void GModelSpectralLogParabola::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-
-
