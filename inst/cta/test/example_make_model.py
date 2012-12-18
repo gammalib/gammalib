@@ -25,8 +25,7 @@ def make_model_for_cntmap(cntmap, modname, xmlname, irf, caldb, clobber=True):
     models = GModels(xmlname)
 
     # Loop over all bins in counts map
-    events = cast_GCTAEventCube(obs.events())
-    for event in events:
+    for event in obs.events():
         model = models.eval(event, obs) * event.size()
         event.counts(model)
 
@@ -52,11 +51,11 @@ if __name__ == '__main__':
     print "... please wait for a few seconds"
 
     # Set parameters
-    irf = "kb_E_50h_v3"
-    caldb = "../caldb"
+    irf     = "kb_E_50h_v3"
+    caldb   = "../caldb"
     xmlname = "data/crab.xml"
-    cntmap = "data/crab_cntmap.fits"
+    cntmap  = "data/crab_cntmap.fits"
     modname = "model.fits"
 
-# Make the model
+    # Make the model
     make_model_for_cntmap(cntmap, modname, xmlname, irf, caldb)
