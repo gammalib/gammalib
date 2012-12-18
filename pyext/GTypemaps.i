@@ -435,3 +435,41 @@ static int var_tuple_to_index(PyObject *input, int *ptr) {
         $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GXmlNode, 0 |  0 );
     }
 }
+
+
+/***********************************************************************//**
+ * @brief GEvent* output conversion
+ *
+ * This typemap implements an automatic cast of a GEvent pointer to the
+ * relevant derived class pointer.
+ ***************************************************************************/
+%typemap(out) GEvent* {
+    if (dynamic_cast<GEventBin*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventBin, 0 |  0 );
+    }
+    else if (dynamic_cast<GEventAtom*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventAtom, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEvent, 0 |  0 );
+    }
+}
+
+
+/***********************************************************************//**
+ * @brief GEvents* output conversion
+ *
+ * This typemap implements an automatic cast of a GEvents pointer to the
+ * relevant derived class pointer.
+ ***************************************************************************/
+%typemap(out) GEvents* {
+    if (dynamic_cast<GEventList*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventList, 0 |  0 );
+    }
+    else if (dynamic_cast<GEventCube*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventCube, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEvents, 0 |  0 );
+    }
+}
