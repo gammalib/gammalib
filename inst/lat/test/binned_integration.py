@@ -1,5 +1,27 @@
 #! /usr/bin/env python
-
+# ==========================================================================
+# This script tests the binned integration.
+#
+# Requires:
+# - matplotlib
+# - numpy
+#
+# Copyright (C) 2012 Jurgen Knodlseder
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ==========================================================================
 from gammalib import *
 from math import *
 import os
@@ -222,19 +244,19 @@ if __name__ == '__main__':
         energy.append(ebds.elogmean(i).MeV())
 
     # Perform integrations
-    analytical = int_analytical(ebds, gamma)
-    trapezoid = int_trapezoid(ebds, gamma)
+    analytical    = int_analytical(ebds, gamma)
+    trapezoid     = int_trapezoid(ebds, gamma)
     log_trapezoid = int_log_trapezoid(ebds, gamma)
-    mean = int_mean(ebds, gamma)
-    logmean = int_logmean(ebds, gamma)
-    geometric = int_geometric(ebds, gamma)
+    mean          = int_mean(ebds, gamma)
+    logmean       = int_logmean(ebds, gamma)
+    geometric     = int_geometric(ebds, gamma)
 
     # Compute differences
-    diff_trapezoid = []
+    diff_trapezoid     = []
     diff_log_trapezoid = []
-    diff_mean = []
-    diff_logmean = []
-    diff_geometric = []
+    diff_mean          = []
+    diff_logmean       = []
+    diff_geometric     = []
     for i in range(ebds.size()):
         diff_trapezoid.append(trapezoid[i] / analytical[i])
         diff_log_trapezoid.append(log_trapezoid[i] / analytical[i])
