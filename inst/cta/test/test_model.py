@@ -167,10 +167,8 @@ def observation(ra=0.0, dec=0.0, emin=0.1, emax=100.0,
     e_max.TeV(emax)
     ebounds.setlog(e_min, e_max, ebins)
     gti = GGti()
-    tmin = GTime()
-    tmax = GTime()
-    tmin.met(0.0)
-    tmax.met(duration)
+    tmin = GTime(0.0)
+    tmax = GTime(duration)
     gti.append(tmin, tmax)
     map = GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
     cube = GCTAEventCube(map, ebounds, gti)
@@ -200,24 +198,10 @@ def test_irf(model, ra=0.0, dec=0.0, npix=100, filename="cntmap.fits"):
 
     # Set CTA observation
     obs = observation(ra=ra, dec=dec, npix=npix)
-    src = GSkyDir()
-    src.radec_deg(ra, dec)
 
     # Loop over all bins
     for bin in obs.events():
-
-        # Cast to CTA bin
-        bin = cast_GCTAEventBin(bin)
-
-        # Set bin energy and time as source energy and time (no dispersion)
-        srcDir = bin.dir()
-        srcEng = bin.energy()
-        srcTime = bin.time()
-
-        # Compute IRF
-        irf = obs.response().irf(bin, model, srcEng, srcTime, obs) * bin.size()
-
-        # Set bin
+        irf = model.eval(bin, obs) * bin.size()
         bin.counts(irf)
 
     # Save observation
@@ -238,27 +222,14 @@ def test_grad(model, ra=0.0, dec=0.0, filename="gradmap.fits", ipar=2):
     print model
 
     # Set CTA observation
-    obs = observation()
-    src = GSkyDir()
-    src.radec_deg(ra, dec)
+    obs = observation(ra=ra, dec=dec, npix=npix)
 
     # Make sure that parameter is free
     model[ipar].free()
 
     # Loop over all bins
     for bin in obs.events():
-
-        # Cast to CTA bin
-        bin = cast_GCTAEventBin(bin)
-
-        # Set bin energy and time as source energy and time (no dispersion)
-        srcEng = bin.energy()
-        srcTime = bin.time()
-
-        # Compute gradient
         grad = obs.model_grad(model, bin, ipar)
-
-        # Set bin
         bin.counts(grad)
 
     # Save observation
@@ -276,10 +247,10 @@ if __name__ == '__main__':
     Test diffuse models.
     """
     # Dump header
-    print
-    print "***********************"
-    print "* Test diffuse models *"
-    print "***********************"
+    print("")
+    print("***********************")
+    print("* Test diffuse models *")
+    print("***********************")
 
     # Test IRF
     # test_irf(ptsrc_model())
