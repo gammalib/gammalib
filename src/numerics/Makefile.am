@@ -7,7 +7,6 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GIntegral.cpp \
-          GIntegrand.cpp \
           GDerivative.cpp \
           GFunction.cpp \
           GNumerics.cpp \
