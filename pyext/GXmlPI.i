@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlPI.i - XML PI node class definition                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,16 @@
 /**
  * @file GXmlPI.i
  * @brief XML PI node class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlPI.hpp"
 #include "GTools.hpp"
-#include "GException.hpp"
 %}
+
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
 
 
 /***********************************************************************//**
@@ -63,17 +65,3 @@ public:
         return tochar(self->print());
     }
 };
-
-
-/***********************************************************************//**
- * @brief GXmlPI type casts
- ***************************************************************************/
-%inline %{
-    GXmlPI* cast_GXmlPI(GXmlNode* node) {
-        if (node->type() != GXmlNode::NT_PI)
-            throw GException::xml_bad_node_type("cast_GXmlPI(GXmlNode*)",
-                                                "",
-                                                "Expecting GXmlPI node.");
-        return dynamic_cast<GXmlPI*>(node);
-    }
-%};

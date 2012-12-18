@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlDocument.i - XML document node class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,16 @@
 /**
  * @file GXmlDocument.i
  * @brief XML document class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlDocument.hpp"
 #include "GTools.hpp"
-#include "GException.hpp"
 %}
+
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
 
 
 /***********************************************************************//**
@@ -71,17 +73,3 @@ public:
         return tochar(self->print());
     }
 };
-
-
-/***********************************************************************//**
- * @brief GXmlDocument type casts
- ***************************************************************************/
-%inline %{
-    GXmlDocument* cast_GXmlDocument(GXmlNode* node) {
-        if (node->type() != GXmlNode::NT_DOCUMENT)
-            throw GException::xml_bad_node_type("cast_GXmlDocument(GXmlNode*)",
-                                                "",
-                                                "Expecting GXmlDocument node.");
-        return dynamic_cast<GXmlDocument*>(node);
-    }
-%};

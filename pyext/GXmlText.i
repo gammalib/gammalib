@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GXmlText.i - XML text node class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,16 @@
 /**
  * @file GXmlText.i
  * @brief XML text node class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlText.hpp"
 #include "GTools.hpp"
-#include "GException.hpp"
 %}
+
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
 
 
 /***********************************************************************//**
@@ -63,17 +65,3 @@ public:
         return tochar(self->print());
     }
 };
-
-
-/***********************************************************************//**
- * @brief GXmlText type casts
- ***************************************************************************/
-%inline %{
-    GXmlText* cast_GXmlText(GXmlNode* node) {
-        if (node->type() != GXmlNode::NT_TEXT)
-            throw GException::xml_bad_node_type("cast_GXmlText(GXmlNode*)",
-                                                "",
-                                                "Expecting GXmlText node.");
-        return dynamic_cast<GXmlText*>(node);
-    }
-%};
