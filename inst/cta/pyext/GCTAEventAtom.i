@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventAtom.i
- * @brief CTA event bin class Python interface definition
+ * @brief CTA event bin class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -44,12 +44,12 @@ public:
     // Implemented pure virtual base class methods
     void               clear(void);
     GCTAEventAtom*     clone(void) const;
-    const GCTAInstDir& dir(void) const { return m_dir; }
-    const GEnergy&     energy(void) const { return m_energy; }
-    const GTime&       time(void) const { return m_time; }
-    void               dir(const GCTAInstDir& dir) { m_dir=dir; }
-    void               energy(const GEnergy& energy) { m_energy=energy; }
-    void               time(const GTime& time) { m_time=time; }
+    const GCTAInstDir& dir(void) const;
+    const GEnergy&     energy(void) const;
+    const GTime&       time(void) const;
+    void               dir(const GCTAInstDir& dir);
+    void               energy(const GEnergy& energy);
+    void               time(const GTime& time);
 };
 
 
