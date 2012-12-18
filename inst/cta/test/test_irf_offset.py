@@ -1,8 +1,27 @@
 #! /usr/bin/env python
-# ===========================================================================================#
-# This script tests the offset angle dependence of the instrumental response function.
+# ==========================================================================
+# This script tests the offset angle dependence of the instrumental response
+# function.
 #
-# ===========================================================================================#
+# It creates a set of models for different offset angles and evaluates the
+# counts map for this set of models.
+#
+# Copyright (C) 2012 Juergen Knoedlseder
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ==========================================================================
 from gammalib import *
 
 
@@ -124,20 +143,21 @@ def observation(ra=0.0, dec=0.0, binsz=0.05, npix=200, ebins=10):
 
     # Set
     ebounds = GEbounds()
-    emin = GEnergy()
-    emax = GEnergy()
+    emin    = GEnergy()
+    emax    = GEnergy()
     emin.TeV(0.1)
     emax.TeV(100.0)
     ebounds.setlog(emin, emax, ebins)
-    gti = GGti()
-    tmin = GTime()
-    tmax = GTime()
-    tmin.met(0.0)
-    tmax.met(1800.0)
+    gti  = GGti()
+    tmin = GTime(0.0)
+    tmax = GTime(1800.0)
     gti.append(tmin, tmax)
     map = GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
     cube = GCTAEventCube(map, ebounds, gti)
     obs.events(cube)
+    obs.ontime(1800.0)
+    obs.livetime(1800.0*0.95)
+    obs.deadc(0.95)
 
     # Optionally show observation
     # print obs
@@ -151,23 +171,16 @@ def observation(ra=0.0, dec=0.0, binsz=0.05, npix=200, ebins=10):
 # ================ #
 def modmap(obs, models, phi=0, theta=0, filename="modmap.fits"):
     """
-    Create model map.
+    Create model map by looping over all bins of the counts map and
+    all models in the model container.
     """
     # Loop over all bins
     for bin in obs.events():
 
-        # Cast to CTA bin
-        bin = cast_GCTAEventBin(bin)
-
-        # Set bin energy and time as source energy and time (no dispersion)
-        srcDir = bin.dir()
-        srcEng = bin.energy()
-        srcTime = bin.time()
-
         # Compute IRF
         irf = 0.0
         for model in models:
-            irf += obs.response().irf(bin, model, srcEng, srcTime, obs) * bin.size()
+            irf += model.eval(bin, obs) * bin.size()
 
         # Set bin
         bin.counts(irf)
