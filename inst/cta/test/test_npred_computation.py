@@ -2,6 +2,9 @@
 # ==========================================================================
 # This script tests the Npred computation of the CTA response.
 #
+# Requires:
+# - matplotlib (optional)
+#
 # Copyright (C) 2011-2012 Jurgen Knodlseder
 #
 # This program is free software: you can redistribute it and/or modify
@@ -29,7 +32,7 @@ try:
     import matplotlib.pyplot as plt
     has_matplotlib = True
 except ImportError:
-    print "WARNING: Matplotlib not available for plotting."
+    print("WARNING: Matplotlib not available for plotting.")
     has_matplotlib = False
 
 
@@ -115,11 +118,7 @@ if __name__ == '__main__':
     """
     # Set response information
     caldb = "$GAMMALIB/share/caldb/cta"
-    irf = "kb_E_50h_v3"
-    # file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023523_std_psf.fits"
-    # file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023526_std_psf.fits"
-    # file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023559_std_psf.fits"
-    # file  = "/project-data/cta/data/CTA1DC-HESS-v2-prerelease-v2/CTA1DC-HESS-run00023592_std_psf.fits"
+    irf   = "kb_E_50h_v3"
 
     # Compute NPsf
     npsf(caldb, irf, radius=1.0)
