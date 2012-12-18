@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GEventAtom.i  -  Abstract event atom class python I/F           *
+ *                 GEventAtom.i - Abstract event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GEventAtom.i
- * @brief GEventAtom class python interface
- * @author J. Knodlseder
+ * @brief Abstract event atom class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -63,16 +63,16 @@ public:
     // Pure virtual methods
     virtual void            clear(void) = 0;
     virtual GEvent*         clone(void) const = 0;
-    virtual double          size(void) const { return 1.0; }
+    virtual double          size(void) const;
     virtual const GInstDir& dir(void) const = 0;
     virtual const GEnergy&  energy(void) const = 0;
     virtual const GTime&    time(void) const = 0;
-    virtual double          counts(void) const { return 1.0; }
-    virtual double          error(void) const { return 0.0; }
+    virtual double          counts(void) const;
+    virtual double          error(void) const;
 
     // Other methods
-    bool isatom(void) const { return true; }
-    bool isbin(void) const { return false; }
+    bool isatom(void) const;
+    bool isbin(void) const;
 };
 
 
@@ -81,16 +81,3 @@ public:
  ***************************************************************************/
 %extend GEventAtom {
 };
-
-
-/***********************************************************************//**
- * @brief GEventAtom type casts
- ***************************************************************************/
-%inline %{
-    GEventAtom* cast_GEventAtom(GEvent* event) {
-        if (!event->isatom())
-            throw GException::fits_invalid_type("cast_GEventAtom(GEvent*)",
-                                                "GEvent is not an event atom.");
-        return dynamic_cast<GEventAtom*>(event);
-    }
-%};

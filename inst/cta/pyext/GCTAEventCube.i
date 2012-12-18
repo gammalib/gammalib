@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAEventCube.i  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventCube.i
  * @brief CTA event bin container class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -84,17 +84,3 @@ public:
             throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
 };
-
-
-/***********************************************************************//**
- * @brief GCTAEventCube type casts
- ***************************************************************************/
-%inline %{
-    GCTAEventCube* cast_GCTAEventCube(GEvents* events) {
-        GCTAEventCube* cube = dynamic_cast<GCTAEventCube*>(events);
-        if (cube == NULL)
-            throw GException::bad_type("cast_GCTAEventCube(GEvents*)",
-                                       "GEvents not of type GCTAEventCube");            
-        return cube;
-    }
-%}

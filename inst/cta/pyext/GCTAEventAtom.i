@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAEventAtom.i  -  CTA event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventAtom.i
  * @brief CTA event bin class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -61,17 +61,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GCTAEventAtom type casts
- ***************************************************************************/
-%inline %{
-    GCTAEventAtom* cast_GCTAEventAtom(GEvent* event) {
-        GCTAEventAtom* atom = dynamic_cast<GCTAEventAtom*>(event);
-        if (atom == NULL)
-            throw GException::bad_type("cast_GCTAEventAtom(GEvent*)",
-                                       "GEvent not of type GCTAEventAtom");            
-        return atom;
-    }
-%}

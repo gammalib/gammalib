@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCTAEventList.i  -  CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventList.i
  * @brief CTA event atom container class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -80,17 +80,3 @@ public:
             throw GException::out_of_range("__setitem__(int)", index, self->size());
     }
 };
-
-
-/***********************************************************************//**
- * @brief GCTAEventList type casts
- ***************************************************************************/
-%inline %{
-    GCTAEventList* cast_GCTAEventList(GEvents* events) {
-        GCTAEventList* list = dynamic_cast<GCTAEventList*>(events);
-        if (list == NULL)
-            throw GException::bad_type("cast_GCTAEventList(GEvents*)",
-                                       "GEvents not of type GCTAEventList");            
-        return list;
-    }
-%}

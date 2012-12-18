@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAInstDir.i  -  CTA instrument direction class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAInstDir.i
  * @brief CTA instrument direction class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -79,17 +79,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GCTAInstDir type casts
- ***************************************************************************/
-%inline %{
-    GCTAInstDir* cast_GCTAInstDir(GInstDir* arg) {
-        GCTAInstDir* dir = dynamic_cast<GCTAInstDir*>(arg);
-        if (dir == NULL)
-            throw GException::bad_type("cast_GCTAInstDir(GInstDir*)",
-                                       "GInstDir not of type GCTAInstDir");
-        return dir;
-    }
-%}

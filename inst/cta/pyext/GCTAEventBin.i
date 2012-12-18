@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventBin.i  -  CTA event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventBin.i
  * @brief CTA event bin class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -71,17 +71,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GCTAEventBin type casts
- ***************************************************************************/
-%inline %{
-    GCTAEventBin* cast_GCTAEventBin(GEvent* event) {
-        GCTAEventBin* bin = dynamic_cast<GCTAEventBin*>(event);
-        if (bin == NULL)
-            throw GException::bad_type("cast_GCTAEventBin(GEvent*)",
-                                       "GEvent not of type GCTAEventBin");
-        return bin;
-    }
-%}

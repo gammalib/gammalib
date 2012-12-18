@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GEventBin.i  -  Abstract event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventBin.i
  * @brief Abstract event bin class python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -84,16 +84,3 @@ public:
  ***************************************************************************/
 %extend GEventBin {
 };
-
-
-/***********************************************************************//**
- * @brief GEventBin type casts
- ***************************************************************************/
-%inline %{
-    GEventBin* cast_GEventBin(GEvent* event) {
-        if (!event->isbin())
-            throw GException::fits_invalid_type("cast_GEventBin(GEvent*)",
-                                                "GEvent is not an event bin.");
-        return dynamic_cast<GEventBin*>(event);
-    }
-%}

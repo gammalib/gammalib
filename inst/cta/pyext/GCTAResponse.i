@@ -123,43 +123,9 @@ public:
 
 /***********************************************************************//**
  * @brief GCTAResponse class extension
- *
- * The irf() and npred() methods are required here to force swig to build
- * also interface for these methods. I guess that it is a swig bug that these
- * interfaces are not built automatically.
  ***************************************************************************/
 %extend GCTAResponse {
     GCTAResponse copy() {
         return (*self);
     }
-/*
-    double irf(const GEvent&       event,
-               const GModelSky&    model,
-               const GEnergy&      srcEng,
-               const GTime&        srcTime,
-               const GObservation& obs) const {
-        return self->GResponse::irf(event, model, srcEng, srcTime, obs);
-    }
-    double npred(const GModelSky&    model,
-                 const GEnergy&      srcEng,
-                 const GTime&        srcTime,
-                 const GObservation& obs) const {
-        return self->GResponse::npred(model, srcEng, srcTime, obs);
-    }
-*/
 };
-
-
-/***********************************************************************//**
- * @brief GCTAResponse type casts
- ***************************************************************************/
-%inline %{
-    GCTAResponse* cast_GCTAResponse(GResponse* arg) {
-        GCTAResponse* rsp = dynamic_cast<GCTAResponse*>(arg);
-        if (rsp == NULL) {
-            throw GException::bad_type("cast_GCTAResponse(GResponse*)",
-                                       "GResponse not of type GCTAResponse");
-        }
-        return rsp;
-    }
-%}

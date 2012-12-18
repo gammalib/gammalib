@@ -1,7 +1,7 @@
 /***************************************************************************
  * GCTAModelRadialGauss.i  -  Radial Gaussian model class python interface *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialGauss.i
  * @brief Radial Gaussian model class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -69,18 +69,3 @@ public:
         return tochar(self->print());
     }
 };
-
-
-/***********************************************************************//**
- * @brief GCTAModelRadialGauss type casts
- ***************************************************************************/
-%inline %{
-    GCTAModelRadialGauss* cast_GCTAModelRadialGauss(GCTAModelRadial* model) {
-        GCTAModelRadialGauss* cast = dynamic_cast<GCTAModelRadialGauss*>(model);
-        if (cast == NULL) {
-            throw GException::bad_type("cast_GCTAModelRadialGauss(GCTAModelRadial* model)",
-                                       "GCTAModelRadial not of type GCTAModelRadialGauss");
-        }
-        return cast;
-    }
-%}

@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GEventList.i  -  Abstract event atom container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventList.i
  * @brief Abstract event atom container class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -60,17 +60,3 @@ public:
  ***************************************************************************/
 %extend GEventList {
 };
-
-
-/***********************************************************************//**
- * @brief GEventList type casts
- ***************************************************************************/
-%inline %{
-    GEventList* cast_GEventList(GEvents* events) {
-        GEventList* list = dynamic_cast<GEventList*>(events);
-        if (list == NULL)
-            throw GException::fits_invalid_type("cast_GEventList(GEvents*)",
-                                                "GEvents is not of type GEventList.");
-        return list;
-    }
-%};

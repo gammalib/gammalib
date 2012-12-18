@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCTAModelRadialProfile.i  -  Radial Profile CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialProfile.i
  * @brief Radial Profile model class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -74,18 +74,3 @@ public:
         return tochar(self->print());
     }
 };
-
-
-/***********************************************************************//**
- * @brief GCTAModelRadialProfile type casts
- ***************************************************************************/
-%inline %{
-    GCTAModelRadialProfile* cast_GCTAModelRadialProfile(GCTAModelRadial* model) {
-        GCTAModelRadialProfile* cast = dynamic_cast<GCTAModelRadialProfile*>(model);
-        if (cast == NULL) {
-            throw GException::bad_type("cast_GCTAModelRadialProfile(GCTAModelRadial* model)",
-                                       "GCTAModelRadial not of type GCTAModelRadialProfile");
-        }
-        return cast;
-    }
-%}

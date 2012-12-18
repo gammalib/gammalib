@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GEventCube.i  -  Abstract event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GEventCube.i
- * @brief Abstract event bin container class Python interface definition
- * @author J. Knodlseder
+ * @brief Abstract event bin container class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -60,17 +60,3 @@ public:
  ***************************************************************************/
 %extend GEventCube {
 };
-
-
-/***********************************************************************//**
- * @brief GEventCube type casts
- ***************************************************************************/
-%inline %{
-    GEventCube* cast_GEventCube(GEvents* events) {
-        GEventCube* cube = dynamic_cast<GEventCube*>(events);
-        if (cube == NULL)
-            throw GException::fits_invalid_type("cast_GEventCube(GEvents*)",
-                                                "GEvents is not of type GEventCube.");
-        return cube;
-    }
-%};

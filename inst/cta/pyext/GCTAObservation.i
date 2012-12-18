@@ -21,7 +21,7 @@
 /**
  * @file GCTAObservation.i
  * @brief CTA observation class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -82,18 +82,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GCTAObservation type casts
- ***************************************************************************/
-%inline %{
-    GCTAObservation* cast_GCTAObservation(GObservation* obs) {
-        GCTAObservation* cta = dynamic_cast<GCTAObservation*>(obs);
-        if (cta == NULL) {
-            throw GException::bad_type("cast_GCTAObservation(GObservation* obs)",
-                                       "GObservation not of type GCTAObservation");
-        }
-        return cta;
-    }
-%}
