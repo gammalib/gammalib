@@ -26,6 +26,7 @@ m4/lt~obsolete.m4
 *.pdf
 *.toc
 *.Pi
+*.Tpi
 *.synctex.gz
 *.dvi
 *.idx
