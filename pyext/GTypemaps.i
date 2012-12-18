@@ -384,6 +384,9 @@ static int var_tuple_to_index(PyObject *input, int *ptr) {
     else if (dynamic_cast<GModelSpectralPlaw2*>($1) != NULL) {
         $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralPlaw2, 0 |  0 );
     }
+    else if (dynamic_cast<GModelSpectralLogParabola*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralLogParabola, 0 |  0 );
+    }
     else {
         $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectral, 0 |  0 );
     }
