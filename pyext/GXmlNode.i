@@ -26,6 +26,11 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GXmlNode.hpp"
+#include "GXmlElement.hpp"
+#include "GXmlComment.hpp"
+#include "GXmlDocument.hpp"
+#include "GXmlPI.hpp"
+#include "GXmlText.hpp"
 #include "GTools.hpp"
 %}
 
