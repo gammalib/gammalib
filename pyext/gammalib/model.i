@@ -24,6 +24,12 @@
 %module model
 %feature("autodoc", "1");
 
+/* __ Headers needed for compilation _____________________________________ */
+%{
+#include "GException.hpp"
+#include "GTools.hpp"
+%}
+
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 

@@ -24,6 +24,12 @@
 %module numerics
 %feature("autodoc", "1");
 
+/* __ Headers needed for compilation _____________________________________ */
+%{
+#include "GException.hpp"
+#include "GTools.hpp"
+%}
+
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 
@@ -31,7 +37,7 @@
 %import(module="gammalib.base") "GBase.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
-//%import(module="gammalib.support") "GException.i"; 
+%import(module="gammalib.support") "GException.i"; 
 // Does not compile! Because not needed?
 
 /* __ Numerics module ____________________________________________________ */
