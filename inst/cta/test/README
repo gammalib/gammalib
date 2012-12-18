@@ -1,19 +1,6 @@
 This folder contains files used for unit testing and files that serve
 as example scripts for the CTA interface of GammaLib.
 
-test_CTA.cpp
-  Unit test C++ file for CTA specific GammaLib components.
-
-test_model.py
-  Creates images of sources models convolved with the CTA instrument
-  response function. Also allows the creation of gradient images.
-
-test_gauss.py
-  Test Gaussian.
-
-test_radial_acceptance.
-  Displays the various radial acceptance models.
-
 example_binned_ml_fit.py
   Illustrates a binned maximum likelihood fit of CTA data.
   This script implements a full analysis chain, and computes
@@ -28,3 +15,31 @@ example_sim_photons.py
 example_make_model.py
   Illustrates how to make a model in counts space for a counts
   map given a specific model in XML format.
+test_CTA.cpp
+  Unit test C++ file for CTA specific GammaLib components.
+
+test_gauss.py
+  Test Gaussian.
+
+test_irf_offset.py
+  Creates images of source models for various offset angles. This
+  tests the IRF variation with offset angle.
+
+test_irf_trafo.py
+  Test coordinate transformations for IRF computation.
+
+test_model.py
+  Creates images of sources models convolved with the CTA instrument
+  response function. Also allows the creation of gradient images.
+
+test_npred_computation.py
+  Test the Npred computation of the CTA response.
+
+test_npred_integration.py
+  Compare numerical to analytical Npred computation for CTA response.
+
+test_radial_acceptance.py
+  Displays the various radial acceptance models.
+
+test_response_table.py
+  Display CTA response table.
