@@ -35,7 +35,7 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GModelRadial.hpp"
-#include "GIntegrand.hpp"
+#include "GFunction.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
@@ -47,7 +47,7 @@
  *
  * @brief Integration kernel for npsf() method
  ***************************************************************************/
-class cta_npsf_kern_rad_azsym : public GIntegrand {
+class cta_npsf_kern_rad_azsym : public GFunction {
 public:
     cta_npsf_kern_rad_azsym(const  GCTAResponse* rsp,
                             double roi,
@@ -89,7 +89,7 @@ protected:
  *
  * @brief Kernel for radial model zenith angle integration of IRF
  ***************************************************************************/
-class cta_irf_radial_kern_rho : public GIntegrand {
+class cta_irf_radial_kern_rho : public GFunction {
 public:
     cta_irf_radial_kern_rho(const GCTAResponse* rsp,
                             const GModelRadial* model,
@@ -141,7 +141,7 @@ protected:
  *
  * @brief Kernel for radial model azimuth angle IRF integration
  ***************************************************************************/
-class cta_irf_radial_kern_omega : public GIntegrand {
+class cta_irf_radial_kern_omega : public GFunction {
 public:
     cta_irf_radial_kern_omega(const GCTAResponse* rsp,
                               double              zenith,
@@ -192,7 +192,7 @@ protected:
  *
  * @brief Kernel for zenith angle Npred integration of radial model
  ***************************************************************************/
-class cta_npred_radial_kern_theta : public GIntegrand {
+class cta_npred_radial_kern_theta : public GFunction {
 public:
     cta_npred_radial_kern_theta(const GCTAResponse*    rsp,
                                 const GModelRadial*    model,
@@ -237,7 +237,7 @@ protected:
  *
  * @brief Kernel for azimuth angle Npred integration of radial model
  ***************************************************************************/
-class cta_npred_radial_kern_phi : public GIntegrand {
+class cta_npred_radial_kern_phi : public GFunction {
 public:
     cta_npred_radial_kern_phi(const GCTAResponse*    rsp,
                               const GEnergy*         srcEng,
@@ -272,7 +272,7 @@ protected:
  *
  * @brief Kernel for IRF offest angle integration of the diffuse source model
  ***************************************************************************/
-class cta_irf_diffuse_kern_theta : public GIntegrand {
+class cta_irf_diffuse_kern_theta : public GFunction {
 public:
     cta_irf_diffuse_kern_theta(const GCTAResponse*  rsp,
                                const GModelSpatial* model,
@@ -320,7 +320,7 @@ protected:
  *
  * @brief Kernel for IRF azimuth angle integration of the diffuse source model
  ***************************************************************************/
-class cta_irf_diffuse_kern_phi : public GIntegrand {
+class cta_irf_diffuse_kern_phi : public GFunction {
 public:
     cta_irf_diffuse_kern_phi(const GCTAResponse*  rsp,
                              const GModelSpatial* model,
@@ -365,7 +365,7 @@ protected:
  *
  * @brief Kernel for Npred offest angle integration of diffuse model
  ***************************************************************************/
-class cta_npred_diffuse_kern_theta : public GIntegrand {
+class cta_npred_diffuse_kern_theta : public GFunction {
 public:
     cta_npred_diffuse_kern_theta(const GCTAResponse*    rsp,
                                  const GModelSpatial*   model,
@@ -395,7 +395,7 @@ protected:
  *
  * @brief Kernel for Npred azimuth angle integration of diffuse model
  ***************************************************************************/
-class cta_npred_diffuse_kern_phi : public GIntegrand {
+class cta_npred_diffuse_kern_phi : public GFunction {
 public:
     cta_npred_diffuse_kern_phi(const GCTAResponse*    rsp,
                                const GModelSpatial*   model,

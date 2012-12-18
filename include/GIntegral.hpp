@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GIntegrand.hpp"
+#include "GFunction.hpp"
 
 
 /***********************************************************************//**
@@ -47,7 +47,7 @@ public:
 
     // Constructors and destructors
     explicit GIntegral(void);
-    explicit GIntegral(GIntegrand* integrand);
+    explicit GIntegral(GFunction* kernel);
     GIntegral(const GIntegral& integral);
     virtual ~GIntegral(void);
 
@@ -55,20 +55,20 @@ public:
     GIntegral& operator=(const GIntegral& integral);
 
     // Methods
-    void              clear(void);
-    GIntegral*        clone(void) const;
-    void              max_iter(const int& max_iter) { m_max_iter=max_iter; }
-    void              eps(const double& eps) { m_eps=eps; }
-    void              silent(const bool& silent) { m_silent=silent; }
-    const int&        iter(void) const { return m_iter; }
-    const int&        max_iter(void) const { return m_max_iter; }
-    const double&     eps(void) const { return m_eps; }
-    const bool&       silent(void) const { return m_silent; }
-    void              integrand(GIntegrand* integrand) { m_integrand=integrand; }
-    const GIntegrand* integrand(void) const { return m_integrand; }
-    double            romb(double a, double b, int k = 5);
-    double            trapzd(double a, double b, int n = 1, double result = 0.0);
-    std::string       print(void) const;
+    void             clear(void);
+    GIntegral*       clone(void) const;
+    void             max_iter(const int& max_iter) { m_max_iter=max_iter; }
+    void             eps(const double& eps) { m_eps=eps; }
+    void             silent(const bool& silent) { m_silent=silent; }
+    const int&       iter(void) const { return m_iter; }
+    const int&       max_iter(void) const { return m_max_iter; }
+    const double&    eps(void) const { return m_eps; }
+    const bool&      silent(void) const { return m_silent; }
+    void             kernel(GFunction* kernel) { m_kernel=kernel; }
+    const GFunction* kernel(void) const { return m_kernel; }
+    double           romb(double a, double b, int k = 5);
+    double           trapzd(double a, double b, int n = 1, double result = 0.0);
+    std::string      print(void) const;
 
 protected:
     // Protected methods
@@ -78,11 +78,11 @@ protected:
     double polint(double* xa, double* ya, int n, double x, double *dy);
 
     // Protected data area
-    GIntegrand* m_integrand;    //!< Pointer to integrand
-    double      m_eps;          //!< Integration precision
-    int         m_max_iter;     //!< Maximum number of iterations
-    int         m_iter;         //!< Number of iterations used
-    bool        m_silent;       //!< Suppress integration warnings
+    GFunction* m_kernel;       //!< Pointer to function kernel
+    double     m_eps;          //!< Integration precision
+    int        m_max_iter;     //!< Maximum number of iterations
+    int        m_iter;         //!< Number of iterations used
+    bool       m_silent;       //!< Suppress integration warnings
 };
 
 #endif /* GINTEGRAL_HPP */

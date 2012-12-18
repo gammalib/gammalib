@@ -33,7 +33,7 @@
 #include "GModelSpectral.hpp"
 #include "GEnergy.hpp"
 #include "GXmlElement.hpp"
-#include "GIntegrand.hpp"
+#include "GFunction.hpp"
 
 
 /***********************************************************************//**
@@ -91,7 +91,7 @@ protected:
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Photon flux integration kernel
-    class flux_kernel : public GIntegrand {
+    class flux_kernel : public GFunction {
     public:
         flux_kernel(const double& norm,
                     const double& index,
@@ -110,7 +110,7 @@ protected:
     };
 
     // Energy flux integration kernel
-    class eflux_kernel : public GIntegrand {
+    class eflux_kernel : public GFunction {
     public:
         eflux_kernel(const double& norm,
                      const double& index,

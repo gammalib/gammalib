@@ -43,24 +43,24 @@ public:
 
     // Constructors and destructors
     explicit GIntegral(void);
-    explicit GIntegral(GIntegrand* integrand);
+    explicit GIntegral(GFunction* kernel);
     GIntegral(const GIntegral& integral);
     virtual ~GIntegral(void);
 
     // Methods
-    void              clear(void);
-    GIntegral*        clone(void) const;
-    void              max_iter(const int& max_iter) { m_max_iter=max_iter; }
-    void              eps(const double& eps) { m_eps=eps; }
-    void              silent(const bool& silent) { m_silent=silent; }
-    const int&        iter(void) const { return m_iter; }
-    const int&        max_iter(void) const { return m_max_iter; }
-    const double&     eps(void) const { return m_eps; }
-    const bool&       silent(void) const { return m_silent; }
-    void              integrand(GIntegrand* integrand) { m_integrand=integrand; }
-    const GIntegrand* integrand(void) const { return m_integrand; }
-    double            romb(double a, double b, int k = 5);
-    double            trapzd(double a, double b, int n = 1, double result = 0.0);
+    void             clear(void);
+    GIntegral*       clone(void) const;
+    void             max_iter(const int& max_iter);
+    void             eps(const double& eps);
+    void             silent(const bool& silent);
+    const int&       iter(void) const;
+    const int&       max_iter(void) const;
+    const double&    eps(void) const;
+    const bool&      silent(void) const;
+    void             kernel(GFunction* kernel);
+    const GFunction* kernel(void) const;
+    double           romb(double a, double b, int k = 5);
+    double           trapzd(double a, double b, int n = 1, double result = 0.0);
 };
 
 

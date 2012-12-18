@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialGauss.hpp  -  Radial Gaussian CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialGauss.hpp
  * @brief Radial Gaussian model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAMODELRADIALGAUSS_HPP
@@ -29,11 +29,12 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <cmath>
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GCTAModelRadial.hpp"
 #include "GCTAInstDir.hpp"
-#include "GIntegrand.hpp"
+#include "GFunction.hpp"
 
 
 /***********************************************************************//**
@@ -87,14 +88,14 @@ protected:
 
     // Radial integration class (used by omega() method). Note that the
     // sigma parameter is given in rad^2
-    class integrand : public GIntegrand {
+    class integrand : public GFunction {
     public:
         integrand(double sigma) : m_sigma(sigma) { }
         double eval(double x) {
             double arg  = x * x / m_sigma;
             double arg2 = arg * arg;
-            double f    = exp(-0.5 * arg2);
-            return (f*sin(x));
+            double f    = std::exp(-0.5 * arg2);
+            return (f*std::sin(x));
         }
     private:
         double m_sigma;

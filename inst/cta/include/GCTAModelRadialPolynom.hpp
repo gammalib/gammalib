@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialPolynom.hpp  -  Radial Polynom CTA model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Juergen Knoedlseder                              *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialPolynom.hpp
  * @brief Radial Polynom model class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAMODELRADIALPOLYNOM_HPP
@@ -30,12 +30,13 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include <cmath>
 #include "GTools.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GCTAModelRadial.hpp"
 #include "GCTAInstDir.hpp"
-#include "GIntegrand.hpp"
+#include "GFunction.hpp"
 
 
 /***********************************************************************//**
@@ -90,11 +91,11 @@ protected:
 
     // Radial integration class (used by omega() method). Note that the
     // integration is done in radians
-    class integrand : public GIntegrand {
+    class integrand : public GFunction {
     public:
         integrand(const GCTAModelRadialPolynom* model) : m_model(model) { }
         double eval(double x) {
-            return (sin(x)*m_model->eval(x*rad2deg));
+            return (std::sin(x)*m_model->eval(x*rad2deg));
         }
     private:
         const GCTAModelRadialPolynom* m_model;

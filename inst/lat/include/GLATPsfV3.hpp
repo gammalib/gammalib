@@ -21,7 +21,7 @@
 /**
  * @file GLATPsfV3.hpp
  * @brief Fermi/LAT point spread function version 3 class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATPSFV3_HPP
@@ -29,10 +29,11 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
+#include <cmath>
 #include "GLATPsfBase.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
-#include "GIntegrand.hpp"
+#include "GFunction.hpp"
 
 
 /***********************************************************************//**
@@ -83,7 +84,7 @@ private:
     // Integrand class. This class is used to perform the radial
     // integration of the PSF to assure the proper normalization.
     // Note that score and stail need to be scaled by energy.
-    class base_integrand : public GIntegrand {
+    class base_integrand : public GFunction {
     public:
         base_integrand(double ncore, double ntail,
                        double score, double stail,
@@ -98,7 +99,7 @@ private:
             double ut = 0.5 * rt * rt;
             double f = m_ncore * (base_fct(uc, m_gcore) + 
                                   m_ntail * base_fct(ut, m_gtail));
-            return (f*sin(x));
+            return (f*std::sin(x));
         }
     private:
         double m_ncore;

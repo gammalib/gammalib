@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAModelRadialAcceptance.hpp  -  Radial acceptance model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialAcceptance.hpp
  * @brief Radial acceptance model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAMODELRADIALACCEPTANCE_HPP
@@ -37,7 +37,7 @@
 #include "GEvent.hpp"
 #include "GObservation.hpp"
 #include "GXmlElement.hpp"
-#include "GIntegrand.hpp"
+#include "GFunction.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAModelRadial.hpp"
 
@@ -95,12 +95,15 @@ protected:
     GModelTemporal*  xml_temporal(const GXmlElement& temporal) const;
 
     // ROI integration kernel
-    class roi_kern : public GIntegrand {
+    class roi_kern : public GFunction {
     public:
         roi_kern(const GCTAModelRadial* parent, const double& roi, const double& dist) :
                  m_parent(parent),
-                 m_roi(roi),   m_cosroi(cos(roi)),
-                 m_dist(dist), m_cosdist(cos(dist)), m_sindist(sin(dist)) { return; }
+                 m_roi(roi),
+                 m_cosroi(std::cos(roi)),
+                 m_dist(dist),
+                 m_cosdist(std::cos(dist)),
+                 m_sindist(std::sin(dist)) { }
         double eval(double r);
     protected:
         const GCTAModelRadial* m_parent;   //!< Pointer to radial model

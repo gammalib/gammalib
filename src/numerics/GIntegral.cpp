@@ -59,20 +59,20 @@ GIntegral::GIntegral(void)
 
 
 /***********************************************************************//**
- * @brief Integrand constructor
+ * @brief Function kernel constructor
  *
- * @param[in] integrand Pointer to integrand.
+ * @param[in] kernel Pointer to function kernel.
  *
- * The Integrand constructor assigns the integrand pointer in constructing
- * the object.
+ * The function kernel constructor assigns the function kernel pointer in
+ * constructing the object.
  ***************************************************************************/
-GIntegral::GIntegral(GIntegrand* integrand)
+GIntegral::GIntegral(GFunction* kernel)
 {
     // Initialise members
     init_members();
 
-    // Set integrand
-    m_integrand = integrand;
+    // Set function kernel
+    m_kernel = kernel;
 
     // Return
     return;
@@ -166,6 +166,8 @@ void GIntegral::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of integral.
  ***************************************************************************/
 GIntegral* GIntegral::clone(void) const
 {
@@ -292,8 +294,8 @@ double GIntegral::trapzd(double a, double b, int n, double result)
         if (n == 1) {
         
             // Evaluate integrand at boundaries
-            double y_a = m_integrand->eval(a);
-            double y_b = m_integrand->eval(b);
+            double y_a = m_kernel->eval(a);
+            double y_b = m_kernel->eval(b);
             
             // Compute result
             result = 0.5*(b-a)*(y_a + y_b);
@@ -337,7 +339,7 @@ double GIntegral::trapzd(double a, double b, int n, double result)
             for (int j = 0; j < it; ++j, x+=del) {
                 
                 // Evaluate integrand
-                double y = m_integrand->eval(x);
+                double y = m_kernel->eval(x);
 
                 // Add integrand
                 sum += y;
@@ -393,7 +395,7 @@ std::string GIntegral::print(void) const
 void GIntegral::init_members(void)
 {
     // Initialise members
-    m_integrand = NULL;
+    m_kernel    = NULL;
     m_eps       = 1.0e-6;
     m_max_iter  = 20;
     m_iter      = 0;
@@ -412,11 +414,11 @@ void GIntegral::init_members(void)
 void GIntegral::copy_members(const GIntegral& integral)
 {
     // Copy attributes
-    m_integrand = integral.m_integrand;
-    m_eps       = integral.m_eps;
-    m_max_iter  = integral.m_max_iter;
-    m_iter      = integral.m_iter;
-    m_silent    = integral.m_silent;
+    m_kernel   = integral.m_kernel;
+    m_eps      = integral.m_eps;
+    m_max_iter = integral.m_max_iter;
+    m_iter     = integral.m_iter;
+    m_silent   = integral.m_silent;
 
     // Return
     return;
