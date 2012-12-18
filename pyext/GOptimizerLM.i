@@ -1,7 +1,7 @@
 /***************************************************************************
  * GOptimizerLM.i  -  Levenberg Marquardt optimizer class Python interface *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GOptimizerLM.i
  * @brief Levenberg Marquardt optimizer class Pyhton interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -65,7 +65,6 @@ public:
     double lambda_start(void) const;
     double lambda_inc(void) const;
     double lambda_dec(void) const;
-    //double lambda(void) const;
     double eps(void) const;
 };
 
@@ -78,17 +77,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GOptimizerLM type casts
- ***************************************************************************/
-%inline %{
-    GOptimizerLM* cast_GOptimizerLM(GOptimizer* arg) {
-        GOptimizerLM* opt = dynamic_cast<GOptimizerLM*>(arg);
-        if (opt == NULL)
-            throw GException::bad_type("cast_GOptimizerLM(GOptimizer*)",
-                                       "GOptimizer not of type GOptimizerLM");
-        return opt;
-    }
-%}
