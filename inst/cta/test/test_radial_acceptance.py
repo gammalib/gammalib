@@ -1,12 +1,12 @@
 #! /usr/bin/env python
-# ===========================================================================================#
-# This script displays the radial acceptance model that may be used to model the
-# CTA radial acceptance.
+# ==========================================================================
+# This script displays the radial acceptance model that may be used to model
+# the CTA radial acceptance.
 #
-# Required 3rd party modules:
+# Requires:
 # - matplotlib
 #
-# Copyright (C) 2011 Jurgen Knodlseder
+# Copyright (C) 2011-2012 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-# ===========================================================================================#
+#
+# ==========================================================================
 import matplotlib.pyplot as plt
 from gammalib import *
 from math import *
@@ -29,26 +30,20 @@ from math import *
 # ========== #
 # Show model #
 # ========== #
-def show_model(xmlfile):
+def show_model(model):
     """
-    Show radial acceptance model from the XML file using matplotlib.
+    Show radial acceptance model using matplotlib.
     """
-    # Load the model
-    models = GModels(xmlfile)
-
-    # Extract radial acceptance model
-    radial = cast_GCTAModelRadialAcceptance(models["Background"]).radial()
-
     # Create angular axis (from 0 to 4 deg)
     thetas = [i * 0.05 for i in range(80)]
 
     # Get model values
-    values = [radial.eval(theta) for theta in thetas]
-    values_grad = [radial.eval_gradients(theta) for theta in thetas]
+    values      = [model.eval(theta) for theta in thetas]
+    values_grad = [model.eval_gradients(theta) for theta in thetas]
 
     # Create figure
     plt.figure(1)
-    plt.title("Radial acceptance model (" + radial.type() + ")")
+    plt.title("Radial acceptance model (" + model.type() + ")")
 
     # Plot data
     plt.plot(thetas, values, 'r-')
@@ -74,11 +69,13 @@ if __name__ == '__main__':
     """
     # Dump header
     print
-    print "*********************************"
-    print "* Show radial acceptance models *"
-    print "*********************************"
+    print "*************************************"
+    print "* Show CTA radial acceptance models *"
+    print "*************************************"
 
-# Display various models
-    show_model("data/crab.xml")
-    show_model("data/crab_poly.xml")
-    show_model("data/crab_profile.xml")
+    # Display various models
+    show_model(GCTAModelRadialGauss(3.0))
+    show_model(GCTAModelRadialProfile(1.5, 3.0, 5.0))
+    show_model(GCTAModelRadialPolynom([1.0, -0.1239176, +0.9751791,
+                                       -3.0584577, +2.9089535, -1.3535372,
+                                       +0.3413752, -0.0449642, +0.0024321]))
