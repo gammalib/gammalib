@@ -38,4 +38,3 @@
 %include "GDerivative.i"
 %include "GFunction.i"
 %include "GIntegral.i"
-%include "GIntegrand.i"
