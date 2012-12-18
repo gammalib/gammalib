@@ -1,4 +1,27 @@
 #! /usr/bin/env python
+# ==========================================================================
+# This script tests the Fermi-LAT analysis.
+#
+# Requires:
+# - matplotlib
+# - numpy
+#
+# Copyright (C) 2012 Jurgen Knodlseder
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ==========================================================================
 
 from gammalib import *
 from math import *
@@ -44,7 +67,7 @@ def analyse_unbinned(xmlname):
     # Perform optimization
     opt = GOptimizerLM()
     obs.optimize(opt)
-    print obs
+    print(obs)
 
 
 # =================== #
@@ -74,14 +97,14 @@ def analyse_binned(xmlname):
     log.cout(True)
     opt = GOptimizerLM(log)
     obs.optimize(opt)
-    print obs
-    print opt
+    print(obs)
+    print(opt)
 
     # Plot residuals
     try:
         plot_residuals(obs)
     except ImportError:
-        print "Matplotlib is not (correctly) installed on your system."
+        print("Matplotlib is not (correctly) installed on your system.")
 
 
 # ============= #
@@ -161,14 +184,10 @@ if __name__ == '__main__':
     Perform testing.
     """
     # Dump result
-    print
-    print "**************************************"
-    print "* Fermi-LAT Python interface testing *"
-    print "**************************************"
-
-    # Initialise success counter
-    tests = 0
-    success = 0
+    print("")
+    print("**************************************")
+    print("* Fermi-LAT Python interface testing *")
+    print("**************************************")
 
     # Analyse data
     # analyse_unbinned("data/p7v6/crab_model.xml")
