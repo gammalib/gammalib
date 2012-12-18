@@ -160,7 +160,7 @@ def observation(ra=0.0, dec=0.0, binsz=0.05, npix=200, ebins=10):
     obs.deadc(0.95)
 
     # Optionally show observation
-    # print obs
+    # print(obs)
 
     # Return observation
     return obs
@@ -200,10 +200,10 @@ if __name__ == '__main__':
     Test offset angle dependence of IRF.
     """
     # Dump header
-    print
-    print "***************************************"
-    print "* Test offset angle dependence of IRF *"
-    print "***************************************"
+    print("")
+    print("***************************************")
+    print("* Test offset angle dependence of IRF *")
+    print("***************************************")
 
     # Set set
     set = 2

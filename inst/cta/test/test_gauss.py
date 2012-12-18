@@ -1,5 +1,26 @@
 #! /usr/bin/env python
-
+# ==========================================================================
+# This script tests the Gaussian gradient.
+#
+# Requires:
+# - matplotlib (optional)
+#
+# Copyright (C) 2012 Juergen Knoedlseder
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ==========================================================================
 from gammalib import *
 from math import *
 
@@ -13,18 +34,18 @@ def gauss(dir, sigma):
     """
     # Compute derivative
     dh = 0.0001
-    s = GSkyDir()
+    s  = GSkyDir()
     f1 = GModelSpatialGauss(s, sigma)
     f2 = GModelSpatialGauss(s, sigma + dh)
     v1 = f1.eval_gradients(dir)
     g1 = f1[2].gradient()
     v2 = f2.eval_gradients(dir)
     g2 = f2[2].gradient()
-    g = (v2 - v1) / dh
+    g  = (v2 - v1) / dh
 
     # Print result
-    print v1, v2
-    print g1, g2, g
+    #print v1, v2
+    #print g1, g2, g
 
     # Return
     return g
@@ -54,10 +75,10 @@ def show_gaussian(sigma):
         theta = [i * sigma * 0.05 for i in range(50)]
 
         # Extract function
-        f_gauss = []
+        f_gauss    = []
         f_expected = []
-        sigma_rad = sigma * (pi / 180.0)
-        norm = 1.0 / (2.0 * pi * sigma_rad * sigma_rad)
+        sigma_rad  = sigma * (pi / 180.0)
+        norm       = 1.0 / (2.0 * pi * sigma_rad * sigma_rad)
         for t in theta:
             s = GSkyDir()
             s.radec_deg(0.0, t)
@@ -78,7 +99,7 @@ def show_gaussian(sigma):
         plt.show()
 
     except ImportError:
-        print "Matplotlib is not (correctly) installed on your system."
+        print("Matplotlib is not (correctly) installed on your system.")
 
     # Return
     return
@@ -92,14 +113,10 @@ if __name__ == '__main__':
     Test Gaussian gradient.
     """
     # Dump header
-    print
-    print "**************************"
-    print "* Test Gaussian gradient *"
-    print "**************************"
+    print("")
+    print("**************************")
+    print("* Test Gaussian gradient *")
+    print("**************************")
 
-# Test
-    # dir = GSkyDir()
-    # dir.radec_deg(0.0, 1.0)
-    # gauss(dir, 10.0)
-    #
+    # Show Gaussian
     show_gaussian(3.0)
