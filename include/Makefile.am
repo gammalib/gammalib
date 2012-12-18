@@ -1,7 +1,5 @@
 # Define package included headers (to be installed)
 pkginclude_HEADERS = GammaLib.hpp \
-                     GBase.hpp \
-                     GRegistry.hpp \
                      GException.hpp \
                      GNodeArray.hpp \
                      GTools.hpp \
@@ -20,9 +18,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsSTG.hpp \
                      GWcsHPX.hpp \
                      GEnergy.hpp \
-                     GTimes.hpp \
                      GTime.hpp \
-                     GTimeReference.hpp \
                      GCaldb.hpp \
                      GObservations.hpp \
                      GObservation.hpp \
@@ -67,6 +63,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlaw2.hpp \
                      GModelSpectralExpPlaw.hpp \
+		     GModelSpectralLogParabola.hpp \
                      GModelSpectralFunc.hpp \
                      GModelSpectralNodes.hpp \
                      GModelSpectralConst.hpp \
@@ -125,7 +122,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GIntegrand.hpp \
                      GDerivative.hpp \
                      GFunction.hpp \
-                     GNumerics.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
                      GOptimizerPars.hpp \

@@ -133,9 +133,7 @@
 
 /* __ Observation handling _______________________________________________ */
 #include "GEnergy.hpp"
-#include "GTimes.hpp"
 #include "GTime.hpp"
-#include "GTimeReference.hpp"
 #include "GCaldb.hpp"
 #include "GObservations.hpp"
 #include "GObservation.hpp"
@@ -183,6 +181,7 @@
 #include "GModelSpectralNodes.hpp"
 #include "GModelSpectralPlaw.hpp"
 #include "GModelSpectralPlaw2.hpp"
+#include "GModelSpectralLogParabola.hpp"
 #include "GModelTemporal.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"

@@ -34,6 +34,7 @@ sources = GModelPar.cpp \
           GModelSpectralNodes.cpp \
           GModelSpectralPlaw.cpp \
           GModelSpectralPlaw2.cpp \
+	  GModelSpectralLogParabola.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \

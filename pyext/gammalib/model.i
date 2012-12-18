@@ -27,12 +27,10 @@
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
 
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
-%import(module="gammalib.base") "GRegistry.i";
-
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
+
+/* __ Inform about base classes __________________________________________ */
 %import(module="gammalib.opt") "GOptimizerPars.i";
 
 /* __ Model handling _____________________________________________________ */
@@ -64,6 +62,7 @@
 %include "GModelSpectralNodes.i"
 %include "GModelSpectralPlaw.i"
 %include "GModelSpectralPlaw2.i"
+%include "GModelSpectralLogParabola.i"
 %include "GModelTemporal.i"
 %include "GModelTemporalRegistry.i"
 %include "GModelTemporalConst.i"
