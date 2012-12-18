@@ -21,13 +21,13 @@
 /**
  * @file GLATObservation.i
  * @brief LAT Observation class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATObservation.hpp"
 %}
-%include stl.i
+//%include stl.i
 
 /***********************************************************************//**
  * @class GLATObservation
@@ -75,17 +75,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GLATObservation type casts
- ***************************************************************************/
-%inline %{
-    GLATObservation* cast_GLATObservation(GObservation* obs) {
-        GLATObservation* lat = dynamic_cast<GLATObservation*>(obs);
-        if (lat == NULL)
-            throw GException::bad_type("cast_GLATObservation(GObservation* obs)",
-                                       "GObservation not of type GLATObservation");            
-        return lat;
-    }
-%}

@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GMWLObservation.i  -  Multi-wavelength observation class         *
+ *         GMWLObservation.i - Multi-wavelength observation class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GMWLObservation.i
- * @brief Multi-wavelength observation class Python interface definition
- * @author J. Knoedlseder
+ * @brief Multi-wavelength observation class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -82,17 +82,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GMWLObservation type casts
- ***************************************************************************/
-%inline %{
-    GMWLObservation* cast_GMWLObservation(GObservation* obs) {
-        GMWLObservation* mwl = dynamic_cast<GMWLObservation*>(obs);
-        if (mwl == NULL)
-            throw GException::bad_type("cast_GMWLObservation(GObservation* obs)",
-                                       "GObservation not of type GMWLObservation");            
-        return mwl;
-    }
-%}

@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GLATEventList.i  -  Fermi/LAT event atom container class        *
+ *         GLATEventList.i  -  Fermi-LAT event atom container class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATEventList.i
- * @brief Fermi/LAT event atom container class interface definition
- * @author J. Knoedlseder
+ * @brief Fermi-LAT event atom container class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -83,18 +83,3 @@ public:
         }
     }
 };
-
-
-/***********************************************************************//**
- * @brief GLATEventList type casts
- ***************************************************************************/
-%inline %{
-    GLATEventList* cast_GLATEventList(GEvents* events) {
-        GLATEventList* list = dynamic_cast<GLATEventList*>(events);
-        if (list == NULL) {
-            throw GException::bad_type("cast_GLATEventList(GEvents*)",
-                                       "GEvents not of type GLATEventList");
-        }
-        return list;
-    }
-%}

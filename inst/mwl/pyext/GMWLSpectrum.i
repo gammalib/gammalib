@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GMWLSpectrum.i  -  Multi-wavelength spectrum class          *
+ *              GMWLSpectrum.i - Multi-wavelength spectrum class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GMWLSpectrum.i
- * @brief Multi-wavelength spectrum class Python interface definition
- * @author J. Knodlseder
+ * @brief Multi-wavelength spectrum class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -78,17 +78,3 @@ public:
             throw GException::out_of_range("__getitem__(int)", index, self->size());
     }
 };
-
-
-/***********************************************************************//**
- * @brief GMWLSpectrum type casts
- ***************************************************************************/
-%inline %{
-    GMWLSpectrum* cast_GMWLSpectrum(GEvents* events) {
-        GMWLSpectrum* cube = dynamic_cast<GMWLSpectrum*>(events);
-        if (cube == NULL)
-            throw GException::bad_type("cast_GMWLSpectrum(GEvents*)",
-                                       "GEvents not of type GMWLSpectrum");            
-        return cube;
-    }
-%}

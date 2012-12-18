@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GLATResponse.i  -  Fermi-LAT response class               *
+ *                GLATResponse.i - Fermi-LAT response class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.i
- * @brief Fermi-LAT Response class Python interface definition
+ * @brief Fermi-LAT response class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -61,7 +61,7 @@ public:
     // Other Methods
     void        caldb(const std::string& caldb);
     std::string caldb(void) const;
-    std::string rspname(void) const { return m_rspname; }
+    std::string rspname(void) const;
     void        load(const std::string& rspname);
     int         size(void) const;
     GLATAeff*   aeff(const int& index) const;
@@ -89,13 +89,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GLATResponse type casts
- ***************************************************************************/
-%inline %{
-    GLATResponse* cast_GLATResponse(GResponse* rsp) {
-        return dynamic_cast<GLATResponse*>(rsp);
-    }
-%}

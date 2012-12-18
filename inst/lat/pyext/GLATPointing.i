@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GLATPointing.i  -  Fermi/LAT pointing class               *
+ *                GLATPointing.i - Fermi-LAT pointing class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATPointing.i
- * @brief Fermi/LAT pointing class interface definition
- * @author J. Knoedlseder
+ * @brief Fermi-LAT pointing class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GLATPointing
  *
- * @brief Interface for the Fermi/LAT pointing
+ * @brief Interface for the Fermi-LAT pointing
  ***************************************************************************/
 class GLATPointing : public GPointing {
 public:
@@ -61,18 +61,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GLATPointing type casts
- ***************************************************************************/
-%inline %{
-    GLATPointing* cast_GLATPointing(GPointing* pnt) {
-        GLATPointing* lat = dynamic_cast<GLATPointing*>(pnt);
-        if (lat == NULL) {
-            throw GException::bad_type("cast_GLATPointing(GPointing*)",
-                                       "GPointing not of type GLATPointing");
-        }
-        return lat;
-    }
-%}

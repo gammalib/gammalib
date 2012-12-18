@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GLATEventCube.i  -  LAT event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventCube.i
  * @brief LAT event bin container class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -82,17 +82,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GLATEventCube type casts
- ***************************************************************************/
-%inline %{
-    GLATEventCube* cast_GLATEventCube(GEvents* events) {
-        GLATEventCube* cube = dynamic_cast<GLATEventCube*>(events);
-        if (cube == NULL)
-            throw GException::bad_type("cast_GLATEventCube(GEvents*)",
-                                       "GEvents not of type GLATEventCube");            
-        return cube;
-    }
-%}

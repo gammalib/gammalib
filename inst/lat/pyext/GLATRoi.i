@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATRoi.i  -  LAT region of interest class                *
+ *              GLATRoi.i - Fermi-LAT region of interest class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATRoi.i
- * @brief GLATRoi class python bindings
- * @author J. Knodlseder
+ * @brief Fermi-LAT regions of interest class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -46,10 +46,10 @@ public:
     GLATRoi*    clone(void) const;
 
     // Other methods
-    GLATInstDir centre(void) const { return m_centre; }
-    double      radius(void) const { return m_radius; }
-    void        centre(const GLATInstDir& centre) { m_centre=centre; return; }
-    void        radius(const double& radius) { m_radius=radius; return; }
+    GLATInstDir centre(void) const;
+    double      radius(void) const;
+    void        centre(const GLATInstDir& centre);
+    void        radius(const double& radius);
 };
 
 
@@ -61,13 +61,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GLATRoi type casts
- ***************************************************************************/
-%inline %{
-    GLATRoi* cast_GLATRoi(GRoi* roi) {
-        return dynamic_cast<GLATRoi*>(roi);
-    }
-%}

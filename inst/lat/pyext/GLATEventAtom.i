@@ -21,7 +21,7 @@
 /**
  * @file GLATEventAtom.i
  * @brief Fermi/LAT event atom class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -62,18 +62,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GLATEventAtom type casts
- ***************************************************************************/
-%inline %{
-    GLATEventAtom* cast_GLATEventAtom(GEvent* event) {
-        GLATEventAtom* atom = dynamic_cast<GLATEventAtom*>(event);
-        if (atom == NULL) {
-            throw GException::bad_type("cast_GLATEventAtom(GEvent*)",
-                                       "GEvent not of type GLATEventAtom");
-        }
-        return atom;
-    }
-%}

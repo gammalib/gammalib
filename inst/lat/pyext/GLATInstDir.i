@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GLATInstDir.i  -  LAT instrument direction class              *
+ *          GLATInstDir.i - Fermi-LAT instrument direction class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATInstDir.i
- * @brief GLATInstDir class python bindings
- * @author J. Knodlseder
+ * @brief Fermi-LAT instrument direction class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -44,22 +44,22 @@ public:
     // Methods
     void         clear(void);
     GLATInstDir* clone(void) const;
-    void         skydir(const GSkyDir& dir) { m_dir=dir; }
-    void         radec(const double& ra, const double& dec) { m_dir.radec(ra,dec); }
-    void         radec_deg(const double& ra, const double& dec) { m_dir.radec_deg(ra,dec); }
-    void         lb(const double& l, const double& b) { m_dir.lb(l,b); }
-    void         lb_deg(const double& l, const double& b) { m_dir.lb_deg(l,b); }
-    GSkyDir      skydir(void) const { return m_dir; }
-    double       l(void) const { return m_dir.l(); }
-    double       l_deg(void) const { return m_dir.l_deg(); }
-    double       b(void) const { return m_dir.b(); }
-    double       b_deg(void) const { return m_dir.b_deg(); }
-    double       ra(void) const { return m_dir.ra(); }
-    double       ra_deg(void) const { return m_dir.ra_deg(); }
-    double       dec(void) const { return m_dir.dec(); }
-    double       dec_deg(void) const { return m_dir.dec_deg(); }
-    double       dist(GSkyDir& dir) const { return m_dir.dist(dir); }
-    double       dist_deg(GSkyDir& dir) const { return m_dir.dist_deg(dir); }
+    void         skydir(const GSkyDir& dir);
+    void         radec(const double& ra, const double& dec);
+    void         radec_deg(const double& ra, const double& dec);
+    void         lb(const double& l, const double& b);
+    void         lb_deg(const double& l, const double& b);
+    GSkyDir      skydir(void) const;
+    double       l(void) const;
+    double       l_deg(void) const;
+    double       b(void) const;
+    double       b_deg(void) const;
+    double       ra(void) const;
+    double       ra_deg(void) const;
+    double       dec(void) const;
+    double       dec_deg(void) const;
+    double       dist(GSkyDir& dir) const;
+    double       dist_deg(GSkyDir& dir) const;
     double       dist(GLATInstDir& dir) const;
     double       dist_deg(GLATInstDir& dir) const;
 };
@@ -73,13 +73,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GLATInstDir type casts
- ***************************************************************************/
-%inline %{
-    GLATInstDir* cast_GLATInstDir(GInstDir* dir) {
-        return dynamic_cast<GLATInstDir*>(dir);
-    }
-%}
