@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-07-00
 
 Author(s) : Juergen Knoedlseder
 
-December, 17th, 2012
+December, 18th, 2012
 
 
 1. Introduction
@@ -69,6 +69,10 @@ spectral models. In particular, simulation of an exponentially cut
 off power law is now possible. The methods now also verify that the
 minimum energy is smaller than the maximum energy. Otherwise, an
 exception is thrown.
+
+The new spectral model GModelSpectralLogParabola has been implemented
+to describe a source with log parabola spectrum. The XML definition
+is compliant with that of Fermi-LAT.
 
 
 8. Numerics module

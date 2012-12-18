@@ -1,4 +1,4 @@
-2012-12-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.7.0 released
         ========================
@@ -17,6 +17,7 @@
         Add GPhotons photon container class
         Implement mc(), flux() and eflux() for all spectral models
         Rework GTime interface and introduce GTimeReference class
+        Add GModelSpectralLogParabola spectral model
  
 2012-09-17  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
