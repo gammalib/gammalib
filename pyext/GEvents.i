@@ -26,11 +26,24 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GEvents.hpp"
+#include "GEvent.hpp"
+#include "GEventBin.hpp"
+#include "GEventAtom.hpp"
 #include "GTools.hpp"
 %}
 
-/* __ Includes ___________________________________________________________ */
-%include "GTypemaps.i"
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GEvent* {
+    if (dynamic_cast<GEventBin*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventBin, 0 |  0 );
+    }
+    else if (dynamic_cast<GEventAtom*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEventAtom, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GEvent, 0 |  0 );
+    }
+}
 
 
 /***********************************************************************//**
