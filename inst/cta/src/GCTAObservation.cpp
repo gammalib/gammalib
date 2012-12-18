@@ -34,7 +34,6 @@
 #include "GTools.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
-#include "GIntegrand.hpp"
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAEventList.hpp"
