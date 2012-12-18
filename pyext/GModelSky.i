@@ -26,11 +26,89 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSky.hpp"
-#include "GTools.hpp"
+#include "GModelSpatial.hpp"
+#include "GModelRadial.hpp"
+#include "GModelRadialDisk.hpp"
+#include "GModelRadialGauss.hpp"
+#include "GModelRadialShell.hpp"
+#include "GModelSpatialConst.hpp"
+#include "GModelSpatialCube.hpp"
+#include "GModelSpatialMap.hpp"
+#include "GModelSpatialPtsrc.hpp"
+#include "GModelSpectral.hpp"
+#include "GModelSpectralConst.hpp"
+#include "GModelSpectralFunc.hpp"
+#include "GModelSpectralNodes.hpp"
+#include "GModelSpectralPlaw.hpp"
+#include "GModelSpectralPlaw2.hpp"
+#include "GModelSpectralLogParabola.hpp"
+#include "GModelTemporal.hpp"
+#include "GModelTemporalConst.hpp"
 %}
 
-/* __ Includes ___________________________________________________________ */
-%include "GTypemaps.i"
+/* __ Typemaps ___________________________________________________________ */
+%typemap(out) GModelSpatial* {
+    if (dynamic_cast<GModelRadial*>($1) != NULL) {
+        if (dynamic_cast<GModelRadialDisk*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialDisk, 0 |  0 );
+        }
+        else if (dynamic_cast<GModelRadialGauss*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialGauss, 0 |  0 );
+        }
+        else if (dynamic_cast<GModelRadialShell*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialShell, 0 |  0 );
+        }
+        else {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadial, 0 |  0 );
+        }
+    }
+    else if (dynamic_cast<GModelSpatialConst*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialConst, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpatialCube*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialCube, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpatialMap*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialMap, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpatialPtsrc*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialPtsrc, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatial, 0 |  0 );
+    }
+}
+%typemap(out) GModelSpectral* {
+    if (dynamic_cast<GModelSpectralConst*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralConst, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralFunc*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralFunc, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralNodes*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralNodes, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralPlaw*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralPlaw, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralPlaw2*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralPlaw2, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpectralLogParabola*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectralLogParabola, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpectral, 0 |  0 );
+    }
+}
+%typemap(out) GModelTemporal* {
+    if (dynamic_cast<GModelTemporalConst*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelTemporalConst, 0 |  0 );
+    }
+    else {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelTemporal, 0 |  0 );
+    }
+}
 
 
 /***********************************************************************//**
