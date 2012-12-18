@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.hpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,11 +18,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GNumerics.hpp
+ * @brief Definition of unit tests for numerics module
+ * @author Juergen Knoedlseder
+ */
 
 #ifndef TEST_NUMERICS_HPP
 #define TEST_NUMERICS_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <cmath>
 #include "GammaLib.hpp"
 #include "GTools.hpp"
 
@@ -32,13 +38,13 @@
  *
  * @brief Gaussian function.
  ***************************************************************************/
-class Gauss : public GIntegrand {
+class Gauss : public GFunction {
 public:
     Gauss(const double& sigma) : m_sigma(sigma) { return; }
     virtual ~Gauss(void) { return; }
     double eval(double x) {
         double arg = -0.5*x*x/m_sigma/m_sigma;
-        double val = 1.0/sqrt(twopi)/m_sigma * exp(arg);
+        double val = 1.0/std::sqrt(twopi)/m_sigma * std::exp(arg);
         return val;
     }
 protected:
