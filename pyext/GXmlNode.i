@@ -31,7 +31,6 @@
 #include "GXmlDocument.hpp"
 #include "GXmlPI.hpp"
 #include "GXmlText.hpp"
-#include "GTools.hpp"
 %}
 
 /* __ Typemaps ___________________________________________________________ */
