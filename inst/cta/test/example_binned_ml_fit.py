@@ -1,5 +1,23 @@
 #! /usr/bin/env python
-
+# ==========================================================================
+# This script performs a binned maximum likelihood analysis of CTA data.
+#
+# Copyright (C) 2012 Juergen Knoedlseder
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+# ==========================================================================
 from gammalib import *
 from math import *
 
@@ -45,7 +63,7 @@ def binned_analysis(model, cntmap, irf, caldb):
     models = obs.models().copy()
 
     # Print optimizer results
-    print opt
+    print(opt)
 
     # Create now a copy of the source model without background
     # only
@@ -67,10 +85,10 @@ def binned_analysis(model, cntmap, irf, caldb):
     ts = 2.0 * (logL - logL0)
 
     # Print optimizer results
-    print opt
+    print(opt)
 
     # Print TS
-    print " Test statistics ...........:", ts
+    print(" Test statistics ...........:", ts)
 
     # Return models
     return models
@@ -84,20 +102,20 @@ if __name__ == '__main__':
     Example illustrating a binned data analysis.
     """
     # Dump header
-    print
-    print "*********************************************************"
-    print "* Perform binned maximum likelihood fitting of CTA data *"
-    print "*********************************************************"
-    print "... please wait for a few seconds"
+    print("")
+    print("*********************************************************")
+    print("* Perform binned maximum likelihood fitting of CTA data *")
+    print("*********************************************************")
+    print("... please wait for a few seconds")
 
     # Set parameters
-    irf = "kb_E_50h_v3"
-    caldb = "../caldb"
-    model = "data/crab.xml"
+    irf    = "kb_E_50h_v3"
+    caldb  = "../caldb"
+    model  = "data/crab.xml"
     cntmap = "data/crab_cntmap.fits"
 
-# Perform binned analysis
+    # Perform binned analysis
     result = binned_analysis(model, cntmap, irf, caldb)
 
     # Print model results
-    print result
+    print(result)
