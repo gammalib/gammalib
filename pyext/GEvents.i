@@ -29,6 +29,9 @@
 #include "GTools.hpp"
 %}
 
+/* __ Includes ___________________________________________________________ */
+%include "GTypemaps.i"
+
 
 /***********************************************************************//**
  * @class GEvents
@@ -72,15 +75,19 @@ public:
         return tochar(self->print());
     }
     GEvent* __getitem__(int index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     void __setitem__(int index, const GEvent& val) {
-        if (index>=0 && index < self->size())
+        if (index>=0 && index < self->size()) {
             *((*self)[index]) = val;
-        else
+        }
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
 };
