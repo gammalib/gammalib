@@ -36,6 +36,7 @@
 #include "GEnergy.hpp"
 #include "GXmlElement.hpp"
 #include "GIntegral.hpp"
+#include "GFunction.hpp"
 
 
 /***********************************************************************//**
@@ -95,7 +96,7 @@ protected:
     void free_members(void);
 
     // Class to determine to the integral photon flux
-    class flux_kern : public GIntegrand{
+    class flux_kern : public GFunction {
     public:
     	// Constructor
     	flux_kern(double norm, double index, double curvature, double pivot) :

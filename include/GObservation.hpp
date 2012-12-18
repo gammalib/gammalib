@@ -36,7 +36,6 @@
 #include "GModels.hpp"
 #include "GTime.hpp"
 #include "GEnergy.hpp"
-#include "GIntegrand.hpp"
 #include "GFunction.hpp"
 
 
@@ -119,7 +118,7 @@ protected:
                    m_parent(parent),
                    m_model(&model),
                    m_event(&event),
-                   m_ipar(ipar) { return; }
+                   m_ipar(ipar) { }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
@@ -133,26 +132,26 @@ protected:
     virtual double npred_spec(const GModel& model, const GTime& obsTime) const;
 
     // Npred kernel classes
-    class npred_temp_kern : public GIntegrand {
+    class npred_temp_kern : public GFunction {
     public:
         npred_temp_kern(const GObservation* parent,
                         const GModel*       model) :
                         m_parent(parent),
-                        m_model(model) { return; }
+                        m_model(model) { }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to source model
     };
 
-    class npred_spec_kern : public GIntegrand {
+    class npred_spec_kern : public GFunction {
     public:
         npred_spec_kern(const GObservation* parent,
                         const GModel*       model,
                         const GTime*        obsTime) :
                         m_parent(parent),
                         m_model(model),
-                        m_time(obsTime) { return; }
+                        m_time(obsTime) { }
         double eval(double x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent

@@ -36,7 +36,7 @@
 #include "GEnergy.hpp"
 #include "GTime.hpp"
 #include "GModelRadial.hpp"
-#include "GIntegrand.hpp"
+#include "GFunction.hpp"
 #include "GMatrix.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -109,7 +109,7 @@ protected:
     void free_members(void);
 
     // Npred theta integration kernel
-    class npred_kern_theta : public GIntegrand {
+    class npred_kern_theta : public GFunction {
     public:
         npred_kern_theta(const GResponse*    rsp,
                          const GModelRadial* radial,
@@ -134,7 +134,7 @@ protected:
     };
 
     // Npred phi integration kernel
-    class npred_kern_phi : public GIntegrand {
+    class npred_kern_phi : public GFunction {
     public:
         npred_kern_phi(const GResponse*    rsp,
                        const GEnergy*      srcEng,
