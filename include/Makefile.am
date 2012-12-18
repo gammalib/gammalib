@@ -63,7 +63,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralPlaw.hpp \
                      GModelSpectralPlaw2.hpp \
                      GModelSpectralExpPlaw.hpp \
-		     GModelSpectralLogParabola.hpp \
+                     GModelSpectralLogParabola.hpp \
                      GModelSpectralFunc.hpp \
                      GModelSpectralNodes.hpp \
                      GModelSpectralConst.hpp \
@@ -119,7 +119,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GSymMatrix.hpp \
                      GSparseMatrix.hpp \
                      GIntegral.hpp \
-                     GIntegrand.hpp \
                      GDerivative.hpp \
                      GFunction.hpp \
                      GOptimizer.hpp \

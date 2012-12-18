@@ -49,7 +49,6 @@
 #include "GSymMatrix.hpp"
 #include "GSparseMatrix.hpp"
 #include "GIntegral.hpp"
-#include "GIntegrand.hpp"
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
 #include "GNumerics.hpp"
