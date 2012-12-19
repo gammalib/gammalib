@@ -296,10 +296,6 @@ void GCTAEventList::save(const std::string& filename, bool clobber) const
  *
  * @todo Ultimately, any events file should have a GTI extension, hence the
  *       extraction of GTIs from TSTART and TSTOP should not be necessary.
- *
- * @todo For the moment we simply use the MJD unit from the GTime class, but
- *       we should add the information from MJDREFI and MJDREFF to allow
- *       setting of arbitrary time units.
  ***************************************************************************/
 void GCTAEventList::read(const GFits& file)
 {
@@ -308,15 +304,6 @@ void GCTAEventList::read(const GFits& file)
 
     // Get event list HDU
     GFitsTable* events = file.table("EVENTS");
-
-    // Load event data
-    read_events(events);
-
-    // Read region of interest from data selection keyword
-    read_ds_roi(events);
-
-    // Read energy boundaries from data selection keyword
-    read_ds_ebounds(events);
 
     // If we have a GTI extension, then read Good Time Intervals from that
     // extension
@@ -346,6 +333,15 @@ void GCTAEventList::read(const GFits& file)
         m_gti.reference(timeref);
 
     } // endelse: GTI built from TSTART and TSTOP
+
+    // Load event data
+    read_events(events);
+
+    // Read region of interest from data selection keyword
+    read_ds_roi(events);
+
+    // Read energy boundaries from data selection keyword
+    read_ds_ebounds(events);
 
     // Return
     return;
