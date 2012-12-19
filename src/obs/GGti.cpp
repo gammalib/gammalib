@@ -684,10 +684,16 @@ std::string GGti::print(void) const
     result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
     result.append("\n"+parformat("Elapsed time")+str(telapse())+" sec");
     result.append("\n"+parformat("Time range"));
-    result.append(tstart().print()+" - "+tstop().print());
+    result.append(str(tstart().convert(m_reference)));
+    result.append(" - ");
+    result.append(str(tstop().convert(m_reference)));
+    result.append(" "+reference().timeunit());
+    result.append(" ("+reference().timesys()+")");
+    result.append("\n"+parformat("Reference MDJ"));
+    result.append(str(reference().mjdref()));
 
     // Append time reference information
-    result.append("\n"+m_reference.print());
+    //result.append("\n"+reference().print());
 
     // Return result
     return result;
