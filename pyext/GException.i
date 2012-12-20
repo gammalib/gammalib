@@ -1,7 +1,7 @@
 /***************************************************************************
- *                     GException.i  -  exception handler                  *
+ *                      GException.i - exception handler                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GException.i
+ * @brief Exception handler for Python interface
+ * @author Juergen Knoedlseder
+ */
 %{
 /* Put headers and other declarations here */
 #include "GException.hpp"
@@ -28,17 +33,11 @@
     try {
         $action
     }
-    catch (const GException::mem_alloc& e) {
-        SWIG_exception(SWIG_MemoryError, e.what());
-    }
-    catch (const GException::empty& e) {
-        SWIG_exception(SWIG_ValueError, e.what());
-    }
     catch (const GException::out_of_range& e) {
         SWIG_exception(SWIG_IndexError, e.what());
     }
-    catch (const GException::fits_invalid_type& e) {
-        SWIG_exception(SWIG_ValueError, e.what());
+    catch (const GExceptionHandler& e) {
+        SWIG_exception(SWIG_RuntimeError, e.what());
     }
     catch (const std::exception& e) {
         SWIG_exception(SWIG_RuntimeError, e.what());
