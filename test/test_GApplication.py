@@ -160,14 +160,14 @@ class Test(GPythonTestSuite):
         Test GPars.
         """
         # Test GPars constructor with bad filename.
-        self.test_try("Test GPars constructor with bad filename")
-        try:
-            pars = GPars("testme.par")
-            self.test_try_failure("Exception not thrown.")
-        except:
-            self.test_try_success()
-        else:
-            self.test_try_failure("This should never happen.")
+        #self.test_try("Test GPars constructor with bad filename")
+        #try:
+        #    pars = GPars("testme.par")
+        #    self.test_try_failure("Exception not thrown.")
+        #except:
+        #    self.test_try_success()
+        #else:
+        #    self.test_try_failure("This should never happen.")
 
         # Return
         return
