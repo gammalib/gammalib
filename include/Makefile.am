@@ -1,89 +1,25 @@
 # Define package included headers (to be installed)
 pkginclude_HEADERS = GammaLib.hpp \
+                     GBase.hpp \
+                     GRegistry.hpp \
                      GException.hpp \
                      GNodeArray.hpp \
                      GTools.hpp \
                      GCsv.hpp \
                      GRan.hpp \
-                     GSkyDir.hpp \
-                     GSkyPixel.hpp \
-                     GSkymap.hpp \
-                     GWcs.hpp \
-                     GWcsRegistry.hpp \
-                     GWcslib.hpp \
-                     GWcsAZP.hpp \
-                     GWcsCAR.hpp \
-                     GWcsTAN.hpp \
-                     GWcsMER.hpp \
-                     GWcsSTG.hpp \
-                     GWcsHPX.hpp \
-                     GEnergy.hpp \
-                     GTime.hpp \
-                     GCaldb.hpp \
-                     GObservations.hpp \
-                     GObservation.hpp \
-                     GObservationRegistry.hpp \
-                     GEvents.hpp \
-                     GEventList.hpp \
-                     GEventCube.hpp \
-                     GEvent.hpp \
-                     GEventAtom.hpp \
-                     GEventBin.hpp \
-                     GGti.hpp \
-                     GEbounds.hpp \
-                     GPointing.hpp \
-                     GRoi.hpp \
-                     GInstDir.hpp \
-                     GResponse.hpp \
-                     GPhotons.hpp \
-                     GPhoton.hpp \
-                     GSource.hpp \
-                     GModelPar.hpp \
-                     GModels.hpp \
-                     GModel.hpp \
-                     GModelRegistry.hpp \
-                     GModelSky.hpp \
-                     GModelData.hpp \
-                     GModelPointSource.hpp \
-                     GModelExtendedSource.hpp \
-                     GModelDiffuseSource.hpp \
-                     GModelSpatial.hpp \
-                     GModelSpatialRegistry.hpp \
-                     GModelSpatialPtsrc.hpp \
-                     GModelSpatialConst.hpp \
-                     GModelSpatialCube.hpp \
-                     GModelSpatialMap.hpp \
-                     GModelRadial.hpp \
-                     GModelRadialRegistry.hpp \
-                     GModelRadialDisk.hpp \
-                     GModelRadialGauss.hpp \
-                     GModelRadialShell.hpp \
-                     GModelSpectral.hpp \
-                     GModelSpectralRegistry.hpp \
-                     GModelSpectralPlaw.hpp \
-                     GModelSpectralPlaw2.hpp \
-                     GModelSpectralExpPlaw.hpp \
-                     GModelSpectralLogParabola.hpp \
-                     GModelSpectralFunc.hpp \
-                     GModelSpectralNodes.hpp \
-                     GModelSpectralConst.hpp \
-                     GModelTemporal.hpp \
-                     GModelTemporalRegistry.hpp \
-                     GModelTemporalConst.hpp \
-                     GApplication.hpp \
-                     GLog.hpp \
-                     GPars.hpp \
-                     GPar.hpp \
-                     GXml.hpp \
-                     GXmlNode.hpp \
-                     GXmlDocument.hpp \
-                     GXmlText.hpp \
-                     GXmlElement.hpp \
-                     GXmlComment.hpp \
-                     GXmlAttribute.hpp \
-                     GXmlPI.hpp \
-                     GFitsHeaderCard.hpp \
+                     GVector.hpp \
+                     GMatrixBase.hpp \
+                     GMatrix.hpp \
+                     GSymMatrix.hpp \
+                     GSparseMatrix.hpp \
+                     GIntegral.hpp \
+                     GDerivative.hpp \
+                     GFunction.hpp \
+                     GNumerics.hpp \
+                     GFits.hpp \
+                     GFitsHDU.hpp \
                      GFitsHeader.hpp \
+                     GFitsHeaderCard.hpp \
                      GFitsImage.hpp \
                      GFitsImageByte.hpp \
                      GFitsImageSByte.hpp \
@@ -111,20 +47,89 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GFitsTableDoubleCol.hpp \
                      GFitsTableCFloatCol.hpp \
                      GFitsTableCDoubleCol.hpp \
-                     GFitsHDU.hpp \
-                     GFits.hpp \
-                     GVector.hpp \
-                     GMatrixBase.hpp \
-                     GMatrix.hpp \
-                     GSymMatrix.hpp \
-                     GSparseMatrix.hpp \
-                     GIntegral.hpp \
-                     GDerivative.hpp \
-                     GFunction.hpp \
+                     GXml.hpp \
+                     GXmlNode.hpp \
+                     GXmlDocument.hpp \
+                     GXmlText.hpp \
+                     GXmlElement.hpp \
+                     GXmlComment.hpp \
+                     GXmlAttribute.hpp \
+                     GXmlPI.hpp \
+                     GApplication.hpp \
+                     GLog.hpp \
+                     GPars.hpp \
+                     GPar.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
                      GOptimizerPars.hpp \
                      GOptimizerFunction.hpp \
                      GTestSuite.hpp \
                      GTestSuites.hpp \
-                     GTestCase.hpp
+                     GTestCase.hpp \
+                     GSkyDir.hpp \
+                     GSkyPixel.hpp \
+                     GSkymap.hpp \
+                     GWcs.hpp \
+                     GWcsRegistry.hpp \
+                     GWcslib.hpp \
+                     GWcsAZP.hpp \
+                     GWcsCAR.hpp \
+                     GWcsTAN.hpp \
+                     GWcsMER.hpp \
+                     GWcsSTG.hpp \
+                     GWcsHPX.hpp \
+                     GEnergy.hpp \
+                     GTime.hpp \
+                     GTimes.hpp \
+                     GTimeReference.hpp \
+                     GCaldb.hpp \
+                     GObservations.hpp \
+                     GObservation.hpp \
+                     GObservationRegistry.hpp \
+                     GEvents.hpp \
+                     GEventList.hpp \
+                     GEventCube.hpp \
+                     GEvent.hpp \
+                     GEventAtom.hpp \
+                     GEventBin.hpp \
+                     GGti.hpp \
+                     GRoi.hpp \
+                     GEbounds.hpp \
+                     GInstDir.hpp \
+                     GPointing.hpp \
+                     GResponse.hpp \
+                     GPhotons.hpp \
+                     GPhoton.hpp \
+                     GSource.hpp \
+                     GModelPar.hpp \
+                     GModels.hpp \
+                     GModel.hpp \
+                     GModelRegistry.hpp \
+                     GModelSky.hpp \
+                     GModelData.hpp \
+                     GModelPointSource.hpp \
+                     GModelExtendedSource.hpp \
+                     GModelDiffuseSource.hpp \
+                     GModelSpatial.hpp \
+                     GModelSpatialRegistry.hpp \
+                     GModelSpatialPtsrc.hpp \
+                     GModelSpatialConst.hpp \
+                     GModelSpatialCube.hpp \
+                     GModelSpatialMap.hpp \
+                     GModelRadial.hpp \
+                     GModelRadialRegistry.hpp \
+                     GModelRadialDisk.hpp \
+                     GModelRadialGauss.hpp \
+                     GModelRadialShell.hpp \
+                     GModelSpectral.hpp \
+                     GModelSpectralRegistry.hpp \
+                     GModelSpectralExpPlaw.hpp \
+                     GModelSpectralFunc.hpp \
+                     GModelSpectralNodes.hpp \
+                     GModelSpectralPlaw.hpp \
+                     GModelSpectralPlaw2.hpp \
+                     GModelSpectralLogParabola.hpp \
+                     GModelSpectralConst.hpp \
+                     GModelTemporal.hpp \
+                     GModelTemporalRegistry.hpp \
+                     GModelTemporalConst.hpp

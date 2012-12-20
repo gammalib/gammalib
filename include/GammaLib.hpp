@@ -133,6 +133,8 @@
 /* __ Observation handling _______________________________________________ */
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GTimes.hpp"
+#include "GTimeReference.hpp"
 #include "GCaldb.hpp"
 #include "GObservations.hpp"
 #include "GObservation.hpp"
@@ -141,6 +143,8 @@
 #include "GEventList.hpp"
 #include "GEventCube.hpp"
 #include "GEvent.hpp"
+#include "GEventAtom.hpp"
+#include "GEventBin.hpp"
 #include "GGti.hpp"
 #include "GRoi.hpp"
 #include "GEbounds.hpp"
