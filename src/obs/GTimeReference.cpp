@@ -522,36 +522,6 @@ double GTimeReference::unitseconds(void) const
 
 
 /***********************************************************************//**
- * @brief Get time in seconds for a specific MJD
- *
- * @param[in] mjdref Reference MJD (days).
- *
- * Returns time in seconds in the specified MJD reference.
- ***************************************************************************/
-/*
-double GTimeReference::time(const double& mjdref) const
-{
-    // Retrieve time in seconds
-    double time = m_time;
-    
-    // Add offset due to MJD differences
-    if (m_mjdref != mjdref) {
-
-        // Compute time offset
-        double offset = (m_mjdref - mjdref) * sec_in_day;
-        
-        // Add offset
-        time += offset;
-
-    }
-
-    // Return time
-    return time;
-}
-*/
-
-
-/***********************************************************************//**
  * @brief Print time reference
  *
  * @return String containing the time reference.

@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GException_app.hpp
+ * @file GException_app.cpp
  * @brief Application exception handler interface definiton
  * @author Juergen Knoedlseder
  */
