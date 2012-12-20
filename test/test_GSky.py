@@ -169,14 +169,14 @@ class Test(GPythonTestSuite):
         self.test_skymap_pixels(pixels, "HEALPix")
 
         # Save HEALPix skymap twice. The second saving should fail.
-        #try:
-        #    pixels.save(file2, True)
-        #    pixels.save(file2)
-        #except RuntimeError:
-        #    pass
-        #else:
-        #    raise RuntimeError("*** TEST ERROR: FITS file overwritten!")
-        #pixels.save(file2, True)
+        try:
+            pixels.save(file2, True)
+            pixels.save(file2)
+        except RuntimeError:
+            pass
+        else:
+            raise RuntimeError("*** TEST ERROR: FITS file overwritten!")
+        pixels.save(file2, True)
 
         # Load again HEALPix skymap
         pixels = GSkymap(file1)
