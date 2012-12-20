@@ -570,10 +570,12 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
     while (pos < len && pos != std::string::npos) {
         std::size_t index = s.find_first_of(sep, pos);
         std::size_t n     = std::string::npos;
-        if (index != std::string::npos)
+        if (index != std::string::npos) {
             n = index-pos;
-        if (n > 0)
+        }
+        if (n > 0) {
             result.push_back(s.substr(pos, n));
+        }
         pos = (index != std::string::npos) ? index + 1 : std::string::npos;
     } // endwhile: there were still characters in the string
 
@@ -596,8 +598,9 @@ std::string fill(const std::string& s, int n)
     std::string result = "";
 
     // Replicate string
-    for (int i = 0; i < n; ++i)
+    for (int i = 0; i < n; ++i) {
         result.append(s);
+    }
 
     // Return result
     return result;
@@ -679,15 +682,16 @@ std::string center(const std::string& s, int n, char c)
  * @brief Convert string in parameter format
  *
  * @param[in] s String to be converted.
+ * @param[in] indent Indentation of parameter (default: 0).
  *
  * Converts and string into the parameter format of type "s ......: " with a
  * total length of G_PARFORMAT_LENGTH.
  ***************************************************************************/
-std::string parformat(const std::string& s)
+std::string parformat(const std::string& s, const int& indent)
 {
     // Compute number of characters to fill right. Do not clip the string if
     // it is too long since we do not want to loose information.
-    int n_right  = G_PARFORMAT_LENGTH - s.length() - 3;
+    int n_right = G_PARFORMAT_LENGTH - s.length() - 3 - indent;
 
     // Set result
     std::string result = " " + s + " " + fill(".", n_right) + ": ";
