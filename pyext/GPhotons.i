@@ -42,11 +42,6 @@ public:
     GPhotons(const GPhotons& photons);
     virtual ~GPhotons(void);
  
-    // Operators
-    GPhotons&      operator=(const GPhotons& photons);
-    GPhoton&       operator[](const int& index);
-    const GPhoton& operator[](const int& index) const;
-
     // Methods
     void           clear(void);
     GPhotons*      clone(void) const;
