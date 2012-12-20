@@ -423,55 +423,55 @@ public:
     // Application exceptions
     class app_error : public GExceptionHandler {
     public:
-        app_error(std::string origin,
-                  std::string message = "");
+        app_error(const std::string& origin,
+                  const std::string& message = "");
     };
     class par_file_not_found : public GExceptionHandler {
     public:
-        par_file_not_found(std::string origin,
-                           std::string filename,
-                           std::string message = "");
+        par_file_not_found(const std::string& origin,
+                           const std::string& filename,
+                           const std::string& message = "");
     };
     class par_file_open_error : public GExceptionHandler {
     public:
-        par_file_open_error(std::string origin,
-                            std::string filename,
-                            std::string message = "");
+        par_file_open_error(const std::string& origin,
+                            const std::string& filename,
+                            const std::string& message = "");
     };
     class home_not_found : public GExceptionHandler {
     public:
-        home_not_found(std::string origin,
-                       std::string message = "");
+        home_not_found(const std::string& origin,
+                       const std::string& message = "");
     };
     class could_not_create_pfiles : public GExceptionHandler {
     public:
-        could_not_create_pfiles(std::string origin,
-                                std::string home,
-                                std::string message = "");
+        could_not_create_pfiles(const std::string& origin,
+                                const std::string& home,
+                                const std::string& message = "");
     };
     class pfiles_not_accessible : public GExceptionHandler {
     public:
-        pfiles_not_accessible(std::string origin,
-                              std::string home,
-                              std::string message = "");
+        pfiles_not_accessible(const std::string& origin,
+                              const std::string& home,
+                              const std::string& message = "");
     };
     class par_file_syntax_error : public GExceptionHandler {
     public:
-        par_file_syntax_error(std::string origin,
-                              std::string home,
-                              std::string message = "");
+        par_file_syntax_error(const std::string& origin,
+                              const std::string& home,
+                              const std::string& message = "");
     };
     class par_error : public GExceptionHandler {
     public:
-        par_error(std::string origin,
-                  std::string name,
-                  std::string message = "");
+        par_error(const std::string& origin,
+                  const std::string& name,
+                  const std::string& message = "");
     };
     class bad_cmdline_argument : public GExceptionHandler {
     public:
-        bad_cmdline_argument(std::string origin,
-                             std::string arg,
-                             std::string message = "");
+        bad_cmdline_argument(const std::string& origin,
+                             const std::string& arg,
+                             const std::string& message = "");
     };
 
 
