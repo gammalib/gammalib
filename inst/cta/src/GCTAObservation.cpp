@@ -1016,11 +1016,14 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
+        // Get time reference
+        GTimeReference timeref = events()->gti().reference();
+
         // Compute some attributes
         double ra_pnt  = (m_pointing != NULL) ? m_pointing->dir().ra_deg() : 0.0;
         double dec_pnt = (m_pointing != NULL) ? m_pointing->dir().dec_deg() : 0.0;
-        double tstart  = events()->tstart().secs();
-        double tstop   = events()->tstop().secs();
+        double tstart  = events()->tstart().convert(timeref);
+        double tstop   = events()->tstop().convert(timeref);
         double telapse = events()->gti().telapse();
         double ontime  = events()->gti().ontime();
         double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
@@ -1037,11 +1040,7 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         // Set observation time information
         hdu->card("TSTART",   tstart, "[s] Mission time of start of observation");
         hdu->card("TSTOP",    tstop, "[s] Mission time of end of observation");
-        hdu->card("MJDREFI",  51910, "[days] Integer part of mission time reference MJD");
-        hdu->card("MJDREFF",  7.428703703703703e-14, "[days] Fractional part of mission time reference MJD");
-        hdu->card("TIMEUNIT", "s", "Time unit");
-        hdu->card("TIMESYS",  "TT", "Time system");
-        hdu->card("TIMEREF",  "LOCAL", "Time reference");
+        timeref.write(hdu);
         hdu->card("TELAPSE",  telapse, "[s] Mission elapsed time");
         hdu->card("ONTIME",   ontime, "[s] Total good time including deadtime");
         hdu->card("LIVETIME", livetime(), "[s] Total livetime");
