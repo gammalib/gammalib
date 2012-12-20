@@ -82,9 +82,9 @@ public:
     bool        islearn(void) const;
     bool        isquery(void) const;
     bool        isfilename(void) const;
-    bool        isvalid(void) const;
-    bool        isundefined(void) const;
-    bool        isnotanumber(void) const;
+    bool        isvalid(void);
+    bool        isundefined(void);
+    bool        isnotanumber(void);
     std::string print(void) const;
   
 protected:

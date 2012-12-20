@@ -676,7 +676,7 @@ bool GPar::isfilename(void) const
 /***********************************************************************//**
  * @brief Signals if parameter is valid
  ***************************************************************************/
-bool GPar::isvalid(void) const
+bool GPar::isvalid(void)
 {
     // Query parameter
     query();
@@ -689,7 +689,7 @@ bool GPar::isvalid(void) const
 /***********************************************************************//**
  * @brief Signals if parameter is undefined
  ***************************************************************************/
-bool GPar::isundefined(void) const
+bool GPar::isundefined(void)
 {
     // Query parameter
     query();
@@ -702,7 +702,7 @@ bool GPar::isundefined(void) const
 /***********************************************************************//**
  * @brief Signals if parameter is not a number
  ***************************************************************************/
-bool GPar::isnotanumber(void) const
+bool GPar::isnotanumber(void)
 {
     // Query parameter
     query();
