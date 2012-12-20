@@ -461,6 +461,13 @@ std::string GPar::string(void)
     // Query parameter
     query();
 
+    // Check if parameter is valid
+    if (m_status != ST_VALID) {
+        throw GException::par_error(G_STRING_GET, name(),
+              "is "+par_status_string()+". Please specify"
+              " a valid parameter value.");
+    }
+
     // Return value
     return m_value;
 }
@@ -489,6 +496,13 @@ std::string GPar::filename(void)
     // Query parameter
     query();
     
+    // Check if parameter is valid
+    if (m_status != ST_VALID) {
+        throw GException::par_error(G_FILENAME_GET, name(),
+              "is "+par_status_string()+". Please specify"
+              " a valid parameter value.");
+    }
+
     // Return value
     return (expand_env(m_value));
 }
@@ -515,6 +529,13 @@ bool GPar::boolean(void)
 
     // Query parameter
     query();
+
+    // Check if parameter is valid
+    if (m_status != ST_VALID) {
+        throw GException::par_error(G_BOOLEAN_GET, name(),
+              "is "+par_status_string()+". Please specify"
+              " a valid parameter value.");
+    }
 
     // Convert boolean value to upper case
     std::string uvalue = toupper(m_value);
@@ -550,6 +571,13 @@ int GPar::integer(void)
     // Query parameter
     query();
 
+    // Check if parameter is valid
+    if (m_status != ST_VALID) {
+        throw GException::par_error(G_INTEGER_GET, name(),
+              "is "+par_status_string()+". Please specify"
+              " a valid parameter value.");
+    }
+
     // Set result
     int result = toint(m_value);
 
@@ -579,6 +607,13 @@ double GPar::real(void)
 
     // Query parameter
     query();
+
+    // Check if parameter is valid
+    if (m_status != ST_VALID) {
+        throw GException::par_error(G_REAL_GET, name(),
+              "is "+par_status_string()+". Please specify"
+              " a valid parameter value.");
+    }
 
     // Set result
     double result = todouble(m_value);
@@ -643,6 +678,9 @@ bool GPar::isfilename(void) const
  ***************************************************************************/
 bool GPar::isvalid(void) const
 {
+    // Query parameter
+    query();
+
     // Return validity
     return (m_status == ST_VALID);
 }
@@ -653,6 +691,9 @@ bool GPar::isvalid(void) const
  ***************************************************************************/
 bool GPar::isundefined(void) const
 {
+    // Query parameter
+    query();
+
     // Return validity
     return (m_status == ST_UNDEFINED);
 }
@@ -663,6 +704,9 @@ bool GPar::isundefined(void) const
  ***************************************************************************/
 bool GPar::isnotanumber(void) const
 {
+    // Query parameter
+    query();
+
     // Return validity
     return (m_status == ST_NAN);
 }
@@ -992,7 +1036,7 @@ void GPar::set_value(const std::string& value)
             lvalue == "none"  ||
             lvalue == "undef" ||
             lvalue == "undefined") {
-            m_value  = "0";
+            m_value  = value;
             m_status = ST_UNDEFINED;
         }
         else if (lvalue == "inf" ||
@@ -1015,13 +1059,13 @@ void GPar::set_value(const std::string& value)
             lvalue == "none"  ||
             lvalue == "undef" ||
             lvalue == "undefined") {
-            m_value  = "0";
+            m_value  = value;
             m_status = ST_UNDEFINED;
         }
         else if (lvalue == "inf" ||
                  lvalue == "infinity" ||
                  lvalue == "nan") {
-            m_value  = "0.0";
+            m_value  = value;
             m_status = ST_NAN;
         }
         else {
@@ -1052,8 +1096,6 @@ void GPar::set_value(const std::string& value)
  *
  * This method queries the parameter from the stardard input if it is needed
  * to be input by the user.
- *
- * @todo Add environment variable substitution.
  ***************************************************************************/
 void GPar::query(void)
 {
@@ -1093,7 +1135,8 @@ void GPar::query(void)
 
         // Update value if value is not the default
         if (value.length() > 0) {
-            m_value  = value;
+            //m_value  = value;
+            set_value(value);
             m_update = true;
         }
 
@@ -1160,3 +1203,38 @@ std::string GPar::par_type_string(const std::string& type) const
     // Return type string
     return type_string;
 }
+
+
+/***********************************************************************//**
+ * @brief Return status string
+ *
+ * @return Returns the parameter status in human readable form.
+ ***************************************************************************/
+std::string GPar::par_status_string(void) const
+{
+    // Allocate status string
+    std::string status;
+
+    // Set status
+    switch (m_status) {
+    case ST_VALID:
+        status.append("valid");
+        break;
+    case ST_UNDEFINED:
+        status.append("undefined");
+        break;
+    case ST_NAN:
+        status.append("NaN");
+        break;
+    case ST_UNDERFLOW:
+        status.append("underflow");
+        break;
+    case ST_OVERFLOW:
+        status.append("overflow");
+        break;
+    }
+
+    // Return status
+    return status;
+}
+

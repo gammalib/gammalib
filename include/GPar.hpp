@@ -113,6 +113,7 @@ protected:
     void        query(void);
     void        stop_query(void);
     std::string par_type_string(const std::string& type) const;
+    std::string par_status_string(void) const;
 
     // Protected data members
     bool        m_update;  //!< Signal value updating
