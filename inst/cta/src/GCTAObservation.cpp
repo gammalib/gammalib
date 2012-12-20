@@ -695,12 +695,14 @@ std::string GCTAObservation::print(void) const
 
     // Append header
     result.append("=== GCTAObservation ===");
+
+    // Append informations
     result.append("\n"+parformat("Name")+name());
     result.append("\n"+parformat("Identifier")+id());
     result.append("\n"+parformat("Instrument")+instrument());
     result.append("\n"+parformat("Statistics")+statistics());
-    result.append("\n"+parformat("Ontime")+str(ontime()));
-    result.append("\n"+parformat("Livetime")+str(livetime()));
+    result.append("\n"+parformat("Ontime")+str(ontime())+" s");
+    result.append("\n"+parformat("Livetime")+str(livetime())+" s");
     result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
 
     // Append pointing
