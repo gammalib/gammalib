@@ -41,9 +41,10 @@
  *
  * This class holds the definition of a calibration database. If the void
  * constructor is invoked it tries setting the calibration database access
- * path using the CALDB environment variable. Alternatively, the calibration
- * database path can be passed to the constructor to override the environment
- * variable, or set using the dir() method.
+ * path using the GAMMALIB_CALDB or CALDB environment variables (the former
+ * takes precedence over the latter). Alternatively, the calibration database
+ * path can be passed to the constructor to override the environment variable
+ * or set using the dir() method.
  *
  * It is assumed that the calibration data are found under
  *
@@ -95,6 +96,7 @@ protected:
     void        init_members(void);
     void        copy_members(const GCaldb& caldb);
     void        free_members(void);
+    std::string rootdir(void) const;
     void        set_database(const std::string& pathname);
     std::string path(const std::string& mission, const std::string& instrument = "");
     std::string cifname(const std::string& mission, const std::string& instrument = "");
