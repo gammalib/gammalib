@@ -68,6 +68,12 @@ public:
     void               time(const GTime& time) { m_time=time; }
     std::string        print(void) const;
 
+    // Other methods
+    const unsigned long& event_id(void) const { return m_event_id; }
+    const unsigned long& obs_id(void)   const { return m_obs_id; }
+    void                 event_id(const unsigned long& id) { m_event_id=id; }
+    void                 obs_id(const unsigned long& id) { m_obs_id=id; }
+
 protected:
     // Protected methods
     void init_members(void);
