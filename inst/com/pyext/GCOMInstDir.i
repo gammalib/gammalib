@@ -25,7 +25,7 @@
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GCTAInstDir.hpp"
+#include "GCOMInstDir.hpp"
 %}
 
 
