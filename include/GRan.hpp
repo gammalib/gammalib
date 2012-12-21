@@ -55,6 +55,7 @@ public:
     void                   clear(void);
     GRan*                  clone(void) const;
     void                   seed(unsigned long long int seed);
+    unsigned long long int seed(void) const { return m_seed; }
     unsigned long int      int32(void);
     unsigned long long int int64(void);
     double                 uniform(void);
