@@ -94,6 +94,7 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpectralLogParabola& model);
     void free_members(void);
+    void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Class to determine to the integral photon flux
     class flux_kern : public GFunction {
@@ -134,6 +135,13 @@ protected:
     GModelPar m_index;        //!< Spectral index
     GModelPar m_curvature;    //!< Curvature
     GModelPar m_pivot;        //!< Pivot energy
+
+    // Cached members used for pre-computations
+    mutable double m_mc_emin;       //!< Minimum energy
+    mutable double m_mc_emax;       //!< Maximum energy
+    mutable double m_mc_exponent;   //!< Exponent (index+1)
+    mutable double m_mc_pow_emin;   //!< Power of minimum energy
+    mutable double m_mc_pow_ewidth; //!< Power of energy width
 };
 
 #endif /* GMODELSPECTRALLOGPARABOLA_HPP */

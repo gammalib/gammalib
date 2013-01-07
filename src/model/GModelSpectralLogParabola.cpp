@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GIntegral.hpp"
 #include "GModelSpectralLogParabola.hpp"
 #include "GModelSpectralRegistry.hpp"
 
@@ -443,14 +444,66 @@ GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
                                       const GEnergy& emax,
                                       GRan& ran) const
 {
-    // Allocate energy
-    GEnergy energy;
+		if (emin >= emax) {
+	        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
+	              "Minimum energy < maximum energy required.");
+	    }
 
-    // Throw exception signalling that method is not yet implemented
-    throw GException::feature_not_implemented(G_MC);
+	    // Allocate energy
+	    GEnergy energy;
 
-    // Return energy
-    return energy;
+	    // Update cache
+	    update_mc_cache(emin, emax);
+
+	    // Initialise energy
+	    double eng;
+
+	    // Initialse acceptance fraction
+	    double acceptance_fraction;
+
+	    // Use rejection method to draw a random energy. We first draw
+	    // analytically from a power law, and then compare the power law
+	    // at the drawn energy to the curved function. This
+	    // gives an acceptance fraction, and we accept the energy only if
+	    // a uniform random number is <= the acceptance fraction.
+	    do {
+
+	        // Get uniform random number
+	        double u = ran.uniform();
+
+	        // Case A: Corresponding mc Plaw-Index is not -1
+	        if (m_mc_exponent != 0.0) {
+	            if (u > 0.0) {
+	                eng = std::exp(std::log(u * m_mc_pow_ewidth + m_mc_pow_emin) /
+	                               m_mc_exponent);
+	            }
+	            else {
+	                eng = 0.0;
+	            }
+	        }
+
+	        // Case B: Corresponding mc Plaw-Index is  -1
+	        else {
+	            eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
+	        }
+
+	        // Compute powerlaw at given energy
+	        double e_norm = eng / pivot();
+	        double plaw   = std::pow(e_norm, m_mc_exponent-1.0);
+
+	        // Compute logparabola at given energy
+	        double logparabola = plaw * std::pow(e_norm,curvature()*std::log(e_norm));
+
+	        // Compute acceptance fraction
+	        acceptance_fraction = logparabola / plaw;
+
+	    } while (ran.uniform() > acceptance_fraction);
+
+	    // Set energy
+	    energy.MeV(eng);
+
+	    // Return energy
+	    return energy;
 }
 
 
@@ -711,7 +764,7 @@ void GModelSpectralLogParabola::init_members(void)
     m_norm.unit("ph/cm2/s/MeV");
     m_norm.scale(1.0);
     m_norm.value(1.0);          // default: 1.0
-    m_norm.min(0.0);            // min:     0.0
+    m_norm.min(0.1);            // min:     0.0
     m_norm.free();
     m_norm.gradient(0.0);
     m_norm.hasgrad(true);
@@ -726,10 +779,11 @@ void GModelSpectralLogParabola::init_members(void)
     m_index.gradient(0.0);
     m_index.hasgrad(true);
 
+    // Initialise curvature
     m_curvature.clear();
     m_curvature.name("Curvature");
     m_curvature.scale(1.0);
-    m_curvature.value(-.1);        // default: -2.0
+    m_curvature.value(-0.1);        // default: -2.0
     m_curvature.range(-10.0,+10.0); // range:   [-10,+10]
     m_curvature.free();
     m_curvature.gradient(0.0);
@@ -751,6 +805,13 @@ void GModelSpectralLogParabola::init_members(void)
     m_pars.push_back(&m_index);
     m_pars.push_back(&m_curvature);
     m_pars.push_back(&m_pivot);
+
+    // Initialise MC cache
+    m_mc_emin       = 0.0;
+    m_mc_emax       = 0.0;
+    m_mc_exponent   = 0.0;
+    m_mc_pow_emin   = 0.0;
+    m_mc_pow_ewidth = 0.0;
 
     // Return
     return;
@@ -777,6 +838,13 @@ void GModelSpectralLogParabola::copy_members(const GModelSpectralLogParabola& mo
     m_pars.push_back(&m_curvature);
     m_pars.push_back(&m_pivot);
 
+    // Copy MC cache
+    m_mc_emin       = model.m_mc_emin;
+    m_mc_emax       = model.m_mc_emax;
+    m_mc_exponent   = model.m_mc_exponent;
+    m_mc_pow_emin   = model.m_mc_pow_emin;
+    m_mc_pow_ewidth = model.m_mc_pow_ewidth;
+
     // Return
     return;
 }
@@ -790,3 +858,60 @@ void GModelSpectralLogParabola::free_members(void)
     // Return
     return;
 }
+
+/***********************************************************************//**
+ * @brief Update Monte Carlo pre computation cache
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Updates the precomputation cache for Monte Carlo simulations.
+ ***************************************************************************/
+void GModelSpectralLogParabola::update_mc_cache(const GEnergy& emin,
+                                            const GEnergy& emax) const
+
+{
+	// Only update if boundaries have changed
+	if(emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax){
+		m_mc_emin       = emin.MeV();
+		m_mc_emax       = emax.MeV();
+
+		// Find a corresponding power law with the criterion: Plaw > LogParabola in the given interval
+	    double index_pl;
+
+		// checking the sign of spectrum curvature
+		if(curvature() < 0){
+
+			// Use the spectral index of the logarithmic center of the interval
+			double e_center = std::pow(10,(std::log10(emin.MeV())+std::log10(emax.MeV()))/2);
+			index_pl = index()+curvature()*std::log(e_center/pivot());
+		}
+
+		else{
+
+			// Use a power law which connects the ends of the convex, curved model
+			double y1 = std::pow(emin.MeV()/pivot(),index()+curvature()*std::log(emin.MeV()/pivot()));
+			double y2 = std::pow(emax.MeV()/pivot(),index()+curvature()*std::log(emax.MeV()/pivot()));
+
+			// Plaw index defined by the slope of a straight line in the log-log-plane
+			index_pl = (std::log(y2)-std::log(y1))/(std::log(emax.MeV())-std::log(emin.MeV()));
+		}
+
+		if(index_pl != -1.0){
+			m_mc_exponent = index_pl + 1.0;
+			m_mc_pow_emin   = std::pow(emin.MeV(), m_mc_exponent);
+			m_mc_pow_ewidth = std::pow(emax.MeV(), m_mc_exponent) - m_mc_pow_emin;
+		}
+
+		else {
+			m_mc_exponent   = 0.0;
+			m_mc_pow_emin   = std::log(emin.MeV());
+			m_mc_pow_ewidth = std::log(emax.MeV()) - m_mc_pow_emin;
+		}
+
+	}
+
+    // Return
+    return;
+}
+
