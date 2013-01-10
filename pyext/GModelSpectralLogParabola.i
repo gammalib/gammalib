@@ -65,6 +65,7 @@ public:
     double index(void) const;
     double curvature(void) const;
     double pivot(void) const;
+
 };
 
 

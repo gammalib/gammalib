@@ -438,7 +438,6 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
  *
  * Returns Monte Carlo energy by randomly drawing from a power law.
  *
- * @todo To be implemented.
  ***************************************************************************/
 GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
                                       const GEnergy& emax,
@@ -489,10 +488,10 @@ GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
 
 	        // Compute powerlaw at given energy
 	        double e_norm = eng / pivot();
-	        double plaw   = std::pow(e_norm, m_mc_exponent-1.0);
+	        double plaw   = m_mc_norm*std::pow(eng/pivot(), m_mc_exponent-1.0);
 
 	        // Compute logparabola at given energy
-	        double logparabola = plaw * std::pow(e_norm,curvature()*std::log(e_norm));
+	        double logparabola = norm()*std::pow(e_norm,index()+curvature()*std::log(e_norm));
 
 	        // Compute acceptance fraction
 	        acceptance_fraction = logparabola / plaw;
@@ -596,17 +595,27 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
         }
 
         // Handle index
-        else if (par->attribute("name") == "Index" ||
-        		 par->attribute("name") == "alpha") {
+        else if (par->attribute("name") == "Index"){
             m_index.read(*par);
             npar[1]++;
         }
+        // change sign if index is defined Fermi-like
+        else if(par->attribute("name") == "alpha") {
+        	m_index.read(*par);
+        	m_index.scale(-m_index.scale());
+        	npar[1]++;
+        }
 
-        // Handle index
-        else if (par->attribute("name") == "Curvature" ||
-        		 par->attribute("name") == "beta") {
+        // Handle curvature
+        else if (par->attribute("name") == "Curvature") {
             m_curvature.read(*par);
             npar[2]++;
+        }
+        // change sign if curvature is defined Fermi-like
+        else if(par->attribute("name") == "beta") {
+        	m_curvature.read(*par);
+        	m_curvature.scale(-m_curvature.scale());
+        	npar[2]++;
         }
 
         // Handle pivot energy
@@ -726,7 +735,7 @@ void GModelSpectralLogParabola::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Print LogParabola information
  ***************************************************************************/
 std::string GModelSpectralLogParabola::print(void) const
 {
@@ -812,6 +821,7 @@ void GModelSpectralLogParabola::init_members(void)
     m_mc_exponent   = 0.0;
     m_mc_pow_emin   = 0.0;
     m_mc_pow_ewidth = 0.0;
+    m_mc_norm = 0.0;
 
     // Return
     return;
@@ -821,7 +831,7 @@ void GModelSpectralLogParabola::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] model GModelSpectralPlaw members which should be copied.
+ * @param[in] model GModelSpectralLogParabola members which should be copied.
  ***************************************************************************/
 void GModelSpectralLogParabola::copy_members(const GModelSpectralLogParabola& model)
 {
@@ -844,6 +854,7 @@ void GModelSpectralLogParabola::copy_members(const GModelSpectralLogParabola& mo
     m_mc_exponent   = model.m_mc_exponent;
     m_mc_pow_emin   = model.m_mc_pow_emin;
     m_mc_pow_ewidth = model.m_mc_pow_ewidth;
+    m_mc_norm = model.m_mc_norm;
 
     // Return
     return;
@@ -882,19 +893,20 @@ void GModelSpectralLogParabola::update_mc_cache(const GEnergy& emin,
 		// checking the sign of spectrum curvature
 		if(curvature() < 0){
 
-			// Use the spectral index of the logarithmic center of the interval
-			double e_center = std::pow(10,(std::log10(emin.MeV())+std::log10(emax.MeV()))/2);
-			index_pl = index()+curvature()*std::log(e_center/pivot());
+			// Use the spectral index at the pivot energy of the LogParabola
+			index_pl = index();
+			m_mc_norm = norm();
 		}
 
 		else{
-
 			// Use a power law which connects the ends of the convex, curved model
-			double y1 = std::pow(emin.MeV()/pivot(),index()+curvature()*std::log(emin.MeV()/pivot()));
-			double y2 = std::pow(emax.MeV()/pivot(),index()+curvature()*std::log(emax.MeV()/pivot()));
 
 			// Plaw index defined by the slope of a straight line in the log-log-plane
-			index_pl = (std::log(y2)-std::log(y1))/(std::log(emax.MeV())-std::log(emin.MeV()));
+			index_pl = std::log(eval(emin)/eval(emax))/std::log(emin.MeV()/emax.MeV());
+
+			// Plaw norm defined such that Plaw = LogParabola at emin
+			m_mc_norm = eval(emin)/std::pow(emin.MeV()/pivot(),index_pl);
+
 		}
 
 		if(index_pl != -1.0){
