@@ -58,7 +58,9 @@ class GModelSpectralLogParabola : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralLogParabola(void);
-    explicit GModelSpectralLogParabola(const double& norm, const double& index, const double &curvature);
+    explicit GModelSpectralLogParabola(const double& norm,
+                                       const double& index,
+                                       const double &curvature);
     explicit GModelSpectralLogParabola(const GXmlElement& xml);
     GModelSpectralLogParabola(const GModelSpectralLogParabola& model);
     virtual ~GModelSpectralLogParabola(void);
@@ -142,7 +144,7 @@ protected:
     mutable double m_mc_exponent;   //!< Exponent (index+1)
     mutable double m_mc_pow_emin;   //!< Power of minimum energy
     mutable double m_mc_pow_ewidth; //!< Power of energy width
-    mutable double m_mc_norm; 	//!< Norm of powerlaw model at logparabola pivot energy
+    mutable double m_mc_norm; 	    //!< Norm of powerlaw model at logparabola pivot energy
 };
 
 #endif /* GMODELSPECTRALLOGPARABOLA_HPP */

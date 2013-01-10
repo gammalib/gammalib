@@ -599,7 +599,8 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
             m_index.read(*par);
             npar[1]++;
         }
-        // change sign if index is defined Fermi-like
+
+        // Change sign if index is defined Fermi-like
         else if(par->attribute("name") == "alpha") {
         	m_index.read(*par);
         	m_index.scale(-m_index.scale());
@@ -611,7 +612,8 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
             m_curvature.read(*par);
             npar[2]++;
         }
-        // change sign if curvature is defined Fermi-like
+
+        // Change sign if curvature is defined Fermi-like
         else if(par->attribute("name") == "beta") {
         	m_curvature.read(*par);
         	m_curvature.scale(-m_curvature.scale());
@@ -821,7 +823,7 @@ void GModelSpectralLogParabola::init_members(void)
     m_mc_exponent   = 0.0;
     m_mc_pow_emin   = 0.0;
     m_mc_pow_ewidth = 0.0;
-    m_mc_norm = 0.0;
+    m_mc_norm       = 0.0;
 
     // Return
     return;
@@ -854,7 +856,7 @@ void GModelSpectralLogParabola::copy_members(const GModelSpectralLogParabola& mo
     m_mc_exponent   = model.m_mc_exponent;
     m_mc_pow_emin   = model.m_mc_pow_emin;
     m_mc_pow_ewidth = model.m_mc_pow_ewidth;
-    m_mc_norm = model.m_mc_norm;
+    m_mc_norm       = model.m_mc_norm;
 
     // Return
     return;
@@ -884,24 +886,28 @@ void GModelSpectralLogParabola::update_mc_cache(const GEnergy& emin,
 {
 	// Only update if boundaries have changed
 	if(emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax){
-		m_mc_emin       = emin.MeV();
-		m_mc_emax       = emax.MeV();
 
-		// Find a corresponding power law with the criterion: Plaw > LogParabola in the given interval
+        // Store energy boundaries
+		m_mc_emin = emin.MeV();
+		m_mc_emax = emax.MeV();
+
+		// Find a corresponding power law with the criterion
+        // Plaw > LogParabola in the given interval
 	    double index_pl;
 
-		// checking the sign of spectrum curvature
-		if(curvature() < 0){
+		// Checking the sign of spectrum curvature
+		if (curvature() < 0) {
 
 			// Use the spectral index at the pivot energy of the LogParabola
-			index_pl = index();
+			index_pl  = index();
 			m_mc_norm = norm();
 		}
+		else {
+			// Use a power law which connects the ends of the convex,
+            // curved model
 
-		else{
-			// Use a power law which connects the ends of the convex, curved model
-
-			// Plaw index defined by the slope of a straight line in the log-log-plane
+			// Plaw index defined by the slope of a straight line in the
+            // log-log-plane
 			index_pl = std::log(eval(emin)/eval(emax))/std::log(emin.MeV()/emax.MeV());
 
 			// Plaw norm defined such that Plaw = LogParabola at emin
@@ -909,12 +915,12 @@ void GModelSpectralLogParabola::update_mc_cache(const GEnergy& emin,
 
 		}
 
-		if(index_pl != -1.0){
-			m_mc_exponent = index_pl + 1.0;
+        // Set precomputation cache
+		if (index_pl != -1.0) {
+			m_mc_exponent   = index_pl + 1.0;
 			m_mc_pow_emin   = std::pow(emin.MeV(), m_mc_exponent);
 			m_mc_pow_ewidth = std::pow(emax.MeV(), m_mc_exponent) - m_mc_pow_emin;
 		}
-
 		else {
 			m_mc_exponent   = 0.0;
 			m_mc_pow_emin   = std::log(emin.MeV());
@@ -926,4 +932,3 @@ void GModelSpectralLogParabola::update_mc_cache(const GEnergy& emin,
     // Return
     return;
 }
-

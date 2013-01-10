@@ -39,7 +39,9 @@ class GModelSpectralLogParabola : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralLogParabola(void);
-    explicit GModelSpectralLogParabola(const double& norm, const double& index,const double& curvature);
+    explicit GModelSpectralLogParabola(const double& norm,
+                                       const double& index,
+                                       const double& curvature);
     explicit GModelSpectralLogParabola(const GXmlElement& xml);
     GModelSpectralLogParabola(const GModelSpectralLogParabola& model);
     virtual ~GModelSpectralLogParabola(void);
