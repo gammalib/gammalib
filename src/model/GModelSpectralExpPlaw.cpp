@@ -792,7 +792,7 @@ void GModelSpectralExpPlaw::init_members(void)
     m_ecut.unit("MeV");
     m_ecut.scale(1.0);
     m_ecut.value(1000.0);       // default: 1000.0
-    m_norm.min(0.1);            // min:     0.1
+    m_ecut.min(0.1);            // min:     0.1
     m_ecut.free();
     m_ecut.gradient(0.0);
     m_ecut.hasgrad(true);
