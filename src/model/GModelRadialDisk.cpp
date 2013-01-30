@@ -217,16 +217,16 @@ GModelRadialDisk* GModelRadialDisk::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function (in units of sr^-1)
  *
- * @param[in] theta Angular distance from shell centre (radians).
+ * @param[in] theta Angular distance from disk centre (radians).
  *
  * Evaluates the spatial part for a disk source model. The disk source
  * model is a radial function \f$f(\theta)\f$, where \f$\theta\f$ is the
- * angular separation between shell centre and the actual location:
+ * angular separation between disk centre and the actual location:
  * \f[
  * f(\theta) = \left \{
  *  \begin{array}{l l}
  *     \displaystyle
- *     2 \pi ( 1 - \cos(\theta))
+ *     {\tt m\_norm}
  *     & \mbox{if $\theta \le $ radius} \\
  *     \\
  *    \displaystyle
@@ -234,6 +234,8 @@ GModelRadialDisk* GModelRadialDisk::clone(void) const
  *  \end{array}
  *  \right .
  * \f]
+ * \f${\tt m\_norm}\f$ is a normalization constant
+ * (see the update() method).
  ***************************************************************************/
 double GModelRadialDisk::eval(const double& theta) const
 {
@@ -263,7 +265,7 @@ double GModelRadialDisk::eval(const double& theta) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients (in units of sr^-1)
  *
- * @param[in] theta Angular distance from shell centre (radians).
+ * @param[in] theta Angular distance from disk centre (radians).
  *
  * Evaluates the function value. No gradient computation is implemented as
  * radial models will be convolved with the instrument response and thus
@@ -478,7 +480,7 @@ void GModelRadialDisk::init_members(void)
     m_pars.push_back(&m_radius);
 
     // Initialise precomputation cache. Note that zero values flag
-    // uninitialised as a zero radius and width shell is not meaningful
+    // uninitialised as a zero radius is not meaningful
     m_last_radius = 0.0;
     m_radius_rad  = 0.0;
     m_norm        = 0.0;
@@ -527,6 +529,11 @@ void GModelRadialDisk::free_members(void)
  *
  * Computes the normalization
  * \f[{\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)}\f]
+ *
+ * Note that this is the correct normalization on the sphere for any
+ * disk radius r. For small r it is very similar to the cartesian
+ * approximation you might have expected:
+ * \f[{\tt m\_norm} = \frac{1}{\pi r ^ 2}\f]
  ***************************************************************************/
 void GModelRadialDisk::update() const
 {
