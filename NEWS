@@ -1,8 +1,8 @@
-New Features and Important Changes in GammaLib 00-07-00
+New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-December, 18th, 2012
+January, 31st, 2013
 
 
 1. Introduction
@@ -13,46 +13,22 @@ changes made since the last release of GammaLib.
 
 2. Configuration
 -----------------
-Dependency tracking has been enabled for the Python interface files,
-so that the Python wrappers will be regenerated automatically upon
-modification of the interface files.
+None
 
 
 3. Application module
 ---------------------
-File locking failures do no longer throw exceptions. This allows to
-operate GammaLib also on systems that do not support file locking.
-Unsupported file locking may occur on some file systems.
-
-The GPar class now handles special values for integer and floating point
-parameters, such as INDEF, NONE, UNDEF, UNDEFINED (for an undefined value)
-and INF, INFINITY, NAN (for values that are not a number). If presence
-of these values can be checked using the isundefined() and the
-isnotanumber() methods. An isvalid() method has been added to check also
-if a parameter value is valid.
+None
 
 
 4. Base module
 --------------
-This new module was introduced to implement interface classes that are
-used to define standard interfaces for GammaLib classes. 
-
-The basis of most classes is the GBase class. This class requires the
-clear, clone, and print methods to be present. The ostream and GLog
-functions are now also implement at the GBase level, hence classes do 
-not need to implement the output streamers anymore. Classes that do not
-derive from GBase are essentially internal classes that are not expected
-to be used by a GammaLib user.
-
-Another fundamental class is GRegistry, from which all registries are
-derived.
+None
 
 
 5. FITS I/O Interface
 ---------------------
-FITS images are now opened using their equivalent data type. This
-ensures that the class that will be used to hold the data has the
-correct precision that avoids data truncation.
+None
 
 
 6. Linear algebra module
@@ -62,17 +38,7 @@ None
 
 7. Model module
 ---------------
-The GSkyModel class has been adapted to the new IRF interface.
-
-The mc(), flux() and eflux() methods have been implement now for all
-spectral models. In particular, simulation of an exponentially cut
-off power law is now possible. The methods now also verify that the
-minimum energy is smaller than the maximum energy. Otherwise, an
-exception is thrown.
-
-The new spectral model GModelSpectralLogParabola has been implemented
-to describe a source with log parabola spectrum. The XML definition
-is compliant with that of Fermi-LAT.
+None
 
 
 8. Numerics module
@@ -82,34 +48,7 @@ None
 
 9. Observation module
 ---------------------
-Added the class GSource which defines a gamma-ray source. This class was
-mainly introduced to simplify the instrument response interface, and
-regroups all attributes that are relative to a gamma-ray source. For the
-moment those comprise the source name, the spatial model, the photon
-energy and the photon arrival time.
-
-A new interface has been defined for all public response function that
-replaces all observed attributes in the interface by the GEvent class
-and all true source attributes by either GPhoton or GSource. This
-considerably reduces the number of interface parameters, allows for an
-easy and transparent interface extension, and prepares the path for
-optimizations.
-
-The GPhotons photon container class has been added. It replaces the
-old std::vector<GPhoton> GPhotons typedef that was used formerly to
-implement a photon container.
-
-The GTime interface has been reworked. GTime now stores time in a reference
-that is native to GammaLib. The zero point of GammaLib's time has been
-defined as January 1, 2010, 00:00:00 (TT). Times are stored in seconds,
-and the time system is Terrestrial Time (TT). Conversion methods are
-provided to transform GTime times into any arbitrary time reference. A
-time reference is implemented using the GTimeReference class. 
-
-The GGti class now stores the time reference, so that GTI's can be read
-and written in any arbitrary time reference. In storage, however, GGti
-stores all time using GTime objects, i.e. storage is in the native
-GammaLib time reference.
+None
 
 
 10. Optimization module
@@ -124,14 +63,7 @@ None
 
 12. Support module
 ------------------
-GNodeArray computations have been optimized in that the last interpolation
-result is cached, and reused if the same value is requested in a subsequent
-call. An unnecessary if statement has also been removed from the bi-section
-method.
-
-Unit tests have been added to check the GNodeArray class. In particular,
-the linear and non-linear interpolation and extrapolation code is now
-validated.
+None
 
 
 13. XML module
@@ -146,33 +78,20 @@ None
 
 15. Multi-wavelength interface
 ------------------------------
-The MWL response was adapted to the new response interface.
+None
 
 
 16. Fermi-LAT interface
 ----------------------
-The Fermi-LAT response was adapted to the new response interface.
-
-The event list reader now takes care of the time conversion from the
-Fermi-LAT time reference to the GammaLib time reference.
+None
 
 
 17. CTA interface
 -----------------
-The CTA response class was refactored. Separate classes have been defined
-to deal with the effective area (GCTAAeff), the point spread function
-(GCTAPsf) and the energy dispersion (GCTAEdisp). Various response formats
-are implemented by derived classes from these abstract base classes.
-This allows now an easy adaption and extension of the response classes.
-
-The CTA response was also adapted to the new response interface.
-
-The CTA event list reader now takes care of the time conversion from the
-CTA time reference to the GammaLib time reference.
+None
 
 
 18. COMPTEL interface
 -----------------
-An interface has been added to deal with data from the COMPTEL telescope
-aboard CGRO. The interface reads the FITS files provides from HEASARC.
+None
 
