@@ -234,8 +234,12 @@ GModelRadialDisk* GModelRadialDisk::clone(void) const
  *  \end{array}
  *  \right .
  * \f]
- * \f${\tt m\_norm}\f$ is a normalization constant
- * (see the update() method).
+ *
+ * where
+ *
+ * \f[ {\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)} \f]
+ *
+ * is a normalization constant (see the update() method).
  ***************************************************************************/
 double GModelRadialDisk::eval(const double& theta) const
 {
@@ -270,6 +274,8 @@ double GModelRadialDisk::eval(const double& theta) const
  * Evaluates the function value. No gradient computation is implemented as
  * radial models will be convolved with the instrument response and thus
  * require the numerical computation of the derivatives.
+ *
+ * See the eval() method for more information.
  ***************************************************************************/
 double GModelRadialDisk::eval_gradients(const double& theta) const
 {
