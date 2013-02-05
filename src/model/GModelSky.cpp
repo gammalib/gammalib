@@ -338,6 +338,9 @@ double GModelSky::eval_gradients(const GEvent& event,
  * GObservation::m_roi member. The integration over the ROI is performed
  * by the GResponse::npred() method.
  *
+ * The method takes care of any instrument dependent scale factors. These
+ * scale factors will be applied to the predicted number of model counts.
+ *
  * @todo The actual method is only correct if no energy and time dispersion
  *       exists. For the moment we set srcEng=obsEng and srcTime=obsTime.
  *       Formally, Equation (2) of the instrument document has to be
@@ -377,6 +380,11 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
                 
         // Compute response
         npred = npred_spatial * npred_spectral * npred_temporal;
+
+        // If required, apply instrument specific model scaling
+        if (!m_scales.empty()) {
+            npred *= scale(obs.instrument()).real_value();
+        }
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
