@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModelPar.cpp  -  Model parameter class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,6 +61,33 @@ GModelPar::GModelPar(void)
     // Initialise members
     init_members();
   
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Parameter constructor
+ *
+ * @param[in] name Parameter name.
+ * @param[in] value Parameter value.
+ * @param[in] scale Parameter scaling (default: 1.0).
+ *
+ * Constructs a model parameter from parameter name, value and scaling. The
+ * real value of the parameter is the specified value times the scaling.
+ ***************************************************************************/
+GModelPar::GModelPar(const std::string& name,
+                     const double&      value,
+                     const double&      scale)
+{
+    // Initialise members
+    init_members();
+
+    // Set attributes
+    this->name(name);
+    this->value(value);
+    this->scale(scale);
+
     // Return
     return;
 }

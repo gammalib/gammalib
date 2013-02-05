@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GModelPar.hpp  -  Model parameter class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,6 +57,8 @@ class GModelPar : public GBase {
 public:
     // Constructors and destructors
     GModelPar(void);
+    GModelPar(const std::string& name, const double& value, 
+              const double& scale = 1.0);
     GModelPar(const GModelPar& par);
     virtual ~GModelPar(void);
 
@@ -111,18 +113,18 @@ protected:
     void free_members(void);
 
     // Proteced data members
-    std::string  m_name;         //!< Parameter name
-    std::string  m_unit;         //!< Parameter unit
-    double       m_value;        //!< Parameter value
-    double       m_error;        //!< Uncertainty in parameter value
-    double       m_gradient;     //!< Model gradient
-    double       m_min;          //!< Parameter minimum
-    double       m_max;          //!< Parameter maximum
-    double       m_scale;        //!< Parameter scale (real = m_value * m_scale)
-    bool         m_free;         //!< Parameter is free
-    bool         m_hasmin;       //!< Parameter has minimum boundary
-    bool         m_hasmax;       //!< Parameter has maximum boundary
-    bool         m_hasgrad;      //!< Parameter has analytic gradient
+    std::string m_name;      //!< Parameter name
+    std::string m_unit;      //!< Parameter unit
+    double      m_value;     //!< Parameter value
+    double      m_error;     //!< Uncertainty in parameter value
+    double      m_gradient;  //!< Model gradient
+    double      m_min;       //!< Parameter minimum
+    double      m_max;       //!< Parameter maximum
+    double      m_scale;     //!< Parameter scale (real = m_value * m_scale)
+    bool        m_free;      //!< Parameter is free
+    bool        m_hasmin;    //!< Parameter has minimum boundary
+    bool        m_hasmax;    //!< Parameter has maximum boundary
+    bool        m_hasgrad;   //!< Parameter has analytic gradient
 };
 
 #endif /* GMODELPAR_HPP */

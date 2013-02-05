@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GModelPar.i  -  Model parameter class Python interface        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,6 +40,8 @@ class GModelPar : public GBase {
 public:
     // Constructors and destructors
     GModelPar(void);
+    GModelPar(const std::string& name, const double& value, 
+              const double& scale = 1.0);
     GModelPar(const GModelPar& par);
     virtual ~GModelPar(void);
 
