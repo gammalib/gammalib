@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GModel.hpp  -  test model class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,37 +18,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GModel.cpp
+ * @brief Test model classes
+ * @author Jean-Baptiste Cayrou
+ */
 
 #ifndef TEST_GMODEL_HPP
 #define TEST_GMODEL_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include "GTools.hpp"
 
+
+/***********************************************************************//**
+ * @class TestGModel
+ *
+ * @brief Test suite for model module testing
+ ***************************************************************************/
 class TestGModel : public GTestSuite
 {
-    public:
-        // Constructors and destructors
-        TestGModel(void) : GTestSuite(){ return; }
-        virtual ~TestGModel(void){ return; }
+public:
+    // Constructors and destructors
+    TestGModel(void) : GTestSuite() {}
+    virtual ~TestGModel(void) {}
 
-        // Methods
-        virtual void set(void);
+    // Methods
+    virtual void set(void);
+    void    test_model_par(void);
+    void    test_model(void);
+    void    test_models(void);
+    void    test_spectral_model(void);
+    void    test_spatial_model(void);
 
-        void test_model_par(void);
-        void test_model(void);
-        void test_models(void);
-        void test_spectral_model(void);
-        void test_spacial_model(void);
+private:        
+    // Private methods
+    void test_xml_model(const std::string& name, const std::string& filename);
+    
     // Private attributes
-    private:
-        std::string m_xml_file;
-        std::string m_xml_model_point_nodes;
-        std::string m_xml_model_spatial_map;
-        
-    //private methods
-        void test_xml_model(const std::string &name, const std::string &filename);
+    std::string m_xml_file;
+    std::string m_xml_model_point_nodes;
+    std::string m_xml_model_spatial_map;
 
 };
 

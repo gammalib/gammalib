@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  test_GModel.cpp  -  test GModel class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file test_GModel.cpp
  * @brief Test model classes
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -33,6 +33,8 @@
 #include <stdexcept>
 #include <stdlib.h>
 #include "test_GModel.hpp"
+#include "GTools.hpp"
+
 
 /***********************************************************************//**
  * @brief Set tests
@@ -48,42 +50,62 @@ void TestGModel::set(void)
     m_xml_model_spatial_map = "data/model_spatial_map.xml";
 
     // Add tests
-    add_test(static_cast<pfunction>(&TestGModel::test_model_par),"Test model parameter handling");
-    add_test(static_cast<pfunction>(&TestGModel::test_model),"Test model handling");
-    add_test(static_cast<pfunction>(&TestGModel::test_models),"Test models");
-    add_test(static_cast<pfunction>(&TestGModel::test_spectral_model),"Test spectral model");
-    add_test(static_cast<pfunction>(&TestGModel::test_spacial_model),"Test spatial model");
+    add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test model parameter handling");
+    add_test(static_cast<pfunction>(&TestGModel::test_model), "Test model handling");
+    add_test(static_cast<pfunction>(&TestGModel::test_models), "Test models");
+    add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model");
+    add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model");
 
     return;
 }
 
+
 /***********************************************************************//**
  * @brief Test model parameter handling.
+ *
+ * Test setting and reading back of parameter value attributes.
  ***************************************************************************/
 void TestGModel::test_model_par(void)
 {
-    // Load unbinned LAT observation
+    // Set model parameter
     GModelPar par;
     par.value(47.01);
     par.error(2.003);
+    par.scale(2.0);
     par.name("Test parameter");
     par.unit("MeV");
-//  std::cout << par << std::endl;
-    par.fix();
-//  std::cout << par << std::endl;
+    par.free();
     par.min(2.0);
-//  std::cout << par << std::endl;
     par.max(200.0);
-//  std::cout << par << std::endl;
     par.remove_min();
-//  std::cout << par << std::endl;
     par.remove_max();
-//  std::cout << par << std::endl;
 
+    // Check parameter access
+    test_value(par.real_value(), 94.02);
+    test_value(par.value(), 47.01);
+    test_value(par.real_error(), 4.006);
+    test_value(par.error(), 2.003);
+    test_value(par.scale(), 2.0);
+    test_assert(par.name() == "Test parameter", "Parameter name");
+    test_assert(par.unit() == "MeV", "Parameter unit");
+    test_assert(par.isfree(), "Parameter freezing");
+    test_assert(par.print() == 
+                "  Test parameter ...........: 94.02 +/- 4.006 MeV (free,scale=2)",
+                "Parameter printing");
+
+    // Set model parameter
+    GModelPar par2("Another test parameter", 3.14, 3.0);
+    test_value(par2.real_value(), 9.42);
+    test_value(par2.value(), 3.14);
+    test_value(par2.scale(), 3.0);
+    test_assert(par2.name() == "Another test parameter", "Parameter name");
+    test_assert(par2.isfree(), "Parameter freezing");
+    test_assert(par2.print() == 
+                "  Another test parameter ...: 9.42 +/- 0  (free,scale=3)",
+                "Parameter printing");
 
     // Exit test
     return;
-
 }
 
 
@@ -107,10 +129,8 @@ void TestGModel::test_model(void)
     }
 
     test_assert((point_source.ra() == 83.6331 && point_source.dec() == +22.0145),
-                           "Test if ra=83.6331 and dec=22.0145",
-                           "Bad values in GModelSpatialPtsrc");
-
-    //std::cout << point_source << std::endl;
+                "Test if ra=83.6331 and dec=22.0145",
+                "Bad values in GModelSpatialPtsrc");
 
     // Setup spectral model
     GModelSpectralPlaw power_law;
@@ -124,9 +144,8 @@ void TestGModel::test_model(void)
     }
 
     test_assert((power_law.norm() == 1.0e-7 && power_law.index() == -2.1),
-                           "Test if norm=1.0e-7 and index=-2.1","Bad values in GModelSpectralPlaw");
-
-    //std::cout << power_law << std::endl;
+                "Test if norm=1.0e-7 and index=-2.1",
+                "Bad values in GModelSpectralPlaw");
 
     // Setup Crab model
     GModelPointSource crab;
@@ -134,14 +153,11 @@ void TestGModel::test_model(void)
     try {
         crab = GModelPointSource(point_source, power_law);
         crab.name("Crab");
-
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
-    //std::cout << crab << std::endl;
 
     // Put model in container
     GModels models;
@@ -150,35 +166,32 @@ void TestGModel::test_model(void)
         models.append(crab);
         models.append(crab);
         models.append(crab);
-
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    //std::cout << models << std::endl;
+    // Set model scaling
+    GModelPar lat("LAT", 1.0);
+    GModelPar cta("CTA", 0.5);
+    crab.scale(lat);
+    crab.scale(lat); // In purpose to check if parameter is appended only once
+    crab.scale(cta);
 
-    // Put container in data
-/*
-    GObservations   data;
-    GLATObservation obs;
-    try {
-        GModels models;
-        models.append(crab);
-        obs.load_unbinned("data/lat/ft1.fits.gz", "data/lat/ft2.fits.gz", "");
-        data.append(obs);
-        data.models(models);
-    }
-    catch (std::exception &e) {
-        std::cout << std::endl << "TEST ERROR: Unable setup GData with GModels." 
-                  << std::endl;
-        std::cout << e.what() << std::endl;
-        throw;
-    }
-    std::cout << ".";
-    //std::cout << data << std::endl;
-*/
+    // Test model scaling
+    test_value(crab.scale("LAT").real_value(), 1.0);
+    test_value(crab.scale("CTA").real_value(), 0.5);
+    test_value(crab.scale("COM").real_value(), 1.0);
+
+    // Test saving and loading
+    GModels models2;
+    models2.append(crab);
+    models2.save("test_instrument.xml");
+    models2.load("test_instrument.xml");
+    test_value(models2[0]->scale("LAT").real_value(), 1.0);
+    test_value(models2[0]->scale("CTA").real_value(), 0.5);
+    test_value(models2[0]->scale("COM").real_value(), 1.0);
 
     // Exit test
     return;
@@ -188,8 +201,14 @@ void TestGModel::test_model(void)
 
 /***********************************************************************//**
  * @brief Test XML model.
+ *
+ * @param[in] name Model name.
+ * @param[in] filename XML model filename.
+ *
+ * Test loading and saving of XML model.
  ***************************************************************************/
-void TestGModel::test_xml_model(const std::string &name, const std::string &filename)
+void TestGModel::test_xml_model(const std::string& name,
+                                const std::string& filename)
 {
     // Test load constructor
     test_try("Test load constructor");
@@ -209,7 +228,6 @@ void TestGModel::test_xml_model(const std::string &name, const std::string &file
         models.load("test.xml");
         models.save("test.xml");
         models.load("test.xml");
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -233,7 +251,7 @@ void TestGModel::test_spectral_model(void)
 /***********************************************************************//**
  * @brief Test spacial model
  ***************************************************************************/
-void TestGModel::test_spacial_model(void)
+void TestGModel::test_spatial_model(void)
 {
     test_xml_model("GModelSpatialMap", m_xml_model_spatial_map);
     return;
