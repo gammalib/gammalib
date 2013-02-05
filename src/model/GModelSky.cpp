@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GModelSky.cpp  -  Abstract sky model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -428,6 +428,9 @@ void GModelSky::read(const GXmlElement& xml)
     // Set instruments
     instruments(xml.attribute("instrument"));
 
+    // Read instrument scales
+    read_scales(xml);
+
     // Set observation identifiers
     ids(xml.attribute("id"));
 
@@ -465,7 +468,7 @@ void GModelSky::write(GXmlElement& xml) const
         src->attribute("name") = name();
         if (spectral() != NULL) src->append(new GXmlElement("spectrum"));
         if (spatial()  != NULL) src->append(new GXmlElement("spatialModel"));
-        xml.append(src);
+        xml.append(src); // Appends pointer
     }
 
     // Set model attributes
@@ -487,6 +490,9 @@ void GModelSky::write(GXmlElement& xml) const
         GXmlElement* spat = static_cast<GXmlElement*>(src->element("spatialModel", 0));
         spatial()->write(*spat);
     }
+
+    // Write instrument scales
+    write_scales(*src);
 
     // Return
     return;
@@ -815,6 +821,11 @@ GModelTemporal* GModelSky::xml_temporal(const GXmlElement& temporal) const
  *
  * This method computes the spatial model component for a given true photon
  * energy and arrival time.
+ *
+ * The method takes care of any instrument dependent scale factors. These
+ * scale factors will be applied to the IRF so that they are correctly
+ * taken into account in the spectral and temporal model gradient
+ * computations.
  ***************************************************************************/
 double GModelSky::spatial(const GEvent& event,
                           const GEnergy& srcEng, const GTime& srcTime,
@@ -838,6 +849,11 @@ double GModelSky::spatial(const GEvent& event,
         // Get IRF value. This method returns the spatial component of the
         // source model.
         double irf = rsp->irf(event, source, obs);
+
+        // If required, apply instrument specific model scaling
+        if (!m_scales.empty()) {
+            irf *= scale(obs.instrument()).real_value();
+        }
 
         // Case A: evaluate gradients
         if (grad) {
