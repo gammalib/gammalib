@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.cpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,6 +35,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                                  "GModel::operator[](int&)"
 #define G_ACCESS2                          "GModel::operator[](std::string&)"
+#define G_WRITE_SCALES                   "GModel::write_scales(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -315,6 +316,81 @@ void GModel::instruments(const std::string& instruments)
 
 
 /***********************************************************************//**
+ * @brief Returns model scale factor for a given instrument
+ *
+ * @param[in] instrument Instrument.
+ *
+ * Returns the model scale factor for a given instrument. If the instrument
+ * name is not found, the method returns a scale factor of unity.
+ ***************************************************************************/
+GModelPar GModel::scale(const std::string& instrument) const
+{
+    // Convert instrument to upper case string
+    std::string uinstrument = toupper(strip_whitespace(instrument));
+
+    // Initialise unit scale factor
+    GModelPar scale;
+    scale.real_value(1.0);
+    scale.name(uinstrument);
+    scale.fix();
+
+    // Search for instrument and recover scale factor if the instrument
+    // has been found.
+    for (int i = 0; i < m_scales.size(); ++i) {
+        if (m_scales[i].name() == uinstrument) {
+            scale = m_scales[i];
+            break;
+        }
+    }
+
+    // Return scale factor
+    return scale;
+}
+
+
+/***********************************************************************//**
+ * @brief Set model scale factor for a given instrument
+ *
+ * @param[in] par Model parameter for scaling.
+ *
+ * Sets the model parameter for a given instrument. The instrument name will
+ * be determined from the model parameter name. The model parameter name
+ * will be converted to upper case and any leading and trailing whitespace
+ * will be stripped.
+ *
+ * If the instrument is not yet defined it will be appended to the list of
+ * instruments.
+ ***************************************************************************/
+void GModel::scale(const GModelPar& par)
+{
+    // Convert instrument to upper case string
+    std::string uinstrument = toupper(strip_whitespace(par.name()));
+
+    // Search for instrument and copy the model parameter if the instrument
+    // has been found. Make sure that the instrument name is in upper case.
+    bool found = false;
+    for (int i = 0; i < m_scales.size(); ++i) {
+        if (m_scales[i].name() == uinstrument) {
+            found       = true;
+            m_scales[i] = par;
+            m_scales[i].name(uinstrument);
+            break;
+        }
+    }
+
+    // If instrument has not been found then append it now to the list
+    // of instruments.
+    if (!found) {
+        m_scales.push_back(par);
+        m_scales[m_scales.size()-1].name(uinstrument);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Returns observation identifiers to which model applies
  *
  * Returns a comma separated list of observation identifiers to which model
@@ -443,6 +519,7 @@ void GModel::init_members(void)
     // Initialise members
     m_name.clear();
     m_instruments.clear();
+    m_scales.clear();
     m_ids.clear();
     m_pars.clear();
 
@@ -461,6 +538,7 @@ void GModel::copy_members(const GModel& model)
     // Copy members
     m_name        = model.m_name;
     m_instruments = model.m_instruments;
+    m_scales      = model.m_scales;
     m_ids         = model.m_ids;
     m_pars        = model.m_pars;
 
@@ -480,15 +558,136 @@ void GModel::free_members(void)
 
 
 /***********************************************************************//**
+ * @brief Read instrument scales from XML element
+ *
+ * @param[in] xml XML source element.
+ *
+ * Reads the instrument scale factors from a tag with the following format
+ *
+ *      <scaling>
+ *         <instrument name="LAT" scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
+ *         <instrument name="CTA" scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
+ *      </scaling>
+ * 
+ * The  name of each instrument will be converted to upper case and any
+ * leading or trailing whitespace will be removed. 
+ *
+ * If no scaling tag is found, all instrument scale factors will be cleared.
+ ***************************************************************************/
+void GModel::read_scales(const GXmlElement& xml)
+{
+    // Clear any existing scales
+    m_scales.clear();
+
+    // Continue only if there is a <scaling> tag
+    if (xml.elements("scaling") != 0) {
+
+        // Get pointer on first instrument scale factors
+        GXmlElement* scales = static_cast<GXmlElement*>(xml.element("scaling", 0));
+
+        // Determine number of scale factors
+        int nscales = scales->elements("instrument");
+
+        // Read all scale factors
+        for (int i = 0; i < nscales; ++i) {
+            GXmlElement* par =
+                static_cast<GXmlElement*>(scales->element("instrument", i));
+            GModelPar scale;
+            scale.read(*par);
+            scale.name(toupper(strip_whitespace(par->attribute("name"))));
+            m_scales.push_back(scale);
+        }
+
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write instrument scales into XML element
+ *
+ * @param[in] xml XML source element.
+ *
+ * @exception GException::model_invalid_parnum
+ *            Invalid number of instrument tags found in XML element.
+ *
+ * If there are instrument scale factors then add a tag with the following
+ * format to the XML element:
+ *
+ *      <scaling>
+ *         <instrument name="LAT" scale="1" min="0.1" max="10" value="1.0" free="0"/>
+ *         <instrument name="CTA" scale="1" min="0.1" max="10" value="0.5" free="0"/>
+ *      </scaling>
+ ***************************************************************************/
+void GModel::write_scales(GXmlElement& xml) const
+{
+    // Continue only is scale factors are present
+    if (!m_scales.empty()) {
+
+        // Get number of instruments
+        int num = m_scales.size();
+
+        // Initialise scaling tag
+        GXmlElement* scale = NULL;
+
+        // If no <scaling> tag exists then add one now with the required
+        // number of instruments ...
+        if (xml.elements("scaling") == 0) {
+            scale = new GXmlElement("scaling");
+            for (int i = 0; i < num; ++i) {
+                scale->append(new GXmlElement("instrument"));
+            }
+            xml.append(scale);
+        }
+
+        // ... otherwise get first tag
+        else {
+            scale = static_cast<GXmlElement*>(xml.element("scaling", 0));
+        }
+
+        // Verify that scaling tag  has the required number of instruments
+        if (scale->elements() != num || scale->elements("instrument") != num) {
+            throw GException::model_invalid_parnum(G_WRITE_SCALES, *scale,
+                  "Instrument scaling needs "+str(num)+" instrument tags.");
+        }
+
+        // Write all instruments
+        for (int i = 0; i < num; ++i) {
+
+            // Get instrument element
+            GXmlElement* inst = static_cast<GXmlElement*>(scale->element("instrument", i));
+
+            // Set instrument name
+            inst->attribute("name", m_scales[i].name());
+
+            // Write instrument scaling factor
+            m_scales[i].write(*inst);
+
+        } // endfor: looped over all instruments
+
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print model attributes
+ *
+ * @return Returns string with model attributes.
  ***************************************************************************/
 std::string GModel::print_attributes(void) const
 {
     // Initialise result string
     std::string result;
 
-    // Append model
+    // Append model name
     result.append(parformat("Name")+name());
+
+    // Append instruments
     result.append("\n"+parformat("Instruments"));
     if (!m_instruments.empty()) {
         for (int i = 0; i < m_instruments.size(); ++i) {
@@ -501,6 +700,25 @@ std::string GModel::print_attributes(void) const
     else {
         result.append("all");
     }
+
+    // Append instrument scale factors
+    result.append("\n"+parformat("Instrument scale factors"));
+    if (!m_scales.empty()) {
+        for (int i = 0; i < m_scales.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(m_scales[i].name());
+            result.append("=");
+            result.append(str(m_scales[i].real_value()));
+        }
+        result.append(", others unity");
+    }
+    else {
+        result.append("unity");
+    }
+
+    // Append observation identifiers
     result.append("\n"+parformat("Observation identifiers"));
     if (!m_ids.empty()) {
         for (int i = 0; i < m_ids.size(); ++i) {

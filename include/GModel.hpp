@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.hpp - Abstract virtual model base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -97,6 +97,8 @@ public:
     void                name(const std::string& name) { m_name=name; }
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
+    GModelPar           scale(const std::string& instrument) const;
+    void                scale(const GModelPar& par);
     std::string         ids(void) const;
     void                ids(const std::string& ids);
     bool                isvalid(const std::string& instruments,
@@ -107,11 +109,14 @@ protected:
     void         init_members(void);
     void         copy_members(const GModel& model);
     void         free_members(void);
+    void         read_scales(const GXmlElement& xml);
+    void         write_scales(GXmlElement& xml) const;
     std::string  print_attributes(void) const;
 
     // Proteced members
     std::string              m_name;         //!< Model name
     std::vector<std::string> m_instruments;  //!< Instruments to which model applies
+    std::vector<GModelPar>   m_scales;       //!< Model instrument scale factors
     std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
 };

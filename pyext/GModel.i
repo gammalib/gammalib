@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GModel.i - Abstract virtual model base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,6 +63,8 @@ public:
     void                name(const std::string& name);
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
+    GModelPar           scale(const std::string& instrument) const;
+    void                scale(const GModelPar& par);
     std::string         ids(void) const;
     void                ids(const std::string& ids);
     bool                isvalid(const std::string& instruments,
