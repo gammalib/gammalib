@@ -176,7 +176,7 @@ std::string GSPIInstDir::print(void) const
     // Append header
     result.append("=== GSPIInstDir ===");
 
-    // TODO: Append any other relevat information
+    // TODO: Append any other relevant information
 
     // Return result
     return result;

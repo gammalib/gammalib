@@ -39,11 +39,15 @@
  * @class GSPIEventBin
  *
  * @brief SPI event bin class
+ *
+ * This class defines an event bin of the SPI data space. The class holds
+ * pointers to the bin attributes, and allocates memory so that all bin
+ * attributes have an associated memory space. With this technique, the class
+ * can be used to hold information that is external to GSPIEventBin. The
+ * GSPIEventCube class will use this property to directly manipulate the
+ * pointers of the bin.
  ***************************************************************************/
 class GSPIEventBin : public GEventBin {
-
-    // Friend classes
-    //friend class GSPIEventCube;
 
 public:
     // Constructors and destructors
@@ -73,12 +77,12 @@ protected:
     void free_members(void);
 
     // Protected members
-    bool         m_alloc;       //!< Signals proper memory allocation
-    int          m_index;       //!< Dataspace index
-    double*      m_counts;      //!< Pointer to number of counts
-    GSPIInstDir* m_dir;         //!< Pointer to bin direction
-    GEnergy*     m_energy;      //!< Pointer to bin energy
-    GTime*       m_time;        //!< Pointer to bin time
+    bool         m_alloc;    //!< Signals memory allocation by object
+    int          m_index;    //!< Dataspace index (-1 if not used)
+    double*      m_counts;   //!< Pointer to number of counts
+    GSPIInstDir* m_dir;      //!< Pointer to bin direction
+    GEnergy*     m_energy;   //!< Pointer to bin energy
+    GTime*       m_time;     //!< Pointer to bin time
 };
 
 #endif /* GSPIEVENTBIN_HPP */

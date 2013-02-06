@@ -223,6 +223,8 @@ std::string GSPIPointing::print(void) const
 
     // Append header
     result.append("=== GSPIPointing ===");
+
+    // Append pointing information
     result.append("\n"+parformat("Pointing direction")+this->dir().print());
 
     // Return result

@@ -29,13 +29,7 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
-#include "GFits.hpp"
-#include "GCaldb.hpp"
 #include "GSPIResponse.hpp"
-#include "GSPIObservation.hpp"
-#include "GSPIEventBin.hpp"
-#include "GSPIInstDir.hpp"
-#include "GSPIException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -236,7 +230,7 @@ double GSPIResponse::npred(const GPhoton&      photon,
 
 
 /***********************************************************************//**
- * @brief Print SPIPTEL response information
+ * @brief Print SPI response information
  *
  * @return String containing SPI response information.
  ***************************************************************************/

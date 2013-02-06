@@ -29,7 +29,6 @@
 #include <config.h>
 #endif
 #include <string>
-#include <cmath>
 #include "GSPIEventBin.hpp"
 #include "GTools.hpp"
 
@@ -53,7 +52,7 @@
  ***************************************************************************/
 GSPIEventBin::GSPIEventBin(void) : GEventBin()
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Return
@@ -68,7 +67,7 @@ GSPIEventBin::GSPIEventBin(void) : GEventBin()
  ***************************************************************************/
 GSPIEventBin::GSPIEventBin(const GSPIEventBin& bin) : GEventBin(bin)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
@@ -171,6 +170,9 @@ GSPIEventBin* GSPIEventBin::clone(void) const
  * @brief Return size of event bin
  *
  * @return Size of event bin (sr MeV s)
+ *
+ * @todo We need to thick about the correct unit for the event bin size
+ * for the SPI telescope. Not sure that "sr" applies here ...
  ***************************************************************************/
 double GSPIEventBin::size(void) const
 {
@@ -232,9 +234,9 @@ std::string GSPIEventBin::print(void) const
  * @brief Initialise class members
  *
  * This method allocates memory for all event bin attributes and intialises
- * the attributes to well defined initial values.
- * 
- * The method assumes that on entry no memory is hold by the member pointers.
+ * the attributes to well defined initial values. The m_alloc member signals
+ * that memory has been allocated, so that memory will be freed upon object
+ * destruction.
  ***************************************************************************/
 void GSPIEventBin::init_members(void)
 {
@@ -245,7 +247,7 @@ void GSPIEventBin::init_members(void)
     m_time   = new GTime;
 
     // Initialise members
-    m_alloc   = true;
+    m_alloc   = true; // Signals that memory has been allocated
     m_index   = -1;   // Signals that event bin does not correspond to cube
     *m_counts = 0.0;
     m_dir->clear();
@@ -286,7 +288,7 @@ void GSPIEventBin::copy_members(const GSPIEventBin& bin)
  * bin), or upon destruction of the object.
  *
  * Note that some logic has been implemented that frees only memory that also
- * has indeed been allocated by the class. Thus if the class only serves as
+ * has indeed been allocated by the object. Thus if the object only serves as
  * container to hold memory pointer allocated by someone else (for example
  * the GSPIEventCube class), no memory is freed.
  ***************************************************************************/
