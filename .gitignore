@@ -74,3 +74,4 @@ test/test_LAT
 test/test_MWL
 test/test_CTA
 test/test_COM
+test/test_SPI
