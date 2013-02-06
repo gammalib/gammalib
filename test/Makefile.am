@@ -41,11 +41,20 @@ if WITH_INST_COM
   test_COM_CPPFLAGS = @CPPFLAGS@
   test_COM_LDADD = $(top_srcdir)/src/libgamma.la
 endif
+if WITH_INST_SPI
+  INST_SPI = test_SPI
+  INCL_SPI = -I$(top_srcdir)/inst/spi/include
+  TEST_SPI = :$(top_srcdir)/inst/spi/test
+  test_SPI_SOURCES = $(top_srcdir)/inst/spi/test/test_SPI.cpp
+  test_SPI_LDFLAGS = @LDFLAGS@
+  test_SPI_CPPFLAGS = @CPPFLAGS@
+  test_SPI_LDADD = $(top_srcdir)/src/libgamma.la
+endif
 
 # Optional python bindings
 if WITH_PYTHON
   TEST_PYTHON_SCRIPT = test_python.py
-  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT):$(PYTHONPATH)
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT)$(TEST_COM)$(TEST_SPI):$(PYTHONPATH)
 endif
 
 # Darwin support
@@ -59,7 +68,8 @@ INCLUDES = -I$(top_srcdir)/include \
            $(INCL_MWL) \
            $(INCL_CTA) \
            $(INCL_LAT) \
-           $(INCL_COM)
+           $(INCL_COM) \
+           $(INCL_SPI)
 
 # Test programs (those will be compiled)
 check_PROGRAMS = test_GSupport \
@@ -75,7 +85,7 @@ check_PROGRAMS = test_GSupport \
                  test_GSky \
                  test_GOptimizer \
                  test_GObservation \
-                 $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM)
+                 $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) $(INST_SPI)
 
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
@@ -95,7 +105,7 @@ TESTS = test_GSupport \
         test_GSky \
         test_GOptimizer \
         test_GObservation \
-        $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) \
+        $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) $(INST_SPI) \
         $(TEST_PYTHON_SCRIPT)
 
 # Standard test sources and links

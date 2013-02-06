@@ -1,7 +1,7 @@
 #############################################################################
 # Disutils setup file for gammalib Python extension module                  #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2012 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2013 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -124,6 +124,9 @@ if '@WITH_INST_LAT_TRUE@' != '#':
 if '@WITH_INST_COM_TRUE@' != '#':
 	sys.stdout.write("Include COMPTEL instrument interface in gammalib Python bindings.\n")
 	inst_modules.append('com')
+if '@WITH_INST_SPI_TRUE@' != '#':
+	sys.stdout.write("Include SPI instrument interface in gammalib Python bindings.\n")
+	inst_modules.append('spi')
 
 # Set extension definition for core modules
 all_modules = []

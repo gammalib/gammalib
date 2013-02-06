@@ -61,6 +61,13 @@ try:
 except:
     has_com = False
 
+# Try importing SPI tests
+try:
+    import test_SPI
+    has_spi = True
+except:
+    has_spi = False
+
 
 # ======================== #
 # Main routine entry point #
@@ -134,6 +141,12 @@ if __name__ == '__main__':
         suite_com = test_COM.Test()
         suite_com.set()
         suites.append(suite_com)
+
+    # Optionally handle SPI suite
+    if has_spi:
+        suite_spi = test_SPI.Test()
+        suite_spi.set()
+        suites.append(suite_spi)
 
     # Run test suite
     success = suites.run()

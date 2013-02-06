@@ -42,10 +42,14 @@ endif
 if WITH_INST_COM
   COM_SWIG_TARGETS = gammalib/com_wrap.cpp gammalib/com.py
 endif
+if WITH_INST_SPI
+  SPI_SWIG_TARGETS = gammalib/spi_wrap.cpp gammalib/spi.py
+endif
 INST_SWIG_TARGETS = $(MWL_SWIG_TARGETS) \
                     $(CTA_SWIG_TARGETS) \
                     $(LAT_SWIG_TARGETS) \
-                    $(COM_SWIG_TARGETS)
+                    $(COM_SWIG_TARGETS) \
+                    $(SPI_SWIG_TARGETS)
 
 # Sources that are required for the build. All targets in the list will be built
 # before anything. These are honored by 'make all', 'make check' and 'make install'.
@@ -113,24 +117,24 @@ swig: $(BUILT_SOURCES)
 
 # Rule for MWL module
 if WITH_INST_MWL
-gammalib/mwl.py: gammalib/mwl_wrap.cpp
-gammalib/mwl_wrap.cpp: $(top_srcdir)/inst/mwl/pyext/mwl.i
+#gammalib/mwl.py: gammalib/mwl_wrap.cpp
+gammalib/mwl_wrap.cpp gammalib/mwl.py: $(top_srcdir)/inst/mwl/pyext/mwl.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/mwl.Tpi" -o gammalib/mwl_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/mwl.Tpi" "gammalib/mwl.Pi"; else rm -f "gammalib/mwl.Tpi"; exit 1; fi
 endif
 
 # Rule for CTA module
 if WITH_INST_CTA
-gammalib/cta.py: gammalib/cta_wrap.cpp
-gammalib/cta_wrap.cpp: $(top_srcdir)/inst/cta/pyext/cta.i
+#gammalib/cta.py: gammalib/cta_wrap.cpp
+gammalib/cta_wrap.cpp gammalib/cta.py: $(top_srcdir)/inst/cta/pyext/cta.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/cta.Tpi" -o gammalib/cta_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/cta.Tpi" "gammalib/cta.Pi"; else rm -f "gammalib/cta.Tpi"; exit 1; fi
 endif
 
 # Rule for LAT module
 if WITH_INST_LAT
-gammalib/lat.py: gammalib/lat_wrap.cpp
-gammalib/lat_wrap.cpp: $(top_srcdir)/inst/lat/pyext/lat.i
+#gammalib/lat.py: gammalib/lat_wrap.cpp
+gammalib/lat_wrap.cpp gammalib/lat.py: $(top_srcdir)/inst/lat/pyext/lat.i
 	if $(SWIGCOMPILE) -MMD -MF "gammalib/lat.Tpi" -o gammalib/lat_wrap.cpp -outdir gammalib $<; \
 	then mv -f "gammalib/lat.Tpi" "gammalib/lat.Pi"; else rm -f "gammalib/lat.Tpi"; exit 1; fi
 endif
@@ -139,6 +143,12 @@ endif
 if WITH_INST_COM
 gammalib/com_wrap.cpp gammalib/com.py: $(top_srcdir)/inst/com/pyext/com.i
 	$(SWIG) -c++ -python -Wall -o gammalib/com_wrap.cpp -outdir gammalib $<
+endif
+
+# Rule for SPI module
+if WITH_INST_SPI
+gammalib/spi_wrap.cpp gammalib/spi.py: $(top_srcdir)/inst/spi/pyext/spi.i
+	$(SWIG) -c++ -python -Wall -o gammalib/spi_wrap.cpp -outdir gammalib $<
 endif
 
 endif # HAVE_SWIG

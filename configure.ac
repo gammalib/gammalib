@@ -2,7 +2,7 @@
 # Configuration for GammaLib - a versatile toolbox for high-level analysis  #
 #                              of astronomical gamma-ray data               #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2006-2012 Juergen Knoedlseder                               #
+# Copyright (C) 2006-2013 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -567,6 +567,19 @@ if test "x$with_com" = "xyes"; then
 fi
 AM_CONDITIONAL(WITH_INST_COM, test "x$with_com" = "xyes")
 
+# Checks for SPI interface
+AC_ARG_WITH([spi],
+            [AS_HELP_STRING([--with-spi],
+                            [compile in SPI specific interface [default=yes]])],
+            [],
+            [with_spi=yes])
+if test "x$with_spi" = "xyes"; then
+  AC_CHECK_FILE([inst/spi/Makefile.am],
+                [with_spi=yes],
+                [with_spi=no])
+fi
+AM_CONDITIONAL(WITH_INST_SPI, test "x$with_spi" = "xyes")
+
 
 #############################################################################
 # Checks for header files                                                   #
@@ -878,6 +891,10 @@ if test "x$with_cta" = "xyes"; then
 fi
 if test "x$with_com" = "xyes"; then
   AC_CHECK_FILES([pyext/gammalib/com_wrap.cpp pyext/gammalib/com.py],,
+                 [has_wrappers="no"])
+fi
+if test "x$with_spi" = "xyes"; then
+  AC_CHECK_FILES([pyext/gammalib/spi_wrap.cpp pyext/gammalib/spi.py],,
                  [has_wrappers="no"])
 fi
 if test "x$has_wrappers" = "xno"; then
@@ -1258,6 +1275,9 @@ fi
 if test "x$with_com" = "xyes"; then
   AC_CONFIG_FILES([inst/com/Makefile])
 fi
+if test "x$with_spi" = "xyes"; then
+  AC_CONFIG_FILES([inst/spi/Makefile])
+fi
 AC_OUTPUT
 
 
@@ -1350,6 +1370,11 @@ if test "x$with_com" = "xyes"; then
   echo "  * COMPTEL interface            (yes)"
 else
   echo "  - COMPTEL interface            (no)"
+fi
+if test "x$with_spi" = "xyes"; then
+  echo "  * SPI interface                (yes)"
+else
+  echo "  - SPI interface                (no)"
 fi
 
 # Dump Doxygen information

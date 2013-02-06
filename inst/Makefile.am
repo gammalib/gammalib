@@ -13,7 +13,10 @@ endif
 if WITH_INST_COM
 INST_COM = com
 endif
+if WITH_INST_SPI
+INST_SPI = spi
+endif
 
 # Set sub directories
-SUBDIRS = $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM)
+SUBDIRS = $(INST_MWL) $(INST_CTA) $(INST_LAT) $(INST_COM) $(INST_SPI)
 
