@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{Maths}}
 \newcommand{\doctype}{\mbox{Mathematical Implementation}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{2 January 2011}}
+\newcommand{\calendar}{\mbox{17 February 2013}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -34,6 +34,89 @@
 % Introduction
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+
+This document provides the derivation of some formulae used in \this.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Functions
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Functions}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{King profile}
+
+The King Profile is a commonly used parametrisation of instrument PSFs in astronomy. 
+It is radially symmetric and compared to a simple Gaussian, it allows longer tails in the distribution 
+of events from a point source. 
+The probability density function is defined as follows:
+\begin{equation}
+P(r|\sigma, \gamma) = \frac{1}{2 \pi \sigma^2} \left( 1 - \frac{1}{\gamma} \right)
+\left( 1 + \frac{1}{2 \gamma} \frac{r^2}{\sigma^2} \right)^{-\gamma}
+\end{equation}
+
+To integrate the function we substitute
+\begin{equation}
+u = \frac{r^2}{2 \sigma^2}
+\end{equation}
+which gives
+\begin{equation}
+r dr = \sigma^2 du
+\end{equation}
+and hence
+\begin{equation}
+\frac{1}{2 \pi \sigma^2} \left( 1 - \frac{1}{\gamma} \right)
+\left( 1 + \frac{1}{2 \gamma} \frac{r^2}{\sigma^2} \right)^{-\gamma} r dr =
+\frac{1}{2 \pi \sigma^2} \left( 1 - \frac{1}{\gamma} \right)
+\left( 1 + \frac{u}{\gamma} \right)^{-\gamma} \sigma^2 du
+\end{equation}
+
+The integral is thus given by
+\begin{eqnarray}
+\int_0^{r_{\rm max}} \int_0^{2 \pi} P(r|\sigma, \gamma) r dr d\phi & = &
+\left( 1 - \frac{1}{\gamma} \right) \int_0^{u_{\rm max}} 
+\left( 1 + \frac{u}{\gamma} \right)^{-\gamma} du \nonumber \\
+& = & \left.
+\left( 1 - \frac{1}{\gamma} \right)
+\left(\frac{(\gamma + u) \left( \frac{ \gamma + u}{\gamma} \right)^{-\gamma}}{1-\gamma} \right) 
+\right|_0^{u_{\rm max}} \nonumber \\
+& = & \left.
+\left( \frac{\gamma-1}{\gamma} \right)
+\left(\frac{(\gamma + u) \left( \frac{ \gamma + u}{\gamma} \right)^{-\gamma}}{1-\gamma} \right) 
+\right|_0^{u_{\rm max}} \nonumber \\
+& = & \left.
+-\left(\frac{(\gamma + u) \left( \frac{ \gamma + u}{\gamma} \right)^{-\gamma}}{\gamma} \right) 
+\right|_0^{u_{\rm max}} \nonumber \\
+& = & \left.
+-\left( \frac{ \gamma + u}{\gamma} \right)^{1-\gamma}
+\right|_0^{u_{\rm max}} \nonumber \\
+& = & \left.
+-\left( 1 + \frac{u}{\gamma} \right)^{1-\gamma}
+\right|_0^{u_{\rm max}} \nonumber \\
+& = & 
+-\left( 1 + \frac{u_{\rm max}}{\gamma} \right)^{1-\gamma}
++1 \nonumber \\
+& = & 1 - \left( 1 + \frac{u_{\rm max}}{\gamma} \right)^{1-\gamma}
+\end{eqnarray}
+where
+\begin{equation}
+u_{\rm max} = \frac{r_{\rm max}^2}{2 \sigma^2}
+\end{equation}
+
+To determine the value of $u_{\rm max}$ that corresponds to a given containment fraction $F$,
+the equation
+\begin{equation}
+1 - \left( 1 + \frac{u_{\rm max}}{\gamma} \right)^{1-\gamma} = F
+\end{equation}
+has to be solved for $u_{\rm max}$, resulting in
+\begin{equation}
+u_{\rm max} = \left( \left( 1 - F \right)^{\frac{1}{1-\gamma}} - 1 \right) \gamma
+\end{equation}
+This can be converted into $r_{\rm max}$ using 
+\begin{equation}
+r_{\rm max} = \sigma \sqrt{ 2 u_{\rm max}}
+\end{equation}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
