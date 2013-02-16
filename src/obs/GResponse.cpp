@@ -359,7 +359,7 @@ double GResponse::npred_ptsrc(const GSource& source,
  * @return Integral of extended source model over ROI.
  *
  * This method returns the spatial integral of an extended source model over
- * the region of interest. If the source is not a point source, the method
+ * the region of interest. If the model is not a radial model, the method
  * returns 0.
  ***************************************************************************/
 double GResponse::npred_extended(const GSource& source,
