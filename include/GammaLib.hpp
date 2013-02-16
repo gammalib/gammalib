@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GammaLib.hpp  -  Gamma-Ray Astronomy Library Header file        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -172,7 +172,6 @@
 #include "GModelSpatialMap.hpp"
 #include "GModelSpatialPtsrc.hpp"
 #include "GModelRadial.hpp"
-#include "GModelRadialRegistry.hpp"
 #include "GModelRadialDisk.hpp"
 #include "GModelRadialGauss.hpp"
 #include "GModelRadialShell.hpp"
