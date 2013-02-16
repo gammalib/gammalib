@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelRadialShell.cpp  -  Radial shell source model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Christoph Deil                              *
+ *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialShell.cpp
  * @brief Radial shell model class implementation
- * @author C. Deil
+ * @author Christoph Deil
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,13 +31,13 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelRadialShell.hpp"
-#include "GModelRadialRegistry.hpp"
+#include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelRadialShell    g_radial_shell_seed;
-const GModelRadialRegistry g_radial_shell_registry(&g_radial_shell_seed);
+const GModelRadialShell     g_radial_shell_seed;
+const GModelSpatialRegistry g_radial_shell_registry(&g_radial_shell_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                        "GModelRadialShell::read(GXmlElement&)"

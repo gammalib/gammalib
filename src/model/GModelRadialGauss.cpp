@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelRadialGauss.cpp  -  Radial Gaussian source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialGauss.cpp
  * @brief Radial Gaussian model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -31,13 +31,13 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelRadialGauss.hpp"
-#include "GModelRadialRegistry.hpp"
+#include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelRadialGauss    g_radial_gauss_seed;
-const GModelRadialRegistry g_radial_gauss_registry(&g_radial_gauss_seed);
+const GModelRadialGauss     g_radial_gauss_seed;
+const GModelSpatialRegistry g_radial_gauss_registry(&g_radial_gauss_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                        "GModelRadialGauss::read(GXmlElement&)"
