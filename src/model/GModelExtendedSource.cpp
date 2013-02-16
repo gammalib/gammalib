@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelExtendedSource.hpp  -  Extended source model class         *
+ *        GModelExtendedSource.cpp  -  Extended source model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,7 +32,6 @@
 #include "GException.hpp"
 #include "GModelExtendedSource.hpp"
 #include "GModelRegistry.hpp"
-#include "GModelRadialRegistry.hpp"
 #include "GModelTemporalConst.hpp"
 
 /* __ Globals ____________________________________________________________ */
@@ -41,7 +40,6 @@ const GModelRegistry       g_extendedsource_registry(&g_extendedsource_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_DIR                                   "GModelExtendedSource::dir()"
-#define G_XML_RADIAL         "GModelExtendedSource::xml_radial(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -75,25 +73,10 @@ GModelExtendedSource::GModelExtendedSource(void) : GModelSky()
  * @param[in] xml XML element.
  ***************************************************************************/
 GModelExtendedSource::GModelExtendedSource(const GXmlElement& xml) :
-                      GModelSky()
+                      GModelSky(xml)
 {
     // Initialise members
     init_members();
-
-    // Get pointers on spectrum and spatial model
-    GXmlElement* spec = static_cast<GXmlElement*>(xml.element("spectrum", 0));
-    GXmlElement* rad  = static_cast<GXmlElement*>(xml.element("spatialModel", 0));
-
-    // Allocate constant
-    GModelTemporalConst temporal;
-
-    // Clone spatial and spectral models
-    m_spatial  = xml_radial(*rad);
-    m_spectral = xml_spectral(*spec);
-    m_temporal = temporal.clone();
-
-    // Set parameter pointers
-    set_pointers();
 
     // Return
     return;
@@ -142,17 +125,6 @@ GModelExtendedSource::GModelExtendedSource(const GXmlElement& radial,
 {
     // Initialise members
     init_members();
-
-    // Allocate constant
-    GModelTemporalConst temporal;
-
-    // Clone spatial and spectral models
-    m_spatial  = xml_radial(radial);
-    m_spectral = xml_spectral(spectral);
-    m_temporal = temporal.clone();
-
-    // Set parameter pointers
-    set_pointers();
 
     // Return
     return;
@@ -267,96 +239,6 @@ GModelExtendedSource* GModelExtendedSource::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Read extended model from XML element
- *
- * @param[in] xml XML element.
- ***************************************************************************/
-void GModelExtendedSource::read(const GXmlElement& xml)
-{
-    // Clear model
-    clear();
-
-    // Get pointers on spectrum and spatial model
-    GXmlElement* spec = static_cast<GXmlElement*>(xml.element("spectrum", 0));
-    GXmlElement* rad  = static_cast<GXmlElement*>(xml.element("spatialModel", 0));
-
-    // Allocate constant
-    GModelTemporalConst temporal;
-
-    // Clone spatial and spectral models
-    m_spatial  = xml_radial(*rad);
-    m_spectral = xml_spectral(*spec);
-    m_temporal = temporal.clone();
-
-    // Set model name
-    name(xml.attribute("name"));
-
-    // Set instruments
-    instruments(xml.attribute("instrument"));
-
-    // Set parameter pointers
-    set_pointers();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Write extended model into XML element
- *
- * @param[in] xml XML element.
- ***************************************************************************/
-void GModelExtendedSource::write(GXmlElement& xml) const
-{
-    // Initialise pointer on source
-    GXmlElement* src = NULL;
-
-    // Search corresponding source
-    int n = xml.elements("source");
-    for (int k = 0; k < n; ++k) {
-        GXmlElement* element = static_cast<GXmlElement*>(xml.element("source", k));
-        if (element->attribute("name") == name()) {
-            src = element;
-            break;
-        }
-    }
-
-    // If no source with corresponding name was found then append one
-    if (src == NULL) {
-        src = new GXmlElement("source");
-        src->attribute("name") = name();
-        if (spectral() != NULL) src->append(new GXmlElement("spectrum"));
-        if (spatial()  != NULL) src->append(new GXmlElement("spatialModel"));
-        xml.append(src);
-    }
-
-    // Set model attributes
-    src->attribute("name", name());
-    src->attribute("type", type());
-    std::string instruments = this->instruments();
-    if (instruments.length() > 0) {
-        src->attribute("instrument", instruments);
-    }
-
-    // Write spectral model
-    if (spectral() != NULL) {
-        GXmlElement* spec = static_cast<GXmlElement*>(src->element("spectrum", 0));
-        spectral()->write(*spec);
-    }
-
-    // Write spatial model
-    if (spatial() != NULL) {
-        GXmlElement* rad = static_cast<GXmlElement*>(src->element("spatialModel", 0));
-        spatial()->write(*rad);
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Print model information
  *
  * @return String containing model information.
@@ -412,36 +294,4 @@ void GModelExtendedSource::free_members(void)
 {
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Construct radial model from XML element
- *
- * @param[in] radial XML element.
- *
- * @exception GException::model_invalid_spatial
- *            Invalid radial model type encountered.
- ***************************************************************************/
-GModelRadial* GModelExtendedSource::xml_radial(const GXmlElement& radial) const
-{
-    // Get radial spatial model type
-    std::string type = radial.attribute("type");
-
-    // Get radial spatial model
-    GModelRadialRegistry registry;
-    GModelRadial*        ptr = registry.alloc(type);
-
-    // If model if valid then read model from XML file
-    if (ptr != NULL) {
-        ptr->read(radial);
-    }
-
-    // ... otherwise throw an exception
-    else {
-        throw GException::model_invalid_spatial(G_XML_RADIAL, type);
-    }
-
-    // Return pointer
-    return ptr;
 }
