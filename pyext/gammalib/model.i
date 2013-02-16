@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     model module  -  Python bindings                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,7 +60,6 @@
 %include "GModelSpatialMap.i"
 %include "GModelSpatialPtsrc.i"
 %include "GModelRadial.i"
-%include "GModelRadialRegistry.i"
 %include "GModelRadialDisk.i"
 %include "GModelRadialGauss.i"
 %include "GModelRadialShell.i"

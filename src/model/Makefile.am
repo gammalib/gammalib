@@ -22,7 +22,6 @@ sources = GModelPar.cpp \
           GModelSpatialMap.cpp \
           GModelSpatialPtsrc.cpp \
           GModelRadial.cpp \
-          GModelRadialRegistry.cpp \
           GModelRadialDisk.cpp \
           GModelRadialGauss.cpp \
           GModelRadialShell.cpp \
@@ -34,7 +33,7 @@ sources = GModelPar.cpp \
           GModelSpectralNodes.cpp \
           GModelSpectralPlaw.cpp \
           GModelSpectralPlaw2.cpp \
-	  GModelSpectralLogParabola.cpp \
+          GModelSpectralLogParabola.cpp \
           GModelTemporal.cpp \
           GModelTemporalRegistry.cpp \
           GModelTemporalConst.cpp \
