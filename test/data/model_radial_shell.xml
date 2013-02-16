@@ -1,0 +1,16 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+  <source name="Cen A lobes" type="DiffuseSource">
+    <spectrum type="PowerLaw">
+      <parameter scale="1e-07" name="Prefactor" min="1e-07" max="1000.0" value="1.73" free="1"/>
+      <parameter scale="1.0" name="Index" min="-5.0" max="+5.0" value="-2.1" free="1"/>
+      <parameter scale="1.0" name="Scale" min="10.0" max="1000000.0" value="100.0" free="0"/>
+    </spectrum>
+    <spatialModel type="ShellFunction">
+      <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+      <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+      <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
+      <parameter name="Width"  scale="1.0" value="0.10"    min="0.01" max="10"  free="1"/>
+    </spatialModel>
+  </source>
+</source_library>
