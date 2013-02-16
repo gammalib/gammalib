@@ -45,9 +45,12 @@ void TestGModel::set(void)
     name("GModel");
 
     // Set attributes
-    m_xml_file              = "data/crab.xml";
-    m_xml_model_point_nodes = "data/model_point_nodes.xml";
-    m_xml_model_spatial_map = "data/model_spatial_map.xml";
+    m_xml_file               = "data/crab.xml";
+    m_xml_model_point_nodes  = "data/model_point_nodes.xml";
+    m_xml_model_spatial_map  = "data/model_spatial_map.xml";
+    m_xml_model_radial_disk  = "data/model_radial_disk.xml";
+    m_xml_model_radial_gauss = "data/model_radial_gauss.xml";
+    m_xml_model_radial_shell = "data/model_radial_shell.xml";
 
     // Add tests
     add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test model parameter handling");
@@ -56,6 +59,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model");
     add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model");
 
+    // Return
     return;
 }
 
@@ -220,8 +224,8 @@ void TestGModel::test_xml_model(const std::string& name,
         test_try_failure(e);
     }
 
-    // Test save constructor
-    test_try("Test load constructor");
+    // Test saving and reloading
+    test_try("Test saving and reloading");
     try {
         GModels models(filename);
         models.save("test.xml");
@@ -244,7 +248,10 @@ void TestGModel::test_xml_model(const std::string& name,
  ***************************************************************************/
 void TestGModel::test_spectral_model(void)
 {
+    // Test spectral models XML interface
     test_xml_model("GModelSpectralNodes", m_xml_model_point_nodes);
+
+    // Return
     return;
 }
 
@@ -253,7 +260,13 @@ void TestGModel::test_spectral_model(void)
  ***************************************************************************/
 void TestGModel::test_spatial_model(void)
 {
-    test_xml_model("GModelSpatialMap", m_xml_model_spatial_map);
+    // Test spatial models XML interface
+    test_xml_model("GModelSpatialMap",  m_xml_model_spatial_map);
+    test_xml_model("GModelRadialDisk",  m_xml_model_radial_disk);
+    test_xml_model("GModelRadialGauss", m_xml_model_radial_gauss);
+    test_xml_model("GModelRadialShell", m_xml_model_radial_shell);
+
+    // Return
     return;
 }
 

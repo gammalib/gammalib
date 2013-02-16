@@ -59,7 +59,9 @@ private:
     std::string m_xml_file;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_spatial_map;
-
+    std::string m_xml_model_radial_disk;
+    std::string m_xml_model_radial_gauss;
+    std::string m_xml_model_radial_shell;
 };
 
 #endif /* TEST_GMODEL_HPP */
