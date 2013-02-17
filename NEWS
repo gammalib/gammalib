@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-January, 31st, 2013
+February, 17th, 2013
 
 
 1. Introduction
@@ -38,7 +38,34 @@ None
 
 7. Model module
 ---------------
-None
+The sky models have been reorganized.
+
+GSkyModel is now the general class for a sky model. It is no longer
+abstract. The classes GModelPointSource, GModelExtendedSource and
+GModelDiffuseSource have been removed, as the source type is fully
+determined from the spatial model component.
+
+All spatial model components have now been categorized into 3 classes:
+
+* GModelSpatialPointSource - point source
+* GModelSpatialRadial - extended axisymmetric models
+* GModelSpatialDiffuse - diffuse models
+
+While GModelSpatialPointSource is a normal class, the other 2 classes
+are abstract and serve as the base classes for the various model
+implementations. The following implementations exist:
+
+GModelSpatialRadial
+ |
+ +- GModelSpatialRadialDisk - axisymmetric disk
+ +- GModelSpatialRadialGauss - axisymmetric Gaussian
+ +- GModelSpatialRadialShell - axisymmetric shell
+
+GModelSpatialDiffuse
+ |
+ +- GModelSpatialDiffuseConst - isotropic map
+ +- GModelSpatialDiffuseCube - map cube
+ +- GModelSpatialDiffuseMap - spatial map
 
 
 8. Numerics module
