@@ -33,7 +33,7 @@ def ptsrc_model(ra=0.0, dec=0.0):
     pos.radec_deg(ra, dec)
 
     # Set spatial model
-    spatial = GModelSpatialPtsrc(pos)
+    spatial = GModelSpatialPointSource(pos)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0)
@@ -57,7 +57,7 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
     center.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelRadialShell(center, radius, width, False)
+    radial = GModelSpatialRadialShell(center, radius, width, False)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0)
@@ -81,7 +81,7 @@ def disk_model(ra=359.6, dec=-0.2, radius=0.4):
     center.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelRadialDisk(center, radius)
+    radial = GModelSpatialRadialDisk(center, radius)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0)
@@ -105,7 +105,7 @@ def gauss_model(ra=359.6, dec=+0.1, sigma=0.2):
     center.radec_deg(ra, dec)
 
     # Set radial model
-    radial = GModelRadialGauss(center, sigma)
+    radial = GModelSpatialRadialGauss(center, sigma)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0)
@@ -125,7 +125,7 @@ def diffuse_model(file="../../../test/data/cena_lobes_parkes.fits"):
     Set Diffuse model.
     """
     # Set spatial model
-    spatial = GModelSpatialMap(file)
+    spatial = GModelSpatialDiffuseMap(file)
 
     # Set spectral model
     spectral = GModelSpectralPlaw(1.0, -2.0)

@@ -35,8 +35,8 @@ def gauss(dir, sigma):
     # Compute derivative
     dh = 0.0001
     s  = GSkyDir()
-    f1 = GModelSpatialGauss(s, sigma)
-    f2 = GModelSpatialGauss(s, sigma + dh)
+    f1 = GModelSpatialRadialGauss(s, sigma)
+    f2 = GModelSpatialRadialGauss(s, sigma + dh)
     v1 = f1.eval_gradients(dir)
     g1 = f1[2].gradient()
     v2 = f2.eval_gradients(dir)
@@ -69,7 +69,7 @@ def show_gaussian(sigma):
 
         # Setup gaussian
         skydir = GSkyDir()
-        gauss = GModelRadialGauss(skydir, sigma)
+        gauss  = GModelSpatialRadialGauss(skydir, sigma)
 
         # Create angular axis
         theta = [i * sigma * 0.05 for i in range(50)]

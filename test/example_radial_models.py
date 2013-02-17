@@ -1,8 +1,8 @@
 #! /usr/bin/env python
-# ===========================================================================================#
+# ==========================================================================
 # This script makes an image from a radial model and verifies that the model
 # is correctly normalized.
-# ===========================================================================================#
+# ==========================================================================
 from gammalib import *
 
 
@@ -47,6 +47,6 @@ if __name__ == '__main__':
     center.radec_deg(0.3, 0.1)
 
     # Test models
-    test_radial_model(name='gauss', model=GModelRadialGauss(center, 0.3))
-    test_radial_model(name='disk', model=GModelRadialDisk(center, 0.8))
-    test_radial_model(name='shell', model=GModelRadialShell(center, 0.5, 0.1))
+    test_radial_model(name='gauss', model=GModelSpatialRadialGauss(center, 0.3))
+    test_radial_model(name='disk',  model=GModelSpatialRadialDisk(center, 0.8))
+    test_radial_model(name='shell', model=GModelSpatialRadialShell(center, 0.5, 0.1))
