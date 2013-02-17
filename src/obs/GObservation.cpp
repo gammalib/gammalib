@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GObservation.cpp  -  Abstract observation base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,7 +32,6 @@
 #include "GObservation.hpp"
 #include "GModelSky.hpp"
 #include "GModelData.hpp"
-#include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
 #include "GDerivative.hpp"
 #include "GTools.hpp"
