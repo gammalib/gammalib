@@ -1323,7 +1323,10 @@ std::string GModelSky::print_model(void) const
     result.append(print_attributes());
 
     // Append model type
-    result.append("\n"+parformat("Model type"));
+    result.append("\n"+parformat("Model type")+type());
+
+    // Append model components
+    result.append("\n"+parformat("Model components"));
     if (n_spatial > 0) {
         result.append("\""+spatial()->type()+"\"");
         if (n_spectral > 0 || n_temporal > 0) {
