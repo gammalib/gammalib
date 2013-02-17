@@ -39,7 +39,7 @@ def ptsrc_model(ra=0.0, dec=0.0):
     spectral = GModelSpectralPlaw(1.0, -2.0)
 
     # Set sky model
-    model = GModelPointSource(spatial, spectral)
+    model = GModelSky(spatial, spectral)
 
     # Return model
     return model
@@ -63,7 +63,7 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
     spectral = GModelSpectralPlaw(1.0, -2.0)
 
     # Set sky model
-    model = GModelExtendedSource(radial, spectral)
+    model = GModelSky(radial, spectral)
 
     # Return model
     return model
@@ -87,7 +87,7 @@ def disk_model(ra=359.6, dec=-0.2, radius=0.4):
     spectral = GModelSpectralPlaw(1.0, -2.0)
 
     # Set sky model
-    model = GModelExtendedSource(radial, spectral)
+    model = GModelSky(radial, spectral)
 
     # Return model
     return model
@@ -111,7 +111,7 @@ def gauss_model(ra=359.6, dec=+0.1, sigma=0.2):
     spectral = GModelSpectralPlaw(1.0, -2.0)
 
     # Set sky model
-    model = GModelExtendedSource(radial, spectral)
+    model = GModelSky(radial, spectral)
 
     # Return model
     return model
@@ -131,7 +131,7 @@ def diffuse_model(file="../../../test/data/cena_lobes_parkes.fits"):
     spectral = GModelSpectralPlaw(1.0, -2.0)
 
     # Set sky model
-    model = GModelDiffuseSource(spatial, spectral)
+    model = GModelSky(spatial, spectral)
 
     # Return model
     return model

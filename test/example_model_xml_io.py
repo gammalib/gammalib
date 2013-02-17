@@ -1,8 +1,8 @@
 #!/usr/bin/env python
-# ===========================================================================================#
-# This script builds a set of models, saves the models into an XML file and loads the
-# models back into memory.
-# ===========================================================================================#
+# ==========================================================================
+# This script builds a set of models, saves the models into an XML file and
+# loads the models back into memory.
+# ==========================================================================
 
 """IO example:  GModels <--> XML file"""
 
@@ -20,9 +20,9 @@ center.radec_deg(42.0, 43.0)
 # Normalization:   1.0e-7 ph/cm2/s/MeV @ 100 MeV
 # Spectral index: -2.1
 # ===================================================
-point_spatial = GModelSpatialPtsrc(center)
+point_spatial  = GModelSpatialPtsrc(center)
 point_spectrum = GModelSpectralPlaw(1.0e-7, -2.1)
-point = GModelPointSource(point_spatial, point_spectrum)
+point = GModelSky(point_spatial, point_spectrum)
 point.name('My point source')
 
 #
@@ -31,9 +31,9 @@ point.name('My point source')
 # Normalization:   4.2e-7 ph/cm2/s/MeV @ 100 MeV
 # Spectral index: -2.4
 # ===================================================
-gauss_spatial = GModelRadialGauss(center, 3.0)
+gauss_spatial  = GModelRadialGauss(center, 3.0)
 gauss_spectrum = GModelSpectralPlaw(4.2e-7, -2.4)
-gauss = GModelExtendedSource(gauss_spatial, gauss_spectrum)
+gauss = GModelSky(gauss_spatial, gauss_spectrum)
 gauss.name('My Gaussian source')
 
 #
