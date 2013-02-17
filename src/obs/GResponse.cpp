@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GResponse.cpp - Response abstract base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,7 +37,7 @@
 #include "GSkyDir.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelSpatialPtsrc.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GModelRadial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -168,7 +168,7 @@ double GResponse::irf(const GEvent&       event,
     double irf = 0.0;
 
     // Is model a point source?
-    if (dynamic_cast<const GModelSpatialPtsrc*>(source.model()) != NULL) {
+    if (dynamic_cast<const GModelSpatialPointSource*>(source.model()) != NULL) {
         irf = irf_ptsrc(event, source, obs);
     }
 
@@ -209,8 +209,8 @@ double GResponse::irf_ptsrc(const GEvent&       event,
     double irf = 0.0;
 
     // Get point source spatial model
-    const GModelSpatialPtsrc* src =
-          dynamic_cast<const GModelSpatialPtsrc*>(source.model());
+    const GModelSpatialPointSource* src =
+          dynamic_cast<const GModelSpatialPointSource*>(source.model());
 
     // Continue only if model is valid
     if (src != NULL) {
@@ -292,7 +292,7 @@ double GResponse::npred(const GSource& source, const GObservation& obs) const
     double npred = 0.0;
 
     // Is model a point source?
-    if (dynamic_cast<const GModelSpatialPtsrc*>(source.model()) != NULL) {
+    if (dynamic_cast<const GModelSpatialPointSource*>(source.model()) != NULL) {
         npred = npred_ptsrc(source, obs);
     }
 
@@ -332,8 +332,8 @@ double GResponse::npred_ptsrc(const GSource& source,
     double npred = 0.0;
 
     // Get point source spatial model
-    const GModelSpatialPtsrc* src =
-          dynamic_cast<const GModelSpatialPtsrc*>(source.model());
+    const GModelSpatialPointSource* src =
+          dynamic_cast<const GModelSpatialPointSource*>(source.model());
 
     // Continue only if model is valid
     if (src != NULL) {
