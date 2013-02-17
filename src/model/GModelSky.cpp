@@ -33,7 +33,7 @@
 #include "GModelRegistry.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
@@ -924,13 +924,13 @@ void GModelSky::set_type(void)
     // Continue only if we have a spatial model component
     if (m_spatial != NULL) {
     
-        // Is model a point source?
+        // Is spatial model a point source?
         if (dynamic_cast<const GModelSpatialPointSource*>(m_spatial) != NULL) {
             m_type = "PointSource";
         }
         
-        // ... otherwise, is model an extended source?
-        else if (dynamic_cast<const GModelRadial*>(m_spatial) != NULL) {
+        // ... otherwise, is spatial model a radial source?
+        else if (dynamic_cast<const GModelSpatialRadial*>(m_spatial) != NULL) {
             m_type = "ExtendedSource";
         }
 

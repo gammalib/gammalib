@@ -38,7 +38,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GModelSpatialPointSource.hpp"
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_IRF_EXTENDED         "GResponse::irf_extended(GInstDir&, GEnergy&,"\
@@ -167,13 +167,13 @@ double GResponse::irf(const GEvent&       event,
     // Initialise IRF value
     double irf = 0.0;
 
-    // Is model a point source?
+    // Is spatial model a point source?
     if (dynamic_cast<const GModelSpatialPointSource*>(source.model()) != NULL) {
         irf = irf_ptsrc(event, source, obs);
     }
 
-    // Is model an extended source?
-    else if (dynamic_cast<const GModelRadial*>(source.model()) != NULL) {
+    // Is spatial model a radial source?
+    else if (dynamic_cast<const GModelSpatialRadial*>(source.model()) != NULL) {
         irf = irf_extended(event, source, obs);
     }
 
@@ -291,13 +291,13 @@ double GResponse::npred(const GSource& source, const GObservation& obs) const
     // Initialise Npred value
     double npred = 0.0;
 
-    // Is model a point source?
+    // Is spatial model a point source?
     if (dynamic_cast<const GModelSpatialPointSource*>(source.model()) != NULL) {
         npred = npred_ptsrc(source, obs);
     }
 
-    // Is model an extended source?
-    else if (dynamic_cast<const GModelRadial*>(source.model()) != NULL) {
+    // Is spatial model a radial source?
+    else if (dynamic_cast<const GModelSpatialRadial*>(source.model()) != NULL) {
         npred = npred_extended(source, obs);
     }
 
@@ -369,7 +369,8 @@ double GResponse::npred_extended(const GSource& source,
     double npred = 0.0;
 
     // Get radial model
-    const GModelRadial* src = dynamic_cast<const GModelRadial*>(source.model());
+    const GModelSpatialRadial* src =
+          dynamic_cast<const GModelSpatialRadial*>(source.model());
 
     // Continue only if model is valid
     if (src != NULL) {

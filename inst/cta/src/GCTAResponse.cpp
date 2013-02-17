@@ -879,7 +879,8 @@ double GCTAResponse::irf_extended(const GEvent&       event,
     }
 
     // Get pointer on radial model
-    const GModelRadial* model = dynamic_cast<const GModelRadial*>(source.model());
+    const GModelSpatialRadial* model =
+          dynamic_cast<const GModelSpatialRadial*>(source.model());
     if (model == NULL) {
         throw GCTAException::bad_model_type(G_IRF_EXTENDED);
     }
@@ -1185,7 +1186,8 @@ double GCTAResponse::npred_extended(const GSource& source,
     }
 
     // Get pointer on radial model
-    const GModelRadial* model = dynamic_cast<const GModelRadial*>(source.model());
+    const GModelSpatialRadial* model =
+          dynamic_cast<const GModelSpatialRadial*>(source.model());
     if (model == NULL) {
         throw GCTAException::bad_model_type(G_IRF_EXTENDED);
     }

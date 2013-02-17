@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GModelRadialDisk.hpp  -  Radial disk source model class           *
+ *        GModelRadialDisk.hpp - Radial disk source model class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Christoph Deil                                   *
+ *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialDisk.hpp
  * @brief Radial disk model class interface definition
- * @author C. Deil
+ * @author Christoph Deil
  */
 
 #ifndef GMODELRADIALDISK_HPP
@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GXmlElement.hpp"
@@ -44,7 +44,7 @@
  * model for a disk source, i.e. constant surface brightness within some
  * radius and no emission outside.
  ***************************************************************************/
-class GModelRadialDisk : public GModelRadial {
+class GModelRadialDisk : public GModelSpatialRadial {
 
 public:
     // Constructors and destructors

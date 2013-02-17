@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GModelRadialGauss.hpp  -  Radial Gaussian source model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialGauss.hpp
  * @brief Radial Gaussian model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELRADIALGAUSS_HPP
@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GXmlElement.hpp"
@@ -43,7 +43,7 @@
  * This class implements the spatial component of the factorised source
  * model for a Gaussian source.
  ***************************************************************************/
-class GModelRadialGauss : public GModelRadial {
+class GModelRadialGauss : public GModelSpatialRadial {
 
 public:
     // Constructors and destructors

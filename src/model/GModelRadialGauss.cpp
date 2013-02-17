@@ -59,7 +59,7 @@ const GModelSpatialRegistry g_radial_gauss_registry(&g_radial_gauss_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelRadialGauss::GModelRadialGauss(void) : GModelRadial()
+GModelRadialGauss::GModelRadialGauss(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -78,8 +78,8 @@ GModelRadialGauss::GModelRadialGauss(void) : GModelRadial()
  * Creates instance of a Gaussian spatial model using a sky direction and
  * a Gaussian width parameter \f$\sigma\f$ (in degrees).
  ***************************************************************************/
-GModelRadialGauss::GModelRadialGauss(const GSkyDir& dir,
-                                     const double&  sigma) : GModelRadial()
+GModelRadialGauss::GModelRadialGauss(const GSkyDir& dir, const double&  sigma) :
+                   GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -102,7 +102,8 @@ GModelRadialGauss::GModelRadialGauss(const GSkyDir& dir,
  * from an XML element. See GModelRadialGauss::read() for more information
  * about the expected structure of the XML element.
  ***************************************************************************/
-GModelRadialGauss::GModelRadialGauss(const GXmlElement& xml) : GModelRadial()
+GModelRadialGauss::GModelRadialGauss(const GXmlElement& xml) :
+                   GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -120,8 +121,8 @@ GModelRadialGauss::GModelRadialGauss(const GXmlElement& xml) : GModelRadial()
  *
  * @param[in] model Radial Gaussian model.
  ***************************************************************************/
-GModelRadialGauss::GModelRadialGauss(const GModelRadialGauss& model)
-                                     : GModelRadial(model)
+GModelRadialGauss::GModelRadialGauss(const GModelRadialGauss& model) : 
+                   GModelSpatialRadial(model)
 {
     // Initialise members
     init_members();
@@ -164,7 +165,7 @@ GModelRadialGauss& GModelRadialGauss::operator=(const GModelRadialGauss& model)
     if (this != &model) {
 
         // Copy base class members
-        this->GModelRadial::operator=(model);
+        this->GModelSpatialRadial::operator=(model);
 
         // Free members
         free_members();
@@ -190,17 +191,17 @@ GModelRadialGauss& GModelRadialGauss::operator=(const GModelRadialGauss& model)
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
+ ***************************************************************************/
 void GModelRadialGauss::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GModelRadial::free_members();
+    this->GModelSpatialRadial::free_members();
     this->GModelSpatial::free_members();
 
     // Initialise members
     this->GModelSpatial::init_members();
-    this->GModelRadial::init_members();
+    this->GModelSpatialRadial::init_members();
     init_members();
 
     // Return
@@ -210,7 +211,7 @@ void GModelRadialGauss::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GModelRadialGauss* GModelRadialGauss::clone(void) const
 {
     return new GModelRadialGauss(*this);
@@ -343,7 +344,7 @@ void GModelRadialGauss::read(const GXmlElement& xml)
     }
 
     // Read Gaussian location
-    GModelRadial::read(xml);
+    GModelSpatialRadial::read(xml);
 
     // Extract model parameters
     int  npar[1]   = {0};
@@ -395,8 +396,8 @@ void GModelRadialGauss::read(const GXmlElement& xml)
  ***************************************************************************/
 void GModelRadialGauss::write(GXmlElement& xml) const
 {
-    // Write shell location
-    GModelRadial::write(xml);
+    // Write Gaussian location
+    GModelSpatialRadial::write(xml);
 
     // If XML element has 2 nodes (which should be the location nodes)
     // then append 1 parameter node
@@ -449,6 +450,8 @@ std::string GModelRadialGauss::print(void) const
 
     // Append header
     result.append("=== GModelRadialGauss ===\n");
+
+    // Append parameters
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
@@ -521,10 +524,3 @@ void GModelRadialGauss::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelRadialShell.hpp  -  Radial shell source model class          *
+ *         GModelRadialShell.hpp - Radial shell source model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Christoph Deil                                   *
+ *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialShell.hpp
  * @brief Radial shell model class interface definition
- * @author C. Deil
+ * @author Christoph Deil
  */
 
 #ifndef GMODELRADIALSHELL_HPP
@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GXmlElement.hpp"
@@ -54,7 +54,7 @@
  * the gamma-ray domain, and improves the convergence of the fitting
  * algorithms.
  ***************************************************************************/
-class GModelRadialShell : public GModelRadial {
+class GModelRadialShell : public GModelSpatialRadial {
 
 public:
     // Constructors and destructors

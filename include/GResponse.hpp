@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GResponse.hpp - Abstract response base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,7 +35,7 @@
 #include "GSource.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GFunction.hpp"
 #include "GMatrix.hpp"
 
@@ -111,12 +111,12 @@ protected:
     // Npred theta integration kernel
     class npred_kern_theta : public GFunction {
     public:
-        npred_kern_theta(const GResponse*    rsp,
-                         const GModelRadial* radial,
-                         const GEnergy*      srcEng,
-                         const GTime*        srcTime,
-                         const GObservation* obs,
-                         const GMatrix*      rot) :
+        npred_kern_theta(const GResponse*           rsp,
+                         const GModelSpatialRadial* radial,
+                         const GEnergy*             srcEng,
+                         const GTime*               srcTime,
+                         const GObservation*        obs,
+                         const GMatrix*             rot) :
                          m_rsp(rsp),
                          m_radial(radial),
                          m_srcEng(srcEng),
@@ -125,12 +125,12 @@ protected:
                          m_rot(rot) { }
         double eval(double theta);
     protected:
-        const GResponse*    m_rsp;           //!< Pointer to response
-        const GModelRadial* m_radial;        //!< Pointer to radial spatial model
-        const GEnergy*      m_srcEng;        //!< Pointer to true photon energy
-        const GTime*        m_srcTime;       //!< Pointer to true photon arrival time
-        const GObservation* m_obs;           //!< Pointer to observation
-        const GMatrix*      m_rot;           //!< Pointer to rotation matrix
+        const GResponse*           m_rsp;      //!< Pointer to response
+        const GModelSpatialRadial* m_radial;   //!< Pointer to radial spatial model
+        const GEnergy*             m_srcEng;   //!< Pointer to true photon energy
+        const GTime*               m_srcTime;  //!< Pointer to true photon arrival time
+        const GObservation*        m_obs;      //!< Pointer to observation
+        const GMatrix*             m_rot;      //!< Pointer to rotation matrix
     };
 
     // Npred phi integration kernel

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAResponse.hpp  -  CTA Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,7 +33,7 @@
 #include "GMatrix.hpp"
 #include "GEvent.hpp"
 #include "GModelSky.hpp"
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GObservation.hpp"
 #include "GResponse.hpp"
 #include "GPointing.hpp"

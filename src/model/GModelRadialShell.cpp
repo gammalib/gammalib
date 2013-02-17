@@ -60,7 +60,7 @@ const GModelSpatialRegistry g_radial_shell_registry(&g_radial_shell_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelRadialShell::GModelRadialShell(void) : GModelRadial()
+GModelRadialShell::GModelRadialShell(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -84,7 +84,8 @@ GModelRadialShell::GModelRadialShell(void) : GModelRadial()
 GModelRadialShell::GModelRadialShell(const GSkyDir& dir,
                                      const double&  radius,
                                      const double&  width,
-                                     const bool& small_angle) : GModelRadial()
+                                     const bool& small_angle) :
+                   GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -109,7 +110,8 @@ GModelRadialShell::GModelRadialShell(const GSkyDir& dir,
  * XML element. See GModelRadialShell::read() for more information about the
  * expected structure of the XML element.
  ***************************************************************************/
-GModelRadialShell::GModelRadialShell(const GXmlElement& xml) : GModelRadial()
+GModelRadialShell::GModelRadialShell(const GXmlElement& xml) :
+                   GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -127,8 +129,8 @@ GModelRadialShell::GModelRadialShell(const GXmlElement& xml) : GModelRadial()
  *
  * @param[in] model Radial shell source model.
  ***************************************************************************/
-GModelRadialShell::GModelRadialShell(const GModelRadialShell& model)
-                                     : GModelRadial(model)
+GModelRadialShell::GModelRadialShell(const GModelRadialShell& model) :
+                   GModelSpatialRadial(model)
 {
     // Initialise members
     init_members();
@@ -171,7 +173,7 @@ GModelRadialShell& GModelRadialShell::operator=(const GModelRadialShell& model)
     if (this != &model) {
 
         // Copy base class members
-        this->GModelRadial::operator=(model);
+        this->GModelSpatialRadial::operator=(model);
 
         // Free members
         free_members();
@@ -197,17 +199,17 @@ GModelRadialShell& GModelRadialShell::operator=(const GModelRadialShell& model)
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
+ ***************************************************************************/
 void GModelRadialShell::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GModelRadial::free_members();
+    this->GModelSpatialRadial::free_members();
     this->GModelSpatial::free_members();
 
     // Initialise members
     this->GModelSpatial::init_members();
-    this->GModelRadial::init_members();
+    this->GModelSpatialRadial::init_members();
     init_members();
 
     // Return
@@ -217,7 +219,7 @@ void GModelRadialShell::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GModelRadialShell* GModelRadialShell::clone(void) const
 {
     return new GModelRadialShell(*this);
@@ -428,7 +430,7 @@ void GModelRadialShell::read(const GXmlElement& xml)
     }
 
     // Read shell location
-    GModelRadial::read(xml);
+    GModelSpatialRadial::read(xml);
 
     // Extract remaining model parameters. Note that we have to loop over
     // all parameters to find the remaining 2 parameters that are
@@ -496,7 +498,7 @@ void GModelRadialShell::read(const GXmlElement& xml)
 void GModelRadialShell::write(GXmlElement& xml) const
 {
     // Write shell location
-    GModelRadial::write(xml);
+    GModelSpatialRadial::write(xml);
 
     // If XML element has 2 nodes (which should be the location nodes)
     // then append 2 parameter nodes
@@ -556,6 +558,8 @@ std::string GModelRadialShell::print(void) const
 
     // Append header
     result.append("=== GModelRadialShell ===\n");
+
+    // Append parameters
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
@@ -783,10 +787,3 @@ double GModelRadialShell::f2(double x)
     // Return value
     return f2;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

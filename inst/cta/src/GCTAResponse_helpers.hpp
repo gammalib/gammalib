@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTAResponse_helpers.hpp  -  CTA response helper classes         *
+ *         GCTAResponse_helpers.hpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,7 +34,7 @@
 #include "GMatrix.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GFunction.hpp"
 
 /* __ Type definitions ___________________________________________________ */
@@ -91,16 +91,16 @@ protected:
  ***************************************************************************/
 class cta_irf_radial_kern_rho : public GFunction {
 public:
-    cta_irf_radial_kern_rho(const GCTAResponse* rsp,
-                            const GModelRadial* model,
-                            double              zenith,
-                            double              azimuth,
-                            double              srcLogEng,
-                            double              obsLogEng,
-                            double              zeta,
-                            double              lambda,
-                            double              omega0,
-                            double              delta_max) :
+    cta_irf_radial_kern_rho(const GCTAResponse*        rsp,
+                            const GModelSpatialRadial* model,
+                            double                     zenith,
+                            double                     azimuth,
+                            double                     srcLogEng,
+                            double                     obsLogEng,
+                            double                     zeta,
+                            double                     lambda,
+                            double                     omega0,
+                            double                     delta_max) :
                             m_rsp(rsp),
                             m_model(model),
                             m_zenith(zenith),
@@ -118,21 +118,21 @@ public:
                             m_cos_delta_max(std::cos(delta_max)) { }
     double eval(double rho);
 protected:
-    const GCTAResponse* m_rsp;           //!< Pointer to CTA response
-    const GModelRadial* m_model;         //!< Pointer to radial model
-    double              m_zenith;        //!< Pointing zenith angle
-    double              m_azimuth;       //!< Pointing azimuth angle
-    double              m_srcLogEng;     //!< True photon energy
-    double              m_obsLogEng;     //!< Measured photon energy
-    double              m_zeta;          //!< Distance model centre - measured photon
-    double              m_cos_zeta;      //!< Cosine of zeta
-    double              m_sin_zeta;      //!< Sine of zeta
-    double              m_lambda;        //!< Distance model centre - pointing
-    double              m_cos_lambda;    //!< Cosine of lambda
-    double              m_sin_lambda;    //!< Sine of lambda
-    double              m_omega0;        //!< Azimuth of pointing in model system
-    double              m_delta_max;     //!< Maximum PSF radius
-    double              m_cos_delta_max; //!< Cosine of maximum PSF radius
+    const GCTAResponse*        m_rsp;           //!< Pointer to CTA response
+    const GModelSpatialRadial* m_model;         //!< Pointer to radial spatial model
+    double                     m_zenith;        //!< Pointing zenith angle
+    double                     m_azimuth;       //!< Pointing azimuth angle
+    double                     m_srcLogEng;     //!< True photon energy
+    double                     m_obsLogEng;     //!< Measured photon energy
+    double                     m_zeta;          //!< Distance model centre - measured photon
+    double                     m_cos_zeta;      //!< Cosine of zeta
+    double                     m_sin_zeta;      //!< Sine of zeta
+    double                     m_lambda;        //!< Distance model centre - pointing
+    double                     m_cos_lambda;    //!< Cosine of lambda
+    double                     m_sin_lambda;    //!< Sine of lambda
+    double                     m_omega0;        //!< Azimuth of pointing in model system
+    double                     m_delta_max;     //!< Maximum PSF radius
+    double                     m_cos_delta_max; //!< Cosine of maximum PSF radius
 };
 
 
@@ -194,15 +194,15 @@ protected:
  ***************************************************************************/
 class cta_npred_radial_kern_theta : public GFunction {
 public:
-    cta_npred_radial_kern_theta(const GCTAResponse*    rsp,
-                                const GModelRadial*    model,
-                                const GEnergy*         srcEng,
-                                const GTime*           srcTime,
-                                const GCTAObservation* obs,
-                                const GMatrix*         rot,
-                                double                 dist,
-                                double                 radius,
-                                double                 phi) :
+    cta_npred_radial_kern_theta(const GCTAResponse*        rsp,
+                                const GModelSpatialRadial* model,
+                                const GEnergy*             srcEng,
+                                const GTime*               srcTime,
+                                const GCTAObservation*     obs,
+                                const GMatrix*             rot,
+                                double                     dist,
+                                double                     radius,
+                                double                     phi) :
                                 m_rsp(rsp),
                                 m_model(model),
                                 m_srcEng(srcEng),
@@ -217,18 +217,18 @@ public:
                                 m_phi(phi) { }
     double eval(double theta);
 protected:
-    const GCTAResponse*    m_rsp;        //!< Pointer to response
-    const GModelRadial*    m_model;      //!< Pointer to radial model
-    const GEnergy*         m_srcEng;     //!< Pointer to true photon energy
-    const GTime*           m_srcTime;    //!< Pointer to true photon arrival time
-    const GCTAObservation* m_obs;        //!< Pointer to observation
-    const GMatrix*         m_rot;        //!< Rotation matrix
-    double                 m_dist;       //!< Distance model-ROI centre
-    double                 m_cos_dist;   //!< Cosine of distance model-ROI centre
-    double                 m_sin_dist;   //!< Sine of distance model-ROI centre
-    double                 m_radius;     //!< ROI+PSF radius
-    double                 m_cos_radius; //!< Cosine of ROI+PSF radius
-    double                 m_phi;        //!< Position angle of ROI
+    const GCTAResponse*        m_rsp;        //!< Pointer to response
+    const GModelSpatialRadial* m_model;      //!< Pointer to radial spatial model
+    const GEnergy*             m_srcEng;     //!< Pointer to true photon energy
+    const GTime*               m_srcTime;    //!< Pointer to true photon arrival time
+    const GCTAObservation*     m_obs;        //!< Pointer to observation
+    const GMatrix*             m_rot;        //!< Rotation matrix
+    double                     m_dist;       //!< Distance model-ROI centre
+    double                     m_cos_dist;   //!< Cosine of distance model-ROI centre
+    double                     m_sin_dist;   //!< Sine of distance model-ROI centre
+    double                     m_radius;     //!< ROI+PSF radius
+    double                     m_cos_radius; //!< Cosine of ROI+PSF radius
+    double                     m_phi;        //!< Position angle of ROI
 };
 
 

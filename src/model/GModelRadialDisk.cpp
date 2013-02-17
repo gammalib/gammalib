@@ -59,7 +59,7 @@ const GModelSpatialRegistry g_radial_disk_registry(&g_radial_disk_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelRadialDisk::GModelRadialDisk(void) : GModelRadial()
+GModelRadialDisk::GModelRadialDisk(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -75,8 +75,8 @@ GModelRadialDisk::GModelRadialDisk(void) : GModelRadial()
  * @param[in] dir Sky position of disk centre.
  * @param[in] radius Disk radius (degrees).
  ***************************************************************************/
-GModelRadialDisk::GModelRadialDisk(const GSkyDir& dir,
-                                   const double&  radius) : GModelRadial()
+GModelRadialDisk::GModelRadialDisk(const GSkyDir& dir, const double&  radius) :
+                  GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -99,7 +99,8 @@ GModelRadialDisk::GModelRadialDisk(const GSkyDir& dir,
  * XML element. See GModelRadialDisk::read() for more information about the
  * expected structure of the XML element.
  ***************************************************************************/
-GModelRadialDisk::GModelRadialDisk(const GXmlElement& xml) : GModelRadial()
+GModelRadialDisk::GModelRadialDisk(const GXmlElement& xml) :
+                  GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -117,8 +118,8 @@ GModelRadialDisk::GModelRadialDisk(const GXmlElement& xml) : GModelRadial()
  *
  * @param[in] model Radial disk model.
  ***************************************************************************/
-GModelRadialDisk::GModelRadialDisk(const GModelRadialDisk& model)
-                                   : GModelRadial(model)
+GModelRadialDisk::GModelRadialDisk(const GModelRadialDisk& model) :
+                  GModelSpatialRadial(model)
 {
     // Initialise members
     init_members();
@@ -161,7 +162,7 @@ GModelRadialDisk& GModelRadialDisk::operator= (const GModelRadialDisk& model)
     if (this != &model) {
 
         // Copy base class members
-        this->GModelRadial::operator=(model);
+        this->GModelSpatialRadial::operator=(model);
 
         // Free members
         free_members();
@@ -187,17 +188,17 @@ GModelRadialDisk& GModelRadialDisk::operator= (const GModelRadialDisk& model)
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
+ ***************************************************************************/
 void GModelRadialDisk::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GModelRadial::free_members();
+    this->GModelSpatialRadial::free_members();
     this->GModelSpatial::free_members();
 
     // Initialise members
     this->GModelSpatial::init_members();
-    this->GModelRadial::init_members();
+    this->GModelSpatialRadial::init_members();
     init_members();
 
     // Return
@@ -207,7 +208,7 @@ void GModelRadialDisk::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ ***************************************************************************/
 GModelRadialDisk* GModelRadialDisk::clone(void) const
 {
     return new GModelRadialDisk(*this);
@@ -347,7 +348,7 @@ void GModelRadialDisk::read(const GXmlElement& xml)
     }
 
     // Read disk location
-    GModelRadial::read(xml);
+    GModelSpatialRadial::read(xml);
 
     // Extract model parameters
     int  npar[1] = {0};
@@ -397,7 +398,7 @@ void GModelRadialDisk::read(const GXmlElement& xml)
 void GModelRadialDisk::write(GXmlElement& xml) const
 {
     // Write disk location
-    GModelRadial::write(xml);
+    GModelSpatialRadial::write(xml);
 
     // If XML element has 2 nodes (which should be the location nodes)
     // then append 1 parameter node
@@ -450,6 +451,8 @@ std::string GModelRadialDisk::print(void) const
 
     // Append header
     result.append("=== GModelRadialDisk ===\n");
+
+    // Append parameters
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
