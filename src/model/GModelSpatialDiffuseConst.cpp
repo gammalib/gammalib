@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpatialConst.cpp  -  Spatial isotropic model class        *
+ *       GModelSpatialDiffuseConst.cpp - Spatial isotropic model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,9 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialConst.cpp
+ * @file GModelSpatialDiffuseConst.cpp
  * @brief Isotropic spatial model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -30,19 +30,19 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelSpatialConst.hpp"
+#include "GModelSpatialDiffuseConst.hpp"
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpatialConst    g_spatial_const_seed;
-const GModelSpatialRegistry g_spatial_const_registry(&g_spatial_const_seed);
+const GModelSpatialDiffuseConst g_spatial_const_seed;
+const GModelSpatialRegistry     g_spatial_const_registry(&g_spatial_const_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_MC                                  "GModelSpatialConst::mc(GRan&)"
-#define G_READ                       "GModelSpatialConst::read(GXmlElement&)"
-#define G_WRITE                     "GModelSpatialConst::write(GXmlElement&)"
+#define G_MC                           "GModelSpatialDiffuseConst::mc(GRan&)"
+#define G_READ                "GModelSpatialDiffuseConst::read(GXmlElement&)"
+#define G_WRITE              "GModelSpatialDiffuseConst::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -60,7 +60,8 @@ const GModelSpatialRegistry g_spatial_const_registry(&g_spatial_const_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpatialConst::GModelSpatialConst(void) : GModelSpatial()
+GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(void) :
+                           GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
@@ -76,11 +77,11 @@ GModelSpatialConst::GModelSpatialConst(void) : GModelSpatial()
  * @param[in] xml XML element.
  *
  * Creates instance of isotropic spatial model by extracting information from
- * an XML element. See GModelSpatialConst::read() for more information about
+ * an XML element. See GModelSpatialDiffuseConst::read() for more information about
  * the expected structure of the XML element.
  ***************************************************************************/
-GModelSpatialConst::GModelSpatialConst(const GXmlElement& xml)
-                                       : GModelSpatial()
+GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GXmlElement& xml) :
+                           GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
@@ -98,8 +99,8 @@ GModelSpatialConst::GModelSpatialConst(const GXmlElement& xml)
  *
  * @param[in] model Isotropic spatial model.
  ***************************************************************************/
-GModelSpatialConst::GModelSpatialConst(const GModelSpatialConst& model)
-                                       : GModelSpatial(model)
+GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GModelSpatialDiffuseConst& model) :
+                           GModelSpatialDiffuse(model)
 {
     // Initialise members
     init_members();
@@ -115,7 +116,7 @@ GModelSpatialConst::GModelSpatialConst(const GModelSpatialConst& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpatialConst::~GModelSpatialConst(void)
+GModelSpatialDiffuseConst::~GModelSpatialDiffuseConst(void)
 {
     // Free members
     free_members();
@@ -135,14 +136,15 @@ GModelSpatialConst::~GModelSpatialConst(void)
  * @brief Assignment operator
  *
  * @param[in] model Isotropic spatial model.
+ * @return Isotropic spatial model.
  ***************************************************************************/
-GModelSpatialConst& GModelSpatialConst::operator= (const GModelSpatialConst& model)
+GModelSpatialDiffuseConst& GModelSpatialDiffuseConst::operator=(const GModelSpatialDiffuseConst& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
 
         // Copy base class members
-        this->GModelSpatial::operator=(model);
+        this->GModelSpatialDiffuse::operator=(model);
 
         // Free members
         free_members();
@@ -168,15 +170,17 @@ GModelSpatialConst& GModelSpatialConst::operator= (const GModelSpatialConst& mod
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
-void GModelSpatialConst::clear(void)
+ ***************************************************************************/
+void GModelSpatialDiffuseConst::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
+    this->GModelSpatialDiffuse::free_members();
     this->GModelSpatial::free_members();
 
     // Initialise members
     this->GModelSpatial::init_members();
+    this->GModelSpatialDiffuse::init_members();
     init_members();
 
     // Return
@@ -186,10 +190,12 @@ void GModelSpatialConst::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
-GModelSpatialConst* GModelSpatialConst::clone(void) const
+ *
+ * @return Pointer to deep copy of diffuse model.
+ ***************************************************************************/
+GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
 {
-    return new GModelSpatialConst(*this);
+    return new GModelSpatialDiffuseConst(*this);
 }
 
 
@@ -201,7 +207,7 @@ GModelSpatialConst* GModelSpatialConst::clone(void) const
  * Evaluates the spatial part for an isotropic source model. By definition
  * this value is independent from the sky direction and is unity.
  ***************************************************************************/
-double GModelSpatialConst::eval(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseConst::eval(const GSkyDir& srcDir) const
 {
     // Return value
     return 1.0;
@@ -217,10 +223,10 @@ double GModelSpatialConst::eval(const GSkyDir& srcDir) const
  * parameter gradient. By definition, the value and gradient is independent
  * from the sky direction. The value is 1, the parameter gradient is 0.
  ***************************************************************************/
-double GModelSpatialConst::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseConst::eval_gradients(const GSkyDir& srcDir) const
 {
     // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialConst*>(this)->m_value.gradient(0.0);
+    const_cast<GModelSpatialDiffuseConst*>(this)->m_value.gradient(0.0);
 
     // Return value
     return 1.0;
@@ -237,7 +243,7 @@ double GModelSpatialConst::eval_gradients(const GSkyDir& srcDir) const
  *
  * @todo Implement method
  ***************************************************************************/
-GSkyDir GModelSpatialConst::mc(GRan& ran) const
+GSkyDir GModelSpatialDiffuseConst::mc(GRan& ran) const
 {
     // Allocate sky direction
     GSkyDir dir;
@@ -263,7 +269,7 @@ GSkyDir GModelSpatialConst::mc(GRan& ran) const
  * Read the isotropic source model information from an XML element. The XML
  * element is required to have 1 parameter named "Value".
  ***************************************************************************/
-void GModelSpatialConst::read(const GXmlElement& xml)
+void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameters
     if (xml.elements() != 1 || xml.elements("parameter") != 1) {
@@ -304,7 +310,7 @@ void GModelSpatialConst::read(const GXmlElement& xml)
  * element has to be of type "ConstantValue" and will have 1 parameter leaf
  * named "Value".
  ***************************************************************************/
-void GModelSpatialConst::write(GXmlElement& xml) const
+void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
@@ -347,14 +353,18 @@ void GModelSpatialConst::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print isotropic source model information
+ *
+ * @return String containing model information.
  ***************************************************************************/
-std::string GModelSpatialConst::print(void) const
+std::string GModelSpatialDiffuseConst::print(void) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
-    result.append("=== GModelSpatialConst ===\n");
+    result.append("=== GModelSpatialDiffuseConst ===\n");
+
+    // Append parameters
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
@@ -374,7 +384,7 @@ std::string GModelSpatialConst::print(void) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelSpatialConst::init_members(void)
+void GModelSpatialDiffuseConst::init_members(void)
 {
     // Initialise Value
     m_value.clear();
@@ -400,7 +410,7 @@ void GModelSpatialConst::init_members(void)
  *
  * @param[in] model Isotropic spatial model.
  ***************************************************************************/
-void GModelSpatialConst::copy_members(const GModelSpatialConst& model)
+void GModelSpatialDiffuseConst::copy_members(const GModelSpatialDiffuseConst& model)
 {
     // Copy members
     m_value = model.m_value;
@@ -417,15 +427,8 @@ void GModelSpatialConst::copy_members(const GModelSpatialConst& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelSpatialConst::free_members(void)
+void GModelSpatialDiffuseConst::free_members(void)
 {
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

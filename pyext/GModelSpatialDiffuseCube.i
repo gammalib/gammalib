@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GModelSpatialCube.i  -  Spatial map cube model class           *
+ *        GModelSpatialDiffuseCube.i - Spatial map cube model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,47 +19,47 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialCube.i
+ * @file GModelSpatialDiffuseCube.i
  * @brief Spatial map cube model class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelSpatialCube.hpp"
+#include "GModelSpatialDiffuseCube.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelSpatialCube
+ * @class GModelSpatialDiffuseCube
  *
  * @brief Spatial map cube model
  ***************************************************************************/
-class GModelSpatialCube  : public GModelSpatial {
+class GModelSpatialDiffuseCube  : public GModelSpatialDiffuse {
 public:
     // Constructors and destructors
-    GModelSpatialCube(void);
-    explicit GModelSpatialCube(const GXmlElement& xml);
-    GModelSpatialCube(const GModelSpatialCube& model);
-    virtual ~GModelSpatialCube(void);
+    GModelSpatialDiffuseCube(void);
+    explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
+    GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
+    virtual ~GModelSpatialDiffuseCube(void);
 
     // Implemented pure virtual methods
-    virtual void               clear(void);
-    virtual GModelSpatialCube* clone(void) const;
-    virtual std::string        type(void) const;
-    virtual double             eval(const GSkyDir& srcDir) const;
-    virtual double             eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir            mc(GRan& ran) const;
-    virtual void               read(const GXmlElement& xml);
-    virtual void               write(GXmlElement& xml) const;
+    virtual void                      clear(void);
+    virtual GModelSpatialDiffuseCube* clone(void) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const GSkyDir& srcDir) const;
+    virtual double                    eval_gradients(const GSkyDir& srcDir) const;
+    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
 };
 
 
 /***********************************************************************//**
- * @brief GModelSpatialCube class extension
+ * @brief GModelSpatialDiffuseCube class extension
  ***************************************************************************/
-%extend GModelSpatialCube {
-    GModelSpatialCube copy() {
+%extend GModelSpatialDiffuseCube {
+    GModelSpatialDiffuseCube copy() {
         return (*self);
     }
 };

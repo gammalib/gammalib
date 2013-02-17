@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GModelSpatialMap.i  -  Spatial map model class              *
+ *           GModelSpatialDiffuseMap.i - Spatial map model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,48 +19,48 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialMap.i
+ * @file GModelSpatialDiffuseMap.i
  * @brief Spatial map model class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelSpatialMap.hpp"
+#include "GModelSpatialDiffuseMap.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelSpatialMap
+ * @class GModelSpatialDiffuseMap
  *
  * @brief Spatial map model
  ***************************************************************************/
-class GModelSpatialMap  : public GModelSpatial {
+class GModelSpatialDiffuseMap  : public GModelSpatialDiffuse {
 public:
     // Constructors and destructors
-    GModelSpatialMap(void);
-    explicit GModelSpatialMap(const GXmlElement& xml);
-    explicit GModelSpatialMap(const std::string& filename);
-    GModelSpatialMap(const GModelSpatialMap& model);
-    virtual ~GModelSpatialMap(void);
+    GModelSpatialDiffuseMap(void);
+    explicit GModelSpatialDiffuseMap(const GXmlElement& xml);
+    explicit GModelSpatialDiffuseMap(const std::string& filename);
+    GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model);
+    virtual ~GModelSpatialDiffuseMap(void);
 
     // Implemented pure virtual methods
-    virtual void              clear(void);
-    virtual GModelSpatialMap* clone(void) const;
-    virtual std::string       type(void) const;
-    virtual double            eval(const GSkyDir& srcDir) const;
-    virtual double            eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir           mc(GRan& ran) const;
-    virtual void              read(const GXmlElement& xml);
-    virtual void              write(GXmlElement& xml) const;
+    virtual void                     clear(void);
+    virtual GModelSpatialDiffuseMap* clone(void) const;
+    virtual std::string              type(void) const;
+    virtual double                   eval(const GSkyDir& srcDir) const;
+    virtual double                   eval_gradients(const GSkyDir& srcDir) const;
+    virtual GSkyDir                  mc(GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
 };
 
 
 /***********************************************************************//**
- * @brief GModelSpatialMap class extension
+ * @brief GModelSpatialDiffuseMap class extension
  ***************************************************************************/
-%extend GModelSpatialMap {
-    GModelSpatialMap copy() {
+%extend GModelSpatialDiffuseMap {
+    GModelSpatialDiffuseMap copy() {
         return (*self);
     }
 };

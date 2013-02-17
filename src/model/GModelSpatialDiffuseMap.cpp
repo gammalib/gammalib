@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GModelSpatialMap.cpp  -  Spatial map model class            *
+ *           GModelSpatialDiffuseMap.cpp - Spatial map model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,9 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialMap.cpp
+ * @file GModelSpatialDiffuseMap.cpp
  * @brief Spatial map model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -30,18 +30,18 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelSpatialMap.hpp"
+#include "GModelSpatialDiffuseMap.hpp"
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpatialMap      g_spatial_map_seed;
-const GModelSpatialRegistry g_spatial_map_registry(&g_spatial_map_seed);
+const GModelSpatialDiffuseMap g_spatial_map_seed;
+const GModelSpatialRegistry   g_spatial_map_registry(&g_spatial_map_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                         "GModelSpatialMap::read(GXmlElement&)"
-#define G_WRITE                       "GModelSpatialMap::write(GXmlElement&)"
+#define G_READ                  "GModelSpatialDiffuseMap::read(GXmlElement&)"
+#define G_WRITE                "GModelSpatialDiffuseMap::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -60,7 +60,8 @@ const GModelSpatialRegistry g_spatial_map_registry(&g_spatial_map_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpatialMap::GModelSpatialMap(void) : GModelSpatial()
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(void) :
+                         GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
@@ -76,10 +77,11 @@ GModelSpatialMap::GModelSpatialMap(void) : GModelSpatial()
  * @param[in] xml XML element.
  *
  * Creates instance of spatial map model by extracting information from an
- * XML element. See GModelSpatialMap::read() for more information about the
+ * XML element. See GModelSpatialDiffuseMap::read() for more information about the
  * expected structure of the XML element.
  ***************************************************************************/
-GModelSpatialMap::GModelSpatialMap(const GXmlElement& xml) : GModelSpatial()
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GXmlElement& xml) :
+                         GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
@@ -100,7 +102,8 @@ GModelSpatialMap::GModelSpatialMap(const GXmlElement& xml) : GModelSpatial()
  * Creates instance of spatial map model by loading a skymap from a FITS
  * file.
  ***************************************************************************/
-GModelSpatialMap::GModelSpatialMap(const std::string& filename) : GModelSpatial()
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const std::string& filename) :
+                         GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
@@ -118,8 +121,8 @@ GModelSpatialMap::GModelSpatialMap(const std::string& filename) : GModelSpatial(
  *
  * @param[in] model Spatial map model.
  ***************************************************************************/
-GModelSpatialMap::GModelSpatialMap(const GModelSpatialMap& model)
-                                   : GModelSpatial(model)
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model) :
+                         GModelSpatialDiffuse(model)
 {
     // Initialise members
     init_members();
@@ -135,7 +138,7 @@ GModelSpatialMap::GModelSpatialMap(const GModelSpatialMap& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpatialMap::~GModelSpatialMap(void)
+GModelSpatialDiffuseMap::~GModelSpatialDiffuseMap(void)
 {
     // Free members
     free_members();
@@ -155,14 +158,15 @@ GModelSpatialMap::~GModelSpatialMap(void)
  * @brief Assignment operator
  *
  * @param[in] model Spatial map model.
+ * @return Spatial map model.
  ***************************************************************************/
-GModelSpatialMap& GModelSpatialMap::operator= (const GModelSpatialMap& model)
+GModelSpatialDiffuseMap& GModelSpatialDiffuseMap::operator=(const GModelSpatialDiffuseMap& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
 
         // Copy base class members
-        this->GModelSpatial::operator=(model);
+        this->GModelSpatialDiffuse::operator=(model);
 
         // Free members
         free_members();
@@ -188,15 +192,17 @@ GModelSpatialMap& GModelSpatialMap::operator= (const GModelSpatialMap& model)
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
-void GModelSpatialMap::clear(void)
+ ***************************************************************************/
+void GModelSpatialDiffuseMap::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
+    this->GModelSpatialDiffuse::free_members();
     this->GModelSpatial::free_members();
 
     // Initialise members
     this->GModelSpatial::init_members();
+    this->GModelSpatialDiffuse::init_members();
     init_members();
 
     // Return
@@ -206,10 +212,12 @@ void GModelSpatialMap::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
-GModelSpatialMap* GModelSpatialMap::clone(void) const
+ *
+ * @return Pointer to deep copy of diffuse map model.
+ ***************************************************************************/
+GModelSpatialDiffuseMap* GModelSpatialDiffuseMap::clone(void) const
 {
-    return new GModelSpatialMap(*this);
+    return new GModelSpatialDiffuseMap(*this);
 }
 
 
@@ -217,12 +225,13 @@ GModelSpatialMap* GModelSpatialMap::clone(void) const
  * @brief Return intensity of skymap
  *
  * @param[in] srcDir True photon arrival direction.
+ * @return Sky map intensity.
  *
  * Returns the intensity of the skymap at the specified sky direction
  * multiplied by the normalization factor. If the sky direction falls outside
  * the skymap, an intensity of 0 is returned.
  ***************************************************************************/
-double GModelSpatialMap::eval(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseMap::eval(const GSkyDir& srcDir) const
 {
     // Get skymap intensity
     double intensity = m_map(srcDir);
@@ -236,13 +245,14 @@ double GModelSpatialMap::eval(const GSkyDir& srcDir) const
  * @brief Return intensity of skymap and gradient
  *
  * @param[in] srcDir True photon arrival direction.
+ * @return Sky map intensity.
  *
  * Returns the intensity of the skymap at the specified sky direction
  * multiplied by the normalization factor. The method also sets the gradient
  * with respect to the normalization factor. If the sky direction falls
  * outside the skymap, an intensity of 0 is returned.
  ***************************************************************************/
-double GModelSpatialMap::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseMap::eval_gradients(const GSkyDir& srcDir) const
 {
     // Get skymap intensity
     double intensity = m_map(srcDir);
@@ -251,7 +261,7 @@ double GModelSpatialMap::eval_gradients(const GSkyDir& srcDir) const
     double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
 
     // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialMap*>(this)->m_value.gradient(g_value);
+    const_cast<GModelSpatialDiffuseMap*>(this)->m_value.gradient(g_value);
 
     // Return intensity times normalization factor
     return (intensity * m_value.real_value());
@@ -262,6 +272,7 @@ double GModelSpatialMap::eval_gradients(const GSkyDir& srcDir) const
  * @brief Returns MC sky direction
  *
  * @param[in] ran Random number generator.
+ * @return Sky direction.
  *
  * @exception GException::feature_not_implemented
  *            Method not yet implemented
@@ -276,7 +287,7 @@ double GModelSpatialMap::eval_gradients(const GSkyDir& srcDir) const
  * distortions). The fractional skymap pixel is then converted into a sky
  * direction.
  ***************************************************************************/
-GSkyDir GModelSpatialMap::mc(GRan& ran) const
+GSkyDir GModelSpatialDiffuseMap::mc(GRan& ran) const
 {
     // Allocate sky direction
     GSkyDir dir;
@@ -334,7 +345,7 @@ GSkyDir GModelSpatialMap::mc(GRan& ran) const
  * Read the skymap information from an XML element. The XML element is
  * required to have 1 parameter named either "Normalization" or "Prefactor".
  ***************************************************************************/
-void GModelSpatialMap::read(const GXmlElement& xml)
+void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameters
     if (xml.elements() != 1 || xml.elements("parameter") != 1) {
@@ -380,7 +391,7 @@ void GModelSpatialMap::read(const GXmlElement& xml)
  * be of type "MapCubeFunction" and will have 1 parameter leaf named either
  * "Value" or "Normalization" (default).
  ***************************************************************************/
-void GModelSpatialMap::write(GXmlElement& xml) const
+void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
@@ -430,15 +441,19 @@ void GModelSpatialMap::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print map cube information
+ * @brief Print map information
+ *
+ * @return String with diffuse map model information.
  ***************************************************************************/
-std::string GModelSpatialMap::print(void) const
+std::string GModelSpatialDiffuseMap::print(void) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
-    result.append("=== GModelSpatialMap ===");
+    result.append("=== GModelSpatialDiffuseMap ===");
+
+    // Append parameters
     result.append("\n"+parformat("Sky map file")+m_filename);
     result.append("\n"+parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
@@ -459,7 +474,7 @@ std::string GModelSpatialMap::print(void) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelSpatialMap::init_members(void)
+void GModelSpatialDiffuseMap::init_members(void)
 {
     // Initialise Value
     m_value.clear();
@@ -490,7 +505,7 @@ void GModelSpatialMap::init_members(void)
  *
  * @param[in] model Spatial map cube model.
  ***************************************************************************/
-void GModelSpatialMap::copy_members(const GModelSpatialMap& model)
+void GModelSpatialDiffuseMap::copy_members(const GModelSpatialDiffuseMap& model)
 {
     // Copy members
     m_value    = model.m_value;
@@ -510,7 +525,7 @@ void GModelSpatialMap::copy_members(const GModelSpatialMap& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelSpatialMap::free_members(void)
+void GModelSpatialDiffuseMap::free_members(void)
 {
     // Return
     return;
@@ -528,7 +543,7 @@ void GModelSpatialMap::free_members(void)
  * skymap. This Monte Carlo cache consists of a linear array that maps a
  * value between 0 and 1 into the skymap pixel.
  ***************************************************************************/
-void GModelSpatialMap::load_map(const std::string& filename)
+void GModelSpatialDiffuseMap::load_map(const std::string& filename)
 {
     // Initialise skymap and cache
     m_map.clear();
@@ -594,10 +609,3 @@ void GModelSpatialMap::load_map(const std::string& filename)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GModelSpatialConst.i  -  Spatial isotropic model class        *
+ *        GModelSpatialDiffuseConst.i - Spatial isotropic model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,47 +19,47 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialConst.i
+ * @file GModelSpatialDiffuseConst.i
  * @brief Isotropic spatial model class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelSpatialConst.hpp"
+#include "GModelSpatialDiffuseConst.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelSpatialConst
+ * @class GModelSpatialDiffuseConst
  *
  * @brief Isotropic spatial model
  ***************************************************************************/
-class GModelSpatialConst  : public GModelSpatial {
+class GModelSpatialDiffuseConst  : public GModelSpatialDiffuse {
 public:
     // Constructors and destructors
-    GModelSpatialConst(void);
-    explicit GModelSpatialConst(const GXmlElement& xml);
-    GModelSpatialConst(const GModelSpatialConst& model);
-    virtual ~GModelSpatialConst(void);
+    GModelSpatialDiffuseConst(void);
+    explicit GModelSpatialDiffuseConst(const GXmlElement& xml);
+    GModelSpatialDiffuseConst(const GModelSpatialDiffuseConst& model);
+    virtual ~GModelSpatialDiffuseConst(void);
 
     // Implemented pure virtual methods
-    virtual void                clear(void);
-    virtual GModelSpatialConst* clone(void) const;
-    virtual std::string         type(void) const;
-    virtual double              eval(const GSkyDir& srcDir) const;
-    virtual double              eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir             mc(GRan& ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
+    virtual void                       clear(void);
+    virtual GModelSpatialDiffuseConst* clone(void) const;
+    virtual std::string                type(void) const;
+    virtual double                     eval(const GSkyDir& srcDir) const;
+    virtual double                     eval_gradients(const GSkyDir& srcDir) const;
+    virtual GSkyDir                    mc(GRan& ran) const;
+    virtual void                       read(const GXmlElement& xml);
+    virtual void                       write(GXmlElement& xml) const;
 };
 
 
 /***********************************************************************//**
- * @brief GModelSpatialConst class extension
+ * @brief GModelSpatialDiffuseConst class extension
  ***************************************************************************/
-%extend GModelSpatialConst {
-    GModelSpatialConst copy() {
+%extend GModelSpatialDiffuseConst {
+    GModelSpatialDiffuseConst copy() {
         return (*self);
     }
 };

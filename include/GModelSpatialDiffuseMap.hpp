@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GModelSpatialMap.hpp  -  Spatial map model class             *
+ *          GModelSpatialDiffuseMap.hpp - Spatial map model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,18 +19,18 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialMap.hpp
+ * @file GModelSpatialDiffuseMap.hpp
  * @brief Spatial map model class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
-#ifndef GMODELSPATIALMAP_HPP
-#define GMODELSPATIALMAP_HPP
+#ifndef GMODELSPATIALDIFFUSEMAP_HPP
+#define GMODELSPATIALDIFFUSEMAP_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GModelSpatial.hpp"
+#include "GModelSpatialDiffuse.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
 #include "GSkymap.hpp"
@@ -38,41 +38,41 @@
 
 
 /***********************************************************************//**
- * @class GModelSpatialMap
+ * @class GModelSpatialDiffuseMap
  *
  * @brief Spatial map model
  *
  * This class implements the spatial component of the factorised source
  * model for a skymap.
  ***************************************************************************/
-class GModelSpatialMap : public GModelSpatial {
+class GModelSpatialDiffuseMap : public GModelSpatialDiffuse {
 
 public:
     // Constructors and destructors
-    GModelSpatialMap(void);
-    explicit GModelSpatialMap(const GXmlElement& xml);
-    explicit GModelSpatialMap(const std::string& filename);
-    GModelSpatialMap(const GModelSpatialMap& model);
-    virtual ~GModelSpatialMap(void);
+    GModelSpatialDiffuseMap(void);
+    explicit GModelSpatialDiffuseMap(const GXmlElement& xml);
+    explicit GModelSpatialDiffuseMap(const std::string& filename);
+    GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model);
+    virtual ~GModelSpatialDiffuseMap(void);
 
     // Operators
-    virtual GModelSpatialMap& operator= (const GModelSpatialMap& model);
+    virtual GModelSpatialDiffuseMap& operator= (const GModelSpatialDiffuseMap& model);
 
     // Implemented pure virtual methods
-    virtual void              clear(void);
-    virtual GModelSpatialMap* clone(void) const;
-    virtual std::string       type(void) const { return "SpatialMap"; }
-    virtual double            eval(const GSkyDir& srcDir) const;
-    virtual double            eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir           mc(GRan& ran) const;
-    virtual void              read(const GXmlElement& xml);
-    virtual void              write(GXmlElement& xml) const;
-    virtual std::string       print(void) const;
+    virtual void                     clear(void);
+    virtual GModelSpatialDiffuseMap* clone(void) const;
+    virtual std::string              type(void) const { return "SpatialMap"; }
+    virtual double                   eval(const GSkyDir& srcDir) const;
+    virtual double                   eval_gradients(const GSkyDir& srcDir) const;
+    virtual GSkyDir                  mc(GRan& ran) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
+    virtual std::string              print(void) const;
 
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GModelSpatialMap& model);
+    void copy_members(const GModelSpatialDiffuseMap& model);
     void free_members(void);
     void load_map(const std::string& filename);
 
@@ -83,4 +83,4 @@ protected:
     std::vector<double> m_mc_cache;     //!< Monte Carlo cache
 };
 
-#endif /* GMODELSPATIALMAP_HPP */
+#endif /* GMODELSPATIALDIFFUSEMAP_HPP */

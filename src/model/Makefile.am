@@ -19,9 +19,10 @@ sources = GModelPar.cpp \
           GModelSpatialRadialDisk.cpp \
           GModelSpatialRadialGauss.cpp \
           GModelSpatialRadialShell.cpp \
-          GModelSpatialConst.cpp \
-          GModelSpatialCube.cpp \
-          GModelSpatialMap.cpp \
+          GModelSpatialDiffuse.cpp \
+          GModelSpatialDiffuseConst.cpp \
+          GModelSpatialDiffuseCube.cpp \
+          GModelSpatialDiffuseMap.cpp \
           GModelSpectral.cpp \
           GModelSpectralRegistry.cpp \
           GModelSpectralConst.cpp \

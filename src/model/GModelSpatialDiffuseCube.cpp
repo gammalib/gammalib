@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GModelSpatialCube.cpp  -  Spatial map cube model class         *
+ *       GModelSpatialDiffuseCube.cpp - Spatial map cube model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,9 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialCube.cpp
+ * @file GModelSpatialDiffuseCube.cpp
  * @brief Spatial map cube model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -30,22 +30,22 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelSpatialCube.hpp"
+#include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpatialCube     g_spatial_cube_seed;
-const GModelSpatialRegistry g_spatial_cube_registry(&g_spatial_cube_seed);
+const GModelSpatialDiffuseCube g_spatial_cube_seed;
+const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL                            "GModelSpatialCube::eval(GSkyDir&)"
-#define G_EVAL_GRADIENTS        "GModelSpatialCube::eval_gradients(GSkyDir&)"
-#define G_MC                                   "GModelSpatialCube::mc(GRan&)"
-#define G_READ                        "GModelSpatialCube::read(GXmlElement&)"
-#define G_WRITE                      "GModelSpatialCube::write(GXmlElement&)"
-#define G_LOAD_CUBE              "GModelSpatialCube::load_cube(std::string&)"
+#define G_EVAL                     "GModelSpatialDiffuseCube::eval(GSkyDir&)"
+#define G_EVAL_GRADIENTS "GModelSpatialDiffuseCube::eval_gradients(GSkyDir&)"
+#define G_MC                            "GModelSpatialDiffuseCube::mc(GRan&)"
+#define G_READ                 "GModelSpatialDiffuseCube::read(GXmlElement&)"
+#define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
+#define G_LOAD_CUBE       "GModelSpatialDiffuseCube::load_cube(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -63,7 +63,8 @@ const GModelSpatialRegistry g_spatial_cube_registry(&g_spatial_cube_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpatialCube::GModelSpatialCube(void) : GModelSpatial()
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(void) :
+                          GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
@@ -79,11 +80,11 @@ GModelSpatialCube::GModelSpatialCube(void) : GModelSpatial()
  * @param[in] xml XML element.
  *
  * Creates instance of spatial map cube model by extracting information from
- * an XML element. See GModelSpatialCube::read() for more information about
+ * an XML element. See GModelSpatialDiffuseCube::read() for more information about
  * the expected structure of the XML element.
  ***************************************************************************/
-GModelSpatialCube::GModelSpatialCube(const GXmlElement& xml)
-                                     : GModelSpatial()
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GXmlElement& xml) :
+                          GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
@@ -101,8 +102,8 @@ GModelSpatialCube::GModelSpatialCube(const GXmlElement& xml)
  *
  * @param[in] model Spatial map cube model.
  ***************************************************************************/
-GModelSpatialCube::GModelSpatialCube(const GModelSpatialCube& model)
-                                     : GModelSpatial(model)
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model) :
+                          GModelSpatialDiffuse(model)
 {
     // Initialise members
     init_members();
@@ -118,7 +119,7 @@ GModelSpatialCube::GModelSpatialCube(const GModelSpatialCube& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpatialCube::~GModelSpatialCube(void)
+GModelSpatialDiffuseCube::~GModelSpatialDiffuseCube(void)
 {
     // Free members
     free_members();
@@ -138,14 +139,15 @@ GModelSpatialCube::~GModelSpatialCube(void)
  * @brief Assignment operator
  *
  * @param[in] model Spatial map cube model.
+ * @return Spatial map cube model.
  ***************************************************************************/
-GModelSpatialCube& GModelSpatialCube::operator= (const GModelSpatialCube& model)
+GModelSpatialDiffuseCube& GModelSpatialDiffuseCube::operator= (const GModelSpatialDiffuseCube& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
 
         // Copy base class members
-        this->GModelSpatial::operator=(model);
+        this->GModelSpatialDiffuse::operator=(model);
 
         // Free members
         free_members();
@@ -171,15 +173,17 @@ GModelSpatialCube& GModelSpatialCube::operator= (const GModelSpatialCube& model)
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
-void GModelSpatialCube::clear(void)
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
+    this->GModelSpatialDiffuse::free_members();
     this->GModelSpatial::free_members();
 
     // Initialise members
     this->GModelSpatial::init_members();
+    this->GModelSpatialDiffuse::init_members();
     init_members();
 
     // Return
@@ -189,10 +193,12 @@ void GModelSpatialCube::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
-GModelSpatialCube* GModelSpatialCube::clone(void) const
+ *
+ * @return Pointer to deep copy of diffuse model.
+ ***************************************************************************/
+GModelSpatialDiffuseCube* GModelSpatialDiffuseCube::clone(void) const
 {
-    return new GModelSpatialCube(*this);
+    return new GModelSpatialDiffuseCube(*this);
 }
 
 
@@ -206,7 +212,7 @@ GModelSpatialCube* GModelSpatialCube::clone(void) const
  *
  * @todo Implement method.
  ***************************************************************************/
-double GModelSpatialCube::eval(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseCube::eval(const GSkyDir& srcDir) const
 {
     // Dump warning that method is not yet implemented
     throw GException::feature_not_implemented(G_EVAL);
@@ -223,13 +229,13 @@ double GModelSpatialCube::eval(const GSkyDir& srcDir) const
  *
  * @todo Implement method.
  ***************************************************************************/
-double GModelSpatialCube::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseCube::eval_gradients(const GSkyDir& srcDir) const
 {
     // Dump warning that method is not yet implemented
     throw GException::feature_not_implemented(G_EVAL_GRADIENTS);
 
     // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialCube*>(this)->m_value.gradient(0.0);
+    const_cast<GModelSpatialDiffuseCube*>(this)->m_value.gradient(0.0);
 
     // Return value
     return 1.0;
@@ -246,7 +252,7 @@ double GModelSpatialCube::eval_gradients(const GSkyDir& srcDir) const
  *
  * @todo Implement method.
  ***************************************************************************/
-GSkyDir GModelSpatialCube::mc(GRan& ran) const
+GSkyDir GModelSpatialDiffuseCube::mc(GRan& ran) const
 {
     // Allocate sky direction
     GSkyDir dir;
@@ -272,7 +278,7 @@ GSkyDir GModelSpatialCube::mc(GRan& ran) const
  * Read the map cube information from an XML element. The XML element is
  * required to have 1 parameter named either "Normalization" or "Value".
  ***************************************************************************/
-void GModelSpatialCube::read(const GXmlElement& xml)
+void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameters
     if (xml.elements() != 1 || xml.elements("parameter") != 1) {
@@ -318,7 +324,7 @@ void GModelSpatialCube::read(const GXmlElement& xml)
  * be of type "MapCubeFunction" and will have 1 parameter leaf named either
  * "Value" or "Normalization" (default).
  ***************************************************************************/
-void GModelSpatialCube::write(GXmlElement& xml) const
+void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
@@ -366,14 +372,18 @@ void GModelSpatialCube::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print map cube information
+ *
+ * @return String containing model information.
  ***************************************************************************/
-std::string GModelSpatialCube::print(void) const
+std::string GModelSpatialDiffuseCube::print(void) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
-    result.append("=== GModelSpatialCube ===\n");
+    result.append("=== GModelSpatialDiffuseCube ===\n");
+
+    // Append parameters
     result.append(parformat("Map cube file")+m_filename);
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
@@ -394,7 +404,7 @@ std::string GModelSpatialCube::print(void) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelSpatialCube::init_members(void)
+void GModelSpatialDiffuseCube::init_members(void)
 {
     // Initialise Value
     m_value.clear();
@@ -423,7 +433,7 @@ void GModelSpatialCube::init_members(void)
  *
  * @param[in] model Spatial map cube model.
  ***************************************************************************/
-void GModelSpatialCube::copy_members(const GModelSpatialCube& model)
+void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& model)
 {
     // Copy members
     m_value    = model.m_value;
@@ -441,7 +451,7 @@ void GModelSpatialCube::copy_members(const GModelSpatialCube& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelSpatialCube::free_members(void)
+void GModelSpatialDiffuseCube::free_members(void)
 {
     // Return
     return;
@@ -457,7 +467,7 @@ void GModelSpatialCube::free_members(void)
  *
  * @todo Implement method. 
  ***************************************************************************/
-void GModelSpatialCube::load_cube(const std::string& filename)
+void GModelSpatialDiffuseCube::load_cube(const std::string& filename)
 {
     // Expand environment variables
     std::string fname = expand_env(filename);
@@ -468,9 +478,3 @@ void GModelSpatialCube::load_cube(const std::string& filename)
     // Return
     return;
 }
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
