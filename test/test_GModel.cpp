@@ -152,10 +152,10 @@ void TestGModel::test_model(void)
                 "Bad values in GModelSpectralPlaw");
 
     // Setup Crab model
-    GModelPointSource crab;
+    GModelSky crab;
     test_try("Setup Crab model");
     try {
-        crab = GModelPointSource(point_source, power_law);
+        crab = GModelSky(point_source, power_law);
         crab.name("Crab");
         test_try_success();
     }
