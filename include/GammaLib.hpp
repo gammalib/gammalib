@@ -169,6 +169,7 @@
 #include "GModelSpatialRadialDisk.hpp"
 #include "GModelSpatialRadialGauss.hpp"
 #include "GModelSpatialRadialShell.hpp"
+#include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialDiffuse.hpp"
 #include "GModelSpatialDiffuseConst.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
