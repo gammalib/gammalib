@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelRadialDisk.i  -  Radial disk source model class            *
+ *         GModelRadialDisk.i - Radial disk source model class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Christoph Deil                                   *
+ *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialDisk.i
  * @brief Radial disk model class Python interface definition
- * @author C. Deil
+ * @author Christoph Deil
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -38,8 +38,7 @@
  * model for a disk source, i.e. constant surface brightness within some
  * radius and no emission outside.
  ***************************************************************************/
-class GModelRadialDisk : public GModelRadial {
-
+class GModelRadialDisk : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelRadialDisk(void);
@@ -67,19 +66,9 @@ public:
 
 /***********************************************************************//**
  * @brief GModelRadialDisk class extension
- *
- * The eval() and eval_gradients() methods are required here to force swig
- * to build also the interface for these methods. I guess that it is a swig
- * bug that these interfaces are not built automatically.
  ***************************************************************************/
 %extend GModelRadialDisk {
     GModelRadialDisk copy() {
         return (*self);
-    }
-    double eval(const GSkyDir& srcDir) const {
-        return self->GModelRadial::eval(srcDir);
-    }
-    double eval_gradients(const GSkyDir& srcDir) const {
-        return self->GModelRadial::eval_gradients(srcDir);
     }
 };

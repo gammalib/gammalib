@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GModelRadialShell.i  -  Radial spatial shell source model class     *
+ *      GModelRadialShell.i - Radial spatial shell source model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Christoph Deil                                   *
+ *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialShell.i
  * @brief Radial spatial shell model class Python interface definition
- * @author C. Deil
+ * @author Christoph Deil
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -34,7 +34,7 @@
  *
  * @brief Radial shell source model class
  ***************************************************************************/
-class GModelRadialShell : public GModelRadial {
+class GModelRadialShell : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelRadialShell(void);
@@ -48,7 +48,7 @@ public:
     // Implemented pure virtual methods
     virtual void               clear(void);
     virtual GModelRadialShell* clone(void) const;
-    virtual std::string        type(void) const { return "ShellFunction"; }
+    virtual std::string        type(void) const;
     virtual double             eval(const double& theta) const;
     virtual double             eval_gradients(const double& theta) const;
     virtual GSkyDir            mc(GRan& ran) const;
@@ -57,30 +57,20 @@ public:
     virtual void               write(GXmlElement& xml) const;
 
     // Other methods
-    double  radius(void) const { return m_radius.real_value(); }
-    double  width(void) const { return m_width.real_value(); }
-    bool    small_angle(void) const { return m_small_angle; }
-    void    radius(const double& radius) { m_radius.real_value(radius); }
-    void    width(const double& width) { m_width.real_value(width); }
-    void    small_angle(const bool& small_angle) { m_small_angle = small_angle; }
+    double  radius(void) const;
+    double  width(void) const;
+    bool    small_angle(void) const;
+    void    radius(const double& radius);
+    void    width(const double& width);
+    void    small_angle(const bool& small_angle);
 };
 
 
 /***********************************************************************//**
  * @brief GModelRadialShell class extension
- *
- * The eval() and eval_gradients() methods are required here to force swig
- * to build also the interface for these methods. I guess that it is a swig
- * bug that these interfaces are not built automatically.
  ***************************************************************************/
 %extend GModelRadialShell {
     GModelRadialShell copy() {
         return (*self);
-    }
-    double eval(const GSkyDir& srcDir) const {
-        return self->GModelRadial::eval(srcDir);
-    }
-    double eval_gradients(const GSkyDir& srcDir) const {
-        return self->GModelRadial::eval_gradients(srcDir);
     }
 };

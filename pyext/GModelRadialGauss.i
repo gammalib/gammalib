@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GModelRadialGauss.i  -  Radial Gaussian source model class        *
+ *        GModelRadialGauss.i - Radial Gaussian source model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelRadialGauss.i
  * @brief Radial Gaussian model class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -35,8 +35,7 @@
  *
  * @brief Radial Gaussian model class
  ***************************************************************************/
-class GModelRadialGauss : public GModelRadial {
-
+class GModelRadialGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
     GModelRadialGauss(void);
@@ -64,19 +63,9 @@ public:
 
 /***********************************************************************//**
  * @brief GModelRadialGauss class extension
- *
- * The eval() and eval_gradients() methods are required here to force swig
- * to build also the interface for these methods. I guess that it is a swig
- * bug that these interfaces are not built automatically.
  ***************************************************************************/
 %extend GModelRadialGauss {
     GModelRadialGauss copy() {
         return (*self);
-    }
-    double eval(const GSkyDir& srcDir) const {
-        return self->GModelRadial::eval(srcDir);
-    }
-    double eval_gradients(const GSkyDir& srcDir) const {
-        return self->GModelRadial::eval_gradients(srcDir);
     }
 };
