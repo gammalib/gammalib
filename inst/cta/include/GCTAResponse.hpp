@@ -34,8 +34,6 @@
 #include "GEvent.hpp"
 #include "GModelSky.hpp"
 #include "GModelRadial.hpp"
-#include "GModelExtendedSource.hpp"
-#include "GModelDiffuseSource.hpp"
 #include "GObservation.hpp"
 #include "GResponse.hpp"
 #include "GPointing.hpp"
