@@ -12,9 +12,6 @@ sources = GModelPar.cpp \
           GModelRegistry.cpp \
           GModelSky.cpp \
           GModelData.cpp \
-          GModelPointSource.cpp \
-          GModelExtendedSource.cpp \
-          GModelDiffuseSource.cpp \
           GModelSpatial.cpp \
           GModelSpatialRegistry.cpp \
           GModelSpatialConst.cpp \

@@ -107,9 +107,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelRegistry.hpp \
                      GModelSky.hpp \
                      GModelData.hpp \
-                     GModelPointSource.hpp \
-                     GModelExtendedSource.hpp \
-                     GModelDiffuseSource.hpp \
                      GModelSpatial.hpp \
                      GModelSpatialRegistry.hpp \
                      GModelSpatialPtsrc.hpp \
