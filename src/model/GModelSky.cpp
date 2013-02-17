@@ -40,7 +40,6 @@
 #include "GModelTemporalConst.hpp"
 #include "GSource.hpp"
 #include "GResponse.hpp"
-#include "GObservation.hpp"
 
 /* __ Globals ____________________________________________________________ */
 const GModelSky         g_pointsource_seed("PointSource");
