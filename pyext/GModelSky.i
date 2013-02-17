@@ -27,14 +27,15 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRadialDisk.hpp"
 #include "GModelSpatialRadialGauss.hpp"
 #include "GModelSpatialRadialShell.hpp"
-#include "GModelSpatialConst.hpp"
-#include "GModelSpatialCube.hpp"
-#include "GModelSpatialMap.hpp"
-#include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialDiffuse.hpp"
+#include "GModelSpatialDiffuseConst.hpp"
+#include "GModelSpatialDiffuseCube.hpp"
+#include "GModelSpatialDiffuseMap.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelSpectralConst.hpp"
 #include "GModelSpectralFunc.hpp"
@@ -48,7 +49,10 @@
 
 /* __ Typemaps ___________________________________________________________ */
 %typemap(out) GModelSpatial* {
-    if (dynamic_cast<GModelSpatialRadial*>($1) != NULL) {
+    if (dynamic_cast<GModelSpatialPointSource*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialPointSource, 0 |  0 );
+    }
+    else if (dynamic_cast<GModelSpatialRadial*>($1) != NULL) {
         if (dynamic_cast<GModelSpatialRadialDisk*>($1) != NULL) {
             $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialRadialDisk, 0 |  0 );
         }
@@ -62,17 +66,19 @@
             $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialRadial, 0 |  0 );
         }
     }
-    else if (dynamic_cast<GModelSpatialConst*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialConst, 0 |  0 );
-    }
-    else if (dynamic_cast<GModelSpatialCube*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialCube, 0 |  0 );
-    }
-    else if (dynamic_cast<GModelSpatialMap*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialMap, 0 |  0 );
-    }
-    else if (dynamic_cast<GModelSpatialPointSource*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialPointSource, 0 |  0 );
+    else if (dynamic_cast<GModelSpatialDiffuse*>($1) != NULL) {
+        if (dynamic_cast<GModelSpatialDiffuseConst*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialDiffuseConst, 0 |  0 );
+        }
+        else if (dynamic_cast<GModelSpatialDiffuseCube*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialDiffuseCube, 0 |  0 );
+        }
+        else if (dynamic_cast<GModelSpatialDiffuseMap*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialDiffuseMap, 0 |  0 );
+        }
+        else {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialDiffuse, 0 |  0 );
+        }
     }
     else {
         $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatial, 0 |  0 );
