@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GModelSky.cpp  -  Abstract sky model base class             *
+ *                    GModelSky.cpp - Sky model class                      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSky.cpp
- * @brief Abstract sky model base class implementation
+ * @brief Sky model class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,17 +30,25 @@
 #endif
 #include "GTools.hpp"
 #include "GException.hpp"
+#include "GModelRegistry.hpp"
 #include "GModelSky.hpp"
-#include "GModelSpatialRegistry.hpp"
 #include "GModelSpatialPtsrc.hpp"
+#include "GModelRadial.hpp"
+#include "GModelSpatialRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"
 #include "GModelTemporalConst.hpp"
-#include "GEvent.hpp"
 #include "GSource.hpp"
-#include "GPointing.hpp"
 #include "GResponse.hpp"
 #include "GObservation.hpp"
+
+/* __ Globals ____________________________________________________________ */
+const GModelSky         g_pointsource_seed("PointSource");
+const GModelSky         g_extendedsource_seed("ExtendedSource");
+const GModelSky         g_diffusesource_seed("DiffuseSource");
+const GModelRegistry    g_pointsource_registry(&g_pointsource_seed);
+const GModelRegistry    g_extendedsource_registry(&g_extendedsource_seed);
+const GModelRegistry    g_diffusesource_registry(&g_diffusesource_seed);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NPRED           "GModelSky::npred(GEnergy&, GTime&, GObservation&)"
@@ -69,11 +77,33 @@
 
 /***********************************************************************//**
  * @brief Void constructor
+ *
+ * Construct an empty sky model. An empty sky model has no type.
  ***************************************************************************/
 GModelSky::GModelSky(void) : GModel()
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Type constructor
+ *
+ * @param[in] type Model type.
+ *
+ * Construct empty sky model of specified type.
+ ***************************************************************************/
+GModelSky::GModelSky(const std::string& type) : GModel()
+{
+    // Initialise members
+    init_members();
+
+    // Set model type
+    m_type = type;
 
     // Return
     return;
@@ -84,10 +114,13 @@ GModelSky::GModelSky(void) : GModel()
  * @brief XML constructor
  *
  * @param[in] xml XML element.
+ *
+ * Construct sky model from the spectral and spatial model information found
+ * in the XML element.
  ***************************************************************************/
 GModelSky::GModelSky(const GXmlElement& xml) : GModel(xml)
 {
-    // Initialise private members for clean destruction
+    // Initialise members
     init_members();
 
     // Get pointers on spectrum and spatial model
@@ -104,6 +137,134 @@ GModelSky::GModelSky(const GXmlElement& xml) : GModel(xml)
 
     // Set parameter pointers
     set_pointers();
+
+    // Set model type dependent on spatial model type
+    set_type();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct sky model from spatial and spectral XML elements
+ *
+ * @param[in] spatial Spatial XML element.
+ * @param[in] spectral Spectral XML element.
+ ***************************************************************************/
+GModelSky::GModelSky(const GXmlElement& spatial, const GXmlElement& spectral) :
+           GModel()
+{
+    // Initialise private members for clean destruction
+    init_members();
+
+    // Allocate constant
+    GModelTemporalConst temporal;
+
+    // Clone spatial and spectral models
+    m_spatial  = xml_spatial(spatial);
+    m_spectral = xml_spectral(spectral);
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Set model type dependent on spatial model type
+    set_type();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct sky model from spatial, spectral and temporal XML elements
+ *
+ * @param[in] spatial Spatial XML element.
+ * @param[in] spectral Spectral XML element.
+ * @param[in] temporal Temporal XML element.
+ ***************************************************************************/
+GModelSky::GModelSky(const GXmlElement& spatial,
+                     const GXmlElement& spectral,
+                     const GXmlElement& temporal) :
+           GModel()
+{
+    // Initialise private members for clean destruction
+    init_members();
+
+    // Clone spatial and spectral models
+    m_spatial  = xml_spatial(spatial);
+    m_spectral = xml_spectral(spectral);
+    m_temporal = xml_temporal(temporal);
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Set model type dependent on spatial model type
+    set_type();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct sky model from spatial and spectral components
+ *
+ * @param[in] spatial Spatial model component.
+ * @param[in] spectral Spectral model component.
+ ***************************************************************************/
+GModelSky::GModelSky(const GModelSpatial& spatial,
+                     const GModelSpectral& spectral) : 
+           GModel()
+{
+    // Initialise members
+    init_members();
+
+    // Allocate temporal constant model
+    GModelTemporalConst temporal;
+
+    // Clone model components
+    m_spatial  = spatial.clone();
+    m_spectral = spectral.clone();
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Set model type dependent on spatial model type
+    set_type();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Construct sky model from spatial, spectral and temporal components
+ *
+ * @param[in] spatial Spatial model component.
+ * @param[in] spectral Spectral model component.
+ * @param[in] temporal Temporal model component.
+ ***************************************************************************/
+GModelSky::GModelSky(const GModelSpatial& spatial,
+                     const GModelSpectral& spectral,
+                     const GModelTemporal& temporal) : 
+           GModel()
+{
+    // Initialise members
+    init_members();
+
+    // Clone model components
+    m_spatial  = spatial.clone();
+    m_spectral = spectral.clone();
+    m_temporal = temporal.clone();
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Set model type dependent on spatial model type
+    set_type();
 
     // Return
     return;
@@ -122,34 +283,6 @@ GModelSky::GModelSky(const GModelSky& model) : GModel(model)
 
     // Copy members
     copy_members(model);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Construct sky model from spatial and spectral XML elements
- *
- * @param[in] spatial Spatial XML element.
- * @param[in] spectral Spectral XML element.
- ***************************************************************************/
-GModelSky::GModelSky(const GXmlElement& spatial, const GXmlElement& spectral)
-                     : GModel()
-{
-    // Initialise private members for clean destruction
-    init_members();
-
-    // Allocate constant
-    GModelTemporalConst temporal;
-
-    // Clone spatial and spectral models
-    m_spatial  = xml_spatial(spatial);
-    m_spectral = xml_spectral(spectral);
-    m_temporal = temporal.clone();
-
-    // Set parameter pointers
-    set_pointers();
 
     // Return
     return;
@@ -179,6 +312,7 @@ GModelSky::~GModelSky(void)
  * @brief Assignment operator
  *
  * @param[in] model Sky model.
+ * @return Sky model.
  ***************************************************************************/
 GModelSky& GModelSky::operator= (const GModelSky& model)
 {
@@ -209,6 +343,37 @@ GModelSky& GModelSky::operator= (const GModelSky& model)
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear instance
+ *
+ * This method properly resets the instance to an initial state.
+ ***************************************************************************/
+void GModelSky::clear(void)
+{
+    // Free class members
+    free_members();
+    this->GModel::free_members();
+
+    // Initialise members
+    this->GModel::init_members();
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone instance
+ *
+ * @return Pointer to deep copy of sky model.
+ ***************************************************************************/
+GModelSky* GModelSky::clone(void) const
+{
+    return new GModelSky(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Returns value of source model
@@ -445,6 +610,9 @@ void GModelSky::read(const GXmlElement& xml)
     // Set parameter pointers
     set_pointers();
 
+    // Set model type dependent on spatial model type
+    set_type();
+
     // Return
     return;
 }
@@ -617,6 +785,27 @@ GPhotons GModelSky::mc(const double& area,
 }
 
 
+/***********************************************************************//**
+ * @brief Print model information
+ *
+ * @return String containing model information.
+ ***************************************************************************/
+std::string GModelSky::print(void) const
+{
+    // Initialise result string
+    std::string result;
+
+    // Append header
+    result.append("=== GModelSky ===");
+
+    // Append model
+    result.append("\n"+print_model());
+
+    // Return result
+    return result;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -629,6 +818,7 @@ GPhotons GModelSky::mc(const double& area,
 void GModelSky::init_members(void)
 {
     // Initialise members
+    m_type.clear();
     m_spatial  = NULL;
     m_spectral = NULL;
     m_temporal = NULL;
@@ -645,7 +835,10 @@ void GModelSky::init_members(void)
  ***************************************************************************/
 void GModelSky::copy_members(const GModelSky& model)
 {
-    // Clone spatial and spectral models
+    // Copy attributes
+    m_type = model.m_type;
+    
+    // Clone model components
     m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
     m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
     m_temporal = (model.m_temporal != NULL) ? model.m_temporal->clone() : NULL;
@@ -713,6 +906,41 @@ void GModelSky::set_pointers(void)
         }
 
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set model type based on spatial model component
+ *
+ * Gathers all parameter pointers from the model.
+ ***************************************************************************/
+void GModelSky::set_type(void)
+{
+    // Clear model type
+    m_type.clear();
+
+    // Continue only if we have a spatial model component
+    if (m_spatial != NULL) {
+    
+        // Is model a point source?
+        if (dynamic_cast<const GModelSpatialPtsrc*>(m_spatial) != NULL) {
+            m_type = "PointSource";
+        }
+        
+        // ... otherwise, is model an extended source?
+        else if (dynamic_cast<const GModelRadial*>(m_spatial) != NULL) {
+            m_type = "ExtendedSource";
+        }
+
+        // ... otherwise we have a diffuse model
+        else {
+            m_type = "DiffuseSource";
+        }
+    
+    } // endif: there was a spatial model component
 
     // Return
     return;
@@ -1131,10 +1359,3 @@ std::string GModelSky::print_model(void) const
     // Return result
     return result;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
