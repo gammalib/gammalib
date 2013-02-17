@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelSpatialPtsrc.hpp  -  Spatial point source model class        *
+ *     GModelSpatialPointSource.hpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialPtsrc.hpp
+ * @file GModelSpatialPointSource.hpp
  * @brief Point source spatial model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
-#ifndef GMODELSPATIALPTSRC_HPP
-#define GMODELSPATIALPTSRC_HPP
+#ifndef GMODELSPATIALPOINTSOURCE_HPP
+#define GMODELSPATIALPOINTSOURCE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -36,36 +36,39 @@
 
 
 /***********************************************************************//**
- * @class GModelSpatialPtsrc
+ * @class GModelSpatialPointSource
  *
  * @brief Point source spatial model
  *
- * This class implements the spatial component of the factorised source
- * model for a point source.
+ * This class implements a point source as the spatial component of the
+ * factorised source model. The point source has two parameters: the Right
+ * Ascension and Declination of the point source location.
+ *
+ * The model is of type "SkyDirFunction".
  ***************************************************************************/
-class GModelSpatialPtsrc : public GModelSpatial {
+class GModelSpatialPointSource : public GModelSpatial {
 
 public:
     // Constructors and destructors
-    GModelSpatialPtsrc(void);
-    explicit GModelSpatialPtsrc(const GSkyDir& dir);
-    explicit GModelSpatialPtsrc(const GXmlElement& xml);
-    GModelSpatialPtsrc(const GModelSpatialPtsrc& model);
-    virtual ~GModelSpatialPtsrc(void);
+    GModelSpatialPointSource(void);
+    explicit GModelSpatialPointSource(const GSkyDir& dir);
+    explicit GModelSpatialPointSource(const GXmlElement& xml);
+    GModelSpatialPointSource(const GModelSpatialPointSource& model);
+    virtual ~GModelSpatialPointSource(void);
 
     // Operators
-    virtual GModelSpatialPtsrc& operator=(const GModelSpatialPtsrc& model);
+    virtual GModelSpatialPointSource& operator=(const GModelSpatialPointSource& model);
 
     // Implemented pure virtual methods
-    virtual void                clear(void);
-    virtual GModelSpatialPtsrc* clone(void) const;
-    virtual std::string         type(void) const { return "SkyDirFunction"; }
-    virtual double              eval(const GSkyDir& srcDir) const;
-    virtual double              eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir             mc(GRan& ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
-    virtual std::string         print(void) const;
+    virtual void                      clear(void);
+    virtual GModelSpatialPointSource* clone(void) const;
+    virtual std::string               type(void) const { return "SkyDirFunction"; }
+    virtual double                    eval(const GSkyDir& srcDir) const;
+    virtual double                    eval_gradients(const GSkyDir& srcDir) const;
+    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
+    virtual std::string               print(void) const;
 
     // Other methods
     double  ra(void) const { return m_ra.real_value(); }
@@ -76,7 +79,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GModelSpatialPtsrc& model);
+    void copy_members(const GModelSpatialPointSource& model);
     void free_members(void);
 
     // Protected members
@@ -84,4 +87,4 @@ protected:
     GModelPar m_dec;         //!< Declination (deg)
 };
 
-#endif /* GMODELSPATIALPTSRC_HPP */
+#endif /* GMODELSPATIALPOINTSOURCE_HPP */

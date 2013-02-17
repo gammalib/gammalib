@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelSpatialPtsrc.cpp  -  Spatial point source model class      *
+ *     GModelSpatialPointSource.cpp - Spatial point source model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,9 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelSpatialPtsrc.cpp
+ * @file GModelSpatialPointSource.cpp
  * @brief Point source spatial model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -30,19 +30,19 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelSpatialPtsrc.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 const double tolerance =  0.000027777778;    // angular tolerance is 1 arcsec
 
 /* __ Globals ____________________________________________________________ */
-const GModelSpatialPtsrc    g_spatial_ptsrc_seed;
-const GModelSpatialRegistry g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
+const GModelSpatialPointSource g_spatial_ptsrc_seed;
+const GModelSpatialRegistry    g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                       "GModelSpatialPtsrc::read(GXmlElement&)"
-#define G_WRITE                     "GModelSpatialPtsrc::write(GXmlElement&)"
+#define G_READ                 "GModelSpatialPointSource::read(GXmlElement&)"
+#define G_WRITE               "GModelSpatialPointSource::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -60,7 +60,7 @@ const GModelSpatialRegistry g_spatial_ptsrc_registry(&g_spatial_ptsrc_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(void) : GModelSpatial()
+GModelSpatialPointSource::GModelSpatialPointSource(void) : GModelSpatial()
 {
     // Initialise members
     init_members();
@@ -75,9 +75,10 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(void) : GModelSpatial()
  *
  * @param[in] dir Sky direction.
  *
- * Creates instance of a point source spatial model using a sky direction.
+ * Construct a point source spatial model from a sky direction.
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
+GModelSpatialPointSource::GModelSpatialPointSource(const GSkyDir& dir) :
+                          GModelSpatial()
 {
     // Initialise members
     init_members();
@@ -95,11 +96,12 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GSkyDir& dir) : GModelSpatial()
  *
  * @param[in] xml XML element.
  *
- * Creates instance of a point source spatial model by extracting information
- * from an XML element. See GModelSpatialPtsrc::read() for more information
+ * Construct a point source spatial model by extracting information from an
+ * XML element. See GModelSpatialPointSource::read() for more information
  * about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(const GXmlElement& xml) : GModelSpatial()
+GModelSpatialPointSource::GModelSpatialPointSource(const GXmlElement& xml) :
+                          GModelSpatial()
 {
     // Initialise members
     init_members();
@@ -117,8 +119,8 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GXmlElement& xml) : GModelSpatial()
  *
  * @param[in] model Point source spatial model.
  ***************************************************************************/
-GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model) 
-                                       : GModelSpatial(model)
+GModelSpatialPointSource::GModelSpatialPointSource(const GModelSpatialPointSource& model) :
+                          GModelSpatial(model)
 {
     // Initialise members
     init_members();
@@ -134,7 +136,7 @@ GModelSpatialPtsrc::GModelSpatialPtsrc(const GModelSpatialPtsrc& model)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelSpatialPtsrc::~GModelSpatialPtsrc(void)
+GModelSpatialPointSource::~GModelSpatialPointSource(void)
 {
     // Free members
     free_members();
@@ -154,8 +156,9 @@ GModelSpatialPtsrc::~GModelSpatialPtsrc(void)
  * @brief Assignment operator
  *
  * @param[in] model Point source spatial model.
+ * @return Point source spatial model.
  ***************************************************************************/
-GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& model)
+GModelSpatialPointSource& GModelSpatialPointSource::operator=(const GModelSpatialPointSource& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -187,8 +190,8 @@ GModelSpatialPtsrc& GModelSpatialPtsrc::operator= (const GModelSpatialPtsrc& mod
 
 /***********************************************************************//**
  * @brief Clear instance
-***************************************************************************/
-void GModelSpatialPtsrc::clear(void)
+ ***************************************************************************/
+void GModelSpatialPointSource::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -205,10 +208,12 @@ void GModelSpatialPtsrc::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
-GModelSpatialPtsrc* GModelSpatialPtsrc::clone(void) const
+ *
+ * @return Pointer to deep copy of point source spatial model.
+ ***************************************************************************/
+GModelSpatialPointSource* GModelSpatialPointSource::clone(void) const
 {
-    return new GModelSpatialPtsrc(*this);
+    return new GModelSpatialPointSource(*this);
 }
 
 
@@ -216,13 +221,14 @@ GModelSpatialPtsrc* GModelSpatialPtsrc::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] srcDir True photon arrival direction.
+ * @return Model value (1 if srcDir corresponds to source direction, 0 else).
  *
  * Evaluates the spatial part for a point source model. It implements a delta
  * function with respect to the coordinates of the source. For numerical
  * reasons a certain tolerance is accepted (typically 0.1 arcsec, i.e. well
  * below the angular resolution of gamma-ray telescopes).
  ***************************************************************************/
-double GModelSpatialPtsrc::eval(const GSkyDir& srcDir) const
+double GModelSpatialPointSource::eval(const GSkyDir& srcDir) const
 {
     // Set value dependent on source distance
     double value = (srcDir.dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
@@ -236,6 +242,7 @@ double GModelSpatialPtsrc::eval(const GSkyDir& srcDir) const
  * @brief Evaluate function and gradients
  *
  * @param[in] srcDir True photon arrival direction.
+ * @return Model value (1 if srcDir corresponds to source direction, 0 else).
  *
  * Evaluates the spatial part for a point source model and the gradient.
  * It implements a delta function with respect to the coordinates of the
@@ -245,7 +252,7 @@ double GModelSpatialPtsrc::eval(const GSkyDir& srcDir) const
  *
  * This method does not provide valid parameter gradients.
  ***************************************************************************/
-double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialPointSource::eval_gradients(const GSkyDir& srcDir) const
 {
     // Set value dependent on source distance
     double value = (srcDir.dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
@@ -259,10 +266,11 @@ double GModelSpatialPtsrc::eval_gradients(const GSkyDir& srcDir) const
  * @brief Returns MC sky direction
  *
  * @param[in] ran Random number generator.
+ * @return Sky direction.
  *
  * This method always returns the directon of the point source.
  ***************************************************************************/
-GSkyDir GModelSpatialPtsrc::mc(GRan& ran) const
+GSkyDir GModelSpatialPointSource::mc(GRan& ran) const
 {
     // Return point source direction
     return dir();
@@ -279,11 +287,23 @@ GSkyDir GModelSpatialPtsrc::mc(GRan& ran) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the point source information from an XML element. The XML element
- * is required to have 2 parameters named either "RA" and "DEC" or "GLON"
- * and "GLAT".
+ * Read the point source information from an XML element with the following
+ * format
+ *
+ *     <spatialModel type="SkyDirFunction">
+ *       <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
+ *       <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+ *     </spatialModel>
+ *
+ * or
+ *
+ *     <spatialModel type="SkyDirFunction">
+ *       <parameter free="0" max="360" min="-360" name="GLON" scale="1" value="83.6331" />
+ *       <parameter free="0" max="90" min="-90" name="GLAT" scale="1" value="22.0145" />
+ *     </spatialModel>
+ *
  ***************************************************************************/
-void GModelSpatialPtsrc::read(const GXmlElement& xml)
+void GModelSpatialPointSource::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 2 parameters
     if (xml.elements() != 2 || xml.elements("parameter") != 2) {
@@ -353,14 +373,18 @@ void GModelSpatialPtsrc::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the point source information into an XML element. The XML element
- * has to be of type 'SkyDirFunction' and will have 2 parameter leafs
- * named 'RA' and 'DEC'.
+ * Write the point source information into an XML element with the following
+ * format
+ *
+ *     <spatialModel type="SkyDirFunction">
+ *       <parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
+ *       <parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+ *     </spatialModel>
  *
  * @todo The case that an existing spatial XML element with "GLON" and "GLAT"
  *       as coordinates is not supported.
  ***************************************************************************/
-void GModelSpatialPtsrc::write(GXmlElement& xml) const
+void GModelSpatialPointSource::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
@@ -410,14 +434,18 @@ void GModelSpatialPtsrc::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print point source information
+ *
+ * @return String containing point source information.
  ***************************************************************************/
-std::string GModelSpatialPtsrc::print(void) const
+std::string GModelSpatialPointSource::print(void) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
-    result.append("=== GModelSpatialPtsrc ===\n");
+    result.append("=== GModelSpatialPointSource ===\n");
+
+    // Append parameters
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
@@ -430,8 +458,10 @@ std::string GModelSpatialPtsrc::print(void) const
 
 /***********************************************************************//**
  * @brief Return position of point source
+ *
+ * @return Point source sky direction.
  ***************************************************************************/
-GSkyDir GModelSpatialPtsrc::dir(void) const
+GSkyDir GModelSpatialPointSource::dir(void) const
 {
     // Allocate sky direction
     GSkyDir srcDir;
@@ -447,7 +477,7 @@ GSkyDir GModelSpatialPtsrc::dir(void) const
 /***********************************************************************//**
  * @brief Set position of point source
  ***************************************************************************/
-void GModelSpatialPtsrc::dir(const GSkyDir& dir)
+void GModelSpatialPointSource::dir(const GSkyDir& dir)
 {
     // Assign Right Ascension and Declination
     m_ra.real_value(dir.ra_deg());
@@ -467,7 +497,7 @@ void GModelSpatialPtsrc::dir(const GSkyDir& dir)
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelSpatialPtsrc::init_members(void)
+void GModelSpatialPointSource::init_members(void)
 {
     // Initialise Right Ascension
     m_ra.clear();
@@ -502,7 +532,7 @@ void GModelSpatialPtsrc::init_members(void)
  *
  * @param[in] model Point source spatial model.
  ***************************************************************************/
-void GModelSpatialPtsrc::copy_members(const GModelSpatialPtsrc& model)
+void GModelSpatialPointSource::copy_members(const GModelSpatialPointSource& model)
 {
     // Copy members
     m_ra  = model.m_ra;
@@ -521,15 +551,8 @@ void GModelSpatialPtsrc::copy_members(const GModelSpatialPtsrc& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelSpatialPtsrc::free_members(void)
+void GModelSpatialPointSource::free_members(void)
 {
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

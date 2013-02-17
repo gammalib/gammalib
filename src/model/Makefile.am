@@ -14,10 +14,10 @@ sources = GModelPar.cpp \
           GModelData.cpp \
           GModelSpatial.cpp \
           GModelSpatialRegistry.cpp \
+          GModelSpatialPointSource.cpp \
           GModelSpatialConst.cpp \
           GModelSpatialCube.cpp \
           GModelSpatialMap.cpp \
-          GModelSpatialPtsrc.cpp \
           GModelRadial.cpp \
           GModelRadialDisk.cpp \
           GModelRadialGauss.cpp \

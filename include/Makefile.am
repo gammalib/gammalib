@@ -109,7 +109,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelData.hpp \
                      GModelSpatial.hpp \
                      GModelSpatialRegistry.hpp \
-                     GModelSpatialPtsrc.hpp \
+                     GModelSpatialPointSource.hpp \
                      GModelSpatialConst.hpp \
                      GModelSpatialCube.hpp \
                      GModelSpatialMap.hpp \
