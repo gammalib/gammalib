@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATResponse.cpp  -  Fermi/LAT response class             *
+ *                GLATResponse.cpp - Fermi/LAT response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,7 +35,7 @@
 #include "GFits.hpp"
 #include "GTools.hpp"
 #include "GCaldb.hpp"
-#include "GModelSpatialPtsrc.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GLATInstDir.hpp"
 #include "GLATResponse.hpp"
 #include "GLATObservation.hpp"
@@ -375,8 +375,8 @@ double GLATResponse::irf(const GLATEventBin& event,
     GLATEventCube* cube = event.cube();
 
     // Get pointer on point source spatial model
-    const GModelSpatialPtsrc* ptsrc =
-          dynamic_cast<const GModelSpatialPtsrc*>(source.model());
+    const GModelSpatialPointSource* ptsrc =
+          dynamic_cast<const GModelSpatialPointSource*>(source.model());
 
     // Get source energy
     GEnergy srcEng = source.energy();
