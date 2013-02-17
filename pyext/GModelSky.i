@@ -32,6 +32,7 @@
 #include "GModelSpatialRadialDisk.hpp"
 #include "GModelSpatialRadialGauss.hpp"
 #include "GModelSpatialRadialShell.hpp"
+#include "GModelSpatialElliptical.hpp"
 #include "GModelSpatialDiffuse.hpp"
 #include "GModelSpatialDiffuseConst.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
@@ -65,6 +66,9 @@
         else {
             $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialRadial, 0 |  0 );
         }
+    }
+    else if (dynamic_cast<GModelSpatialElliptical*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialElliptical, 0 |  0 );
     }
     else if (dynamic_cast<GModelSpatialDiffuse*>($1) != NULL) {
         if (dynamic_cast<GModelSpatialDiffuseConst*>($1) != NULL) {
