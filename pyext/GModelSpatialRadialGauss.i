@@ -63,9 +63,21 @@ public:
 
 /***********************************************************************//**
  * @brief GModelSpatialRadialGauss class extension
+ *
+ * The eval(GSkyDir&) and eval_gradients(GSkyDir&) need to be defined in the
+ * extension to force swig to build also the interface for these methods that
+ * are implemented in the base class only. It's not clear to me why these
+ * methods are not inherited automatically. Maybe this could also be handled
+ * by a %typemap(typecheck) construct.
  ***************************************************************************/
 %extend GModelSpatialRadialGauss {
     GModelSpatialRadialGauss copy() {
         return (*self);
+    }
+    double eval(const GSkyDir& srcDir) const {
+        return self->GModelSpatialRadial::eval(srcDir);
+    }
+    double eval_gradients(const GSkyDir& srcDir) const {
+        return self->GModelSpatialRadial::eval_gradients(srcDir);
     }
 };
