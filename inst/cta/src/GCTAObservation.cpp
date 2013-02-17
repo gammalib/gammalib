@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GCTAObservation.cpp  -  CTA Observation class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,7 +32,6 @@
 #include "GException.hpp"
 #include "GFits.hpp"
 #include "GTools.hpp"
-#include "GModelSpatialPtsrc.hpp"
 #include "GIntegral.hpp"
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
