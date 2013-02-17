@@ -1,12 +1,12 @@
 #! /usr/bin/env python
-# ===========================================================================================#
+# ==========================================================================
 # This script illustrates how the GammaLib photon simulator works.
 #
-# Based on the MAGIC spectrum of the Crab nebula, and by assuming a powerlaw, it will
-# create a Monte Carlo sample of photons.
+# Based on the MAGIC spectrum of the Crab nebula, and by assuming a powerlaw,
+# it will create a Monte Carlo sample of photons.
 #
 # If matplotlib is installed, the spectrum will be displayed on the screen.
-# ===========================================================================================#
+# ==========================================================================
 from gammalib import *
 from math import *
 
@@ -22,16 +22,14 @@ def simulate(xmlname, e_min, e_max, area, duration):
     dir = GSkyDir()
     emin = GEnergy()
     emax = GEnergy()
-    tmin = GTime()
-    tmax = GTime()
+    tmin = GTime(0.0)
+    tmax = GTime(duration)
 
     # Define MC parameters
     dir.radec_deg(83.6331, 22.0145)
     radius = 10.0
     emin.TeV(e_min)
     emax.TeV(e_max)
-    tmin.met(0.0)
-    tmax.met(duration)
 
     # Allocate random number generator
     ran = GRan()
@@ -39,14 +37,13 @@ def simulate(xmlname, e_min, e_max, area, duration):
     # Load models and extract first model
     models = GModels(xmlname)
     model = models[0]
-    print model
+    print(model)
 
     # Simulate photons
     photons = model.mc(area, dir, radius, emin, emax, tmin, tmax, ran)
 
     # Print photons
-    print str(len(photons)) + " photons simulated."
-    #print str(photons.size()) + " photons simulated."
+    print(str(len(photons)) + " photons simulated.")
 
     # Return photons
     return photons
@@ -115,14 +112,14 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
         plt.ylabel("Number of incident photons")
 
         # Notify
-        print "PLEASE CLOSE WINDOW TO CONTINUE ..."
+        print("PLEASE CLOSE WINDOW TO CONTINUE ...")
 
         # Allocate histogram
         # Show plot
         plt.show()
 
     except ImportError:
-        print "Matplotlib is not (correctly) installed on your system."
+        print("Matplotlib is not (correctly) installed on your system.")
 
     # Return
     return
