@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GModels.i  -  Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,26 +29,12 @@
 #include "GModel.hpp"
 #include "GModelSky.hpp"
 #include "GModelData.hpp"
-#include "GModelDiffuseSource.hpp"
-#include "GModelExtendedSource.hpp"
-#include "GModelPointSource.hpp"
 %}
 
 /* __ Typemaps ___________________________________________________________ */
 %typemap(out) GModel* {
     if (dynamic_cast<GModelSky*>($1) != NULL) {
-        if (dynamic_cast<GModelDiffuseSource*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelDiffuseSource, 0 |  0 );
-        }
-        else if (dynamic_cast<GModelExtendedSource*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelExtendedSource, 0 |  0 );
-        }
-        else if (dynamic_cast<GModelPointSource*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelPointSource, 0 |  0 );
-        }
-        else {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSky, 0 |  0 );
-        }
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSky, 0 |  0 );
     }
     else if (dynamic_cast<GModelData*>($1) != NULL) {
         $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelData, 0 |  0 );
