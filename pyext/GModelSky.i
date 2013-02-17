@@ -27,7 +27,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 #include "GModelRadialDisk.hpp"
 #include "GModelRadialGauss.hpp"
 #include "GModelRadialShell.hpp"
@@ -48,8 +48,8 @@
 
 /* __ Typemaps ___________________________________________________________ */
 %typemap(out) GModelSpatial* {
-    if (dynamic_cast<GModelRadial*>($1) != NULL) {
-        if (dynamic_cast<GModelRadialDisk*>($1) != NULL) {
+    if (dynamic_cast<GModelSpatialRadial*>($1) != NULL) {
+        if (dynamic_cast<GModelSpatialRadial*>($1) != NULL) {
             $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialDisk, 0 |  0 );
         }
         else if (dynamic_cast<GModelRadialGauss*>($1) != NULL) {
@@ -59,7 +59,7 @@
             $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialShell, 0 |  0 );
         }
         else {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadial, 0 |  0 );
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialRadial, 0 |  0 );
         }
     }
     else if (dynamic_cast<GModelSpatialConst*>($1) != NULL) {
