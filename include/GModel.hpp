@@ -113,7 +113,7 @@ protected:
     void         write_scales(GXmlElement& xml) const;
     std::string  print_attributes(void) const;
 
-    // Proteced members
+    // Protected members
     std::string              m_name;         //!< Model name
     std::vector<std::string> m_instruments;  //!< Instruments to which model applies
     std::vector<GModelPar>   m_scales;       //!< Model instrument scale factors
