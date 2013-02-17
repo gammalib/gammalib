@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelRadial.hpp  -  Abstract radial spatial model base class      *
+ *    GModelSpatialRadial.hpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadial.hpp
+ * @file GModelSpatialRadial.hpp
  * @brief Abstract radial spatial model base class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
-#ifndef GMODELRADIAL_HPP
-#define GMODELRADIAL_HPP
+#ifndef GMODELSPATIALRADIAL_HPP
+#define GMODELSPATIALRADIAL_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -38,57 +38,57 @@
 
 
 /***********************************************************************//**
- * @class GModelRadial
+ * @class GModelSpatialRadial
  *
- * @brief Abstract radial model base class
+ * @brief Abstract radial spatial model base class
  *
- * This class implements the radial spatial component of the factorized
- * gamma-ray source model. Typical examples of radial components are a
- * Gaussian or a shell source.
+ * This class defines the interface for a radial model as spatial component
+ * of the factorized source model. Typical examples of radial components are
+ * axisymmetric Disk, Gaussian or Shell sources.
  ***************************************************************************/
-class GModelRadial : public GModelSpatial {
+class GModelSpatialRadial : public GModelSpatial {
 
 public:
     // Constructors and destructors
-    GModelRadial(void);
-    GModelRadial(const GModelRadial& model);
-    explicit GModelRadial(const GXmlElement& xml);
-    virtual ~GModelRadial(void);
+    GModelSpatialRadial(void);
+    GModelSpatialRadial(const GModelSpatialRadial& model);
+    explicit GModelSpatialRadial(const GXmlElement& xml);
+    virtual ~GModelSpatialRadial(void);
 
     // Operators
-    virtual GModelRadial& operator=(const GModelRadial& model);
+    virtual GModelSpatialRadial& operator=(const GModelSpatialRadial& model);
 
     // Pure virtual methods
-    virtual void          clear(void) = 0;
-    virtual GModelRadial* clone(void) const = 0;
-    virtual std::string   type(void) const = 0;
-    virtual double        eval(const double& theta) const = 0;
-    virtual double        eval_gradients(const double& theta) const = 0;
-    virtual GSkyDir       mc(GRan& ran) const = 0;
-    virtual double        theta_max(void) const = 0;
-    virtual std::string   print(void) const = 0;
+    virtual void                 clear(void) = 0;
+    virtual GModelSpatialRadial* clone(void) const = 0;
+    virtual std::string          type(void) const = 0;
+    virtual double               eval(const double& theta) const = 0;
+    virtual double               eval_gradients(const double& theta) const = 0;
+    virtual GSkyDir              mc(GRan& ran) const = 0;
+    virtual double               theta_max(void) const = 0;
+    virtual std::string          print(void) const = 0;
 
     // Implemented virtual methods
-    virtual double        eval(const GSkyDir& srcDir) const;
-    virtual double        eval_gradients(const GSkyDir& srcDir) const;
-    virtual void          read(const GXmlElement& xml);
-    virtual void          write(GXmlElement& xml) const;
+    virtual double eval(const GSkyDir& srcDir) const;
+    virtual double eval_gradients(const GSkyDir& srcDir) const;
+    virtual void   read(const GXmlElement& xml);
+    virtual void   write(GXmlElement& xml) const;
 
     // Other methods
-    double                ra(void) const { return m_ra.real_value(); }
-    double                dec(void) const { return m_dec.real_value(); }
-    GSkyDir               dir(void) const;
-    void                  dir(const GSkyDir& dir);
+    double  ra(void) const { return m_ra.real_value(); }
+    double  dec(void) const { return m_dec.real_value(); }
+    GSkyDir dir(void) const;
+    void    dir(const GSkyDir& dir);
 
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GModelRadial& model);
+    void copy_members(const GModelSpatialRadial& model);
     void free_members(void);
 
     // Proteced members
-    GModelPar  m_ra;    //!< Right Ascension (deg)
-    GModelPar  m_dec;   //!< Declination (deg)
+    GModelPar m_ra;    //!< Right Ascension (deg)
+    GModelPar m_dec;   //!< Declination (deg)
 };
 
-#endif /* GMODELRADIAL_HPP */
+#endif /* GMODELSPATIALRADIAL_HPP */

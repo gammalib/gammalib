@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GModelRadial.i  -  Abstract radial model base class           *
+ *     GModelSpatialRadial.i - Abstract radial spatial model base class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,56 +19,55 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadial.i
+ * @file GModelSpatialRadial.i
  * @brief Abstract radial model base class Python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelRadial
+ * @class GModelSpatialRadial
  *
- * @brief Abstract radial model base class
+ * @brief Abstract radial spatial model base class
  ***************************************************************************/
-class GModelRadial : public GModelSpatial {
+class GModelSpatialRadial : public GModelSpatial {
 
 public:
     // Constructors and destructors
-    GModelRadial(void);
-    GModelRadial(const GModelRadial& model);
-    explicit GModelRadial(const GXmlElement& xml);
-    virtual ~GModelRadial(void);
+    GModelSpatialRadial(void);
+    GModelSpatialRadial(const GModelSpatialRadial& model);
+    explicit GModelSpatialRadial(const GXmlElement& xml);
+    virtual ~GModelSpatialRadial(void);
 
     // Pure virtual methods
-    virtual void          clear(void) = 0;
-    virtual GModelRadial* clone(void) const = 0;
-    virtual std::string   type(void) const = 0;
-    virtual double        eval(const double& theta) const = 0;
-    virtual double        eval_gradients(const double& theta) const = 0;
-    virtual GSkyDir       mc(GRan& ran) const = 0;
-    virtual double        theta_max(void) const = 0;
+    virtual void                 clear(void) = 0;
+    virtual GModelSpatialRadial* clone(void) const = 0;
+    virtual std::string          type(void) const = 0;
+    virtual double               eval(const double& theta) const = 0;
+    virtual double               eval_gradients(const double& theta) const = 0;
+    virtual GSkyDir              mc(GRan& ran) const = 0;
+    virtual double               theta_max(void) const = 0;
 
     // Implemented virtual methods
-    virtual double        eval(const GSkyDir& srcDir) const;
-    virtual double        eval_gradients(const GSkyDir& srcDir) const;
-    virtual void          read(const GXmlElement& xml);
-    virtual void          write(GXmlElement& xml) const;
+    virtual double eval(const GSkyDir& srcDir) const;
+    virtual double eval_gradients(const GSkyDir& srcDir) const;
+    virtual void   read(const GXmlElement& xml);
+    virtual void   write(GXmlElement& xml) const;
 
     // Other methods
-    int                   size(void) const;
-    double                ra(void) const;
-    double                dec(void) const;
-    GSkyDir               dir(void) const;
-    void                  dir(const GSkyDir& dir);
+    double  ra(void) const;
+    double  dec(void) const;
+    GSkyDir dir(void) const;
+    void    dir(const GSkyDir& dir);
 };
 
 
 /***********************************************************************//**
- * @brief GModelRadial class extension
+ * @brief GModelSpatialRadial class extension
  ***************************************************************************/
-%extend GModelRadial {
+%extend GModelSpatialRadial {
 };

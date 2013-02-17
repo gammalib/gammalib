@@ -15,13 +15,13 @@ sources = GModelPar.cpp \
           GModelSpatial.cpp \
           GModelSpatialRegistry.cpp \
           GModelSpatialPointSource.cpp \
-          GModelSpatialConst.cpp \
-          GModelSpatialCube.cpp \
-          GModelSpatialMap.cpp \
-          GModelRadial.cpp \
+          GModelSpatialRadial.cpp \
           GModelRadialDisk.cpp \
           GModelRadialGauss.cpp \
           GModelRadialShell.cpp \
+          GModelSpatialConst.cpp \
+          GModelSpatialCube.cpp \
+          GModelSpatialMap.cpp \
           GModelSpectral.cpp \
           GModelSpectralRegistry.cpp \
           GModelSpectralConst.cpp \

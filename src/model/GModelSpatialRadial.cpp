@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelRadial.cpp  -  Abstract radial spatial model base class      *
+ *    GModelSpatialRadial.cpp - Abstract radial spatial model base class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,9 +19,9 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadial.cpp
+ * @file GModelSpatialRadial.cpp
  * @brief Abstract radial spatial model base class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -29,11 +29,11 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
-#include "GModelRadial.hpp"
+#include "GModelSpatialRadial.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                             "GModelRadial::read(GXmlElement&)"
-#define G_WRITE                           "GModelRadial::write(GXmlElement&)"
+#define G_READ                      "GModelSpatialRadial::read(GXmlElement&)"
+#define G_WRITE                    "GModelSpatialRadial::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -51,7 +51,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelRadial::GModelRadial(void) : GModelSpatial()
+GModelSpatialRadial::GModelSpatialRadial(void) : GModelSpatial()
 {
     // Initialise members
     init_members();
@@ -67,10 +67,11 @@ GModelRadial::GModelRadial(void) : GModelSpatial()
  * @param[in] xml XML element.
  *
  * Creates instance of a radial spatial model by extracting information
- * from an XML element. See GModelRadial::read() for more information about
+ * from an XML element. See GModelSpatialRadial::read() for more information about
  * the expected structure of the XML element.
  ***************************************************************************/
-GModelRadial::GModelRadial(const GXmlElement& xml) : GModelSpatial()
+GModelSpatialRadial::GModelSpatialRadial(const GXmlElement& xml) : 
+                     GModelSpatial()
 {
     // Initialise members
     init_members();
@@ -87,7 +88,8 @@ GModelRadial::GModelRadial(const GXmlElement& xml) : GModelSpatial()
  *
  * @param[in] model Radial spatial model.
  ***************************************************************************/
-GModelRadial::GModelRadial(const GModelRadial& model) : GModelSpatial()
+GModelSpatialRadial::GModelSpatialRadial(const GModelSpatialRadial& model) :
+                     GModelSpatial()
 {
     // Initialise members
     init_members();
@@ -103,7 +105,7 @@ GModelRadial::GModelRadial(const GModelRadial& model) : GModelSpatial()
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelRadial::~GModelRadial(void)
+GModelSpatialRadial::~GModelSpatialRadial(void)
 {
     // Free members
     free_members();
@@ -124,7 +126,7 @@ GModelRadial::~GModelRadial(void)
  *
  * @param[in] model Radial spatial model.
  ***************************************************************************/
-GModelRadial& GModelRadial::operator= (const GModelRadial& model)
+GModelSpatialRadial& GModelSpatialRadial::operator=(const GModelSpatialRadial& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -162,7 +164,7 @@ GModelRadial& GModelRadial::operator= (const GModelRadial& model)
  * Evaluates the radial spatial model for a given true photon arrival
  * direction.
  ***************************************************************************/
-double GModelRadial::eval(const GSkyDir& srcDir) const
+double GModelSpatialRadial::eval(const GSkyDir& srcDir) const
 {
     // Compute distance from source (in radians)
     double theta = srcDir.dist(dir());
@@ -183,7 +185,7 @@ double GModelRadial::eval(const GSkyDir& srcDir) const
  * Evaluates the radial spatial model for a given true photon arrival
  * direction.
  ***************************************************************************/
-double GModelRadial::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialRadial::eval_gradients(const GSkyDir& srcDir) const
 {
     // Compute distance from source (in radians)
     double theta = srcDir.dist(dir());
@@ -210,7 +212,7 @@ double GModelRadial::eval_gradients(const GSkyDir& srcDir) const
  * element is required to have at least 2 parameters.
  * The location is named either "RA" and "DEC" or "GLON" and "GLAT".
  ***************************************************************************/
-void GModelRadial::read(const GXmlElement& xml)
+void GModelSpatialRadial::read(const GXmlElement& xml)
 {
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
@@ -295,7 +297,7 @@ void GModelRadial::read(const GXmlElement& xml)
  * @todo The case that an existing spatial XML element with "GLON" and "GLAT"
  *       as coordinates is not supported.
  ***************************************************************************/
-void GModelRadial::write(GXmlElement& xml) const
+void GModelSpatialRadial::write(GXmlElement& xml) const
 {
     // Set model type
     if (xml.attribute("type") == "") {
@@ -358,7 +360,7 @@ void GModelRadial::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Return position of radial spatial model
  ***************************************************************************/
-GSkyDir GModelRadial::dir(void) const
+GSkyDir GModelSpatialRadial::dir(void) const
 {
     // Allocate sky direction
     GSkyDir srcDir;
@@ -374,7 +376,7 @@ GSkyDir GModelRadial::dir(void) const
 /***********************************************************************//**
  * @brief Set position of radial spatial model
  ***************************************************************************/
-void GModelRadial::dir(const GSkyDir& dir)
+void GModelSpatialRadial::dir(const GSkyDir& dir)
 {
     // Assign Right Ascension and Declination
     m_ra.real_value(dir.ra_deg());
@@ -394,7 +396,7 @@ void GModelRadial::dir(const GSkyDir& dir)
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelRadial::init_members(void)
+void GModelSpatialRadial::init_members(void)
 {
     // Initialise Right Ascension
     m_ra.clear();
@@ -429,7 +431,7 @@ void GModelRadial::init_members(void)
  *
  * @param[in] model Radial spatial model.
  ***************************************************************************/
-void GModelRadial::copy_members(const GModelRadial& model)
+void GModelSpatialRadial::copy_members(const GModelSpatialRadial& model)
 {
     // Copy members
     m_ra  = model.m_ra;
@@ -448,15 +450,8 @@ void GModelRadial::copy_members(const GModelRadial& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelRadial::free_members(void)
+void GModelSpatialRadial::free_members(void)
 {
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
