@@ -34,7 +34,7 @@
 #include "GModelSpatialConst.hpp"
 #include "GModelSpatialCube.hpp"
 #include "GModelSpatialMap.hpp"
-#include "GModelSpatialPtsrc.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GModelSpectral.hpp"
 #include "GModelSpectralConst.hpp"
 #include "GModelSpectralFunc.hpp"
@@ -71,8 +71,8 @@
     else if (dynamic_cast<GModelSpatialMap*>($1) != NULL) {
         $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialMap, 0 |  0 );
     }
-    else if (dynamic_cast<GModelSpatialPtsrc*>($1) != NULL) {
-        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialPtsrc, 0 |  0 );
+    else if (dynamic_cast<GModelSpatialPointSource*>($1) != NULL) {
+        $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialPointSource, 0 |  0 );
     }
     else {
         $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatial, 0 |  0 );

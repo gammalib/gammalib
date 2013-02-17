@@ -32,7 +32,7 @@
 #include "GException.hpp"
 #include "GModelRegistry.hpp"
 #include "GModelSky.hpp"
-#include "GModelSpatialPtsrc.hpp"
+#include "GModelSpatialPointSource.hpp"
 #include "GModelRadial.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
@@ -713,7 +713,7 @@ GPhotons GModelSky::mc(const double& area,
     if (valid_model()) {
 
         // Get point source pointer
-        GModelSpatialPtsrc* ptsrc = dynamic_cast<GModelSpatialPtsrc*>(m_spatial);
+        GModelSpatialPointSource* ptsrc = dynamic_cast<GModelSpatialPointSource*>(m_spatial);
 
         // Check if model will produce any photons in the specified
         // simulation region. If the model is a point source we check if the
@@ -925,7 +925,7 @@ void GModelSky::set_type(void)
     if (m_spatial != NULL) {
     
         // Is model a point source?
-        if (dynamic_cast<const GModelSpatialPtsrc*>(m_spatial) != NULL) {
+        if (dynamic_cast<const GModelSpatialPointSource*>(m_spatial) != NULL) {
             m_type = "PointSource";
         }
         

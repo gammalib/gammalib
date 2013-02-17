@@ -119,12 +119,12 @@ void TestGModel::test_model_par(void)
 void TestGModel::test_model(void)
 {
     // Setup spatial model
-    GModelSpatialPtsrc point_source;
+    GModelSpatialPointSource point_source;
     test_try("Setup spatial model");
     try {
         GSkyDir dir;
         dir.radec_deg(83.6331, +22.0145);
-        point_source = GModelSpatialPtsrc(dir);
+        point_source = GModelSpatialPointSource(dir);
 
         test_try_success();
     }
@@ -134,7 +134,7 @@ void TestGModel::test_model(void)
 
     test_assert((point_source.ra() == 83.6331 && point_source.dec() == +22.0145),
                 "Test if ra=83.6331 and dec=22.0145",
-                "Bad values in GModelSpatialPtsrc");
+                "Bad values in GModelSpatialPointSource");
 
     // Setup spectral model
     GModelSpectralPlaw power_law;
