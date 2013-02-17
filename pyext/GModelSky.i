@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GModelSky.i  -  Abstract virtual sky model class python I/F       *
+ *                      GModelSky.i - Sky model class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSky.i
- * @brief GModelSky class python interface
+ * @brief Sky model class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -114,41 +114,54 @@
 /***********************************************************************//**
  * @class GModelSky
  *
- * @brief Abstract virtual sky model class python interface defintion.
+ * @brief Sky model class
  ***************************************************************************/
 class GModelSky : public GModel {
 public:
     // Constructors and destructors
     GModelSky(void);
+    explicit GModelSky(const std::string& type);
     explicit GModelSky(const GXmlElement& xml);
-    explicit GModelSky(const GXmlElement& spatial, const GXmlElement& spectral);
+    explicit GModelSky(const GXmlElement& spatial,
+                       const GXmlElement& spectral);
+    explicit GModelSky(const GXmlElement& spatial,
+                       const GXmlElement& spectral,
+                       const GXmlElement& temporal);
+    explicit GModelSky(const GModelSpatial& spatial,
+                       const GModelSpectral& spectral);
+    explicit GModelSky(const GModelSpatial& spatial,
+                       const GModelSpectral& spectral,
+                       const GModelTemporal& temporal);
     GModelSky(const GModelSky& model);
     virtual ~GModelSky(void);
 
-    // Pure virtual methods
-    virtual void        clear(void) = 0;
-    virtual GModelSky*  clone(void) const = 0;
-    virtual std::string type(void) const = 0;
-
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
+    virtual void        clear(void);
+    virtual GModelSky*  clone(void) const;
+    virtual std::string type(void) const;
     virtual double      eval(const GEvent& event,
                              const GObservation& obs) const;
     virtual double      eval_gradients(const GEvent& event,
                                        const GObservation& obs) const;
-    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
+    virtual double      npred(const GEnergy& obsEng,
+                              const GTime& obsTime,
                               const GObservation& obs) const;
     virtual void        read(const GXmlElement& xml);
     virtual void        write(GXmlElement& xml) const;
+    virtual std::string print(void) const;
 
     // Other methods
-    GModelSpatial*      spatial(void) const { return m_spatial; }
-    GModelSpectral*     spectral(void) const { return m_spectral; }
-    GModelTemporal*     temporal(void) const { return m_temporal; }
-    double              value(const GSkyDir& srcDir, const GEnergy& srcEng,
+    GModelSpatial*      spatial(void) const;
+    GModelSpectral*     spectral(void) const;
+    GModelTemporal*     temporal(void) const;
+    double              value(const GSkyDir& srcDir,
+                              const GEnergy& srcEng,
                               const GTime& srcTime);
-    GVector             gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
+    GVector             gradients(const GSkyDir& srcDir,
+                                  const GEnergy& srcEng,
                                   const GTime& srcTime);
-    GPhotons            mc(const double& area, const GSkyDir& dir, const double& radius,
+    GPhotons            mc(const double& area,
+                           const GSkyDir& dir, const double& radius,
                            const GEnergy& emin, const GEnergy& emax,
                            const GTime& tmin, const GTime& tmax,
                            GRan& ran) const;
