@@ -28,9 +28,9 @@
 #include "GModelSky.hpp"
 #include "GModelSpatial.hpp"
 #include "GModelSpatialRadial.hpp"
-#include "GModelRadialDisk.hpp"
-#include "GModelRadialGauss.hpp"
-#include "GModelRadialShell.hpp"
+#include "GModelSpatialRadialDisk.hpp"
+#include "GModelSpatialRadialGauss.hpp"
+#include "GModelSpatialRadialShell.hpp"
 #include "GModelSpatialConst.hpp"
 #include "GModelSpatialCube.hpp"
 #include "GModelSpatialMap.hpp"
@@ -49,14 +49,14 @@
 /* __ Typemaps ___________________________________________________________ */
 %typemap(out) GModelSpatial* {
     if (dynamic_cast<GModelSpatialRadial*>($1) != NULL) {
-        if (dynamic_cast<GModelSpatialRadial*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialDisk, 0 |  0 );
+        if (dynamic_cast<GModelSpatialRadialDisk*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialRadialDisk, 0 |  0 );
         }
-        else if (dynamic_cast<GModelRadialGauss*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialGauss, 0 |  0 );
+        else if (dynamic_cast<GModelSpatialRadialGauss*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialRadialGauss, 0 |  0 );
         }
-        else if (dynamic_cast<GModelRadialShell*>($1) != NULL) {
-            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelRadialShell, 0 |  0 );
+        else if (dynamic_cast<GModelSpatialRadialShell*>($1) != NULL) {
+            $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialRadialShell, 0 |  0 );
         }
         else {
             $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSpatialRadial, 0 |  0 );

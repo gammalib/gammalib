@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GModelRadialGauss.hpp  -  Radial Gaussian source model class       *
+ *    GModelSpatialRadialGauss.hpp - Radial Gaussian source model class    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadialGauss.hpp
+ * @file GModelSpatialRadialGauss.hpp
  * @brief Radial Gaussian model class interface definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GMODELRADIALGAUSS_HPP
-#define GMODELRADIALGAUSS_HPP
+#ifndef GMODELSPATIALRADIALGAUSS_HPP
+#define GMODELSPATIALRADIALGAUSS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -36,37 +36,37 @@
 
 
 /***********************************************************************//**
- * @class GModelRadialGauss
+ * @class GModelSpatialRadialGauss
  *
  * @brief Radial Gaussian model class
  *
  * This class implements the spatial component of the factorised source
  * model for a Gaussian source.
  ***************************************************************************/
-class GModelRadialGauss : public GModelSpatialRadial {
+class GModelSpatialRadialGauss : public GModelSpatialRadial {
 
 public:
     // Constructors and destructors
-    GModelRadialGauss(void);
-    explicit GModelRadialGauss(const GSkyDir& dir, const double& sigma);
-    explicit GModelRadialGauss(const GXmlElement& xml);
-    GModelRadialGauss(const GModelRadialGauss& model);
-    virtual ~GModelRadialGauss(void);
+    GModelSpatialRadialGauss(void);
+    explicit GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
+    explicit GModelSpatialRadialGauss(const GXmlElement& xml);
+    GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
+    virtual ~GModelSpatialRadialGauss(void);
 
     // Operators
-    virtual GModelRadialGauss& operator=(const GModelRadialGauss& model);
+    virtual GModelSpatialRadialGauss& operator=(const GModelSpatialRadialGauss& model);
 
     // Implemented pure virtual methods
-    virtual void               clear(void);
-    virtual GModelRadialGauss* clone(void) const;
-    virtual std::string        type(void) const { return "GaussFunction"; }
-    virtual double             eval(const double& theta) const;
-    virtual double             eval_gradients(const double& theta) const;
-    virtual GSkyDir            mc(GRan& ran) const;
-    virtual double             theta_max(void) const;
-    virtual void               read(const GXmlElement& xml);
-    virtual void               write(GXmlElement& xml) const;
-    virtual std::string        print(void) const;
+    virtual void                      clear(void);
+    virtual GModelSpatialRadialGauss* clone(void) const;
+    virtual std::string               type(void) const { return "GaussFunction"; }
+    virtual double                    eval(const double& theta) const;
+    virtual double                    eval_gradients(const double& theta) const;
+    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual double                    theta_max(void) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
+    virtual std::string               print(void) const;
 
     // Other methods
     double  sigma(void) const { return m_sigma.real_value(); }
@@ -75,11 +75,11 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GModelRadialGauss& model);
+    void copy_members(const GModelSpatialRadialGauss& model);
     void free_members(void);
 
     // Protected members
     GModelPar m_sigma;      //!< Gaussian width (deg)
 };
 
-#endif /* GMODELRADIALGAUSS_HPP */
+#endif /* GMODELSPATIALRADIALGAUSS_HPP */

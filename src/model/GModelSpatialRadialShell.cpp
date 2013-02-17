@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GModelRadialShell.cpp  -  Radial shell source model class          *
+ *      GModelSpatialRadialShell.cpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadialShell.cpp
+ * @file GModelSpatialRadialShell.cpp
  * @brief Radial shell model class implementation
  * @author Christoph Deil
  */
@@ -30,18 +30,18 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelRadialShell.hpp"
+#include "GModelSpatialRadialShell.hpp"
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelRadialShell     g_radial_shell_seed;
-const GModelSpatialRegistry g_radial_shell_registry(&g_radial_shell_seed);
+const GModelSpatialRadialShell g_radial_shell_seed;
+const GModelSpatialRegistry    g_radial_shell_registry(&g_radial_shell_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                        "GModelRadialShell::read(GXmlElement&)"
-#define G_WRITE                      "GModelRadialShell::write(GXmlElement&)"
+#define G_READ                 "GModelSpatialRadialShell::read(GXmlElement&)"
+#define G_WRITE               "GModelSpatialRadialShell::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -60,7 +60,7 @@ const GModelSpatialRegistry g_radial_shell_registry(&g_radial_shell_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelRadialShell::GModelRadialShell(void) : GModelSpatialRadial()
+GModelSpatialRadialShell::GModelSpatialRadialShell(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -81,11 +81,11 @@ GModelRadialShell::GModelRadialShell(void) : GModelSpatialRadial()
  * The small angle approximation is (a little) faster, but incorrect for
  * shells larger than a few degrees.
  ***************************************************************************/
-GModelRadialShell::GModelRadialShell(const GSkyDir& dir,
+GModelSpatialRadialShell::GModelSpatialRadialShell(const GSkyDir& dir,
                                      const double&  radius,
                                      const double&  width,
                                      const bool& small_angle) :
-                   GModelSpatialRadial()
+                          GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -107,11 +107,11 @@ GModelRadialShell::GModelRadialShell(const GSkyDir& dir,
  * @param[in] xml XML element.
  *
  * Creates instance of shell spatial model by extracting information from an
- * XML element. See GModelRadialShell::read() for more information about the
+ * XML element. See GModelSpatialRadialShell::read() for more information about the
  * expected structure of the XML element.
  ***************************************************************************/
-GModelRadialShell::GModelRadialShell(const GXmlElement& xml) :
-                   GModelSpatialRadial()
+GModelSpatialRadialShell::GModelSpatialRadialShell(const GXmlElement& xml) :
+                          GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -129,8 +129,8 @@ GModelRadialShell::GModelRadialShell(const GXmlElement& xml) :
  *
  * @param[in] model Radial shell source model.
  ***************************************************************************/
-GModelRadialShell::GModelRadialShell(const GModelRadialShell& model) :
-                   GModelSpatialRadial(model)
+GModelSpatialRadialShell::GModelSpatialRadialShell(const GModelSpatialRadialShell& model) :
+                          GModelSpatialRadial(model)
 {
     // Initialise members
     init_members();
@@ -146,7 +146,7 @@ GModelRadialShell::GModelRadialShell(const GModelRadialShell& model) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelRadialShell::~GModelRadialShell(void)
+GModelSpatialRadialShell::~GModelSpatialRadialShell(void)
 {
     // Free members
     free_members();
@@ -166,8 +166,9 @@ GModelRadialShell::~GModelRadialShell(void)
  * @brief Assignment operator
  *
  * @param[in] model Radial shell source model.
+ * @return Radial shell source model.
  ***************************************************************************/
-GModelRadialShell& GModelRadialShell::operator=(const GModelRadialShell& model)
+GModelSpatialRadialShell& GModelSpatialRadialShell::operator=(const GModelSpatialRadialShell& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -200,7 +201,7 @@ GModelRadialShell& GModelRadialShell::operator=(const GModelRadialShell& model)
 /***********************************************************************//**
  * @brief Clear instance
  ***************************************************************************/
-void GModelRadialShell::clear(void)
+void GModelSpatialRadialShell::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -219,10 +220,12 @@ void GModelRadialShell::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of model.
  ***************************************************************************/
-GModelRadialShell* GModelRadialShell::clone(void) const
+GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
 {
-    return new GModelRadialShell(*this);
+    return new GModelSpatialRadialShell(*this);
 }
 
 
@@ -278,7 +281,7 @@ GModelRadialShell* GModelRadialShell::clone(void) const
  * Here, \f$\theta_{\rm in}\f$ and \f$\theta_{\rm out}\f$ are the shell inner
  * and outer radius.
  ***************************************************************************/
-double GModelRadialShell::eval(const double& theta) const
+double GModelSpatialRadialShell::eval(const double& theta) const
 {
     // Update precomputation cache
     update();
@@ -296,9 +299,9 @@ double GModelRadialShell::eval(const double& theta) const
     // Compute value
     double value = 0.0;
     if (x < m_x_out) {
-        value = sqrt(m_x_out - x);
+        value = std::sqrt(m_x_out - x);
         if (x < m_x_in) {
-            value -= sqrt(m_x_in - x);
+            value -= std::sqrt(m_x_in - x);
         }
     }
     
@@ -308,7 +311,7 @@ double GModelRadialShell::eval(const double& theta) const
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(result) || isinfinite(result)) {
-        std::cout << "*** ERROR: GModelRadialShell::eval";
+        std::cout << "*** ERROR: GModelSpatialRadialShell::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (result=" << result;
         std::cout << ", m_norm=" << m_norm;
@@ -331,11 +334,11 @@ double GModelRadialShell::eval(const double& theta) const
  *
  * @param[in] theta Angular distance from shell centre (radians).
  *
- * This method simply calls GModelRadialShell::eval() as no analytical
- * gradients will be computed. See GModelRadialShell::eval() for details
+ * This method simply calls GModelSpatialRadialShell::eval() as no analytical
+ * gradients will be computed. See GModelSpatialRadialShell::eval() for details
  * about the implemented method.
  ***************************************************************************/
-double GModelRadialShell::eval_gradients(const double& theta) const
+double GModelSpatialRadialShell::eval_gradients(const double& theta) const
 {
     // Return value
     return (eval(theta));
@@ -349,7 +352,7 @@ double GModelRadialShell::eval_gradients(const double& theta) const
  *
  * Draws an arbitrary sky position from the 2D shell distribution.
  ***************************************************************************/
-GSkyDir GModelRadialShell::mc(GRan& ran) const
+GSkyDir GModelSpatialRadialShell::mc(GRan& ran) const
 {
     // Update precomputation cache
     update();
@@ -392,7 +395,7 @@ GSkyDir GModelRadialShell::mc(GRan& ran) const
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
  ***************************************************************************/
-double GModelRadialShell::theta_max(void) const
+double GModelSpatialRadialShell::theta_max(void) const
 {
     // Return value
     return ((radius()+width())*deg2rad);
@@ -418,7 +421,7 @@ double GModelRadialShell::theta_max(void) const
  *       width boundary. The radius and radius boundary should be >=0, the
  *       width and width boundary should be >0.
  ***************************************************************************/
-void GModelRadialShell::read(const GXmlElement& xml)
+void GModelSpatialRadialShell::read(const GXmlElement& xml)
 {
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
@@ -495,7 +498,7 @@ void GModelRadialShell::read(const GXmlElement& xml)
  * element will have 4 parameter leafs named "RA", "DEC", "Radius" and 
  * "Width". The location leafs are handled by the GModelRadial base class.
  ***************************************************************************/
-void GModelRadialShell::write(GXmlElement& xml) const
+void GModelSpatialRadialShell::write(GXmlElement& xml) const
 {
     // Write shell location
     GModelSpatialRadial::write(xml);
@@ -550,14 +553,16 @@ void GModelRadialShell::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print information
+ *
+ * @return String containing model information.
  ***************************************************************************/
-std::string GModelRadialShell::print(void) const
+std::string GModelSpatialRadialShell::print(void) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
-    result.append("=== GModelRadialShell ===\n");
+    result.append("=== GModelSpatialRadialShell ===\n");
 
     // Append parameters
     result.append(parformat("Number of parameters")+str(size()));
@@ -579,7 +584,7 @@ std::string GModelRadialShell::print(void) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelRadialShell::init_members(void)
+void GModelSpatialRadialShell::init_members(void)
 {
     // Initialise Radius
     m_radius.clear();
@@ -634,7 +639,7 @@ void GModelRadialShell::init_members(void)
  * should have been done by init_members() that was called before. Otherwise
  * we would have the radius and width twice on the stack.
  ***************************************************************************/
-void GModelRadialShell::copy_members(const GModelRadialShell& model)
+void GModelSpatialRadialShell::copy_members(const GModelSpatialRadialShell& model)
 {
     // Copy members
     m_radius      = model.m_radius;
@@ -658,7 +663,7 @@ void GModelRadialShell::copy_members(const GModelRadialShell& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelRadialShell::free_members(void)
+void GModelSpatialRadialShell::free_members(void)
 {
     // Return
     return;
@@ -695,7 +700,7 @@ void GModelRadialShell::free_members(void)
  *          \frac{\sqrt{2} \cos {\tt m\_theta\_in}}
  *               {\sqrt{2} + \sqrt{1 - \cos 2 {\tt m\_theta\_in}}} \right)\f]
  ***************************************************************************/
-void GModelRadialShell::update() const
+void GModelSpatialRadialShell::update() const
 {
     // Set constants
     const double c1 = twopi / 3.0;
@@ -734,7 +739,7 @@ void GModelRadialShell::update() const
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(m_norm) || isinfinite(m_norm)) {
-        std::cout << "*** ERROR: GModelRadialShell::update:";
+        std::cout << "*** ERROR: GModelSpatialRadialShell::update:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (m_norm=" << m_norm;
         std::cout << ", radius=" << radius();
@@ -758,7 +763,7 @@ void GModelRadialShell::update() const
  *
  * Computes \f$f1(x) = \sqrt{1 - \cos 2 x}\f$.
  ***************************************************************************/
-double GModelRadialShell::f1(double x)
+double GModelSpatialRadialShell::f1(double x)
 {
     // Compute value
     double f1 = std::sqrt(1.0 - std::cos(2.0 * x));
@@ -776,7 +781,7 @@ double GModelRadialShell::f1(double x)
  *    \ln \left( \frac{\sqrt{2} \cos x}{\sqrt{2} + \sqrt{ 1 - \cos 2 x}}
  *        \right)\f].
  ***************************************************************************/
-double GModelRadialShell::f2(double x)
+double GModelSpatialRadialShell::f2(double x)
 {
     // Compute value
     double t1 = (1.0 + std::cos(2.0*x)) / 4.0;

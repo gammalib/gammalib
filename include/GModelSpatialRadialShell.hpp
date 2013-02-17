@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GModelRadialShell.hpp - Radial shell source model class         *
+ *      GModelSpatialRadialShell.hpp - Radial shell source model class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadialShell.hpp
+ * @file GModelSpatialRadialShell.hpp
  * @brief Radial shell model class interface definition
  * @author Christoph Deil
  */
 
-#ifndef GMODELRADIALSHELL_HPP
-#define GMODELRADIALSHELL_HPP
+#ifndef GMODELSPATIALRADIALSHELL_HPP
+#define GMODELSPATIALRADIALSHELL_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -36,7 +36,7 @@
 
 
 /**************************************************************************
- * @class GModelRadialShell
+ * @class GModelSpatialRadialShell
  *
  * @brief Shell source model class
  *
@@ -54,32 +54,32 @@
  * the gamma-ray domain, and improves the convergence of the fitting
  * algorithms.
  ***************************************************************************/
-class GModelRadialShell : public GModelSpatialRadial {
+class GModelSpatialRadialShell : public GModelSpatialRadial {
 
 public:
     // Constructors and destructors
-    GModelRadialShell(void);
-    explicit GModelRadialShell(const GSkyDir& dir,
+    GModelSpatialRadialShell(void);
+    explicit GModelSpatialRadialShell(const GSkyDir& dir,
                                const double& radius, const double& width,
                                const bool& small_angle = true);
-    explicit GModelRadialShell(const GXmlElement& xml);
-    GModelRadialShell(const GModelRadialShell& model);
-    virtual ~GModelRadialShell(void);
+    explicit GModelSpatialRadialShell(const GXmlElement& xml);
+    GModelSpatialRadialShell(const GModelSpatialRadialShell& model);
+    virtual ~GModelSpatialRadialShell(void);
 
     // Operators
-    virtual GModelRadialShell& operator=(const GModelRadialShell& model);
+    virtual GModelSpatialRadialShell& operator=(const GModelSpatialRadialShell& model);
 
     // Implemented pure virtual methods
-    virtual void               clear(void);
-    virtual GModelRadialShell* clone(void) const;
-    virtual std::string        type(void) const { return "ShellFunction"; }
-    virtual double             eval(const double& theta) const;
-    virtual double             eval_gradients(const double& theta) const;
-    virtual GSkyDir            mc(GRan& ran) const;
-    virtual double             theta_max(void) const;
-    virtual void               read(const GXmlElement& xml);
-    virtual void               write(GXmlElement& xml) const;
-    virtual std::string        print(void) const;
+    virtual void                      clear(void);
+    virtual GModelSpatialRadialShell* clone(void) const;
+    virtual std::string               type(void) const { return "ShellFunction"; }
+    virtual double                    eval(const double& theta) const;
+    virtual double                    eval_gradients(const double& theta) const;
+    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual double                    theta_max(void) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
+    virtual std::string               print(void) const;
 
     // Other methods
     double  radius(void) const { return m_radius.real_value(); }
@@ -92,7 +92,7 @@ public:
 protected:
     // Protected methods
     void          init_members(void);
-    void          copy_members(const GModelRadialShell& model);
+    void          copy_members(const GModelSpatialRadialShell& model);
     void          free_members(void);
     void          update(void) const;
     static double f1(double x);
@@ -113,4 +113,4 @@ protected:
     mutable double  m_norm;          //!< Shell normalization
 };
 
-#endif /* GMODELRADIALSHELL_HPP */
+#endif /* GMODELSPATIALRADIALSHELL_HPP */

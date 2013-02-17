@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GModelRadialDisk.hpp - Radial disk source model class            *
+ *      GModelSpatialRadialDisk.hpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadialDisk.hpp
+ * @file GModelSpatialRadialDisk.hpp
  * @brief Radial disk model class interface definition
  * @author Christoph Deil
  */
 
-#ifndef GMODELRADIALDISK_HPP
-#define GMODELRADIALDISK_HPP
+#ifndef GMODELSPATIALRADIALDISK_HPP
+#define GMODELSPATIALRADIALDISK_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -36,7 +36,7 @@
 
 
 /**************************************************************************
- * @class GModelRadialDisk
+ * @class GModelSpatialRadialDisk
  *
  * @brief Disk source model class
  *
@@ -44,30 +44,30 @@
  * model for a disk source, i.e. constant surface brightness within some
  * radius and no emission outside.
  ***************************************************************************/
-class GModelRadialDisk : public GModelSpatialRadial {
+class GModelSpatialRadialDisk : public GModelSpatialRadial {
 
 public:
     // Constructors and destructors
-    GModelRadialDisk(void);
-    explicit GModelRadialDisk(const GSkyDir& dir, const double& radius);
-    explicit GModelRadialDisk(const GXmlElement& xml);
-    GModelRadialDisk(const GModelRadialDisk& model);
-    virtual ~GModelRadialDisk(void);
+    GModelSpatialRadialDisk(void);
+    explicit GModelSpatialRadialDisk(const GSkyDir& dir, const double& radius);
+    explicit GModelSpatialRadialDisk(const GXmlElement& xml);
+    GModelSpatialRadialDisk(const GModelSpatialRadialDisk& model);
+    virtual ~GModelSpatialRadialDisk(void);
 
     // Operators
-    virtual GModelRadialDisk& operator=(const GModelRadialDisk& model);
+    virtual GModelSpatialRadialDisk& operator=(const GModelSpatialRadialDisk& model);
 
     // Implemented pure virtual methods
-    virtual void              clear(void);
-    virtual GModelRadialDisk* clone(void) const;
-    virtual std::string       type(void) const { return "DiskFunction"; }
-    virtual double            eval(const double& theta) const;
-    virtual double            eval_gradients(const double& theta) const;
-    virtual GSkyDir           mc(GRan& ran) const;
-    virtual double            theta_max(void) const;
-    virtual void              read(const GXmlElement& xml);
-    virtual void              write(GXmlElement& xml) const;
-    virtual std::string       print(void) const;
+    virtual void                     clear(void);
+    virtual GModelSpatialRadialDisk* clone(void) const;
+    virtual std::string              type(void) const { return "DiskFunction"; }
+    virtual double                   eval(const double& theta) const;
+    virtual double                   eval_gradients(const double& theta) const;
+    virtual GSkyDir                  mc(GRan& ran) const;
+    virtual double                   theta_max(void) const;
+    virtual void                     read(const GXmlElement& xml);
+    virtual void                     write(GXmlElement& xml) const;
+    virtual std::string              print(void) const;
 
     // Other methods
     double radius(void) const { return m_radius.real_value(); }
@@ -76,7 +76,7 @@ public:
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GModelRadialDisk& model);
+    void copy_members(const GModelSpatialRadialDisk& model);
     void free_members(void);
     void update(void) const;
 
@@ -89,4 +89,4 @@ protected:
     mutable double m_norm;          //!< Normalization
 };
 
-#endif /* GMODELRADIALDISK_HPP */
+#endif /* GMODELSPATIALRADIALDISK_HPP */

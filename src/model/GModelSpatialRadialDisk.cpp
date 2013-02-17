@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GModelRadialDisk.cpp  -  Radial disk source model class            *
+ *      GModelSpatialRadialDisk.cpp - Radial disk source model class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadialDisk.cpp
+ * @file GModelSpatialRadialDisk.cpp
  * @brief Radial disk model class implementation
  * @author Christoph Deil
  */
@@ -30,18 +30,18 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GModelRadialDisk.hpp"
+#include "GModelSpatialRadialDisk.hpp"
 #include "GModelSpatialRegistry.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Globals ____________________________________________________________ */
-const GModelRadialDisk      g_radial_disk_seed;
-const GModelSpatialRegistry g_radial_disk_registry(&g_radial_disk_seed);
+const GModelSpatialRadialDisk g_radial_disk_seed;
+const GModelSpatialRegistry   g_radial_disk_registry(&g_radial_disk_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                         "GModelRadialDisk::read(GXmlElement&)"
-#define G_WRITE                       "GModelRadialDisk::write(GXmlElement&)"
+#define G_READ                  "GModelSpatialRadialDisk::read(GXmlElement&)"
+#define G_WRITE                "GModelSpatialRadialDisk::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -59,7 +59,7 @@ const GModelSpatialRegistry g_radial_disk_registry(&g_radial_disk_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelRadialDisk::GModelRadialDisk(void) : GModelSpatialRadial()
+GModelSpatialRadialDisk::GModelSpatialRadialDisk(void) : GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -75,8 +75,9 @@ GModelRadialDisk::GModelRadialDisk(void) : GModelSpatialRadial()
  * @param[in] dir Sky position of disk centre.
  * @param[in] radius Disk radius (degrees).
  ***************************************************************************/
-GModelRadialDisk::GModelRadialDisk(const GSkyDir& dir, const double&  radius) :
-                  GModelSpatialRadial()
+GModelSpatialRadialDisk::GModelSpatialRadialDisk(const GSkyDir& dir,
+                                                 const double&  radius) :
+                         GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -96,11 +97,11 @@ GModelRadialDisk::GModelRadialDisk(const GSkyDir& dir, const double&  radius) :
  * @param[in] xml XML element.
  *
  * Creates instance of radial disk model by extracting information from an
- * XML element. See GModelRadialDisk::read() for more information about the
+ * XML element. See GModelSpatialRadialDisk::read() for more information about the
  * expected structure of the XML element.
  ***************************************************************************/
-GModelRadialDisk::GModelRadialDisk(const GXmlElement& xml) :
-                  GModelSpatialRadial()
+GModelSpatialRadialDisk::GModelSpatialRadialDisk(const GXmlElement& xml) :
+                         GModelSpatialRadial()
 {
     // Initialise members
     init_members();
@@ -118,8 +119,8 @@ GModelRadialDisk::GModelRadialDisk(const GXmlElement& xml) :
  *
  * @param[in] model Radial disk model.
  ***************************************************************************/
-GModelRadialDisk::GModelRadialDisk(const GModelRadialDisk& model) :
-                  GModelSpatialRadial(model)
+GModelSpatialRadialDisk::GModelSpatialRadialDisk(const GModelSpatialRadialDisk& model) :
+                         GModelSpatialRadial(model)
 {
     // Initialise members
     init_members();
@@ -135,7 +136,7 @@ GModelRadialDisk::GModelRadialDisk(const GModelRadialDisk& model) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GModelRadialDisk::~GModelRadialDisk(void)
+GModelSpatialRadialDisk::~GModelSpatialRadialDisk(void)
 {
     // Free members
     free_members();
@@ -155,8 +156,9 @@ GModelRadialDisk::~GModelRadialDisk(void)
  * @brief Assignment operator
  *
  * @param[in] model Radial disk model.
+ * @return Radial disk model.
  ***************************************************************************/
-GModelRadialDisk& GModelRadialDisk::operator= (const GModelRadialDisk& model)
+GModelSpatialRadialDisk& GModelSpatialRadialDisk::operator=(const GModelSpatialRadialDisk& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -189,7 +191,7 @@ GModelRadialDisk& GModelRadialDisk::operator= (const GModelRadialDisk& model)
 /***********************************************************************//**
  * @brief Clear instance
  ***************************************************************************/
-void GModelRadialDisk::clear(void)
+void GModelSpatialRadialDisk::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
@@ -209,9 +211,9 @@ void GModelRadialDisk::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  ***************************************************************************/
-GModelRadialDisk* GModelRadialDisk::clone(void) const
+GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
 {
-    return new GModelRadialDisk(*this);
+    return new GModelSpatialRadialDisk(*this);
 }
 
 
@@ -242,7 +244,7 @@ GModelRadialDisk* GModelRadialDisk::clone(void) const
  *
  * is a normalization constant (see the update() method).
  ***************************************************************************/
-double GModelRadialDisk::eval(const double& theta) const
+double GModelSpatialRadialDisk::eval(const double& theta) const
 {
     // Update precomputation cache
     update();
@@ -253,7 +255,7 @@ double GModelRadialDisk::eval(const double& theta) const
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
-        std::cout << "*** ERROR: GModelRadialDisk::eval";
+        std::cout << "*** ERROR: GModelSpatialRadialDisk::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ", m_radius_rad=" << m_radius_rad;
@@ -278,7 +280,7 @@ double GModelRadialDisk::eval(const double& theta) const
  *
  * See the eval() method for more information.
  ***************************************************************************/
-double GModelRadialDisk::eval_gradients(const double& theta) const
+double GModelSpatialRadialDisk::eval_gradients(const double& theta) const
 {
     // Return value
     return (eval(theta));
@@ -292,7 +294,7 @@ double GModelRadialDisk::eval_gradients(const double& theta) const
  *
  * Draws an arbitrary sky position from the 2D disk distribution.
  ***************************************************************************/
-GSkyDir GModelRadialDisk::mc(GRan& ran) const
+GSkyDir GModelSpatialRadialDisk::mc(GRan& ran) const
 {
     // Simulate offset from photon arrival direction
     double cosrad = std::cos(radius()*deg2rad);
@@ -311,7 +313,7 @@ GSkyDir GModelRadialDisk::mc(GRan& ran) const
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
  ***************************************************************************/
-double GModelRadialDisk::theta_max(void) const
+double GModelSpatialRadialDisk::theta_max(void) const
 {
     // Return value
     return (radius()*deg2rad);
@@ -336,7 +338,7 @@ double GModelRadialDisk::theta_max(void) const
  * @todo Implement a test of the radius and radius boundary. The radius
  *       and radius minimum should be >0.
  ***************************************************************************/
-void GModelRadialDisk::read(const GXmlElement& xml)
+void GModelSpatialRadialDisk::read(const GXmlElement& xml)
 {
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
@@ -395,7 +397,7 @@ void GModelRadialDisk::read(const GXmlElement& xml)
  * Write the Disk source information into an XML element. The XML element
  * will have 3 parameter leafs named "RA", "DEC" and "Radius"
  ***************************************************************************/
-void GModelRadialDisk::write(GXmlElement& xml) const
+void GModelSpatialRadialDisk::write(GXmlElement& xml) const
 {
     // Write disk location
     GModelSpatialRadial::write(xml);
@@ -443,14 +445,16 @@ void GModelRadialDisk::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print information
+ *
+ * @return String containing model information.
  ***************************************************************************/
-std::string GModelRadialDisk::print(void) const
+std::string GModelSpatialRadialDisk::print(void) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
-    result.append("=== GModelRadialDisk ===\n");
+    result.append("=== GModelSpatialRadialDisk ===\n");
 
     // Append parameters
     result.append(parformat("Number of parameters")+str(size()));
@@ -472,7 +476,7 @@ std::string GModelRadialDisk::print(void) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GModelRadialDisk::init_members(void)
+void GModelSpatialRadialDisk::init_members(void)
 {
     // Initialise Radius
     m_radius.clear();
@@ -508,7 +512,7 @@ void GModelRadialDisk::init_members(void)
  * should have been done by init_members() that was called before. Otherwise
  * we would have the radius twice on the stack.
  ***************************************************************************/
-void GModelRadialDisk::copy_members(const GModelRadialDisk& model)
+void GModelSpatialRadialDisk::copy_members(const GModelSpatialRadialDisk& model)
 {
     // Copy members
     m_radius = model.m_radius;
@@ -526,7 +530,7 @@ void GModelRadialDisk::copy_members(const GModelRadialDisk& model)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GModelRadialDisk::free_members(void)
+void GModelSpatialRadialDisk::free_members(void)
 {
     // Return
     return;
@@ -544,7 +548,7 @@ void GModelRadialDisk::free_members(void)
  * approximation you might have expected:
  * \f[{\tt m\_norm} = \frac{1}{\pi r ^ 2}\f]
  ***************************************************************************/
-void GModelRadialDisk::update() const
+void GModelSpatialRadialDisk::update() const
 {
     // Update if radius has changed
     if (m_last_radius != radius()) {
@@ -564,10 +568,3 @@ void GModelRadialDisk::update() const
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

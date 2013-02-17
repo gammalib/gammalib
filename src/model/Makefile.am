@@ -16,9 +16,9 @@ sources = GModelPar.cpp \
           GModelSpatialRegistry.cpp \
           GModelSpatialPointSource.cpp \
           GModelSpatialRadial.cpp \
-          GModelRadialDisk.cpp \
-          GModelRadialGauss.cpp \
-          GModelRadialShell.cpp \
+          GModelSpatialRadialDisk.cpp \
+          GModelSpatialRadialGauss.cpp \
+          GModelSpatialRadialShell.cpp \
           GModelSpatialConst.cpp \
           GModelSpatialCube.cpp \
           GModelSpatialMap.cpp \

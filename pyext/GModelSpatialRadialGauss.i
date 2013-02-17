@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GModelRadialGauss.i - Radial Gaussian source model class         *
+ *     GModelSpatialRadialGauss.i - Radial Gaussian source model class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,41 +19,41 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadialGauss.i
+ * @file GModelSpatialRadialGauss.i
  * @brief Radial Gaussian model class Python interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelRadialGauss.hpp"
+#include "GModelSpatialRadialGauss.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GModelRadialGauss
+ * @class GModelSpatialRadialGauss
  *
  * @brief Radial Gaussian model class
  ***************************************************************************/
-class GModelRadialGauss : public GModelSpatialRadial {
+class GModelSpatialRadialGauss : public GModelSpatialRadial {
 public:
     // Constructors and destructors
-    GModelRadialGauss(void);
-    explicit GModelRadialGauss(const GSkyDir& dir, const double& sigma);
-    explicit GModelRadialGauss(const GXmlElement& xml);
-    GModelRadialGauss(const GModelRadialGauss& model);
-    virtual ~GModelRadialGauss(void);
+    GModelSpatialRadialGauss(void);
+    explicit GModelSpatialRadialGauss(const GSkyDir& dir, const double& sigma);
+    explicit GModelSpatialRadialGauss(const GXmlElement& xml);
+    GModelSpatialRadialGauss(const GModelSpatialRadialGauss& model);
+    virtual ~GModelSpatialRadialGauss(void);
 
     // Implemented pure virtual methods
-    virtual void               clear(void);
-    virtual GModelRadialGauss* clone(void) const;
-    virtual std::string        type(void) const;
-    virtual double             eval(const double& theta) const;
-    virtual double             eval_gradients(const double& theta) const;
-    virtual GSkyDir            mc(GRan& ran) const;
-    virtual double             theta_max(void) const;
-    virtual void               read(const GXmlElement& xml);
-    virtual void               write(GXmlElement& xml) const;
+    virtual void                      clear(void);
+    virtual GModelSpatialRadialGauss* clone(void) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const double& theta) const;
+    virtual double                    eval_gradients(const double& theta) const;
+    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual double                    theta_max(void) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
 
     // Other methods
     double  sigma(void) const;
@@ -62,10 +62,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GModelRadialGauss class extension
+ * @brief GModelSpatialRadialGauss class extension
  ***************************************************************************/
-%extend GModelRadialGauss {
-    GModelRadialGauss copy() {
+%extend GModelSpatialRadialGauss {
+    GModelSpatialRadialGauss copy() {
         return (*self);
     }
 };

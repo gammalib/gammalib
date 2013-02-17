@@ -111,9 +111,9 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialRegistry.hpp \
                      GModelSpatialPointSource.hpp \
                      GModelSpatialRadial.hpp \
-                     GModelRadialDisk.hpp \
-                     GModelRadialGauss.hpp \
-                     GModelRadialShell.hpp \
+                     GModelSpatialRadialDisk.hpp \
+                     GModelSpatialRadialGauss.hpp \
+                     GModelSpatialRadialShell.hpp \
                      GModelSpatialConst.hpp \
                      GModelSpatialCube.hpp \
                      GModelSpatialMap.hpp \

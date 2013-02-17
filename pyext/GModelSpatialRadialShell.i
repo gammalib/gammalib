@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GModelRadialShell.i - Radial spatial shell source model class      *
+ *   GModelSpatialRadialShell.i - Radial spatial shell source model class  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Christoph Deil                              *
  * ----------------------------------------------------------------------- *
@@ -19,42 +19,42 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GModelRadialShell.i
+ * @file GModelSpatialRadialShell.i
  * @brief Radial spatial shell model class Python interface definition
  * @author Christoph Deil
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GModelRadialShell.hpp"
+#include "GModelSpatialRadialShell.hpp"
 #include "GTools.hpp"
 %}
 
 /**************************************************************************
- * @class GModelRadialShell
+ * @class GModelSpatialRadialShell
  *
  * @brief Radial shell source model class
  ***************************************************************************/
-class GModelRadialShell : public GModelSpatialRadial {
+class GModelSpatialRadialShell : public GModelSpatialRadial {
 public:
     // Constructors and destructors
-    GModelRadialShell(void);
-    explicit GModelRadialShell(const GSkyDir& dir,
+    GModelSpatialRadialShell(void);
+    explicit GModelSpatialRadialShell(const GSkyDir& dir,
                                const double& radius, const double& width,
                                const bool& small_angle = true);
-    explicit GModelRadialShell(const GXmlElement& xml);
-    GModelRadialShell(const GModelRadialShell& model);
-    virtual ~GModelRadialShell(void);
+    explicit GModelSpatialRadialShell(const GXmlElement& xml);
+    GModelSpatialRadialShell(const GModelSpatialRadialShell& model);
+    virtual ~GModelSpatialRadialShell(void);
 
     // Implemented pure virtual methods
-    virtual void               clear(void);
-    virtual GModelRadialShell* clone(void) const;
-    virtual std::string        type(void) const;
-    virtual double             eval(const double& theta) const;
-    virtual double             eval_gradients(const double& theta) const;
-    virtual GSkyDir            mc(GRan& ran) const;
-    virtual double             theta_max(void) const;
-    virtual void               read(const GXmlElement& xml);
-    virtual void               write(GXmlElement& xml) const;
+    virtual void                      clear(void);
+    virtual GModelSpatialRadialShell* clone(void) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const double& theta) const;
+    virtual double                    eval_gradients(const double& theta) const;
+    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual double                    theta_max(void) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
 
     // Other methods
     double  radius(void) const;
@@ -67,10 +67,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GModelRadialShell class extension
+ * @brief GModelSpatialRadialShell class extension
  ***************************************************************************/
-%extend GModelRadialShell {
-    GModelRadialShell copy() {
+%extend GModelSpatialRadialShell {
+    GModelSpatialRadialShell copy() {
         return (*self);
     }
 };
