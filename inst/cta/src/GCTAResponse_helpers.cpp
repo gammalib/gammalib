@@ -118,10 +118,15 @@ double cta_npsf_kern_rad_azsym::eval(double delta)
  *
  * This method evaluates the kernel \f$K(\rho)\f$ for the zenith angle
  * integration
+ *
  * \f[\int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho) d\rho\f]
+ *
  * of the product between model and IRF, where
- * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}} M(\rho)
- *              IRF(\rho, \omega) d\omega\f],
+ *
+ * \f[K(\rho) = \sin \rho \times M(\rho) \times
+ *              \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *              IRF(\rho, \omega) d\omega\f]
+ *
  * \f$M(\rho)\f$ is the azimuthally symmetric source model, and
  * \f$IRF(\rho, \omega)\f$ is the instrument response function.
  ***************************************************************************/
@@ -203,27 +208,42 @@ double cta_irf_radial_kern_rho::eval(double rho)
  *
  * @param[in] omega Azimuth angle (radians).
  *
- * This method evaluates the instrument response function
- * \f$IRF(\rho,\omega)\f$ for the azimuth angle integration of the IRF.
+ * This method evaluates the product
  *
- * From the model coordinates \f$(\rho,\omega)\f$ it computes the PSF
- * offset angle \f$\delta\f$, defined as the angle between true 
- * (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) photon arrival direction,
- * using
+ * \f[IRF(\rho,\omega) \times M(\rho,\omega)\f]
+ *
+ * where
+ * \f$IRF(\rho,\omega)\f$ is the instrument response function,
+ * \f$M(\rho,\omega)\f$ is the spatial component of the radial model,
+ * \f$\rho\f$ is the offset angle with respect to the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between model centre \f$\vec{m}\f$ and the observed photon arrival 
+ * direction \f$\vec{p'}\f$.
+ *
+ * From the model coordinates \f$(\rho,\omega)\f$, the method computes the
+ * angle between the true (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) 
+ * photon arrival direction using
+ * 
  * \f[\delta = \arccos(\cos \rho \cos \zeta + 
  *                     \sin \rho \sin \zeta \cos \omega)\f]
- * where
- * \f$\zeta\f$ is the angular distance between the observed photon direction
- * \f$\vec{p}\f$ and the model centre \f$\vec{m}\f$.
  *
- * Furthermore, it computes the observed photon offset angle \f$\theta\f$,
- * defined as the angle between observed photon direction and camera pointing,
- * using
+ * where
+ * \f$\zeta\f$ is the angular distance between the observed photon arrival
+ * direction \f$\vec{p'}\f$ and the model centre \f$\vec{m}\f$. This angle
+ * \f$\delta\f$ is used to compute the \f$PSF(\delta)\f$ value.
+ *
+ * The method computes also the angle \f$\theta\f$ between the observed
+ * photon arrival direction \f$\vec{p'}\f$ and the camera pointing
+ * \f$\vec{d}\f$ using
+ *
  * \f[\theta = \arccos(\cos \rho \cos \lambda + 
  *                     \sin \rho \sin \lambda \cos \omega_0 - \omega)\f]
+ *
  * where
- * \f$\lambda\f$ is the angular distance between the model centre and the
- * camera pointing direction.
+ * \f$\lambda\f$ is the angular distance between the model centre 
+ * \f$\vec{m}\f$ and the camera pointing direction \f$\vec{d}\f$.
+ * The angle \f$\theta\f$ is used in the computation of the IRF (no
+ * azimuthal dependence is so far implemented for the IRF computation).
  ***************************************************************************/
 double cta_irf_radial_kern_omega::eval(double omega)
 {
@@ -267,15 +287,16 @@ double cta_irf_radial_kern_omega::eval(double omega)
 /***********************************************************************//**
  * @brief Kernel for zenith angle Npred integration or radial model
  *
- * @param[in] theta Radial model zenith angle (radians).
+ * @param[in] rho Radial model zenith angle (radians).
  *
  * Integrates the spatial component of the radial source model multiplied
  * by Npred for a given model offset angle over all azimuth angles that fall
  * within the ROI+PSF radius using
  *
- * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}}
- *              M(\rho,\omega) Npred(\rho,\omega)
- *              \sin \rho d\omega\f],
+ * \f[K(\rho) = \sin \rho \times M(\rho) \times
+ *              \int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ *              N_{\rm pred}(\rho,\omega)
+ *              d\omega\f],
  *
  * The azimuth angle integration range 
  * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
@@ -346,7 +367,7 @@ double cta_npred_radial_kern_rho::eval(double rho)
 /***********************************************************************//**
  * @brief Kernel for azimuth angle Npred integration of radial model
  *
- * @param[in] phi Azimuth angle (radians).
+ * @param[in] omega Azimuth angle (radians).
  *
  * @todo Re-consider formula for possible simplification (dumb matrix
  *       multiplication is definitely not the fastest way to do that
@@ -408,8 +429,9 @@ double cta_npred_radial_kern_omega::eval(double omega)
  *
  * of the product between model and IRF, where
  *
- * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}} M(\rho, \omega)
- *              IRF(\rho, \omega) d\omega\f],
+ * \f[K(\rho) = \sin \rho \times
+ *              \int_{\omega_{\rm min}}^{\omega_{\rm max}} M(\rho, \omega)
+ *              IRF(\rho, \omega) d\omega\f]
  * \f$M(\rho, \omega)\f$ is the elliptical source model,
  * \f$IRF(\rho, \omega)\f$ is the instrument response function,
  * \f$\rho\f$ is the offset angle with respect to the model centre, and
@@ -589,9 +611,9 @@ double cta_irf_elliptical_kern_omega::eval(double omega)
  * by Npred for a given model offset angle over all azimuth angles that fall
  * within the ROI+PSF radius using
  *
- * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}}
- *              M(\rho,\omega) Npred(\rho,\omega)
- *              \sin \rho d\omega\f],
+ * \f[K(\rho) = \sin \rho \times \int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ *              M(\rho,\omega) N_{\rm pred}(\rho,\omega)
+ *              d\omega\f],
  *
  * The azimuth angle integration range 
  * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
@@ -664,7 +686,7 @@ double cta_npred_elliptical_kern_rho::eval(double rho)
  *
  * Computes the product of the elliptical model with Npred using
  *
- * \f[M(\rho,\omega) Npred(\rho,\omega)\f]
+ * \f[M(\rho,\omega) \times N_{\rm pred}(\rho,\omega)\f]
  *
  * where
  * \f$M(\rho,\omega)\f$ is the spatial component of the elliptical model,

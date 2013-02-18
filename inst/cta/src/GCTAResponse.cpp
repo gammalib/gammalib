@@ -847,9 +847,10 @@ std::string GCTAResponse::print(void) const
  * Performs integration of the model times IRF over the true photon arrival
  * direction in the coordinate system of the source model for azimuthally
  * independent models \f$M(\rho)\f$:
+ *
  * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} M(\rho) IRF(\rho, \omega)
- *    d\rho d\omega\f],
+ *    \sin \rho \, d\rho d\omega\f]
  *
  * The source centre is located at \f$\vec{m}\f$, and a spherical system
  * is defined around this location with \f$(\omega,\rho)\f$ being the
@@ -1025,7 +1026,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
  * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
  *    M(\rho, \omega) IRF(\rho,\omega)
- *    \sin \rho d\rho d\omega\f],
+ *    \sin \rho \, d\rho d\omega\f],
  *
  * The source model centre is located at \f$\vec{m}\f$, and a spherical
  * coordinate system is defined around this location with \f$(\rho,\omega)\f$
@@ -1187,9 +1188,9 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
  * direction. Integration is done first over the azimuth angle \f$\phi\f$ and
  * then over the offset angle \f$\theta\f$. Specifically, the method computes
  *
- * \f[irf = \int_{0}^{\theta_{\rm max}}
- *          \int_{0}^{2\pi}
- *          M(\theta, \phi) IRF(\theta, \phi) d\phi \sin \theta d\theta\f]
+ * \f[\int_{0}^{\theta_{\rm max}}
+ *    \int_{0}^{2\pi}
+ *    M(\theta, \phi) IRF(\theta, \phi) d\phi \sin \theta d\theta\f]
  *
  * Here, \f$M(\theta, \phi)\f$ is the spatial component of the diffuse source
  * model and \f$IRF(\theta, \phi)\f$ is the point spread function.
@@ -2067,11 +2068,12 @@ double GCTAResponse::nedisp(const GSkyDir&      srcDir,
  *
  * The following timing was obtained on a 64 Bit machine (fermi) using the
  * script ./test_model for a disk, a Gaussian, and a shell model:
- *                      Disk      Gauss      Shell
- * m_eps = 1e-3 : user 0m03.80s  0m13.41s   0m03.83s
- * m_eps = 1e-4 : user 0m03.85s  0m13.71s   0m04.68s
- * m_eps = 1e-5 : user 0m06.29s  0m23.22s   0m16.94s
- * m_eps = 1e-6 : user 0m12.65s  0m55.08s   1m32.52s
+ *
+ *                           Disk      Gauss      Shell
+ *      m_eps = 1e-3 : user 0m03.80s  0m13.41s   0m03.83s
+ *      m_eps = 1e-4 : user 0m03.85s  0m13.71s   0m04.68s
+ *      m_eps = 1e-5 : user 0m06.29s  0m23.22s   0m16.94s
+ *      m_eps = 1e-6 : user 0m12.65s  0m55.08s   1m32.52s
  ***************************************************************************/
 void GCTAResponse::init_members(void)
 {
