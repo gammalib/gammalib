@@ -1014,28 +1014,23 @@ double GCTAResponse::irf_radial(const GEvent&       event,
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction.
  * @exception GCTAException::bad_model_type
- *            Model is not a radial model.
+ *            Model is not an elliptical model.
  *
  * Performs integration of the model times IRF over the true photon arrival
- * direction in the coordinate system of the source model for azimuthally
- * independent models \f$M(\rho)\f$:
+ * direction in the coordinate system of the source model for elliptical
+ * models \f$M(\rho,\omega)\f$:
+ *
  * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
- *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} M(\rho) IRF(\rho, \omega)
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    M(\rho, \omega) IRF(\rho,\omega)
  *    d\rho d\omega\f],
  *
- * The source centre is located at \f$\vec{m}\f$, and a spherical system
- * is defined around this location with \f$(\omega,\rho)\f$ being the
- * azimuth and zenith angles, respectively. \f$\omega=0\f$ is defined
- * by the direction that connects the source centre \f$\vec{m}\f$ to the
- * measured photon direction \f$\vec{p'}\f$, and \f$\omega\f$ increases
- * counterclockwise.
- *
- * Note that this method approximates the true theta angle (angle between
- * incident photon and pointing direction) by the measured theta angle
- * (angle between the measured photon arrival direction and the pointing
- * direction). Given the slow variation of the PSF shape over the field of
- * view, this approximation should be fine. It helps in fact a lot in
- * speeding up the computations.
+ * The source model centre is located at \f$\vec{m}\f$, and a spherical
+ * coordinate system is defined around this location with \f$(\rho,\omega)\f$
+ * being the zenith and azimuth angles, respectively. The azimuth angle
+ * \f$(\omega)\f$ is counted counterclockwise from the vector that runs from
+ * the model centre \f$\vec{m}\f$ to the measured photon direction
+ * \f$\vec{p'}\f$.
  ***************************************************************************/
 double GCTAResponse::irf_elliptical(const GEvent&       event,
                                     const GSource&      source,
@@ -1066,7 +1061,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
         throw GCTAException::bad_model_type(G_IRF_ELLIPTICAL);
     }
 
-    // Get event attributes
+    // Get event attributes (measured photon)
     const GSkyDir& obsDir = dir->dir();
     const GEnergy& obsEng = event.energy();
 
@@ -1078,20 +1073,23 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     double zenith  = pnt->zenith();
     double azimuth = pnt->azimuth();
 
-    // Determine angular distance between measured photon direction and model
-    // centre [radians]
-    double zeta = centre.dist(dir->dir());
+    // Determine angular distance between observed photon direction and model
+    // centre and position angle of observed photon direction seen from the
+    // model centre [radians]
+    double zeta     = centre.dist(obsDir);
+    double obsOmega = centre.posang(obsDir);
 
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
-    double eta = pnt->dir().dist(dir->dir());
+    double eta = pnt->dir().dist(obsDir);
 
     // Determine angular distance between model centre and pointing direction
     // [radians]
     double lambda = centre.dist(pnt->dir());
 
-    // Compute azimuth angle of pointing in model system [radians]
-    // Will be comprised in interval [0,pi]
+    // Compute azimuth angle of pointing in model coordinate system [radians]
+    // This azimuth angle is comprised in the interval [0,pi], and defines
+    // the zero point of the model coordinate system.
     double omega0 = 0.0;
     double denom  = std::sin(lambda) * std::sin(zeta);
     if (denom != 0.0) {
@@ -1103,21 +1101,18 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     double srcLogEng = srcEng.log10TeV();
     double obsLogEng = obsEng.log10TeV();
 
-    // Assign the observed theta angle (eta) as the true theta angle
-    // between the source and the pointing directions. This is a (not
-    // too bad) approximation which helps to speed up computations.
-    // If we want to do this correctly, however, we would need to move
-    // the psf_dummy_sigma down to the integration kernel, and we would
-    // need to make sure that psf_delta_max really gives the absolute
-    // maximum (this is certainly less critical)
-    double theta = eta;
-    double phi   = 0.0; //TODO: Implement IRF Phi dependence
-
-    // Get maximum PSF and source radius in radians.
+    // Get maximum PSF radius [radians]. We assign here the measured theta
+    // angle (eta) as the true theta angle between the source and the pointing
+    // directions. As we only use the angle to determine the maximum PSF size,
+    // this should be sufficient.
+    double theta     = eta;
+    double phi       = 0.0; //TODO: Implement IRF Phi dependence
     double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
-    double src_max   = model->theta_max();
 
-    // Set elliptical model zenith angle range
+    // Get maximum source model radius [radians]
+    double src_max = model->theta_max();
+
+    // Set zenith angle integration range for elliptical model
     double rho_min = (zeta > delta_max) ? zeta - delta_max : 0.0;
     double rho_max = zeta + delta_max;
     if (rho_max > src_max) {
@@ -1139,6 +1134,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
                                               obsLogEng,
                                               zeta,
                                               lambda,
+                                              obsOmega,
                                               omega0,
                                               delta_max);
 

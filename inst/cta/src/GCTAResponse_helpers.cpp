@@ -393,12 +393,19 @@ double cta_npred_radial_kern_phi::eval(double phi)
  *
  * This method evaluates the kernel \f$K(\rho)\f$ for the zenith angle
  * integration
+ *
  * \f[\int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho) d\rho\f]
+ *
  * of the product between model and IRF, where
+ *
  * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}} M(\rho, \omega)
  *              IRF(\rho, \omega) d\omega\f],
- * \f$M(\rho)\f$ is the azimuthally symmetric source model, and
- * \f$IRF(\rho, \omega)\f$ is the instrument response function.
+ * \f$M(\rho, \omega)\f$ is the elliptical source model,
+ * \f$IRF(\rho, \omega)\f$ is the instrument response function,
+ * \f$\rho\f$ is the offset angle with respect to the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between model centre \f$\vec{m}\f$ and the observed photon arrival 
+ * direction \f$\vec{p'}\f$.
  ***************************************************************************/
 double cta_irf_elliptical_kern_rho::eval(double rho)
 {
@@ -430,7 +437,14 @@ double cta_irf_elliptical_kern_rho::eval(double rho)
         double sin_ph  = sin_rho*m_sin_lambda;
 
         // Setup integration kernel
-        cta_irf_elliptical_kern_omega integrand(this,
+        cta_irf_elliptical_kern_omega integrand(m_rsp,
+                                                m_model,
+                                                m_zenith,
+                                                m_azimuth,
+                                                m_srcLogEng,
+                                                m_obsLogEng,
+                                                m_obsOmega,
+                                                m_omega0,
                                                 rho,
                                                 cos_psf,
                                                 sin_psf,
@@ -469,86 +483,87 @@ double cta_irf_elliptical_kern_rho::eval(double rho)
  *
  * This method evaluates the product
  *
- * \f[IRF(\rho,\omega) \times M(\rho, \omega)\f
+ * \f[IRF(\rho,\omega) \times M(\rho,\omega)\f]
  *
- * where 
- 
- instrument response function
- * \f$IRF(\rho,\omega)\f$ for the azimuth angle integration of the IRF.
+ * where
+ * \f$IRF(\rho,\omega)\f$ is the instrument response function,
+ * \f$M(\rho,\omega)\f$ is the spatial component of the elliptical model,
+ * \f$\rho\f$ is the offset angle with respect to the model centre, and
+ * \f$\omega\f$ is the position angle with respect to the connecting line
+ * between model centre \f$\vec{m}\f$ and the observed photon arrival 
+ * direction \f$\vec{p'}\f$.
  *
- * From the model coordinates \f$(\rho,\omega)\f$ it computes the PSF
- * offset angle \f$\delta\f$, defined as the angle between true 
- * (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) photon arrival direction,
- * using
+ * From the model coordinates \f$(\rho,\omega)\f$, the method computes the
+ * angle between the true (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) 
+ * photon arrival direction using
+ * 
  * \f[\delta = \arccos(\cos \rho \cos \zeta + 
  *                     \sin \rho \sin \zeta \cos \omega)\f]
- * where
- * \f$\zeta\f$ is the angular distance between the observed photon direction
- * \f$\vec{p}\f$ and the model centre \f$\vec{m}\f$.
  *
- * Furthermore, it computes the observed photon offset angle \f$\theta\f$,
- * defined as the angle between observed photon direction and camera pointing,
- * using
+ * where
+ * \f$\zeta\f$ is the angular distance between the observed photon arrival
+ * direction \f$\vec{p'}\f$ and the model centre \f$\vec{m}\f$. This angle
+ * \f$\delta\f$ is used to compute the \f$PSF(\delta)\f$ value.
+ *
+ * The method computes also the angle \f$\theta\f$ between the observed
+ * photon arrival direction \f$\vec{p'}\f$ and the camera pointing
+ * \f$\vec{d}\f$ using
+ *
  * \f[\theta = \arccos(\cos \rho \cos \lambda + 
  *                     \sin \rho \sin \lambda \cos \omega_0 - \omega)\f]
+ *
  * where
- * \f$\lambda\f$ is the angular distance between the model centre and the
- * camera pointing direction.
+ * \f$\lambda\f$ is the angular distance between the model centre 
+ * \f$\vec{m}\f$ and the camera pointing direction \f$\vec{d}\f$.
+ * The angle \f$\theta\f$ is used in the computation of the IRF (no
+ * azimuthal dependence is so far implemented for the IRF computation).
  ***************************************************************************/
 double cta_irf_elliptical_kern_omega::eval(double omega)
 {
-    // Compute PSF offset angle [radians]
-    double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
+    // Initialise IRF value
+    double irf = 0.0;
+
+    // Evaluate sky model
+    double model = m_model->eval(m_rho, omega + m_obsOmega);
+
+    // Continue only if model is positive
+    if (model > 0.0) {
+
+        // Compute PSF offset angle [radians]
+        double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
     
-    // Compute observed photon offset angle in camera system [radians]
-    double offset = std::acos(m_cos_ph + m_sin_ph * std::cos(m_kernel->m_omega0 - omega));
-    
-    // TODO: Compute true photon azimuth angle in camera system [radians]
-    double azimuth = 0.0;
+        // Compute true photon offset and azimuth angle in camera system
+        // [radians]
+        double theta = std::acos(m_cos_ph + m_sin_ph * std::cos(m_omega0 - omega));
+        double phi   = 0.0; //TODO: Implement IRF Phi dependence
 
-    // Evaluate sky model M(rho, omega)
-    double model = m_kernel->m_model->eval(m_rho, omega);
+        // Evaluate IRF * model
+        irf = m_rsp->aeff(theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
+              m_rsp->psf(delta, theta, phi, m_zenith, m_azimuth, m_srcLogEng) *
+              model;
 
-    // Evaluate IRF
-    double irf = m_kernel->m_rsp->aeff(offset, 
-                                       azimuth,
-                                       m_kernel->m_zenith, 
-                                       m_kernel->m_azimuth, 
-                                       m_kernel->m_srcLogEng) *
-                 m_kernel->m_rsp->psf(delta, 
-                                      offset,
-                                      azimuth,
-                                      m_kernel->m_zenith,
-                                      m_kernel->m_azimuth,
-                                      m_kernel->m_srcLogEng);
+        // Optionally take energy dispersion into account
+        if (m_rsp->hasedisp() && irf > 0.0) {
+            irf *= m_rsp->edisp(m_obsLogEng, theta, phi, 
+                                m_zenith, m_azimuth, m_srcLogEng);
+        }
 
-    // Optionally take energy dispersion into account
-    if (m_kernel->m_rsp->hasedisp() && irf > 0.0) {
-        irf *= m_kernel->m_rsp->edisp(m_kernel->m_obsLogEng,
-                                      offset,
-                                      azimuth, 
-                                      m_kernel->m_zenith,
-                                      m_kernel->m_azimuth,
-                                      m_kernel->m_srcLogEng);
-    }
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(irf) || isinfinite(irf)) {
+            std::cout << "*** ERROR: cta_irf_elliptical_kern_omega::eval";
+            std::cout << "(omega=" << omega << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", model=" << model;
+            std::cout << ", delta=" << delta;
+            std::cout << ", theta=" << theta;
+            std::cout << ", phi=" << phi << ")";
+            std::cout << std::endl;
+        }
+        #endif
 
-    // Multiply IRF * model
-    irf *= model;
-
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(irf) || isinfinite(irf)) {
-        std::cout << "*** ERROR: cta_irf_elliptical_kern_omega::eval";
-        std::cout << "(omega=" << omega << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (irf=" << irf;
-        std::cout << ", model=" << model;
-        std::cout << ", delta=" << delta;
-        std::cout << ", offset=" << offset;
-        std::cout << ", azimuth=" << azimuth << ")";
-        std::cout << std::endl;
-    }
-    #endif
+    } // endif: model is positive
 
     // Return
     return irf;

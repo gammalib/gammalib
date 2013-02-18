@@ -283,6 +283,7 @@ public:
                                 double                         obsLogEng,
                                 double                         zeta,
                                 double                         lambda,
+                                double                         obsOmega,
                                 double                         omega0,
                                 double                         delta_max) :
                                 m_rsp(rsp),
@@ -297,6 +298,7 @@ public:
                                 m_lambda(lambda),
                                 m_cos_lambda(std::cos(lambda)),
                                 m_sin_lambda(std::sin(lambda)),
+                                m_obsOmega(obsOmega),
                                 m_omega0(omega0),
                                 m_delta_max(delta_max),
                                 m_cos_delta_max(std::cos(delta_max)) { }
@@ -314,6 +316,7 @@ public:
     double                         m_lambda;        //!< Distance model centre - pointing
     double                         m_cos_lambda;    //!< Cosine of lambda
     double                         m_sin_lambda;    //!< Sine of lambda
+    double                         m_obsOmega;      //!< Measured photon position angle from model centre
     double                         m_omega0;        //!< Azimuth of pointing in model system
     double                         m_delta_max;     //!< Maximum PSF radius
     double                         m_cos_delta_max; //!< Cosine of maximum PSF radius
@@ -327,13 +330,27 @@ public:
  ***************************************************************************/
 class cta_irf_elliptical_kern_omega : public GFunction {
 public:
-    cta_irf_elliptical_kern_omega(const cta_irf_elliptical_kern_rho* kernel,
-                                  double                             rho,
-                                  double                             cos_psf,
-                                  double                             sin_psf,
-                                  double                             cos_ph,
-                                  double                             sin_ph) :
-                                  m_kernel(kernel),
+    cta_irf_elliptical_kern_omega(const GCTAResponse*            rsp,
+                                  const GModelSpatialElliptical* model,
+                                  double                         zenith,
+                                  double                         azimuth,
+                                  double                         srcLogEng,
+                                  double                         obsLogEng,
+                                  double                         obsOmega,
+                                  double                         omega0,
+                                  double                         rho,
+                                  double                         cos_psf,
+                                  double                         sin_psf,
+                                  double                         cos_ph,
+                                  double                         sin_ph) :
+                                  m_rsp(rsp),
+                                  m_model(model),
+                                  m_zenith(zenith),
+                                  m_azimuth(azimuth),
+                                  m_srcLogEng(srcLogEng),
+                                  m_obsLogEng(obsLogEng),
+                                  m_obsOmega(obsOmega),
+                                  m_omega0(omega0),
                                   m_rho(rho),
                                   m_cos_psf(cos_psf),
                                   m_sin_psf(sin_psf),
@@ -341,12 +358,19 @@ public:
                                   m_sin_ph(sin_ph) { }
     double eval(double omega);
 public:
-    const cta_irf_elliptical_kern_rho* m_kernel;  //!< Pointer to zenith angle kernel
-    double                             m_rho;     //!< Model zenith angle
-    double                             m_cos_psf; //!< Cosine term for PSF offset angle computation
-    double                             m_sin_psf; //!< Sine term for PSF offset angle computation
-    double                             m_cos_ph;  //!< Cosine term for photon offset angle computation
-    double                             m_sin_ph;  //!< Sine term for photon offset angle computation
+    const GCTAResponse*            m_rsp;        //!< Pointer to CTA response
+    const GModelSpatialElliptical* m_model;      //!< Pointer to spatial model
+    double                         m_zenith;     //!< Pointing zenith angle
+    double                         m_azimuth;    //!< Pointing azimuth angle
+    double                         m_srcLogEng;  //!< True photon energy
+    double                         m_obsLogEng;  //!< Measured photon energy
+    double                         m_obsOmega;   //!< Measured photon position angle from model centre
+    double                         m_omega0;     //!< Azimuth of pointing in model system
+    double                         m_rho;        //!< Model zenith angle
+    double                         m_cos_psf;    //!< Cosine term for PSF offset angle computation
+    double                         m_sin_psf;    //!< Sine term for PSF offset angle computation
+    double                         m_cos_ph;     //!< Cosine term for photon offset angle computation
+    double                         m_sin_ph;     //!< Sine term for photon offset angle computation
 };
 
 
