@@ -68,6 +68,8 @@
 #define G_IRF_DIFFUSE          "GCTAResponse::irf_diffuse(GEvent&, GSource&,"\
                                                             " GObservation&)"
 #define G_NPRED_RADIAL  "GCTAResponse::npred_radial(GSource&, GObservation&)"
+#define G_NPRED_ELLIPTICAL         "GCTAResponse::npred_elliptical(GSource&,"\
+                                                            " GObservation&)"
 #define G_NPRED_DIFFUSE               "GCTAResponse::npred_diffuse(GSource&,"\
                                                             " GObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
@@ -1023,7 +1025,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
  * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
  *    M(\rho, \omega) IRF(\rho,\omega)
- *    d\rho d\omega\f],
+ *    \sin \rho d\rho d\omega\f],
  *
  * The source model centre is located at \f$\vec{m}\f$, and a spherical
  * coordinate system is defined around this location with \f$(\rho,\omega)\f$
@@ -1316,7 +1318,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of radial source model
+ * @brief Return spatial integral of radial source model over ROI
  *
  * @param[in] source Source.
  * @param[in] obs Observation.
@@ -1330,10 +1332,27 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
+ * Integrates the spatial component of the radial source model multiplied
+ * by Npred over the region of interest using
+ *
+ * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    M(\rho,\omega) Npred(\rho,\omega)
+ *    \sin \rho d\rho d\omega\f],
+ *
+ * The integration is performed in a spherical coordinate system that is
+ * centred on the source model centre \f$\vec{m}\f$, with \f$(\rho,\omega)\f$
+ * being the zenith and azimuth angles, respectively.
+ *
+ * The zenith angle integration range \f$[\rho_{\rm min}, \rho_{\rm max}\f$
+ * and azimuth angle integration range 
+ * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
+ * are adjusted so that only coordinates within the circular region of
+ * interest will be considered.
+ *
  * Note that we estimate the integration radius based on the size of the
- * onaxis PSF in this method. This should be fine as long as the offaxis
- * PSF is not considerably larger than the onaxis PSF. We should verify
- * this, however.
+ * onaxis PSF. This should be fine as long as the offaxis PSF is not
+ * considerably larger than the onaxis PSF. We should verify this, however.
  *
  * @todo Verify that offaxis PSF is not considerably larger than onaxis
  *       PSF. 
@@ -1401,15 +1420,15 @@ double GCTAResponse::npred_radial(const GSource& source,
     // Set offset angle integration range. We take here the ROI+PSF into
     // account to make no integrations beyond the point where the
     // contribution drops to zero.
-    double theta_min = (roi_model_distance > roi_psf_radius)
-                       ? roi_model_distance - roi_psf_radius: 0.0;
-    double theta_max = model->theta_max();
+    double rho_min = (roi_model_distance > roi_psf_radius)
+                     ? roi_model_distance - roi_psf_radius: 0.0;
+    double rho_max = model->theta_max();
 
     // Perform offset angle integration only if interval is valid
-    if (theta_max > theta_min) {
+    if (rho_max > rho_min) {
 
         // Compute rotation matrix to convert from native model coordinates,
-        // given by (theta,phi), into celestial coordinates.
+        // given by (rho,omega), into celestial coordinates.
         GMatrix ry;
         GMatrix rz;
         GMatrix rot;
@@ -1419,28 +1438,28 @@ double GCTAResponse::npred_radial(const GSource& source,
         
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
-        double phi = centre.posang(events->roi().centre().dir());
+        double omega0 = centre.posang(events->roi().centre().dir());
 
         // Setup integration kernel
-        cta_npred_radial_kern_theta integrand(this,
-                                              model,
-                                              &(source.energy()),
-                                              &(source.time()),
-                                              ctaobs,
-                                              &rot,
-                                              roi_model_distance,
-                                              roi_psf_radius,
-                                              phi);
+        cta_npred_radial_kern_rho integrand(this,
+                                            model,
+                                            &(source.energy()),
+                                            &(source.time()),
+                                            ctaobs,
+                                            &rot,
+                                            roi_model_distance,
+                                            roi_psf_radius,
+                                            omega0);
 
         // Integrate over theta
         GIntegral integral(&integrand);
-        npred = integral.romb(theta_min, theta_max);
+        npred = integral.romb(rho_min, rho_max);
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_RADIAL)
         std::cout << "GCTAResponse::npred_radial:";
-        std::cout << " theta_min=" << theta_min;
-        std::cout << " theta_max=" << theta_max;
+        std::cout << " rho_min=" << rho_min;
+        std::cout << " rho_max=" << rho_max;
         std::cout << " npred=" << npred << std::endl;
         #endif
 
@@ -1452,8 +1471,8 @@ double GCTAResponse::npred_radial(const GSource& source,
         std::cout << "*** ERROR: GCTAResponse::npred_radial:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
-        std::cout << ", theta_min=" << theta_min;
-        std::cout << ", theta_max=" << theta_max;
+        std::cout << ", rho_min=" << rho_min;
+        std::cout << ", rho_max=" << rho_max;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -1464,7 +1483,172 @@ double GCTAResponse::npred_radial(const GSource& source,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of diffuse source model
+ * @brief Return spatial integral of elliptical source model over ROI
+ *
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * @exception GCTAException::bad_observation_type
+ *            Observation is not a CTA observation.
+ * @exception GCTAException::no_pointing
+ *            Pointing is not a CTA pointing.
+ * @exception GException::no_list
+ *            Observation contains no event list.
+ * @exception GCTAException::bad_model_type
+ *            Model is not an elliptical model.
+ *
+ * Integrates the spatial component of the elliptical source model multiplied
+ * by Npred over the region of interest using
+ *
+ * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    M(\rho,\omega) Npred(\rho,\omega)
+ *    \sin \rho d\rho d\omega\f],
+ *
+ * The integration is performed in a spherical coordinate system that is
+ * centred on the source model centre \f$\vec{m}\f$, with \f$(\rho,\omega)\f$
+ * being the zenith and azimuth angles, respectively.
+ *
+ * The zenith angle integration range \f$[\rho_{\rm min}, \rho_{\rm max}\f$
+ * and azimuth angle integration range 
+ * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
+ * are adjusted so that only coordinates within the circular region of
+ * interest will be considered.
+ *
+ * Note that we estimate the integration radius based on the size of the
+ * onaxis PSF. This should be fine as long as the offaxis PSF is not
+ * considerably larger than the onaxis PSF. We should verify this, however.
+ *
+ * @todo Verify that offaxis PSF is not considerably larger than onaxis
+ *       PSF. 
+ ***************************************************************************/
+double GCTAResponse::npred_elliptical(const GSource& source,
+                                      const GObservation& obs) const
+{
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL) {
+        throw GCTAException::bad_observation_type(G_NPRED_ELLIPTICAL);
+    }
+
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing();
+    if (pnt == NULL) {
+        throw GCTAException::no_pointing(G_NPRED_ELLIPTICAL);
+    }
+
+    // Get pointer on CTA events list
+    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
+    if (events == NULL) {
+        throw GException::no_list(G_NPRED_ELLIPTICAL);
+    }
+
+    // Get pointer on elliptical model
+    const GModelSpatialElliptical* model =
+          dynamic_cast<const GModelSpatialElliptical*>(source.model());
+    if (model == NULL) {
+        throw GCTAException::bad_model_type(G_NPRED_ELLIPTICAL);
+    }
+
+    // Get source attributes
+    const GSkyDir& centre = model->dir();
+    const GEnergy& srcEng = source.energy();
+
+    // Get pointing direction zenith angle and azimuth [radians]
+    double zenith  = pnt->zenith();
+    double azimuth = pnt->azimuth();
+
+    // Get log10(E/TeV) of true photon energy
+    double srcLogEng = srcEng.log10TeV();
+
+    // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
+    // as this allows us doing this computation in the outer loop. This
+    // should be sufficient here, unless the offaxis PSF becomes much worse
+    // than the onaxis PSF. In this case, we may add a safety factor here
+    // to make sure we encompass the entire PSF.
+    double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
+
+    // Extract ROI radius (radians)
+    double roi_radius = events->roi().radius() * deg2rad;
+
+    // Compute distance between ROI and model centre (radians)
+    double roi_model_distance = events->roi().centre().dist(centre);
+
+    // Compute the ROI radius plus maximum PSF radius (radians). Any photon
+    // coming from beyond this radius will not make it in the dataspace and
+    // thus can be neglected.
+    double roi_psf_radius = roi_radius + psf_max_radius;
+
+    // Set offset angle integration range. We take here the ROI+PSF into
+    // account to make no integrations beyond the point where the
+    // contribution drops to zero.
+    double rho_min = (roi_model_distance > roi_psf_radius)
+                     ? roi_model_distance - roi_psf_radius: 0.0;
+    double rho_max = model->theta_max();
+
+    // Perform offset angle integration only if interval is valid
+    if (rho_max > rho_min) {
+
+        // Compute rotation matrix to convert from native model coordinates,
+        // given by (rho,omega), into celestial coordinates.
+        GMatrix ry;
+        GMatrix rz;
+        GMatrix rot;
+        ry.eulery(model->dec() - 90.0);
+        rz.eulerz(-model->ra());
+        rot = transpose(ry * rz);
+        
+        // Compute position angle of ROI centre with respect to model
+        // centre (radians)
+        double omega0 = centre.posang(events->roi().centre().dir());
+
+        // Setup integration kernel
+        cta_npred_elliptical_kern_rho integrand(this,
+                                                model,
+                                                &(source.energy()),
+                                                &(source.time()),
+                                                ctaobs,
+                                                &rot,
+                                                roi_model_distance,
+                                                roi_psf_radius,
+                                                omega0);
+
+        // Integrate over theta
+        GIntegral integral(&integrand);
+        npred = integral.romb(rho_min, rho_max);
+
+        // Compile option: Show integration results
+        #if defined(G_DEBUG_NPRED_ELLIPTICAL)
+        std::cout << "GCTAResponse::npred_elliptical:";
+        std::cout << " rho_min=" << rho_min;
+        std::cout << " rho_max=" << rho_max;
+        std::cout << " npred=" << npred << std::endl;
+        #endif
+
+    } // endif: offset angle range was valid
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(npred) || isinfinite(npred)) {
+        std::cout << "*** ERROR: GCTAResponse::npred_elliptical:";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", rho_min=" << rho_min;
+        std::cout << ", rho_max=" << rho_max;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+    
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of diffuse source model over ROI
  *
  * @param[in] source Source.
  * @param[in] obs Observation.

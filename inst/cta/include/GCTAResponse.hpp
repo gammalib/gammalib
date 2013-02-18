@@ -102,6 +102,8 @@ public:
                                const GObservation& obs) const;
     virtual double npred_radial(const GSource&      source,
                                 const GObservation& obs) const;
+    virtual double npred_elliptical(const GSource&      source,
+                                    const GObservation& obs) const;
     virtual double npred_diffuse(const GSource&      source,
                                  const GObservation& obs) const;
 

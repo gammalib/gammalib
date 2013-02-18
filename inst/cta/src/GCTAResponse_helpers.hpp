@@ -44,7 +44,7 @@
 
 
 /***********************************************************************//**
- * @class cta_irf_radial_kern_rho
+ * @class cta_npsf_kern_rad_azsym
  *
  * @brief Integration kernel for npsf() method
  ***************************************************************************/
@@ -189,34 +189,34 @@ protected:
 
 
 /***********************************************************************//**
- * @class cta_npred_radial_kern_theta
+ * @class cta_npred_radial_kern_rho
  *
  * @brief Kernel for zenith angle Npred integration of radial model
  ***************************************************************************/
-class cta_npred_radial_kern_theta : public GFunction {
+class cta_npred_radial_kern_rho : public GFunction {
 public:
-    cta_npred_radial_kern_theta(const GCTAResponse*        rsp,
-                                const GModelSpatialRadial* model,
-                                const GEnergy*             srcEng,
-                                const GTime*               srcTime,
-                                const GCTAObservation*     obs,
-                                const GMatrix*             rot,
-                                double                     dist,
-                                double                     radius,
-                                double                     phi) :
-                                m_rsp(rsp),
-                                m_model(model),
-                                m_srcEng(srcEng),
-                                m_srcTime(srcTime),
-                                m_obs(obs),
-                                m_rot(rot),
-                                m_dist(dist),
-                                m_cos_dist(std::cos(dist)),
-                                m_sin_dist(std::sin(dist)),
-                                m_radius(radius),
-                                m_cos_radius(std::cos(radius)),
-                                m_phi(phi) { }
-    double eval(double theta);
+    cta_npred_radial_kern_rho(const GCTAResponse*        rsp,
+                              const GModelSpatialRadial* model,
+                              const GEnergy*             srcEng,
+                              const GTime*               srcTime,
+                              const GCTAObservation*     obs,
+                              const GMatrix*             rot,
+                              double                     dist,
+                              double                     radius,
+                              double                     omega0) :
+                              m_rsp(rsp),
+                              m_model(model),
+                              m_srcEng(srcEng),
+                              m_srcTime(srcTime),
+                              m_obs(obs),
+                              m_rot(rot),
+                              m_dist(dist),
+                              m_cos_dist(std::cos(dist)),
+                              m_sin_dist(std::sin(dist)),
+                              m_radius(radius),
+                              m_cos_radius(std::cos(radius)),
+                              m_omega0(omega0) { }
+    double eval(double rho);
 protected:
     const GCTAResponse*        m_rsp;        //!< Pointer to response
     const GModelSpatialRadial* m_model;      //!< Pointer to radial spatial model
@@ -229,42 +229,40 @@ protected:
     double                     m_sin_dist;   //!< Sine of distance model-ROI centre
     double                     m_radius;     //!< ROI+PSF radius
     double                     m_cos_radius; //!< Cosine of ROI+PSF radius
-    double                     m_phi;        //!< Position angle of ROI
+    double                     m_omega0;     //!< Position angle of ROI
 };
 
 
 /***********************************************************************//**
- * @class cta_npred_radial_kern_phi
+ * @class cta_npred_radial_kern_omega
  *
  * @brief Kernel for azimuth angle Npred integration of radial model
  ***************************************************************************/
-class cta_npred_radial_kern_phi : public GFunction {
+class cta_npred_radial_kern_omega : public GFunction {
 public:
-    cta_npred_radial_kern_phi(const GCTAResponse*    rsp,
-                              const GEnergy*         srcEng,
-                              const GTime*           srcTime,
-                              const GCTAObservation* obs,
-                              const GMatrix*         rot,
-                              double                 theta,
-                              double                 sin_theta) :
-                              m_rsp(rsp),
-                              m_srcEng(srcEng),
-                              m_srcTime(srcTime),
-                              m_obs(obs),
-                              m_rot(rot),
-                              m_theta(theta),
-                              m_cos_theta(std::cos(theta)),
-                              m_sin_theta(sin_theta) { }
-    double eval(double phi);
+    cta_npred_radial_kern_omega(const GCTAResponse*    rsp,
+                                const GEnergy*         srcEng,
+                                const GTime*           srcTime,
+                                const GCTAObservation* obs,
+                                const GMatrix*         rot,
+                                double                 sin_rho,
+                                double                 cos_rho) :
+                                m_rsp(rsp),
+                                m_srcEng(srcEng),
+                                m_srcTime(srcTime),
+                                m_obs(obs),
+                                m_rot(rot),
+                                m_sin_rho(sin_rho),
+                                m_cos_rho(cos_rho) { }
+    double eval(double omega);
 protected:
     const GCTAResponse*    m_rsp;        //!< Pointer to response
     const GEnergy*         m_srcEng;     //!< Pointer to true photon energy
     const GTime*           m_srcTime;    //!< Pointer to true photon arrival time
     const GCTAObservation* m_obs;        //!< Pointer to observation
     const GMatrix*         m_rot;        //!< Rotation matrix
-    double                 m_theta;      //!< Offset angle (radians)
-    double                 m_cos_theta;  //!< Cosine of offset angle
-    double                 m_sin_theta;  //!< Sine of offset angle
+    double                 m_cos_rho;    //!< Cosine of offset angle
+    double                 m_sin_rho;    //!< Sine of offset angle
 };
 
 
@@ -371,6 +369,87 @@ public:
     double                         m_sin_psf;    //!< Sine term for PSF offset angle computation
     double                         m_cos_ph;     //!< Cosine term for photon offset angle computation
     double                         m_sin_ph;     //!< Sine term for photon offset angle computation
+};
+
+
+/***********************************************************************//**
+ * @class cta_npred_elliptical_kern_rho
+ *
+ * @brief Kernel for zenith angle Npred integration of elliptical model
+ ***************************************************************************/
+class cta_npred_elliptical_kern_rho : public GFunction {
+public:
+    cta_npred_elliptical_kern_rho(const GCTAResponse*            rsp,
+                                  const GModelSpatialElliptical* model,
+                                  const GEnergy*                 srcEng,
+                                  const GTime*                   srcTime,
+                                  const GCTAObservation*         obs,
+                                  const GMatrix*                 rot,
+                                  double                         dist,
+                                  double                         radius,
+                                  double                         omega0) :
+                                  m_rsp(rsp),
+                                  m_model(model),
+                                  m_srcEng(srcEng),
+                                  m_srcTime(srcTime),
+                                  m_obs(obs),
+                                  m_rot(rot),
+                                  m_dist(dist),
+                                  m_cos_dist(std::cos(dist)),
+                                  m_sin_dist(std::sin(dist)),
+                                  m_radius(radius),
+                                  m_cos_radius(std::cos(radius)),
+                                  m_omega0(omega0) { }
+    double eval(double rho);
+protected:
+    const GCTAResponse*            m_rsp;        //!< Pointer to response
+    const GModelSpatialElliptical* m_model;      //!< Pointer to model
+    const GEnergy*                 m_srcEng;     //!< Pointer to true photon energy
+    const GTime*                   m_srcTime;    //!< Pointer to true photon arrival time
+    const GCTAObservation*         m_obs;        //!< Pointer to observation
+    const GMatrix*                 m_rot;        //!< Rotation matrix
+    double                         m_dist;       //!< Distance model-ROI centre
+    double                         m_cos_dist;   //!< Cosine of distance model-ROI centre
+    double                         m_sin_dist;   //!< Sine of distance model-ROI centre
+    double                         m_radius;     //!< ROI+PSF radius
+    double                         m_cos_radius; //!< Cosine of ROI+PSF radius
+    double                         m_omega0;     //!< Position angle of ROI
+};
+
+
+/***********************************************************************//**
+ * @class cta_npred_elliptical_kern_omega
+ *
+ * @brief Kernel for azimuth angle Npred integration of elliptical model
+ ***************************************************************************/
+class cta_npred_elliptical_kern_omega : public GFunction {
+public:
+    cta_npred_elliptical_kern_omega(const GCTAResponse*            rsp,
+                                    const GModelSpatialElliptical* model,
+                                    const GEnergy*                 srcEng,
+                                    const GTime*                   srcTime,
+                                    const GCTAObservation*         obs,
+                                    const GMatrix*                 rot,
+                                    double                         sin_rho,
+                                    double                         cos_rho) :
+                                    m_rsp(rsp),
+                                    m_model(model),
+                                    m_srcEng(srcEng),
+                                    m_srcTime(srcTime),
+                                    m_obs(obs),
+                                    m_rot(rot),
+                                    m_sin_rho(sin_rho),
+                                    m_cos_rho(cos_rho) { }
+    double eval(double omega);
+protected:
+    const GCTAResponse*            m_rsp;      //!< Pointer to response
+    const GModelSpatialElliptical* m_model;    //!< Pointer to model
+    const GEnergy*                 m_srcEng;   //!< Pointer to true photon energy
+    const GTime*                   m_srcTime;  //!< Pointer to true photon arrival time
+    const GCTAObservation*         m_obs;      //!< Pointer to observation
+    const GMatrix*                 m_rot;      //!< Rotation matrix
+    double                         m_sin_rho;  //!< Sine of offset angle
+    double                         m_cos_rho;  //!< Cosine of offset angle
 };
 
 

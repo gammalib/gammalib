@@ -269,59 +269,69 @@ double cta_irf_radial_kern_omega::eval(double omega)
  *
  * @param[in] theta Radial model zenith angle (radians).
  *
- * This method integrates a radial model for a given zenith angle theta over
- * all azimuth angles that fall within the ROI+PSF radius. The limitation to
- * an arc assures that the integration converges properly.
+ * Integrates the spatial component of the radial source model multiplied
+ * by Npred for a given model offset angle over all azimuth angles that fall
+ * within the ROI+PSF radius using
+ *
+ * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ *              M(\rho,\omega) Npred(\rho,\omega)
+ *              \sin \rho d\omega\f],
+ *
+ * The azimuth angle integration range 
+ * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
+ * is limited to an arc around the vector connecting the model centre to
+ * the ROI centre. This limitation assures proper converges properly.
  ***************************************************************************/
-double cta_npred_radial_kern_theta::eval(double theta)
+double cta_npred_radial_kern_rho::eval(double rho)
 {
     // Initialise Npred value
     double npred = 0.0;
 
     // Compute half length of arc that lies within ROI+PSF radius (radians)
-    double dphi = 0.5 * cta_roi_arclength(theta,
-                                          m_dist,
-                                          m_cos_dist,
-                                          m_sin_dist,
-                                          m_radius,
-                                          m_cos_radius);
+    double domega = 0.5 * cta_roi_arclength(rho,
+                                            m_dist,
+                                            m_cos_dist,
+                                            m_sin_dist,
+                                            m_radius,
+                                            m_cos_radius);
 
     // Continue only if arc length is positive
-    if (dphi > 0.0) {
+    if (domega > 0.0) {
 
-        // Compute phi integration range
-        double phi_min = m_phi - dphi;
-        double phi_max = m_phi + dphi;
+        // Compute omega integration range
+        double omega_min = m_omega0 - domega;
+        double omega_max = m_omega0 + domega;
 
         // Get radial model value
-        double model = m_model->eval(theta);
+        double model = m_model->eval(rho);
 
-        // Compute sine of offset angle
-        double sin_theta = std::sin(theta);
+        // Compute sine and cosine of offset angle
+        double sin_rho = std::sin(rho);
+        double cos_rho = std::cos(rho);
 
         // Setup phi integration kernel
-        cta_npred_radial_kern_phi integrand(m_rsp,
-                                            m_srcEng,
-                                            m_srcTime,
-                                            m_obs,
-                                            m_rot,
-                                            theta,
-                                            sin_theta);
+        cta_npred_radial_kern_omega integrand(m_rsp,
+                                              m_srcEng,
+                                              m_srcTime,
+                                              m_obs,
+                                              m_rot,
+                                              sin_rho,
+                                              cos_rho);
 
         // Integrate over phi
         GIntegral integral(&integrand);
-        npred = integral.romb(phi_min, phi_max) * sin_theta * model;
+        npred = integral.romb(omega_min, omega_max) * sin_rho * model;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
         if (isnotanumber(npred) || isinfinite(npred)) {
-            std::cout << "*** ERROR: cta_npred_radial_kern_theta::eval";
-            std::cout << "(theta=" << theta << "):";
+            std::cout << "*** ERROR: cta_npred_radial_kern_rho::eval";
+            std::cout << "(rho=" << rho << "):";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
             std::cout << ", model=" << model;
-            std::cout << ", phi=[" << phi_min << "," << phi_max << "]";
-            std::cout << ", sin_theta=" << sin_theta;
+            std::cout << ", omega=[" << omega_min << "," << omega_max << "]";
+            std::cout << ", sin_rho=" << sin_rho;
             std::cout << ")" << std::endl;
         }
         #endif
@@ -342,12 +352,12 @@ double cta_npred_radial_kern_theta::eval(double theta)
  *       multiplication is definitely not the fastest way to do that
  *       computation).
  ***************************************************************************/
-double cta_npred_radial_kern_phi::eval(double phi)
+double cta_npred_radial_kern_omega::eval(double omega)
 {
     // Compute sky direction vector in native coordinates
-    double  cos_phi = std::cos(phi);
-    double  sin_phi = std::sin(phi);
-    GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
+    double  cos_omega = std::cos(omega);
+    double  sin_omega = std::sin(omega);
+    GVector native(-cos_omega*m_sin_rho, sin_omega*m_sin_rho, m_cos_rho);
 
     // Rotate from native into celestial system
     GVector cel = *m_rot * native;
@@ -365,12 +375,12 @@ double cta_npred_radial_kern_phi::eval(double phi)
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
     if (isnotanumber(npred) || isinfinite(npred)) {
-        std::cout << "*** ERROR: cta_npred_radial_kern_phi::eval";
-        std::cout << "(phi=" << phi << "):";
+        std::cout << "*** ERROR: cta_npred_radial_kern_omega::eval";
+        std::cout << "(omega=" << omega << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
-        std::cout << ", cos_phi=" << cos_phi;
-        std::cout << ", sin_phi=" << sin_phi;
+        std::cout << ", cos_omega=" << cos_omega;
+        std::cout << ", sin_omega=" << sin_omega;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -567,6 +577,148 @@ double cta_irf_elliptical_kern_omega::eval(double omega)
 
     // Return
     return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for zenith angle Npred integration of elliptical model
+ *
+ * @param[in] rho Elliptical model offset angle (radians).
+ *
+ * Integrates the spatial component of the elliptical source model multiplied
+ * by Npred for a given model offset angle over all azimuth angles that fall
+ * within the ROI+PSF radius using
+ *
+ * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ *              M(\rho,\omega) Npred(\rho,\omega)
+ *              \sin \rho d\omega\f],
+ *
+ * The azimuth angle integration range 
+ * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
+ * is limited to an arc around the vector connecting the model centre to
+ * the ROI centre. This limitation assures proper converges properly.
+ ***************************************************************************/
+double cta_npred_elliptical_kern_rho::eval(double rho)
+{
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Compute half length of arc that lies within ROI+PSF radius (radians)
+    double domega = 0.5 * cta_roi_arclength(rho,
+                                            m_dist,
+                                            m_cos_dist,
+                                            m_sin_dist,
+                                            m_radius,
+                                            m_cos_radius);
+
+    // Continue only if arc length is positive
+    if (domega > 0.0) {
+
+        // Compute phi integration range
+        double omega_min = m_omega0 - domega;
+        double omega_max = m_omega0 + domega;
+
+        // Compute sine and cosine of offset angle
+        double sin_rho = std::sin(rho);
+        double cos_rho = std::cos(rho);
+
+        // Setup phi integration kernel
+        cta_npred_elliptical_kern_omega integrand(m_rsp,
+                                                  m_model,
+                                                  m_srcEng,
+                                                  m_srcTime,
+                                                  m_obs,
+                                                  m_rot,
+                                                  sin_rho,
+                                                  cos_rho);
+
+        // Integrate over phi
+        GIntegral integral(&integrand);
+        npred = integral.romb(omega_min, omega_max) * sin_rho;
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(npred) || isinfinite(npred)) {
+            std::cout << "*** ERROR: cta_npred_elliptical_kern_rho::eval";
+            std::cout << "(rho=" << rho << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (npred=" << npred;
+            std::cout << ", omega=[" << omega_min << "," << omega_max << "]";
+            std::cout << ", sin_rho=" << sin_rho;
+            std::cout << ", cos_rho=" << cos_rho;
+            std::cout << ")" << std::endl;
+        }
+        #endif
+
+    } // endif: arc length was positive
+
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuth angle Npred integration of elliptical model
+ *
+ * @param[in] omega Azimuth angle (radians).
+ *
+ * Computes the product of the elliptical model with Npred using
+ *
+ * \f[M(\rho,\omega) Npred(\rho,\omega)\f]
+ *
+ * where
+ * \f$M(\rho,\omega)\f$ is the spatial component of the elliptical model,
+ * \f$Npred(\rho,\omega)\f$ is the point source IRF integral over the ROI,
+ * and \f$(\rho,\omega)\f$ are the zenith and azimuth angles of a spherical
+ * coordinate system that is centred on the source model centre.
+ ***************************************************************************/
+double cta_npred_elliptical_kern_omega::eval(double omega)
+{
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Compute sky direction vector in native coordinates
+    double  cos_omega = std::cos(omega);
+    double  sin_omega = std::sin(omega);
+    GVector native(-cos_omega*m_sin_rho, sin_omega*m_sin_rho, m_cos_rho);
+
+    // Rotate from native into celestial system
+    GVector cel = *m_rot * native;
+
+    // Set sky direction
+    GSkyDir srcDir;
+    srcDir.celvector(cel);
+
+    // Get model value for this sky direction
+    double model = m_model->eval(srcDir);
+
+    // Continue only if sky intensity is positive
+    if (model > 0.0) {
+
+        // Set Photon
+        GPhoton photon(srcDir, *m_srcEng, *m_srcTime);
+
+        // Compute Npred for this sky direction
+        npred = m_rsp->npred(photon, *m_obs) * model;
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(npred) || isinfinite(npred)) {
+            std::cout << "*** ERROR: cta_npred_elliptical_kern_omega::eval";
+            std::cout << "(omega=" << omega << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (npred=" << npred;
+            std::cout << ", model=" << model;
+            std::cout << ", cos_omega=" << cos_omega;
+            std::cout << ", sin_omega=" << sin_omega;
+            std::cout << ")" << std::endl;
+        }
+        #endif
+
+    } // endif: sky intensity was positive
+    
+    // Return Npred
+    return npred;
 }
 
 
