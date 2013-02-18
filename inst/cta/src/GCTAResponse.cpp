@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAResponse.cpp  -  CTA Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,14 +58,14 @@
 #define G_NPRED             "GCTAResponse::npred(GSkyDir&, GEnergy&, GTime&,"\
                                                             " GObservation&)"
 #define G_MC            "GCTAResponse::mc(double&,GPhoton&,GPointing&,GRan&)"
-#define G_IRF_EXTENDED      "GCTAResponse::irf_extended(GInstDir&, GEnergy&,"\
-           " GTime&, GModelExtendedSource&, GEnergy&, GTime&, GObservation&)"
-#define G_IRF_DIFFUSE     "GCTAResponse::irf_diffuse(GCTAInstDir&, GEnergy&,"\
-         " GTime&, GModelDiffuseSource&, GEnergy&, GTime&, GCTAObservation&)"
-#define G_NPRED_EXTENDED                      "GCTAResponse::npred_extended("\
-                       "GModelExtendedSource&,GEnergy&,GTime&,GObservation&)"
-#define G_NPRED_DIFFUSE                        "GCTAResponse::npred_diffuse("\
-                        "GModelDiffuseSource&,GEnergy&,GTime&,GObservation&)"
+
+#define G_IRF_RADIAL            "GCTAResponse::irf_radial(GEvent&, GSource&,"\
+                                                            " GObservation&)"
+#define G_IRF_DIFFUSE          "GCTAResponse::irf_diffuse(GEvent&, GSource&,"\
+                                                            " GObservation&)"
+#define G_NPRED_RADIAL  "GCTAResponse::npred_radial(GSource&, GObservation&)"
+#define G_NPRED_DIFFUSE               "GCTAResponse::npred_diffuse(GSource&,"\
+                                                            " GObservation&)"
 #define G_READ           "GCTAResponse::read_performance_table(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -74,9 +74,9 @@
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_READ_ARF                         //!< Debug read_arf method
-//#define G_DEBUG_IRF_EXTENDED                 //!< Debug irf_extended method
-//#define G_DEBUG_IRF_DIFFUSE                  //!< Debug irf_diffuse method
-//#define G_DEBUG_NPRED_EXTENDED             //!< Debug npred_extended method
+//#define G_DEBUG_IRF_RADIAL                     //!< Debug irf_radial method
+//#define G_DEBUG_IRF_DIFFUSE                   //!< Debug irf_diffuse method
+//#define G_DEBUG_NPRED_RADIAL                 //!< Debug npred_radial method
 //#define G_DEBUG_NPRED_DIFFUSE               //!< Debug npred_diffuse method
 //#define G_DEBUG_PRINT_AEFF                   //!< Debug print() Aeff method
 //#define G_DEBUG_PRINT_PSF                     //!< Debug print() Psf method
@@ -94,7 +94,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Creates an empty instance of a CTA response object.
+ * Constructs void CTA response.
  ***************************************************************************/
 GCTAResponse::GCTAResponse(void) : GResponse()
 {
@@ -111,9 +111,7 @@ GCTAResponse::GCTAResponse(void) : GResponse()
  *
  * @param[in] rsp CTA response.
  *
- * Copies an instance of a CTA response object. Note that a deep copy is
- * performed, hence the original object can be destroyed without any loss
- * of information in the copy.
+ * Constructs CTA response by making a deep copy of an existing object.
  **************************************************************************/
 GCTAResponse::GCTAResponse(const GCTAResponse& rsp) : GResponse(rsp)
 {
@@ -184,6 +182,7 @@ GCTAResponse::~GCTAResponse(void)
  * @brief Assignment operator
  *
  * @param[in] rsp CTA response.
+ * @return CTA response.
  *
  * Assigns CTA response object to another CTA response object. The assignment
  * performs a deep copy of all information, hence the original object from
@@ -243,6 +242,8 @@ void GCTAResponse::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of CTA response.
  *
  * Creates a clone (deep copy) of a CTA response object.
  ***************************************************************************/
@@ -794,6 +795,8 @@ std::string GCTAResponse::print(void) const
 
     // Append header
     result.append("=== GCTAResponse ===");
+
+    // Append response information
     result.append("\n"+parformat("Calibration database")+m_caldb);
     result.append("\n"+parformat("Response name")+m_rspname);
     result.append("\n"+parformat("RMF file name")+m_rmffile);
@@ -820,7 +823,7 @@ std::string GCTAResponse::print(void) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return value of extended source instrument response function
+ * @brief Return value of radial source instrument response function
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
@@ -856,33 +859,33 @@ std::string GCTAResponse::print(void) const
  * view, this approximation should be fine. It helps in fact a lot in
  * speeding up the computations.
  ***************************************************************************/
-double GCTAResponse::irf_extended(const GEvent&       event,
-                                  const GSource&      source,
-                                  const GObservation& obs) const
+double GCTAResponse::irf_radial(const GEvent&       event,
+                                const GSource&      source,
+                                const GObservation& obs) const
 {
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
     if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_IRF_EXTENDED);
+        throw GCTAException::bad_observation_type(G_IRF_RADIAL);
     }
 
     // Get pointer on CTA pointing
     const GCTAPointing *pnt = ctaobs->pointing();
     if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_IRF_EXTENDED);
+        throw GCTAException::no_pointing(G_IRF_RADIAL);
     }
 
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
     if (dir == NULL) {
-        throw GCTAException::bad_instdir_type(G_IRF_EXTENDED);
+        throw GCTAException::bad_instdir_type(G_IRF_RADIAL);
     }
 
     // Get pointer on radial model
     const GModelSpatialRadial* model =
           dynamic_cast<const GModelSpatialRadial*>(source.model());
     if (model == NULL) {
-        throw GCTAException::bad_model_type(G_IRF_EXTENDED);
+        throw GCTAException::bad_model_type(G_IRF_RADIAL);
     }
 
     // Get event attributes
@@ -969,7 +972,7 @@ double GCTAResponse::irf_extended(const GEvent&       event,
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
         if (isnotanumber(irf) || isinfinite(irf)) {
-            std::cout << "*** ERROR: GCTAResponse::irf_extended:";
+            std::cout << "*** ERROR: GCTAResponse::irf_radial:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (irf=" << irf;
             std::cout << ", rho_min=" << rho_min;
@@ -981,8 +984,8 @@ double GCTAResponse::irf_extended(const GEvent&       event,
     }
 
     // Compile option: Show integration results
-    #if defined(G_DEBUG_IRF_EXTENDED)
-    std::cout << "GCTAResponse::irf_extended:";
+    #if defined(G_DEBUG_IRF_RADIAL)
+    std::cout << "GCTAResponse::irf_radial:";
     std::cout << " rho_min=" << rho_min;
     std::cout << " rho_max=" << rho_max;
     std::cout << " irf=" << irf << std::endl;
@@ -1043,7 +1046,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
     // Get pointer on spatial model
     const GModelSpatial* model = dynamic_cast<const GModelSpatial*>(source.model());
     if (model == NULL) {
-        throw GCTAException::bad_model_type(G_IRF_EXTENDED);
+        throw GCTAException::bad_model_type(G_IRF_DIFFUSE);
     }
 
     // Get event attributes
@@ -1139,7 +1142,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return spatial integral of extended source model
+ * @brief Return spatial integral of radial source model
  *
  * @param[in] source Source.
  * @param[in] obs Observation.
@@ -1161,8 +1164,8 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
  * @todo Verify that offaxis PSF is not considerably larger than onaxis
  *       PSF. 
  ***************************************************************************/
-double GCTAResponse::npred_extended(const GSource& source,
-                                    const GObservation& obs) const
+double GCTAResponse::npred_radial(const GSource& source,
+                                  const GObservation& obs) const
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -1170,26 +1173,26 @@ double GCTAResponse::npred_extended(const GSource& source,
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
     if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_NPRED_EXTENDED);
+        throw GCTAException::bad_observation_type(G_NPRED_RADIAL);
     }
 
     // Get pointer on CTA pointing
     const GCTAPointing *pnt = ctaobs->pointing();
     if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_IRF_DIFFUSE);
+        throw GCTAException::no_pointing(G_NPRED_RADIAL);
     }
 
     // Get pointer on CTA events list
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
     if (events == NULL) {
-        throw GException::no_list(G_NPRED_EXTENDED);
+        throw GException::no_list(G_NPRED_RADIAL);
     }
 
     // Get pointer on radial model
     const GModelSpatialRadial* model =
           dynamic_cast<const GModelSpatialRadial*>(source.model());
     if (model == NULL) {
-        throw GCTAException::bad_model_type(G_IRF_EXTENDED);
+        throw GCTAException::bad_model_type(G_NPRED_RADIAL);
     }
 
     // Get source attributes
@@ -1260,8 +1263,8 @@ double GCTAResponse::npred_extended(const GSource& source,
         npred = integral.romb(theta_min, theta_max);
 
         // Compile option: Show integration results
-        #if defined(G_DEBUG_NPRED_EXTENDED)
-        std::cout << "GCTAResponse::npred_extended:";
+        #if defined(G_DEBUG_NPRED_RADIAL)
+        std::cout << "GCTAResponse::npred_radial:";
         std::cout << " theta_min=" << theta_min;
         std::cout << " theta_max=" << theta_max;
         std::cout << " npred=" << npred << std::endl;
@@ -1272,7 +1275,7 @@ double GCTAResponse::npred_extended(const GSource& source,
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
     if (isnotanumber(npred) || isinfinite(npred)) {
-        std::cout << "*** ERROR: GCTAResponse::npred_extended:";
+        std::cout << "*** ERROR: GCTAResponse::npred_radial:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
         std::cout << ", theta_min=" << theta_min;
@@ -1342,7 +1345,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
     // Get pointer on spatial model
     const GModelSpatial* model = dynamic_cast<const GModelSpatial*>(source.model());
     if (model == NULL) {
-        throw GCTAException::bad_model_type(G_IRF_EXTENDED);
+        throw GCTAException::bad_model_type(G_NPRED_DIFFUSE);
     }
 
     // Get source attributes

@@ -92,14 +92,14 @@ public:
     virtual std::string   print(void) const;
 
     // Overload virtual base class methods
-    virtual double irf_extended(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
+    virtual double irf_radial(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
     virtual double irf_diffuse(const GEvent&       event,
                                const GSource&      source,
                                const GObservation& obs) const;
-    virtual double npred_extended(const GSource&      source,
-                                  const GObservation& obs) const;
+    virtual double npred_radial(const GSource&      source,
+                                const GObservation& obs) const;
     virtual double npred_diffuse(const GSource&      source,
                                  const GObservation& obs) const;
 
