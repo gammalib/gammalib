@@ -390,7 +390,7 @@ double GResponse::npred_ptsrc(const GSource& source,
 
 
 /***********************************************************************//**
- * @brief Return ROI integral of radial source model
+ * @brief Return spatial integral of radial source model
  *
  * @param[in] source Source.
  * @param[in] obs Observation.
@@ -406,32 +406,32 @@ double GResponse::npred_radial(const GSource& source,
     // Initialise Npred value
     double npred = 0.0;
 
-    // Get radial model
-    const GModelSpatialRadial* src =
+    // Get radial spatial model
+    const GModelSpatialRadial* spatial =
           dynamic_cast<const GModelSpatialRadial*>(source.model());
 
-    // Continue only if model is valid
-    if (src != NULL) {
+    // Continue only if spatial model is valid
+    if (spatial != NULL) {
     
         // Compute rotation matrix to convert from native coordinates given
         // by (theta,phi) into celestial coordinates.
         GMatrix ry;
         GMatrix rz;
         GMatrix rot;
-        ry.eulery(src->dec() - 90.0);
-        rz.eulerz(-src->ra());
+        ry.eulery(spatial->dec() - 90.0);
+        rz.eulerz(-spatial->ra());
         rot = transpose(ry * rz);
 
         // Set offset angle integration range
         double theta_min = 0.0;
-        double theta_max = src->theta_max();
+        double theta_max = spatial->theta_max();
 
         // Perform offset angle integration if interval is valid
         if (theta_max > theta_min) {
 
             // Setup integration kernel
             GResponse::npred_radial_kern_theta integrand(this,
-                                                         src,
+                                                         spatial,
                                                          &(source.energy()),
                                                          &(source.time()),
                                                          &obs,
@@ -475,19 +475,74 @@ double GResponse::npred_radial(const GSource& source,
  *
  * @param[in] source Source.
  * @param[in] obs Observation.
- *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented.
  ***************************************************************************/
 double GResponse::npred_elliptical(const GSource& source,
                                    const GObservation& obs) const
 {
-    // Feature not yet implemented
-    throw GException::feature_not_implemented(G_NPRED_ELLIPTICAL,
-          "Npred computation not implemented for elliptical models.");
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Get elliptical spatial model
+    const GModelSpatialElliptical* spatial =
+          dynamic_cast<const GModelSpatialElliptical*>(source.model());
+
+    // Continue only if spatial model is valid
+    if (spatial != NULL) {
+    
+        // Compute rotation matrix to convert from native coordinates given
+        // by (theta,phi) into celestial coordinates.
+        GMatrix ry;
+        GMatrix rz;
+        GMatrix rot;
+        ry.eulery(spatial->dec() - 90.0);
+        rz.eulerz(-spatial->ra());
+        rot = transpose(ry * rz);
+
+        // Set offset angle integration range
+        double theta_min = 0.0;
+        double theta_max = spatial->theta_max();
+
+        // Perform offset angle integration if interval is valid
+        if (theta_max > theta_min) {
+
+            // Setup integration kernel
+            GResponse::npred_elliptical_kern_theta integrand(this,
+                                                             spatial,
+                                                             &(source.energy()),
+                                                             &(source.time()),
+                                                             &obs,
+                                                             &rot);
+
+            // Integrate over theta
+            GIntegral integral(&integrand);
+            npred = integral.romb(theta_min, theta_max);
+
+            // Compile option: Show integration results
+            #if defined(G_DEBUG_NPRED_ELLIPTICAL)
+            std::cout << "GResponse::npred_elliptical:";
+            std::cout << " theta_min=" << theta_min;
+            std::cout << " theta_max=" << theta_max;
+            std::cout << " npred=" << npred << std::endl;
+            #endif
+
+        } // endif: offset angle range was valid
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(npred) || isinfinite(npred)) {
+            std::cout << "*** ERROR: GResponse::npred_elliptical:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (npred=" << npred;
+            std::cout << ", theta_min=" << theta_min;
+            std::cout << ", theta_max=" << theta_max;
+            std::cout << ")" << std::endl;
+        }
+        #endif
+
+    } // endif: elliptical model was valid
 
     // Return Npred
-    return 0.0;
+    return npred;
 }
 
 
@@ -629,6 +684,97 @@ double GResponse::npred_radial_kern_phi::eval(double phi)
         std::cout << "(phi=" << phi << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
+        std::cout << ", cos_phi=" << cos_phi;
+        std::cout << ", sin_phi=" << sin_phi;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for offset angle Npred integration of elliptical model
+ *
+ * @param[in] theta Radial model offset angle (radians).
+ ***************************************************************************/
+double GResponse::npred_elliptical_kern_theta::eval(double theta)
+{
+    // Initialise Npred value
+    double npred = 0.0;
+
+    // Compute sine of offset angle
+    double sin_theta = std::sin(theta);
+
+    // Setup phi integration kernel
+    GResponse::npred_elliptical_kern_phi integrand(m_rsp,
+                                                   m_spatial,
+                                                   m_srcEng,
+                                                   m_srcTime,
+                                                   m_obs,
+                                                   m_rot,
+                                                   theta,
+                                                   sin_theta);
+
+    // Integrate over phi
+    GIntegral integral(&integrand);
+    npred = integral.romb(0.0, twopi) * sin_theta;
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(npred) || isinfinite(npred)) {
+        std::cout << "*** ERROR: GResponse::npred_radial_kern_theta::eval";
+        std::cout << "(theta=" << theta << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", sin_theta=" << sin_theta;
+        std::cout << ")" << std::endl;
+    }
+    #endif
+
+    // Return Npred
+    return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for azimuth angle Npred integration of elliptical model
+ *
+ * @param[in] phi Azimuth angle (radians).
+ ***************************************************************************/
+double GResponse::npred_elliptical_kern_phi::eval(double phi)
+{
+    // Compute sky direction vector in native coordinates
+    double  cos_phi = std::cos(phi);
+    double  sin_phi = std::sin(phi);
+    GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
+
+    // Rotate from native into celestial system
+    GVector cel = *m_rot * native;
+
+    // Set sky direction
+    GSkyDir srcDir;
+    srcDir.celvector(cel);
+
+    // Set photon
+    GPhoton photon(srcDir, *m_srcEng, *m_srcTime);
+
+    // Get elliptical model value
+    double model = m_spatial->eval(m_theta, phi);
+
+    // Compute Npred for this sky direction
+    double npred = m_rsp->npred(photon, *m_obs) * model;
+
+    // Debug: Check for NaN
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(npred) || isinfinite(npred)) {
+        std::cout << "*** ERROR: GResponse::npred_radial_kern_phi::eval";
+        std::cout << "(phi=" << phi << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (npred=" << npred;
+        std::cout << ", model=" << model;
         std::cout << ", cos_phi=" << cos_phi;
         std::cout << ", sin_phi=" << sin_phi;
         std::cout << ")" << std::endl;
