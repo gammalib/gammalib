@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GResponse.i  -  Abstract response base class              *
+ *                GResponse.i - Abstract response base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,9 +61,12 @@ public:
     virtual double irf_ptsrc(const GEvent&       event,
                              const GSource&      source,
                              const GObservation& obs) const;
-    virtual double irf_extended(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
+    virtual double irf_radial(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
+    virtual double irf_elliptical(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const;
     virtual double irf_diffuse(const GEvent&       event,
                                const GSource&      source,
                                const GObservation& obs) const;
@@ -71,8 +74,10 @@ public:
                          const GObservation& obs) const;
     virtual double npred_ptsrc(const GSource&      source,
                                const GObservation& obs) const;
-    virtual double npred_extended(const GSource&      source,
-                                  const GObservation& obs) const;
+    virtual double npred_radial(const GSource&      source,
+                                const GObservation& obs) const;
+    virtual double npred_elliptical(const GSource&      source,
+                                    const GObservation& obs) const;
     virtual double npred_diffuse(const GSource&      source,
                                  const GObservation& obs) const;
 };

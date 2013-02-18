@@ -39,23 +39,27 @@
 #include "GTools.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
+#include "GModelSpatialElliptical.hpp"
+#include "GModelSpatialDiffuse.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_IRF_EXTENDED         "GResponse::irf_extended(GInstDir&, GEnergy&,"\
-           " GTime&, GModelExtendedSource&, GEnergy&, GTime&, GObservation&)"
-#define G_IRF_DIFFUSE           "GResponse::irf_diffuse(GInstDir&, GEnergy&,"\
-            " GTime&, GModelDiffuseSource&, GEnergy&, GTime&, GObservation&)"
-#define G_NPRED_EXTENDED   "GResponse::npred_extended(GModelExtendedSource&,"\
-                                          " GEnergy&, GTime&, GObservation&)"
-#define G_NPRED_DIFFUSE      "GResponse::npred_diffuse(GModelDiffuseSource&,"\
-                                          " GEnergy&, GTime&, GObservation&)"
+#define G_IRF_RADIAL               "GResponse::irf_radial(GEvent&, GSource&,"\
+                                                            " GObservation&)"
+#define G_IRF_ELLIPTICAL       "GResponse::irf_elliptical(GEvent&, GSource&,"\
+                                                            " GObservation&)"
+#define G_IRF_DIFFUSE             "GResponse::irf_diffuse(GEvent&, GSource&,"\
+                                                            " GObservation&)"
+#define G_NPRED_RADIAL     "GResponse::npred_radial(GSource&, GObservation&)"
+#define G_NPRED_ELLIPTICAL            "GResponse::npred_elliptical(GSource&,"\
+                                                            " GObservation&)"
+#define G_NPRED_DIFFUSE   "GResponse::npred_diffuse(GSource&, GObservation&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_NPRED_EXTENDED                    //!< Debug npred_extended
+//#define G_DEBUG_NPRED_RADIAL                        //!< Debug npred_radial
 
 
 /*==========================================================================
@@ -118,6 +122,7 @@ GResponse::~GResponse(void)
  * @brief Assignment operator
  *
  * @param[in] rsp Response.
+ * @return Response.
  ***************************************************************************/
 GResponse& GResponse::operator= (const GResponse& rsp)
 {
@@ -156,9 +161,8 @@ GResponse& GResponse::operator= (const GResponse& rsp)
  * Returns the instrument response function for a given event, source and
  * observation.
  *
- * Note that this method applies the deadtime correction, so that the
- * response function can be directly multiplied by the exposure time (also
- * known as ontime).
+ * The method applies the deadtime correction, so that the response function
+ * can be directly multiplied by the exposure time (also known as ontime).
  ***************************************************************************/
 double GResponse::irf(const GEvent&       event,
                       const GSource&      source,
@@ -174,11 +178,16 @@ double GResponse::irf(const GEvent&       event,
 
     // Is spatial model a radial source?
     else if (dynamic_cast<const GModelSpatialRadial*>(source.model()) != NULL) {
-        irf = irf_extended(event, source, obs);
+        irf = irf_radial(event, source, obs);
     }
 
-    // ... otherwise we have a diffuse model
-    else {
+    // Is spatial model an elliptical source?
+    else if (dynamic_cast<const GModelSpatialElliptical*>(source.model()) != NULL) {
+        irf = irf_elliptical(event, source, obs);
+    }
+
+    // Is spatial model a diffuse source?
+    else if (dynamic_cast<const GModelSpatialDiffuse*>(source.model()) != NULL) {
         irf = irf_diffuse(event, source, obs);
     }
 
@@ -229,7 +238,7 @@ double GResponse::irf_ptsrc(const GEvent&       event,
 
 
 /***********************************************************************//**
- * @brief Return value of extended source instrument response function
+ * @brief Return IRF value for radial source model
  *
  * @param[in] event Observed event.
  * @param[in] source Source.
@@ -238,13 +247,36 @@ double GResponse::irf_ptsrc(const GEvent&       event,
  * @exception GException::feature_not_implemented
  *            Method is not implemented.
  ***************************************************************************/
-double GResponse::irf_extended(const GEvent&       event,
-                               const GSource&      source,
-                               const GObservation& obs) const
+double GResponse::irf_radial(const GEvent&       event,
+                             const GSource&      source,
+                             const GObservation& obs) const
 {
     // Feature not yet implemented
-    throw GException::feature_not_implemented(G_IRF_EXTENDED,
-          "Extended IRF not implemented for this class.");
+    throw GException::feature_not_implemented(G_IRF_RADIAL,
+          "IRF computation not implemented for radial models.");
+
+    // Return IRF
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return IRF value for elliptical source model
+ *
+ * @param[in] event Observed event.
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method is not implemented.
+ ***************************************************************************/
+double GResponse::irf_elliptical(const GEvent&       event,
+                                 const GSource&      source,
+                                 const GObservation& obs) const
+{
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_IRF_ELLIPTICAL,
+          "IRF computation not implemented for elliptical models.");
 
     // Return IRF
     return 0.0;
@@ -267,7 +299,7 @@ double GResponse::irf_diffuse(const GEvent&       event,
 {
     // Feature not yet implemented
     throw GException::feature_not_implemented(G_IRF_DIFFUSE,
-          "Diffuse IRF not implemented for this class.");
+          "IRF computation not implemented for diffuse models.");
 
     // Return IRF
     return 0.0;
@@ -281,7 +313,8 @@ double GResponse::irf_diffuse(const GEvent&       event,
  * @param[in] obs Observation.
  *
  * Returns the data space integral of the instrument response function for
- * a given source and a particular observation.
+ * a given source and a particular observation. This method is needed for
+ * an unbinned maximum likelihood analysis.
  *
  * The method applies the deadtime correction, so that the result can be
  * directly multiplied by the exposure time (also known as ontime).
@@ -298,11 +331,16 @@ double GResponse::npred(const GSource& source, const GObservation& obs) const
 
     // Is spatial model a radial source?
     else if (dynamic_cast<const GModelSpatialRadial*>(source.model()) != NULL) {
-        npred = npred_extended(source, obs);
+        npred = npred_radial(source, obs);
     }
 
-    // ... otherwise we have a diffuse model
-    else {
+    // Is spatial model an elliptical source?
+    else if (dynamic_cast<const GModelSpatialElliptical*>(source.model()) != NULL) {
+        npred = npred_elliptical(source, obs);
+    }
+
+    // Is spatial model a diffuse source?
+    else if (dynamic_cast<const GModelSpatialDiffuse*>(source.model()) != NULL) {
         npred = npred_diffuse(source, obs);
     }
 
@@ -352,18 +390,18 @@ double GResponse::npred_ptsrc(const GSource& source,
 
 
 /***********************************************************************//**
- * @brief Return ROI integral of extended source model
+ * @brief Return ROI integral of radial source model
  *
  * @param[in] source Source.
  * @param[in] obs Observation.
- * @return Integral of extended source model over ROI.
+ * @return Integral of radial source model over ROI.
  *
- * This method returns the spatial integral of an extended source model over
+ * This method returns the spatial integral of a radial source model over
  * the region of interest. If the model is not a radial model, the method
  * returns 0.
  ***************************************************************************/
-double GResponse::npred_extended(const GSource& source,
-                                 const GObservation& obs) const
+double GResponse::npred_radial(const GSource& source,
+                               const GObservation& obs) const
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -392,20 +430,20 @@ double GResponse::npred_extended(const GSource& source,
         if (theta_max > theta_min) {
 
             // Setup integration kernel
-            GResponse::npred_kern_theta integrand(this,
-                                                  src,
-                                                  &(source.energy()),
-                                                  &(source.time()),
-                                                  &obs,
-                                                  &rot);
+            GResponse::npred_radial_kern_theta integrand(this,
+                                                         src,
+                                                         &(source.energy()),
+                                                         &(source.time()),
+                                                         &obs,
+                                                         &rot);
 
             // Integrate over theta
             GIntegral integral(&integrand);
             npred = integral.romb(theta_min, theta_max);
 
             // Compile option: Show integration results
-            #if defined(G_DEBUG_NPRED_EXTENDED)
-            std::cout << "GResponse::npred_extended:";
+            #if defined(G_DEBUG_NPRED_RADIAL)
+            std::cout << "GResponse::npred_radial:";
             std::cout << " theta_min=" << theta_min;
             std::cout << " theta_max=" << theta_max;
             std::cout << " npred=" << npred << std::endl;
@@ -416,7 +454,7 @@ double GResponse::npred_extended(const GSource& source,
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
         if (isnotanumber(npred) || isinfinite(npred)) {
-            std::cout << "*** ERROR: GResponse::npred_extended:";
+            std::cout << "*** ERROR: GResponse::npred_radial:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
             std::cout << ", theta_min=" << theta_min;
@@ -429,6 +467,27 @@ double GResponse::npred_extended(const GSource& source,
 
     // Return Npred
     return npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial integral of elliptical source model
+ *
+ * @param[in] source Source.
+ * @param[in] obs Observation.
+ *
+ * @exception GException::feature_not_implemented
+ *            Method not yet implemented.
+ ***************************************************************************/
+double GResponse::npred_elliptical(const GSource& source,
+                                   const GObservation& obs) const
+{
+    // Feature not yet implemented
+    throw GException::feature_not_implemented(G_NPRED_ELLIPTICAL,
+          "Npred computation not implemented for elliptical models.");
+
+    // Return Npred
+    return 0.0;
 }
 
 
@@ -446,7 +505,7 @@ double GResponse::npred_diffuse(const GSource& source,
 {
     // Feature not yet implemented
     throw GException::feature_not_implemented(G_NPRED_DIFFUSE,
-          "Method for extended source not implemented for this class.");
+          "Npred computation not implemented for diffuse models.");
 
     // Return Npred
     return 0.0;
@@ -492,29 +551,29 @@ void GResponse::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Kernel for offset angle Npred integration
+ * @brief Kernel for offset angle Npred integration of radial model
  *
  * @param[in] theta Radial model offset angle (radians).
  ***************************************************************************/
-double GResponse::npred_kern_theta::eval(double theta)
+double GResponse::npred_radial_kern_theta::eval(double theta)
 {
     // Initialise Npred value
     double npred = 0.0;
 
     // Get radial model value
-    double model = m_radial->eval(theta);
+    double model = m_spatial->eval(theta);
 
     // Compute sine of offset angle
     double sin_theta = std::sin(theta);
 
     // Setup phi integration kernel
-    GResponse::npred_kern_phi integrand(m_rsp,
-                                        m_srcEng,
-                                        m_srcTime,
-                                        m_obs,
-                                        m_rot,
-                                        theta,
-                                        sin_theta);
+    GResponse::npred_radial_kern_phi integrand(m_rsp,
+                                               m_srcEng,
+                                               m_srcTime,
+                                               m_obs,
+                                               m_rot,
+                                               theta,
+                                               sin_theta);
 
     // Integrate over phi
     GIntegral integral(&integrand);
@@ -523,7 +582,7 @@ double GResponse::npred_kern_theta::eval(double theta)
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
     if (isnotanumber(npred) || isinfinite(npred)) {
-        std::cout << "*** ERROR: GResponse::npred_kern_theta::eval";
+        std::cout << "*** ERROR: GResponse::npred_radial_kern_theta::eval";
         std::cout << "(theta=" << theta << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -539,11 +598,11 @@ double GResponse::npred_kern_theta::eval(double theta)
 
 
 /***********************************************************************//**
- * @brief Kernel for azimuth angle Npred integration
+ * @brief Kernel for azimuth angle Npred integration of radial model
  *
  * @param[in] phi Azimuth angle (radians).
  ***************************************************************************/
-double GResponse::npred_kern_phi::eval(double phi)
+double GResponse::npred_radial_kern_phi::eval(double phi)
 {
     // Compute sky direction vector in native coordinates
     double  cos_phi = std::cos(phi);
@@ -566,7 +625,7 @@ double GResponse::npred_kern_phi::eval(double phi)
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
     if (isnotanumber(npred) || isinfinite(npred)) {
-        std::cout << "*** ERROR: GResponse::npred_kern_phi::eval";
+        std::cout << "*** ERROR: GResponse::npred_radial_kern_phi::eval";
         std::cout << "(phi=" << phi << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;

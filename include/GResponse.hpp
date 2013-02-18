@@ -87,9 +87,12 @@ public:
     virtual double irf_ptsrc(const GEvent&       event,
                              const GSource&      source,
                              const GObservation& obs) const;
-    virtual double irf_extended(const GEvent&       event,
-                                const GSource&      source,
-                                const GObservation& obs) const;
+    virtual double irf_radial(const GEvent&       event,
+                              const GSource&      source,
+                              const GObservation& obs) const;
+    virtual double irf_elliptical(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const;
     virtual double irf_diffuse(const GEvent&       event,
                                const GSource&      source,
                                const GObservation& obs) const;
@@ -97,8 +100,10 @@ public:
                          const GObservation& obs) const;
     virtual double npred_ptsrc(const GSource&      source,
                                const GObservation& obs) const;
-    virtual double npred_extended(const GSource&      source,
-                                  const GObservation& obs) const;
+    virtual double npred_radial(const GSource&      source,
+                                const GObservation& obs) const;
+    virtual double npred_elliptical(const GSource&      source,
+                                    const GObservation& obs) const;
     virtual double npred_diffuse(const GSource&      source,
                                  const GObservation& obs) const;
 
@@ -108,49 +113,49 @@ protected:
     void copy_members(const GResponse& rsp);
     void free_members(void);
 
-    // Npred theta integration kernel
-    class npred_kern_theta : public GFunction {
+    // Npred theta integration kernel for radial model
+    class npred_radial_kern_theta : public GFunction {
     public:
-        npred_kern_theta(const GResponse*           rsp,
-                         const GModelSpatialRadial* radial,
-                         const GEnergy*             srcEng,
-                         const GTime*               srcTime,
-                         const GObservation*        obs,
-                         const GMatrix*             rot) :
-                         m_rsp(rsp),
-                         m_radial(radial),
-                         m_srcEng(srcEng),
-                         m_srcTime(srcTime),
-                         m_obs(obs),
-                         m_rot(rot) { }
+        npred_radial_kern_theta(const GResponse*           rsp,
+                                const GModelSpatialRadial* spatial,
+                                const GEnergy*             srcEng,
+                                const GTime*               srcTime,
+                                const GObservation*        obs,
+                                const GMatrix*             rot) :
+                                m_rsp(rsp),
+                                m_spatial(spatial),
+                                m_srcEng(srcEng),
+                                m_srcTime(srcTime),
+                                m_obs(obs),
+                                m_rot(rot) { }
         double eval(double theta);
     protected:
         const GResponse*           m_rsp;      //!< Pointer to response
-        const GModelSpatialRadial* m_radial;   //!< Pointer to radial spatial model
+        const GModelSpatialRadial* m_spatial;  //!< Pointer to spatial model
         const GEnergy*             m_srcEng;   //!< Pointer to true photon energy
         const GTime*               m_srcTime;  //!< Pointer to true photon arrival time
         const GObservation*        m_obs;      //!< Pointer to observation
         const GMatrix*             m_rot;      //!< Pointer to rotation matrix
     };
 
-    // Npred phi integration kernel
-    class npred_kern_phi : public GFunction {
+    // Npred phi integration kernel for radial model
+    class npred_radial_kern_phi : public GFunction {
     public:
-        npred_kern_phi(const GResponse*    rsp,
-                       const GEnergy*      srcEng,
-                       const GTime*        srcTime,
-                       const GObservation* obs,
-                       const GMatrix*      rot,
-                       double              theta,
-                       double              sin_theta) :
-                       m_rsp(rsp),
-                       m_srcEng(srcEng),
-                       m_srcTime(srcTime),
-                       m_obs(obs),
-                       m_rot(rot),
-                       m_theta(theta),
-                       m_cos_theta(std::cos(theta)),
-                       m_sin_theta(sin_theta) { }
+        npred_radial_kern_phi(const GResponse*    rsp,
+                              const GEnergy*      srcEng,
+                              const GTime*        srcTime,
+                              const GObservation* obs,
+                              const GMatrix*      rot,
+                              double              theta,
+                              double              sin_theta) :
+                              m_rsp(rsp),
+                              m_srcEng(srcEng),
+                              m_srcTime(srcTime),
+                              m_obs(obs),
+                              m_rot(rot),
+                              m_theta(theta),
+                              m_cos_theta(std::cos(theta)),
+                              m_sin_theta(sin_theta) { }
         double eval(double phi);
     protected:
         const GResponse*    m_rsp;           //!< Pointer to response
