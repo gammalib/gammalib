@@ -161,7 +161,7 @@ GSPIEventBin* GSPIEventCube::operator[](const int& index)
 {
     // TODO: Implement method (dummy code only)
     GSPIEventBin* ptr;
-    
+
     // Return pointer
     return ptr;
 }
@@ -177,7 +177,7 @@ const GSPIEventBin* GSPIEventCube::operator[](const int& index) const
 {
     // TODO: Implement method (dummy code only)
     GSPIEventBin* ptr;
-    
+
     // Return pointer
     return ptr;
 }
