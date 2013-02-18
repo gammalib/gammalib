@@ -33,7 +33,6 @@
 #include "GMatrix.hpp"
 #include "GEvent.hpp"
 #include "GModelSky.hpp"
-#include "GModelSpatialRadial.hpp"
 #include "GObservation.hpp"
 #include "GResponse.hpp"
 #include "GPointing.hpp"
@@ -95,6 +94,9 @@ public:
     virtual double irf_radial(const GEvent&       event,
                               const GSource&      source,
                               const GObservation& obs) const;
+    virtual double irf_elliptical(const GEvent&       event,
+                                  const GSource&      source,
+                                  const GObservation& obs) const;
     virtual double irf_diffuse(const GEvent&       event,
                                const GSource&      source,
                                const GObservation& obs) const;

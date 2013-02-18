@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTAResponse_helpers.cpp  -  CTA response helper classes         *
+ *         GCTAResponse_helpers.cpp - CTA response helper classes          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -377,6 +377,181 @@ double cta_npred_radial_kern_phi::eval(double phi)
 
     // Return Npred
     return npred;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                Helper class methods for elliptical sources              =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Kernel for elliptical model integration over model's zenith angle
+ *
+ * @param[in] rho Zenith angle with respect to model centre [radians].
+ *
+ * This method evaluates the kernel \f$K(\rho)\f$ for the zenith angle
+ * integration
+ * \f[\int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho) d\rho\f]
+ * of the product between model and IRF, where
+ * \f[K(\rho) = \int_{\omega_{\rm min}}^{\omega_{\rm max}} M(\rho, \omega)
+ *              IRF(\rho, \omega) d\omega\f],
+ * \f$M(\rho)\f$ is the azimuthally symmetric source model, and
+ * \f$IRF(\rho, \omega)\f$ is the instrument response function.
+ ***************************************************************************/
+double cta_irf_elliptical_kern_rho::eval(double rho)
+{
+    // Compute half length of arc that lies within PSF validity circle
+    // (in radians)
+    double domega = 0.5 * cta_roi_arclength(rho,
+                                            m_zeta,
+                                            m_cos_zeta,
+                                            m_sin_zeta,
+                                            m_delta_max,
+                                            m_cos_delta_max);
+
+    // Initialise result
+    double irf = 0.0;
+
+    // Continue only if arc length is positive
+    if (domega > 0.0) {
+
+        // Compute omega integration range
+        double omega_min = -domega;
+        double omega_max = +domega;
+
+        // Precompute cosine and sine terms for azimuthal integration
+        double cos_rho = std::cos(rho);
+        double sin_rho = std::sin(rho);
+        double cos_psf = cos_rho*m_cos_zeta;
+        double sin_psf = sin_rho*m_sin_zeta;
+        double cos_ph  = cos_rho*m_cos_lambda;
+        double sin_ph  = sin_rho*m_sin_lambda;
+
+        // Setup integration kernel
+        cta_irf_elliptical_kern_omega integrand(this,
+                                                rho,
+                                                cos_psf,
+                                                sin_psf,
+                                                cos_ph,
+                                                sin_ph);
+
+        // Integrate over phi
+        GIntegral integral(&integrand);
+        integral.eps(m_rsp->eps());
+        irf = integral.romb(omega_min, omega_max) * sin_rho;
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(irf) || isinfinite(irf)) {
+            std::cout << "*** ERROR: cta_irf_elliptical_kern_rho";
+            std::cout << "(rho=" << rho << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (irf=" << irf;
+            std::cout << ", domega=" << domega;
+            std::cout << ", sin_rho=" << sin_rho << ")";
+            std::cout << std::endl;
+        }
+        #endif
+
+    } // endif: arc length was positive
+
+    // Return result
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Kernel for elliptical model integration over model's azimuth angle
+ *
+ * @param[in] omega Azimuth angle (radians).
+ *
+ * This method evaluates the product
+ *
+ * \f[IRF(\rho,\omega) \times M(\rho, \omega)\f
+ *
+ * where 
+ 
+ instrument response function
+ * \f$IRF(\rho,\omega)\f$ for the azimuth angle integration of the IRF.
+ *
+ * From the model coordinates \f$(\rho,\omega)\f$ it computes the PSF
+ * offset angle \f$\delta\f$, defined as the angle between true 
+ * (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) photon arrival direction,
+ * using
+ * \f[\delta = \arccos(\cos \rho \cos \zeta + 
+ *                     \sin \rho \sin \zeta \cos \omega)\f]
+ * where
+ * \f$\zeta\f$ is the angular distance between the observed photon direction
+ * \f$\vec{p}\f$ and the model centre \f$\vec{m}\f$.
+ *
+ * Furthermore, it computes the observed photon offset angle \f$\theta\f$,
+ * defined as the angle between observed photon direction and camera pointing,
+ * using
+ * \f[\theta = \arccos(\cos \rho \cos \lambda + 
+ *                     \sin \rho \sin \lambda \cos \omega_0 - \omega)\f]
+ * where
+ * \f$\lambda\f$ is the angular distance between the model centre and the
+ * camera pointing direction.
+ ***************************************************************************/
+double cta_irf_elliptical_kern_omega::eval(double omega)
+{
+    // Compute PSF offset angle [radians]
+    double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
+    
+    // Compute observed photon offset angle in camera system [radians]
+    double offset = std::acos(m_cos_ph + m_sin_ph * std::cos(m_kernel->m_omega0 - omega));
+    
+    // TODO: Compute true photon azimuth angle in camera system [radians]
+    double azimuth = 0.0;
+
+    // Evaluate sky model M(rho, omega)
+    double model = m_kernel->m_model->eval(m_rho, omega);
+
+    // Evaluate IRF
+    double irf = m_kernel->m_rsp->aeff(offset, 
+                                       azimuth,
+                                       m_kernel->m_zenith, 
+                                       m_kernel->m_azimuth, 
+                                       m_kernel->m_srcLogEng) *
+                 m_kernel->m_rsp->psf(delta, 
+                                      offset,
+                                      azimuth,
+                                      m_kernel->m_zenith,
+                                      m_kernel->m_azimuth,
+                                      m_kernel->m_srcLogEng);
+
+    // Optionally take energy dispersion into account
+    if (m_kernel->m_rsp->hasedisp() && irf > 0.0) {
+        irf *= m_kernel->m_rsp->edisp(m_kernel->m_obsLogEng,
+                                      offset,
+                                      azimuth, 
+                                      m_kernel->m_zenith,
+                                      m_kernel->m_azimuth,
+                                      m_kernel->m_srcLogEng);
+    }
+
+    // Multiply IRF * model
+    irf *= model;
+
+    // Compile option: Check for NaN/Inf
+    #if defined(G_NAN_CHECK)
+    if (isnotanumber(irf) || isinfinite(irf)) {
+        std::cout << "*** ERROR: cta_irf_elliptical_kern_omega::eval";
+        std::cout << "(omega=" << omega << "):";
+        std::cout << " NaN/Inf encountered";
+        std::cout << " (irf=" << irf;
+        std::cout << ", model=" << model;
+        std::cout << ", delta=" << delta;
+        std::cout << ", offset=" << offset;
+        std::cout << ", azimuth=" << azimuth << ")";
+        std::cout << std::endl;
+    }
+    #endif
+
+    // Return
+    return irf;
 }
 
 
