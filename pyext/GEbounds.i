@@ -56,6 +56,7 @@ public:
     void        insert(const GEnergy& emin, const GEnergy& emax);
     void        pop(const int& index);
     void        reserve(const int& num);
+    void        extend(const GEbounds& ebds);
     void        setlin(const int& num, const GEnergy& emin, const GEnergy& emax);
     void        setlog(const int& num, const GEnergy& emin, const GEnergy& emax);
     void        load(const std::string& filename,

@@ -269,8 +269,8 @@ void GEbounds::insert(const GEnergy& emin, const GEnergy& emax)
 
         // Determine index at which interval should be inserted
         int inx = 0;
-        for (int i = 0; i < m_num; ++i) {
-            if (emin < m_min[i])
+        for (; inx < m_num; ++inx) {
+            if (emin < m_min[inx])
                 break;
         }
 
@@ -331,6 +331,59 @@ void GEbounds::pop(const int& index)
  ***************************************************************************/
 void GEbounds::reserve(const int& num)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append energy boundaries
+ *
+ * @param[in] ebds Energy boundaries.
+ *
+ * Append energy boundaries at the end of any existing boundaries.
+ ***************************************************************************/
+void GEbounds::extend(const GEbounds& ebds)
+{
+    // Do nothing if energy boundaries are empty
+    if (!ebds.isempty()) {
+
+        // Allocate new intervals
+        int      num = m_num+ebds.size();
+        GEnergy* min = new GEnergy[num];
+        GEnergy* max = new GEnergy[num];
+
+        // Initialise index
+        int inx = 0;
+        
+        // Copy existing intervals
+        for (; inx < m_num; ++inx) {
+            min[inx] = m_min[inx];
+            max[inx] = m_max[inx];
+        }
+
+        // Append intervals
+        for (int i = 0; i < ebds.size(); ++i, ++inx) {
+            min[inx] = ebds.m_min[i];
+            max[inx] = ebds.m_max[i];
+        }
+
+        // Free memory
+        if (m_min != NULL) delete [] m_min;
+        if (m_max != NULL) delete [] m_max;
+
+        // Set new memory
+        m_min = min;
+        m_max = max;
+
+        // Set number of elements
+        m_num = num;
+
+        // Set attributes
+        set_attributes();
+
+    } // endif: energy boundaries were not empty
+
     // Return
     return;
 }
@@ -737,18 +790,14 @@ std::string GEbounds::print(void) const
 
     // Append information
     result.append(parformat("Number of intervals")+str(size()));
+    result.append("\n");
+    result.append(parformat("Energy range"));
+    result.append(emin().print());
+    result.append(" - ");
+    result.append(emax().print());
     
-    // Single energy bin
-    if (size() == 1) {
-        result.append("\n");
-        result.append(parformat("Energy range"));
-        result.append(emin().print());
-        result.append(" - ");
-        result.append(emax().print());
-    }
-    
-    // Multiple energy bins
-    else if (size() > 1) {
+    // If there are multiple energy bins then append them
+    if (size() > 1) {
         for (int i = 0; i < size(); ++i) {
             result.append("\n");
             result.append(parformat("Energy interval "+str(i)));
@@ -833,6 +882,9 @@ void GEbounds::free_members(void)
 
 /***********************************************************************//**
  * @brief Set class attributes
+ *
+ * Determines the minimum and maximum energy from all intervals. If no
+ * interval is present the minimum and maximum energies are cleared.
  ***************************************************************************/
 void GEbounds::set_attributes(void)
 {
@@ -840,7 +892,11 @@ void GEbounds::set_attributes(void)
     // energy from these intervals ...
     if (m_num > 0) {
         m_emin = m_min[0];
-        m_emax = m_max[m_num-1];
+        m_emax = m_max[0];
+        for (int i = 1; i < m_num; ++i) {
+            if (m_min[i] < m_emin) m_emin = m_min[i];
+            if (m_max[i] > m_emax) m_emax = m_max[i];
+        }
     }
 
     // ... otherwise clear the minimum and maximum energy
