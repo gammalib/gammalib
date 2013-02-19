@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GEbounds.hpp  -  Energy boundaries class                  *
+ *                GEbounds.hpp - Energy boundaries class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GEnergy.hpp"
@@ -38,30 +38,36 @@
 /***********************************************************************//**
  * @class GEbounds
  *
- * @brief Interface for the energy boundaries class
+ * @brief Energy boundaries container class
  *
  * This class holds a list of energy intervals.
  ***************************************************************************/
-class GEbounds : public GBase {
+class GEbounds : public GContainer {
 
 public:
     // Constructors and destructors
     GEbounds(void);
     GEbounds(const GEbounds& ebds);
+    explicit GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
+                      const bool& log=true);
     explicit GEbounds(const std::string& filename,
                       const std::string& extname = "EBOUNDS");
     virtual ~GEbounds(void);
 
     // Operators
-    GEbounds& operator= (const GEbounds& ebds);
+    GEbounds& operator=(const GEbounds& ebds);
 
     // Methods
     void        clear(void);
     GEbounds*   clone(void) const;
+    int         size(void) const { return m_num; }
+    bool        isempty(void) const { return (m_num == 0); }
     void        append(const GEnergy& emin, const GEnergy& emax);
     void        insert(const GEnergy& emin, const GEnergy& emax);
-    void        setlin(const GEnergy& emin, const GEnergy& emax, const int& num);
-    void        setlog(const GEnergy& emin, const GEnergy& emax, const int& num);
+    void        pop(const int& index);
+    void        reserve(const int& num);
+    void        setlin(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void        setlog(const int& num, const GEnergy& emin, const GEnergy& emax);
     void        load(const std::string& filename,
                      const std::string& extname = "EBOUNDS");
     void        save(const std::string& filename, bool clobber,
@@ -69,13 +75,12 @@ public:
     void        read(GFitsTable* hdu);
     void        write(GFits* file, const std::string& extname = "EBOUNDS") const;
     int         index(const GEnergy& eng) const;
-    int         size(void) const { return m_num; }
     GEnergy     emin(void) const { return m_emin; }
     GEnergy     emax(void) const { return m_emax; }
-    GEnergy     emin(int inx) const;
-    GEnergy     emax(int inx) const;
-    GEnergy     emean(int inx) const;
-    GEnergy     elogmean(int inx) const;
+    GEnergy     emin(const int& index) const;
+    GEnergy     emax(const int& index) const;
+    GEnergy     emean(const int& index) const;
+    GEnergy     elogmean(const int& index) const;
     bool        contains(const GEnergy& eng) const;
     std::string print(void) const;
 
@@ -86,7 +91,7 @@ protected:
     void copy_members(const GEbounds& ebds);
     void free_members(void);
     void set_attributes(void);
-    void insert_eng(int inx, const GEnergy& emin, const GEnergy& emax);
+    void insert_eng(const int& index, const GEnergy& emin, const GEnergy& emax);
     void merge_engs(void);
 
     // Protected data area

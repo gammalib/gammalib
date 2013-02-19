@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GEbounds.cpp  -  Energy boundary class                  *
+ *                  GEbounds.cpp - Energy boundary class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEbounds.cpp
- * @brief Energy boundary class implementation.
+ * @brief Energy boundary class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -39,10 +39,11 @@
 #include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EMIN                                          "GEbounds::emin(int)"
-#define G_EMAX                                          "GEbounds::emax(int)"
-#define G_EMEAN                                        "GEbounds::emean(int)"
-#define G_ELOGMEAN                                  "GEbounds::elogmean(int)"
+#define G_POP                                           "GEbounds::pop(int&)"
+#define G_EMIN                                         "GEbounds::emin(int&)"
+#define G_EMAX                                         "GEbounds::emax(int&)"
+#define G_EMEAN                                       "GEbounds::emean(int&)"
+#define G_ELOGMEAN                                 "GEbounds::elogmean(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -61,7 +62,7 @@
 /***********************************************************************//**
  * @brief Constructor
  ***************************************************************************/
-GEbounds::GEbounds(void) : GBase()
+GEbounds::GEbounds(void)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -90,6 +91,37 @@ GEbounds::GEbounds(const GEbounds& ebds)
 
 
 /***********************************************************************//**
+ * @brief Interval constructor
+ *
+ * @param[in] num Number of energy intervals.
+ * @param[in] emin Minimum energy of first interval.
+ * @param[in] emax Maximum energy of last interval.
+ * @param[in] log Use logarithmic spacing? (defaults to true).
+ *
+ * Constructs energy boundaries by defining @p num successive energy interval
+ * between @p emin and @p emax. The @p log parameter controls whether the
+ * energy spacing is logarihmic (default) or linear.
+ ***************************************************************************/
+GEbounds::GEbounds(const int& num, const GEnergy& emin, const GEnergy& emax,
+                   const bool& log)
+{
+    // Initialise members
+    init_members();
+
+    // Set intervals
+    if (log) {
+        this->setlog(num, emin, emax);
+    }
+    else {
+        this->setlin(num, emin, emax);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Load constructor
  *
  * @param[in] filename FITS filename.
@@ -106,7 +138,6 @@ GEbounds::GEbounds(const std::string& filename, const std::string& extname)
     // Return
     return;
 }
-
 
 
 /***********************************************************************//**
@@ -132,8 +163,9 @@ GEbounds::~GEbounds(void)
  * @brief Assignment operator
  *
  * @param[in] ebds Energy boundaries to be assigned.
+ * @return Energy boundaries.
  ***************************************************************************/
-GEbounds& GEbounds::operator= (const GEbounds& ebds)
+GEbounds& GEbounds::operator=(const GEbounds& ebds)
 {
     // Execute only if object is not identical
     if (this != &ebds) {
@@ -177,10 +209,9 @@ void GEbounds::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone GEbounds
+ * @brief Clone energy boundaries
  *
- * Cloning provides a copy of the GEbounds. Cloning is used to allocate
- * derived classes into a base class pointer.
+ * @return Pointer to deep copy of energy boundaries.
  ***************************************************************************/
 GEbounds* GEbounds::clone(void) const
 {
@@ -190,14 +221,16 @@ GEbounds* GEbounds::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Append energy boundaries
+ * @brief Append energy interval
  *
- * @param[in] emin Minimum energy of interval to be appended.
- * @param[in] emax Maximum energy of interval to be appended.
+ * @param[in] emin Minimum energy of interval.
+ * @param[in] emax Maximum energy of interval.
  *
- * This method appends a new energy interval at the end of the list of
- * existing intervals. No checking for energy ordering or overlap is done.
- * If the energy interval is not valid (emax <= emin), nothing is done.
+ * Appends a new energy interval to the end of the energy boundaries
+ * container.
+ *
+ * No checking for energy ordering or overlap is done. If the energy interval
+ * is not valid (@p emax <= @p emin), nothing is done.
  ***************************************************************************/
 void GEbounds::append(const GEnergy& emin, const GEnergy& emax)
 {
@@ -215,15 +248,19 @@ void GEbounds::append(const GEnergy& emin, const GEnergy& emax)
 
 
 /***********************************************************************//**
- * @brief Insert energy boundaries at the approprita location
+ * @brief Insert energy interval
  *
- * @param[in] emin Minimum energy of interval to be appended.
- * @param[in] emax Maximum energy of interval to be appended.
+ * @param[in] emin Minimum energy of interval.
+ * @param[in] emax Maximum energy of interval.
  *
- * This method inserts a new energy interval at the appropriate location
- * into the object. Energy interval ordering is done based on the minimum
- * energy. No checking is done for energy interval overlap.
- * If the energy interval is not valid (emax <= emin), nothing is done.
+ * Inserts a new energy interval into the energy boundaries. The insertion
+ * is done at the appopriate location, based on the minimum energy of the
+ * interval. The method will search all existing intervals for the first
+ * interval that has a minimum energy smaller than the specified @p emin
+ * value.
+ *
+ * No checking for energy ordering or overlap is done. If the energy interval
+ * is not valid (@p emax <= @p emin), nothing is done.
  ***************************************************************************/
 void GEbounds::insert(const GEnergy& emin, const GEnergy& emax)
 {
@@ -248,13 +285,68 @@ void GEbounds::insert(const GEnergy& emin, const GEnergy& emax)
 
 
 /***********************************************************************//**
- * @brief Set linearly spaced energy bins
+ * @brief Remove energy interval
  *
- * @param[in] emin Minimum energy of boundaries.
- * @param[in] emax Maximum energy of boundaries.
- * @param[in] num Number of energy bins.
+ * @param[in] index Index.
+ *
+ * Removes energy interval at @p index from the energy boundaries container.
+ * All intervals after the specified @p index are moved forward by one.
+ *
+ * Note that the method does not actually reduce the memory size but just
+ * updates the information on the number of elements in the array.
  ***************************************************************************/
-void GEbounds::setlin(const GEnergy& emin, const GEnergy& emax, const int& num)
+void GEbounds::pop(const int& index)
+{
+    #if defined(G_RANGE_CHECK)
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= m_num) {
+        throw GException::out_of_range(G_POP, index, 0, m_num-1);
+    }
+    #endif
+
+    // Move all elements located after index forward
+    for (int i = index+1; i < m_num; ++i) {
+        m_min[i-1] = m_min[i];
+        m_min[i-1] = m_max[i];
+    }
+
+    // Reduce number of elements by one
+    m_num--;
+
+    // Update attributes
+    set_attributes();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Reserve space for energy intervals
+ *
+ * @param[in] num Number of elements.
+ *
+ * This method does nothing (it is needed to satisfy the GContainer
+ * interface).
+ ***************************************************************************/
+void GEbounds::reserve(const int& num)
+{
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set linearly spaced energy intervals
+ *
+ * @param[in] num Number of energy intervals.
+ * @param[in] emin Minimum energy of first interval.
+ * @param[in] emax Maximum energy of last interval.
+ *
+ * Creates @p num linearly spaced energy boundaries running from @p emin to
+ * @p emax.
+ ***************************************************************************/
+void GEbounds::setlin(const int& num, const GEnergy& emin, const GEnergy& emax)
 {
     // Initialise members
     clear();
@@ -271,19 +363,25 @@ void GEbounds::setlin(const GEnergy& emin, const GEnergy& emax, const int& num)
         max += ebin;
     }
 
+    // Set attributes
+    set_attributes();
+
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Set logarithmically spaced energy bins
+ * @brief Set logarithmically spaced energy intervals
  *
- * @param[in] emin Minimum energy of boundaries.
- * @param[in] emax Maximum energy of boundaries.
- * @param[in] num Number of energy bins.
+ * @param[in] num Number of energy intervals.
+ * @param[in] emin Minimum energy of first interval.
+ * @param[in] emax Maximum energy of last interval.
+ *
+ * Creates @p num logarithmically spaced energy boundaries running from
+ * @p emin to @p emax.
  ***************************************************************************/
-void GEbounds::setlog(const GEnergy& emin, const GEnergy& emax, const int& num)
+void GEbounds::setlog(const int& num, const GEnergy& emin, const GEnergy& emax)
 {
     // Initialise members
     clear();
@@ -302,6 +400,9 @@ void GEbounds::setlog(const GEnergy& emin, const GEnergy& emax, const int& num)
         append(min, max);
     }
 
+    // Set attributes
+    set_attributes();
+
     // Return
     return;
 }
@@ -313,7 +414,7 @@ void GEbounds::setlog(const GEnergy& emin, const GEnergy& emax, const int& num)
  * @param[in] filename FITS filename.
  * @param[in] extname FITS extension name (defaults to "EBOUNDS").
  *
- * This method loads the energy boundary definitions from a FITS file.
+ * Loads the energy boundary definitions from a FITS file.
  ***************************************************************************/
 void GEbounds::load(const std::string& filename, const std::string& extname)
 {
@@ -341,7 +442,7 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
  * @brief Save energy boundaries to FITS file.
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite any existing file.
+ * @param[in] clobber Overwrite any existing file?
  * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS").
  ***************************************************************************/
 void GEbounds::save(const std::string& filename, bool clobber,
@@ -366,8 +467,8 @@ void GEbounds::save(const std::string& filename, bool clobber,
  *
  * @param[in] hdu Pointer to FITS HDU from which GEbounds are loaded.
  *
- * This method loads the energy boundary definitions from a FITS HDU. It
- * assumes that the energy is stored in units of keV.
+ * Loads the energy boundary definitions from a FITS HDU. It assumes that the
+ * energy is stored in units of keV.
  *
  * @todo Needs to interpret energy units. We could also add an optional
  *       string parameter that allows external specification about how
@@ -414,9 +515,9 @@ void GEbounds::read(GFitsTable* hdu)
  * @brief Write energy boundaries into FITS file.
  *
  * @param[in] file Pointer to FITS file.
- * @param[in] extname Energy boundary extension name (default is "EBOUNDS")
+ * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS")
  *
- * This method writes energy boundaries in units of keV.
+ * Writes energy boundaries in units of keV.
  *
  * @todo Write header keywords.
  * @todo Should we allow for the possibility to specify the energy units?
@@ -458,6 +559,7 @@ void GEbounds::write(GFits* file, const std::string& extname) const
  * @brief Returns energy bin index for a given energy
  *
  * @param[in] eng Energy.
+ * @return Bin index.
  *
  * Returns the energy boundary bin index for a given energy. If the energy
  * falls outside any of the boundaries, -1 is returned.
@@ -483,63 +585,75 @@ int GEbounds::index(const GEnergy& eng) const
 /***********************************************************************//**
  * @brief Returns minimum energy for a given bin
  *
- * @param[in] inx Energy bin.
+ * @param[in] index Energy bin index.
+ * @return Minimum bin energy.
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
  ***************************************************************************/
-GEnergy GEbounds::emin(int inx) const
+GEnergy GEbounds::emin(const int& index) const
 {
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
-    if (inx < 0 || inx >= m_num)
-        throw GException::out_of_range(G_EMIN, inx, 0, m_num-1);
+    if (index < 0 || index >= m_num) {
+        throw GException::out_of_range(G_EMIN, index, 0, m_num-1);
+    }
     #endif
 
     // Return
-    return (m_min[inx]);
+    return (m_min[index]);
 }
 
 
 /***********************************************************************//**
  * @brief Returns maximum energy for a given bin
  *
- * @param[in] inx Energy bin.
+ * @param[in] index Energy bin index.
+ * @return Maximum bin energy.
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
  ***************************************************************************/
-GEnergy GEbounds::emax(int inx) const
+GEnergy GEbounds::emax(const int& index) const
 {
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
-    if (inx < 0 || inx >= m_num)
-        throw GException::out_of_range(G_EMAX, inx, 0, m_num-1);
+    if (index < 0 || index >= m_num) {
+        throw GException::out_of_range(G_EMAX, index, 0, m_num-1);
+    }
     #endif
 
     // Return
-    return (m_max[inx]);
+    return (m_max[index]);
 }
 
 
 /***********************************************************************//**
  * @brief Returns mean energy for a given bin
  *
- * @param[in] inx Energy bin.
+ * @param[in] index Energy bin index.
+ * @return Mean bin energy.
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
+ *
+ * Computes
+ *
+ * \f[0.5 * (E_{\rm min} + E_{\rm max})}\f]
+ *
+ * for the specified energy bin.
  ***************************************************************************/
-GEnergy GEbounds::emean(int inx) const
+GEnergy GEbounds::emean(const int& index) const
 {
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
-    if (inx < 0 || inx >= m_num)
-        throw GException::out_of_range(G_EMEAN, inx, 0, m_num-1);
+    if (index < 0 || index >= m_num) {
+        throw GException::out_of_range(G_EMEAN, index, 0, m_num-1);
+    }
     #endif
 
     // Compute mean energy
-    GEnergy emean = 0.5 * (m_min[inx] + m_max[inx]);
+    GEnergy emean = 0.5 * (m_min[index] + m_max[index]);
 
     // Return
     return emean;
@@ -549,23 +663,31 @@ GEnergy GEbounds::emean(int inx) const
 /***********************************************************************//**
  * @brief Returns logarithmic mean energy for a given bin
  *
- * @param[in] inx Energy bin.
+ * @param[in] index Energy bin index.
+ * @return Logarithmic mean bin energy.
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
+ *
+ * Computes
+ *
+ * \f[10^{0.5 * (\log E_{\rm min} + \log E_{\rm max})}\f]
+ *
+ * for the specified energy bin.
  ***************************************************************************/
-GEnergy GEbounds::elogmean(int inx) const
+GEnergy GEbounds::elogmean(const int& index) const
 {
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
-    if (inx < 0 || inx >= m_num)
-        throw GException::out_of_range(G_ELOGMEAN, inx, 0, m_num-1);
+    if (index < 0 || index >= m_num) {
+        throw GException::out_of_range(G_ELOGMEAN, index, 0, m_num-1);
+    }
     #endif
 
     // Compute logarithmic mean energy
     GEnergy elogmean;
-    double  elogmin  = std::log10(m_min[inx].MeV());
-    double  elogmax  = std::log10(m_max[inx].MeV());
+    double  elogmin  = std::log10(m_min[index].MeV());
+    double  elogmax  = std::log10(m_max[index].MeV());
     elogmean.MeV(std::pow(10.0, 0.5 * (elogmin + elogmax)));
 
     // Return
@@ -574,9 +696,13 @@ GEnergy GEbounds::elogmean(int inx) const
 
 
 /***********************************************************************//**
- * @brief Tests whether energy is within energy boundaries intervals
+ * @brief Tests whether energy is within at least one interval
  *
  * @param[in] eng Energy to be tested.
+ * @return True if energy falls in at least one interval, false otherwise.
+ *
+ * Verifies if the specified energy @p eng falls within at least one of the
+ * intervals of the energy boundaries.
  ***************************************************************************/
 bool GEbounds::contains(const GEnergy& eng) const
 {
@@ -598,6 +724,8 @@ bool GEbounds::contains(const GEnergy& eng) const
 
 /***********************************************************************//**
  * @brief Print energy boundaries
+ *
+ * @return String containing energy boundary information.
  ***************************************************************************/
 std::string GEbounds::print(void) const
 {
@@ -606,6 +734,8 @@ std::string GEbounds::print(void) const
 
     // Append Header
     result.append("=== GEbounds ===\n");
+
+    // Append information
     result.append(parformat("Number of intervals")+str(size()));
     
     // Single energy bin
@@ -659,7 +789,7 @@ void GEbounds::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] ebds GEbounds members which should be copied.
+ * @param[in] ebds Energy boundaries.
  ***************************************************************************/
 void GEbounds::copy_members(const GEbounds& ebds)
 {
@@ -723,22 +853,28 @@ void GEbounds::set_attributes(void)
 /***********************************************************************//**
  * @brief Insert energy interval
  *
- * @param[in] inx Index at which energy interval is to be inserted.
+ * @param[in] index Index after with interval is inserted.
  * @param[in] emin Minimum energy of interval.
  * @param[in] emax Maximum energy of interval.
  *
- * Inserts an energy interval at a given position in the GEbounds array. This
- * method does not assure the energy ordering of the intervals, this has to
- * be done by the client that determines the appropriate value of inx.
+ * Inserts an energy interval after the specified index in the energy
+ * boundaries. The method does not reorder the intervals by energy, instead
+ * the client needs to determine the approriate @p index.
+ *
  * Invalid parameters do not produce any exception, but are handled
- * transparently. If the interval is invalid (emax <= emin), no interval
- * will be inserted. If the index is out of the valid range, the index
+ * transparently. If the interval is invalid (@p emax <= @p emin) then
+ * nothing is done. If the @p index is out of the valid range, the index
  * will be adjusted to either the first or the last element.
  ***************************************************************************/
-void GEbounds::insert_eng(int inx, const GEnergy& emin, const GEnergy& emax)
+void GEbounds::insert_eng(const int&     index,
+                          const GEnergy& emin,
+                          const GEnergy& emax)
 {
     // Continue only if energy interval is valid
     if (emax > emin) {
+
+        // Set index
+        int inx = index;
 
         // If inx is out of range then adjust it
         if (inx < 0)     inx = 0;
@@ -749,7 +885,7 @@ void GEbounds::insert_eng(int inx, const GEnergy& emin, const GEnergy& emax)
         GEnergy* min = new GEnergy[num];
         GEnergy* max = new GEnergy[num];
 
-        // Copy intervals before GTI to be inserted
+        // Copy intervals before index to be inserted
         for (int i = 0; i < inx; ++i) {
             min[i] = m_min[i];
             max[i] = m_max[i];
@@ -759,7 +895,7 @@ void GEbounds::insert_eng(int inx, const GEnergy& emin, const GEnergy& emax)
         min[inx] = emin;
         max[inx] = emax;
 
-        // Copy intervals after GTI to be inserted
+        // Copy intervals after index to be inserted
         for (int i = inx+1; i < num; ++i) {
             min[i] = m_min[i-1];
             max[i] = m_max[i-1];
@@ -773,8 +909,10 @@ void GEbounds::insert_eng(int inx, const GEnergy& emin, const GEnergy& emax)
         m_min = min;
         m_max = max;
 
-        // Set attributes
+        // Set number of elements
         m_num = num;
+
+        // Set attributes
         set_attributes();
 
     } // endif: Energy interval was valid
@@ -789,9 +927,10 @@ void GEbounds::insert_eng(int inx, const GEnergy& emin, const GEnergy& emax)
  *
  * Merges all overlapping energy intervals into a single interval. This
  * method assumes that the intervals are ordered correctly by minimum
- * energy time. Note that the method does not actually reduce the memory
- * size but just updates the information on the number of elements in the
- * array.
+ * energy. 
+ *
+ * Note that the method does not actually reduce the memory size but just
+ * updates the information on the number of elements in the array.
  ***************************************************************************/
 void GEbounds::merge_engs(void)
 {
@@ -814,8 +953,9 @@ void GEbounds::merge_engs(void)
         }
 
         // Otherwise increment interval index
-        else
+        else {
             i++;
+        }
 
     } // endwhile: there were still intervals to check
 
