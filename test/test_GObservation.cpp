@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GObservation.cpp - Test observation module            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <iostream>
 #include "testinst/GTestLib.hpp"
 #include "test_GObservation.hpp"
 
@@ -58,6 +57,7 @@ void TestGObservation::set(void)
     // Append tests
     append(static_cast<pfunction>(&TestGObservation::test_time_reference), "Test GTimeReference");
     append(static_cast<pfunction>(&TestGObservation::test_time), "Test GTime");
+    append(static_cast<pfunction>(&TestGObservation::test_ebounds), "Test GEbounds");
 
     // Return
     return;
@@ -251,6 +251,134 @@ void TestGObservation::test_time(void)
     test_assert(a >= b, "Greater than or equal operator corrupt.");
     test_assert(b < a, "Less than operator corrupt.");
     test_assert(b <= a, "Less than or equal operator corrupt.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GEbounds
+ ***************************************************************************/
+void TestGObservation::test_ebounds(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GEbounds ebds;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Manipulate energy boudaries starting from an empty object
+    GEbounds ebds;
+    test_value(ebds.size(), 0, "GEbounds should have zero size.");
+    test_assert(ebds.isempty(), "GEbounds should be empty.");
+    test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
+    test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
+
+    // Add empty interval
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(1.0, "MeV"));
+    test_value(ebds.size(), 0, "GEbounds should have zero size.");
+    test_assert(ebds.isempty(), "GEbounds should be empty.");
+    test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
+    test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
+
+    // Add one interval
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(10.0, "MeV"));
+    test_value(ebds.size(), 1, "GEbounds should have 1 element.");
+    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 10.0, 1.0e-10, "Maximum energy should be 10.");
+
+    // Remove interval
+    ebds.pop(0);
+    test_value(ebds.size(), 0, "GEbounds should have zero size.");
+    test_assert(ebds.isempty(), "GEbounds should be empty.");
+    test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
+    test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
+
+    // Append two overlapping intervals
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.append(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
+    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
+
+    // Clear object
+    ebds.clear();
+    test_value(ebds.size(), 0, "GEbounds should have zero size.");
+    test_assert(ebds.isempty(), "GEbounds should be empty.");
+    test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
+    test_value(ebds.emax().MeV(), 0.0, 1.0e-10, "Maximum energy should be 0.");
+
+    // Append two overlapping intervals in inverse order
+    ebds.clear();
+    ebds.append(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
+    ebds.append(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
+    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
+
+    // Insert two overlapping intervals
+    ebds.clear();
+    ebds.insert(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.insert(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 1 element.");
+    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
+
+    // Insert two overlapping intervals in inverse order
+    ebds.clear();
+    ebds.insert(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
+    ebds.insert(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
+    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
+
+    // Check linear boundaries
+    ebds.clear();
+    ebds.setlin(2, GEnergy(1.0, "MeV"), GEnergy(3.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
+    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
+    test_value(ebds.emin(1).MeV(), 2.0, 1.0e-10, "Bin 1 minimum energy should be 2.");
+    test_value(ebds.emax(0).MeV(), 2.0, 1.0e-10, "Bin 0 maximum energy should be 2.");
+    test_value(ebds.emax(1).MeV(), 3.0, 1.0e-10, "Bin 1 maximum energy should be 3.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 3.0, 1.0e-10, "Maximum energy should be 3.");
+
+    // Check logarithmic boundaries
+    ebds.clear();
+    ebds.setlog(2, GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    test_value(ebds.size(), 2, "GEbounds should have 2 elements.");
+    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
+    test_value(ebds.emin(1).MeV(), 10.0, 1.0e-10, "Bin 1 minimum energy should be 10.");
+    test_value(ebds.emax(0).MeV(), 10.0, 1.0e-10, "Bin 0 maximum energy should be 10.");
+    test_value(ebds.emax(1).MeV(), 100.0, 1.0e-10, "Bin 1 maximum energy should be 100.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 100.0, 1.0e-10, "Maximum energy should be 100.");
+
+    // Check boundary extension
+    GEbounds ext(1, GEnergy(100.0, "MeV"), GEnergy(1000.0, "MeV"));
+    ebds.extend(ext);
+    test_value(ebds.size(), 3, "GEbounds should have 3 elements.");
+    test_assert(!ebds.isempty(), "GEbounds should not be empty.");
+    test_value(ebds.emin(0).MeV(), 1.0, 1.0e-10, "Bin 0 minimum energy should be 1.");
+    test_value(ebds.emin(1).MeV(), 10.0, 1.0e-10, "Bin 1 minimum energy should be 10.");
+    test_value(ebds.emin(2).MeV(), 100.0, 1.0e-10, "Bin 2 minimum energy should be 100.");
+    test_value(ebds.emax(0).MeV(), 10.0, 1.0e-10, "Bin 0 maximum energy should be 10.");
+    test_value(ebds.emax(1).MeV(), 100.0, 1.0e-10, "Bin 1 maximum energy should be 100.");
+    test_value(ebds.emax(2).MeV(), 1000.0, 1.0e-10, "Bin 1 maximum energy should be 1000.");
+    test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
+    test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
     // Return
     return;
