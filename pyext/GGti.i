@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GGti.i  -  Good time interval class                   *
+ *                    GGti.i - Good time interval class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GGti.i
- * @brief Good time interval class Python interface definition
+ * @brief Good time interval class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GGti
  *
- * @brief Interface for the GTI class.
+ * @brief Good Time Interval class
  ***************************************************************************/
 class GGti : public GBase {
 public:
@@ -47,10 +47,14 @@ public:
     void                  clear(void);
     GGti*                 clone(void) const;
     int                   size(void) const;
+    bool                  isempty(void) const;
     void                  add(const GTime& tstart, const GTime& tstop);
     void                  append(const GTime& tstart, const GTime& tstop);
     void                  insert(const GTime& tstart, const GTime& tstop);
     void                  reduce(const GTime& tstart, const GTime& tstop);
+    void                  pop(const int& index);
+    void                  reserve(const int& num);
+    void                  extend(const GGti& gti);
     void                  load(const std::string& filename,
                                const std::string& extname = "GTI");
     void                  save(const std::string& filename, bool clobber,
@@ -60,8 +64,8 @@ public:
                                 const std::string& extname = "GTI") const;
     const GTime&          tstart(void) const;
     const GTime&          tstop(void) const;
-    const GTime&          tstart(const int& inx) const;
-    const GTime&          tstop(const int& inx) const;
+    const GTime&          tstart(const int& index) const;
+    const GTime&          tstop(const int& index) const;
     const double&         telapse(void) const;
     const double&         ontime(void) const;
     void                  reference(const GTimeReference& ref);
