@@ -40,6 +40,7 @@ The GContainer interface class has been added to provide a common base
 class for all container classes. The following classes are now derived
 from GContainer:
 - GEbounds
+- GGti
 
 
 6. FITS I/O Interface
