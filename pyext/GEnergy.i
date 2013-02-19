@@ -45,11 +45,12 @@ public:
     // Constructors and destructors
     GEnergy(void);
     GEnergy(const GEnergy& eng);
+    explicit GEnergy(const double& eng, const std::string& unit);
     virtual ~GEnergy(void);
  
     // Operators
-    GEnergy& operator+= (const GEnergy& eng);
-    GEnergy& operator-= (const GEnergy& eng);
+    GEnergy& operator+=(const GEnergy& eng);
+    GEnergy& operator-=(const GEnergy& eng);
 
     // Methods
     void     clear(void);

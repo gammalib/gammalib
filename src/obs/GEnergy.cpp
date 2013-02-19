@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GEnergy.cpp - Energy class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -32,10 +32,12 @@
 #include <cmath>
 #include "GEnergy.hpp"
 #include "GTools.hpp"
+#include "GException.hpp"
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCT                 "GEnergy::GEnergy(double&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -82,6 +84,52 @@ GEnergy::GEnergy(const GEnergy& eng)
 
 
 /***********************************************************************//**
+ * @brief Energy constructor
+ *
+ * @param[in] eng Energy.
+ * @param[in] unit Energy unit (one of erg(s), keV, MeV, GeV, TeV).
+ *
+ * @exception GException::invalid_argument
+ *            Invalid energy unit specified.
+ *
+ * Construct energy from an energy value and unit. The constructor interprets
+ * the unit string and performs automatic conversion of the energy value. 
+ ***************************************************************************/
+GEnergy::GEnergy(const double& eng, const std::string& unit)
+{ 
+    // Initialise private members
+    init_members();
+
+    // Set energy according to unit string
+    std::string eunit = tolower(unit);
+    if (eunit == "erg" || eunit == "ergs") {
+        this->erg(eng);
+    }
+    else if (eunit == "kev") {
+        this->keV(eng);
+    }
+    else if (eunit == "mev") {
+        this->MeV(eng);
+    }
+    else if (eunit == "gev") {
+        this->GeV(eng);
+    }
+    else if (eunit == "tev") {
+        this->TeV(eng);
+    }
+    else {
+        throw GException::invalid_argument(G_CONSTRUCT, unit,
+              "Valid energy units are \"erg(s)\", \"keV\", \"MeV\","
+              " \"GeV\", or \"TeV\" (case insensitive).");
+    }
+
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
 GEnergy::~GEnergy(void)
@@ -104,6 +152,7 @@ GEnergy::~GEnergy(void)
  * @brief Assignment operator
  *
  * @param[in] eng Energy.
+ * @return Energy.
  ***************************************************************************/
 GEnergy& GEnergy::operator= (const GEnergy& eng)
 { 
@@ -150,6 +199,8 @@ void GEnergy::clear(void)
 
 /***********************************************************************//**
  * @brief Clone object
+ *
+ * @return Pointer to deep copy of energy.
  ***************************************************************************/
 GEnergy* GEnergy::clone(void) const
 {
@@ -160,6 +211,8 @@ GEnergy* GEnergy::clone(void) const
 
 /***********************************************************************//**
  * @brief Return energy in erg
+ *
+ * @return Energy in erg.
  ***************************************************************************/
 double GEnergy::erg(void) const
 {
@@ -173,6 +226,8 @@ double GEnergy::erg(void) const
 
 /***********************************************************************//**
  * @brief Return energy in keV
+ *
+ * @return Energy in keV.
  ***************************************************************************/
 double GEnergy::keV(void) const
 {
@@ -186,6 +241,8 @@ double GEnergy::keV(void) const
 
 /***********************************************************************//**
  * @brief Return energy in MeV
+ *
+ * @return Energy in MeV.
  ***************************************************************************/
 double GEnergy::MeV(void) const
 {
@@ -196,6 +253,8 @@ double GEnergy::MeV(void) const
 
 /***********************************************************************//**
  * @brief Return energy in GeV
+ *
+ * @return Energy in GeV.
  ***************************************************************************/
 double GEnergy::GeV(void) const
 {
@@ -209,6 +268,8 @@ double GEnergy::GeV(void) const
 
 /***********************************************************************//**
  * @brief Return energy in TeV
+ *
+ * @return Energy in TeV.
  ***************************************************************************/
 double GEnergy::TeV(void) const
 {
@@ -223,6 +284,8 @@ double GEnergy::TeV(void) const
 /***********************************************************************//**
  * @brief Return log10 of energy in keV
  *
+ * @return Energy in log10 keV.
+ *
  * Returns the log10 of the energy in keV.
  ***************************************************************************/
 double GEnergy::log10keV(void) const
@@ -234,6 +297,8 @@ double GEnergy::log10keV(void) const
 
 /***********************************************************************//**
  * @brief Return log10 of energy in MeV
+ *
+ * @return Energy in log10 MeV.
  *
  * Returns the log10 of the energy in MeV. The result is stored internally
  * and not recomputed when the method is called again with the same energy
@@ -256,6 +321,8 @@ double GEnergy::log10MeV(void) const
 /***********************************************************************//**
  * @brief Return log10 of energy in GeV
  *
+ * @return Energy in log10 GeV.
+ *
  * Returns the log10 of the energy in GeV.
  ***************************************************************************/
 double GEnergy::log10GeV(void) const
@@ -267,6 +334,8 @@ double GEnergy::log10GeV(void) const
 
 /***********************************************************************//**
  * @brief Return log10 of energy in TeV
+ *
+ * @return Energy in log10 TeV.
  *
  * Returns the log10 of the energy in TeV.
  ***************************************************************************/
@@ -438,14 +507,18 @@ std::string GEnergy::print(void) const
     std::string result;
 
     // Append energy
-    if (GeV() > 1000.0)
+    if (GeV() > 1000.0) {
         result.append(str(TeV())+" TeV");
-    else if (MeV() > 1000.0)
+    }
+    else if (MeV() > 1000.0) {
         result.append(str(GeV())+" GeV");
-    else if (keV() > 1000.0)
+    }
+    else if (keV() > 1000.0) {
         result.append(str(MeV())+" MeV");
-    else
+    }
+    else {
         result.append(str(keV())+" keV");
+    }
 
     // Return
     return result;

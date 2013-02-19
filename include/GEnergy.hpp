@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GEnergy.hpp - Energy class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,12 +64,13 @@ public:
     // Constructors and destructors
     GEnergy(void);
     GEnergy(const GEnergy& eng);
+    explicit GEnergy(const double& eng, const std::string& unit);
     virtual ~GEnergy(void);
  
     // Operators
-    GEnergy& operator= (const GEnergy& eng);
-    GEnergy& operator+= (const GEnergy& eng);
-    GEnergy& operator-= (const GEnergy& eng);
+    GEnergy& operator=(const GEnergy& eng);
+    GEnergy& operator+=(const GEnergy& eng);
+    GEnergy& operator-=(const GEnergy& eng);
 
     // Methods
     void        clear(void);
