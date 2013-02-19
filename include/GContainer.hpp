@@ -57,7 +57,7 @@ public:
     /// Destroys class.
     virtual ~GContainer(void) {}
 
-    /// @brief Return number of objects is container
+    /// @brief Return number of objects in container
     ///
     /// @return Number of objects in container.
     virtual int size(void) const = 0;
