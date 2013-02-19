@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-February, 17th, 2013
+February, 19th, 2013
 
 
 1. Introduction
@@ -11,32 +11,48 @@ This document briefly summarizes module by module the most important
 changes made since the last release of GammaLib.
 
 
-2. Configuration
+2. Public interface modifications
+---------------------------------
+This section summarizes all modifications of public class interfaces
+that will lead to compatibility issues with response to the last
+GammaLib release.
+
+GEbounds
+  The number argument in the setlin and setlon methods has been moved
+  from the last position to the first position in the argument list.
+  The emin, emax, emean and elogmean methods now take a const integer
+  reference as argument instead of an integer value.
+
+
+3. Configuration
 -----------------
 None
 
 
-3. Application module
+4. Application module
 ---------------------
 None
 
 
-4. Base module
+5. Base module
 --------------
-None
+The GContainer interface class has been added to provide a common base
+class for all container classes. The following classes are now derived
+from GContainer:
+- GEbounds
 
 
-5. FITS I/O Interface
+6. FITS I/O Interface
 ---------------------
 None
 
 
-6. Linear algebra module
+7. Linear algebra module
 ------------------------
 None
 
 
-7. Model module
+8. Model module
 ---------------
 The sky models have been reorganized.
 
@@ -48,7 +64,8 @@ determined from the spatial model component.
 All spatial model components have now been categorized into 3 classes:
 
 * GModelSpatialPointSource - point source
-* GModelSpatialRadial - extended axisymmetric models
+* GModelSpatialRadial - extended radial models
+* GModelSpatialElliptical - extended elliptical models
 * GModelSpatialDiffuse - diffuse models
 
 While GModelSpatialPointSource is a normal class, the other 2 classes
@@ -61,6 +78,8 @@ GModelSpatialRadial
  +- GModelSpatialRadialGauss - axisymmetric Gaussian
  +- GModelSpatialRadialShell - axisymmetric shell
 
+GModelSpatialElliptical
+
 GModelSpatialDiffuse
  |
  +- GModelSpatialDiffuseConst - isotropic map
@@ -68,57 +87,59 @@ GModelSpatialDiffuse
  +- GModelSpatialDiffuseMap - spatial map
 
 
-8. Numerics module
+9. Numerics module
 ------------------
 None
 
 
-9. Observation module
----------------------
-None
+10. Observation module
+----------------------
+Add energy constructor to GEnergy that allows one-line construction of
+an object by specifying an energy value and unit. Possible unit strings
+are erg(s), keV, MeV, GeV, and TeV (case insensitive).
 
 
-10. Optimization module
+11. Optimization module
 -----------------------
 None
 
 
-11. Sky module
+12. Sky module
 --------------
 None
 
 
-12. Support module
+13. Support module
 ------------------
 None
 
 
-13. XML module
+14. XML module
 --------------
 None
 
 
-14. Test module
+15. Test module
 ---------------
 None
 
 
-15. Multi-wavelength interface
+16. Multi-wavelength interface
 ------------------------------
 None
 
 
-16. Fermi-LAT interface
+17. Fermi-LAT interface
 ----------------------
 None
 
 
-17. CTA interface
+18. CTA interface
 -----------------
 None
 
 
-18. COMPTEL interface
------------------
+19. COMPTEL interface
+---------------------
 None
 
