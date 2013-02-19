@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GException.hpp  -  exception handler                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,8 +72,9 @@ public:
     // Invalid argument
     class invalid_argument : public GExceptionHandler {
     public:
-        invalid_argument(std::string origin,
-                         std::string message = "");
+        invalid_argument(const std::string& origin,
+                         const std::string& argument,
+                         const std::string& message = "");
     };
 
     // Invalid type conversion
