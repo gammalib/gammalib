@@ -221,6 +221,46 @@ GEbounds* GEbounds::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Add one energy interval
+ *
+ * @param[in] emin Minimum energy of interval.
+ * @param[in] emax Maximum energy of interval.
+ *
+ * Adds an energy interval to the energy boundaries by merging with any
+ * any overlapping intervals. The energy interval is added at the appropriate
+ * location, based on the minimum energy of the interval. The method will
+ * search all existing intervals for the first interval that has a minimum
+ * energy smaller than the specified @p emin value.
+ *
+ * No checking for energy ordering or overlap is done. If the energy interval
+ * is not valid (@p emax <= @p emin), nothing is done.
+ ***************************************************************************/
+void GEbounds::add(const GEnergy& emin, const GEnergy& emax)
+{
+    // Continue only if energy interval is valid
+    if (emax > emin) {
+
+        // Determine index at which interval should be inserted
+        int inx = 0;
+        for (; inx < m_num; ++inx) {
+            if (emin < m_min[inx])
+                break;
+        }
+
+        // Insert interval
+        insert_eng(inx, emin, emax);
+
+        // Merge any overlapping energy intervals
+        merge_engs();
+
+    } // endif: Energy interval was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Append energy interval
  *
  * @param[in] emin Minimum energy of interval.
@@ -254,7 +294,7 @@ void GEbounds::append(const GEnergy& emin, const GEnergy& emax)
  * @param[in] emax Maximum energy of interval.
  *
  * Inserts a new energy interval into the energy boundaries. The insertion
- * is done at the appopriate location, based on the minimum energy of the
+ * is done at the appropriate location, based on the minimum energy of the
  * interval. The method will search all existing intervals for the first
  * interval that has a minimum energy smaller than the specified @p emin
  * value.
@@ -287,7 +327,7 @@ void GEbounds::insert(const GEnergy& emin, const GEnergy& emax)
 /***********************************************************************//**
  * @brief Remove energy interval
  *
- * @param[in] index Index.
+ * @param[in] index Energy interval index (0 ... size()-1).
  *
  * Removes energy interval at @p index from the energy boundaries container.
  * All intervals after the specified @p index are moved forward by one.
@@ -638,7 +678,7 @@ int GEbounds::index(const GEnergy& eng) const
 /***********************************************************************//**
  * @brief Returns minimum energy for a given bin
  *
- * @param[in] index Energy bin index.
+ * @param[in] index Energy bin index (0 ... size()-1).
  * @return Minimum bin energy.
  *
  * @exception GException::out_of_range
@@ -661,7 +701,7 @@ GEnergy GEbounds::emin(const int& index) const
 /***********************************************************************//**
  * @brief Returns maximum energy for a given bin
  *
- * @param[in] index Energy bin index.
+ * @param[in] index Energy bin index (0 ... size()-1).
  * @return Maximum bin energy.
  *
  * @exception GException::out_of_range
@@ -684,7 +724,7 @@ GEnergy GEbounds::emax(const int& index) const
 /***********************************************************************//**
  * @brief Returns mean energy for a given bin
  *
- * @param[in] index Energy bin index.
+ * @param[in] index Energy bin index (0 ... size()-1).
  * @return Mean bin energy.
  *
  * @exception GException::out_of_range
@@ -716,7 +756,7 @@ GEnergy GEbounds::emean(const int& index) const
 /***********************************************************************//**
  * @brief Returns logarithmic mean energy for a given bin
  *
- * @param[in] index Energy bin index.
+ * @param[in] index Energy bin index (0 ... size()-1).
  * @return Logarithmic mean bin energy.
  *
  * @exception GException::out_of_range

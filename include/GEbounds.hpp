@@ -62,6 +62,7 @@ public:
     GEbounds*   clone(void) const;
     int         size(void) const { return m_num; }
     bool        isempty(void) const { return (m_num == 0); }
+    void        add(const GEnergy& emin, const GEnergy& emax);
     void        append(const GEnergy& emin, const GEnergy& emax);
     void        insert(const GEnergy& emin, const GEnergy& emax);
     void        pop(const int& index);
