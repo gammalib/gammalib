@@ -44,8 +44,11 @@
  * This class holds a list of Good Time Intervals, i.e. time intervals that
  * are valid for science analysis. Times are stored using the GTime class.
  * The class also holds information about the time reference, which will
- * be retained when reading and used when writing, so that GTIs are always
- * written in the specified time reference.
+ * be retained when reading and used when writing, so that Good Time
+ * Intervals are always written in the specified time reference.
+ *
+ * The class has no method for sorting of the Good Time Intervals; it is
+ * expected that the Good Time Intervals are correctly set by the client.
  ***************************************************************************/
 class GGti : public GContainer {
 
@@ -62,11 +65,12 @@ public:
     // Methods
     void                  clear(void);
     GGti*                 clone(void) const;
-    int                   size(void) const;
-    bool                  isempty(void) const;
-    void                  add(const GTime& tstart, const GTime& tstop);
+    int                   size(void) const { return m_num; }
+    bool                  isempty(void) const { return (m_num == 0); }
     void                  append(const GTime& tstart, const GTime& tstop);
     void                  insert(const GTime& tstart, const GTime& tstop);
+    void                  merge(void);
+    void                  merge(const GTime& tstart, const GTime& tstop);
     void                  reduce(const GTime& tstart, const GTime& tstop);
     void                  pop(const int& index);
     void                  reserve(const int& num);
@@ -96,13 +100,12 @@ protected:
     void  free_members(void);
     void  set_attributes(void);
     void  insert_gti(const int& index, const GTime& tstart, const GTime& tstop);
-    void  merge_gtis(void);
 
     // Protected data area
-    int             m_num;       //!< Number of intervals
-    GTime           m_tstart;    //!< Start of observation
-    GTime           m_tstop;     //!< Stop of observation
-    double          m_ontime;    //!< Sum of GTI durations (in seconds)
+    int             m_num;       //!< Number of Good Time Intervals
+    GTime           m_tstart;    //!< Start time of Good Time Intervals
+    GTime           m_tstop;     //!< Stop time of Good Time Intervals
+    double          m_ontime;    //!< Sum of Good Time Interval durations (in seconds)
     double          m_telapse;   //!< Time between start of first GTI and stop of last GTI (in seconds)
     GTime          *m_start;     //!< Array of start times
     GTime          *m_stop;      //!< Array of stop times

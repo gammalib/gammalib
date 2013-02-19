@@ -40,7 +40,12 @@
  *
  * @brief Energy boundaries container class
  *
- * This class holds a list of energy intervals.
+ * This class holds a list of energy intervals that are defined by a minimum
+ * and maximum energy. Energies are implement using the GEnergy class which
+ * holds unit independent energy information.
+ *
+ * The class has no method for sorting of the energy boundaries; it is
+ * expected that the energy boundaries are correctly set by the client.
  ***************************************************************************/
 class GEbounds : public GContainer {
 
@@ -62,9 +67,10 @@ public:
     GEbounds*   clone(void) const;
     int         size(void) const { return m_num; }
     bool        isempty(void) const { return (m_num == 0); }
-    void        add(const GEnergy& emin, const GEnergy& emax);
     void        append(const GEnergy& emin, const GEnergy& emax);
     void        insert(const GEnergy& emin, const GEnergy& emax);
+    void        merge(void);
+    void        merge(const GEnergy& emin, const GEnergy& emax);
     void        pop(const int& index);
     void        reserve(const int& num);
     void        extend(const GEbounds& ebds);
@@ -77,8 +83,8 @@ public:
     void        read(GFitsTable* hdu);
     void        write(GFits* file, const std::string& extname = "EBOUNDS") const;
     int         index(const GEnergy& eng) const;
-    GEnergy     emin(void) const { return m_emin; }
-    GEnergy     emax(void) const { return m_emax; }
+    GEnergy     emin(void) const { return m_emin; } //!< @brief Returns minimum energy of all intervals
+    GEnergy     emax(void) const { return m_emax; } //!< @brief Returns maximum energy of all intervals
     GEnergy     emin(const int& index) const;
     GEnergy     emax(const int& index) const;
     GEnergy     emean(const int& index) const;
@@ -94,14 +100,13 @@ protected:
     void free_members(void);
     void set_attributes(void);
     void insert_eng(const int& index, const GEnergy& emin, const GEnergy& emax);
-    void merge_engs(void);
 
     // Protected data area
     int      m_num;         //!< Number of energy boundaries
-    GEnergy  m_emin;        //!< Minimum energy covered
-    GEnergy  m_emax;        //!< Maximum energy covered
-    GEnergy* m_min;         //!< Energy bin minima
-    GEnergy* m_max;         //!< Energy bin maxima
+    GEnergy  m_emin;        //!< Minimum energy of all intervals
+    GEnergy  m_emax;        //!< Maximum energy of all intervals
+    GEnergy* m_min;         //!< Array of interval minimum energies
+    GEnergy* m_max;         //!< Array of interval maximum energies
 };
 
 #endif /* GEBOUNDS_HPP */

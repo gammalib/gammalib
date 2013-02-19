@@ -343,19 +343,19 @@ void TestGObservation::test_ebounds(void)
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
-    // Add two overlapping intervals
+    // Merge two overlapping intervals
     ebds.clear();
-    ebds.add(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
-    ebds.add(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
+    ebds.merge(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.merge(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
     test_value(ebds.size(), 1, "GEbounds should have 1 element.");
     test_assert(!ebds.isempty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
     test_value(ebds.emax().MeV(), 1000.0, 1.0e-10, "Maximum energy should be 1000.");
 
-    // Add two overlapping intervals in inverse order
+    // Merge two overlapping intervals in inverse order
     ebds.clear();
-    ebds.add(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
-    ebds.add(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
+    ebds.merge(GEnergy(10.0, "MeV"), GEnergy(1000.0, "MeV"));
+    ebds.merge(GEnergy(1.0, "MeV"), GEnergy(100.0, "MeV"));
     test_value(ebds.size(), 1, "GEbounds should have 1 element.");
     test_assert(!ebds.isempty(), "GEbounds should not be empty.");
     test_value(ebds.emin().MeV(), 1.0, 1.0e-10, "Minimum energy should be 1.");
@@ -490,19 +490,19 @@ GEbounds ebds;
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
 
-    // Add two overlapping intervals
+    // Merge two overlapping intervals
     gti.clear();
-    gti.add(GTime(1.0), GTime(100.0));
-    gti.add(GTime(10.0), GTime(1000.0));
+    gti.merge(GTime(1.0), GTime(100.0));
+    gti.merge(GTime(10.0), GTime(1000.0));
     test_value(gti.size(), 1, "GGti should have 1 interval.");
     test_assert(!gti.isempty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");
     test_value(gti.tstop().secs(), 1000.0, 1.0e-10, "Stop time should be 1000.");
 
-    // Add two overlapping intervals in inverse order
+    // Merge two overlapping intervals in inverse order
     gti.clear();
-    gti.add(GTime(10.0), GTime(1000.0));
-    gti.add(GTime(1.0), GTime(100.0));
+    gti.merge(GTime(10.0), GTime(1000.0));
+    gti.merge(GTime(1.0), GTime(100.0));
     test_value(gti.size(), 1, "GGti should have 1 interval.");
     test_assert(!gti.isempty(), "GGti should not be empty.");
     test_value(gti.tstart().secs(), 1.0, 1.0e-10, "Start time should be 1.");

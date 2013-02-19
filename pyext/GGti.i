@@ -48,9 +48,10 @@ public:
     GGti*                 clone(void) const;
     int                   size(void) const;
     bool                  isempty(void) const;
-    void                  add(const GTime& tstart, const GTime& tstop);
     void                  append(const GTime& tstart, const GTime& tstop);
     void                  insert(const GTime& tstart, const GTime& tstop);
+    void                  merge(void);
+    void                  merge(const GTime& tstart, const GTime& tstop);
     void                  reduce(const GTime& tstart, const GTime& tstop);
     void                  pop(const int& index);
     void                  reserve(const int& num);

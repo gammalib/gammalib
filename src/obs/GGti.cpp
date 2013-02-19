@@ -48,7 +48,6 @@
 /* __ Debug definitions __________________________________________________ */
 
 
-
 /*==========================================================================
  =                                                                         =
  =                         Constructors/destructors                        =
@@ -90,6 +89,10 @@ GGti::GGti(const GGti& gti)
  * @brief Time reference constructor
  *
  * @param[in] ref Time reference.
+ *
+ * Constructs Good Time Intervals using a specific time reference. The time
+ * reference will be used when writing the Good Time Intervals into a FITS
+ * file.
  ***************************************************************************/
 GGti::GGti(const GTimeReference& ref)
 {
@@ -184,85 +187,15 @@ GGti* GGti::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of intervals
- *
- * @return Number of intervals.
- *
- * Returns number of intervals.
- ***************************************************************************/
-int GGti::size(void) const
-{
-    // Return number of intervals
-    return m_num;
-}
-
-
-/***********************************************************************//**
- * @brief Signals whether there are no intervals
- *
- * @return True if there are no intervals, false otherwise.
- ***************************************************************************/
-bool GGti::isempty(void) const
-{
-    // Return
-    return (m_num == 0);
-}
-
-
-/***********************************************************************//**
- * @brief Add one Good Time Interval
+ * @brief Append Good Time Interval
  *
  * @param[in] tstart Start time of interval.
  * @param[in] tstop Stop time of interval.
  *
- * Adds a new Good Time Interval to the object. Use this method if you want
- * to automatically merge the new Good Time Interval with the existing time
- * intervals.
+ * Appends a Good Time Interval at the end of the container.
  *
- * If the specified Good Time Interval overlaps with an existing Good Time
- * Interval, the existing time interval will be extended. If overlap with
- * more than a single interval exists, the intervals will be merged. Otherwise
- * a new interval will be inserted, respecting the time ordering of the
- * intervals.
- *
- * If the time interval is not valid (@p tstop <= @p tstart) nothing is done.
- ***************************************************************************/
-void GGti::add(const GTime& tstart, const GTime& tstop)
-{
-    // Continue only if time interval is valid
-    if (tstop > tstart) {
-
-        // Determine index at which GTI should be inserted
-        int inx = 0;
-        for (int i = 0; i < m_num; ++i) {
-            if (tstart < m_start[i]) {
-                break;
-            }
-        }
-
-        // Insert GTI
-        insert_gti(inx, tstart, tstop);
-
-        // Merge any overlapping GTIs
-        merge_gtis();
-
-    } // endif: Time interval was valid
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Append one Good Time Interval
- *
- * @param[in] tstart Start time of interval.
- * @param[in] tstop Stop time of interval.
- *
- * Appends a new GTI at the end of the object. In contrast to the add method,
- * no checking of time ordering or interval merging will be done.
- *
- * If the time interval is not valid (@p tstop <= @p tstart) nothing is done.
+ * The method does nothing if the Good Time Interval is not valid
+ * (i.e. @p tstart >= @p tstop).
  ***************************************************************************/
 void GGti::append(const GTime& tstart, const GTime& tstop)
 {
@@ -280,18 +213,100 @@ void GGti::append(const GTime& tstart, const GTime& tstop)
 
 
 /***********************************************************************//**
- * @brief Insert one Good Time Interval
+ * @brief Insert Good Time Interval
  *
  * @param[in] tstart Start time of interval.
  * @param[in] tstop Stop time of interval.
  *
- * Inserts a new GTI at the appropriate time ordered position in the object.
- * Time ordering will be done based on the start time of the GTI.
- * No check for interval overlap will be done.
+ * Inserts a Good Time Interval into the container after the first interval
+ * that has a start time smaller than @p tstart. The method implicitely
+ * assumes that the Good Time Intervals are ordered by increasing start time.
  *
- * If the time interval is not valid (@p tstop <= @p tstart) nothing is done.
+ * The method does nothing if the Good Time Interval is not valid
+ * (i.e. @p tstart >= @p tstop).
  ***************************************************************************/
 void GGti::insert(const GTime& tstart, const GTime& tstop)
+{
+    // Continue only if time interval is valid
+    if (tstop > tstart) {
+
+        // Determine index at which GTI should be inserted
+        int inx = 0;
+        for (int i = 0; i < m_num; ++i) {
+            if (tstart < m_start[i]) {
+                break;
+            }
+        }
+
+        // Insert interval
+        insert_gti(inx, tstart, tstop);
+
+    } // endif: Time interval was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Merge all overlapping Good Time Intervals
+ *
+ * Merges all overlapping or connecting successive Good Time Intervals. The
+ * method implicitely assumes that the intervals are ordered by increasing
+ * start time.
+ *
+ * Note that the method does not actually reduce the memory size but just
+ * updates the information on the number of elements in the array.
+ ***************************************************************************/
+void GGti::merge(void)
+{
+    // Find overlaps
+    int i   = 0;
+    int num = m_num;
+    while (i < num-1) {
+
+        // If GTI overlaps with following one then merge both GTIs, move
+        // all remaining GTIs one position up, and reduce number of elements
+        if (m_start[i+1] <= m_stop[i]) {
+            m_start[i] = (m_start[i] < m_start[i+1]) ? m_start[i] : m_start[i+1];
+            m_stop[i]  = (m_stop[i]  > m_stop[i+1])  ? m_stop[i]  : m_stop[i+1];
+            for (int k = i+2; k < num; ++k) {
+                m_start[k-1] = m_start[k];
+                m_stop[k-1]  = m_stop[k];
+            }
+            num--;
+        }
+
+        // Otherwise increment GTI index
+        else {
+            i++;
+        }
+
+    } // endwhile: there were still GTIs to check
+
+    // Update number of elements in GTI
+    m_num = num;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Merge Good Time Interval into container
+ *
+ * @param[in] tstart Start time of interval.
+ * @param[in] tstop Stop time of interval.
+ *
+ * Inserts a Good Time Interval into the container after the first interval
+ * that has a start time smaller than @p tstart and then merges any
+ * overlapping or connecting Good Time Intervals. The method implicitely
+ * assumes that the intervals are ordered by increasing start time.
+ *
+ * The method does nothing if the Good Time Interval is not valid
+ * (i.e. @p tstart >= @p tstop).
+ ***************************************************************************/
+void GGti::merge(const GTime& tstart, const GTime& tstop)
 {
     // Continue only if time interval is valid
     if (tstop > tstart) {
@@ -307,6 +322,9 @@ void GGti::insert(const GTime& tstart, const GTime& tstop)
         // Insert GTI
         insert_gti(inx, tstart, tstop);
 
+        // Merge any overlapping GTIs
+        merge();
+
     } // endif: Time interval was valid
 
     // Return
@@ -321,10 +339,13 @@ void GGti::insert(const GTime& tstart, const GTime& tstop)
  * @param[in] tstop Stop time of interval.
  *
  * Reduces the Good Time Intervals to the specified interval. Reducing means
- * that all GTIs are dropped that fall outside the interval, and GTIs will be
- * limited to within the interval if they overlap.
+ * that all Good Time Intervals are dropped that fall outside the specified
+ * interval [@p tstart, @p tstop], and Good Time Intervals will be limited
+ * to >@p tstart and <=@p tstop in case that their boundaries are outside
+ * [@p tstart, @p tstop].
  *
- * If the time interval is not valid (@p tstop <= @p tstart) nothing is done.
+ * The method does nothing if the Good Time Interval is not valid
+ * (i.e. @p tstart >= @p tstop).
  ***************************************************************************/
 void GGti::reduce(const GTime& tstart, const GTime& tstop)
 {
@@ -392,10 +413,10 @@ void GGti::reduce(const GTime& tstart, const GTime& tstop)
 /***********************************************************************//**
  * @brief Remove Good Time Interval
  *
- * @param[in] index GTI index (0 ... size()-1).
+ * @param[in] index Good Time Interval index (0 ... size()-1).
  *
- * Removes Good Time Interval at @p index. All intervals after the specified
- * @p index are moved forward by one.
+ * Removes Good Time Interval at @p index from the container. All intervals
+ * after the specified @p index are moved forward by one position.
  *
  * Note that the method does not actually reduce the memory size but just
  * updates the information on the number of elements in the array.
@@ -427,7 +448,7 @@ void GGti::pop(const int& index)
 
 
 /***********************************************************************//**
- * @brief Reserve space for Good Time Interval
+ * @brief Reserve space for Good Time Intervals
  *
  * @param[in] num Number of elements.
  *
@@ -446,9 +467,10 @@ void GGti::reserve(const int& num)
  *
  * @param[in] gti Good Time Intervals.
  *
- * Append Good Time Intervals at the end of any Good Time Intervals. The
- * method performs automatic time reference conversion in case that both
- * Good Time Intervals do not have the same reference.
+ * Append Good Time Intervals to the container. The method performs automatic
+ * time reference conversion in case that the specified Good Time Intervals
+ * @p gti have a time reference that differs from that of the current
+ * instance.
  ***************************************************************************/
 void GGti::extend(const GGti& gti)
 {
@@ -500,7 +522,7 @@ void GGti::extend(const GGti& gti)
 
 
 /***********************************************************************//**
- * @brief Load GTIs from FITS file.
+ * @brief Load Good Time Intervals from FITS file
  *
  * @param[in] filename FITS filename.
  * @param[in] extname GTI extension name (defaults to "GTI")
@@ -530,15 +552,16 @@ void GGti::load(const std::string& filename, const std::string& extname)
 
 
 /***********************************************************************//**
- * @brief Save GTI intervals to FITS file.
+ * @brief Save Good Time Intervals intervals to FITS file
  *
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite any existing GTI extension?
  * @param[in] extname GTI extension name (defaults to "GTI")
  *
- * Saves Good Time Intervals into FITS file. If the file does not exist it is
- * created. If the file exists the GTI is appended as extension. If another
- * GTI exists already it is overwritten if clobber=true.
+ * Saves Good Time Intervals into extension @p extname of a FITS file. If the
+ * file does not exist it is created. If the file exists the GTI is appended
+ * as extension. If another GTI exists already it is overwritten if
+ * @p clobber=true.
  ***************************************************************************/
 void GGti::save(const std::string& filename, bool clobber,
                 const std::string& extname) const
@@ -558,12 +581,11 @@ void GGti::save(const std::string& filename, bool clobber,
 
 
 /***********************************************************************//**
- * @brief Read GTI time reference and intervals from FITS table
+ * @brief Read Good Time Intervals and time reference from FITS table
  *
  * @param[in] hdu Pointer to FITS table.
  *
- * Reads the GTI time reference and time intervals from a FITS table
- * extension.
+ * Reads the Good Time Intervals and time reference from a FITS table.
  ***************************************************************************/
 void GGti::read(const GFitsTable* hdu)
 {
@@ -599,14 +621,15 @@ void GGti::read(const GFitsTable* hdu)
 
 
 /***********************************************************************//**
- * @brief Write GTI time reference and intervals into FITS file
+ * @brief Write Good Time Intervals and time reference into FITS object
  *
  * @param[in] file Pointer to FITS file.
- * @param[in] extname GTI extension name (default is "GTI")
+ * @param[in] extname GTI extension name (defaults to "GTI")
  *
- * Saves GTI into a FITS file. If the file does not exist it is
- * created. If the file exists the GTI is appended as extension. If another
- * GTI exists already it is overwritten if clobber=true.
+ * Saves Good Time Intervals and time reference into a FITS object. If the
+ * file does not exist it is created. If the file exists the GTI is appended
+ * as extension. If another GTI exists already it is overwritten if
+ * @p clobber=true.
  *
  * @todo Implement clobber method for overwriting of existing GTIs.
  ***************************************************************************/
@@ -643,9 +666,9 @@ void GGti::write(GFits* file, const std::string& extname) const
 
 
 /***********************************************************************//**
- * @brief Returns earliest start time of GTI
+ * @brief Returns earliest start time in Good Time Intervals
  *
- * @return Earliest start time of GTI.
+ * @return Earliest start time in Good Time Intervals.
  ***************************************************************************/
 const GTime& GGti::tstart(void) const
 {
@@ -655,9 +678,9 @@ const GTime& GGti::tstart(void) const
 
 
 /***********************************************************************//**
- * @brief Returns latest stop time of GTI
+ * @brief Returns latest stop time in Good Time Intervals
  *
- * @return Latest stop time of GTI.
+ * @return Latest stop time in Good Time Intervals.
  ***************************************************************************/
 const GTime& GGti::tstop(void) const
 {
@@ -667,9 +690,9 @@ const GTime& GGti::tstop(void) const
 
 
 /***********************************************************************//**
- * @brief Returns start time of specific GTI
+ * @brief Returns start time for a given Good Time Interval
  *
- * @param[in] index GTI index (0 ... size()-1).
+ * @param[in] index Good Time Interval index (0 ... size()-1).
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
@@ -689,9 +712,9 @@ const GTime& GGti::tstart(const int& index) const
 
 
 /***********************************************************************//**
- * @brief Returns stop time of specific GTI
+ * @brief Returns stop time for a given Good Time Interval
  *
- * @param[in] index GTI index (0 ... size()-1).
+ * @param[in] index Good Time Interval index (0 ... size()-1).
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
@@ -713,7 +736,11 @@ const GTime& GGti::tstop(const int& index) const
 /***********************************************************************//**
  * @brief Returns elapsed time
  *
- * @return Elapsed time [secs].
+ * @return Elapsed time [seconds].
+ *
+ * Returns the elapsed time in seconds. The elapsed time is defined as the
+ * time difference between the latest stop time and the earliest start time
+ * in the Good Time Intervals.
  ***************************************************************************/
 const double& GGti::telapse(void) const
 {
@@ -725,7 +752,10 @@ const double& GGti::telapse(void) const
 /***********************************************************************//**
  * @brief Returns ontime
  *
- * @return Ontime [secs].
+ * @return Ontime [seconds].
+ *
+ * Returns the ontime in seconds. The ontime is defined as the sum of all
+ * Good Time Intervals.
  ***************************************************************************/
 const double& GGti::ontime(void) const
 {
@@ -735,11 +765,13 @@ const double& GGti::ontime(void) const
 
 
 /***********************************************************************//**
- * @brief Set GTI time reference
+ * @brief Set time reference for Good Time Intervals
  *
  * @param[in] ref Time reference.
  *
- * Sets the time reference of the Good Time Intervals.
+ * Sets the time reference of the Good Time Intervals. This defines the
+ * reference time which will be writted into the FITS file upon saving of
+ * the Good Time Intervals.
  ***************************************************************************/
 void GGti::reference(const GTimeReference& ref)
 {
@@ -752,7 +784,7 @@ void GGti::reference(const GTimeReference& ref)
 
 
 /***********************************************************************//**
- * @brief Return GTI time reference
+ * @brief Return time reference for Good Time Intervals
  *
  * @return Time reference.
  *
@@ -766,14 +798,13 @@ const GTimeReference& GGti::reference(void) const
 
 
 /***********************************************************************//**
- * @brief Tests whether GTI intervals contain the specified time
+ * @brief Checks whether Good Time Intervals contain time
  *
- * @param[in] time Time.
+ * @param[in] time Time to be checked.
  *
- * Checks whether a given time is contained within any of the Good Time
- * Intervals. The method returns true once the first GTI interval
- * comprising the time is found. It returns false if none of the intervals
- * contains the time.
+ * Checks if a given @p time falls in at least one of the Good Time
+ * Intervals. The method exits when the first matching interval has been
+ * found.
  ***************************************************************************/
 bool GGti::contains(const GTime& time) const
 {
@@ -948,17 +979,18 @@ void GGti::set_attributes(void)
 /***********************************************************************//**
  * @brief Insert Good Time Interval
  *
- * @param[in] index Index at which GTI is to be inserted.
- * @param[in] tstart Start time of interval to be inserted.
- * @param[in] tstop Stop time of interval to be inserted.
+ * @param[in] index Index after which interval is inserted.
+ * @param[in] tstart Start time of interval.
+ * @param[in] tstop Stop time of interval.
  *
- * Inserts a GTI at a given position in the GTI array. This method does not
- * assure the time ordering of the GTIs, this has to be done by the client
- * that determines the appropriate value of inx.
+ * Inserts a Good Time Interval after the specified @p index in the Good
+ * Time Intervals. The method does not reorder the intervals by time,
+ * instead the client needs to determine the approriate @p index.
+ *
  * Invalid parameters do not produce any exception, but are handled
- * transparently. If the GTI is invalid (tstop <= tstart), no interval
- * will be inserted. If the index is out of the valid range, the index
- * will be adjusted to either the first or the last element.
+ * transparently. If the interval is invalid (i.e. @p tstart >= @p tstop)
+ * then nothing is done. If the @p index is out of the valid range, the
+ * index will be adjusted to either the first or the last element.
  ***************************************************************************/
 void GGti::insert_gti(const int& index, const GTime& tstart, const GTime& tstop)
 {
@@ -1008,49 +1040,6 @@ void GGti::insert_gti(const int& index, const GTime& tstart, const GTime& tstop)
         set_attributes();
 
     } // endif: Time interval was valid
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Merge all overlapping Good Time Intervals
- *
- * Merges all overlapping Good Time Intervals into a single Good Time
- * Interval. This method assumes that the Good Time Intervals are ordered
- * correctly by start time. Note that the method does not actually reduce
- * the memory size but just updates the information on the number of elements
- * in the array.
- ***************************************************************************/
-void GGti::merge_gtis(void)
-{
-    // Find overlaps
-    int i   = 0;
-    int num = m_num;
-    while (i < num-1) {
-
-        // If GTI overlaps with following one then merge both GTIs, move
-        // all remaining GTIs one position up, and reduce number of elements
-        if (m_start[i+1] <= m_stop[i]) {
-            m_start[i] = (m_start[i] < m_start[i+1]) ? m_start[i] : m_start[i+1];
-            m_stop[i]  = (m_stop[i]  > m_stop[i+1])  ? m_stop[i]  : m_stop[i+1];
-            for (int k = i+2; k < num; ++k) {
-                m_start[k-1] = m_start[k];
-                m_stop[k-1]  = m_stop[k];
-            }
-            num--;
-        }
-
-        // Otherwise increment GTI index
-        else {
-            i++;
-        }
-
-    } // endwhile: there were still GTIs to check
-
-    // Update number of elements in GTI
-    m_num = num;
 
     // Return
     return;

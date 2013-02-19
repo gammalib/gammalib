@@ -34,8 +34,6 @@
  * @class GEbounds
  *
  * @brief Energy boundaries container class
- *
- * This class holds a list of energy intervals.
  ***************************************************************************/
 class GEbounds : public GBase {
 public:
@@ -52,9 +50,10 @@ public:
     GEbounds*   clone(void) const;
     int         size(void) const;
     bool        isempty(void) const;
-    void        add(const GEnergy& emin, const GEnergy& emax);
     void        append(const GEnergy& emin, const GEnergy& emax);
     void        insert(const GEnergy& emin, const GEnergy& emax);
+    void        merge(void);
+    void        merge(const GEnergy& emin, const GEnergy& emax);
     void        pop(const int& index);
     void        reserve(const int& num);
     void        extend(const GEbounds& ebds);
