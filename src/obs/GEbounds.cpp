@@ -836,14 +836,18 @@ void GEbounds::free_members(void)
  ***************************************************************************/
 void GEbounds::set_attributes(void)
 {
-    // Continue only if there are intervals
+    // If there are intervals then determine the minimum and maximum
+    // energy from these intervals ...
     if (m_num > 0) {
-
-        // Set attributes
         m_emin = m_min[0];
         m_emax = m_max[m_num-1];
+    }
 
-    } // endif: there were intervals
+    // ... otherwise clear the minimum and maximum energy
+    else {
+        m_emin.clear();
+        m_emax.clear();
+    }
 
     // Return
     return;
