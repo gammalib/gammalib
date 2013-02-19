@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       test_CTA.cpp - Test CTA classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -250,12 +250,9 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     gti.append(tstart, tstop);
 
     // Setup energy boundaries
-    GEbounds ebounds;
-    GEnergy  emin;
-    GEnergy  emax;
-    emin.TeV(0.1);
-    emax.TeV(100.0);
-    ebounds.setlog(emin, emax, nebins);
+    GEnergy  emin(0.1, "TeV");
+    GEnergy  emax(100.0, "TeV");
+    GEbounds ebounds(nebins, emin, emax);
 
     // Setup event cube centered on Cen A
     GCTAEventCube cube(map, ebounds, gti);
@@ -331,10 +328,8 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     GEbounds ebounds;
     GTime    tstart(0.0);
     GTime    tstop(1800.0);
-    GEnergy  emin;
-    GEnergy  emax;
-    emin.TeV(0.1);
-    emax.TeV(100.0);
+    GEnergy  emin(0.1, "TeV");
+    GEnergy  emax(100.0, "TeV");
     gti.append(tstart, tstop);
     ebounds.append(emin, emax);
     GCTAEventList events;
