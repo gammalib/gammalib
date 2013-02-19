@@ -226,11 +226,14 @@ GEbounds* GEbounds::clone(void) const
  * @param[in] emin Minimum energy of interval.
  * @param[in] emax Maximum energy of interval.
  *
- * Adds an energy interval to the energy boundaries by merging with any
- * any overlapping intervals. The energy interval is added at the appropriate
- * location, based on the minimum energy of the interval. The method will
- * search all existing intervals for the first interval that has a minimum
- * energy smaller than the specified @p emin value.
+ * Adds an energy interval to the object. Use this method if you want to
+ * automatically merge the new energy interval with the existing energy
+ * intervals.
+ *
+ * The energy interval is added at the appropriate location, based on the
+ * minimum energy of the interval. The method will search all existing
+ * intervals for the first interval that has a minimum energy smaller than
+ * the specified @p emin value.
  *
  * No checking for energy ordering or overlap is done. If the energy interval
  * is not valid (@p emax <= @p emin), nothing is done.
