@@ -1,6 +1,7 @@
 # Define package included headers (to be installed)
 pkginclude_HEADERS = GammaLib.hpp \
                      GBase.hpp \
+                     GContainer.hpp \
                      GRegistry.hpp \
                      GException.hpp \
                      GNodeArray.hpp \

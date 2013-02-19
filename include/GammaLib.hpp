@@ -34,6 +34,7 @@
 
 /* __ Interface classes __________________________________________________ */
 #include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GRegistry.hpp"
 
 /* __ Common tools _______________________________________________________ */
