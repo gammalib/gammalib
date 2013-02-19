@@ -735,7 +735,7 @@ GEnergy GEbounds::emax(const int& index) const
  *
  * Computes
  *
- * \f[0.5 * (E_{\rm min} + E_{\rm max})}\f]
+ * \f[0.5 * (E_{\rm min} + E_{\rm max})\f]
  *
  * for the specified energy bin.
  ***************************************************************************/
