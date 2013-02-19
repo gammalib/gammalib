@@ -62,7 +62,7 @@ public:
     /// @return Number of objects in container.
     virtual int size(void) const = 0;
     
-    /// @brief Signals if container is empty
+    /// @brief Checks if container is empty
     ///
     /// @return True if no objects are in container, false otherwise.
     virtual bool isempty(void) const = 0;
