@@ -48,6 +48,7 @@ public:
     void         test_time_reference(void);
     void         test_time(void);
     void         test_ebounds(void);
+    void         test_gti(void);
 };
 
 
