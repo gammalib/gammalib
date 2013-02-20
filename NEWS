@@ -14,7 +14,7 @@ changes made since the last release of GammaLib.
 2. Public interface modifications
 ---------------------------------
 This section summarizes all modifications of public class interfaces
-that will lead to compatibility issues with response to the last
+that will lead to compatibility issues with respect to the last
 GammaLib release.
 
 GEbounds
@@ -22,6 +22,19 @@ GEbounds
   from the last position to the first position in the argument list.
   The emin, emax, emean and elogmean methods now take a const integer
   reference as argument instead of an integer value.
+
+GObservations
+  The observation is now passed as const reference in the append()
+  method (was non-const before). The observation iterator has been
+  removed from the class. The reference returned by the models() method
+  is now declared const.
+
+GOptimizerFunction
+  The value method now returns a value instead of a pointer.
+
+GOptimizer & GOptimizerLM
+  The optimization operators have been removed and replaced by the
+  optimize method.
 
 
 3. Configuration
