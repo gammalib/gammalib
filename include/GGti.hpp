@@ -72,7 +72,7 @@ public:
     void                  merge(void);
     void                  merge(const GTime& tstart, const GTime& tstop);
     void                  reduce(const GTime& tstart, const GTime& tstop);
-    void                  pop(const int& index);
+    void                  remove(const int& index);
     void                  reserve(const int& num);
     void                  extend(const GGti& gti);
     void                  load(const std::string& filename,

@@ -47,9 +47,8 @@ public:
     virtual GOptimizerPars*  clone(void) const = 0;
     virtual int              size(void) const = 0;
     virtual bool             isempty(void) const = 0;
-    virtual void             pop(const int& index) = 0;
+    virtual void             remove(const int& index) = 0;
     virtual void             reserve(const int& num) = 0;
-    virtual std::string      print(void) const = 0;
 
     // Methods
     virtual int              npars(void) const;

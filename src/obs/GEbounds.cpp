@@ -39,7 +39,7 @@
 #include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_POP                                           "GEbounds::pop(int&)"
+#define G_REMOVE                                     "GEbounds::remove(int&)"
 #define G_EMIN                                         "GEbounds::emin(int&)"
 #define G_EMAX                                         "GEbounds::emax(int&)"
 #define G_EMEAN                                       "GEbounds::emean(int&)"
@@ -377,12 +377,12 @@ void GEbounds::merge(const GEnergy& emin, const GEnergy& emax)
  * Note that the method does not actually reduce the memory size but just
  * updates the information on the number of elements in the array.
  ***************************************************************************/
-void GEbounds::pop(const int& index)
+void GEbounds::remove(const int& index)
 {
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_POP, index, 0, m_num-1);
+        throw GException::out_of_range(G_REMOVE, index, 0, m_num-1);
     }
     #endif
 

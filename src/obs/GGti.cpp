@@ -37,7 +37,7 @@
 #include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_POP                                               "GGti::pop(int&)"
+#define G_REMOVE                                         "GGti::remove(int&)"
 #define G_TSTART                                         "GGti::tstart(int&)"
 #define G_TSTOP                                           "GGti::tstop(int&)"
 
@@ -421,12 +421,12 @@ void GGti::reduce(const GTime& tstart, const GTime& tstop)
  * Note that the method does not actually reduce the memory size but just
  * updates the information on the number of elements in the array.
  ***************************************************************************/
-void GGti::pop(const int& index)
+void GGti::remove(const int& index)
 {
     #if defined(G_RANGE_CHECK)
     // If index is outside boundary then throw an error
     if (index < 0 || index >= m_num) {
-        throw GException::out_of_range(G_POP, index, 0, m_num-1);
+        throw GException::out_of_range(G_REMOVE, index, 0, m_num-1);
     }
     #endif
 

@@ -66,8 +66,8 @@ public:
     void     append(const GModel& model);
     void     insert(const int& index, const GModel& model);
     void     insert(const std::string& name, const GModel& model);
-    void     pop(const int& index);
-    void     pop(const std::string& name);
+    void     remove(const int& index);
+    void     remove(const std::string& name);
     void     reserve(const int& num);
     void     extend(const GModels& models);
     void     set(const int& index, const GModel& model);

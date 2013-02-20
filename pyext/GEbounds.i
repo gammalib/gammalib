@@ -54,7 +54,7 @@ public:
     void        insert(const GEnergy& emin, const GEnergy& emax);
     void        merge(void);
     void        merge(const GEnergy& emin, const GEnergy& emax);
-    void        pop(const int& index);
+    void        remove(const int& index);
     void        reserve(const int& num);
     void        extend(const GEbounds& ebds);
     void        setlin(const int& num, const GEnergy& emin, const GEnergy& emax);

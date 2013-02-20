@@ -295,7 +295,7 @@ void TestGObservation::test_ebounds(void)
     test_value(ebds.emax().MeV(), 10.0, 1.0e-10, "Maximum energy should be 10.");
 
     // Remove interval
-    ebds.pop(0);
+    ebds.remove(0);
     test_value(ebds.size(), 0, "GEbounds should have zero size.");
     test_assert(ebds.isempty(), "GEbounds should be empty.");
     test_value(ebds.emin().MeV(), 0.0, 1.0e-10, "Minimum energy should be 0.");
@@ -442,7 +442,7 @@ GEbounds ebds;
     test_value(gti.tstop().secs(), 10.0, 1.0e-10, "Stop time should be 10.");
 
     // Remove interval
-    gti.pop(0);
+    gti.remove(0);
     test_value(gti.size(), 0, "GGti should have zero size.");
     test_assert(gti.isempty(), "GGti should be empty.");
     test_value(gti.tstart().secs(), 0.0, 1.0e-10, "Start time should be 0.");

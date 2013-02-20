@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GContainer.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -34,28 +33,15 @@
  * @class GContainer
  *
  * @brief Interface class for container classes
- *
- * This class defines the interface for container classes. The usage of the
- * interface class imposes on all container classes to implement the following
- * methods:
- *
- *     clear      - Clear container (inherited from GBase)
- *     clone      - Clones container (inherited from GBase)
- *     print      - Print container content (inherited from GBase)
- *
- *     size       - Returns number of objects is container
- *     isempty    - Signals if container is empty
- *     pop        - Removes an object from the container
- *     reserve    - Reserves space in the container
  ***************************************************************************/
 class GContainer : public GBase {
 public:
     // Constructors and destructors
     virtual ~GContainer(void) {}
 
-    // Methods
+    // Pure virtual methods
     virtual int  size(void) const = 0;
     virtual bool isempty(void) const = 0;
-    virtual void pop(const int& index) = 0;
+    virtual void remove(const int& index) = 0;
     virtual void reserve(const int& num) = 0;
 };

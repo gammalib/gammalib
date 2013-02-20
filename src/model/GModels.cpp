@@ -41,8 +41,8 @@
 #define G_ACCESS2                         "GModels::operator[](std::string&)"
 #define G_INSERT1                            "GModels::insert(int&, GModel&)"
 #define G_INSERT2                    "GModels::insert(std::string&, GModel&)"
-#define G_POP1                                           "GModels::pop(int&)"
-#define G_POP2                                   "GModels::pop(std::string&)"
+#define G_REMOVE1                                     "GModels::remove(int&)"
+#define G_REMOVE2                             "GModels::remove(std::string&)"
 #define G_SET1                                  "GModels::set(int&, GModel&)"
 #define G_SET2                          "GModels::set(std::string&, GModel&)"
 #define G_READ                                         "GModels::read(GXml&)"
@@ -384,7 +384,7 @@ void GModels::insert(const std::string& name, const GModel& model)
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::model_not_found(G_POP2, name);
+        throw GException::model_not_found(G_INSERT2, name);
     }
 
     // Make deep copy of model
@@ -413,12 +413,12 @@ void GModels::insert(const std::string& name, const GModel& model)
  *
  * Remove model of specified @p index from container.
  ***************************************************************************/
-void GModels::pop(const int& index)
+void GModels::remove(const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_POP1, index, 0, size()-1);
+        throw GException::out_of_range(G_REMOVE1, index, 0, size()-1);
     }
     #endif
 
@@ -443,14 +443,14 @@ void GModels::pop(const int& index)
  *
  * Remove model of specified @p name from container.
  ***************************************************************************/
-void GModels::pop(const std::string& name)
+void GModels::remove(const std::string& name)
 {
     // Get parameter index
     int index = get_index(name);
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::model_not_found(G_POP2, name);
+        throw GException::model_not_found(G_REMOVE2, name);
     }
 
     // Erase model component from container

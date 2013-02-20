@@ -37,16 +37,15 @@
  * @brief Interface class for container classes
  *
  * This class defines the interface for container classes. The usage of the
- * interface class imposes on all container classes to implement the following
- * methods:
+ * interface class imposes on all container classes are coherent interface.
+ * The following methods are mandatory:
  *
  *     clear      - Clear container (inherited from GBase)
  *     clone      - Clones container (inherited from GBase)
  *     print      - Print container content (inherited from GBase)
- *
  *     size       - Returns number of objects is container
- *     isempty    - Signals if container is empty
- *     pop        - Removes an object from the container
+ *     isempty    - Checks if container is empty
+ *     remove     - Removes an object from the container
  *     reserve    - Reserves space in the container
  ***************************************************************************/
 class GContainer : public GBase {
@@ -71,14 +70,14 @@ public:
     ///
     /// @param[in] index Index.
     ///
-    /// Removes the object with the specified index from the container.
-    virtual void pop(const int& index) = 0;
+    /// Removes the object with the specified @p index from the container.
+    virtual void remove(const int& index) = 0;
 
     /// @brief Reserves space in the container
     ///
     /// @param[in] num Number of objects.
     ///
-    /// Reserves space for num objects in the container.
+    /// Reserves space for @p num objects in the container.
     virtual void reserve(const int& num) = 0;
 };
 
