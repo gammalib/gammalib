@@ -1,7 +1,7 @@
 /***************************************************************************
- *    GOptimizerFunction.cpp  -  Optimizer function abstract base class    *
+ *     GOptimizerFunction.cpp - Optimizer function abstract base class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,12 +21,10 @@
 /**
  * @file GOptimizerFunction.cpp
  * @brief Optimizer function abstract base class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
-#include <iostream>
-#include "GException.hpp"
 #include "GOptimizerFunction.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -98,8 +96,9 @@ GOptimizerFunction::~GOptimizerFunction()
  * @brief Assignment operator
  *
  * @param[in] fct Optimizer function.
+ * @return Optimizer function.
  ***************************************************************************/
-GOptimizerFunction& GOptimizerFunction::operator= (const GOptimizerFunction& fct)
+GOptimizerFunction& GOptimizerFunction::operator=(const GOptimizerFunction& fct)
 {
     // Execute only if object is not identical
     if (this != &fct) {
@@ -162,10 +161,3 @@ void GOptimizerFunction::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

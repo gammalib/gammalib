@@ -1,7 +1,7 @@
 /***************************************************************************
- *    GOptimizerFunction.hpp  -  Optimizer function abstract base class    *
+ *     GOptimizerFunction.hpp - Optimizer function abstract base class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GOptimizerFunction.hpp
  * @brief Optimizer function abstract base class
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GOPTIMIZERFUNCTION_HPP
@@ -40,24 +40,27 @@
  *
  * This class provides an abstract interface for the function that is used
  * by the GOptimizer optimization class.
- * The method eval() returns the function value at a given set of parameters
+ *
+ * The eval() method returns the function value at a given set of parameters
  * that is defined by an instance of the optimizer parameter container class
- * GOptimizerPars.
+ * GOptimizerPars. The value() method returns the actual function value at
+ * these parameters, and the gradient() and covar() methods return pointers
+ * on the gradient vector and the covariance matrix at the parameter values.
  ***************************************************************************/
 class GOptimizerFunction {
 
 public:
     // Constructors and destructors
-    GOptimizerFunction();
+    GOptimizerFunction(void);
     GOptimizerFunction(const GOptimizerFunction& fct);
-    virtual ~GOptimizerFunction();
+    virtual ~GOptimizerFunction(void);
 
     // Operators
     virtual GOptimizerFunction& operator= (const GOptimizerFunction& fct);
 
     // Virtual methods
     virtual void           eval(const GOptimizerPars& pars) = 0;
-    virtual double*        value(void) = 0;
+    virtual double         value(void) = 0;
     virtual GVector*       gradient(void) = 0;
     virtual GSparseMatrix* covar(void) = 0;
  
@@ -66,7 +69,6 @@ protected:
     void init_members(void);
     void copy_members(const GOptimizerFunction& fct);
     void free_members(void);
-
 };
 
 #endif /* GOPTIMIZERFUNCTION_HPP */
