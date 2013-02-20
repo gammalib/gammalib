@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GOptimizerLM.cpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -146,45 +146,6 @@ GOptimizerLM& GOptimizerLM::operator= (const GOptimizerLM& opt)
 }
 
 
-/***********************************************************************//**
- * @brief Optimization operator
- *
- * @param[in] fct Optimization function.
- * @param[in] p Parameters to be optimised.
- ***************************************************************************/
-GOptimizerPars& GOptimizerLM::operator()(GOptimizerFunction& fct,
-                                         GOptimizerPars&     p)
-{
-    // Initalise output parameters with input parameters
-    GOptimizerPars* pars = p.clone();
-
-    // Perform LM optimization
-    optimize(&fct, pars);
-
-    // Return
-    return *pars;
-}
-
-
-/***********************************************************************//**
- * @brief Optimization operator
- *
- * @param[in] fct Optimization function.
- * @param[in] m Model parameters to be optimised.
- ***************************************************************************/
-GModels& GOptimizerLM::operator() (GOptimizerFunction& fct, GModels& m)
-{
-    // Initalise output parameters with input parameters
-    GModels* models = new GModels(m);
-
-    // Perform LM optimization
-    optimize(&fct, models);
-
-    // Return
-    return *models;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -217,6 +178,240 @@ void GOptimizerLM::clear(void)
 GOptimizerLM* GOptimizerLM::clone(void) const
 {
     return new GOptimizerLM(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Optimize function parameters
+ *
+ * @param[in] fct Optimization function.
+ * @param[in] pars Function parameters.
+ ***************************************************************************/
+void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
+{
+    // Perform LM optimization
+    //optimize(&fct, &pars);
+
+    // Get number of parameters. Continue only if there are free parameters
+    m_npars = pars.npars();
+    m_nfree = pars.nfree();
+    if (m_nfree > 0) {
+
+        // Initialise optimization parameters
+        m_lambda  = m_lambda_start;
+        m_status  = G_LM_CONVERGED;
+
+        // Initialise bookkeeping arrays
+        m_hit_boundary.clear();
+        m_hit_minimum.clear();
+        m_hit_maximum.clear();
+        m_par_freeze.clear();
+        m_par_remove.clear();
+        m_hit_boundary.reserve(m_npars);
+        m_hit_minimum.reserve(m_npars);
+        m_hit_maximum.reserve(m_npars);
+        m_par_freeze.reserve(m_npars);
+        m_par_remove.reserve(m_npars);
+        for (int i = 0; i < m_npars; ++i) {
+            m_hit_boundary.push_back(false);
+            m_hit_minimum.push_back(0);
+            m_hit_maximum.push_back(0);
+            m_par_freeze.push_back(false);
+            m_par_remove.push_back(false);
+        }
+
+        // Initial function evaluation
+        fct.eval(pars);
+
+        // If a free parameter has a zero diagonal element in the curvature
+        // matrix then remove this parameter definitely from the fit as it
+        // otherwise will block the fit. The problem appears in the unbinned
+        // fitting where parameter gradients may be zero (due to the truncation
+        // of the PSF), but the Npred gradient is not zero. In principle we
+        // could use the Npred gradient for fitting (I guess), but I still
+        // have to figure out how ... (the diagonal loading was not so
+        // successful as it faked early convergence)
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
+            if (pars.par(ipar).isfree()) {
+                if ((*fct.covar())(ipar,ipar) == 0.0) {
+                    if (m_logger != NULL) {
+                        *m_logger << "  Parameter \"" << pars.par(ipar).name();
+                        *m_logger << "\" has zero covariance.";
+                        *m_logger << " Fix parameter." << std::endl;
+                    }
+                    m_par_remove[ipar] = true;
+                    pars.par(ipar).fix();
+                }
+            }
+        }
+
+        // Save function value
+        m_value = fct.value();
+
+        // Save initial statistics and lambda values
+        double value_old  = m_value;
+        double lambda_old = m_lambda;
+        int    lambda_inc = 0;
+
+        // Optionally write initial iteration into logger
+        if (m_logger != NULL) {
+            *m_logger << "Initial iteration: ";
+            *m_logger << "func=" << m_value << ", ";
+            *m_logger << "Lambda=" << m_lambda << std::endl;
+        }
+        #if defined(G_DEBUG_OPT)
+        std::cout << "Initial iteration: func=" << m_value << ", Lambda="
+                  << m_lambda << std::endl;
+        #endif
+
+        // Initialise iteration flags
+        bool check_for_freeze = true;
+
+        // Iterative fitting
+        for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
+
+            // Perform one iteration
+            iteration(fct, pars);
+
+            // Compute function improvement (>0 means decrease)
+            double delta = value_old - m_value;
+
+            // Determine maximum (scaled) gradient
+            double grad_max  = 0.0;
+            int    grad_imax = -1;
+            for (int ipar = 0; ipar < m_npars; ++ipar) {
+                if (pars.par(ipar).isfree()) {
+                    double grad = pars.par(ipar).gradient();
+                    if (grad > grad_max) {
+                        grad_max  = grad;
+                        grad_imax = ipar;
+                    }
+                    if (grad == 0.0) {
+                        *m_logger << "Parameter " << ipar;
+                        *m_logger << " (" << pars.par(ipar).name() << ")";
+                        *m_logger << " has a zero gradient." << std::endl;
+                    }
+                }
+            }
+
+            // Optionally write iteration results into logger
+            if (m_logger != NULL) {
+                *m_logger << "Iteration " << m_iter << ": ";
+                *m_logger << "func=" << m_value << ", ";
+                *m_logger << "Lambda=" << m_lambda << ", ";
+                *m_logger << "delta=" << delta;
+                *m_logger << ", " << "max(grad)=" << grad_max;
+                *m_logger << " [" << grad_imax << "]";
+                if (m_lambda > lambda_old) {
+                    *m_logger << " (stalled)";
+                }
+                *m_logger << std::endl;
+            }
+            #if defined(G_DEBUG_OPT)
+            std::cout << "Iteration " << m_iter << ": func=" 
+                      << m_value << ", Lambda=" << m_lambda
+                      << ", delta=" << delta << std::endl;
+            #endif
+
+            // Reset lambda increment if we had success
+            if (m_lambda < lambda_old) {
+                lambda_inc = 0;
+            }
+
+            // If function increased while lambda did not increase then stop
+            // iterations
+            //if ((m_lambda <= lambda_old) && (delta < 0.0))
+            //    break;
+
+            // Stop if convergence was reached. Before stopping, check
+            // if some parameters were frozen, and if this was the case,
+            // free them now and continue. We do this only once, i.e.
+            // the next time a parameter is frozen and convergence is
+            // reached we really stop.
+            if ((m_lambda <= lambda_old) && (delta < m_eps)) {
+
+                // Check for frozen parameters, and if some exist, free
+                // them and start over
+                if (check_for_freeze) {
+
+                    // Signal that we won't check frozen parameters
+                    // anymore
+                    check_for_freeze = false;
+
+                    // Free frozen parameters and determine how many
+                    // have been frozen
+                    int nfrozen = 0;
+                    for (int ipar = 0; ipar < m_npars; ++ipar) {
+                        if (m_par_freeze[ipar]) {
+                            nfrozen++;
+                            pars.par(ipar).free();
+                            if (m_logger != NULL) {
+                                *m_logger << "  Free parameter \""
+                                          << pars.par(ipar).name()
+                                          << "\" after convergence was"
+                                             " reached with frozen"
+                                             " parameter." << std::endl;
+                            }
+                        }
+                    }
+
+                    // If there were frozen parameters then start over
+                    // again (initialise optimizer)
+                    if (nfrozen > 0) {
+                        m_lambda   = m_lambda_start;
+                        value_old  = m_value;
+                        lambda_old = m_lambda;
+                        lambda_inc = 0;
+                        continue;
+                    }
+                }
+
+                // ... otherwise, convergence was reached and we can stop
+                // now
+                break;
+                
+            } // endif: convergence check
+
+            // Monitor the number of subsequent increases of lambda and
+            // stop if the number of increases exceeds threshold
+            lambda_inc = (m_lambda > lambda_old) ? lambda_inc + 1 : 0;
+            if (lambda_inc >= m_max_stall) {
+                m_status = G_LM_STALLED;
+                break;
+            }
+
+            // Bookkeeping of actual result (we always store the last
+            // lambda to detect turn arounds in the lambda tendency; however
+            // we always keep the best function value)
+            lambda_old = m_lambda;
+            if (delta > 0.0) {
+                value_old = m_value;
+            }
+
+        } // endfor: iterations
+
+        // Compute parameter uncertainties
+        errors(fct, pars);
+        
+        // Free now all temporarily frozen parameters so that the resulting
+        // model has the same attributes as the initial model
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
+            if (m_par_freeze[ipar] || m_par_remove[ipar]) {
+                pars.par(ipar).free();
+                if (m_logger != NULL) {
+                    *m_logger << "  Free parameter \""
+                              << pars.par(ipar).name()
+                              << "\" after convergence was"
+                                 " reached with frozen"
+                                 " parameter." << std::endl;
+                }
+            }
+        }
+
+    } // endif: there were free parameters to fit
+
+    // Return
+    return;
 }
 
 
@@ -355,243 +550,6 @@ void GOptimizerLM::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Perform LM optimization
- *
- * @param[in] fct Optimization function.
- * @param[in] pars Function parameters.
- ***************************************************************************/
-void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
-{
-    // Single loop for common exit point
-    do {
-
-        // Fall through if pointers are not valid
-        if (fct == NULL || pars == NULL)
-            continue;
-
-        // Set number of parameters. Fall through if there are no parameters
-        // to optimize
-        m_npars = pars->npars();
-        m_nfree = pars->nfree();
-        if (m_nfree < 1)
-            continue;
-
-        // Initialise optimization parameters
-        m_lambda  = m_lambda_start;
-        m_status  = G_LM_CONVERGED;
-
-        // Initialise bookkeeping arrays
-        m_hit_boundary.clear();
-        m_hit_minimum.clear();
-        m_hit_maximum.clear();
-        m_par_freeze.clear();
-        m_par_remove.clear();
-        m_hit_boundary.reserve(m_npars);
-        m_hit_minimum.reserve(m_npars);
-        m_hit_maximum.reserve(m_npars);
-        m_par_freeze.reserve(m_npars);
-        m_par_remove.reserve(m_npars);
-        for (int i = 0; i < m_npars; ++i) {
-            m_hit_boundary.push_back(false);
-            m_hit_minimum.push_back(0);
-            m_hit_maximum.push_back(0);
-            m_par_freeze.push_back(false);
-            m_par_remove.push_back(false);
-        }
-
-        // Initial evaluation
-        fct->eval(*pars);
-
-        // If a free parameter has a zero diagonal element in the curvature
-        // matrix then remove this parameter definitely from the fit as it
-        // otherwise will block the fit. The problem appears in the unbinned
-        // fitting where parameter gradients may be zero (due to the truncation
-        // of the PSF), but the Npred gradient is not zero. In principle we
-        // could use the Npred gradient for fitting (I guess), but I still
-        // have to figure out how ... (the diagonal loading was not so
-        // successful as it faked early convergence)
-        for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (pars->par(ipar).isfree()) {
-                if ((*fct->covar())(ipar,ipar) == 0.0) {
-                    //(*fct->covar())(ipar,ipar) = m_diag_load;
-                    if (m_logger != NULL) {
-                        *m_logger << "  Parameter \"" << pars->par(ipar).name();
-                        *m_logger << "\" has zero covariance.";
-                        *m_logger << " Fix parameter." << std::endl;
-                    }
-                    m_par_remove[ipar] = true;
-                    pars->par(ipar).fix();
-                }
-            }
-        }
-
-        // Save parameters
-        m_value = *(fct->value());
-
-        // Save initial statistics and lambda values
-        double value_old  = m_value;
-        double lambda_old = m_lambda;
-        int    lambda_inc = 0;
-
-        // Optionally write initial iteration into logger
-        if (m_logger != NULL) {
-            *m_logger << "Initial iteration: ";
-            *m_logger << "func=" << m_value << ", ";
-            *m_logger << "Lambda=" << m_lambda << std::endl;
-        }
-        #if defined(G_DEBUG_OPT)
-        std::cout << "Initial iteration: func=" << m_value << ", Lambda="
-                  << m_lambda << std::endl;
-        #endif
-
-        // Initialise iteration flags
-        bool check_for_freeze = true;
-
-        // Iterative fitting
-        for (m_iter = 1; m_iter <= m_max_iter; ++m_iter) {
-
-            // Perform one iteration
-            iteration(fct, pars);
-
-            // Compute function improvement (>0 means decrease)
-            double delta = value_old - m_value;
-
-            // Determine maximum (scaled) gradient
-            double grad_max  = 0.0;
-            int    grad_imax = -1;
-            for (int ipar = 0; ipar < m_npars; ++ipar) {
-                if (pars->par(ipar).isfree()) {
-                    double grad = pars->par(ipar).gradient();
-                    if (grad > grad_max) {
-                        grad_max  = grad;
-                        grad_imax = ipar;
-                    }
-                    if (grad == 0.0) {
-                        *m_logger << "Parameter " << ipar;
-                        *m_logger << " (" << pars->par(ipar).name() << ")";
-                        *m_logger << " has a zero gradient." << std::endl;
-                    }
-                }
-            }
-
-            // Optionally write iteration results into logger
-            if (m_logger != NULL) {
-                *m_logger << "Iteration " << m_iter << ": ";
-                *m_logger << "func=" << m_value << ", ";
-                *m_logger << "Lambda=" << m_lambda << ", ";
-                *m_logger << "delta=" << delta;
-                *m_logger << ", " << "max(grad)=" << grad_max;
-                *m_logger << " [" << grad_imax << "]";
-                if (m_lambda > lambda_old)
-                    *m_logger << " (stalled)";
-                *m_logger << std::endl;
-            }
-            #if defined(G_DEBUG_OPT)
-            std::cout << "Iteration " << m_iter << ": func=" 
-                      << m_value << ", Lambda=" << m_lambda
-                      << ", delta=" << delta << std::endl;
-            #endif
-
-            // Reset lambda increment if we had success
-            if (m_lambda < lambda_old)
-                lambda_inc = 0;
-
-            // If function increased while lambda did not increase then stop
-            // iterations
-            //if ((m_lambda <= lambda_old) && (delta < 0.0))
-            //    break;
-
-            // Stop if convergence was reached. Before stopping, check
-            // if some parameters were frozen, and if this was the case,
-            // free them now and continue. We do this only once, i.e.
-            // the next time a parameter is frozen and convergence is
-            // reached we really stop.
-            if ((m_lambda <= lambda_old) && (delta < m_eps)) {
-
-                // Check for frozen parameters, and if some exist, free
-                // them and start over
-                if (check_for_freeze) {
-
-                    // Signal that we won't check frozen parameters
-                    // anymore
-                    check_for_freeze = false;
-
-                    // Free frozen parameters and determine how many
-                    // have been frozen
-                    int nfrozen = 0;
-                    for (int ipar = 0; ipar < m_npars; ++ipar) {
-                        if (m_par_freeze[ipar]) {
-                            nfrozen++;
-                            pars->par(ipar).free();
-                            if (m_logger != NULL) {
-                                *m_logger << "  Free parameter \""
-                                          << pars->par(ipar).name()
-                                          << "\" after convergence was"
-                                             " reached with frozen"
-                                             " parameter." << std::endl;
-                            }
-                        }
-                    }
-
-                    // If there were frozen parameters then start over
-                    // again (initialise optimizer)
-                    if (nfrozen > 0) {
-                        m_lambda   = m_lambda_start;
-                        value_old  = m_value;
-                        lambda_old = m_lambda;
-                        lambda_inc = 0;
-                        continue;
-                    }
-                }
-
-                // ... otherwise, convergence was reached and we can stop
-                // now
-                break;
-            }
-
-            // Monitor the number of subsequent increases of lambda and
-            // stop if the number of increases exceeds threshold
-            lambda_inc = (m_lambda > lambda_old) ? lambda_inc + 1 : 0;
-            if (lambda_inc >= m_max_stall) {
-                m_status = G_LM_STALLED;
-                break;
-            }
-
-            // Bookkeeping of actual result (we always store the last
-            // lambda to detect turn arounds in the lambda tendency; however
-            // we always keep the best function value)
-            lambda_old = m_lambda;
-            if (delta > 0.0)
-                value_old = m_value;
-
-        } // endfor: iterations
-
-        // Compute parameter uncertainties
-        errors(fct, pars);
-        
-        // Free now all temporarily frozen parameters so that the resulting
-        // model has the same attributes as the initial model
-        for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (m_par_freeze[ipar] || m_par_remove[ipar]) {
-                pars->par(ipar).free();
-                if (m_logger != NULL) {
-                    *m_logger << "  Free parameter \""
-                              << pars->par(ipar).name()
-                              << "\" after convergence was"
-                                 " reached with frozen"
-                                 " parameter." << std::endl;
-                }
-            }
-        }
-
-    } while (0); // endwhile: main loop
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Perform one LM iteration
  *
  * @param[in] fct Optimizer function.
@@ -603,18 +561,14 @@ void GOptimizerLM::optimize(GOptimizerFunction* fct, GOptimizerPars* pars)
  * is assumed to return the gradient and curvature matrix with respect to the
  * parameter values (and not the scaled true values).
  ***************************************************************************/
-void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
+void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 {
     // Single loop for common exit point
     do {
 
-        // Fall through if pointers are not valid
-        if (fct == NULL || pars == NULL)
-            continue;
-
         // Initialise iteration parameters
-        GVector*       grad  = fct->gradient();
-        GSparseMatrix* covar = fct->covar();
+        GVector*       grad  = fct.gradient();
+        GSparseMatrix* covar = fct.covar();
 
         // Save function value, gradient and covariance matrix
         double         save_value = m_value;
@@ -623,8 +577,9 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
 
         // Save parameter values in vector
         GVector save_pars(m_npars);
-        for (int ipar = 0; ipar < m_npars; ++ipar)
-            save_pars[ipar] = pars->par(ipar).value();
+        for (int ipar = 0; ipar < m_npars; ++ipar) {
+            save_pars[ipar] = pars.par(ipar).value();
+        }
 
         // Setup matrix and vector for covariance computation
         for (int ipar = 0; ipar < m_npars; ++ipar) {
@@ -676,18 +631,18 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         }
 
         // Get LM step size
-        double step = step_size(grad, pars);
+        double step = step_size(*grad, pars);
 
         // Derive new parameter vector
         for (int ipar = 0; ipar < m_npars; ++ipar) {
 
             // Consider only free parameters
-            if (pars->par(ipar).isfree()) {
+            if (pars.par(ipar).isfree()) {
 
                 // Get actual parameter value and limits
-                double p     = pars->par(ipar).value();
-                double p_min = pars->par(ipar).min();
-                double p_max = pars->par(ipar).max();
+                double p     = pars.par(ipar).value();
+                double p_min = pars.par(ipar).min();
+                double p_max = pars.par(ipar).max();
 
                 // Compute new parameter value
                 p += (*grad)[ipar] * step;
@@ -695,25 +650,25 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
                 // Debug option: dump new parameter value
                 #if defined(G_DEBUG_ITER)
                 std::cout << "Trial ";
-                std::cout << pars->par(ipar).name() << " = ";
+                std::cout << pars.par(ipar).name() << " = ";
                 std::cout << p << std::endl;
                 #endif
 
                 // Constrain parameter to within the valid range
-                if (pars->par(ipar).hasmin() && p < p_min) {
+                if (pars.par(ipar).hasmin() && p < p_min) {
                     if (m_hit_minimum[ipar] >= m_max_hit) {
                         if (m_logger != NULL) {
-                            *m_logger << "  Parameter \"" << pars->par(ipar).name();
+                            *m_logger << "  Parameter \"" << pars.par(ipar).name();
                             *m_logger << "\" hits minimum " << p_min << " more than ";
                             *m_logger << m_max_hit << " times.";
                             *m_logger << " Fix parameter at minimum for now." << std::endl;
                         }
                         m_par_freeze[ipar] = true;
-                        pars->par(ipar).fix();
+                        pars.par(ipar).fix();
                     }
                     else {
                         if (m_logger != NULL) {
-                            *m_logger << "  Parameter \"" << pars->par(ipar).name();
+                            *m_logger << "  Parameter \"" << pars.par(ipar).name();
                             *m_logger << "\" hits minimum: ";
                             *m_logger << p << " < " << p_min;
                             *m_logger << " (" << m_hit_minimum[ipar]+1 << ")" << std::endl;
@@ -722,20 +677,20 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
                     m_hit_minimum[ipar]++;
                     p = p_min;
                 }
-                else if (pars->par(ipar).hasmax() && p > p_max) {
+                else if (pars.par(ipar).hasmax() && p > p_max) {
                     if (m_hit_maximum[ipar] >= m_max_hit) {
                         if (m_logger != NULL) {
-                            *m_logger << "  Parameter \"" << pars->par(ipar).name();
+                            *m_logger << "  Parameter \"" << pars.par(ipar).name();
                             *m_logger << "\" hits maximum " << p_max << " more than ";
                             *m_logger << m_max_hit << " times.";
                             *m_logger << " Fix parameter at maximum for now." << std::endl;
                         }
                         m_par_freeze[ipar] = true;
-                        pars->par(ipar).fix();
+                        pars.par(ipar).fix();
                     }
                     else {
                         if (m_logger != NULL) {
-                            *m_logger << "  Parameter \"" << pars->par(ipar).name();
+                            *m_logger << "  Parameter \"" << pars.par(ipar).name();
                             *m_logger << "\" hits maximum: ";
                             *m_logger << p << " > " << p_max;
                             *m_logger << " (" << m_hit_maximum[ipar]+1 << ")" << std::endl;
@@ -750,14 +705,14 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
                 }
 
                 // Set new parameter value
-                pars->par(ipar).value(p);
+                pars.par(ipar).value(p);
 
             } // endif: Parameter was free
 
         } // endfor: computed new parameter vector
 
         // Evaluate function at new parameters
-        fct->eval(*pars);
+        fct.eval(pars);
 
         // If a free parameter has a zero diagonal element in the curvature
         // matrix then remove this parameter definitely from the fit as it
@@ -768,26 +723,25 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         // have to figure out how ... (the diagonal loading was not so
         // successful as it faked early convergence)
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (pars->par(ipar).isfree()) {
-                if ((*fct->covar())(ipar,ipar) == 0.0) {
-                    //(*fct->covar())(ipar,ipar) = m_diag_load;
+            if (pars.par(ipar).isfree()) {
+                if ((*fct.covar())(ipar,ipar) == 0.0) {
                     if (m_logger != NULL) {
-                        *m_logger << "  Parameter \"" << pars->par(ipar).name();
+                        *m_logger << "  Parameter \"" << pars.par(ipar).name();
                         *m_logger << "\" has zero covariance.";
                         *m_logger << " Fix parameter." << std::endl;
                     }
                     m_par_remove[ipar] = true;
-                    pars->par(ipar).fix();
+                    pars.par(ipar).fix();
                 }
             }
         }
 
         // Fetch new pointers since eval will allocate new memory
-        grad  = fct->gradient();
-        covar = fct->covar();
+        grad  = fct.gradient();
+        covar = fct.covar();
 
         // Retrieve new function value
-        m_value = *(fct->value());
+        m_value = fct.value();
 
         // Debug option: dump new function value
         #if defined(G_DEBUG_ITER)
@@ -798,29 +752,33 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
         // Determine how many parameters have changed
         int par_change = 0;
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (pars->par(ipar).value() != save_pars[ipar])
+            if (pars.par(ipar).value() != save_pars[ipar])
                 par_change++;
         }
 
         // If the function has decreased then accept the new solution and decrease
         // lambda ...
         double delta = save_value - m_value;
-        if (delta > 0.0)
+        if (delta > 0.0) {
             m_lambda *= m_lambda_dec;
+        }
 
         // ... if function is identical then accept new solution. If the parameters 
         // have changed then increase lambda, otherwise decrease lambda
         else if (delta == 0.0) {
-            if (par_change)
+            if (par_change) {
                 m_lambda *= m_lambda_inc;
-            else
+            }
+            else {
                 m_lambda *= m_lambda_dec;
+            }
         }
 
         // ... if function worsened slightly then accept new solution and increase
         // lambda
-        else if (delta > 1.0e-6)
+        else if (delta > 1.0e-6) {
             m_lambda *= m_lambda_inc;
+        }
 
         // ... otherwise,  if the statistics did not improve then use old parameters
         // and increase lamdba. Restore also the best statistics value that was
@@ -830,8 +788,9 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
             m_value   = save_value;
             *grad     = save_grad;
             *covar    = save_covar;
-            for (int ipar = 0; ipar < m_npars; ++ipar)
-                pars->par(ipar).value(save_pars[ipar]);
+            for (int ipar = 0; ipar < m_npars; ++ipar) {
+                pars.par(ipar).value(save_pars[ipar]);
+            }
         }
 
     } while (0); // endwhile: main loop
@@ -839,6 +798,119 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
     // Return
     return;
 
+}
+
+
+/***********************************************************************//**
+ * @brief Compute parameter uncertainties
+ *
+ * @param[in] fct Optimizer function.
+ * @param[in] pars Function parameters.
+ *
+ * Compute parameter uncertainties from the diagonal elements of the
+ * covariance matrix.
+ ***************************************************************************/
+void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
+{
+    // Get number of parameters
+    int npars = pars.npars();
+
+    // Perform final parameter evaluation
+    fct.eval(pars);
+
+    // Fetch sparse matrix pointer. We have to do this after the eval()
+    // method since eval() will allocate new memory for the covariance
+    // matrix!
+    GSparseMatrix* covar = fct.covar();
+
+    // Save best fitting value
+    m_value = fct.value();
+
+    // Save covariance matrix
+    GSparseMatrix save_covar = GSparseMatrix(*covar);
+
+    // Signal no diagonal element loading
+    bool diag_loaded = false;
+
+    // Loop over error computation (maximum 2 turns)
+    for (int i = 0; i < 2; ++i) {
+
+        // Solve: covar * X = unit
+        try {
+            covar->cholesky_decompose(1);
+            GVector unit(npars);
+            for (int ipar = 0; ipar < npars; ++ipar) {
+                unit[ipar] = 1.0;
+                GVector x  = covar->cholesky_solver(unit,1);
+                if (x[ipar] >= 0.0) {
+                    pars.par(ipar).error(sqrt(x[ipar]));
+                }
+                else {
+                    pars.par(ipar).error(0.0);
+                    m_status = G_LM_BAD_ERRORS;
+                }
+                unit[ipar] = 0.0;
+            }
+        }
+        catch (GException::matrix_zero &e) {
+            m_status = G_LM_SINGULAR;
+            if (m_logger != NULL) {
+                *m_logger << "GOptimizerLM::terminate: "
+                          << "All curvature matrix elements are zero."
+                          << std::endl;
+            }
+            break;
+        }
+        catch (GException::matrix_not_pos_definite &e) {
+
+            // Load diagonal if this has not yet been tried
+            if (!diag_loaded) {
+
+                // Flag errors as inaccurate
+                m_status = G_LM_BAD_ERRORS;
+                if (m_logger != NULL) {
+                    *m_logger << "Non-Positive definite curvature matrix encountered."
+                              << std::endl;
+                    *m_logger << "Load diagonal elements with 1e-10."
+                              << " Fit errors may be inaccurate."
+                              << std::endl;
+                }
+
+                // Try now with diagonal loaded matrix
+                *covar = save_covar;
+                for (int ipar = 0; ipar < npars; ++ipar) {
+                    (*covar)(ipar,ipar) += 1.0e-10;
+                }
+
+                // Signal loading
+                diag_loaded = true;
+
+                // Try again
+                continue;
+
+            } // endif: diagonal has not yet been loaded
+
+            // ... otherwise signal an error
+            else {
+                m_status = G_LM_NOT_POSTIVE_DEFINITE;
+                if (m_logger != NULL) {
+                    *m_logger << "Non-Positive definite curvature matrix encountered,"
+                              << " even after diagonal loading." << std::endl;
+                }
+                break;
+            }
+        }
+        catch (std::exception &e) {
+            throw;
+        }
+
+        // If no error occured then break now
+        break;
+
+    } // endfor: looped over error computation
+
+    // Return
+    return;
 }
 
 
@@ -853,7 +925,7 @@ void GOptimizerLM::iteration(GOptimizerFunction* fct, GOptimizerPars* pars)
  * next parameter vector should stay within the parameter boundaries
  * (provided that boundaries exist).
  ***************************************************************************/
-double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
+double GOptimizerLM::step_size(const GVector& grad, const GOptimizerPars& pars)
 {
     // Initialise step size
     double step = 1.0;
@@ -865,16 +937,16 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
         int ipar_bnd = -1;
 
         // Loop over all parameters
-        for (int ipar = 0; ipar < pars->npars(); ++ipar) {
+        for (int ipar = 0; ipar < pars.npars(); ++ipar) {
 
             // Get parameter attributes
-            double p     = pars->par(ipar).value();
-            double p_min = pars->par(ipar).min();
-            double p_max = pars->par(ipar).max();
-            double delta = (*grad)[ipar];
+            double p     = pars.par(ipar).value();
+            double p_min = pars.par(ipar).min();
+            double p_max = pars.par(ipar).max();
+            double delta = grad[ipar];
 
             // Check if a parameter minimum requires a reduced step size
-            if (pars->par(ipar).hasmin()) {
+            if (pars.par(ipar).hasmin()) {
                 double step_min = (delta < 0.0) ? (p_min - p)/delta : 1.0;
                 if (step_min > 0.0) {
                     if (step_min < step) {
@@ -887,7 +959,7 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
                         m_hit_boundary[ipar] = false;
                         if (m_logger != NULL) {
                             *m_logger << "  Parameter \"";
-                            *m_logger << pars->par(ipar).name();
+                            *m_logger << pars.par(ipar).name();
                             *m_logger << "\" does not drive optimization step anymore.";
                             *m_logger << std::endl;
                         }
@@ -896,7 +968,7 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
             }
 
             // Check if a parameter maximum requires a reduced step size
-            if (pars->par(ipar).hasmax()) {
+            if (pars.par(ipar).hasmax()) {
                 double step_max = (delta > 0.0) ? (p_max - p)/delta : 1.0;
                 if (step_max > 0.0) {
                     if (step_max < step) {
@@ -909,7 +981,7 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
                         m_hit_boundary[ipar] = false;
                         if (m_logger != NULL) {
                             *m_logger << "  Parameter \"";
-                            *m_logger << pars->par(ipar).name();
+                            *m_logger << pars.par(ipar).name();
                             *m_logger << "\" does not drive optimization step anymore.";
                             *m_logger << std::endl;
                         }
@@ -924,7 +996,7 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
             m_hit_boundary[ipar_bnd] = true;
             if (m_logger != NULL) {
                 *m_logger << "  Parameter \"";
-                *m_logger << pars->par(ipar_bnd).name();
+                *m_logger << pars.par(ipar_bnd).name();
                 *m_logger << "\" drives optimization step (step=";
                 *m_logger << step << ")" << std::endl;
             }
@@ -934,122 +1006,4 @@ double GOptimizerLM::step_size(GVector* grad, GOptimizerPars* pars)
 
     // Return step size
     return step;
-}
-
-
-/***********************************************************************//**
- * @brief Compute parameter uncertainties
- *
- * @param[in] fct Optimizer function.
- * @param[in] pars Function parameters.
- *
- * Compute parameter uncertainties from the diagonal elements of the
- * covariance matrix.
- ***************************************************************************/
-void GOptimizerLM::errors(GOptimizerFunction* fct, GOptimizerPars* pars)
-{
-    // Continue only if pointers are valid
-    if (fct != NULL && pars != NULL) {
-
-        // Get number of parameters
-        int npars = pars->npars();
-
-        // Perform final parameter evaluation
-        fct->eval(*pars);
-
-        // Fetch sparse matrix pointer. We have to do this after the eval()
-        // method since eval() will allocate new memory for the covariance
-        // matrix!
-        GSparseMatrix* covar = fct->covar();
-
-        // Save best fitting value
-        m_value = *(fct->value());
-
-        // Save covariance matrix
-        GSparseMatrix save_covar = GSparseMatrix(*covar);
-
-        // Signal no diagonal element loading
-        bool diag_loaded = false;
-
-        // Loop over error computation (maximum 2 turns)
-        for (int i = 0; i < 2; ++i) {
-
-            // Solve: covar * X = unit
-            try {
-                covar->cholesky_decompose(1);
-                GVector unit(npars);
-                for (int ipar = 0; ipar < npars; ++ipar) {
-                    unit[ipar] = 1.0;
-                    GVector x  = covar->cholesky_solver(unit,1);
-                    if (x[ipar] >= 0.0) {
-                        pars->par(ipar).error(sqrt(x[ipar]));
-                    }
-                    else {
-                        pars->par(ipar).error(0.0);
-                        m_status = G_LM_BAD_ERRORS;
-                    }
-                    unit[ipar] = 0.0;
-                }
-            }
-            catch (GException::matrix_zero &e) {
-                m_status = G_LM_SINGULAR;
-                if (m_logger != NULL) {
-                    *m_logger << "GOptimizerLM::terminate: "
-                              << "All curvature matrix elements are zero."
-                              << std::endl;
-                }
-                break;
-            }
-            catch (GException::matrix_not_pos_definite &e) {
-
-                // Load diagonal if this has not yet been tried
-                if (!diag_loaded) {
-
-                    // Flag errors as inaccurate
-                    m_status = G_LM_BAD_ERRORS;
-                    if (m_logger != NULL) {
-                        *m_logger << "Non-Positive definite curvature matrix encountered."
-                                  << std::endl;
-                        *m_logger << "Load diagonal elements with 1e-10."
-                                  << " Fit errors may be inaccurate."
-                                  << std::endl;
-                    }
-
-                    // Try now with diagonal loaded matrix
-                    *covar = save_covar;
-                    for (int ipar = 0; ipar < npars; ++ipar) {
-                        (*covar)(ipar,ipar) += 1.0e-10;
-                    }
-
-                    // Signal loading
-                    diag_loaded = true;
-
-                    // Try again
-                    continue;
-
-                } // endif: diagonal has not yet been loaded
-
-                // ... otherwise signal an error
-                else {
-                    m_status = G_LM_NOT_POSTIVE_DEFINITE;
-                    if (m_logger != NULL) {
-                        *m_logger << "Non-Positive definite curvature matrix encountered,"
-                                  << " even after diagonal loading." << std::endl;
-                    }
-                    break;
-                }
-            }
-            catch (std::exception &e) {
-                throw;
-            }
-
-            // If no error occured then break now
-            break;
-
-        } // endfor: looped over error computation
-
-    } // endif: pointers were valid
-
-    // Return
-    return;
 }

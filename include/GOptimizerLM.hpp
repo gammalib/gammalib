@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GOptimizerLM.hpp  -  Levenberg Marquardt optimizer           *
+ *             GOptimizerLM.hpp - Levenberg Marquardt optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GOptimizerLM.hpp
  * @brief Levenberg Marquardt optimizer class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GOPTIMIZERLM_HPP
@@ -31,7 +31,6 @@
 #include <vector>
 #include "GOptimizer.hpp"
 #include "GOptimizerFunction.hpp"
-#include "GModels.hpp"
 #include "GLog.hpp"
 
 /* __ Definitions ________________________________________________________ */
@@ -45,7 +44,7 @@
 /***********************************************************************//**
  * @class GOptimizerLM
  *
- * @brief Levenberg Marquardt optimizer class interface defintion
+ * @brief Levenberg Marquardt optimizer class
  *
  * This method implements an Levenberg Marquardt optimizer.
  ***************************************************************************/
@@ -55,49 +54,47 @@ public:
 
     // Constructors and destructors
     GOptimizerLM(void);
-    GOptimizerLM(GLog& log);
+    explicit GOptimizerLM(GLog& log);
     GOptimizerLM(const GOptimizerLM& opt);
     virtual ~GOptimizerLM(void);
 
     // Operators
-    GOptimizerLM&   operator= (const GOptimizerLM& opt);
-    GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p);
-    GModels&        operator() (GOptimizerFunction& fct, GModels& m);
+    GOptimizerLM& operator=(const GOptimizerLM& opt);
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void          clear(void);
     virtual GOptimizerLM* clone(void) const;
+    virtual void          optimize(GOptimizerFunction& fct, GOptimizerPars& pars);
+    virtual double        value(void) const { return m_value; }   //!< @brief Return function value
+    virtual int           status(void) const { return m_status; } //!< @brief Return optimization status
+    virtual int           iter(void) const { return m_iter; }     //!< @brief Return number of iterations
     virtual std::string   print(void) const;
-    virtual double        value(void) const { return m_value; }
-    virtual int           status(void) const { return m_status; }
-    virtual int           iter(void) const { return m_iter; }
     
     // Methods
-    void   max_iter(const int& n) { m_max_iter=n; }
-    void   max_stalls(const int& n) { m_max_stall=n; }
-    void   max_boundary_hits(const int& n) { m_max_stall=n; }
-    void   lambda_start(const double& val) { m_lambda_start=val; }
-    void   lambda_inc(const double& val) { m_lambda_inc=val; }
-    void   lambda_dec(const double& val) { m_lambda_dec=val; }
-    void   eps(const double& eps) { m_eps=eps; }
-    int    max_iter(void) const { return m_max_iter; }
-    int    max_stalls(void) const { return m_max_stall; }
-    int    max_boundary_hits(void) const { return m_max_hit; }
-    double lambda_start(void) const { return m_lambda_start; }
-    double lambda_inc(void) const { return m_lambda_inc; }
-    double lambda_dec(void) const { return m_lambda_dec; }
-    double lambda(void) const { return m_lambda; }
-    double eps(void) const { return m_eps; }
+    void          max_iter(const int& n) { m_max_iter=n; }                //!< @brief Set maximum number of iterations
+    void          max_stalls(const int& n) { m_max_stall=n; }             //!< @brief Set maximum number of stalls
+    void          max_boundary_hits(const int& n) { m_max_stall=n; }      //!< @brief Set maximum number of boundary hits
+    void          lambda_start(const double& val) { m_lambda_start=val; } //!< @brief Set lambda start value
+    void          lambda_inc(const double& val) { m_lambda_inc=val; }     //!< @brief Set lambda increment
+    void          lambda_dec(const double& val) { m_lambda_dec=val; }     //!< @brief Set lambda decrement
+    void          eps(const double& eps) { m_eps=eps; }                   //!< @brief Set convergence precisions
+    int           max_iter(void) const { return m_max_iter; }             //!< @brief Return maximum number of iterations
+    int           max_stalls(void) const { return m_max_stall; }          //!< @brief Return maximum number of stalls 
+    int           max_boundary_hits(void) const { return m_max_hit; }     //!< @brief Return maximum number of boundary hits
+    const double& lambda_start(void) const { return m_lambda_start; }     //!< @brief Return lambda start value
+    const double& lambda_inc(void) const { return m_lambda_inc; }         //!< @brief Return lambda increment
+    const double& lambda_dec(void) const { return m_lambda_dec; }         //!< @brief Return lambda derement
+    const double& lambda(void) const { return m_lambda; }                 //!< @brief Return lambda value
+    const double& eps(void) const { return m_eps; }                       //!< @brief Return convergence precision
 
 protected:
     // Protected methods
     void   init_members(void);
     void   copy_members(const GOptimizerLM& opt);
     void   free_members(void);
-    void   optimize(GOptimizerFunction* fct, GOptimizerPars* pars);
-    void   iteration(GOptimizerFunction* fct, GOptimizerPars* pars);
-    void   errors(GOptimizerFunction* fct, GOptimizerPars* pars);
-    double step_size(GVector* grad, GOptimizerPars* pars);
+    void   iteration(GOptimizerFunction& fct, GOptimizerPars& pars);
+    void   errors(GOptimizerFunction& fct, GOptimizerPars& pars);
+    double step_size(const GVector& grad, const GOptimizerPars& pars);
 
     // Protected members
     int               m_npars;           //!< Number of parameters
@@ -117,7 +114,6 @@ protected:
     std::vector<bool> m_par_remove;      //!< Bookkeeping of parameter removal
     double            m_lambda;          //!< Actual lambda
     double            m_value;           //!< Actual function value
-    //double            m_diag_load;       //!< Value for diagonal loading
     int               m_status;          //!< Fit status
     int               m_iter;            //!< Iteration
     GLog*             m_logger;          //!< Pointer to optional logger

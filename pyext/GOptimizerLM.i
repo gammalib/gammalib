@@ -47,25 +47,26 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GOptimizerLM* clone(void) const;
+    virtual void          optimize(GOptimizerFunction& fct, GOptimizerPars& pars);
     virtual double        value(void) const;
     virtual int           status(void) const;
     virtual int           iter(void) const;
     
     // Methods
-    void   max_iter(const int& n);
-    void   max_stalls(const int& n);
-    void   max_boundary_hits(const int& n);
-    void   lambda_start(const double& val);
-    void   lambda_inc(const double& val);
-    void   lambda_dec(const double& val);
-    void   eps(const double& eps);
-    int    max_iter(void) const;
-    int    max_stalls(void) const;
-    int    max_boundary_hits(void) const;
-    double lambda_start(void) const;
-    double lambda_inc(void) const;
-    double lambda_dec(void) const;
-    double eps(void) const;
+    void          max_iter(const int& n);
+    void          max_stalls(const int& n);
+    void          max_boundary_hits(const int& n);
+    void          lambda_start(const double& val);
+    void          lambda_inc(const double& val);
+    void          lambda_dec(const double& val);
+    void          eps(const double& eps);
+    int           max_iter(void) const;
+    int           max_stalls(void) const;
+    int           max_boundary_hits(void) const;
+    const double& lambda_start(void) const;
+    const double& lambda_inc(void) const;
+    const double& lambda_dec(void) const;
+    const double& eps(void) const;
 };
 
 
@@ -75,5 +76,8 @@ public:
 %extend GOptimizerLM {
     GOptimizerLM copy() {
         return (*self);
+    }
+    const double& lambda_value(void) {
+        return (self->lambda());
     }
 };
