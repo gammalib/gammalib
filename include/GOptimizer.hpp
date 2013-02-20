@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GOptimizer.hpp  -  Abstract base class for optimizer          *
+ *            GOptimizer.hpp - Abstract base class for optimizer           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizer.hpp
- * @brief Optimizer abstract base class interface definition.
+ * @brief Abstract optimizer abstract base class interface definition
  * @author Juergen Knoedlseder
  */
 
@@ -32,15 +32,24 @@
 #include "GBase.hpp"
 #include "GOptimizerPars.hpp"
 #include "GOptimizerFunction.hpp"
-#include "GModels.hpp"
 
 
 /***********************************************************************//**
  * @class GOptimizer
  *
- * @brief Optimizer abstract base class interface defintion
+ * @brief Abstract optimizer abstract base class
  *
- * This class defines the abstract interface for the optimizer class.
+ * This class defines the abstract interface for the optimizer class. The
+ * optimizer class is used to optimize the parameters of a function. The
+ * function is implemented using the abstract GOptimizerFunction class
+ * while the parameters are implemented using the abstract GOptimizerPars
+ * class.
+ *
+ * The main driver of this class is the optimize() method which optimizes
+ * the parameters using a function. The function value can be accessed
+ * using the value() method, the status() method provides an integer with
+ * status information, the iter() method gives the number of iterations for
+ * iterative optimization algorithms.
  ***************************************************************************/
 class GOptimizer : public GBase {
 
@@ -51,19 +60,16 @@ public:
     virtual ~GOptimizer(void);
 
     // Operators
-    virtual GOptimizer&     operator= (const GOptimizer& opt);
-    virtual GOptimizerPars& operator() (GOptimizerFunction& fct, GOptimizerPars& p) = 0;
-    virtual GModels&        operator() (GOptimizerFunction& fct, GModels& m) = 0;
+    virtual GOptimizer& operator=(const GOptimizer& opt);
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GOptimizer* clone(void) const = 0;
+    virtual void        optimize(GOptimizerFunction& fct, GOptimizerPars& pars) = 0;
     virtual double      value(void) const = 0;
     virtual int         status(void) const = 0;
     virtual int         iter(void) const = 0;
     virtual std::string print(void) const = 0;
- 
-    // Implemented methods
 
 protected:
     // Protected methods

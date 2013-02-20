@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GOptimizer.cpp  -  Abstract base class for optimizer          *
+ *            GOptimizer.cpp - Abstract base class for optimizer           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizer.cpp
- * @brief GOptimizer abstract base class implementation.
+ * @brief Abstract optimizer abstract base class interface implementation
  * @author Juergen Knoedlseder
  */
 
@@ -96,6 +96,7 @@ GOptimizer::~GOptimizer()
  * @brief Assignment operator
  *
  * @param[in] opt Optimizer.
+ * @return Optimizer.
  ***************************************************************************/
 GOptimizer& GOptimizer::operator= (const GOptimizer& opt)
 { 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GOptimizer.i  -  Optimizer class Python interface            *
+ *             GOptimizer.i - Abstract base class for optimizer            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizer.i
- * @brief Optimizer abstract base class Python interface
+ * @brief Abstract optimizer abstract base class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,9 +33,7 @@
 /***********************************************************************//**
  * @class GOptimizer
  *
- * @brief Optimizer base class Python interface defintion
- *
- * This class defines the abstract interface for the optimizer class.
+ * @brief Abstract optimizer abstract base class
  ***************************************************************************/
 class GOptimizer : public GBase {
 
@@ -48,6 +46,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GOptimizer* clone(void) const = 0;
+    virtual void        optimize(GOptimizerFunction& fct, GOptimizerPars& pars) = 0;
     virtual double      value(void) const = 0;
     virtual int         status(void) const = 0;
     virtual int         iter(void) const = 0;
