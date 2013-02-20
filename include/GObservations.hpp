@@ -111,11 +111,11 @@ public:
     void           save(const std::string& filename) const;
     void           read(const GXml& xml);
     void           write(GXml& xml) const;
-    void           models(const GModels& models) { m_models=models;}
+    void           models(const GModels& models) { m_models=models;} //!< @brief Set model container
     void           models(const std::string& filename);
-    const GModels& models(void) { return m_models; }
+    const GModels& models(void) { return m_models; } //!< @brief Return model container
     void           optimize(GOptimizer& opt);
-    double         npred(void) const { return m_fct.npred(); }
+    double         npred(void) const { return m_fct.npred(); } //!< @brief Return total number of predicted events
     std::string    print(void) const;
 
 
@@ -129,57 +129,63 @@ public:
         ~optimizer(void);
 
         // Operators
-        optimizer& operator= (const optimizer& fct);
+        optimizer& operator=(const optimizer& fct);
 
-        // Methods
-        void           set(GObservations* obs) { m_this=obs; }
-        void           eval(const GOptimizerPars& pars);
-        void           poisson_unbinned(const GObservation&   obs,
-                                        const GOptimizerPars& pars);
-        void           poisson_unbinned(const GObservation&   obs,
-                                        const GOptimizerPars& pars,
-                                        GSparseMatrix&        covar,
-                                        GVector&              mgrad,
-                                        double&               value,
-                                        GVector&              gradient);
-        void           poisson_binned(const GObservation&   obs,
-                                      const GOptimizerPars& pars);
-        void           poisson_binned(const GObservation&   obs,
-                                      const GOptimizerPars& pars,
-                                      GSparseMatrix&        covar,
-                                      GVector&              mgrad,
-                                      double&               value,
-                                      double&               npred,
-                                      GVector&              gradient);
-        void           gaussian_binned(const GObservation&   obs,
-                                       const GOptimizerPars& pars);
-        void           gaussian_binned(const GObservation&   obs,
-                                       const GOptimizerPars& pars,
-                                       GSparseMatrix&        covar,
-                                       GVector&              mgrad,
-                                       double&               value,
-                                       double&               npred,
-                                       GVector&              gradient);
-        double*        value(void) { return &m_value; }
-        double         npred(void) const { return m_npred; }
-        GVector*       gradient(void) { return m_gradient; }
-        GSparseMatrix* covar(void) { return m_covar; }
+        // Implemented pure virtual base class methods
+        double         value(void) { return m_value; }       //!< @brief Return optimizer function value
+        double         npred(void) const { return m_npred; } //!< @brief Return predicted number of events
+        GVector*       gradient(void) { return m_gradient; } //!< @brief Return pointer to gradient vector
+        GSparseMatrix* covar(void) { return m_covar; }       //!< @brief Return pointer to covariance matrix
+
+        // Other methods
+        void set(GObservations* obs) { m_this=obs; } //!< @brief Set GObservations pointer
+        void eval(const GOptimizerPars& pars);
+        void poisson_unbinned(const GObservation&   obs,
+                              const GOptimizerPars& pars);
+        void poisson_unbinned(const GObservation&   obs,
+                              const GOptimizerPars& pars,
+                              GSparseMatrix&        covar,
+                              GVector&              mgrad,
+                              double&               value,
+                              GVector&              gradient);
+        void poisson_binned(const GObservation&   obs,
+                            const GOptimizerPars& pars);
+        void poisson_binned(const GObservation&   obs,
+                            const GOptimizerPars& pars,
+                            GSparseMatrix&        covar,
+                            GVector&              mgrad,
+                            double&               value,
+                            double&               npred,
+                            GVector&              gradient);
+        void gaussian_binned(const GObservation&   obs,
+                             const GOptimizerPars& pars);
+        void gaussian_binned(const GObservation&   obs,
+                             const GOptimizerPars& pars,
+                             GSparseMatrix&        covar,
+                             GVector&              mgrad,
+                             double&               value,
+                             double&               npred,
+                             GVector&              gradient);
+
     protected:
+        // Protected methods
         void           init_members(void);
         void           copy_members(const optimizer& fct);
         void           free_members(void);
+
+        // Protected data members
         double         m_value;       //!< Function value
         double         m_npred;       //!< Total number of predicted events
         double         m_minmod;      //!< Minimum model value
         double         m_minerr;      //!< Minimum error value
         GVector*       m_gradient;    //!< Pointer to gradient vector
         GSparseMatrix* m_covar;       //!< Pointer to covariance matrix
-        GObservations* m_this;        //!< Pointer to GObservations object
         GVector*       m_wrk_grad;    //!< Pointer to working gradient vector
+        GObservations* m_this;        //!< Pointer to GObservations object
     };
 
     // Optimizer access method
-    const GObservations::optimizer& function(void) const { return m_fct; }
+    const GObservations::optimizer& function(void) const { return m_fct; } //!< @brief Return optimizer function
 
 protected:
     // Protected methods
