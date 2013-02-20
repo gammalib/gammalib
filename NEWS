@@ -43,6 +43,9 @@ from GContainer:
 - GGti
 - GOptimizerPars (and hence GModels)
 
+Appropriate methods have been implemented in these classes to handle
+containers. They are not detailed here.
+
 
 6. FITS I/O Interface
 ---------------------
