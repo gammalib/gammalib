@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GOptimizerPars.hpp  -  Optimizer parameters abstract base class     *
+ *    GOptimizerPars.hpp - Abstract optimizer parameters container class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizerPars.hpp
- * @brief Optimizer parameters abstract base class definition
+ * @brief Abstract optimizer parameters base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -38,12 +38,14 @@
  *
  * @brief Optimizer parameter container class
  *
- * This class is a container class for model parameters.
+ * This class is a container class for parameters of a function that are to
+ * be optimized. The optimizer function is defined by the abstract
+ * GOptimizerFunction class.
  *
- * As the class holds simpliy a collection of model parameters, it should
- * neither deal with allocation and deallocation, nor with cloning of
- * model parameters. This will be done by the classes that actually
- * implement the model parameters.
+ * The class holds a flat array of pointers to models parameters. It neither
+ * deals with allocation and deallocation, nor with cloning of function
+ * parameters, this will be done by the classes that actually implement the
+ * model parameters.
  *
  * @todo This container class has no operator[] method as GModels is a
  *       derived class of this container class so that GModels can be
@@ -63,14 +65,14 @@ public:
     // Operators
     virtual GOptimizerPars& operator=(const GOptimizerPars& pars);
 
-    // Methods
-    virtual void             clear(void);
-    virtual GOptimizerPars*  clone(void) const;
-    virtual int              npars(void) const { return m_pars.size(); }
+    // Pure virtual methods
+    virtual void clear(void) = 0;
+
+    // Other methods
+    virtual int              npars(void) const { return m_pars.size(); } //! @brief Return number of parameters
     virtual int              nfree(void) const;
     virtual GModelPar&       par(const int& index);
     virtual const GModelPar& par(const int& index) const;
-    virtual std::string      print(void) const;
 
 protected:
     // Protected methods

@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GOptimizerPars.i  -  Optimizer parameters abstract base class      *
+ *     GOptimizerPars.i - Abstract optimizer parameter container class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GOptimizerPars.i
- * @brief Optimizer parameters abstract base class definition
+ * @brief Abstract optimizer parameters base class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -42,12 +42,14 @@ public:
     GOptimizerPars(const GOptimizerPars& pars);
     virtual ~GOptimizerPars(void);
 
-    // Virtual methods
-    virtual void            clear(void);
-    virtual GOptimizerPars* clone(void) const;
-    virtual int             npars(void) const;
-    virtual int             nfree(void) const;
-    virtual GModelPar&      par(const int& index);
+    // Pure virtual methods
+    virtual void clear(void) = 0;
+
+    // Methods
+    virtual int              npars(void) const;
+    virtual int              nfree(void) const;
+    virtual GModelPar&       par(const int& index);
+    virtual const GModelPar& par(const int& index) const;
 };
 
 
@@ -55,10 +57,4 @@ public:
  * @brief GOptimizerPars class extension
  ***************************************************************************/
 %extend GOptimizerPars {
-    char *__str__() {
-        return tochar(self->print());
-    }
-    GOptimizerPars copy() {
-        return (*self);
-    }
 };

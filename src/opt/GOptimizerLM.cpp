@@ -156,7 +156,7 @@ GOptimizerPars& GOptimizerLM::operator()(GOptimizerFunction& fct,
                                          GOptimizerPars&     p)
 {
     // Initalise output parameters with input parameters
-    GOptimizerPars* pars = new GOptimizerPars(p);
+    GOptimizerPars* pars = p.clone();
 
     // Perform LM optimization
     optimize(&fct, pars);

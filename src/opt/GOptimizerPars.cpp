@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GOptimizerPars.cpp  -  Parameter container class           *
+ *    GOptimizerPars.cpp - Abstract optimizer parameters container class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GOptimizerPars.cpp
- * @brief Optimizer parameter container class implementation
- * @author J. Knodlseder
+ * @brief Abstract optimizer parameter container class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -102,6 +102,7 @@ GOptimizerPars::~GOptimizerPars()
  * @brief Assignment operator
  *
  * @param[in] pars Optimizer parameters.
+ * @return Optimizer parameters.
  ***************************************************************************/
 GOptimizerPars& GOptimizerPars::operator= (const GOptimizerPars& pars)
 { 
@@ -131,32 +132,12 @@ GOptimizerPars& GOptimizerPars::operator= (const GOptimizerPars& pars)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
- ***************************************************************************/
-void GOptimizerPars::clear(void)
-{
-    // Free class members
-    free_members();
-
-    // Initialise members
-    init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone instance
- ***************************************************************************/
-GOptimizerPars* GOptimizerPars::clone(void) const
-{
-    return new GOptimizerPars(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of free parameters
+ * @brief Return number of free parameters
+ *
+ * @return Number of free parameters.
+ *
+ * Determines the number of free parameters by collecting statistics from all
+ * model parameters.
  ***************************************************************************/
 int GOptimizerPars::nfree(void) const
 {
@@ -165,8 +146,9 @@ int GOptimizerPars::nfree(void) const
     
     // Collect all free parameters
     for (int i = 0; i < npars(); ++i) {
-        if (m_pars[i]->isfree())
+        if (m_pars[i]->isfree()) {
             nfree++;
+        }
     }
     
     // Return
@@ -177,7 +159,7 @@ int GOptimizerPars::nfree(void) const
 /***********************************************************************//**
  * @brief Returns reference to model parameter
  *
- * @param[in] index Parameter index [0,...,npars()-1]
+ * @param[in] index Parameter index [0,...,npars()-1].
  *
  * @exception GException::out_of_range
  *            Parameter index is out of range.
@@ -186,8 +168,9 @@ GModelPar& GOptimizerPars::par(const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= npars())
+    if (index < 0 || index >= npars()) {
         throw GException::out_of_range(G_PAR, index, 0, npars()-1);
+    }
     #endif
     
     // Return parameter reference
@@ -198,7 +181,7 @@ GModelPar& GOptimizerPars::par(const int& index)
 /***********************************************************************//**
  * @brief Returns reference to model parameter (const version)
  *
- * @param[in] index Parameter index [0,...,npars()-1]
+ * @param[in] index Parameter index [0,...,npars()-1].
  *
  * @exception GException::out_of_range
  *            Parameter index is out of range.
@@ -207,31 +190,13 @@ const GModelPar& GOptimizerPars::par(const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= npars())
+    if (index < 0 || index >= npars()) {
         throw GException::out_of_range(G_PAR, index, 0, npars()-1);
+    }
     #endif
     
     // Return parameter reference
     return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Print models
- ***************************************************************************/
-std::string GOptimizerPars::print(void) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Append header
-    result.append("=== GOptimizerPars ===");
-    result.append("\n"+parformat("Number of parameters")+str(npars()));
-    for (int i = 0; i < npars(); ++i)
-        result.append("\n"+m_pars[i]->print());
-
-    // Return result
-    return result;
 }
 
 
