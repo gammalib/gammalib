@@ -1,7 +1,7 @@
 /***************************************************************************
  *              test_GOptimizer.cpp - test GOptimizer class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -61,7 +61,7 @@ void TestGOptimizer::set(void){
  * 
  * This method supports two testing modes: 0 = unbinned and 1 = binned.
  ***************************************************************************/
-GModelPar& TestGOptimizer::test_optimizer(int mode)
+void TestGOptimizer::test_optimizer(const int& mode)
 {
     // Create Test Model
     GTestModelData model;
@@ -122,16 +122,17 @@ GModelPar& TestGOptimizer::test_optimizer(int mode)
     obs.optimize(opt);
 
     // Get the result
-    GModelPar& result = (*(obs.models()[0]))[0];
+    GModelPar result = (*(obs.models()[0]))[0];
 
-    //check if converged
-    test_assert(opt.status()==0, "Check if converged", "Optimizer did not convered"); 
+    // Check if converged
+    test_assert(opt.status()==0, "Check if converged", 
+                                 "Optimizer did not converge"); 
 
-    //check if value is correct
-    test_value(result.value(),RATE,result.error()*3); 
+    // Check if value is correct
+    test_value(result.value(), RATE, result.error()*3); 
 
     // Return
-    return (*(obs.models()[0]))[0];
+    return;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GOptimizer.hpp  -  test optimizer module              *
+ *               test_GOptimizer.hpp - test optimizer module               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,6 +47,7 @@ public:
     virtual void set(void);
     void         test_unbinned_optimizer(void);
     void         test_binned_optimizer(void);
-    GModelPar&   test_optimizer(int mode);
+    void         test_optimizer(const int& mode);
 };
+
 #endif /* TEST_GOPTIMIZER_HPP */

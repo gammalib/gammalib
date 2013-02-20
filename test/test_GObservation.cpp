@@ -560,7 +560,7 @@ void TestOpenMP::set(void)
  * 
  * This method supports two testing modes: 0 = unbinned and 1 = binned.
  ***************************************************************************/
-GModelPar& TestOpenMP::test_observations_optimizer(int mode)
+void TestOpenMP::test_observations_optimizer(const int& mode)
 {
     // Create Test Model
     GTestModelData model;
@@ -621,16 +621,17 @@ GModelPar& TestOpenMP::test_observations_optimizer(int mode)
     obs.optimize(opt);
 
     // Get the result
-    GModelPar& result = (*(obs.models()[0]))[0];
+    GModelPar result = (*(obs.models()[0]))[0];
 
-    //check if converged
-    test_assert(opt.status()==0, "Check if converged", "Optimizer did not convered"); 
+    // Check if converged
+    test_assert(opt.status()==0, "Check if converged", 
+                                 "Optimizer did not converge"); 
 
-    //check if value is correct
+    // Check if value is correct
     test_value(result.value(),RATE,result.error()*3); 
 
     // Return
-    return (*(obs.models()[0]))[0];
+    return;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                      test_COM.cpp  -  test COM classes                  *
+ *                       test_COM.cpp - test COM classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -603,13 +603,11 @@ void TestGCOMOptimize::test_binned_optimizer(void)
         GOptimizerLM opt;
         opt.max_iter(100);
         obs.optimize(opt);
-//std::cout << obs << std::endl;
-//std::cout << opt << std::endl;
         test_try_success();
         for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            GModel* model = obs.models()[i];
+            const GModel* model = obs.models()[i];
             for (int k = 0; k < model->size(); ++k) {
-                GModelPar& par  = (*model)[k];
+                GModelPar par  = (*model)[k];
                 std::string msg = "Verify optimization result for " + par.print();
                 test_value(par.real_value(), fit_results[j++], 5.0e-5, msg);
                 test_value(par.real_error(), fit_results[j++], 5.0e-5, msg);

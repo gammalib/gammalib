@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_MWL.cpp  -  Test multi-wavelength classes             *
+ *               test_MWL.cpp - Test multi-wavelength classes              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -221,9 +221,9 @@ void TestGMWL::test_optimizer(void)
         obs.optimize(opt);
         test_try_success();
         for (int i = 0, j = 0; i < obs.models().size(); ++i) {
-            GModel* model = obs.models()[i];
+            const GModel* model = obs.models()[i];
             for (int k = 0; k < model->size(); ++k) {
-                GModelPar& par = (*model)[k];
+                GModelPar par = (*model)[k];
                 std::string msg = "Verify optimization result for " + par.print();
                 test_value(par.real_value(), fit_results[j++], 1.0e-4, msg);
                 test_value(par.real_error(), fit_results[j++], 1.0e-3, msg);

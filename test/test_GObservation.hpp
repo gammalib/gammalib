@@ -71,7 +71,7 @@ public:
     void         test_observations_optimizer_unbinned_10();
     void         test_observations_optimizer_binned_1();
     void         test_observations_optimizer_binned_10();
-    GModelPar&   test_observations_optimizer(int mode=0);
+    void         test_observations_optimizer(const int& mode=0);
 };
 #endif
 
