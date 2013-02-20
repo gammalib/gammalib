@@ -12,7 +12,6 @@ sources = GEnergy.cpp \
           GTimeReference.cpp \
           GCaldb.cpp \
           GObservations.cpp \
-          GObservations_iterator.cpp \
           GObservations_optimizer.cpp \
           GObservation.cpp \
           GObservationRegistry.cpp \

@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GObservations.hpp  -  Observation container class           *
+ *              GObservations.hpp - Observation container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GObservation.hpp"
 #include "GEvent.hpp"
 #include "GOptimizer.hpp"
@@ -41,26 +41,49 @@
 /***********************************************************************//**
  * @class GObservations
  *
- * @brief GObservations container class interface defintion.
+ * @brief Observation container class
  *
- * This is the main user interface class that provides high level access to
- * gamma-ray observations and their analysis. Observations are appended using
- * the append() method and can be access using the operator(). The class
- * implements an event iterator GObservations::iterator that allows iterating
- * over all events in all observations.
+ * This is the main user interface class that provides high-level access to
+ * gamma-ray observations and manages their scientific analysis.
  *
- * @todo Implement models pointer instead of models elements since models
- * should be attached without loosing the external link to the model
- * parameters.
+ * GObservations holds a list of pointers to GObservation objects which
+ * implement gamma-ray observations. The class derives from the abstract
+ * container interface class GContainer, and provides methods to manage the
+ * list of observations.
+ * The append() appends an observation to the container, the insert() method
+ * inserts an observation at a specific position in the list (though the
+ * order of the observations in the list is not relevant for the scientific
+ * analysis).
+ * The remove() method removes a specific observation from the list and the
+ * extend() method extends the list of observations by appending another
+ * list of observations to it.
+ * The size() method provides the number of observations in the list.
  *
- * @todo Implement append() method using a pointer instead of a reference
- * to make clear that the observation is linked from the outside (and thus
- * has to be preserved). Or should we have both options????
+ * The operator[] provides access to an observation in the list by index,
+ * returning a reference to the observation.
  *
- * @todo Use std::vector for building a list of pointers to observations
- * instead of a proper memory handling implementation.
+ * The observation information may be stored into a XML file. The save()
+ * method saves all information into a XML file while the load() method
+ * loads the information into the list. Alternatively, a XML file
+ * constructor can be used to construct an instance of GObservations by
+ * loading observation information from a XML file. In addition, the
+ * read() and write() method handle the reading and writing of observation
+ * information from and into a XML object of type GXml.
+ *
+ * The class also holds a list of models that is implemented by the GModels
+ * class. The models() method allows setting and retrieving the list of
+ * models, as well as loading of models from an XML file.
+ *
+ * Based on the list of models, the optimize() method will optimize all
+ * model parameters that are marked as free in the list of models. The
+ * npred() method returns the total number of events that are prediced
+ * by all models after optimization.
+ *
+ * GObservations also provides an optimizer class that is derived from
+ * the abstract GOptimizerFunction base class. The GObservations::optimizer
+ * class is the object that is used for model parameter optimization.
  ***************************************************************************/
-class GObservations : public GBase {
+class GObservations : public GContainer {
 
 public:
     // Constructors and destructors
@@ -78,48 +101,23 @@ public:
     void           clear(void);
     GObservations* clone(void) const;
     int            size(void) const { return m_obs.size(); }
-    void           append(GObservation& obs);
+    bool           isempty(void) const { return m_obs.empty(); }
+    void           append(const GObservation& obs);
+    void           insert(const int& index, const GObservation& obs);
+    void           remove(const int& index);
+    void           reserve(const int& num) { return m_obs.reserve(num); }
+    void           extend(const GObservations& obs);
     void           load(const std::string& filename);
     void           save(const std::string& filename) const;
     void           read(const GXml& xml);
     void           write(GXml& xml) const;
     void           models(const GModels& models) { m_models=models;}
     void           models(const std::string& filename);
-    GModels&       models(void) { return m_models; }
+    const GModels& models(void) { return m_models; }
     void           optimize(GOptimizer& opt);
-    double         npred(void) const { return m_npred; }
+    double         npred(void) const { return m_fct.npred(); }
     std::string    print(void) const;
 
-    // Event iterator
-    class iterator {
-    friend class GObservations;
-    public:
-        // Constructors and destructors
-        iterator(void);
-        iterator(GObservations *obs);
-        ~iterator(void) { return; }
-
-        // Operators
-        iterator&     operator++(void);                // Prefix
-        iterator      operator++(int junk);            // Postfix
-        bool          operator==(const iterator& it) const 
-                      { return ((m_index == it.m_index) && (m_event == it.m_event)); }
-        bool          operator!=(const iterator& it) const
-                      { return ((m_index != it.m_index) || (m_event != it.m_event)); }
-        GEvent&       operator*(void) { return *m_event; }
-        GEvent*       operator->(void) { return &(*m_event); }
-
-        // Methods
-        GObservation* obs(void) { return m_obs; }
-    protected:
-        int               m_index;    //!< Actual observation index [0,m_num-1]
-        GEvents::iterator m_event;    //!< Iterator on actual event
-        GEvents::iterator m_end;      //!< Iterator on observation end
-        GObservation*     m_obs;      //!< Pointer to actual observation
-        GObservations*    m_this;     //!< Pointer to GObservations object
-    };
-    iterator begin(void);
-    iterator end(void);
 
     // Optimizer
     class optimizer : public GOptimizerFunction {
@@ -134,13 +132,34 @@ public:
         optimizer& operator= (const optimizer& fct);
 
         // Methods
+        void           set(GObservations* obs) { m_this=obs; }
         void           eval(const GOptimizerPars& pars);
-        void           poisson_unbinned(const GObservation& obs, const GOptimizerPars& pars);
-        void           poisson_unbinned(const GObservation& obs, const GOptimizerPars& pars, GSparseMatrix& covar, GVector& mgrad, double& value, GVector& gradient);
-        void           poisson_binned(const GObservation& obs, const GOptimizerPars& pars);
-        void           poisson_binned(const GObservation& obs, const GOptimizerPars& pars, GSparseMatrix& covar, GVector& mgrad, double& value, double& npred, GVector& gradient);
-        void           gaussian_binned(const GObservation& obs, const GOptimizerPars& pars);
-        void           gaussian_binned(const GObservation& obs, const GOptimizerPars& pars, GSparseMatrix& covar, GVector& mgrad, double& value, double& npred, GVector& gradient);
+        void           poisson_unbinned(const GObservation&   obs,
+                                        const GOptimizerPars& pars);
+        void           poisson_unbinned(const GObservation&   obs,
+                                        const GOptimizerPars& pars,
+                                        GSparseMatrix&        covar,
+                                        GVector&              mgrad,
+                                        double&               value,
+                                        GVector&              gradient);
+        void           poisson_binned(const GObservation&   obs,
+                                      const GOptimizerPars& pars);
+        void           poisson_binned(const GObservation&   obs,
+                                      const GOptimizerPars& pars,
+                                      GSparseMatrix&        covar,
+                                      GVector&              mgrad,
+                                      double&               value,
+                                      double&               npred,
+                                      GVector&              gradient);
+        void           gaussian_binned(const GObservation&   obs,
+                                       const GOptimizerPars& pars);
+        void           gaussian_binned(const GObservation&   obs,
+                                       const GOptimizerPars& pars,
+                                       GSparseMatrix&        covar,
+                                       GVector&              mgrad,
+                                       double&               value,
+                                       double&               npred,
+                                       GVector&              gradient);
         double*        value(void) { return &m_value; }
         double         npred(void) const { return m_npred; }
         GVector*       gradient(void) { return m_gradient; }
@@ -159,6 +178,9 @@ public:
         GVector*       m_wrk_grad;    //!< Pointer to working gradient vector
     };
 
+    // Optimizer access method
+    const GObservations::optimizer& function(void) const { return m_fct; }
+
 protected:
     // Protected methods
     void init_members(void);
@@ -166,10 +188,9 @@ protected:
     void free_members(void);
 
     // Protected members
-    std::vector<GObservation*> m_obs;      //!< List of observations
-    GModels                    m_models;   //!< Models
-    double                     m_npred;    //!< Total number of predicted events
-
+    std::vector<GObservation*> m_obs;    //!< List of observations
+    GModels                    m_models; //!< List of models
+    GObservations::optimizer   m_fct;    //!< Optimizer function
 };
 
 #endif /* GOBSERVATIONS_HPP */

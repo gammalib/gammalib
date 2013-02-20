@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GObservations.i  -  Observations container class            *
+ *              GObservations.i - Observations container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GObservations.i
- * @brief Observation container class Python interface definition
+ * @brief Observations container class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -35,7 +35,7 @@
  *
  * @brief Observation container class
  ***************************************************************************/
-class GObservations : public GBase {
+class GObservations : public GContainer {
 public:
     // Constructors and destructors
     GObservations(void);
@@ -47,16 +47,24 @@ public:
     void           clear(void);
     GObservations* clone(void) const;
     int            size(void) const;
-    void           append(GObservation& obs);
+    bool           isempty(void) const;
+    void           append(const GObservation& obs);
+    void           insert(const int& index, const GObservation& obs);
+    void           remove(const int& index);
+    void           reserve(const int& num);
+    void           extend(const GObservations& obs);
     void           load(const std::string& filename);
     void           save(const std::string& filename) const;
     void           read(const GXml& xml);
     void           write(GXml& xml) const;
     void           models(const GModels& models);
     void           models(const std::string& filename);
-    GModels&       models(void) { return m_models; }
+    const GModels& models(void);
     void           optimize(GOptimizer& opt);
     double         npred(void) const;
+
+    // Optimizer access method
+    const GObservations::optimizer& function(void) const;
 };
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GObservations_optimizer.cpp  -  Optimizer class of observations class  *
+ *   GObservations_optimizer.cpp - Optimizer class of observations class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GObservations_optimizer.cpp
  * @brief Model parameter optimization class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -63,7 +63,7 @@
 
 /***********************************************************************//**
  * @brief Void constructor
-***************************************************************************/
+ ***************************************************************************/
 GObservations::optimizer::optimizer(void) : GOptimizerFunction()
 {
     // Initialise members
@@ -75,9 +75,13 @@ GObservations::optimizer::optimizer(void) : GOptimizerFunction()
 
 
 /***********************************************************************//**
- * @brief Construct optimizer from GObservations observation container
+ * @brief Observations constructor
  *
- * @param[in] obs Observations container.
+ * @param[in] obs Observations container pointer.
+ *
+ * Constructs optimizer from GObservations container. The method copies the
+ * pointer to the observation container in the m_this member, making the
+ * observation container accessible to the optimizer class.
  ***************************************************************************/
 GObservations::optimizer::optimizer(GObservations *obs) : GOptimizerFunction()
 {
@@ -96,11 +100,12 @@ GObservations::optimizer::optimizer(GObservations *obs) : GOptimizerFunction()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] fct Optimizer.
+ * @param[in] fct Optimizer function.
  ***************************************************************************/
-GObservations::optimizer::optimizer(const optimizer& fct) : GOptimizerFunction(fct)
+GObservations::optimizer::optimizer(const optimizer& fct) :
+                          GOptimizerFunction(fct)
 {
-    // Initialise class members for clean destruction
+    // Initialise members
     init_members();
 
     // Copy members
@@ -133,7 +138,8 @@ GObservations::optimizer::~optimizer(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] fct Optimizer.
+ * @param[in] fct Optimizer function.
+ * @return Optimizer function.
  ***************************************************************************/
 GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& fct)
 {
@@ -146,7 +152,7 @@ GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& 
         // Free members
         free_members();
 
-        // Initialise private members for clean destruction
+        // Initialise private members
         init_members();
 
         // Copy members
@@ -166,7 +172,7 @@ GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& 
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief   Evaluate log-likelihood function
+ * @brief Evaluate log-likelihood function
  *
  * @param[in] pars Optimizer parameters.
  *
@@ -174,7 +180,7 @@ GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& 
  *            Invalid optimization statistics encountered.
  *
  * This method evaluates the -(log-likelihood) function for parameter
- * optimisation. It handles both binned and unbinned data and supportes
+ * optimization. It handles both binned and unbinned data and supportes
  * Poisson and Gaussian statistics. 
  * Note that different statistics and different analysis methods
  * (binned/unbinned) may be combined.
@@ -184,14 +190,15 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     // Timing measurement
     #if G_EVAL_TIMING
     #ifdef _OPENMP
-            double t_start = omp_get_wtime();
+    double t_start = omp_get_wtime();
     #else
-            clock_t t_start = clock();
+    clock_t t_start = clock();
     #endif
     #endif
 
     // Single loop for common exit point
     do {
+
         // Get number of parameters
         int npars = pars.npars();
 
@@ -411,9 +418,9 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     // Timing measurement
     #if G_EVAL_TIMING
     #ifdef _OPENMP
-        double t_elapse = omp_get_wtime()-t_start;
+    double t_elapse = omp_get_wtime()-t_start;
     #else
-        double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
     #endif
     std::cout << "GObservations::optimizer::eval: CPU usage = "
               << t_elapse << " sec" << std::endl;
@@ -473,9 +480,9 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
     // Timing measurement
     #if G_EVAL_TIMING
     #ifdef _OPENMP
-        double t_start = omp_get_wtime();
+    double t_start = omp_get_wtime();
     #else
-                clock_t t_start = clock();
+    clock_t t_start = clock();
     #endif
     #endif
 
@@ -561,9 +568,9 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
     // Timing measurement
     #if G_EVAL_TIMING
     #ifdef _OPENMP
-        double t_elapse = omp_get_wtime()-t_start;
+    double t_elapse = omp_get_wtime()-t_start;
     #else
-        double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
     #endif
     std::cout << "GObservations::optimizer::poisson_unbinned: CPU usage = "
               << t_elapse << " sec" << std::endl;
@@ -627,9 +634,9 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
     // Timing measurement
     #if G_EVAL_TIMING
     #ifdef _OPENMP
-        double t_start = omp_get_wtime();
+    double t_start = omp_get_wtime();
     #else
-                clock_t t_start = clock();
+    clock_t t_start = clock();
     #endif
     #endif
 
@@ -801,9 +808,9 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
     // Timing measurement
     #if G_EVAL_TIMING
     #ifdef _OPENMP
-        double t_elapse = omp_get_wtime()-t_start;
+    double t_elapse = omp_get_wtime()-t_start;
     #else
-            double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
     #endif
     std::cout << "GObservations::optimizer::poisson_binned: CPU usage = "
               << t_elapse << " sec" << std::endl;
@@ -868,9 +875,9 @@ void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
     // Timing measurement
     #if G_EVAL_TIMING
     #ifdef _OPENMP
-        double t_start = omp_get_wtime();
+    double t_start = omp_get_wtime();
     #else
-                clock_t t_start = clock();
+    clock_t t_start = clock();
     #endif
     #endif
 
@@ -975,9 +982,9 @@ void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
     // Timing measurement
     #if G_EVAL_TIMING
     #ifdef _OPENMP
-        double t_elapse = omp_get_wtime()-t_start;
+    double t_elapse = omp_get_wtime()-t_start;
     #else
-        double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
+    double t_elapse = (double)(clock() - t_start) / (double)CLOCKS_PER_SEC;
     #endif
     std::cout << "GObservations::optimizer::gaussian_binned: CPU usage = "
               << t_elapse << " sec" << std::endl;
@@ -1004,9 +1011,9 @@ void GObservations::optimizer::init_members(void)
     m_npred     = 0.0;
     m_minmod    = 1.0e-100;
     m_minerr    = 1.0e-100;
+    m_this      = NULL;
     m_gradient  = NULL;
     m_covar     = NULL;
-    m_this      = NULL;
     m_wrk_grad  = NULL;
 
     // Return
@@ -1026,6 +1033,7 @@ void GObservations::optimizer::copy_members(const optimizer& fct)
     m_npred  = fct.m_npred;
     m_minmod = fct.m_minmod;
     m_minerr = fct.m_minerr;
+    m_this   = fct.m_this;
 
     // Clone gradient if it exists
     if (fct.m_gradient != NULL) m_gradient = new GVector(*fct.m_gradient);
@@ -1059,10 +1067,3 @@ void GObservations::optimizer::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/
