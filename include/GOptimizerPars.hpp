@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GModelPar.hpp"
 
 
@@ -54,7 +54,7 @@
  *       very clean. We should think about how we can make this a clean
  *       thing ...
  ***************************************************************************/
-class GOptimizerPars : public GBase {
+class GOptimizerPars : public GContainer {
 
 public:
     // Constructors and destructors
@@ -65,8 +65,14 @@ public:
     // Operators
     virtual GOptimizerPars& operator=(const GOptimizerPars& pars);
 
-    // Pure virtual methods
-    virtual void clear(void) = 0;
+    // Pure virtual base class methods
+    virtual void             clear(void) = 0;
+    virtual GOptimizerPars*  clone(void) const = 0;
+    virtual int              size(void) const = 0;
+    virtual bool             isempty(void) const = 0;
+    virtual void             pop(const int& index) = 0;
+    virtual void             reserve(const int& num) = 0;
+    virtual std::string      print(void) const = 0;
 
     // Other methods
     virtual int              npars(void) const { return m_pars.size(); } //! @brief Return number of parameters

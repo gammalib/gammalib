@@ -35,15 +35,21 @@
  *
  * @brief Optimizer parameter container class
  ***************************************************************************/
-class GOptimizerPars : public GBase {
+class GOptimizerPars : public GContainer {
 public:
     // Constructors and destructors
     GOptimizerPars(void);
     GOptimizerPars(const GOptimizerPars& pars);
     virtual ~GOptimizerPars(void);
 
-    // Pure virtual methods
-    virtual void clear(void) = 0;
+    // Pure virtual base class methods
+    virtual void             clear(void) = 0;
+    virtual GOptimizerPars*  clone(void) const = 0;
+    virtual int              size(void) const = 0;
+    virtual bool             isempty(void) const = 0;
+    virtual void             pop(const int& index) = 0;
+    virtual void             reserve(const int& num) = 0;
+    virtual std::string      print(void) const = 0;
 
     // Methods
     virtual int              npars(void) const;
