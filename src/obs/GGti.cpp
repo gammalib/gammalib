@@ -413,7 +413,7 @@ void GGti::reduce(const GTime& tstart, const GTime& tstop)
 /***********************************************************************//**
  * @brief Remove Good Time Interval
  *
- * @param[in] index Good Time Interval index (0 ... size()-1).
+ * @param[in] index Good Time Interval index (0,...,size()-1).
  *
  * Removes Good Time Interval at @p index from the container. All intervals
  * after the specified @p index are moved forward by one position.
@@ -692,7 +692,7 @@ const GTime& GGti::tstop(void) const
 /***********************************************************************//**
  * @brief Returns start time for a given Good Time Interval
  *
- * @param[in] index Good Time Interval index (0 ... size()-1).
+ * @param[in] index Good Time Interval index (0,...,size()-1).
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.
@@ -714,7 +714,7 @@ const GTime& GGti::tstart(const int& index) const
 /***********************************************************************//**
  * @brief Returns stop time for a given Good Time Interval
  *
- * @param[in] index Good Time Interval index (0 ... size()-1).
+ * @param[in] index Good Time Interval index (0,...,size()-1).
  *
  * @exception GException::out_of_range
  *            Specified index is out of range.

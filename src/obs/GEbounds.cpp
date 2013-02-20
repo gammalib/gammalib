@@ -368,7 +368,7 @@ void GEbounds::merge(const GEnergy& emin, const GEnergy& emax)
 /***********************************************************************//**
  * @brief Remove energy interval
  *
- * @param[in] index Energy interval index (0 ... size()-1).
+ * @param[in] index Energy interval index (0,...,size()-1).
  *
  * Removes energy interval at @p index from the energy boundaries container.
  * All intervals after the specified @p index are moved forward by one
@@ -723,7 +723,7 @@ int GEbounds::index(const GEnergy& eng) const
 /***********************************************************************//**
  * @brief Returns minimum energy for a given energy interval
  *
- * @param[in] index Energy interval index (0 ... size()-1).
+ * @param[in] index Energy interval index (0,...,size()-1).
  * @return Minimum energy of interval.
  *
  * @exception GException::out_of_range
@@ -746,7 +746,7 @@ GEnergy GEbounds::emin(const int& index) const
 /***********************************************************************//**
  * @brief Returns maximum energy for a given energy interval
  *
- * @param[in] index Energy interval index (0 ... size()-1).
+ * @param[in] index Energy interval index (0,...,size()-1).
  * @return Maximum energy of interval.
  *
  * @exception GException::out_of_range
@@ -769,7 +769,7 @@ GEnergy GEbounds::emax(const int& index) const
 /***********************************************************************//**
  * @brief Returns mean energy for a given energy interval
  *
- * @param[in] index Energy interval index (0 ... size()-1).
+ * @param[in] index Energy interval index (0,...,size()-1).
  * @return Mean energy of interval.
  *
  * @exception GException::out_of_range
@@ -799,7 +799,7 @@ GEnergy GEbounds::emean(const int& index) const
 /***********************************************************************//**
  * @brief Returns logarithmic mean energy for a given energy interval
  *
- * @param[in] index Energy interval index (0 ... size()-1).
+ * @param[in] index Energy interval index (0,...,size()-1).
  * @return Logarithmic mean energy of interval.
  *
  * @exception GException::out_of_range
