@@ -406,7 +406,7 @@ void GModels::insert(const std::string& name, const GModel& model)
 /***********************************************************************//**
  * @brief Remove model from container
  *
- * @param[in] index Model index.
+ * @param[in] index Model index (0,...,size()-1).
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
