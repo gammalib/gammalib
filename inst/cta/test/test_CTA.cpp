@@ -417,15 +417,8 @@ void TestGCTAObservation::test_unbinned_obs(void)
         test_try_failure(e);
     }
 
-    // Loop over all events using iterators
-    int num = 0;
-    for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
-        num++;
-    }
-    test_value(num, 8794, 1.0e-20, "Test observation iterator");
-
     // Loop over all events using iterator
-    num = 0;
+    int num = 0;
     GCTAEventList *ptr = static_cast<GCTAEventList*>(const_cast<GEvents*>(run.events()));
     for (GCTAEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
         num++;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                      test_LAT.cpp  -  test LAT classes                  *
+ *                       test_LAT.cpp - test LAT classes                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -425,15 +425,8 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
         test_try_failure(e);
     }
 
-    // Loop over all events in GObservations using iterators
-    int num = 0;
-    for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
-        num++;
-    }
-    test_value(num, nevents*2, 1.0e-20, "Test observation iterator");
-
     // Loop over all events using iterator
-    num = 0;
+    int num = 0;
     GLATEventList *ptr = static_cast<GLATEventList*>(const_cast<GEvents*>(run.events()));
     for (GLATEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
         num++;
@@ -521,19 +514,9 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
         test_try_failure(e);
     }
 
-    // Loop over all events in GObservations using iterators
+    // Loop over all events using iterator
     int num = 0;
     int sum = 0;
-    for (GObservations::iterator event = obs.begin(); event != obs.end(); ++event) {
-        num++;
-        sum += (int)event->counts();
-    }
-    test_value(sum, 2*nevents, 1.0e-20, "Test observation iterator (counts)");
-    test_value(num, 2*nsize, 1.0e-20, "Test observation iterator (bins)");
-
-    // Loop over all events using iterator
-    num = 0;
-    sum = 0;
     GLATEventCube *ptr = static_cast<GLATEventCube*>(const_cast<GEvents*>(run.events()));
     for (GLATEventCube::iterator event = ptr->begin(); event != ptr->end(); ++event) {
         num++;
