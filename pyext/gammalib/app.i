@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall app.i                                           *
  ***************************************************************************/
+/**
+ * @file app.i
+ * @brief Application module
+ * @author Juergen Knoedlseder
+ */
 %module app
 %feature("autodoc", "1");
 
@@ -35,6 +40,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+//%import(module="gammalib.base") "GContainer.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";

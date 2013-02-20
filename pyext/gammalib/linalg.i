@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    linalg module  -  Python bindings                    *
+ *                     linalg module - Python bindings                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall linalg.i                                        *
  ***************************************************************************/
+/**
+ * @file linalg.i
+ * @brief Linear algebra module
+ * @author Juergen Knoedlseder
+ */
 %module linalg
 %feature("autodoc", "1");
 

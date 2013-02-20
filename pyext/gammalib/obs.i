@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    obs module  -  Python bindings                       *
+ *                     obs module - Python bindings                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall obs.i                                           *
  ***************************************************************************/
+/**
+ * @file obs.i
+ * @brief Observation module
+ * @author Juergen Knoedlseder
+ */
 %module obs
 %feature("autodoc", "1");
 
@@ -35,6 +40,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+%import(module="gammalib.base") "GContainer.i";
 %import(module="gammalib.base") "GRegistry.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */

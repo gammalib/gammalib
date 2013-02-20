@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    xml module  -  Python bindings                       *
+ *                     xml module - Python bindings                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall xml.i                                           *
  ***************************************************************************/
+/**
+ * @file xml.i
+ * @brief XML module
+ * @author Juergen Knoedlseder
+ */
 %module xml
 %feature("autodoc", "1");
 
@@ -35,6 +40,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+//%import(module="gammalib.base") "GContainer.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";

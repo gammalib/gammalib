@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  support module  -  Python bindings                     *
+ *                   support module - Python bindings                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall support.i                                      *
  ***************************************************************************/
+/**
+ * @file support.i
+ * @brief Support module
+ * @author Juergen Knoedlseder
+ */
 %module support
 %feature("autodoc", "1");
 
@@ -35,6 +40,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+//%import(module="gammalib.base") "GContainer.i";
 
 /* __ Support module _____________________________________________________ */
 %include "GException.i"

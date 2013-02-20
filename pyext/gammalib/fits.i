@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall fits.i                                          *
  ***************************************************************************/
+/**
+ * @file fits.i
+ * @brief FITS module
+ * @author Juergen Knoedlseder
+ */
 %module fits
 %feature("autodoc", "1");
 

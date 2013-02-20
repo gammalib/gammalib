@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    test module  -  Python bindings                      *
+ *                    test module - Python bindings                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall test.i                                          *
  ***************************************************************************/
+/**
+ * @file test.i
+ * @brief Test module
+ * @author Juergen Knoedlseder
+ */
 %module test
 %feature("autodoc", "1");
 
@@ -35,6 +40,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+//%import(module="gammalib.base") "GContainer.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";

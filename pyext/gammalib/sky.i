@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    sky module  -  Python bindings                       *
+ *                     sky module - Python bindings                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2011-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall sky.i                                           *
  ***************************************************************************/
+/**
+ * @file sky.i
+ * @brief Sky module
+ * @author Juergen Knoedlseder
+ */
 %module sky
 %feature("autodoc", "1");
 

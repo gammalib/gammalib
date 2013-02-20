@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   numerics module  -  Python bindings                   *
+ *                    numerics module - Python bindings                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall numerics.i                                      *
  ***************************************************************************/
+/**
+ * @file numerics.i
+ * @brief Numerics module
+ * @author Juergen Knoedlseder
+ */
 %module numerics
 %feature("autodoc", "1");
 
@@ -38,7 +43,6 @@
 
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i"; 
-// Does not compile! Because not needed?
 
 /* __ Numerics module ____________________________________________________ */
 %include "GDerivative.i"

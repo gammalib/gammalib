@@ -1,5 +1,5 @@
 /***************************************************************************
- *                     model module  -  Python bindings                    *
+ *                      model module - Python bindings                     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -21,6 +21,11 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall model.i                                         *
  ***************************************************************************/
+/**
+ * @file model.i
+ * @brief Model module
+ * @author Juergen Knoedlseder
+ */
 %module model
 %feature("autodoc", "1");
 
@@ -35,6 +40,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+%import(module="gammalib.base") "GContainer.i";
 %import(module="gammalib.base") "GRegistry.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
