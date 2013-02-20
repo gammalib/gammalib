@@ -41,6 +41,7 @@ class for all container classes. The following classes are now derived
 from GContainer:
 - GEbounds
 - GGti
+- GOptimizerPars (and hence GModels)
 
 
 6. FITS I/O Interface
