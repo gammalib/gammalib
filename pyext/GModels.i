@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GModels.i  -  Model container class                   *
+ *                    GModels.i - Model container class                    *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModels.i
- * @brief GModels class SWIG interface.
+ * @brief Model container class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -48,7 +48,7 @@
 /***********************************************************************//**
  * @class GModels
  *
- * @brief GModels class Python bindings.
+ * @brief Model container class
  ***************************************************************************/
 class GModels : public GOptimizerPars {
 public:
@@ -62,7 +62,16 @@ public:
     void     clear(void);
     GModels* clone(void) const;
     int      size(void) const;
+    bool     isempty(void) const;
     void     append(const GModel& model);
+    void     insert(const int& index, const GModel& model);
+    void     insert(const std::string& name, const GModel& model);
+    void     pop(const int& index);
+    void     pop(const std::string& name);
+    void     reserve(const int& num);
+    void     extend(const GModels& models);
+    void     set(const int& index, const GModel& model);
+    void     set(const std::string& name, const GModel& model);
     void     load(const std::string& filename);
     void     save(const std::string& filename) const;
     void     read(const GXml& xml);

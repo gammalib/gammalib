@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GModels.hpp  -  Model container class                *
+ *                     GModels.hpp - Model container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -43,13 +43,23 @@ class GObservation;
  *
  * @brief Model container class
  *
- * This container class collects models of gamma-ray data that are used
- * for maximum likelihood fitting. It derives from the optimizer parameter
- * class GOptimizerPars.
+ * This container class collects models of type GModel that are used to
+ * describe the gamma-ray data. Each model has a number of parameters
+ * that are implemented using the GModelPar class. This container class
+ * provides methods to manage the container class, to access and to evaluate
+ * the models.
  *
- * @todo Add extend method to append a container to the container
- * @todo Add insert method to insert a model into the container
- * @todo Add pop method to delete a model from the container (default: last)
+ * The only member of this class is a list of model pointers. GModels handles
+ * the proper allocation and deallocation of the model memory.
+ *
+ * GModels derives from GOptimizerPars which contains a flat array of
+ * model parameters. This flat array is set using the protected
+ * set_pointers() method. This method is called after each manipulation of
+ * the list of model pointers to ensure consistency between the models and
+ * the flat array of parameter pointers. The optimizer function
+ * GOptimizerFunction will manipulate the parameters in that flat array,
+ * and as this array points towards the parameters stored in GModels, it will
+ * directly modify the model parameters of the container class.
  ***************************************************************************/
 class GModels : public GOptimizerPars {
 
@@ -71,7 +81,14 @@ public:
     void          clear(void);
     GModels*      clone(void) const;
     int           size(void) const { return m_models.size(); }
+    bool          isempty(void) const { return m_models.empty(); }
     void          append(const GModel& model);
+    void          insert(const int& index, const GModel& model);
+    void          insert(const std::string& name, const GModel& model);
+    void          pop(const int& index);
+    void          pop(const std::string& name);
+    void          reserve(const int& num) { return m_models.reserve(num); }
+    void          extend(const GModels& models);
     void          set(const int& index, const GModel& model);
     void          set(const std::string& name, const GModel& model);
     void          load(const std::string& filename);

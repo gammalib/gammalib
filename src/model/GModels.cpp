@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GModels.cpp  -  Model container class                  *
+ *                   GModels.cpp - Model container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,8 +39,12 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                                 "GModels::operator[](int&)"
 #define G_ACCESS2                         "GModels::operator[](std::string&)"
-#define G_SET1                                   "GModels::set(int&,GModel&)"
-#define G_SET2                           "GModels::set(std::string&,GModel&)"
+#define G_INSERT1                            "GModels::insert(int&, GModel&)"
+#define G_INSERT2                    "GModels::insert(std::string&, GModel&)"
+#define G_POP1                                           "GModels::pop(int&)"
+#define G_POP2                                   "GModels::pop(std::string&)"
+#define G_SET1                                  "GModels::set(int&, GModel&)"
+#define G_SET2                          "GModels::set(std::string&, GModel&)"
 #define G_READ                                         "GModels::read(GXml&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -58,8 +62,6 @@
 
 /***********************************************************************//**
  * @brief Void constructor
- *
- * Constructs an empty model container.
  ***************************************************************************/
 GModels::GModels(void) : GOptimizerPars()
 {
@@ -75,8 +77,6 @@ GModels::GModels(void) : GOptimizerPars()
  * @brief Copy constructor
  *
  * @param[in] models Model container.
- *
- * Constructs a copy of a model container.
  ***************************************************************************/
 GModels::GModels(const GModels& models) : GOptimizerPars(models)
 {
@@ -96,7 +96,8 @@ GModels::GModels(const GModels& models) : GOptimizerPars(models)
  *
  * @param[in] filename XML filename.
  *
- * Constructs model container from the model information of an XML file.
+ * Constructs model container from an XML file. See the read() method for
+ * more information about the expected structure of the XML file.
  ***************************************************************************/
 GModels::GModels(const std::string& filename)
 {
@@ -111,12 +112,8 @@ GModels::GModels(const std::string& filename)
 }
 
 
-
-
 /***********************************************************************//**
  * @brief Destructor
- *
- * Destroys the model container.
  ***************************************************************************/
 GModels::~GModels(void)
 {
@@ -138,8 +135,7 @@ GModels::~GModels(void)
  * @brief Assignment operator
  *
  * @param[in] models Model container.
- *
- * Assigns a model container to the instance.
+ * @return Model container.
  ***************************************************************************/
 GModels& GModels::operator= (const GModels& models)
 {
@@ -166,14 +162,15 @@ GModels& GModels::operator= (const GModels& models)
 
 
 /***********************************************************************//**
- * @brief Returns pointer to model
+ * @brief Return pointer to model
  *
- * @param[in] index Model index [0,...,size()-1].
+ * @param[in] index Model index (0,...,size()-1).
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Returns a model pointer by index. The return value will never be NULL.
+ * Returns a pointer to the model with the specified @p index.
+ * The return value will never be NULL.
  ***************************************************************************/
 GModel* GModels::operator[](const int& index)
 {
@@ -190,15 +187,15 @@ GModel* GModels::operator[](const int& index)
 
 
 /***********************************************************************//**
- * @brief Returns pointer to model (const version)
+ * @brief Return pointer to model (const version)
  *
- * @param[in] index Model index [0,...,size()-1].
+ * @param[in] index Model index (0,...,size()-1).
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Returns a constant model pointer by index. The return value will never be
- * NULL.
+ * Returns a pointer to the model with the specified @p index.
+ * The return value will never be NULL.
  ***************************************************************************/
 const GModel* GModels::operator[](const int& index) const
 {
@@ -215,15 +212,15 @@ const GModel* GModels::operator[](const int& index) const
 
 
 /***********************************************************************//**
- * @brief Returns pointer to model
+ * @brief Return pointer to model
  *
  * @param[in] name Model name.
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Returns a model pointer by model name. The return value will never be
- * NULL.
+ * Returns a pointer to the model with the specified @p name.
+ * The return value will never be NULL.
  ***************************************************************************/
 GModel* GModels::operator[](const std::string& name)
 {
@@ -241,15 +238,15 @@ GModel* GModels::operator[](const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Returns pointer to model (const version)
+ * @brief Return pointer to model (const version)
  *
  * @param[in] name Model name.
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Returns a constant model pointer by model name. The return value will
- * never be NULL.
+ * Returns a pointer to the model with the specified @p name.
+ * The return value will never be NULL.
  ***************************************************************************/
 const GModel* GModels::operator[](const std::string& name) const
 {
@@ -295,6 +292,8 @@ void GModels::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  *
+ * @return Pointer to deep copy of model container
+ *
  * Makes a deep copy of the model container instance.
  ***************************************************************************/
 GModels* GModels::clone(void) const
@@ -308,7 +307,8 @@ GModels* GModels::clone(void) const
  *
  * @param[in] model Model.
  *
- * Appends one model to the container by making a deep copy.
+ * Appends model to the container by making a deep copy of the model and
+ * storing its pointer.
  ***************************************************************************/
 void GModels::append(const GModel& model)
 {
@@ -323,6 +323,180 @@ void GModels::append(const GModel& model)
     // Set parameter pointers
     set_pointers();
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert model into container
+ *
+ * @param[in] index Model index (0,...,size()-1).
+ * @param[in] model Model.
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ *
+ * Inserts a @p model into the container before the model with the specified
+ * @p index.
+ ***************************************************************************/
+void GModels::insert(const int& index, const GModel& model)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
+    }
+    #endif
+
+    // Make deep copy of model
+    GModel* model_copy = model.clone();
+
+    // If copy is valid, insert it to the container
+    if (model_copy != NULL) {
+        m_models.insert(m_models.begin()+index, model_copy);
+    }
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert model into container
+ *
+ * @param[in] name Model name.
+ * @param[in] model Model.
+ *
+ * @exception GException::model_not_found
+ *            Model with specified name not found in container.
+ *
+ * Inserts a @p model into the container before the model with the specified
+ * @p name.
+ ***************************************************************************/
+void GModels::insert(const std::string& name, const GModel& model)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if parameter name was not found
+    if (index >= size()) {
+        throw GException::model_not_found(G_POP2, name);
+    }
+
+    // Make deep copy of model
+    GModel* model_copy = model.clone();
+
+    // If copy is valid, insert it to the container
+    if (model_copy != NULL) {
+        m_models.insert(m_models.begin()+index, model_copy);
+    }
+
+    // Set parameter pointers
+    set_pointers();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove model from container
+ *
+ * @param[in] index Model index.
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ *
+ * Remove model of specified @p index from container.
+ ***************************************************************************/
+void GModels::pop(const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_POP1, index, 0, size()-1);
+    }
+    #endif
+
+    // Erase model component from container
+    m_models.erase(m_models.begin() + index);
+
+    // Set parameter pointers
+    set_pointers();
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove model from container
+ *
+ * @param[in] name Model name.
+ *
+ * @exception GException::model_not_found
+ *            Model with specified name not found in container.
+ *
+ * Remove model of specified @p name from container.
+ ***************************************************************************/
+void GModels::pop(const std::string& name)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if parameter name was not found
+    if (index >= size()) {
+        throw GException::model_not_found(G_POP2, name);
+    }
+
+    // Erase model component from container
+    m_models.erase(m_models.begin() + index);
+
+    // Set parameter pointers
+    set_pointers();
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append model container
+ *
+ * @param[in] models Model container.
+ *
+ * Append model container to the container.
+ ***************************************************************************/
+void GModels::extend(const GModels& models)
+{
+    // Do nothing if model container is empty
+    if (!models.isempty()) {
+
+        // Reserve enough space
+        reserve(size() + models.size());
+
+        // Loop over all model components
+        for (int i = 0; i < models.size(); ++i) {
+
+            // Make deep copy of model
+            GModel* model_copy = models[i]->clone();
+
+            // If copy is valid, append it to the container
+            if (model_copy != NULL) {
+                m_models.push_back(model_copy);
+            }
+
+        } // endfor: looped over all model components
+
+        // Set parameter pointers
+        set_pointers();
+
+    } // endif: model container was not empty
+    
     // Return
     return;
 }
@@ -402,7 +576,8 @@ void GModels::set(const std::string& name, const GModel& model)
  *
  * @param[in] filename XML filename.
  *
- * Loads all models that are defined in an XML file.
+ * Loads all models from an XML file. See the read() method for more
+ * information about the expected structure of the XML file.
  ***************************************************************************/
 void GModels::load(const std::string& filename)
 {
@@ -451,16 +626,23 @@ void GModels::save(const std::string& filename) const
  * @exception GException::model_invalid
  *            Invalid model type encountered.
  *
- * Read models from the first source library found in the XML document. It is
- * assumed that each model is composed of a spectral and a spatial model
- * (Fermi-LAT style). The decoding of the spatial and spectral XML elements
- * is done within a GModel constructor.
+ * Read models from the first source library found in the XML document. The
+ * XML document is expected to have the following structure
+ *
+ *     <source_library title="source library">
+ *       <source name="Source1" type="PointSource">
+ *         ...
+ *       </source>
+ *       <source name="Source2" type="DiffuseSource">
+ *         ...
+ *       </source>
+ *     </source_library>
+ *
+ * Each @p source tag will be interpreted as a model component.
  *
  * @todo Sources names are not verified so far for uniqueness. This would be
  *       required to achieve an unambiguous update of parameters in an already
- *       existing XML file when using the write method. Also, no control is
- *       performed that only a single spectral and spatial component exists in
- *       each source definition.
+ *       existing XML file when using the write method.
  ***************************************************************************/
 void GModels::read(const GXml& xml)
 {
