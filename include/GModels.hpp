@@ -72,10 +72,10 @@ public:
 
     // Operators
     GModels&      operator=(const GModels& models);
-    GModel*       operator[](const int& index);
-    const GModel* operator[](const int& index) const;
-    GModel*       operator[](const std::string& name);
-    const GModel* operator[](const std::string& name) const;
+    GModel&       operator[](const int& index);
+    const GModel& operator[](const int& index) const;
+    GModel&       operator[](const std::string& name);
+    const GModel& operator[](const std::string& name) const;
 
     // Methods
     void          clear(void);

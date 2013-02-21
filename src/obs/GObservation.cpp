@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.cpp  -  Abstract observation base class          *
+ *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -190,7 +190,7 @@ double GObservation::model(const GModels& models, const GEvent& event,
     #endif
 
     // Initialise
-    double model = 0.0;    // Reset model value
+    double value = 0.0;    // Reset model value
     int    igrad = 0;      // Reset gradient counter
 
     // If gradient is available then reset gradient vector elements to 0
@@ -201,35 +201,32 @@ double GObservation::model(const GModels& models, const GEvent& event,
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
-        // Get model pointer. Continue only if pointer is valid
-        const GModel* mptr = models[i];
-        if (mptr != NULL) {
+        // Get model
+        const GModel& model = models[i];
 
-            // Continue only if model applies to specific instrument and
-            // observation identifier
-            if (mptr->isvalid(instrument(), id())) {
+        // Continue only if model applies to specific instrument and
+        // observation identifier
+        if (model.isvalid(instrument(), id())) {
 
-                // Compute value and add to model
-                model += mptr->eval_gradients(event, *this);
+            // Compute value and add to model
+            value += model.eval_gradients(event, *this);
 
-                // Optionally determine model gradients
-                if (gradient != NULL) {
-                    for (int k = 0; k < mptr->size(); ++k) {
-                        (*gradient)[igrad+k] = model_grad(*mptr, event, k);
-                    }
+            // Optionally determine model gradients
+            if (gradient != NULL) {
+                for (int k = 0; k < model.size(); ++k) {
+                    (*gradient)[igrad+k] = model_grad(model, event, k);
                 }
+            }
 
-            } // endif: model component was valid for instrument
-
-            // Increment parameter counter for gradients
-            igrad += mptr->size();
+        // Increment parameter counter for gradients
+        igrad += model.size();
 
         } // endif: model was valid
 
     } // endfor: Looped over models
 
-    // Return
-    return model;
+    // Return value
+    return value;
 }
 
 
@@ -276,30 +273,27 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
     // Loop over models
     for (int i = 0; i < models.size(); ++i) {
 
-        // Get model pointer. Continue only if pointer is valid
-        const GModel* mptr = models[i];
-        if (mptr != NULL) {
+        // Get model
+        const GModel& model = models[i];
 
-            // Continue only if model applies to specific instrument and
-            // observation identifier
-            if (mptr->isvalid(instrument(), id())) {
+        // Continue only if model applies to specific instrument and
+        // observation identifier
+        if (model.isvalid(instrument(), id())) {
 
-                // Determine Npred for model
-                npred += npred_temp(*mptr);
+            // Determine Npred for model
+            npred += npred_temp(model);
 
-                // Optionally determine Npred gradients
-                if (gradient != NULL) {
-                    for (int k = 0; k < mptr->size(); ++k) {
-                        (*gradient)[igrad+k] = npred_grad(*mptr, k);
-                    }
+            // Optionally determine Npred gradients
+            if (gradient != NULL) {
+                for (int k = 0; k < model.size(); ++k) {
+                    (*gradient)[igrad+k] = npred_grad(model, k);
                 }
+            }
 
-            } // endif: model component was valid for instrument
+        } // endif: model component was valid for instrument
 
-            // Increment parameter counter for gradient
-            igrad += mptr->size();
-
-        } // endif: model was valid
+        // Increment parameter counter for gradient
+        igrad += model.size();
 
     } // endfor: Looped over models
 

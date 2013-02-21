@@ -36,6 +36,9 @@ GOptimizer & GOptimizerLM
   The optimization operators have been removed and replaced by the
   optimize method.
 
+GModels
+  The model access operators now return the model by reference
+  instead of returning a pointer.
 
 3. Configuration
 -----------------
