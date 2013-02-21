@@ -621,7 +621,7 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
     obs.optimize(opt);
 
     // Get the result
-    GModelPar result = (obs.models()[0])[0];
+    GModelPar result = (*(obs.models()[0]))[0];
 
     // Check if converged
     test_assert(opt.status()==0, "Check if converged", 

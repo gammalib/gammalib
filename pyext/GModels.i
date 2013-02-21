@@ -32,7 +32,7 @@
 %}
 
 /* __ Typemaps ___________________________________________________________ */
-%typemap(out) GModel& {
+%typemap(out) GModel* {
     if (dynamic_cast<GModelSky*>($1) != NULL) {
         $result = SWIG_NewPointerObj(SWIG_as_voidptr($1), SWIGTYPE_p_GModelSky, 0 |  0 );
     }
@@ -88,7 +88,7 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GModel& __getitem__(const int& index) {
+    GModel* __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
@@ -97,7 +97,7 @@ public:
                                            0, self->size()-1);
         }
     }
-    GModel& __getitem__(const std::string& name) {
+    GModel* __getitem__(const std::string& name) {
         return (*self)[name];
     }
     void __setitem__(const int& index, const GModel& val) {
