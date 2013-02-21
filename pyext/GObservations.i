@@ -48,6 +48,7 @@ public:
     GObservations* clone(void) const;
     int            size(void) const;
     bool           isempty(void) const;
+    void           set(const int& index, const GObservation& obs);
     void           append(const GObservation& obs);
     void           insert(const int& index, const GObservation& obs);
     void           remove(const int& index);
@@ -75,7 +76,7 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
-    GObservation& __getitem__(const int& index) {
+    GObservation* __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
@@ -85,7 +86,7 @@ public:
     }
     void __setitem__(const int& index, const GObservation& val) {
         if (index>=0 && index < self->size()) {
-            (*self)[index] = val;
+            self->set(index, val);
             return;
         }
         else {

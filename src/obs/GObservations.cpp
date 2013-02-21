@@ -35,6 +35,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                         "GObservations::operator[](int&)"
+#define G_SET                       "GObservations::set(int&, GObservation&)"
 #define G_INSERT                 "GObservations::insert(int&, GObservation&)"
 #define G_REMOVE                                "GObservations::remove(int&)"
 #define G_READ                                   "GObservations::read(GXml&)"
@@ -152,7 +153,7 @@ GObservations& GObservations::operator=(const GObservations& obs)
 
 
 /***********************************************************************//**
- * @brief Return reference to observation
+ * @brief Return pointer to observation
  *
  * @param[in] index Observation index (0,...,size()-1)
  * @return Observation.
@@ -160,9 +161,9 @@ GObservations& GObservations::operator=(const GObservations& obs)
  * @exception GException::out_of_range
  *            Operation index is out of range.
  *
- * Returns a reference to the observation with specified @p index.
+ * Returns a pointer to the observation with specified @p index.
  ***************************************************************************/
-GObservation& GObservations::operator[](const int& index)
+GObservation* GObservations::operator[](const int& index)
 {
     // Compile option: If index is outside boundary then raise exception
     #if defined(G_RANGE_CHECK)
@@ -171,22 +172,22 @@ GObservation& GObservations::operator[](const int& index)
     }
     #endif
 
-    // Return reference
-    return *(m_obs[index]);
+    // Return pointer
+    return m_obs[index];
 }
 
 
 /***********************************************************************//**
- * @brief Return reference to observation (const version)
+ * @brief Return pointer to observation (const version)
  *
  * @param[in] index Observation index (0,...,size()-1)
  *
  * @exception GException::out_of_range
  *            Operation index is out of range.
  *
- * Returns a constant reference to the observation with specified @p index.
+ * Returns a const pointer to the observation with specified @p index.
  ***************************************************************************/
-const GObservation& GObservations::operator[](const int& index) const
+const GObservation* GObservations::operator[](const int& index) const
 {
     // Compile option: If index is outside boundary then raise exception
     #if defined(G_RANGE_CHECK)
@@ -195,8 +196,8 @@ const GObservation& GObservations::operator[](const int& index) const
     }
     #endif
 
-    // Return reference
-    return *(m_obs[index]);
+    // Return pointer
+    return m_obs[index];
 }
 
 
@@ -230,6 +231,38 @@ void GObservations::clear(void)
 GObservations* GObservations::clone(void) const
 {
     return new GObservations(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Set observation in container
+ *
+ * @param[in] index Observation index [0,...,size()-1].
+ * @param[in] obs Observation.
+ *
+ * @exception GException::out_of_range
+ *            Observation index is out of range.
+ *
+ * Set a deep copy and observation @obs at the specified @p index in the
+ * container.
+ ***************************************************************************/
+void GObservations::set(const int& index, const GObservation& obs)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_SET, index, 0, size()-1);
+    }
+    #endif
+
+    // Delete existing observation
+    if (m_obs[index] != NULL) delete m_obs[index];
+
+    // Store pointer to a deep copy of the observation
+    m_obs[index] = obs.clone();
+
+    // Return
+    return;
 }
 
 
@@ -324,7 +357,7 @@ void GObservations::extend(const GObservations& obs)
         // Loop over all observations, clone them and append them to the
         // list
         for (int i = 0; i < obs.size(); ++i) {
-            m_obs.push_back(obs[i].clone());
+            m_obs.push_back(obs[i]->clone());
         }
 
     } // endif: observation container was not empty
@@ -585,7 +618,7 @@ std::string GObservations::print(void) const
     // Append observations
     for (int i = 0; i < size(); ++i) {
         result.append("\n");
-        result.append((*this)[i].print());
+        result.append((*this)[i]->print());
     }
 
     // Append models

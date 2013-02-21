@@ -94,14 +94,15 @@ public:
 
     // Operators
     GObservations&      operator= (const GObservations& obs);
-    GObservation&       operator[](const int& index);
-    const GObservation& operator[](const int& index) const;
+    GObservation*       operator[](const int& index);
+    const GObservation* operator[](const int& index) const;
 
     // Methods
     void           clear(void);
     GObservations* clone(void) const;
     int            size(void) const { return m_obs.size(); }
     bool           isempty(void) const { return m_obs.empty(); }
+    void           set(const int& index, const GObservation& obs);
     void           append(const GObservation& obs);
     void           insert(const int& index, const GObservation& obs);
     void           remove(const int& index);
