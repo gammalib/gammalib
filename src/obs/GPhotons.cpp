@@ -305,7 +305,7 @@ void GPhotons::extend(const GPhotons& photons)
         // Reserve enough space
         reserve(size() + num);
 
-        // Loop over all model components and append pointers to deep copies
+        // Loop over all elements and append them to container
         for (int i = 0; i < num; ++i) {
             m_photons.push_back(photons[i]);
         }
