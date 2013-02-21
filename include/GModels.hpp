@@ -82,6 +82,8 @@ public:
     GModels*      clone(void) const;
     int           size(void) const { return m_models.size(); }
     bool          isempty(void) const { return m_models.empty(); }
+    void          set(const int& index, const GModel& model);
+    void          set(const std::string& name, const GModel& model);
     void          append(const GModel& model);
     void          insert(const int& index, const GModel& model);
     void          insert(const std::string& name, const GModel& model);
@@ -89,8 +91,6 @@ public:
     void          remove(const std::string& name);
     void          reserve(const int& num) { return m_models.reserve(num); }
     void          extend(const GModels& models);
-    void          set(const int& index, const GModel& model);
-    void          set(const std::string& name, const GModel& model);
     void          load(const std::string& filename);
     void          save(const std::string& filename) const;
     void          read(const GXml& xml);
