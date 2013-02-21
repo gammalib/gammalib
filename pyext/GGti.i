@@ -82,6 +82,9 @@ public:
     char *__str__() {
         return tochar(self->print());
     }
+    int __len__() {
+        return (self->size());
+    }
     GGti copy() {
         return (*self);
     }
