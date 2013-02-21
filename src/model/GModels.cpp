@@ -162,16 +162,17 @@ GModels& GModels::operator= (const GModels& models)
 
 
 /***********************************************************************//**
- * @brief Return model
+ * @brief Return pointer to model
  *
  * @param[in] index Model index (0,...,size()-1).
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Returns the model with the specified @p index.
+ * Returns a pointer to the model with the specified @p index.
+ * The return value will never be NULL.
  ***************************************************************************/
-GModel& GModels::operator[](const int& index)
+GModel* GModels::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -181,21 +182,22 @@ GModel& GModels::operator[](const int& index)
     #endif
 
     // Return pointer
-    return *(m_models[index]);
+    return m_models[index];
 }
 
 
 /***********************************************************************//**
- * @brief Return model (const version)
+ * @brief Return pointer to model (const version)
  *
  * @param[in] index Model index (0,...,size()-1).
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Returns the model with the specified @p index.
+ * Returns a pointer to the model with the specified @p index.
+ * The return value will never be NULL.
  ***************************************************************************/
-const GModel& GModels::operator[](const int& index) const
+const GModel* GModels::operator[](const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -205,21 +207,22 @@ const GModel& GModels::operator[](const int& index) const
     #endif
 
     // Return pointer
-    return *(m_models[index]);
+    return m_models[index];
 }
 
 
 /***********************************************************************//**
- * @brief Return model
+ * @brief Return pointer to model
  *
  * @param[in] name Model name.
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Returns the model with the specified @p name.
+ * Returns a pointer to the model with the specified @p name.
+ * The return value will never be NULL.
  ***************************************************************************/
-GModel& GModels::operator[](const std::string& name)
+GModel* GModels::operator[](const std::string& name)
 {
     // Get parameter index
     int index = get_index(name);
@@ -230,21 +233,22 @@ GModel& GModels::operator[](const std::string& name)
     }
 
     // Return pointer
-    return *(m_models[index]);
+    return m_models[index];
 }
 
 
 /***********************************************************************//**
- * @brief Return model (const version)
+ * @brief Return pointer to model (const version)
  *
  * @param[in] name Model name.
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Returns the model with the specified @p name.
+ * Returns a pointer to the model with the specified @p name.
+ * The return value will never be NULL.
  ***************************************************************************/
-const GModel& GModels::operator[](const std::string& name) const
+const GModel* GModels::operator[](const std::string& name) const
 {
     // Get parameter index
     int index = get_index(name);
@@ -255,7 +259,7 @@ const GModel& GModels::operator[](const std::string& name) const
     }
 
     // Return pointer
-    return *(m_models[index]);
+    return m_models[index];
 }
 
 
@@ -308,8 +312,13 @@ GModels* GModels::clone(void) const
  ***************************************************************************/
 void GModels::append(const GModel& model)
 {
-    // Append model to the container
-    m_models.push_back(model.clone());
+    // Make deep copy of model
+    GModel* model_copy = model.clone();
+
+    // If copy is valid, append it to the container
+    if (model_copy != NULL) {
+        m_models.push_back(model_copy);
+    }
 
     // Set parameter pointers
     set_pointers();
@@ -340,8 +349,13 @@ void GModels::insert(const int& index, const GModel& model)
     }
     #endif
 
-    // Insert model into the container
-    m_models.insert(m_models.begin()+index, model.clone());
+    // Make deep copy of model
+    GModel* model_copy = model.clone();
+
+    // If copy is valid, insert it to the container
+    if (model_copy != NULL) {
+        m_models.insert(m_models.begin()+index, model_copy);
+    }
 
     // Set parameter pointers
     set_pointers();
@@ -373,8 +387,13 @@ void GModels::insert(const std::string& name, const GModel& model)
         throw GException::model_not_found(G_INSERT2, name);
     }
 
-    // Insert model into the container
-    m_models.insert(m_models.begin()+index, model.clone());
+    // Make deep copy of model
+    GModel* model_copy = model.clone();
+
+    // If copy is valid, insert it to the container
+    if (model_copy != NULL) {
+        m_models.insert(m_models.begin()+index, model_copy);
+    }
 
     // Set parameter pointers
     set_pointers();
@@ -460,10 +479,18 @@ void GModels::extend(const GModels& models)
         // Reserve enough space
         reserve(size() + models.size());
 
-        // Loop over all model components and append deep copies to container
+        // Loop over all model components
         for (int i = 0; i < models.size(); ++i) {
-            m_models.push_back(models[i].clone());
-        }
+
+            // Make deep copy of model
+            GModel* model_copy = models[i]->clone();
+
+            // If copy is valid, append it to the container
+            if (model_copy != NULL) {
+                m_models.push_back(model_copy);
+            }
+
+        } // endfor: looped over all model components
 
         // Set parameter pointers
         set_pointers();

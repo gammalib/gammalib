@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   test_GModel.cpp - test GModel class                   *
+ *                  test_GModel.cpp  -  test GModel class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -193,9 +193,9 @@ void TestGModel::test_model(void)
     models2.append(crab);
     models2.save("test_instrument.xml");
     models2.load("test_instrument.xml");
-    test_value(models2[0].scale("LAT").real_value(), 1.0);
-    test_value(models2[0].scale("CTA").real_value(), 0.5);
-    test_value(models2[0].scale("COM").real_value(), 1.0);
+    test_value(models2[0]->scale("LAT").real_value(), 1.0);
+    test_value(models2[0]->scale("CTA").real_value(), 0.5);
+    test_value(models2[0]->scale("COM").real_value(), 1.0);
 
     // Exit test
     return;
