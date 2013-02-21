@@ -45,11 +45,12 @@ public:
 
     // Methods
     virtual void set(void);
-    void         test_time_reference(void);
-    void         test_time(void);
     void         test_ebounds(void);
     void         test_gti(void);
     void         test_photons(void);
+    void         test_time_reference(void);
+    void         test_time(void);
+    void         test_times(void);
 };
 
 

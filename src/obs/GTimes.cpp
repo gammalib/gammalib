@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GTimes.cpp - Time container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                                "GTimes::operator[](int&)"
+#define G_INSERT                               "GTimes::insert(int&, GTime&)"
+#define G_REMOVE                                       "GTimes::remove(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -136,9 +138,11 @@ GTimes& GTimes::operator=(const GTimes& times)
 GTime& GTimes::operator[](const int& index)
 {
     // If index is outside boundary then throw an error
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
     }
+    #endif
 
     // Return reference
     return m_times[index];
@@ -156,9 +160,11 @@ GTime& GTimes::operator[](const int& index)
 const GTime& GTimes::operator[](const int& index) const
 {
     // If index is outside boundary then throw an error
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
     }
+    #endif
 
     // Return reference
     return m_times[index];
@@ -194,7 +200,6 @@ void GTimes::clear(void)
  ***************************************************************************/
 GTimes* GTimes::clone(void) const
 {
-    // Clone this image
     return new GTimes(*this);
 }
 
@@ -217,16 +222,111 @@ void GTimes::append(const GTime& time)
 
 
 /***********************************************************************//**
+ * @brief Insert time into container
+ *
+ * @param[in] index Time index (0,...,size()-1).
+ * @param[in] time Time.
+ *
+ * @exception GException::out_of_range
+ *            Time index is out of range.
+ *
+ * Inserts a @p time into the container before the time with the specified
+ * @p index.
+ ***************************************************************************/
+void GTimes::insert(const int& index, const GTime& time)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (isempty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+        }
+    }
+    else {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+        }
+    }
+    #endif
+
+    // Inserts time
+    m_times.insert(m_times.begin()+index, time);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove time from container
+ *
+ * @param[in] index Time index (0,...,size()-1).
+ *
+ * @exception GException::out_of_range
+ *            Time index is out of range.
+ *
+ * Remove time of specified @p index from container.
+ ***************************************************************************/
+void GTimes::remove(const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_REMOVE, index, 0, size()-1);
+    }
+    #endif
+
+    // Erase time from container
+    m_times.erase(m_times.begin() + index);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append time container
+ *
+ * @param[in] times Time container.
+ *
+ * Append time container to the container.
+ ***************************************************************************/
+void GTimes::extend(const GTimes& times)
+{
+    // Do nothing if time container is empty
+    if (!times.isempty()) {
+
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = times.size();
+
+        // Reserve enough space
+        reserve(size() + num);
+
+        // Loop over all elements and append them to container
+        for (int i = 0; i < num; ++i) {
+            m_times.push_back(times[i]);
+        }
+
+    } // endif: time container was not empty
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Reserve memory for times in container
  *
- * @param[in] number Number of times.
+ * @param[in] num Number of times.
  *
- * This method reserves memory for a number of times in the container.
+ * This method reserves memory for @p num times in the container.
  ***************************************************************************/
-void GTimes::reserve(const int& number)
+void GTimes::reserve(const int& num)
 {
     // Reserve memory
-    m_times.reserve(number);
+    m_times.reserve(num);
 
     // Return
     return;

@@ -36,7 +36,7 @@
  *
  * @brief Container class for times.
  ***************************************************************************/
-class GTimes : public GBase {
+class GTimes : public GContainer {
 
 public:
     // Constructors and destructors
@@ -45,11 +45,15 @@ public:
     virtual ~GTimes(void);
  
     // Methods
-    void        clear(void);
-    GTimes*     clone(void) const;
-    int         size(void) const;
-    void        append(const GTime& time);
-    void        reserve(const int& number);
+    void    clear(void);
+    GTimes* clone(void) const;
+    int     size(void) const;
+    bool    isempty(void) const;
+    void    append(const GTime& time);
+    void    insert(const int& index, const GTime& time);
+    void    remove(const int& index);
+    void    reserve(const int& num);
+    void    extend(const GTimes& times);
 };
 
 

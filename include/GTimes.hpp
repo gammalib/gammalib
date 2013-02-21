@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GTimes.hpp - Time container class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,16 +30,19 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GTime.hpp"
 
 
 /***********************************************************************//**
  * @class GTimes
  *
- * @brief Container class for times.
+ * @brief Time container class.
+ *
+ * This class is a container for times. Times are implemented by the GTime
+ * class which stores time in a system independent way.
  ***************************************************************************/
-class GTimes : public GBase {
+class GTimes : public GContainer {
 
 public:
     // Constructors and destructors
@@ -56,8 +59,12 @@ public:
     void        clear(void);
     GTimes*     clone(void) const;
     int         size(void) const { return m_times.size(); }
+    bool        isempty(void) const { return m_times.empty(); }
     void        append(const GTime& time);
-    void        reserve(const int& number);
+    void        insert(const int& index, const GTime& time);
+    void        remove(const int& index);
+    void        reserve(const int& num);
+    void        extend(const GTimes& times);
     std::string print(void) const;
   
 protected:
@@ -67,6 +74,7 @@ protected:
     void free_members(void);
 
     // Protected data members
-    std::vector<GTime> m_times;      //!< Time list
+    std::vector<GTime> m_times;  //!< List of times
 };
+
 #endif /* GTIMES_HPP */
