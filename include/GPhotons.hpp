@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPhotons.hpp - Photon container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,16 +29,20 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GPhoton.hpp"
 
 
 /***********************************************************************//**
  * @class GPhotons
  *
- * @brief Container class for photons.
+ * @brief Photons container class
+ *
+ * This class is a container for photons. Photons are implemented by the
+ * GPhoton class which stores the physical attributes of a photon such as the
+ * photon arrival direction, its energy and its arrival time. 
  ***************************************************************************/
-class GPhotons : public GBase {
+class GPhotons : public GContainer {
 
 public:
     // Constructors and destructors
@@ -55,8 +59,12 @@ public:
     void           clear(void);
     GPhotons*      clone(void) const;
     int            size(void) const { return m_photons.size(); }
+    bool           isempty(void) const { return m_photons.empty(); }
     void           append(const GPhoton& photon);
-    void           reserve(const int& number);
+    void           insert(const int& index, const GPhoton& photon);
+    void           remove(const int& index);
+    void           reserve(const int& num);
+    void           extend(const GPhotons& photons);
     std::string    print(void) const;
   
 protected:
@@ -66,6 +74,7 @@ protected:
     void free_members(void);
 
     // Protected data members
-    std::vector<GPhoton> m_photons;      //!< Photon list
+    std::vector<GPhoton> m_photons;  //!< List of photons
 };
+
 #endif /* GPHOTONS_HPP */

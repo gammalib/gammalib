@@ -49,6 +49,7 @@ public:
     void         test_time(void);
     void         test_ebounds(void);
     void         test_gti(void);
+    void         test_photons(void);
 };
 
 

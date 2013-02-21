@@ -60,6 +60,7 @@ from GContainer:
 - GEbounds
 - GGti
 - GOptimizerPars (and hence GModels)
+- GPhotons
 
 Appropriate methods have been implemented in these classes to handle
 containers. They are not detailed here.

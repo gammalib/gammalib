@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPhotons.cpp - Photon container class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,6 +34,8 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_OP_ACCESS                              "GPhotons::operator[](int&)"
+#define G_INSERT                           "GPhotons::insert(int&, GPhoton&)"
+#define G_REMOVE                                     "GPhotons::remove(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -217,16 +219,111 @@ void GPhotons::append(const GPhoton& photon)
 
 
 /***********************************************************************//**
+ * @brief Insert photon into container
+ *
+ * @param[in] index Photon index (0,...,size()-1).
+ * @param[in] photon Photon.
+ *
+ * @exception GException::out_of_range
+ *            Photon index is out of range.
+ *
+ * Inserts a @p photon into the container before the photon with the
+ * specified @p index.
+ ***************************************************************************/
+void GPhotons::insert(const int& index, const GPhoton& photon)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (isempty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+        }
+    }
+    else {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+        }
+    }
+    #endif
+
+    // Inserts photon
+    m_photons.insert(m_photons.begin()+index, photon);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove photon from container
+ *
+ * @param[in] index Photon index (0,...,size()-1).
+ *
+ * @exception GException::out_of_range
+ *            Photon index is out of range.
+ *
+ * Remove photon of specified @p index from container.
+ ***************************************************************************/
+void GPhotons::remove(const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_REMOVE, index, 0, size()-1);
+    }
+    #endif
+
+    // Erase photon component from container
+    m_photons.erase(m_photons.begin() + index);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append photon container
+ *
+ * @param[in] photons Photon container.
+ *
+ * Append photon container to the container.
+ ***************************************************************************/
+void GPhotons::extend(const GPhotons& photons)
+{
+    // Do nothing if photon container is empty
+    if (!photons.isempty()) {
+
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = photons.size();
+
+        // Reserve enough space
+        reserve(size() + num);
+
+        // Loop over all model components and append pointers to deep copies
+        for (int i = 0; i < num; ++i) {
+            m_photons.push_back(photons[i]);
+        }
+
+    } // endif: photon container was not empty
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Reserve memory for photons in container
  *
- * @param[in] number Number of photons.
+ * @param[in] num Number of photons.
  *
- * This method reserves memory for a number of photons in the container.
+ * This method reserves memory for @p num photons in the container.
  ***************************************************************************/
-void GPhotons::reserve(const int& number)
+void GPhotons::reserve(const int& num)
 {
     // Reserve memory
-    m_photons.reserve(number);
+    m_photons.reserve(num);
 
     // Return
     return;

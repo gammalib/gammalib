@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GPhotons.i - Photon container class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,7 +35,7 @@
  *
  * @brief Container class for photons.
  ***************************************************************************/
-class GPhotons : public GBase {
+class GPhotons : public GContainer {
 public:
     // Constructors and destructors
     GPhotons(void);
@@ -43,11 +43,15 @@ public:
     virtual ~GPhotons(void);
  
     // Methods
-    void           clear(void);
-    GPhotons*      clone(void) const;
-    int            size(void) const;
-    void           append(const GPhoton& photon);
-    void           reserve(const int& number);
+    void      clear(void);
+    GPhotons* clone(void) const;
+    int       size(void) const;
+    bool      isempty(void) const;
+    void      append(const GPhoton& photon);
+    void      insert(const int& index, const GPhoton& photon);
+    void      remove(const int& index);
+    void      reserve(const int& num);
+    void      extend(const GPhotons& photons);
 };
 
 
