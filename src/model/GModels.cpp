@@ -335,8 +335,15 @@ void GModels::insert(const int& index, const GModel& model)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
+    if (isempty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
+        }
+    }
+    else {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_INSERT1, index, 0, size()-1);
+        }
     }
     #endif
 
@@ -457,11 +464,16 @@ void GModels::extend(const GModels& models)
     // Do nothing if model container is empty
     if (!models.isempty()) {
 
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = models.size();
+
         // Reserve enough space
-        reserve(size() + models.size());
+        reserve(size() + num);
 
         // Loop over all model components and append pointers to deep copies 
-        for (int i = 0; i < models.size(); ++i) {
+        for (int i = 0; i < num; ++i) {
             m_models.push_back(models[i]->clone());
         }
 

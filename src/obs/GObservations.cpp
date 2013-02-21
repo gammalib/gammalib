@@ -297,10 +297,17 @@ void GObservations::append(const GObservation& obs)
  ***************************************************************************/
 void GObservations::insert(const int& index, const GObservation& obs)
 {
-    // Compile option: If index is outside boundary then raise exception
+    // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+    if (isempty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+        }
+    }
+    else {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+        }
     }
     #endif
 
@@ -351,12 +358,17 @@ void GObservations::extend(const GObservations& obs)
     // Do nothing if observation container is empty
     if (!obs.isempty()) {
 
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = obs.size();
+
         // Reserve enough space
-        reserve(size() + obs.size());
+        reserve(size() + num);
 
         // Loop over all observations, clone them and append them to the
         // list
-        for (int i = 0; i < obs.size(); ++i) {
+        for (int i = 0; i < num; ++i) {
             m_obs.push_back(obs[i]->clone());
         }
 
