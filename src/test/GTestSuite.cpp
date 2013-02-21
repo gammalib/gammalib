@@ -621,7 +621,7 @@ void GTestSuite::test_try(const std::string& name)
 void GTestSuite::test_try_success(void)
 {
     // If the stack is empty
-    if (m_stack_try.size() == 0) {
+    if (m_stack_try.empty()) {
         throw GException::test_nested_try_error(G_TRY_SUCCESS, 
               "Called "G_TRY_SUCCESS" without a previous call to test_try()");
     }
@@ -669,7 +669,7 @@ void GTestSuite::test_try_failure(const std::string& message,
                                   const std::string& type)
 {
     // If the stack is empty
-    if (m_stack_try.size() == 0) {
+    if (m_stack_try.empty()) {
         throw GException::test_nested_try_error(G_TRY_FAILURE1,
               "Called "G_TRY_FAILURE1" without a previous call to test_try()");
     }
@@ -730,7 +730,7 @@ void GTestSuite::test_try_failure(const std::string& message,
 void GTestSuite::test_try_failure(const std::exception& e)
 {
     // If the stack is empty
-    if (m_stack_try.size() == 0) {
+    if (m_stack_try.empty()) {
         throw GException::test_nested_try_error(G_TRY_FAILURE2,
               "Called "G_TRY_FAILURE2" without a previous call to test_try()");
     }
@@ -987,7 +987,7 @@ std::string GTestSuite::format_name(const std::string& name)
     std::string format_name;
 
     // Set name of the try blocks
-    if (m_stack_try.size() > 0) {
+    if (!m_stack_try.empty()) {
         format_name += m_stack_try.back()->name();
     }
     else {
