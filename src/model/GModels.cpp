@@ -170,7 +170,6 @@ GModels& GModels::operator= (const GModels& models)
  *            Model index is out of range.
  *
  * Returns a pointer to the model with the specified @p index.
- * The return value will never be NULL.
  ***************************************************************************/
 GModel* GModels::operator[](const int& index)
 {
@@ -194,8 +193,7 @@ GModel* GModels::operator[](const int& index)
  * @exception GException::out_of_range
  *            Model index is out of range.
  *
- * Returns a pointer to the model with the specified @p index.
- * The return value will never be NULL.
+ * Returns a const pointer to the model with the specified @p index.
  ***************************************************************************/
 const GModel* GModels::operator[](const int& index) const
 {
@@ -220,7 +218,6 @@ const GModel* GModels::operator[](const int& index) const
  *            Model with specified name not found in container.
  *
  * Returns a pointer to the model with the specified @p name.
- * The return value will never be NULL.
  ***************************************************************************/
 GModel* GModels::operator[](const std::string& name)
 {
@@ -245,8 +242,7 @@ GModel* GModels::operator[](const std::string& name)
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
  *
- * Returns a pointer to the model with the specified @p name.
- * The return value will never be NULL.
+ * Returns a const pointer to the model with the specified @p name.
  ***************************************************************************/
 const GModel* GModels::operator[](const std::string& name) const
 {
@@ -312,13 +308,8 @@ GModels* GModels::clone(void) const
  ***************************************************************************/
 void GModels::append(const GModel& model)
 {
-    // Make deep copy of model
-    GModel* model_copy = model.clone();
-
-    // If copy is valid, append it to the container
-    if (model_copy != NULL) {
-        m_models.push_back(model_copy);
-    }
+    // Append deep copy of model
+    m_models.push_back(model.clone());
 
     // Set parameter pointers
     set_pointers();
@@ -349,13 +340,8 @@ void GModels::insert(const int& index, const GModel& model)
     }
     #endif
 
-    // Make deep copy of model
-    GModel* model_copy = model.clone();
-
-    // If copy is valid, insert it to the container
-    if (model_copy != NULL) {
-        m_models.insert(m_models.begin()+index, model_copy);
-    }
+    // Inserts deep copy of model
+    m_models.insert(m_models.begin()+index, model.clone());
 
     // Set parameter pointers
     set_pointers();
@@ -387,13 +373,8 @@ void GModels::insert(const std::string& name, const GModel& model)
         throw GException::model_not_found(G_INSERT2, name);
     }
 
-    // Make deep copy of model
-    GModel* model_copy = model.clone();
-
-    // If copy is valid, insert it to the container
-    if (model_copy != NULL) {
-        m_models.insert(m_models.begin()+index, model_copy);
-    }
+    // Inserts deep copy of model
+    m_models.insert(m_models.begin()+index, model.clone());
 
     // Set parameter pointers
     set_pointers();
@@ -479,18 +460,10 @@ void GModels::extend(const GModels& models)
         // Reserve enough space
         reserve(size() + models.size());
 
-        // Loop over all model components
+        // Loop over all model components and append pointers to deep copies 
         for (int i = 0; i < models.size(); ++i) {
-
-            // Make deep copy of model
-            GModel* model_copy = models[i]->clone();
-
-            // If copy is valid, append it to the container
-            if (model_copy != NULL) {
-                m_models.push_back(model_copy);
-            }
-
-        } // endfor: looped over all model components
+            m_models.push_back(models[i]->clone());
+        }
 
         // Set parameter pointers
         set_pointers();

@@ -23,11 +23,16 @@ GEbounds
   The emin, emax, emean and elogmean methods now take a const integer
   reference as argument instead of an integer value.
 
+GModels
+  The set() method has been added for model setting.
+
 GObservations
   The observation is now passed as const reference in the append()
   method (was non-const before). The observation iterator has been
   removed from the class. The reference returned by the models() method
-  is now declared const.
+  is now declared const. The operator[] now return a pointer instead
+  of a reference and the set() method has been added for observation
+  setting.
 
 GOptimizerFunction
   The value method now returns a value instead of a pointer.
