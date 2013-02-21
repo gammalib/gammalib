@@ -138,10 +138,12 @@ GPhotons& GPhotons::operator=(const GPhotons& photons)
 GPhoton& GPhotons::operator[](const int& index)
 {
     // If index is outside boundary then throw an error
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
     }
-
+    #endif
+    
     // Return reference
     return m_photons[index];
 }
@@ -158,9 +160,11 @@ GPhoton& GPhotons::operator[](const int& index)
 const GPhoton& GPhotons::operator[](const int& index) const
 {
     // If index is outside boundary then throw an error
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
     }
+    #endif
 
     // Return reference
     return m_photons[index];
