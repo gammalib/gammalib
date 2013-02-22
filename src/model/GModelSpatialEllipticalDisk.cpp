@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class       *
+ *   GModelSpatialEllipticalDisk.cpp - Elliptical disk source model class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Michael Mayer                              *
+ *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,11 +38,11 @@
 
 /* __ Globals ____________________________________________________________ */
 const GModelSpatialEllipticalDisk g_elliptical_disk_seed;
-const GModelSpatialRegistry   g_elliptical_disk_registry(&g_elliptical_disk_seed);
+const GModelSpatialRegistry       g_elliptical_disk_registry(&g_elliptical_disk_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                  "GModelSpatialEllipticalDisk::read(GXmlElement&)"
-#define G_WRITE                "GModelSpatialEllipticalDisk::write(GXmlElement&)"
+#define G_READ              "GModelSpatialEllipticalDisk::read(GXmlElement&)"
+#define G_WRITE            "GModelSpatialEllipticalDisk::write(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -60,7 +60,8 @@ const GModelSpatialRegistry   g_elliptical_disk_registry(&g_elliptical_disk_seed
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(void) : GModelSpatialElliptical()
+GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(void) :
+                             GModelSpatialElliptical()
 {
     // Initialise members
     init_members();
@@ -77,10 +78,14 @@ GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(void) : GModelSpatialEl
  * @param[in] minor Semi minor axis (degrees).
  * @param[in] major Semi major axis (degrees).
  * @param[in] posangle Position angle of major axis (degrees).
+ *
+ * Construct elliptical disk model from model parameters.
  ***************************************************************************/
 GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                                 const double&  minor,const double& major, const double & posangle) :
-                         GModelSpatialElliptical()
+                                                         const double&  minor,
+                                                         const double&  major,
+                                                         const double& posangle) :
+                             GModelSpatialElliptical()
 {
     // Initialise members
     init_members();
@@ -101,12 +106,12 @@ GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * Creates instance of Elliptical disk model by extracting information from an
- * XML element. See GModelSpatialEllipticalDisk::read() for more information about the
- * expected structure of the XML element.
+ * Creates instance of Elliptical disk model by extracting information from
+ * an XML element. See GModelSpatialEllipticalDisk::read() for more
+ * information about the expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GXmlElement& xml) :
-                         GModelSpatialElliptical()
+                             GModelSpatialElliptical()
 {
     // Initialise members
     init_members();
@@ -125,7 +130,7 @@ GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GXmlElement& xml)
  * @param[in] model Elliptical disk model.
  ***************************************************************************/
 GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model) :
-                         GModelSpatialElliptical(model)
+                             GModelSpatialElliptical(model)
 {
     // Initialise members
     init_members();
@@ -215,6 +220,8 @@ void GModelSpatialEllipticalDisk::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of elliptical disk model.
  ***************************************************************************/
 GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
 {
@@ -253,32 +260,45 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  *
  * @TODO check formula
  ***************************************************************************/
-double GModelSpatialEllipticalDisk::eval(const double& theta, const double& posangle) const
+double GModelSpatialEllipticalDisk::eval(const double& theta,
+                                         const double& posangle) const
 {
-    // Update precomputation cache
-    update();
+    // Initialise value
+    double value = 0.0;
 
+    // Continue only if we're inside circle enclosing the ellipse
+    if (theta <= theta_max()) {
 
-    double diff_angle = posangle - m_posangle.real_value()*deg2rad;
-    double cosinus = std::cos(diff_angle);
-    double sinus = std::sin(diff_angle);
+        // Update precomputation cache
+        update();
 
-    double r_ell = m_minor_rad*m_major_rad/std::sqrt(std::pow(m_minor_rad*cosinus,2)+std::pow(m_major_rad*sinus,2));
-    double value = (theta <= r_ell) ? m_norm : 0.0;
+        // Perform computations
+        double diff_angle = posangle - m_posangle.real_value()*deg2rad;
+        double cosinus    = std::cos(diff_angle);
+        double sinus      = std::sin(diff_angle);
+        double arg1       = m_minor_rad * cosinus;
+        double arg2       = m_major_rad * sinus;
+        double r_ell      = m_minor_rad * m_major_rad /
+                            std::sqrt(arg1*arg1 + arg2*arg2);
 
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
-        std::cout << "*** ERROR: GModelSpatialEllipticalDisk::eval";
-        std::cout << "(theta=" << theta << "): NaN/Inf encountered";
-        std::cout << "(posangle=" << posangle << "): NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", R_ellipse=" << r_ell;
-        std::cout << ", diff_angle=" << diff_angle;
-        std::cout << ", m_norm=" << m_norm;
-        std::cout << ")" << std::endl;
-    }
-    #endif
+        // Set value
+        value = (theta <= r_ell) ? m_norm : 0.0;
+
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(value) || isinfinite(value)) {
+            std::cout << "*** ERROR: GModelSpatialEllipticalDisk::eval";
+            std::cout << "(theta=" << theta << "): NaN/Inf encountered";
+            std::cout << "(posangle=" << posangle << "): NaN/Inf encountered";
+            std::cout << " (value=" << value;
+            std::cout << ", R_ellipse=" << r_ell;
+            std::cout << ", diff_angle=" << diff_angle;
+            std::cout << ", m_norm=" << m_norm;
+            std::cout << ")" << std::endl;
+        }
+        #endif
+
+    } // endif: position was inside enclosing circle
 
     // Return value
     return value;
@@ -289,7 +309,7 @@ double GModelSpatialEllipticalDisk::eval(const double& theta, const double& posa
  * @brief Evaluate function and gradients (in units of sr^-1)
  *
  * @param[in] theta Angular distance from disk centre (radians).
- * @param[in] posangle Position angle for sky position(radians).
+ * @param[in] posangle Position angle (clockwise from North) (radians).
  *
  * Evaluates the function value. No gradient computation is implemented as
  * Elliptical models will be convolved with the instrument response and thus
@@ -297,7 +317,8 @@ double GModelSpatialEllipticalDisk::eval(const double& theta, const double& posa
  *
  * See the eval() method for more information.
  ***************************************************************************/
-double GModelSpatialEllipticalDisk::eval_gradients(const double& theta, const double& posangle) const
+double GModelSpatialEllipticalDisk::eval_gradients(const double& theta,
+                                                   const double& posangle) const
 {
     // Return value
     return (eval(theta, posangle));
@@ -314,6 +335,7 @@ double GModelSpatialEllipticalDisk::eval_gradients(const double& theta, const do
  ***************************************************************************/
 GSkyDir GModelSpatialEllipticalDisk::mc(GRan& ran) const
 {
+    // Update precomputation cache
 	update();
 
 	// Initialise a radial disk model with radius of the major axis
@@ -329,7 +351,7 @@ GSkyDir GModelSpatialEllipticalDisk::mc(GRan& ran) const
 		// Set SkyDir to random position
 		dir = disk.mc(ran);
 
-	}while(GModelSpatialElliptical::eval(dir)<=0);
+	} while(GModelSpatialElliptical::eval(dir) <= 0.0);
 
 	// Return SkyDir
 	return dir;
@@ -339,11 +361,16 @@ GSkyDir GModelSpatialEllipticalDisk::mc(GRan& ran) const
 
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
+ *
+ * @return Returns maximum model radians.
  ***************************************************************************/
 double GModelSpatialEllipticalDisk::theta_max(void) const
 {
+    // Set maximum model radius
+    double theta_max = (major() > minor()) ? major()*deg2rad : minor()*deg2rad;
+
     // Return value
-    return (major()*deg2rad);
+    return theta_max;
 }
 
 
@@ -371,23 +398,23 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
 
-    // Verify that XML element has exactly 3 parameters
+    // Verify that XML element has exactly 5 parameters
     if (xml.elements() != 5 || npars != 5) {
         throw GException::model_invalid_parnum(G_READ, xml,
-              "Elliptical Disk model requires exactly 5 parameters.");
+              "Elliptical disk model requires exactly 5 parameters.");
     }
 
     // Read disk location
     GModelSpatialElliptical::read(xml);
 
     // Extract model parameters
-    int  npar[2] = {0};
+    int  npar[2] = {0, 0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
         GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
-        // Handle Radius
+        // Handle minor radius
         if (par->attribute("name") == "MinorRadius") {
             
             // Read parameter
@@ -397,6 +424,7 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
             npar[0]++;
         }
 
+        // Handle major radius
         else if (par->attribute("name") == "MajorRadius") {
 
         	// Read parameter
@@ -411,7 +439,8 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
     // Verify that all parameters were found
     if (npar[0] != 1 || npar[1] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
-              "EllipticalDisk requires \"MinorRadius\" and \"MajorRadius\" parameter.");
+              "Elliptical disk model requires \"MinorRadius\" and"
+              " \"MajorRadius\" parameters.");
     }
 
     // Return
@@ -438,9 +467,9 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
     // Write disk location
     GModelSpatialElliptical::write(xml);
 
-    // If XML element has 2 nodes (which should be the location nodes)
-    // then append 1 parameter node
-    if (xml.elements() == 2) {
+    // If XML element has 3 nodes (which should be the location and PA nodes)
+    // then append 2 parameter nodes
+    if (xml.elements() == 3) {
         xml.append(new GXmlElement("parameter name=\"MinorRadius\""));
         xml.append(new GXmlElement("parameter name=\"MajorRadius\""));
     }
@@ -448,20 +477,20 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
     // Determine number of parameter nodes in XML element
     int npars = xml.elements("parameter");
 
-    // Verify that XML element has exactly 3 parameters
+    // Verify that XML element has exactly 5 parameters
     if (xml.elements() != 5 || npars != 5) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
-              "Elliptical Disk model requires exactly 2 parameters.");
+              "Elliptical Disk model requires exactly 5 parameters.");
     }
 
     // Set or update model parameter attributes
-    int npar[1] = {0};
+    int npar[2] = {0, 0};
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
         GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
-        // Handle Radius
+        // Handle minor radius
         if (par->attribute("name") == "MinorRadius") {
 
         	// Write parameter
@@ -471,6 +500,7 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
             npar[0]++;
         }
 
+        // Handle major radius
         else if (par->attribute("name") == "MajorRadius") {
 
         	// Write parameter
@@ -485,7 +515,8 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
     // Check of all required parameters are present
     if (npar[0] != 1 || npar[1] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
-              "Require \"MinorRadius\" and \"MajorRadius\" parameter.");
+              "Elliptical disk model requires \"MinorRadius\" and"
+              " \"MajorRadius\" parameters.");
     }
 
     // Return
@@ -559,7 +590,7 @@ void GModelSpatialEllipticalDisk::init_members(void)
     m_last_major = 0.0;
     m_minor_rad  = 0.0;
     m_major_rad  = 0.0;
-    m_norm        = 0.0;
+    m_norm       = 0.0;
 
     // Return
     return;
@@ -586,7 +617,7 @@ void GModelSpatialEllipticalDisk::copy_members(const GModelSpatialEllipticalDisk
     m_last_major = model.m_last_major;
     m_minor_rad  = model.m_minor_rad;
     m_major_rad  = model.m_major_rad;
-    m_norm        = model.m_norm;
+    m_norm       = model.m_norm;
 
     // Return
     return;
