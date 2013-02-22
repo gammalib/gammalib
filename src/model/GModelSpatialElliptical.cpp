@@ -456,18 +456,19 @@ void GModelSpatialElliptical::init_members(void)
     m_dec.hasgrad(false);
 
     // Initialise Position Angle
-    m_dec.clear();
-    m_dec.name("PA");
-    m_dec.unit("deg");
-    m_dec.fix();
-    m_dec.scale(1.0);
-    m_dec.gradient(0.0);
-    m_dec.hasgrad(false);
+    m_posangle.clear();
+    m_posangle.name("PA");
+    m_posangle.unit("deg");
+    m_posangle.fix();
+    m_posangle.scale(1.0);
+    m_posangle.gradient(0.0);
+    m_posangle.hasgrad(false);
 
     // Set parameter pointer(s)
     m_pars.clear();
     m_pars.push_back(&m_ra);
     m_pars.push_back(&m_dec);
+    m_pars.push_back(&m_posangle);
 
     // Return
     return;

@@ -35,7 +35,7 @@ AC_CONFIG_MACRO_DIR([m4])
 #AM_INIT_AUTOMAKE([gnu no-dependencies])
 AM_INIT_AUTOMAKE([gnu no-dependencies -Wno-portability])
 #AM_INIT_AUTOMAKE([gnu -Wno-portability])
-AM_CONFIG_HEADER([config.h])
+AC_CONFIG_HEADER([config.h])
 
 
 #############################################################################

@@ -58,6 +58,7 @@
 %include "GModelSpatialRadialGauss.i"
 %include "GModelSpatialRadialShell.i"
 %include "GModelSpatialElliptical.i"
+%include "GModelSpatialEllipticalDisk.i"
 %include "GModelSpatialDiffuse.i"
 %include "GModelSpatialDiffuseConst.i"
 %include "GModelSpatialDiffuseCube.i"

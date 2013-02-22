@@ -20,6 +20,7 @@ sources = GModelPar.cpp \
           GModelSpatialRadialGauss.cpp \
           GModelSpatialRadialShell.cpp \
           GModelSpatialElliptical.cpp \
+	  			GModelSpatialEllipticalDisk.cpp \
           GModelSpatialDiffuse.cpp \
           GModelSpatialDiffuseConst.cpp \
           GModelSpatialDiffuseCube.cpp \
