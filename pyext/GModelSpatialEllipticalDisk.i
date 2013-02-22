@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GModelSpatialEllipticalDisk.i - Abstract elliptical disc model class  *
+ *    GModelSpatialEllipticalDisk.i - Elliptical disk source model class   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpatialEllipticalDisk.i
- * @brief Elliptical disk model class Python interface
+ * @brief Elliptical disk model class interface definition
  * @author Michael Mayer
  */
 %{
@@ -33,37 +33,38 @@
 /***********************************************************************//**
  * @class GModelSpatialEllipticalDisk
  *
- * @brief elliptical disk model class
+ * @brief Elliptical disk model class
  ***************************************************************************/
 class GModelSpatialEllipticalDisk : public GModelSpatialElliptical {
 public:
     // Constructors and destructors
     GModelSpatialEllipticalDisk(void);
-    GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model);
-    explicit GModelSpatialEllipticalDisk(const GSkyDir& dir, const double& minor,const double& major, const double& posangle);
+    explicit GModelSpatialEllipticalDisk(const GSkyDir& dir,
+                                         const double&  minor,
+                                         const double&  major,
+                                         const double&  posangle);
     explicit GModelSpatialEllipticalDisk(const GXmlElement& xml);
+    GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model);
     virtual ~GModelSpatialEllipticalDisk(void);
 
-    // Pure virtual methods
-    virtual void                     clear(void);
+    // Implemented pure virtual base class methods
+    virtual void                         clear(void);
     virtual GModelSpatialEllipticalDisk* clone(void) const;
-    virtual std::string              type(void) const;
-    virtual double                   eval(const double& theta,const double& posangle) const;
-    virtual double                   eval_gradients(const double& theta,const double& posangle)const;
-    virtual GSkyDir                  mc(GRan& ran) const;
-    virtual double                   theta_max(void) const;
-
-    // Implemented virtual methods
-    virtual void   read(const GXmlElement& xml);
-    virtual void   write(GXmlElement& xml) const;
+    virtual std::string                  type(void) const;
+    virtual double                       eval(const double& theta,
+                                              const double& posangle) const;
+    virtual double                       eval_gradients(const double& theta,
+                                                        const double& posangle) const;
+    virtual GSkyDir                      mc(GRan& ran) const;
+    virtual double                       theta_max(void) const;
+    virtual void                         read(const GXmlElement& xml);
+    virtual void                         write(GXmlElement& xml) const;
 
     // Other methods
-    double  ra(void) const;
-    double  dec(void) const;
-    double  posangle(void) const;
-    GSkyDir dir(void) const;
-    void    dir(const GSkyDir& dir);
-    void    posangle(const double& posangle);
+    double minor(void) const;
+    double major(void) const;
+    void   minor(const double& minor);
+    void   major(const double& major);
 };
 
 
