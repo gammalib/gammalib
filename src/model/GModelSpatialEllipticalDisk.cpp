@@ -75,16 +75,16 @@ GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(void) :
  * @brief Disk constructor
  *
  * @param[in] dir Sky position of disk centre.
- * @param[in] minor Semi minor axis (degrees).
- * @param[in] major Semi major axis (degrees).
- * @param[in] posangle Position angle of major axis (degrees).
+ * @param[in] semiminor Semi-minor axis (degrees).
+ * @param[in] semimajor Semi-major axis (degrees).
+ * @param[in] posangle Position angle of semi-major axis (degrees).
  *
  * Construct elliptical disk model from model parameters.
  ***************************************************************************/
 GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                                         const double&  minor,
-                                                         const double&  major,
-                                                         const double& posangle) :
+                                                         const double&  semiminor,
+                                                         const double&  semimajor,
+                                                         const double&  posangle) :
                              GModelSpatialElliptical()
 {
     // Initialise members
@@ -92,8 +92,8 @@ GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GSkyDir& dir,
 
     // Assign parameters
     this->dir(dir);
-    this->minor(minor);
-    this->major(major);
+    this->semiminor(semiminor);
+    this->semimajor(semimajor);
     this->posangle(posangle);
 
     // Return
@@ -276,9 +276,9 @@ double GModelSpatialEllipticalDisk::eval(const double& theta,
         double diff_angle = posangle - m_posangle.real_value()*deg2rad;
         double cosinus    = std::cos(diff_angle);
         double sinus      = std::sin(diff_angle);
-        double arg1       = m_minor_rad * cosinus;
-        double arg2       = m_major_rad * sinus;
-        double r_ell      = m_minor_rad * m_major_rad /
+        double arg1       = m_semiminor_rad * cosinus;
+        double arg2       = m_semimajor_rad * sinus;
+        double r_ell      = m_semiminor_rad * m_semimajor_rad /
                             std::sqrt(arg1*arg1 + arg2*arg2);
 
         // Set value
@@ -338,8 +338,8 @@ GSkyDir GModelSpatialEllipticalDisk::mc(GRan& ran) const
     // Update precomputation cache
 	update();
 
-	// Initialise a radial disk model with radius of the major axis
-	GModelSpatialRadialDisk disk = GModelSpatialRadialDisk(dir(),major());
+	// Initialise a radial disk model with radius of the semimajor axis
+	GModelSpatialRadialDisk disk = GModelSpatialRadialDisk(dir(), semimajor());
 
 	// Initialise SkyDir
 	GSkyDir dir = GSkyDir();
@@ -367,7 +367,8 @@ GSkyDir GModelSpatialEllipticalDisk::mc(GRan& ran) const
 double GModelSpatialEllipticalDisk::theta_max(void) const
 {
     // Set maximum model radius
-    double theta_max = (major() > minor()) ? major()*deg2rad : minor()*deg2rad;
+    double theta_max = (semimajor() > semiminor()) ?
+                       semimajor()*deg2rad : semiminor()*deg2rad;
 
     // Return value
     return theta_max;
@@ -387,7 +388,7 @@ double GModelSpatialEllipticalDisk::theta_max(void) const
  * Read the elliptical disk information from an XML element. The XML element
  * is required to have 5 parameters.
  * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
- * rotation angle "PA", the semi-minor axis "MinorRadius" and the semi-major
+ * rotation angle "PA", the semi-semiminor axis "MinorRadius" and the semi-semimajor
  * axis "MajorRadius"
  *
  * @todo Implement a test of the ellipse boundary. The axes
@@ -414,21 +415,21 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
         // Get parameter element
         GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
-        // Handle minor radius
+        // Handle semiminor radius
         if (par->attribute("name") == "MinorRadius") {
             
             // Read parameter
-            m_minor.read(*par);
+            m_semiminor.read(*par);
             
             // Increment parameter counter
             npar[0]++;
         }
 
-        // Handle major radius
+        // Handle semimajor radius
         else if (par->attribute("name") == "MajorRadius") {
 
         	// Read parameter
-        	m_major.read(*par);
+        	m_semimajor.read(*par);
 
         	// Increment parameter counter
         	npar[1]++;
@@ -490,21 +491,21 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
         // Get parameter element
         GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
 
-        // Handle minor radius
+        // Handle semiminor radius
         if (par->attribute("name") == "MinorRadius") {
 
         	// Write parameter
-            m_minor.write(*par);
+            m_semiminor.write(*par);
 
             // Increment parameter counter
             npar[0]++;
         }
 
-        // Handle major radius
+        // Handle semimajor radius
         else if (par->attribute("name") == "MajorRadius") {
 
         	// Write parameter
-            m_major.write(*par);
+            m_semimajor.write(*par);
 
             // Increment parameter counter
             npar[1]++;
@@ -559,38 +560,39 @@ std::string GModelSpatialEllipticalDisk::print(void) const
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::init_members(void)
 {
-    // Initialise minor axis
-    m_minor.clear();
-    m_minor.name("MinorRadius");
-    m_minor.unit("deg");
-    m_minor.value(2.778e-4); // 1 arcsec
-    m_minor.min(2.778e-4);   // 1 arcsec
-    m_minor.free();
-    m_minor.scale(1.0);
-    m_minor.gradient(0.0);
-    m_minor.hasgrad(false);  // Elliptical components never have gradients
+    // Initialise semi-minor axis
+    m_semiminor.clear();
+    m_semiminor.name("MinorRadius");
+    m_semiminor.unit("deg");
+    m_semiminor.value(2.778e-4); // 1 arcsec
+    m_semiminor.min(2.778e-4);   // 1 arcsec
+    m_semiminor.free();
+    m_semiminor.scale(1.0);
+    m_semiminor.gradient(0.0);
+    m_semiminor.hasgrad(false);  // Elliptical components never have gradients
 
-    m_major.clear();
-    m_major.name("MajorRadius");
-    m_major.unit("deg");
-    m_major.value(2.778e-4); // 1 arcsec
-    m_major.min(2.778e-4);   // 1 arcsec
-    m_major.free();
-    m_major.scale(1.0);
-    m_major.gradient(0.0);
-    m_major.hasgrad(false);  // Elliptical components never have gradients
+    // Initialise semi-major axis
+    m_semimajor.clear();
+    m_semimajor.name("MajorRadius");
+    m_semimajor.unit("deg");
+    m_semimajor.value(2.778e-4); // 1 arcsec
+    m_semimajor.min(2.778e-4);   // 1 arcsec
+    m_semimajor.free();
+    m_semimajor.scale(1.0);
+    m_semimajor.gradient(0.0);
+    m_semimajor.hasgrad(false);  // Elliptical components never have gradients
 
     // Set parameter pointer(s)
-    m_pars.push_back(&m_minor);
-    m_pars.push_back(&m_major);
+    m_pars.push_back(&m_semiminor);
+    m_pars.push_back(&m_semimajor);
 
     // Initialise precomputation cache. Note that zero values flag
     // uninitialised as a zero radius is not meaningful
-    m_last_minor = 0.0;
-    m_last_major = 0.0;
-    m_minor_rad  = 0.0;
-    m_major_rad  = 0.0;
-    m_norm       = 0.0;
+    m_last_semiminor = 0.0;
+    m_last_semimajor = 0.0;
+    m_semiminor_rad  = 0.0;
+    m_semimajor_rad  = 0.0;
+    m_norm           = 0.0;
 
     // Return
     return;
@@ -609,15 +611,15 @@ void GModelSpatialEllipticalDisk::init_members(void)
 void GModelSpatialEllipticalDisk::copy_members(const GModelSpatialEllipticalDisk& model)
 {
     // Copy members
-	m_minor = model.m_minor;
-	m_major = model.m_major;
+	m_semiminor = model.m_semiminor;
+	m_semimajor = model.m_semimajor;
 
     // Copy precomputation cache
-    m_last_minor = model.m_last_minor;
-    m_last_major = model.m_last_major;
-    m_minor_rad  = model.m_minor_rad;
-    m_major_rad  = model.m_major_rad;
-    m_norm       = model.m_norm;
+    m_last_semiminor = model.m_last_semiminor;
+    m_last_semimajor = model.m_last_semimajor;
+    m_semiminor_rad  = model.m_semiminor_rad;
+    m_semimajor_rad  = model.m_semimajor_rad;
+    m_norm           = model.m_norm;
 
     // Return
     return;
@@ -642,26 +644,27 @@ void GModelSpatialEllipticalDisk::free_members(void)
  * TODO check this formula
  *
  * Note that this is the correct normalization on the sphere for any
- * ellipse with a semi-minor axis a and semi-major axis b. For small a and b it is very similar to the
- * cartesian
+ * ellipse with a semi-semiminor axis a and semi-semimajor axis b. 
+ * For small a and b it is very similar to the cartesian
  * approximation you might have expected:
  * \f[{\tt m\_norm} = \frac{1}{\pi ab}\f]
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::update() const
 {
     // Update if one axis has changed has changed
-    if (m_last_minor != minor() || m_last_major != major()) {
+    if (m_last_semiminor != semiminor() || m_last_semimajor != semimajor()) {
 
         // Store last values
-        m_last_minor = minor();
-        m_last_major = major();
+        m_last_semiminor = semiminor();
+        m_last_semimajor = semimajor();
 
         // Compute axes in radians
-        m_minor_rad = minor() * deg2rad;
-        m_major_rad = major() * deg2rad;
+        m_semiminor_rad = semiminor() * deg2rad;
+        m_semimajor_rad = semimajor() * deg2rad;
 
         // Perform precomputations
-        double denom = twopi * std::sqrt(1 - std::cos(m_minor_rad))*std::sqrt(1 - std::cos(m_major_rad));
+        double denom = twopi * std::sqrt(1 - std::cos(m_semiminor_rad)) *
+                               std::sqrt(1 - std::cos(m_semimajor_rad));
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required

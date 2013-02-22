@@ -50,8 +50,8 @@ public:
     // Constructors and destructors
     GModelSpatialEllipticalDisk(void);
     explicit GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                         const double&  minor,
-                                         const double&  major,
+                                         const double&  semiminor,
+                                         const double&  semimajor,
                                          const double&  posangle);
     explicit GModelSpatialEllipticalDisk(const GXmlElement& xml);
     GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model);
@@ -75,10 +75,10 @@ public:
     virtual std::string                  print(void) const;
 
     // Other methods
-    double minor(void) const { return m_minor.real_value(); }
-    double major(void) const { return m_major.real_value(); }
-    void   minor(const double& minor) { m_minor.real_value(minor); }
-    void   major(const double& major) { m_major.real_value(major); }
+    double semiminor(void) const { return m_semiminor.real_value(); }
+    double semimajor(void) const { return m_semimajor.real_value(); }
+    void   semiminor(const double& semiminor) { m_semiminor.real_value(semiminor); }
+    void   semimajor(const double& semimajor) { m_semimajor.real_value(semimajor); }
 
 protected:
     // Protected methods
@@ -88,15 +88,15 @@ protected:
     void update(void) const;
 
     // Protected members
-    GModelPar      m_minor;        //!< minor axis of ellipse (degrees)
-    GModelPar      m_major;        //!< major axis of ellipse (degrees)
+    GModelPar      m_semiminor;        //!< semi-minor axis of ellipse (degrees)
+    GModelPar      m_semimajor;        //!< semi-major axis of ellipse (degrees)
 
     // Cached members used for pre-computations
-    mutable double m_last_minor;   //!< Last minor axis
-    mutable double m_last_major;   //!< Last major axis
-    mutable double m_minor_rad;    //!< Radius in radians
-    mutable double m_major_rad;    //!< Radius in radians
-    mutable double m_norm;         //!< Normalization
+    mutable double m_last_semiminor;   //!< Last semi-minor axis
+    mutable double m_last_semimajor;   //!< Last semi-major axis
+    mutable double m_semiminor_rad;    //!< Radius in radians
+    mutable double m_semimajor_rad;    //!< Radius in radians
+    mutable double m_norm;             //!< Normalization
 };
 
 #endif /* GMODELSPATIALELLIPTICALDISK_HPP */

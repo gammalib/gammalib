@@ -40,8 +40,8 @@ public:
     // Constructors and destructors
     GModelSpatialEllipticalDisk(void);
     explicit GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                         const double&  minor,
-                                         const double&  major,
+                                         const double&  semiminor,
+                                         const double&  semimajor,
                                          const double&  posangle);
     explicit GModelSpatialEllipticalDisk(const GXmlElement& xml);
     GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model);
@@ -61,10 +61,10 @@ public:
     virtual void                         write(GXmlElement& xml) const;
 
     // Other methods
-    double minor(void) const;
-    double major(void) const;
-    void   minor(const double& minor);
-    void   major(const double& major);
+    double semiminor(void) const;
+    double semimajor(void) const;
+    void   semiminor(const double& semiminor);
+    void   semimajor(const double& semimajor);
 };
 
 
