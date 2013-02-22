@@ -116,6 +116,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialRadialGauss.hpp \
                      GModelSpatialRadialShell.hpp \
                      GModelSpatialElliptical.hpp \
+		     						 GModelSpatialEllipticalDisk.hpp \
                      GModelSpatialDiffuse.hpp \
                      GModelSpatialDiffuseConst.hpp \
                      GModelSpatialDiffuseCube.hpp \
