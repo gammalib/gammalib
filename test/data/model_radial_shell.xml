@@ -1,6 +1,6 @@
 <?xml version="1.0" standalone="no"?>
 <source_library title="source library">
-  <source name="Cen A lobes" type="DiffuseSource">
+  <source name="Cen A lobes" type="ExtendedSource">
     <spectrum type="PowerLaw">
       <parameter scale="1e-07" name="Prefactor" min="1e-07" max="1000.0" value="1.73" free="1"/>
       <parameter scale="1.0" name="Index" min="-5.0" max="+5.0" value="-2.1" free="1"/>
