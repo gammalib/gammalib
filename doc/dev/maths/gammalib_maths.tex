@@ -10,7 +10,7 @@
 \newcommand{\shorttype}{\mbox{Maths}}
 \newcommand{\doctype}{\mbox{Mathematical Implementation}}
 \newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{17 February 2013}}
+\newcommand{\calendar}{\mbox{23 February 2013}}
 \newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 \newcommand{\approv}{\mbox{J\"urgen Kn\"odlseder}}
 
@@ -125,7 +125,7 @@ r_{\rm max} = \sigma \sqrt{ 2 u_{\rm max}}
 \section{Spatial models}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{ShellFunction}
+\subsection{Radial Shell}
 
 \subsubsection{Small angle approximation}
 
@@ -279,6 +279,30 @@ $\theta_{\rm in} = \frac{2}{3}\theta_{\rm out}$.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Elliptical disk}
+
+The effective radius $\theta_0$ of the ellipse on the sphere is given by
+\begin{equation}
+\theta_0 = \frac{1}{\sqrt{\frac{\cos^2(\phi-\phi_0)}{a^2} + \frac{\sin^2(\phi-\phi_0)}{b^2}}}
+\end{equation}
+where
+$\phi_0$ is the position angle of the ellipse,
+$\phi$ is the position angle of the position of interest on the sky with respect to the ellipse centre,
+$a$ is the semi-major axis of the ellipse, and
+$b$ is the semi-major axis.
+This formula can be rewritten as
+\begin{equation}
+\theta_0 = \frac{ab}{\sqrt{b^2 \cos^2(\phi-\phi_0) + a^2 \sin^2(\phi-\phi_0)}}
+\end{equation}
+which is the formula implemented in {\tt GModelSpatialEllipticalDisk::eval()}.
+
+The solid angle subtended by the ellipse is given by 
+\begin{equation}
+\Omega = 2 \pi \sqrt{(1-\cos a) (1-\cos b)}
+\end{equation}
+which is the formula implemented in {\tt GModelSpatialEllipticalDisk::update()}.
+{\bf WARNING: This formula has not yet been verified.}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
