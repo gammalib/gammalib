@@ -82,8 +82,10 @@
 //#define G_DEBUG_READ_ARF                         //!< Debug read_arf method
 //#define G_DEBUG_IRF_RADIAL                     //!< Debug irf_radial method
 //#define G_DEBUG_IRF_DIFFUSE                   //!< Debug irf_diffuse method
+//#define G_DEBUG_IRF_ELLIPTICAL             //!< Debug irf_elliptical method
 //#define G_DEBUG_NPRED_RADIAL                 //!< Debug npred_radial method
 //#define G_DEBUG_NPRED_DIFFUSE               //!< Debug npred_diffuse method
+//#define G_DEBUG_NPRED_ELLIPTICAL         //!< Debug npred_elliptical method
 //#define G_DEBUG_PRINT_AEFF                   //!< Debug print() Aeff method
 //#define G_DEBUG_PRINT_PSF                     //!< Debug print() Psf method
 //#define G_DEBUG_PSF_DUMMY_SIGMA           //!< Debug psf_dummy_sigma method
@@ -1161,7 +1163,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     }
 
     // Compile option: Show integration results
-    #if defined(G_IRF_ELLIPTICAL)
+    #if defined(G_DEBUG_IRF_ELLIPTICAL)
     std::cout << "GCTAResponse::irf_elliptical:";
     std::cout << " rho_min=" << rho_min;
     std::cout << " rho_max=" << rho_max;
