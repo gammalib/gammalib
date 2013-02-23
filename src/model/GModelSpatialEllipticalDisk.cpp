@@ -233,32 +233,47 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  * @brief Evaluate function (in units of sr^-1)
  *
  * @param[in] theta Angular distance from disk centre (radians).
- * @param[in] posangle Position angle (clockwise from North) (radians).
+ * @param[in] posangle Position angle (counterclockwise from North) (radians).
  *
- * Evaluates the spatial part for a elliptical disk source model. The disk source
- * model is a Elliptical function \f$f(\theta, \phi)\f$, where \f$\theta\f$ is the
- * angular separation between elliptical disk centre and the actual location and \f$\phi\f$ the
- * rotation angle (clockwise from North):@TODO edit formula
+ * Evaluates the spatial component for an elliptical disk source model. The
+ * disk source model is an elliptical function \f$f(\theta, \phi)\f$, where
+ * \f$\theta\f$ is the angular separation between elliptical disk centre and
+ * the actual location and \f$\phi\f$ the position angle with respect to the
+ * ellipse centre, counted counterclockwise from North.
+ *
+ * The function \f$f(\theta, \phi)\f$ is given by
+ *
  * \f[
  * f(\theta,\phi) = \left \{
  *  \begin{array}{l l}
  *     \displaystyle
  *     {\tt m\_norm}
- *     & \mbox{if $\theta \le $ radius} \\
+ *     & \mbox{if $\theta \le $ \theta_0} \\
  *     \\
- *    \displaystyle
- *    0 & \mbox{if $\theta > $ radius}
+ *     \displaystyle
+ *     0 & \mbox{else}
  *  \end{array}
  *  \right .
  * \f]
  *
- * where
+ * where \f$\theta_0\f$ is the effective radius of the ellipse on the sphere
+ * given by
  *
- * \f[ {\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)} \f]
+ * \f[\theta_0\ =
+ *    \frac{ab}{\sqrt{b^2 \cos^2(\phi-\phi_0) + a^2 \sin^2(\phi-\phi_0)}}\f]
  *
- * is a normalization constant (see the update() method).
+ * and
+ * \f$a\f$ is the semi-major axis of the ellipse,
+ * \f$b\f$ is the semi-minor axis, and
+ * \f$\phi_0\f$ is the position angle of the ellipse, counted
+ * counterclockwise from North.
  *
- * @TODO check formula
+ * The normalisation constant \f${\tt m\_norm}\f$ which is the inverse of the
+ * solid angle subtended by an ellipse is given by
+ *
+ * @todo Quote formula for ellipse solid angle
+ *
+ * (see the update() method).
  ***************************************************************************/
 double GModelSpatialEllipticalDisk::eval(const double& theta,
                                          const double& posangle) const
@@ -309,7 +324,7 @@ double GModelSpatialEllipticalDisk::eval(const double& theta,
  * @brief Evaluate function and gradients (in units of sr^-1)
  *
  * @param[in] theta Angular distance from disk centre (radians).
- * @param[in] posangle Position angle (clockwise from North) (radians).
+ * @param[in] posangle Position angle (counterclockwise from North) (radians).
  *
  * Evaluates the function value. No gradient computation is implemented as
  * Elliptical models will be convolved with the instrument response and thus
@@ -641,13 +656,7 @@ void GModelSpatialEllipticalDisk::free_members(void)
  *
  * Computes the normalization
  * \f[{\tt m\_norm} = \frac{1}{2 \pi (1 - \cos a) (1 - \cos b)}\f]
- * TODO check this formula
- *
- * Note that this is the correct normalization on the sphere for any
- * ellipse with a semi-semiminor axis a and semi-semimajor axis b. 
- * For small a and b it is very similar to the cartesian
- * approximation you might have expected:
- * \f[{\tt m\_norm} = \frac{1}{\pi ab}\f]
+ * @todo check this formula
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::update() const
 {
@@ -663,8 +672,8 @@ void GModelSpatialEllipticalDisk::update() const
         m_semimajor_rad = semimajor() * deg2rad;
 
         // Perform precomputations
-        double denom = twopi * std::sqrt(1 - std::cos(m_semiminor_rad)) *
-                               std::sqrt(1 - std::cos(m_semimajor_rad));
+        double denom = twopi * std::sqrt((1 - std::cos(m_semiminor_rad)) *
+                                         (1 - std::cos(m_semimajor_rad)));
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required
