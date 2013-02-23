@@ -45,12 +45,13 @@ void TestGModel::set(void)
     name("GModel");
 
     // Set attributes
-    m_xml_file               = "data/crab.xml";
-    m_xml_model_point_nodes  = "data/model_point_nodes.xml";
-    m_xml_model_spatial_map  = "data/model_spatial_map.xml";
-    m_xml_model_radial_disk  = "data/model_radial_disk.xml";
-    m_xml_model_radial_gauss = "data/model_radial_gauss.xml";
-    m_xml_model_radial_shell = "data/model_radial_shell.xml";
+    m_xml_file                  = "data/crab.xml";
+    m_xml_model_point_nodes     = "data/model_point_nodes.xml";
+    m_xml_model_spatial_map     = "data/model_spatial_map.xml";
+    m_xml_model_radial_disk     = "data/model_radial_disk.xml";
+    m_xml_model_radial_gauss    = "data/model_radial_gauss.xml";
+    m_xml_model_radial_shell    = "data/model_radial_shell.xml";
+    m_xml_model_elliptical_disk = "data/model_elliptical_disk.xml";
 
     // Add tests
     add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test model parameter handling");
@@ -265,6 +266,7 @@ void TestGModel::test_spatial_model(void)
     test_xml_model("GModelRadialDisk",  m_xml_model_radial_disk);
     test_xml_model("GModelRadialGauss", m_xml_model_radial_gauss);
     test_xml_model("GModelRadialShell", m_xml_model_radial_shell);
+    test_xml_model("GModelSpatialEllipticalDisk", m_xml_model_elliptical_disk);
 
     // Return
     return;

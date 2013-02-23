@@ -62,6 +62,7 @@ private:
     std::string m_xml_model_radial_disk;
     std::string m_xml_model_radial_gauss;
     std::string m_xml_model_radial_shell;
+    std::string m_xml_model_elliptical_disk;
 };
 
 #endif /* TEST_GMODEL_HPP */
