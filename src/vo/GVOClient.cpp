@@ -29,6 +29,9 @@
 #include <config.h>
 #endif
 #include <cstdlib>         // std::getenv() function
+#include <sys/socket.h>    // socket(), connect() functions
+#include <netinet/in.h>    // server address
+#include <arpa/inet.h>     // htons() function
 #include "GVOClient.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -170,6 +173,14 @@ GVOClient* GVOClient::clone(void) const
  ***************************************************************************/
 void GVOClient::connect(void)
 {
+    // Connect to Hub
+    connect_hub();
+
+    // Continue only if connection has been established
+    if (m_socket != -1) {
+        int i = 0;
+    }
+
     // Return
     return;
 }
@@ -205,6 +216,20 @@ bool GVOClient::hashub(void) const
 
 
 /***********************************************************************//**
+ * @brief Signals if client is connected to Hub
+ *
+ * @return True if client is connected to Hub, false otherwise.
+ *
+ * Checks if a client is connected to Hub.
+ ***************************************************************************/
+bool GVOClient::isconnected(void) const
+{
+    // Return
+    return false;
+}
+
+
+/***********************************************************************//**
  * @brief Print VO client information
  *
  * @return String containing VO client information
@@ -217,11 +242,19 @@ std::string GVOClient::print(void) const
     // Append header
     result.append("=== GVOClient ===");
 
-    // Append client information
+    // Append Hub information
     result.append("\n"+parformat("Hub key")+m_secret);
     result.append("\n"+parformat("Hub URL")+m_hub_url);
     result.append("\n"+parformat("SAMP protocal version")+m_version);
-    result.append("\n"+parformat("Client key")+m_client_key);
+
+    // Append connection information
+    result.append("\n"+parformat("Hub connection"));
+    if (m_socket == -1) {
+        result.append("no");
+    }
+    else {
+        result.append("established on socket "+str(m_socket));
+    }
 
     // Return result
     return result;
@@ -244,6 +277,7 @@ void GVOClient::init_members(void)
     m_hub_url.clear();
     m_version.clear();
     m_client_key.clear();
+    m_socket = -1;         // Signals no socket
 
     // Return
     return;
@@ -262,6 +296,7 @@ void GVOClient::copy_members(const GVOClient& client)
     m_hub_url    = client.m_hub_url;
     m_version    = client.m_version;
     m_client_key = client.m_client_key;
+    m_socket     = client.m_socket;
 
     // Return
     return;
@@ -273,6 +308,111 @@ void GVOClient::copy_members(const GVOClient& client)
  ***************************************************************************/
 void GVOClient::free_members(void)
 {
+    // Close socket
+    close(m_socket);
+    m_socket = -1;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Connect Hub
+ *
+ * Connects to Hub by creating a socket and connecting to this socket. The
+ * method expects that a Hub has already been found. If no Hub has been found
+ * (i.e. hashub() returns false), the method does nothing.
+ *
+ * The method extracts the hostname and the port from the Hub endpoint URL.
+ * If Hub connection fails, any created socket is closed.
+ *
+ * If the method is successful, m_socket will contain on exit a non-negative
+ * number. If any failure occurs, m_socket will be set to -1.
+ ***************************************************************************/
+void GVOClient::connect_hub(void)
+{
+    // Continue only if a Hub is found
+    if (hashub()) {
+
+        // Close any existing socket
+        if (m_socket != -1) {
+            close(m_socket);
+            m_socket = -1;
+        }
+
+        // Create fresh socket
+        m_socket = socket(AF_INET, SOCK_STREAM, 0);
+
+        // Continue only if socket exists
+        if (m_socket != -1) {
+
+            // Extract host name and port from Hub URL
+            std::string host = "";
+            std::string port = "";
+            if (m_hub_url.compare(0, 7, "http://") == 0) {
+                size_t length;
+                size_t start = 7;
+                size_t stop  = m_hub_url.find(":", start);
+                if (stop != std::string::npos) {
+                    length = stop - start;
+                }
+                else {
+                    length = std::string::npos;
+                }
+                host = m_hub_url.substr(start, length);
+                if (stop != std::string::npos) {
+                    stop = stop + 1;
+                    size_t end = m_hub_url.find("/", stop);
+                    if (end != std::string::npos) {
+                        length = end - stop;
+                    }
+                    else {
+                        length = std::string::npos;
+                    }
+                    port = m_hub_url.substr(stop, length);
+                }
+            }
+
+            // Continue only if host and port information was found
+            if (!host.empty() && !port.empty()) {
+
+                // Declare server information structure
+                struct sockaddr_in serv_addr;
+
+                // Make sure that structure is clean
+                bzero((char*)&serv_addr, sizeof(serv_addr));
+        
+                // Set type of connection (internet connection)
+                serv_addr.sin_family = AF_INET;
+
+                // Set server name
+                serv_addr.sin_addr.s_addr = inet_addr(host.c_str());
+
+                // Set port number
+                serv_addr.sin_port = htons(toint(port));
+
+                // Estabish connection (:: uses global scope function). If
+                // connection fails the socket is closed.
+                if (::connect(m_socket,
+                              reinterpret_cast<struct sockaddr*>(&serv_addr),
+                              sizeof(serv_addr)) < 0) {
+                    close(m_socket);
+                    m_socket = -1;
+                }
+
+            } // endif: host and port information found
+
+            // ... otherwise close socket
+            else {
+                close(m_socket);
+                m_socket = -1;
+            }
+
+        } // endif: there was a valid socket
+
+    } // endif: there was a Hub
+
     // Return
     return;
 }

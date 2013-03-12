@@ -64,6 +64,18 @@ void TestGVO::test_GVOClient(void)
         test_try_failure(e);
     }
 
+    // Test Hub connection
+    test_try("GVOClient hub connection");
+    try {
+        GVOClient client;
+        client.connect();
+        std::cout << client << std::endl;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Return
     return;
 }

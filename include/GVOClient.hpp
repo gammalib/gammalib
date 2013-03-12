@@ -64,6 +64,7 @@ public:
     void        connect(void);
     void        disconnect(void);
     bool        hashub(void) const;
+    bool        isconnected(void) const;
     std::string print(void) const;
 
 protected:
@@ -71,6 +72,7 @@ protected:
     void        init_members(void);
     void        copy_members(const GVOClient& client);
     void        free_members(void);
+    void        connect_hub(void);
     bool        find_hub(void);
     std::string hub_lockfile(void) const;
 
@@ -79,6 +81,7 @@ protected:
     std::string m_hub_url;     //!< The XML-RPC endpoint for communication with the hub
     std::string m_version;     //!< The version of the SAMP Standard Profile implemented by the hub
     std::string m_client_key;  //!< Client key
+    int         m_socket;      //!< Hub socket
 };
 
 #endif /* GVOCLIENT_HPP */
