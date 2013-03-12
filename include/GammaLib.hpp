@@ -96,6 +96,9 @@
 #include "GXmlAttribute.hpp"
 #include "GXmlPI.hpp"
 
+/* __ VO module __________________________________________________________ */
+#include "GVOClient.hpp"
+
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
 #include "GLog.hpp"
