@@ -1,7 +1,7 @@
 /***************************************************************************
  *                     GXml.cpp - XML class implementation                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,7 +74,7 @@ GXml::GXml(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] xml XML object.
+ * @param[in] xml XML document.
  ***************************************************************************/
 GXml::GXml(const GXml& xml)
 {
@@ -90,17 +90,29 @@ GXml::GXml(const GXml& xml)
 
 
 /***********************************************************************//**
- * @brief Load constructor
+ * @brief XML document constructor
  *
- * @param[in] filename XML file name.
+ * @param[in] xml XML text string or file name.
+ *
+ * Constructs GXml object by either parsing a text string or a file. If the
+ * @p xml argument starts with @p <?xml it is interpreted as a XML file and
+ * parsed directly. Otherwise the constructor will interpret @p xml as a
+ * filename, and open the file for parsing.
  ***************************************************************************/
-GXml::GXml(const std::string& filename)
+GXml::GXml(const std::string& xml)
 {
     // Initialise members
     init_members();
 
-    // Load XML file
-    load(filename);
+    // If the string is an XML text then parse it directly
+    if (xml.compare(0, 5, "<?xml") == 0) {
+        parse(NULL, xml);
+    }
+
+    // ... otherwise interpret the string as a filename
+    else {
+        load(xml);
+    }
 
     // Return
     return;
@@ -129,7 +141,8 @@ GXml::~GXml(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] xml XML object.
+ * @param[in] xml XML document.
+ * @return XML document.
  ***************************************************************************/
 GXml& GXml::operator= (const GXml& xml)
 {
@@ -176,10 +189,12 @@ void GXml::clear(void)
 
 /***********************************************************************//**
  * @brief Clone object
+ *
+ * @return Deep copy of XML document.
  ***************************************************************************/
 GXml* GXml::clone(void) const
 {
-    // Clone this image
+    // Clone object
     return new GXml(*this);
 }
 
@@ -221,16 +236,18 @@ void GXml::load(const std::string& filename)
     std::string fname = expand_env(filename);
 
     // Check if file exists
-    if (!file_exists(fname))
+    if (!file_exists(fname)) {
         throw GException::file_not_found(G_LOAD, fname);
+    }
 
     // Open parameter file
     FILE* fptr = fopen(fname.c_str(), "r");
-    if (fptr == NULL)
+    if (fptr == NULL) {
         throw GException::file_open_error(G_LOAD, fname);
+    }
 
     // Parse file
-    parse(fptr);
+    parse(fptr, "");
 
     // Close file
     fclose(fptr);
@@ -254,8 +271,9 @@ void GXml::save(const std::string& filename)
 {
     // Open parameter file
     FILE* fptr = fopen(filename.c_str(), "w");
-    if (fptr == NULL)
+    if (fptr == NULL) {
         throw GException::file_open_error(G_SAVE, filename);
+    }
 
     // Write XML document
     m_root.write(fptr);
@@ -416,34 +434,39 @@ void GXml::free_members(void)
 /***********************************************************************//**
  * @brief Parse XML file
  *
- * @param[in] fptr Pointer to file to be parsed.
+ * @param[in] fptr File pointer.
+ * @param[in] string Text string.
  *
  * @exception GException::xml_syntax_error
  *            XML syntax error.
  *
- * Parse the XML file and add nodes corresponding to the content to the
- * object. The XML file is split into segments, made either of text or of
+ * Parses either a XML file or a XML text string and creates all associated
+ * nodes. The XML file is split into segments, made either of text or of
  * tags.
  ***************************************************************************/
-void GXml::parse(FILE* fptr)
+void GXml::parse(FILE* fptr, const std::string& string)
 {
     // Initialise parser
     int         c;
+    int         index      = 0;
     bool        in_markup  = false;
     bool        in_comment = false;
     std::string segment;
     GXmlNode*   current = &m_root;
 
     // Main parsing loop
-    while ((c = fgetc(fptr)) != EOF) {
+    //while ((c = fgetc(fptr)) != EOF) {
+    while ((c = getchar(fptr, string, index)) != EOF) {
 
         // Convert special characters into line feeds
         if (c == '\x85' || c == L'\x2028') {
-            if (in_markup)
+            if (in_markup) {
                  throw GException::xml_syntax_error(G_PARSE, segment,
                                    "invalid character encountered");
-            else
+            }
+            else {
                 c = '\x0a';
+            }
         }
 
         // If we are not within a markup and if a markup is reached then add
@@ -460,6 +483,7 @@ void GXml::parse(FILE* fptr)
                 segment.clear();
                 segment.append(1, (char)c);
                 in_markup = true;
+
             }
 
             // Markup stop encountered?
@@ -470,8 +494,9 @@ void GXml::parse(FILE* fptr)
             }
 
             // ... otherwise add character to segment
-            else
+            else {
                 segment.append(1, (char)c);
+            }
         }
 
         // If we are within a markup and if a markup end is reached then process
@@ -489,8 +514,9 @@ void GXml::parse(FILE* fptr)
                 if (in_comment) {
                     int n = segment.length();
                     if (n > 2) {
-                        if (segment.compare(n-3,3,"-->") == 0)
+                        if (segment.compare(n-3,3,"-->") == 0) {
                             in_comment = false;
+                        }
                     }
                 }
 
@@ -521,33 +547,71 @@ void GXml::parse(FILE* fptr)
             // ... otherwise add character to segment
             else {
                 segment.append(1, (char)c);
-                if (!in_comment && segment == "<!--")
+                if (!in_comment && segment == "<!--") {
                     in_comment = true;
+                }
             }
         }
 
-    }
+    } // endwhile: main parsing loop
 
     // Process any pending segment
     if (segment.size() > 0) {
-        if (in_markup)
+        if (in_markup) {
             process_markup(&current, segment);
-        else
+        }
+        else {
             process_text(&current, segment);
-    } // endif: there was a pending segment
+        }
+    }
 
     // Verify that we are back to the root node
     if (current != &m_root) {
         std::string message = "closing tag ";
         GXmlElement* element = dynamic_cast<GXmlElement*>(current);
-        if (element != NULL)
+        if (element != NULL) {
             message += "for GXmlElement \""+element->name()+"\"";
+        }
         message += " is missing";
         throw GException::xml_syntax_error(G_PARSE, "", message);
     }
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get next character from file or text string
+ *
+ * @param[in] fptr File pointer.
+ * @param[in] string Text string.
+ * @param[in] index Index.
+ *
+ * If the file pointer is not NULL, the method returns the next character
+ * from the file. If the file pointer is NULL, the next character from the
+ * text string is returned. If the end of the file or the end of the text
+ * string is reached then EOF is returned.
+ ***************************************************************************/
+int GXml::getchar(FILE* fptr, const std::string& string, int& index) const
+{
+    // Initialise character
+    int c = EOF;
+
+    // If we have a valid file pointer then get one character from file ...
+    if (fptr != NULL) {
+        c = fgetc(fptr);
+    }
+
+    // ... otherwise, if we have a valid string then get one character from
+    // string
+    else if (index < string.length()) {
+        c = (int)string[index];
+        index++;
+    }
+
+    // Return character
+    return c;
 }
 
 

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                           GXml.hpp - XML class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,7 +57,7 @@ public:
     // Constructors and destructors
     GXml(void);
     GXml(const GXml& xml);
-    explicit GXml(const std::string& filename);
+    explicit GXml(const std::string& xml);
     ~GXml(void);
 
     // Operators
@@ -94,7 +94,8 @@ protected:
     void       init_members(void);
     void       copy_members(const GXml& xml);
     void       free_members(void);
-    void       parse(FILE* fptr);
+    void       parse(FILE* fptr, const std::string& string);
+    int        getchar(FILE* fptr, const std::string& string, int& index) const;
     void       process_markup(GXmlNode** current, const std::string& segment);
     void       process_text(GXmlNode** current, const std::string& segment);
     MarkupType get_markuptype(const std::string& segment) const;
