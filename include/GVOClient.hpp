@@ -63,6 +63,7 @@ public:
     GVOClient*  clone(void) const;
     void        connect(void);
     void        disconnect(void);
+    bool        hashub(void) const;
     std::string print(void) const;
 
 protected:

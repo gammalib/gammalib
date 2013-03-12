@@ -56,6 +56,9 @@ GVOClient::GVOClient(void)
     // Initialise members
     init_members();
 
+    // Find Hub
+    find_hub();
+    
     // Return
     return;
 }
@@ -188,6 +191,20 @@ void GVOClient::disconnect(void)
 
 
 /***********************************************************************//**
+ * @brief Signals if client has Hub information
+ *
+ * @return True if client has Hub information, false otherwise.
+ *
+ * Checks if all mandatory Hub tokens are non-empty.
+ ***************************************************************************/
+bool GVOClient::hashub(void) const
+{
+    // Return Hub information status
+    return (!m_secret.empty() && !m_hub_url.empty() && !m_version.empty());
+}
+
+
+/***********************************************************************//**
  * @brief Print VO client information
  *
  * @return String containing VO client information
@@ -204,7 +221,7 @@ std::string GVOClient::print(void) const
     result.append("\n"+parformat("Hub key")+m_secret);
     result.append("\n"+parformat("Hub URL")+m_hub_url);
     result.append("\n"+parformat("SAMP protocal version")+m_version);
-    result.append("\n"+parformat("Client key")+m_version);
+    result.append("\n"+parformat("Client key")+m_client_key);
 
     // Return result
     return result;
@@ -263,11 +280,92 @@ void GVOClient::free_members(void)
 
 /***********************************************************************//**
  * @brief Find SAMP Hub
+ *
+ * @return True of SAMP Hub has been found, false otherwise.
+ *
+ * Search a valid SAMP Hub and retrieve all mandatory token for this Hub.
+ * The manadtory tokens are
+ *
+ *     samp.secret           Opaque text string required for Hub registration
+ *     samp.hub.xmlrpc.url   XML-RPC endpoint for communication
+ *     samp.profile.version  Version of SAMP profile
+ *
+ * Implements IVOA standard REC-SAMP-1.3-20120411.
+ *
+ * @todo If no valid Hub was found the method should attempt to start its
+ * own Hub.
  ***************************************************************************/
 bool GVOClient::find_hub(void)
 {
-    // Return
-    return false;
+    // Allocate line buffer
+    const int n = 1000; 
+    char      line[n];
+
+    // Initialise find flag to false
+    bool found = false;
+
+    // Get lockfile URL
+    std::string lockurl = hub_lockfile();
+
+    // Continue only if a URL has been found
+    if (!lockurl.empty()) {
+
+        // If we have a file:// prefix then strip it now. This is a kluge
+        // and should be remplaced by a method that allows opening any kind
+        // of URL
+        if (lockurl.compare(0, 7, "file://") == 0) {
+            lockurl = lockurl.substr(7, std::string::npos);
+        }
+    
+        // Open SAMP lockfile. Continue only if opening was successful
+        FILE* fptr = fopen(lockurl.c_str(), "r");
+        if (fptr != NULL) {
+
+            // Parse lockfile and search for mandatory tokens
+            while (fgets(line, n, fptr) != NULL) {
+
+                // Convert line to C++ string
+                std::string cline = std::string(line);
+
+                // Check for secret key
+                if (cline.compare(0, 12, "samp.secret=") == 0) {
+                    m_secret = strip_chars(cline.substr(12, std::string::npos), "\r\n");
+                }
+
+                // Check for Hub URL
+                else if (cline.compare(0, 20, "samp.hub.xmlrpc.url=") == 0) {
+                    m_hub_url = strip_chars(cline.substr(20, std::string::npos), "\r\n");
+                }
+
+                // Check for profile version
+                else if (cline.compare(0, 21, "samp.profile.version=") == 0) {
+                    m_version = strip_chars(cline.substr(21, std::string::npos), "\r\n");
+                }
+
+            }
+
+            // Close SAMP lockfile
+            fclose(fptr);
+
+            // Check for existence of mandatory tokens
+            found = hashub();
+        }
+
+    } // endif: URL has been found
+
+    //TODO: Create GammaLib own Hub in case that no Hub has been found
+    //if (!found) {
+    //}
+
+    // If no Hub has been found, clear all Hub related members
+    if (!found) {
+        m_secret.clear();
+        m_hub_url.clear();
+        m_version.clear();
+    }
+
+    // Return find flag
+    return found;
 }
 
 
