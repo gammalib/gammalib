@@ -70,6 +70,7 @@ check_PROGRAMS = test_GSupport \
                  test_GNumerics \
                  test_GFits \
                  test_GXml \
+                 test_GVO \
                  test_GApplication \
                  test_GModel \
                  test_GSky \
@@ -90,6 +91,7 @@ TESTS = test_GSupport \
         test_GNumerics \
         test_GFits \
         test_GXml \
+        test_GVO \
         test_GApplication \
         test_GModel \
         test_GSky \
@@ -138,6 +140,11 @@ test_GXml_SOURCES = test_GXml.cpp
 test_GXml_LDFLAGS = @LDFLAGS@
 test_GXml_CPPFLAGS = @CPPFLAGS@
 test_GXml_LDADD = $(top_srcdir)/src/libgamma.la
+#
+test_GVO_SOURCES = test_GVO.cpp
+test_GVO_LDFLAGS = @LDFLAGS@
+test_GVO_CPPFLAGS = @CPPFLAGS@
+test_GVO_LDADD = $(top_srcdir)/src/libgamma.la
 #
 test_GApplication_SOURCES = test_GApplication.cpp
 test_GApplication_LDFLAGS = @LDFLAGS@
