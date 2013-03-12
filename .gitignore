@@ -70,6 +70,7 @@ test/test_GSupport
 test/test_GSymMatrix
 test/test_GVector
 test/test_GXml
+test/test_GVO
 test/test_LAT
 test/test_MWL
 test/test_CTA
