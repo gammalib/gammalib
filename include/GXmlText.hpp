@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GXmlText.hpp - XML text node class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlText.hpp
  * @brief XML text node class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GXMLTEXT_HPP
@@ -50,14 +50,18 @@ public:
     virtual ~GXmlText(void);
 
     // Operators
-    GXmlText& operator= (const GXmlText& node);
+    GXmlText& operator=(const GXmlText& node);
 
-    // Implemented virtual methods
+    // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GXmlText*   clone(void) const;
     virtual void        write(FILE* fptr, int indent = 0) const;
-    virtual std::string print(int indent = 0) const;
     virtual NodeType    type(void) const { return NT_TEXT; }
+    virtual std::string print(int indent = 0) const;
+
+    // Other methods
+    const std::string& text(void) const { return m_text; }
+    void               text(const std::string& text) { m_text=text; }
 
 protected:
     // Protected methods
