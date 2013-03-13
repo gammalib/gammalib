@@ -30,6 +30,8 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GXml.hpp"
+#include "GXmlNode.hpp"
 
 
 /***********************************************************************//**
@@ -65,6 +67,7 @@ public:
     void        disconnect(void);
     bool        hashub(void) const;
     bool        isconnected(void) const;
+    GXml        response(void) const;
     std::string print(void) const;
 
 protected:
@@ -72,15 +75,25 @@ protected:
     void        init_members(void);
     void        copy_members(const GVOClient& client);
     void        free_members(void);
-    void        connect_hub(void);
     bool        find_hub(void);
-    std::string hub_lockfile(void) const;
+    void        connect_hub(void);
+    void        register_hub(void);
+    void        send_metadata(void);
+    
+    // Low-level methods
+    void        post_string(const std::string& string) const;
+    std::string receive_string(void) const;
+    std::string get_response_value(const GXml& xml, const std::string& name) const;
+    void        get_name_value_pair(const GXmlNode* node, std::string& name, std::string& value) const;
+    std::string get_hub_lockfile(void) const;
 
     // Protected data area
     std::string m_secret;      //!< Secret Hub key
     std::string m_hub_url;     //!< The XML-RPC endpoint for communication with the hub
     std::string m_version;     //!< The version of the SAMP Standard Profile implemented by the hub
-    std::string m_client_key;  //!< Client key
+    std::string m_client_key;  //!< Private client key
+    std::string m_hub_id;      //!< Hub identifier
+    std::string m_client_id;   //!< Client identifier
     int         m_socket;      //!< Hub socket
 };
 
