@@ -30,7 +30,7 @@
 #endif
 #include <cstdlib>         // std::getenv() function
 #include <cstring>         // std::memset() function
-#include <fcntl.h>         // close() function
+#include <unistd.h>        // close() function
 #include <netdb.h>         // getaddrinfo() function
 #include <sys/socket.h>    // socket(), connect() functions
 #include "GVOClient.hpp"
