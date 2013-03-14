@@ -451,7 +451,7 @@ void GUrlFile::printf(const char* format, ...)
         // Set start argument
         va_start(arg_ptr, format);
 
-        // Read data from file
+        // Write data into file
         std::vfprintf(m_fptr, format, arg_ptr);
 
         // Stop argument reading
