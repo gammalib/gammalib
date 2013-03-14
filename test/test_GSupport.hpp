@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GSupport.hpp - test support module                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,7 +31,6 @@
 #include "GammaLib.hpp"
 
 
-
 /***********************************************************************//**
  * @class TestGSupport
  *
@@ -41,13 +40,14 @@ class TestGSupport : public GTestSuite {
 
 public:
     // Constructors and destructors
-    TestGSupport(void) : GTestSuite(){ }
-    virtual ~TestGSupport(void){ }
+    TestGSupport(void) : GTestSuite() { }
+    virtual ~TestGSupport(void) { }
 
     // Methods
     virtual void set(void);
     void         test_expand_env(void);
     void         test_node_array(void);
+    void         test_url_file(void);
 
 private:
     // Private methods

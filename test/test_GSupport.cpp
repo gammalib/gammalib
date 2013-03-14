@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 test_GSupport.cpp - test support module                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,6 +50,7 @@ void TestGSupport::set(void){
     // Add tests
     add_test(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
     add_test(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
+    add_test(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
 
     // Return
     return;
@@ -288,6 +289,81 @@ void TestGSupport::test_node_array_interpolation(const int&    num,
         double result   = array.interpolate(value, values);
         test_value(result, expected);
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GUrlFile class
+ *
+ * Test the GUrlFile class.
+ ***************************************************************************/
+void TestGSupport::test_url_file(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GUrlFile url;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test open constructor
+    test_try("Open constructor");
+    try {
+        GUrlFile url("test_url.dat", "w");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test file writing
+    GUrlFile url("test_url.dat", "w");
+    test_value(url.write("abcd", 4), 4);
+    url.putchar('e');
+    url.printf("fghi%s%d%3.1fxyz", "jklm", 41, 9.9);
+    url.close();
+
+    // Test file reading using read() method
+    char buffer[100];
+    url.open("test_url.dat", "r");
+    test_value(url.read(buffer, 99), 21);
+    std::string result = std::string(buffer, 21);
+    test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
+                "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
+                result+"\n");
+    url.close();
+
+    // Test file reading using getchar() method
+    result.clear();
+    url.open("test_url.dat", "r");
+    int character = 0;
+    do {
+        character = url.getchar();
+        if (character != EOF) {
+            char c = (char)character;
+            result.append(1, c);
+        }
+    } while (character != EOF);
+    test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
+                "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
+                result+"\n");
+    url.close();
+
+    // Test file reading using scanf() method
+    result.clear();
+    url.open("test_url.dat", "r");
+    url.scanf("%s", buffer);
+    result = std::string(buffer, 21);
+    test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
+                "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
+                result+"\n");
+    url.close();
 
     // Return
     return;

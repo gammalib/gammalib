@@ -50,6 +50,7 @@ class Test(GPythonTestSuite):
 
         # Append tests
         self.append(self.test_node_array, "Test GNodeArray")
+        self.append(self.test_url_file,   "Test GUrlFile")
 
         # Return
         return
@@ -87,3 +88,28 @@ class Test(GPythonTestSuite):
 
         # Return
         return
+
+
+    # Test GUrlFile class
+    def test_url_file(self):
+        """
+        Test GUrlFile class.
+        """
+        # Test file writing
+        url = GUrlFile("test_url.dat", "w")
+        self.test_value(url.write("abcd", 4), 4)
+        url.putchar(ord("e"))
+        url.close()
+
+        # Test file reading
+        buffer = ""
+        url = GUrlFile("test_url.dat", "r")
+        buffer = url.read(99)
+        self.test_assert(buffer == "abcde",
+                         "Expected \"abcde\" in file, found \""+
+                         buffer+"\n");
+        url.close()
+
+        # Return
+        return
+        
