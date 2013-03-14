@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-February, 19th, 2013
+March, 14th, 2013
 
 
 1. Introduction
@@ -144,27 +144,37 @@ None
 None
 
 
-15. Test module
+15. VO module
+-------------
+This new module has been added to support compliance with the Virtual
+Observatory (VO) protocols.
+
+The GVOClient class implements a VO compliant client that can communicate
+with a SAMP Hub. The method supports SAMP discovery and registering and
+unregistering.
+
+
+16. Test module
 ---------------
 None
 
 
-16. Multi-wavelength interface
+17. Multi-wavelength interface
 ------------------------------
 None
 
 
-17. Fermi-LAT interface
+18. Fermi-LAT interface
 ----------------------
 None
 
 
-18. CTA interface
+19. CTA interface
 -----------------
 None
 
 
-19. COMPTEL interface
+20. COMPTEL interface
 ---------------------
 None
 

@@ -1,4 +1,4 @@
-2013-02-19  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2013-03-14  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released
         ========================
@@ -6,6 +6,7 @@
         Reorganize sky models
         Introduce GContainer interface class
         Review of public interfaces of all classes
+        Add Virtual Observatory support
 
 2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
