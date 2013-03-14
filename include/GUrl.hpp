@@ -36,6 +36,10 @@
  * @class GUrl
  *
  * @brief Abstract URL base class
+ *
+ * This class defines the abstract interface for all URL classes. The URL
+ * classes implement handling of various URL types through a standard
+ * interface. This allows to develop URL independent code.
  ***************************************************************************/
 class GUrl : public GBase {
 
