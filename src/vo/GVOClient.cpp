@@ -30,6 +30,7 @@
 #endif
 #include <cstdlib>         // std::getenv() function
 #include <cstring>         // std::memset() function
+#include <fcntl.h>         // close() function
 #include <netdb.h>         // getaddrinfo() function
 #include <sys/socket.h>    // socket(), connect() functions
 #include "GVOClient.hpp"
@@ -167,14 +168,12 @@ GVOClient* GVOClient::clone(void) const
  * @brief Register client to SAMP Hub
  *
  * Connects the VO client to the Hub. A socket to the Hub is opened and the
- * client is registered at the Hub.
- *
- * @todo Implement method
+ * client is registered at the Hub. Metadata are sent.
  ***************************************************************************/
 void GVOClient::connect(void)
 {
     // Register to Hub
-    register_hub();
+    register_to_hub();
 
     // Send meta data
     send_metadata();
@@ -189,11 +188,18 @@ void GVOClient::connect(void)
  *
  * Disconnects the VO client from the Hub. The client is unregistered and the
  * socket to the Hub is closed.
- *
- * @todo Implement method
  ***************************************************************************/
 void GVOClient::disconnect(void)
 {
+    // Unregister from Hub
+    unregister_from_hub();
+
+    // Close socket
+    if (m_socket != -1) {
+        close(m_socket);
+        m_socket = -1;
+    }
+
     // Return
     return;
 }
@@ -277,7 +283,7 @@ std::string GVOClient::print(void) const
     // Append Hub information
     result.append("\n"+parformat("Hub key")+m_secret);
     result.append("\n"+parformat("Hub URL")+m_hub_url);
-    result.append("\n"+parformat("Hub host:port")+m_hub_host+":"+m_hub_port);
+    result.append("\n"+parformat("Hub host (port)")+m_hub_host+" ("+m_hub_port+")");
     result.append("\n"+parformat("SAMP protocol version")+m_version);
 
     // Append connection information
@@ -358,9 +364,14 @@ void GVOClient::copy_members(const GVOClient& client)
  ***************************************************************************/
 void GVOClient::free_members(void)
 {
+    // Unregister from Hub
+    unregister_from_hub();
+
     // Close socket
-    close(m_socket);
-    m_socket = -1;
+    if (m_socket != -1) {
+        close(m_socket);
+        m_socket = -1;
+    }
 
     // Return
     return;
@@ -497,7 +508,7 @@ bool GVOClient::find_hub(void)
  * If the method is successful, m_socket will contain on exit a non-negative
  * number. If any failure occurs, m_socket will be set to -1.
  ***************************************************************************/
-void GVOClient::connect_hub(void)
+void GVOClient::connect_to_hub(void)
 {
     // Close any existing socket
     if (m_socket != -1) {
@@ -552,10 +563,10 @@ void GVOClient::connect_hub(void)
 /***********************************************************************//**
  * @brief Register client at SAMP Hub
  ***************************************************************************/
-void GVOClient::register_hub(void)
+void GVOClient::register_to_hub(void)
 {
     // Connect to Hub
-    connect_hub();
+    connect_to_hub();
 
     // Continue only if Hub connection has been established
     if (m_socket != -1) {
@@ -591,6 +602,47 @@ void GVOClient::register_hub(void)
 
 
 /***********************************************************************//**
+ * @brief Unregister client from SAMP Hub
+ ***************************************************************************/
+void GVOClient::unregister_from_hub(void)
+{
+    // Connect to Hub
+    connect_to_hub();
+
+    // Continue only if Hub connection has been established
+    if (m_socket != -1) {
+
+        // Declare message
+        std::string msg = "";
+
+        // Set metadata header
+        msg.append("<?xml version=\"1.0\"?>\n");
+        msg.append("<methodCall>\n");
+        msg.append("<methodName>samp.hub.unregister</methodName>\n");
+        msg.append("<params>\n");
+        msg.append("<param><value><string>"+m_client_key+"</string></value></param>\n");
+        msg.append("</params>\n");
+        msg.append("</methodCall>\n");
+
+        // Post message
+        post_string(msg);
+
+        // Get Hub response
+        GXml xml = response();
+
+        // Reset Hub and client identifiers
+        m_client_key.clear();
+        m_hub_id.clear();
+        m_client_id.clear();
+
+    } // endif: Hub connection has been established
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Send client metadata to Hub
  ***************************************************************************/
 void GVOClient::send_metadata(void)
@@ -598,7 +650,7 @@ void GVOClient::send_metadata(void)
     // Connect to Hub. This was needed to post the metadata to the Hub.
     // Apparently, the connection is lost after each write/read cycle.
     // Maybe this is socket standard?
-    connect_hub();
+    connect_to_hub();
 
     // Continue only if Hub connection has been established
     if (m_socket != -1) {
