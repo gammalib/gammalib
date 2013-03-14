@@ -412,7 +412,7 @@ void GUrlFile::scanf(const char* format, ...)
         va_start(arg_ptr, format);
 
         // Read data from file
-        std::vfscanf(m_fptr, format, arg_ptr);
+        vfscanf(m_fptr, format, arg_ptr);
 
         // Stop argument reading
         va_end(arg_ptr);
