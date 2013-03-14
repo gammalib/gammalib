@@ -76,8 +76,9 @@ protected:
     void        copy_members(const GVOClient& client);
     void        free_members(void);
     bool        find_hub(void);
-    void        connect_hub(void);
-    void        register_hub(void);
+    void        connect_to_hub(void);
+    void        register_to_hub(void);
+    void        unregister_from_hub(void);
     void        send_metadata(void);
     
     // Low-level methods
