@@ -8,6 +8,8 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GTools.hpp \
                      GCsv.hpp \
                      GRan.hpp \
+                     GUrl.hpp \
+                     GUrlFile.hpp \
                      GVector.hpp \
                      GMatrixBase.hpp \
                      GMatrix.hpp \
@@ -117,7 +119,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpatialRadialGauss.hpp \
                      GModelSpatialRadialShell.hpp \
                      GModelSpatialElliptical.hpp \
-		     						 GModelSpatialEllipticalDisk.hpp \
+                     GModelSpatialEllipticalDisk.hpp \
                      GModelSpatialDiffuse.hpp \
                      GModelSpatialDiffuseConst.hpp \
                      GModelSpatialDiffuseCube.hpp \

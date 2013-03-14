@@ -42,6 +42,8 @@
 #include "GNodeArray.hpp"
 #include "GCsv.hpp"
 #include "GRan.hpp"
+#include "GUrl.hpp"
+#include "GUrlFile.hpp"
 
 /* __ Numerics module ____________________________________________________ */
 #include "GVector.hpp"

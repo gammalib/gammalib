@@ -2,15 +2,17 @@
 
 # Set include directories
 INCLUDES = -I$(top_srcdir)/include \
-	   -I$(top_builddir)/src \
-	   -I$(top_srcdir)/src
+           -I$(top_builddir)/src \
+           -I$(top_srcdir)/src
 
 # Define sources for this directory
 sources = GException.cpp \
           GTools.cpp \
           GNodeArray.cpp \
           GCsv.cpp \
-          GRan.cpp
+          GRan.cpp \
+          GUrl.cpp \
+          GUrlFile.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libsupport.la
