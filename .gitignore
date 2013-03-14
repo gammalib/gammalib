@@ -55,6 +55,7 @@ config.sub
 configure
 src/gammalib-setup
 doc/Doxyfile.bak
+test/test_url.dat
 
 # Binaries
 test/test_GApplication
