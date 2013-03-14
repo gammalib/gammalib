@@ -29,9 +29,9 @@
 #include <config.h>
 #endif
 #include <cstdlib>         // std::getenv() function
+#include <cstring>         // std::memset() function
+#include <netdb.h>         // getaddrinfo() function
 #include <sys/socket.h>    // socket(), connect() functions
-#include <netinet/in.h>    // server address
-#include <arpa/inet.h>     // htons() function
 #include "GVOClient.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
@@ -271,10 +271,14 @@ std::string GVOClient::print(void) const
     // Append header
     result.append("=== GVOClient ===");
 
+    // Append client information
+    result.append("\n"+parformat("Name")+m_name);
+
     // Append Hub information
     result.append("\n"+parformat("Hub key")+m_secret);
     result.append("\n"+parformat("Hub URL")+m_hub_url);
-    result.append("\n"+parformat("SAMP protocal version")+m_version);
+    result.append("\n"+parformat("Hub host:port")+m_hub_host+":"+m_hub_port);
+    result.append("\n"+parformat("SAMP protocol version")+m_version);
 
     // Append connection information
     result.append("\n"+parformat("Hub connection"));
@@ -309,8 +313,11 @@ std::string GVOClient::print(void) const
 void GVOClient::init_members(void)
 {
     // Initialise members
+    m_name = "GammaLib";
     m_secret.clear();
     m_hub_url.clear();
+    m_hub_host.clear();
+    m_hub_port.clear();
     m_version.clear();
     m_client_key.clear();
     m_hub_id.clear();
@@ -330,8 +337,11 @@ void GVOClient::init_members(void)
 void GVOClient::copy_members(const GVOClient& client)
 {
     // Copy members
+    m_name       = client.m_name;
     m_secret     = client.m_secret;
     m_hub_url    = client.m_hub_url;
+    m_hub_host   = client.m_hub_host;
+    m_hub_port   = client.m_hub_port;
     m_version    = client.m_version;
     m_client_key = client.m_client_key;
     m_hub_id     = client.m_hub_id;
@@ -349,7 +359,6 @@ void GVOClient::copy_members(const GVOClient& client)
 void GVOClient::free_members(void)
 {
     // Close socket
-    shutdown(m_socket, 2);
     close(m_socket);
     m_socket = -1;
 
@@ -427,9 +436,35 @@ bool GVOClient::find_hub(void)
             // Close SAMP lockfile
             fclose(fptr);
 
+            // Extract host and port from Hub URL
+            if (m_hub_url.compare(0, 7, "http://") == 0) {
+                size_t length;
+                size_t start = 7;
+                size_t stop  = m_hub_url.find(":", start);
+                if (stop != std::string::npos) {
+                    length = stop - start;
+                }
+                else {
+                    length = std::string::npos;
+                }
+                m_hub_host = m_hub_url.substr(start, length);
+                if (stop != std::string::npos) {
+                    stop = stop + 1;
+                    size_t end = m_hub_url.find("/", stop);
+                    if (end != std::string::npos) {
+                        length = end - stop;
+                    }
+                    else {
+                        length = std::string::npos;
+                    }
+                    m_hub_port = m_hub_url.substr(stop, length);
+                }
+            }
+
             // Check for existence of mandatory tokens
             found = hashub();
-        }
+
+        } // endif: SAMP lockfile opened
 
     } // endif: URL has been found
 
@@ -464,86 +499,50 @@ bool GVOClient::find_hub(void)
  ***************************************************************************/
 void GVOClient::connect_hub(void)
 {
-    // Continue only if a Hub is found
-    if (hashub()) {
+    // Close any existing socket
+    if (m_socket != -1) {
+        close(m_socket);
+        m_socket = -1;
+    }
 
-        // Close any existing socket
-        if (m_socket != -1) {
-            close(m_socket);
-            m_socket = -1;
-        }
+    // Continue only if host and port information was found
+    if (!m_hub_host.empty() && !m_hub_port.empty()) {
 
-        // Create fresh socket
-        m_socket = socket(AF_INET, SOCK_STREAM, 0);
+        // Set hints
+        struct addrinfo hints;
+        std::memset(&hints, 0, sizeof(hints));
+        hints.ai_family   = AF_INET;
+        hints.ai_socktype = SOCK_STREAM;
 
-        // Continue only if socket exists
-        if (m_socket != -1) {
+        // Get server information
+        struct addrinfo* servinfo;
+        if (getaddrinfo(m_hub_host.c_str(), m_hub_port.c_str(),
+                        &hints, &servinfo) == 0) {
 
-            // Extract host name and port from Hub URL
-            std::string host = "";
-            std::string port = "";
-            if (m_hub_url.compare(0, 7, "http://") == 0) {
-                size_t length;
-                size_t start = 7;
-                size_t stop  = m_hub_url.find(":", start);
-                if (stop != std::string::npos) {
-                    length = stop - start;
-                }
-                else {
-                    length = std::string::npos;
-                }
-                host = m_hub_url.substr(start, length);
-                if (stop != std::string::npos) {
-                    stop = stop + 1;
-                    size_t end = m_hub_url.find("/", stop);
-                    if (end != std::string::npos) {
-                        length = end - stop;
+            // Loop through all the results and connect to the first
+            // we can
+            for (struct addrinfo* ptr = servinfo; ptr != NULL; ptr = ptr->ai_next) {
+
+                // Create socket
+                m_socket = socket(ptr->ai_family,
+                                  ptr->ai_socktype,
+                                  ptr->ai_protocol);
+
+                // Connect to socket if socket is valid
+                if (m_socket != -1) {
+                    if (::connect(m_socket,
+                                  ptr->ai_addr,
+                                  ptr->ai_addrlen) == -1) {
+                        close(m_socket);
+                        m_socket = -1;
                     }
-                    else {
-                        length = std::string::npos;
-                    }
-                    port = m_hub_url.substr(stop, length);
-                }
-            }
-
-            // Continue only if host and port information was found
-            if (!host.empty() && !port.empty()) {
-
-                // Declare server information structure
-                struct sockaddr_in serv_addr;
-
-                // Make sure that structure is clean
-                bzero((char*)&serv_addr, sizeof(serv_addr));
-        
-                // Set type of connection (internet connection)
-                serv_addr.sin_family = AF_INET;
-
-                // Set server name
-                serv_addr.sin_addr.s_addr = inet_addr(host.c_str());
-
-                // Set port number
-                serv_addr.sin_port = htons(toint(port));
-
-                // Estabish connection (:: uses global scope function). If
-                // connection fails the socket is closed.
-                if (::connect(m_socket,
-                              reinterpret_cast<struct sockaddr*>(&serv_addr),
-                              sizeof(serv_addr)) < 0) {
-                    close(m_socket);
-                    m_socket = -1;
                 }
 
-            } // endif: host and port information found
+            } // endfor: looped through all results
 
-            // ... otherwise close socket
-            else {
-                close(m_socket);
-                m_socket = -1;
-            }
+        } // endif: server information was valid
 
-        } // endif: there was a valid socket
-
-    } // endif: there was a Hub
+    } // endif: host and port information found
 
     // Return
     return;
@@ -618,7 +617,7 @@ void GVOClient::send_metadata(void)
         // Set SAMP name
         msg.append("<member>\n");
         msg.append("<name>samp.name</name>\n");
-        msg.append("<value><string>GammaLib</string></value>\n");
+        msg.append("<value><string>"+m_name+"</string></value>\n");
         msg.append("</member>\n");
 
         // Set SAMP description text
@@ -661,32 +660,6 @@ void GVOClient::send_metadata(void)
 
         // Get Hub response
         GXml xml = response();
-/*
-
-
-
-        // Set metadata header
-        msg.clear();
-        msg.append("<?xml version=\"1.0\"?>\n"
-                   "<methodCall>\n"
-                   "  <methodName>samp.hub.notifyAll</methodName>\n"
-                   "  <params>\n"
-                   "    <param><value><string>"+m_client_key+"</string></value></param>\n"
-                   "    <param><value><struct>\n"
-                   "      <member>\n"
-                   "        <name>samp.mtype</name>\n"
-                   "        <value>samp.app.ping</value>\n"
-                   "      </member>\n"
-                   "    </struct></value></param>\n"
-                   "  </params>\n"
-                   "</methodCall>");
-connect_hub();
-        post_string(msg);
-
-        // Get Hub response
-        xml = response();
-std::cout << xml << std::endl;
-*/
 
     } // endif: Hub connection has been established
 
@@ -820,7 +793,7 @@ void GVOClient::post_string(const std::string& content) const
         bool done = false;
         do {
             int length      = post.length();
-            int sent_length = write(m_socket, post.c_str(), length);
+            int sent_length = send(m_socket, post.c_str(), length, 0);
             if (sent_length < length) {
                 post = post.substr(sent_length, std::string::npos);
             }
@@ -859,7 +832,7 @@ std::string GVOClient::receive_string(void) const
         // Read buffer until it is empty
         int n = 0;
         do {
-            n = read(m_socket, buffer, 1000);
+            n = recv(m_socket, buffer, 1000, 0);
             if (n > 0) {
                 buffer[n+1] = '\0';
                 result.append(std::string(buffer));
