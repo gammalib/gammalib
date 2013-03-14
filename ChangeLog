@@ -7,6 +7,7 @@
         Introduce GContainer interface class
         Review of public interfaces of all classes
         Add Virtual Observatory support
+        Introduce GUrl classes for transparent URL handling
 
 2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

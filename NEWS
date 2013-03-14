@@ -136,7 +136,13 @@ None
 
 13. Support module
 ------------------
-None
+The abstract GUrl base class has been implemented that provides an
+interface for transparent handling of Unified Resource Locators.
+Using this interface, files can be equally handles as strings, or
+http addresses.
+
+The following URL types have been implemented so far:
+* GUrlFile: handles flat files.
 
 
 14. XML module
