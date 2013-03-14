@@ -62,8 +62,9 @@ public:
         return tochar(self->print());
     }
     char* read(const int& nbyte) {
-        char* buffer = new char[nbyte+1];
-        int   nread  = self->read(buffer, nbyte);
+        char* buffer  = new char[nbyte+1];
+        int   nread   = self->read(buffer, nbyte);
+        buffer[nread] = '\0';
         return buffer;
     }
     int write(const std::string& buffer, const int& nbyte) {
