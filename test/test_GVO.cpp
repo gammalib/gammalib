@@ -65,10 +65,12 @@ void TestGVO::test_GVOClient(void)
     }
 
     // Test Hub connection
-    test_try("GVOClient hub connection");
+    test_try("GVOClient hub connection and disconnection");
     try {
         GVOClient client;
         client.connect();
+        std::cout << client << std::endl;
+        client.disconnect();
         std::cout << client << std::endl;
         test_try_success();
     }
