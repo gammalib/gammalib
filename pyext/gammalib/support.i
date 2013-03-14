@@ -47,3 +47,5 @@
 %include "GNodeArray.i"
 %include "GCsv.i"
 %include "GRan.i"
+%include "GUrl.i"
+%include "GUrlFile.i"
