@@ -44,6 +44,7 @@
 #include "GRan.hpp"
 #include "GUrl.hpp"
 #include "GUrlFile.hpp"
+#include "GUrlString.hpp"
 
 /* __ Numerics module ____________________________________________________ */
 #include "GVector.hpp"

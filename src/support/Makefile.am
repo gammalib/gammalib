@@ -12,7 +12,8 @@ sources = GException.cpp \
           GCsv.cpp \
           GRan.cpp \
           GUrl.cpp \
-          GUrlFile.cpp
+          GUrlFile.cpp \
+          GUrlString.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libsupport.la
