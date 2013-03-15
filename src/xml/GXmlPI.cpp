@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GXmlPI.cpp - XML PI node class implementation             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlPI.cpp
  * @brief XML PI node class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -64,7 +64,7 @@ GXmlPI::GXmlPI(void) : GXmlNode()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] node Object from which the instance should be built.
+ * @param[in] node XML Processing Instruction.
  ***************************************************************************/
 GXmlPI::GXmlPI(const GXmlPI& node) : GXmlNode(node)
 {
@@ -119,9 +119,10 @@ GXmlPI::~GXmlPI(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] node Object which should be assigned.
+ * @param[in] node XML Processing Instruction.
+ * @return XML Processing Instruction.
  ***************************************************************************/
-GXmlPI& GXmlPI::operator= (const GXmlPI& node)
+GXmlPI& GXmlPI::operator=(const GXmlPI& node)
 {
     // Execute only if object is not identical
     if (this != &node) {
@@ -152,9 +153,9 @@ GXmlPI& GXmlPI::operator= (const GXmlPI& node)
  ==========================================================================*/
  
  /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear XML Processing Instruction
  *
- * This method properly resets the object to an initial state.
+ * Resets the XML Processing Instruction to an initial state.
  ***************************************************************************/
 void GXmlPI::clear(void)
 {
@@ -172,26 +173,32 @@ void GXmlPI::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
+ * @brief Clone XML Processing Instruction
+ *
+ * @return Pointer to deep copy of XML Processing Instruction.
+ ***************************************************************************/
 GXmlPI* GXmlPI::clone(void) const
 {
+    // Clone XML PI
     return new GXmlPI(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Write Processing Instruction into file
+ * @brief Write Processing Instruction into URL
  *
- * @param[in] fptr File pointer.
- * @param[in] indent Text indentation.
+ * @param[in] url Unified Resource Locator.
+ * @param[in] indent Text indentation (default = 0).
  ***************************************************************************/
-void GXmlPI::write(FILE* fptr, int indent) const
+void GXmlPI::write(GUrl& url, const int& indent) const
 {
-    // Write Processing Instruction into file
-    for (int k = 0; k < indent; ++k)
-        std::fprintf(fptr, " ");
-    std::fprintf(fptr, "<?%s?>\n", m_pi.c_str());
+    // Prepend indentation
+    for (int k = 0; k < indent; ++k) {
+        url.printf(" ");
+    }
+
+    // Write Processing Instruction into URL
+    url.printf("<?%s?>\n", m_pi.c_str());
 
     // Return
     return;
@@ -200,11 +207,12 @@ void GXmlPI::write(FILE* fptr, int indent) const
 
 
 /***********************************************************************//**
- * @brief Print Processing Instruction
+ * @brief Print XML Processing Instruction
  *
- * @param[in] indent Text indentation.
+ * @param[in] indent Text indentation (default = 0).
+ * @return String containing XML Processing Instruction.
  ***************************************************************************/
-std::string GXmlPI::print(int indent) const
+std::string GXmlPI::print(const int& indent) const
 {
     // Initialise result string
     std::string result = fill(" ", indent);
@@ -278,24 +286,19 @@ void GXmlPI::parse(const std::string& segment)
 
     // Check on existence of brackets
     if (n < 4 || (segment.compare(0,2,"<?")   != 0) ||
-                 (segment.compare(n-2,2,"?>") != 0))
+                 (segment.compare(n-2,2,"?>") != 0)) {
         throw GException::xml_syntax_error(G_PARSE, segment,
               "missing or invalid Processing Instruction brackets");
+    }
 
     // Set comment
-    if (n > 4)
+    if (n > 4) {
         m_pi = segment.substr(2, n-4);
-    else
+    }
+    else {
         m_pi.clear();
+    }
 
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-

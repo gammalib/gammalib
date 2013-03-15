@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.hpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <string>
 #include <vector>
 #include "GBase.hpp"
+#include "GUrl.hpp"
 
 
 /***********************************************************************//**
@@ -49,7 +50,7 @@ public:
     virtual ~GXmlNode(void);
 
     // Operators
-    GXmlNode& operator= (const GXmlNode& node);
+    GXmlNode& operator=(const GXmlNode& node);
 
     // Public enumerators
     enum NodeType {
@@ -66,10 +67,12 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GXmlNode*   clone(void) const = 0;
-    virtual void        write(FILE* fptr, int indent = 0) const = 0;
+    virtual void        write(GUrl& url, const int& indent) const = 0;
     virtual NodeType    type(void) const = 0;
+    virtual std::string print(const int& indent) const = 0;
+
+    // Virtual
     virtual std::string print(void) const;
-    virtual std::string print(int indent) const = 0;
 
     // Methods
     void      append(GXmlNode* node);

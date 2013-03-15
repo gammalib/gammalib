@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlDocument.hpp - XML document node class definition         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlDocument.hpp
  * @brief XML document node class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knodlseder
  */
 
 #ifndef GXMLDOCUMENT_HPP
@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include "GUrl.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlAttribute.hpp"
 
@@ -55,9 +56,9 @@ public:
     // Implemented virtual methods
     void          clear(void);
     GXmlDocument* clone(void) const;
-    void          write(FILE* fptr, int indent = 0) const;
-    std::string   print(int indent = 0) const;
+    void          write(GUrl& url, const int& indent = 0) const;
     NodeType      type(void) const { return NT_DOCUMENT; }
+    std::string   print(const int& indent = 0) const;
 
     // Methods
     std::string version(void) const { return m_version.value(); }

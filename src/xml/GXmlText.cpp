@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GXmlText.cpp - XML text node class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlText.cpp
  * @brief XML text node class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -62,7 +62,7 @@ GXmlText::GXmlText(void) : GXmlNode()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] node Object from which the instance should be built.
+ * @param[in] node XML text.
  ***************************************************************************/
 GXmlText::GXmlText(const GXmlText& node) : GXmlNode(node)
 {
@@ -80,7 +80,9 @@ GXmlText::GXmlText(const GXmlText& node) : GXmlNode(node)
 /***********************************************************************//**
  * @brief Text constructor
  *
- * @param[in] text Text for instance building.
+ * @param[in] text Text string.
+ *
+ * Construct object by attributing a text string.
  ***************************************************************************/
 GXmlText::GXmlText(const std::string& text) : GXmlNode()
 {
@@ -117,9 +119,10 @@ GXmlText::~GXmlText(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] node Object which should be assigned.
+ * @param[in] node XML text.
+ * @return XML text.
  ***************************************************************************/
-GXmlText& GXmlText::operator= (const GXmlText& node)
+GXmlText& GXmlText::operator=(const GXmlText& node)
 {
     // Execute only if object is not identical
     if (this != &node) {
@@ -150,9 +153,9 @@ GXmlText& GXmlText::operator= (const GXmlText& node)
  ==========================================================================*/
  
  /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear XML text
  *
- * This method properly resets the object to an initial state.
+ * Resets the XML text to a clean initial state.
  ***************************************************************************/
 void GXmlText::clear(void)
 {
@@ -170,28 +173,32 @@ void GXmlText::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
+ * @brief Clone XML text
+ *
+ * @return Pointer to deep copy of XML text.
+ ***************************************************************************/
 GXmlText* GXmlText::clone(void) const
 {
+    // Clone XML text
     return new GXmlText(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Write text into file
+ * @brief Write XML text into URL
  *
- * @param[in] fptr File pointer.
- * @param[in] indent Text indentation.
+ * @param[in] url Unified Resource Locator.
+ * @param[in] indent Text indentation (default = 0).
  ***************************************************************************/
-void GXmlText::write(FILE* fptr, int indent) const
+void GXmlText::write(GUrl& url, const int& indent) const
 {
-    // Write comment into file
-    for (int k = 0; k < indent; ++k)
-        std::fprintf(fptr, " ");
+    // Prepend indentation
+    for (int k = 0; k < indent; ++k) {
+        url.printf(" ");
+    }
 
-    // Write document header in file
-    std::fprintf(fptr, "%s", m_text.c_str());
+    // Write text
+    url.printf("%s", m_text.c_str());
 
     // Return
     return;
@@ -199,11 +206,12 @@ void GXmlText::write(FILE* fptr, int indent) const
 
 
 /***********************************************************************//**
- * @brief Print text in string
+ * @brief Print XML text
  *
- * @param[in] indent Text indentation (optional, default=0).
+ * @param[in] indent Text indentation (default = 0).
+ * @return String containing XML text.
  ***************************************************************************/
-std::string GXmlText::print(int indent) const
+std::string GXmlText::print(const int& indent) const
 {
     // Initialise result string
     std::string result = fill(" ", indent);
@@ -238,7 +246,7 @@ void GXmlText::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] node Object from which members which should be copied.
+ * @param[in] node XML text.
  ***************************************************************************/
 void GXmlText::copy_members(const GXmlText& node)
 {
@@ -258,11 +266,4 @@ void GXmlText::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
 

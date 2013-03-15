@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlDocument.i - XML document node class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GXmlDocument.i
- * @brief XML document class Python interface definition
+ * @brief XML document class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -34,22 +34,18 @@
  * @class GXmlDocument
  *
  * @brief XML document node class
- *
- * This class implements the root node of an XML document. It contains the
- * three special attributes 'version', 'encoding', and 'standalone'.
  ***************************************************************************/
 class GXmlDocument : public GXmlNode {
-
 public:
     // Constructors and destructors
     GXmlDocument(void);
     GXmlDocument(const GXmlDocument& node);
-    ~GXmlDocument(void);
+    virtual ~GXmlDocument(void);
 
     // Implemented virtual methods
     void          clear(void);
     GXmlDocument* clone(void) const;
-    void          write(FILE* fptr, int indent = 0) const;
+    void          write(GUrl& url, const int& indent = 0) const;
     NodeType      type(void) const;
 
     // Methods
@@ -68,5 +64,8 @@ public:
 %extend GXmlDocument {
     char *__str__() {
         return tochar(self->print());
+    }
+    GXmlDocument copy() {
+        return (*self);
     }
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlPI.hpp - XML PI node class definition                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,15 +21,15 @@
 /**
  * @file GXmlPI.hpp
  * @brief XML PI node class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GXMLPI_HPP
 #define GXMLPI_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <cstdio>           // FILE*, std::fprintf
 #include <string>
+#include "GUrl.hpp"
 #include "GXmlNode.hpp"
 
 
@@ -50,14 +50,14 @@ public:
     virtual ~GXmlPI(void);
 
     // Operators
-    GXmlPI& operator= (const GXmlPI& node);
+    GXmlPI& operator=(const GXmlPI& node);
 
     // Implemented virtual methods
     virtual void        clear(void);
     virtual GXmlPI*     clone(void) const;
-    virtual void        write(FILE* fptr, int indent = 0) const;
-    virtual std::string print(int indent = 0) const;
+    virtual void        write(GUrl& url, const int& indent = 0) const;
     virtual NodeType    type(void) const { return NT_PI; }
+    virtual std::string print(const int& indent = 0) const;
 
     // Other methods
     const std::string& pi(void) const { return m_pi; }

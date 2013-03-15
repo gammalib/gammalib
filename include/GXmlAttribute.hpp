@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlAttribute.hpp - XML attribute class definition            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,9 +28,9 @@
 #define GXMLATTRIBUTE_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <cstdio>             // FILE, std::fprintf
 #include <string>
 #include "GBase.hpp"
+#include "GUrl.hpp"
 
 
 /***********************************************************************//**
@@ -38,7 +38,7 @@
  *
  * @brief XML attribute class
  *
- * This class implements the attribute of an XML element. An attribute
+ * This class implements an attribute of an XML element. An attribute
  * consists of a name-value pair. Note that the hyphens are stored for the
  * attribute value. Allowed hyphens are " and '.
  ***************************************************************************/
@@ -52,17 +52,17 @@ public:
     virtual ~GXmlAttribute(void);
 
     // Operators
-    GXmlAttribute& operator= (const GXmlAttribute& attr);
+    GXmlAttribute& operator=(const GXmlAttribute& attr);
 
     // Methods
     void           clear(void);
     GXmlAttribute* clone(void) const;
-    void           write(FILE* fptr) const;
-    std::string    print(void) const;
+    void           write(GUrl& url) const;
     std::string    name(void) const { return m_name; }
     std::string    value(void) const;
     void           name(const std::string& name) { m_name=name; }
     void           value(std::string value);
+    std::string    print(void) const;
 
 protected:
     // Protected methods

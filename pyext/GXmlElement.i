@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GXmlElement.i - XML element node class definition           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GXmlElement.i
- * @brief XML element node class Python interface definition
+ * @brief XML element node class interface definition
   * @author Juergen Knoedlseder
  */
 %{
@@ -34,11 +34,8 @@
  * @class GXmlElement
  *
  * @brief XML element node class
- *
- * This class implements an XML element with it's associated attributes.
  ***************************************************************************/
 class GXmlElement : public GXmlNode {
-
 public:
     // Constructors and destructors
     GXmlElement(void);
@@ -49,7 +46,7 @@ public:
     // Implemented virtual methods
     virtual void         clear(void);
     virtual GXmlElement* clone(void) const;
-    virtual void         write(FILE* fptr, int indent = 0) const;
+    virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const;
 
     // Methods
@@ -68,5 +65,8 @@ public:
 %extend GXmlElement {
     char *__str__() {
         return tochar(self->print());
+    }
+    GXmlElement copy() {
+        return (*self);
     }
 };

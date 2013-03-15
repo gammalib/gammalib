@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GXml.i - XML class definition                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -36,13 +36,12 @@
  * @brief XML class
  ***************************************************************************/
 class GXml : public GBase {
-
 public:
     // Constructors and destructors
     GXml(void);
     GXml(const GXml& xml);
     explicit GXml(const std::string& filename);
-    ~GXml(void);
+    virtual ~GXml(void);
 
     // Methods
     void         clear(void);
@@ -50,6 +49,8 @@ public:
     void         append(GXmlNode* node);
     void         load(const std::string& filename);
     void         save(const std::string& filename);
+    void         read(GUrl& url);
+    void         write(GUrl& url, const int& indent = 0) const;
     int          children(void) const;
     GXmlNode*    child(int index) const;
     int          elements(void) const;
@@ -64,7 +65,7 @@ public:
  ***************************************************************************/
 %extend GXml {
     char *__str__() {
-        return tochar(self->print());
+        return tochar(self->print(0));
     }
     GXml copy() {
         return (*self);

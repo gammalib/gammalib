@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GXmlElement.hpp - XML element node class definition          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlElement.hpp
  * @brief XML element node class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GXMLELEMENT_HPP
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
+#include "GUrl.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlAttribute.hpp"
 
@@ -54,14 +55,14 @@ public:
     virtual ~GXmlElement(void);
 
     // Operators
-    GXmlElement& operator= (const GXmlElement& node);
+    GXmlElement& operator=(const GXmlElement& node);
 
     // Implemented virtual methods
     virtual void         clear(void);
     virtual GXmlElement* clone(void) const;
-    virtual void         write(FILE* fptr, int indent = 0) const;
-    virtual std::string  print(int indent = 0) const;
+    virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const { return NT_ELEMENT; }
+    virtual std::string  print(const int& indent = 0) const;
 
     // Methods
     std::string  name(void) const { return m_name; }

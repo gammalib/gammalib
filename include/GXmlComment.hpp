@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GXmlComment.hpp - XML comment node class definition           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,15 +21,15 @@
 /**
  * @file GXmlComment.hpp
  * @brief XML comment node class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knodlseder
  */
 
 #ifndef GXMLCOMMENT_HPP
 #define GXMLCOMMENT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <cstdio>             // FILE*, std::fprintf
 #include <string>
+#include "GUrl.hpp"
 #include "GXmlNode.hpp"
 
 
@@ -51,18 +51,18 @@ public:
     virtual ~GXmlComment(void);
 
     // Operators
-    GXmlComment& operator= (const GXmlComment& node);
+    GXmlComment& operator=(const GXmlComment& node);
 
     // Implemented virtual methods
     virtual void         clear(void);
     virtual GXmlComment* clone(void) const;
-    virtual void         write(FILE* fptr, int indent = 0) const;
-    virtual std::string  print(int indent = 0) const;
+    virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const { return NT_COMMENT; }
+    virtual std::string  print(const int& indent = 0) const;
 
     // Other methods
-    const std::string& comment(void) const { return m_comment; }
-    void               comment(const std::string& comment) { m_comment=comment; }
+    const std::string&   comment(void) const { return m_comment; }
+    void                 comment(const std::string& comment) { m_comment=comment; }
 
 protected:
     // Protected methods

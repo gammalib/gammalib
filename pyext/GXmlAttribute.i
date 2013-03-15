@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GXmlAttribute.i - XML attribute class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GXmlAttribute.i
- * @brief XML arrtibute class Python interface definition
- * @author J. Knodlseder
+ * @brief XML arrtibute class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -34,26 +34,23 @@
  * @class GXmlAttribute
  *
  * @brief XML attribute class
- *
- * This class implements the attribute of an XML element. An attribute
- * consists of a name-value pair. Note that the hyphens are stored for the
- * attribute value. Allowed hyphens are " and '.
  ***************************************************************************/
-class GXmlAttribute {
+class GXmlAttribute : public GBase {
 public:
     // Constructors and destructors
     GXmlAttribute(void);
-    GXmlAttribute(const GXmlAttribute& attr);
-    GXmlAttribute(const std::string& name, const std::string& value);
-    ~GXmlAttribute(void);
+    explicit GXmlAttribute(const GXmlAttribute& attr);
+    explicit GXmlAttribute(const std::string& name, const std::string& value);
+    virtual ~GXmlAttribute(void);
 
     // Methods
-    void        clear(void);
-    void        write(FILE* fptr) const;
-    std::string name(void) const { return m_name; }
-    std::string value(void) const;
-    void        name(const std::string& name) { m_name=name; }
-    void        value(std::string value);
+    void           clear(void);
+    GXmlAttribute* clone(void) const;
+    void           write(GUrl& url) const;
+    std::string    name(void) const;
+    std::string    value(void) const;
+    void           name(const std::string& name);
+    void           value(std::string value);
 };
 
 

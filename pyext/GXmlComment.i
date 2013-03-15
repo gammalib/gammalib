@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GXmlComment.i - XML comment node class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GXmlComment.i
- * @brief XML comment class Python interface definition
+ * @brief XML comment class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -34,12 +34,8 @@
  * @class GXmlComment
  *
  * @brief XML comment node class
- *
- * This class implements a XML comment. The comment text is stored without
- * the <!-- --> brackets.
  ***************************************************************************/
 class GXmlComment : public GXmlNode {
-
 public:
     // Constructors and destructors
     GXmlComment(void);
@@ -50,12 +46,12 @@ public:
     // Implemented virtual methods
     virtual void         clear(void);
     virtual GXmlComment* clone(void) const;
-    virtual void         write(FILE* fptr, int indent = 0) const;
+    virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const;
 
     // Other methods
-    const std::string& comment(void) const;
-    void               comment(const std::string& comment);
+    const std::string&   comment(void) const;
+    void                 comment(const std::string& comment);
 };
 
 
@@ -65,5 +61,8 @@ public:
 %extend GXmlComment {
     char *__str__() {
         return tochar(self->print());
+    }
+    GXmlComment copy() {
+        return (*self);
     }
 };

@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GXmlElement.cpp - XML element node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,13 @@
 /**
  * @file GXmlElement.cpp
  * @brief XML element node class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdio>             // std::fprintf
 #include "GException.hpp"
 #include "GXmlElement.hpp"
 #include "GTools.hpp"
@@ -36,7 +35,8 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_PARSE_START                "GXmlElement::parse_start(std::string&)"
 #define G_PARSE_STOP                  "GXmlElement::parse_stop(std::string&)"
-#define G_PARSE_ATTRIBUTE "GXmlElement::parse_attribute(size_t*,std::string&)"
+#define G_PARSE_ATTRIBUTE            "GXmlElement::parse_attribute(size_t*, "\
+                                                              "std::string&)"
 
 /* __ Constants __________________________________________________________ */
 const int g_indent = 2;                      //!< Indent for XML file writing
@@ -126,8 +126,9 @@ GXmlElement::~GXmlElement(void)
  * @brief Assignment operator
  *
  * @param[in] node XML element.
+ * @return XML element.
  ***************************************************************************/
-GXmlElement& GXmlElement::operator= (const GXmlElement& node)
+GXmlElement& GXmlElement::operator=(const GXmlElement& node)
 {
     // Execute only if object is not identical
     if (this != &node) {
@@ -158,9 +159,9 @@ GXmlElement& GXmlElement::operator= (const GXmlElement& node)
  ==========================================================================*/
  
  /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear XML element
  *
- * This method properly resets the object to an initial state.
+ * Resets the XML element to a clean initial state.
  ***************************************************************************/
 void GXmlElement::clear(void)
 {
@@ -178,53 +179,58 @@ void GXmlElement::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
+ * @brief Clone XML element
+ *
+ * @return Pointer to deep copy of XML element.
+ ***************************************************************************/
 GXmlElement* GXmlElement::clone(void) const
 {
+    // Clone element
     return new GXmlElement(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Write node into file
+ * @brief Write node into URL
  *
- * @param[in] fptr File pointer.
- * @param[in] indent Text indentation.
+ * @param[in] url Unified Resource Locator.
+ * @param[in] indent Text indentation (default: 0).
  ***************************************************************************/
-void GXmlElement::write(FILE* fptr, int indent) const
+void GXmlElement::write(GUrl& url, const int& indent) const
 {
-    // Write element name into file
+    // Prepend indentation
     for (int k = 0; k < indent; ++k) {
-        std::fprintf(fptr, " ");
+        url.printf(" ");
     }
-    std::fprintf(fptr, "<%s", m_name.c_str());
 
-    // Write attributes into file
+    // Write element name into URL
+    url.printf("<%s", m_name.c_str());
+
+    // Write attributes into URL
     for (int k = 0; k < m_attr.size(); ++k) {
-        m_attr[k]->write(fptr);
+        m_attr[k]->write(url);
     }
 
     // If there are no children then write an empty tag
     if (children() < 1) {
-        std::fprintf(fptr, " />\n");
+        url.printf(" />\n");
     }
 
     // ... otherwise finish start tag, write children and write end tag
     else {
         // Finish start tag
-        std::fprintf(fptr, ">\n");
+        url.printf(">\n");
 
         // Write children in file
         for (int i = 0; i < children(); ++i) {
-            m_nodes[i]->write(fptr, indent+g_indent);
+            m_nodes[i]->write(url, indent+g_indent);
         }
 
         // Write end tag
         for (int k = 0; k < indent; ++k) {
-            std::fprintf(fptr, " ");
+            url.printf(" ");
         }
-        std::fprintf(fptr, "</%s>\n", m_name.c_str());
+        url.printf("</%s>\n", m_name.c_str());
     }
 
     // Return
@@ -233,11 +239,12 @@ void GXmlElement::write(FILE* fptr, int indent) const
 
 
 /***********************************************************************//**
- * @brief Print node
+ * @brief Print XML element
  *
- * @param[in] indent Text indentation.
+ * @param[in] indent Text indentation (default = 0).
+ * @return String containing XML element
  ***************************************************************************/
-std::string GXmlElement::print(int indent) const
+std::string GXmlElement::print(const int& indent) const
 {
     // Initialise result string
     std::string result = fill(" ", indent);
@@ -601,11 +608,3 @@ void GXmlElement::parse_attribute(size_t* pos, const std::string& segment)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-

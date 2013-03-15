@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GXmlAttribute.cpp - XML attribute class implementation          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlAttribute.cpp
  * @brief XML attribute class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -123,8 +123,9 @@ GXmlAttribute::~GXmlAttribute(void)
  * @brief Assignment operator
  *
  * @param[in] attr XML attribute.
+ * @return XML attribute.
  ***************************************************************************/
-GXmlAttribute& GXmlAttribute::operator= (const GXmlAttribute& attr)
+GXmlAttribute& GXmlAttribute::operator=(const GXmlAttribute& attr)
 {
     // Execute only if object is not identical
     if (this != &attr) {
@@ -152,9 +153,9 @@ GXmlAttribute& GXmlAttribute::operator= (const GXmlAttribute& attr)
  ==========================================================================*/
 
  /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear XML attribute
  *
- * This method properly resets the object to an initial state.
+ * Resets XML attribute to a clean initial state.
  ***************************************************************************/
 void GXmlAttribute::clear(void)
 {
@@ -170,23 +171,28 @@ void GXmlAttribute::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
-***************************************************************************/
+ * @brief Clone XML attribute
+ *
+ * @return Pointer to deep copy of XML attribute
+ ***************************************************************************/
 GXmlAttribute* GXmlAttribute::clone(void) const
 {
+    // Clone XML attribute
     return new GXmlAttribute(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Write attribute into file
+ * @brief Write attribute into URL
  *
- * @param[in] fptr File pointer.
+ * @param[in] url Unified Resource Locator.
+ *
+ * Writes the XML attribute into the @p url object.
  ***************************************************************************/
-void GXmlAttribute::write(FILE* fptr) const
+void GXmlAttribute::write(GUrl& url) const
 {
-    // Write attribute into file
-    std::fprintf(fptr, " %s=%s", m_name.c_str(), m_value.c_str());
+    // Write attribute into URL
+    url.printf(" %s=%s", m_name.c_str(), m_value.c_str());
 
     // Return
     return;
@@ -195,6 +201,8 @@ void GXmlAttribute::write(FILE* fptr) const
 
 /***********************************************************************//**
  * @brief Print attribute
+ *
+ * @return String containing attribute.
  ***************************************************************************/
 std::string GXmlAttribute::print(void) const
 {
@@ -212,7 +220,7 @@ std::string GXmlAttribute::print(void) const
 /***********************************************************************//**
  * @brief Returns attribute value
  *
- * The method returns the attribute value by stripping the hyphens.
+ * Returns the attribute value by stripping the hyphens.
  ***************************************************************************/
 std::string GXmlAttribute::value(void) const
 {
@@ -221,8 +229,9 @@ std::string GXmlAttribute::value(void) const
 
     // Extract value by stripping hyphens
     int n = m_value.length();
-    if (n > 2)
+    if (n > 2) {
         value = m_value.substr(1, n-2);
+    }
 
     // Return value
     return value;
@@ -261,10 +270,12 @@ void GXmlAttribute::value(std::string value)
     // least one " hyphen is found we have an invalid value and throw an
     // exception.
     if (has_hyphens1) {
-        if (n_hyphens1 > 2 && n_hyphens2 == 0)
+        if (n_hyphens1 > 2 && n_hyphens2 == 0) {
             value = "\"" + value + "\"";
-        else if (n_hyphens1 > 2 && n_hyphens2 > 0)
+        }
+        else if (n_hyphens1 > 2 && n_hyphens2 > 0) {
             throw GException::xml_attribute_value(G_VALUE, value);
+        }
     }
 
     // Case B: value has " start and end hyphens. Keep value as is if no other
@@ -273,20 +284,25 @@ void GXmlAttribute::value(std::string value)
     // least one ' hyphen is found we have an invalid value and throw an
     // exception.
     else if (has_hyphens2) {
-        if (n_hyphens1 == 0 && n_hyphens2 > 2)
+        if (n_hyphens1 == 0 && n_hyphens2 > 2) {
             value = "'" + value + "'";
-        else if (n_hyphens1 > 0 && n_hyphens2 > 2)
+        }
+        else if (n_hyphens1 > 0 && n_hyphens2 > 2) {
             throw GException::xml_attribute_value(G_VALUE, value);
+        }
     }
 
     // Case C: value has no start and end hyphens.
     else {
-        if (n_hyphens1 >= 0 && n_hyphens2 == 0)
+        if (n_hyphens1 >= 0 && n_hyphens2 == 0) {
             value = "\"" + value + "\"";
-        else if (n_hyphens1 == 0 && n_hyphens2 > 0)
+        }
+        else if (n_hyphens1 == 0 && n_hyphens2 > 0) {
             value = "'" + value + "'";
-        else
+        }
+        else {
             throw GException::xml_attribute_value(G_VALUE, value);
+        }
     }
 
     // Set value
@@ -341,11 +357,3 @@ void GXmlAttribute::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GXmlNode.cpp - Abstract XML node base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,8 +105,9 @@ GXmlNode::~GXmlNode(void)
  * @brief Assignment operator
  *
  * @param[in] node XML node.
+ * @return XML node.
  ***************************************************************************/
-GXmlNode& GXmlNode::operator= (const GXmlNode& node)
+GXmlNode& GXmlNode::operator=(const GXmlNode& node)
 {
     // Execute only if object is not identical
     if (this != &node) {

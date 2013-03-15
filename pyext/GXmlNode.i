@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlNode.i - Abstract XML node base class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GXmlNode.i
- * @brief Abstract XML node base class Python interface definition
+ * @brief Abstract XML node base class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -60,11 +60,8 @@
  * @class GXmlNode
  *
  * @brief Abstract XML node base class
- *
- * This class defines an abstract node of a XML document.
  ***************************************************************************/
 class GXmlNode : public GBase {
-
 public:
     // Constructors and destructors
     GXmlNode(void);
@@ -86,7 +83,7 @@ public:
     // Pure virtual methods
     virtual void      clear(void) = 0;
     virtual GXmlNode* clone(void) const = 0;
-    virtual void      write(FILE* fptr, int indent = 0) const = 0;
+    virtual void      write(GUrl& url, const int& indent) const = 0;
     virtual NodeType  type(void) const = 0;
     
     // Methods

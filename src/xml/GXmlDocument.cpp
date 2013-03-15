@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GXmlDocument.cpp - XML document node class implementation        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,14 +21,13 @@
 /**
  * @file GXmlDocument.cpp
  * @brief XML document node class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdio>             // std::fprintf
 #include "GXmlDocument.hpp"
 #include "GTools.hpp"
 
@@ -63,7 +62,7 @@ GXmlDocument::GXmlDocument(void) : GXmlNode()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] node Object from which the instance should be built.
+ * @param[in] node XML document.
  ***************************************************************************/
 GXmlDocument::GXmlDocument(const GXmlDocument& node) : GXmlNode(node)
 {
@@ -100,9 +99,10 @@ GXmlDocument::~GXmlDocument(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] node Object which should be assigned.
+ * @param[in] node XML document.
+ * @return XML document.
  ***************************************************************************/
-GXmlDocument& GXmlDocument::operator= (const GXmlDocument& node)
+GXmlDocument& GXmlDocument::operator=(const GXmlDocument& node)
 {
     // Execute only if object is not identical
     if (this != &node) {
@@ -133,9 +133,9 @@ GXmlDocument& GXmlDocument::operator= (const GXmlDocument& node)
  ==========================================================================*/
  
  /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear XML document
  *
- * This method properly resets the object to an initial state.
+ * Resets the XML document to a clean initial state.
  ***************************************************************************/
 void GXmlDocument::clear(void)
 {
@@ -153,31 +153,35 @@ void GXmlDocument::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
+ * @brief Clone XML document
+ *
+ * @return Pointer to deep copy of XML document.
+ ***************************************************************************/
 GXmlDocument* GXmlDocument::clone(void) const
 {
+    // Clone document
     return new GXmlDocument(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Write node into file
+ * @brief Write XML document into URL
  *
- * @param[in] fptr File pointer.
- * @param[in] indent Text indentation.
+ * @param[in] url Unified Resource Locator.
+ * @param[in] indent Text indentation (default = 0).
  ***************************************************************************/
-void GXmlDocument::write(FILE* fptr, int indent) const
+void GXmlDocument::write(GUrl& url, const int& indent) const
 {
-    // Write document header in file
-    std::fprintf(fptr, "<?xml version=\"%s\" encoding=\"%s\" standalone=\"%s\"?>\n",
-                 version().c_str(),
-                 encoding().c_str(),
-                 standalone().c_str());
+    // Write document header into URL
+    url.printf("<?xml version=\"%s\" encoding=\"%s\" standalone=\"%s\"?>\n",
+               version().c_str(),
+               encoding().c_str(),
+               standalone().c_str());
 
-    // Write children in file
-    for (int i = 0; i < children(); ++i)
-        m_nodes[i]->write(fptr, indent);
+    // Write children into URL
+    for (int i = 0; i < children(); ++i) {
+        m_nodes[i]->write(url, indent);
+    }
 
     // Return
     return;
@@ -185,11 +189,12 @@ void GXmlDocument::write(FILE* fptr, int indent) const
 
 
 /***********************************************************************//**
- * @brief Print document
+ * @brief Print XML document
  *
- * @param[in] indent Text indentation.
+ * @param[in] indent Text indentation (default = 0).
+ * @return String containing XML document.
  ***************************************************************************/
-std::string GXmlDocument::print(int indent) const
+std::string GXmlDocument::print(const int& indent) const
 {
     // Initialise result string
     std::string result = fill(" ", indent);
@@ -201,8 +206,9 @@ std::string GXmlDocument::print(int indent) const
     result.append(" standalone=" + standalone());
 
     // Append children
-    for (int i = 0; i < children(); ++i)
+    for (int i = 0; i < children(); ++i) {
         result.append("\n" + m_nodes[i]->print(indent));
+    }
 
     // Return
     return result;
@@ -261,10 +267,3 @@ void GXmlDocument::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

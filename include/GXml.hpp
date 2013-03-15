@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
+#include "GUrl.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlDocument.hpp"
 #include "GXmlElement.hpp"
@@ -58,10 +59,10 @@ public:
     GXml(void);
     GXml(const GXml& xml);
     explicit GXml(const std::string& xml);
-    ~GXml(void);
+    virtual ~GXml(void);
 
     // Operators
-    GXml& operator= (const GXml& xml);
+    GXml& operator=(const GXml& xml);
 
     // Methods
     void         clear(void);
@@ -69,6 +70,8 @@ public:
     void         append(GXmlNode* node);
     void         load(const std::string& filename);
     void         save(const std::string& filename);
+    void         read(GUrl& url);
+    void         write(GUrl& url, const int& indent = 0) const;
     int          children(void) const;
     GXmlNode*    child(int index) const;
     int          elements(void) const;
@@ -76,7 +79,7 @@ public:
     GXmlElement* element(int index) const;
     GXmlElement* element(const std::string& name, int index) const;
     std::string  print(void) const;
-    std::string  print(int indent) const;
+    std::string  print(const int& indent = 0) const;
 
 protected:
     // Protected enumerators
@@ -94,8 +97,8 @@ protected:
     void       init_members(void);
     void       copy_members(const GXml& xml);
     void       free_members(void);
-    void       parse(FILE* fptr, const std::string& string);
-    int        getchar(FILE* fptr, const std::string& string, int& index) const;
+    void       parse(GUrl& url);
+    //int        getchar(GUrl& url, const std::string& string, int& index) const;
     void       process_markup(GXmlNode** current, const std::string& segment);
     void       process_text(GXmlNode** current, const std::string& segment);
     MarkupType get_markuptype(const std::string& segment) const;

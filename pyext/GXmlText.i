@@ -34,11 +34,8 @@
  * @class GXmlText
  *
  * @brief XML text node class
- *
- * This class implements a text segment of a XML document.
  ***************************************************************************/
 class GXmlText : public GXmlNode {
-
 public:
     // Constructors and destructors
     GXmlText(void);
@@ -49,7 +46,7 @@ public:
     // Implemented virtual methods
     virtual void        clear(void);
     virtual GXmlText*   clone(void) const;
-    virtual void        write(FILE* fptr, int indent = 0) const;
+    virtual void        write(GUrl& url, const int& indent = 0) const;
     virtual NodeType    type(void) const;
 
     // Other methods
@@ -64,5 +61,8 @@ public:
 %extend GXmlText {
     char *__str__() {
         return tochar(self->print());
+    }
+    GXmlText copy() {
+        return (*self);
     }
 };

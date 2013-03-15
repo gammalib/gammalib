@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GXmlPI.i - XML PI node class definition                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GXmlPI.i
- * @brief XML PI node class Python interface definition
+ * @brief XML PI node class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -34,11 +34,8 @@
  * @class GXmlPI
  *
  * @brief XML Processing Instruction node class
- *
- * This class implements a XML Processing Instruction.
  ***************************************************************************/
 class GXmlPI : public GXmlNode {
-
 public:
     // Constructors and destructors
     GXmlPI(void);
@@ -49,7 +46,7 @@ public:
     // Implemented virtual methods
     virtual void        clear(void);
     virtual GXmlPI*     clone(void) const;
-    virtual void        write(FILE* fptr, int indent = 0) const;
+    virtual void        write(GUrl& url, const int& indent = 0) const;
     virtual NodeType    type(void) const;
 };
 
@@ -60,5 +57,8 @@ public:
 %extend GXmlPI {
     char *__str__() {
         return tochar(self->print());
+    }
+    GXmlPI copy() {
+        return (*self);
     }
 };

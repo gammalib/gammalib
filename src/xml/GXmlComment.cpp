@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GXmlComment.cpp - XML comment node class implementation         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GXmlComment.cpp
  * @brief XML comment node class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -120,8 +120,9 @@ GXmlComment::~GXmlComment(void)
  * @brief Assignment operator
  *
  * @param[in] node XML comment.
+ * @return XML comment.
  ***************************************************************************/
-GXmlComment& GXmlComment::operator= (const GXmlComment& node)
+GXmlComment& GXmlComment::operator=(const GXmlComment& node)
 {
     // Execute only if object is not identical
     if (this != &node) {
@@ -152,9 +153,9 @@ GXmlComment& GXmlComment::operator= (const GXmlComment& node)
  ==========================================================================*/
  
  /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear XML comment
  *
- * This method properly resets the object to an initial state.
+ * Resets the XML comment to an clean initial state.
  ***************************************************************************/
 void GXmlComment::clear(void)
 {
@@ -172,26 +173,32 @@ void GXmlComment::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone class
-***************************************************************************/
+ * @brief Clone XML comment
+ *
+ * @return Pointer to deep copy of XML comment.
+ ***************************************************************************/
 GXmlComment* GXmlComment::clone(void) const
 {
+    // Clone comment
     return new GXmlComment(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Write comment into file
+ * @brief Write comment into URL
  *
- * @param[in] fptr File pointer.
- * @param[in] indent Text indentation.
+ * @param[in] url Unified Resource Locator.
+ * @param[in] indent Text indentation (default = 0).
  ***************************************************************************/
-void GXmlComment::write(FILE* fptr, int indent) const
+void GXmlComment::write(GUrl& url, const int& indent) const
 {
+    // Prepend indentation
+    for (int k = 0; k < indent; ++k) {
+        url.printf(" ");
+    }
+
     // Write comment into file
-    for (int k = 0; k < indent; ++k)
-        std::fprintf(fptr, " ");
-    std::fprintf(fptr, "<!--%s-->\n", m_comment.c_str());
+    url.printf("<!--%s-->\n", m_comment.c_str());
 
     // Return
     return;
@@ -199,11 +206,12 @@ void GXmlComment::write(FILE* fptr, int indent) const
 
 
 /***********************************************************************//**
- * @brief Print comment in output stream
+ * @brief Print XML comment
  *
- * @param[in] indent Text indentation.
+ * @param[in] indent Text indentation (default = 0).
+ * @return String containing XML comment
  ***************************************************************************/
-std::string GXmlComment::print(int indent) const
+std::string GXmlComment::print(const int& indent) const
 {
     // Initialise result string
     std::string result = fill(" ", indent);
@@ -242,7 +250,7 @@ void GXmlComment::init_members(void)
  ***************************************************************************/
 void GXmlComment::copy_members(const GXmlComment& node)
 {
-    // Copy attributes
+    // Copy members
     m_comment = node.m_comment;
 
     // Return
@@ -287,14 +295,17 @@ void GXmlComment::parse(const std::string& segment)
         // valid comment brackets
         if (segment[0] == '<') {
             if (n < 7 || (segment.compare(0,4,"<!--")  != 0) ||
-                         (segment.compare(n-3,3,"-->") != 0))
+                         (segment.compare(n-3,3,"-->") != 0)) {
                 throw GException::xml_syntax_error(G_PARSE, segment,
                                   "invalid comment brackets");
-            else
+            }
+            else {
                 m_comment = segment.substr(4, n-7);
+            }
         }
-        else
+        else {
             m_comment = segment;
+        }
 
         //@todo Check validity of characters comment string
 
@@ -303,11 +314,3 @@ void GXmlComment::parse(const std::string& segment)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
-

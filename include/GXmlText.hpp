@@ -28,8 +28,8 @@
 #define GXMLTEXT_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include <cstdio>             // FILE*, std::fprintf
 #include <string>
+#include "GUrl.hpp"
 #include "GXmlNode.hpp"
 
 
@@ -55,9 +55,9 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GXmlText*   clone(void) const;
-    virtual void        write(FILE* fptr, int indent = 0) const;
+    virtual void        write(GUrl& url, const int& indent = 0) const;
     virtual NodeType    type(void) const { return NT_TEXT; }
-    virtual std::string print(int indent = 0) const;
+    virtual std::string print(const int& indent = 0) const;
 
     // Other methods
     const std::string& text(void) const { return m_text; }

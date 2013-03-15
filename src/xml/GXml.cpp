@@ -28,7 +28,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <cstdio>
+//#include <cstdio>
+#include "GUrlFile.hpp"
 #include "GXml.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlDocument.hpp"
@@ -41,8 +42,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                                     "GXml::load(std::string&)"
-#define G_SAVE                                     "GXml::load(std::string&)"
-#define G_PARSE                                          "GXml::parse(FILE*)"
+#define G_PARSE                                      "GXml::parse(GUrl& url)"
 #define G_PROCESS              "GXml::process(GXmlNode*, const std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -106,7 +106,8 @@ GXml::GXml(const std::string& xml)
 
     // If the string is an XML text then parse it directly
     if (xml.compare(0, 5, "<?xml") == 0) {
-        parse(NULL, xml);
+        //TODO: Implement GUrlString
+        //parse(NULL, xml);
     }
 
     // ... otherwise interpret the string as a filename
@@ -144,7 +145,7 @@ GXml::~GXml(void)
  * @param[in] xml XML document.
  * @return XML document.
  ***************************************************************************/
-GXml& GXml::operator= (const GXml& xml)
+GXml& GXml::operator=(const GXml& xml)
 {
     // Execute only if object is not identical
     if (this != &xml) {
@@ -172,9 +173,9 @@ GXml& GXml::operator= (const GXml& xml)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object.
+ * @brief Clear XML object
  *
- * Reset object to a clean initial state.
+ * Resets XML object to a clean initial state.
  ***************************************************************************/
 void GXml::clear(void)
 {
@@ -188,9 +189,9 @@ void GXml::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone XML object
  *
- * @return Deep copy of XML document.
+ * @return Deep copy of XML object.
  ***************************************************************************/
 GXml* GXml::clone(void) const
 {
@@ -200,7 +201,7 @@ GXml* GXml::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Append child node to XML document.
+ * @brief Append child node to XML document
  *
  * @param[in] node Child node.
  ***************************************************************************/
@@ -215,42 +216,25 @@ void GXml::append(GXmlNode* node)
 
 
 /***********************************************************************//**
- * @brief Load XML file.
+ * @brief Load XML file
  *
- * @param[in] filename Name of file to be loaded.
- *
- * @exception GException::file_not_found
- *            XML file not found.
- * @exception GException::file_open_error
- *            Unable to open XML file (read access requested).
+ * @param[in] filename File name.
  *
  * Loads XML file by reading all lines from the XML file.
  * Any environment variable present in the filename will be expanded.
+ *
+ * @todo Interpret URL.
  ***************************************************************************/
 void GXml::load(const std::string& filename)
 {
-    // Clear object
-    clear();
+    // Open XML URL as file for reading
+    GUrlFile url(filename.c_str(), "r");
 
-    // Expand environment variables
-    std::string fname = expand_env(filename);
+    // Read XML document from URL
+    read(url);
 
-    // Check if file exists
-    if (!file_exists(fname)) {
-        throw GException::file_not_found(G_LOAD, fname);
-    }
-
-    // Open parameter file
-    FILE* fptr = fopen(fname.c_str(), "r");
-    if (fptr == NULL) {
-        throw GException::file_open_error(G_LOAD, fname);
-    }
-
-    // Parse file
-    parse(fptr, "");
-
-    // Close file
-    fclose(fptr);
+    // Close URL
+    url.close();
 
     // Return
     return;
@@ -260,26 +244,22 @@ void GXml::load(const std::string& filename)
 /***********************************************************************//**
  * @brief Save XML file.
  *
- * @param[in] filename Name of file to be saved.
- *
- * @exception GException::file_open_error
- *            Unable to open XML file (write access requested).
+ * @param[in] filename File name.
  *
  * Save XML document into file.
+ *
+ * @todo Interpret URL.
  ***************************************************************************/
 void GXml::save(const std::string& filename)
 {
-    // Open parameter file
-    FILE* fptr = fopen(filename.c_str(), "w");
-    if (fptr == NULL) {
-        throw GException::file_open_error(G_SAVE, filename);
-    }
+    // Open XML file for writing
+    GUrlFile url(filename.c_str(), "w");
 
     // Write XML document
-    m_root.write(fptr);
+    write(url, 0);
 
     // Close file
-    fclose(fptr);
+    url.close();
 
     // Return
     return;
@@ -287,7 +267,43 @@ void GXml::save(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Return number of children in document root
+ * @brief Read XML document from URL
+ *
+ * @param[in] url Unified Resource Locator.
+ ***************************************************************************/
+void GXml::read(GUrl& url)
+{
+    // Clear object
+    clear();
+
+    // Parse file
+    parse(url);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write XML document into URL
+ *
+ * @param[in] url Unified Resource Locator.
+ * @param[in] indent Indentation (default = 0).
+ ***************************************************************************/
+void GXml::write(GUrl& url, const int& indent) const
+{
+    // Write XML document
+    m_root.write(url);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of children in XML document root
+ *
+ * @return Number of children in document.
  ***************************************************************************/
 int GXml::children(void) const
 {
@@ -309,7 +325,9 @@ GXmlNode* GXml::child(int index) const
 
 
 /***********************************************************************//**
- * @brief Return number of child elements in document root
+ * @brief Return number of child elements in XML document root
+ *
+ * @return Number of child elements in document.
  ***************************************************************************/
 int GXml::elements(void) const
 {
@@ -357,8 +375,11 @@ GXmlElement* GXml::element(const std::string& name, int index) const
 
 /***********************************************************************//**
  * @brief Print XML object
+ *
+ * @param[in] indent Text indentation (default = 0).
+ * @return String containing XML object.
  ***************************************************************************/
-std::string GXml::print(int indent) const
+std::string GXml::print(const int& indent) const
 {
     // Initialise result string
     std::string result;
@@ -376,6 +397,8 @@ std::string GXml::print(int indent) const
 
 /***********************************************************************//**
  * @brief Print XML object
+ *
+ * @return String containing XML object.
  ***************************************************************************/
 std::string GXml::print(void) const
 {
@@ -432,9 +455,9 @@ void GXml::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Parse XML file
+ * @brief Parse XML URL
  *
- * @param[in] fptr File pointer.
+ * @param[in] url Unified Resource Locator.
  * @param[in] string Text string.
  *
  * @exception GException::xml_syntax_error
@@ -444,7 +467,7 @@ void GXml::free_members(void)
  * nodes. The XML file is split into segments, made either of text or of
  * tags.
  ***************************************************************************/
-void GXml::parse(FILE* fptr, const std::string& string)
+void GXml::parse(GUrl& url)
 {
     // Initialise parser
     int         c;
@@ -456,7 +479,8 @@ void GXml::parse(FILE* fptr, const std::string& string)
 
     // Main parsing loop
     //while ((c = fgetc(fptr)) != EOF) {
-    while ((c = getchar(fptr, string, index)) != EOF) {
+    //while ((c = getchar(fptr, string, index)) != EOF) {
+    while ((c = url.getchar()) != EOF) {
 
         // Convert special characters into line feeds
         if (c == '\x85' || c == L'\x2028') {
@@ -593,6 +617,7 @@ void GXml::parse(FILE* fptr, const std::string& string)
  * text string is returned. If the end of the file or the end of the text
  * string is reached then EOF is returned.
  ***************************************************************************/
+/*
 int GXml::getchar(FILE* fptr, const std::string& string, int& index) const
 {
     // Initialise character
@@ -613,6 +638,7 @@ int GXml::getchar(FILE* fptr, const std::string& string, int& index) const
     // Return character
     return c;
 }
+*/
 
 
 /***********************************************************************//**
@@ -776,33 +802,39 @@ GXml::MarkupType GXml::get_markuptype(const std::string& segment) const
 
     // Check for comment
     if (n >= 7 && (segment.compare(0,4,"<!--") == 0) &&
-             (segment.compare(n-3,3,"-->") == 0))
+                  (segment.compare(n-3,3,"-->") == 0)) {
         type = MT_COMMENT;
+    }
 
     // Check for declaration
     else if (n >= 7 && (segment.compare(0,6,"<?xml ") == 0) &&
-             (segment.compare(n-2,2,"?>") == 0))
+                       (segment.compare(n-2,2,"?>") == 0)) {
         type = MT_DECLARATION;
+    }
 
     // Check for processing instruction
     else if (n >= 4 && (segment.compare(0,2,"<?") == 0) &&
-             (segment.compare(n-2,2,"?>") == 0))
+                       (segment.compare(n-2,2,"?>") == 0)) {
         type = MT_PROCESSING;
+    }
 
     // Check for empty element tag
     else if (n >= 3 && (segment.compare(0,1,"<") == 0) &&
-             (segment.compare(n-2,2,"/>") == 0))
+                       (segment.compare(n-2,2,"/>") == 0)) {
         type = MT_ELEMENT_EMPTY;
+    }
 
     // Check for element end tag
     else if (n >= 3 && (segment.compare(0,2,"</") == 0) &&
-             (segment.compare(n-1,1,">") == 0))
+                       (segment.compare(n-1,1,">") == 0)) {
         type = MT_ELEMENT_END;
+    }
 
     // Check for element start tag
     else if (n >= 2 && (segment.compare(0,1,"<") == 0) &&
-             (segment.compare(n-1,1,">") == 0))
+                       (segment.compare(n-1,1,">") == 0)) {
         type = MT_ELEMENT_START;
+    }
 
     // Return type
     return type;
