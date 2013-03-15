@@ -48,6 +48,7 @@ public:
     void         test_expand_env(void);
     void         test_node_array(void);
     void         test_url_file(void);
+    void         test_url_string(void);
 
 private:
     // Private methods

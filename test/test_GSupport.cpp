@@ -51,6 +51,7 @@ void TestGSupport::set(void){
     add_test(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
     add_test(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
     add_test(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
+    add_test(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
 
     // Return
     return;
@@ -360,6 +361,79 @@ void TestGSupport::test_url_file(void)
     url.open("test_url.dat", "r");
     url.scanf("%s", buffer);
     result = std::string(buffer, 21);
+    test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
+                "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
+                result+"\n");
+    url.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GUrlString class
+ *
+ * Test the GUrlString class.
+ ***************************************************************************/
+void TestGSupport::test_url_string(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GUrlString url;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test open constructor
+    test_try("Open constructor");
+    try {
+        GUrlString url("My nice text string");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test string writing
+    GUrlString url;
+    test_value(url.write("abcd", 4), 4);
+    url.putchar('e');
+    url.printf("fghi%s%d%3.1fxyz", "jklm", 41, 9.9);
+
+    // Test string reading using read() method
+    char buffer[100];
+    url.rewind();
+    test_value(url.read(buffer, 99), 21);
+    std::string result = std::string(buffer, 21);
+    test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
+                "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
+                result+"\n");
+
+    // Test string reading using getchar() method
+    result.clear();
+    url.rewind();
+    int character = 0;
+    do {
+        character = url.getchar();
+        if (character != EOF) {
+            char c = (char)character;
+            result.append(1, c);
+        }
+    } while (character != EOF);
+    test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
+                "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
+                result+"\n");
+
+    // Test string reading using scanf() method
+    char buffer2[100];
+    result.clear();
+    url.rewind();
+    url.scanf("%s", buffer2);
+    result = std::string(buffer2, 21);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
                 result+"\n");
