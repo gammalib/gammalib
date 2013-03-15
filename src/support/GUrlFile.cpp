@@ -195,6 +195,8 @@ GUrlFile* GUrlFile::clone(void) const
  * @param[in] url File name.
  * @param[in] mode File mode.
  *
+ * @exception GException::file_not_found
+ *            File not found.
  * @exception GException::file_open_error
  *            Unable to open file.
  *
@@ -210,6 +212,11 @@ void GUrlFile::open(const std::string& url, const std::string& mode)
 
     // Expand environment variables
     std::string filename = expand_env(url);
+
+    // Check if file exists
+    if (!file_exists(filename)) {
+        throw GException::file_not_found(G_OPEN, filename);
+    }
 
     // Try opening file. Throw an exception if opening failed.
     m_fptr = std::fopen(filename.c_str(), mode.c_str());
