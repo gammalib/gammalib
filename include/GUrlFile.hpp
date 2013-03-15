@@ -50,7 +50,7 @@ public:
     // Operators
     GUrlFile& operator=(const GUrlFile& url);
 
-    // Pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GUrlFile*   clone(void) const;
     virtual void        open(const std::string& url, const std::string& mode);
