@@ -30,8 +30,11 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GUrl.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -39,9 +42,18 @@
  *
  * @brief Abstract XML node base class
  *
- * This class defines an abstract node of a XML document.
+ * This class defines the interface for all XML nodes. Each XML node can be
+ * the container for a number of child nodes. The GXmlNode class is thus
+ * designed as a container class that holds a list of pointers of type
+ * GXmlNode. This allows implementing an arbitrary complex tree structure.
+ *
+ * The only member of this class is a list of XML node pointers. GXmlNode
+ * handles the proper allocation and deallocation of the node memory.
+ *
+ * Most methods are identical to those of the GXml class. Please refer to
+ * the documentation of this class for a description of the methods.
  ***************************************************************************/
-class GXmlNode : public GBase {
+class GXmlNode : public GContainer {
 
 public:
     // Constructors and destructors
@@ -50,7 +62,9 @@ public:
     virtual ~GXmlNode(void);
 
     // Operators
-    GXmlNode& operator=(const GXmlNode& node);
+    GXmlNode&       operator=(const GXmlNode& node);
+    GXmlNode*       operator[](const int& index);
+    const GXmlNode* operator[](const int& index) const;
 
     // Public enumerators
     enum NodeType {
@@ -64,24 +78,28 @@ public:
         NT_TYPECOUNT
     };
 
-    // Pure virtual methods
-    virtual void        clear(void) = 0;
-    virtual GXmlNode*   clone(void) const = 0;
-    virtual void        write(GUrl& url, const int& indent) const = 0;
-    virtual NodeType    type(void) const = 0;
-    virtual std::string print(const int& indent) const = 0;
-
-    // Virtual
-    virtual std::string print(void) const;
-
     // Methods
-    void      append(GXmlNode* node);
-    int       children(void) const;
-    GXmlNode* child(const int& index) const;
-    int       elements(void) const;
-    int       elements(const std::string& name) const;
-    GXmlNode* element(const int& index) const;
-    GXmlNode* element(const std::string& name, const int& index) const;
+    virtual void               clear(void) = 0;
+    virtual GXmlNode*          clone(void) const = 0;
+    virtual int                size(void) const { return m_nodes.size(); }
+    virtual bool               isempty(void) const { return m_nodes.empty(); }
+    virtual void               set(const int& index, const GXmlNode& node);
+    virtual void               append(const GXmlNode& node);
+    virtual GXmlElement*       append(const std::string& segment);
+    virtual void               insert(const int& index, const GXmlNode& node);
+    virtual void               remove(const int& index);
+    virtual void               reserve(const int& num) { return m_nodes.reserve(num); }
+    virtual void               extend(const GXmlNode& node);
+    virtual int                elements(void) const;
+    virtual int                elements(const std::string& name) const;
+    virtual GXmlElement*       element(const int& index);
+    virtual const GXmlElement* element(const int& index) const;
+    virtual GXmlElement*       element(const std::string& name, const int& index);
+    virtual const GXmlElement* element(const std::string& name, const int& index) const;
+    virtual void               write(GUrl& url, const int& indent) const = 0;
+    virtual NodeType           type(void) const = 0;
+    virtual std::string        print(const int& indent) const = 0;
+    virtual std::string        print(void) const;
 
 protected:
     // Protected methods
@@ -90,7 +108,7 @@ protected:
     void free_members(void);
 
     // Protected data members
-    std::vector<GXmlNode*> m_nodes;    //!< Pointer to nodes contained in node
+    std::vector<GXmlNode*> m_nodes;   //!< Pointer to child nodes
 };
 
 #endif /* GXMLNODE_HPP */

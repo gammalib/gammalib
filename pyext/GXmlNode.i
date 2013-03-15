@@ -80,20 +80,26 @@ public:
         NT_TYPECOUNT
     };
 
-    // Pure virtual methods
-    virtual void      clear(void) = 0;
-    virtual GXmlNode* clone(void) const = 0;
-    virtual void      write(GUrl& url, const int& indent) const = 0;
-    virtual NodeType  type(void) const = 0;
-    
     // Methods
-    void      append(GXmlNode* node);
-    int       children(void) const;
-    GXmlNode* child(int index) const;
-    int       elements(void) const;
-    int       elements(const std::string& name) const;
-    GXmlNode* element(int index) const;
-    GXmlNode* element(const std::string& name, int index) const;
+    virtual void               clear(void) = 0;
+    virtual GXmlNode*          clone(void) const = 0;
+    virtual int                size(void) const;
+    virtual bool               isempty(void) const;
+    virtual void               set(const int& index, const GXmlNode& node);
+    virtual void               append(const GXmlNode& node);
+    virtual GXmlElement*       append(const std::string& segment);
+    virtual void               insert(const int& index, const GXmlNode& node);
+    virtual void               remove(const int& index);
+    virtual void               reserve(const int& num);
+    virtual void               extend(const GXmlNode& node);
+    virtual int                elements(void) const;
+    virtual int                elements(const std::string& name) const;
+    virtual GXmlElement*       element(const int& index);
+    virtual const GXmlElement* element(const int& index) const;
+    virtual GXmlElement*       element(const std::string& name, const int& index);
+    virtual const GXmlElement* element(const std::string& name, const int& index) const;
+    virtual void               write(GUrl& url, const int& indent) const = 0;
+    virtual NodeType           type(void) const = 0;
 };
 
 
@@ -103,5 +109,27 @@ public:
 %extend GXmlNode {
     char *__str__() {
         return tochar(self->print());
+    }
+    GXmlNode* __getitem__(const int& index) {
+        if (index >= 0 && index < self->size()) {
+            return (*self)[index];
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", index,
+                                           0, self->size()-1);
+        }
+    }
+    void __setitem__(const int& index, const GXmlNode& node) {
+        if (index >= 0 && index < self->size()) {
+            self->set(index, node);
+            return;
+        }
+        else {
+            throw GException::out_of_range("__setitem__(int)", index,
+                                           0, self->size()-1);
+        }
+    }
+    int __len__() {
+        return (self->size());
     }
 };

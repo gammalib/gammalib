@@ -33,8 +33,11 @@
 #include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ACCESS                                 "GXmlNode::operator[](int&)"
+#define G_SET                                "GXmlNode::set(int&, GXmlNode&)"
 #define G_APPEND                                "GXmlNode::append(GXmlNode*)"
-#define G_CHILD                             "GXmlNode* GXmlNode::child(int&)"
+#define G_INSERT                          "GXmlNode::insert(int&, GXmlNode&)"
+#define G_REMOVE                                     "GXmlNode::remove(int&)"
 #define G_ELEMENT1                        "GXmlNode* GXmlNode::element(int&)"
 #define G_ELEMENT2          "GXmlNode* GXmlNode::element(std::string&, int&)"
 
@@ -128,6 +131,56 @@ GXmlNode& GXmlNode::operator=(const GXmlNode& node)
 }
 
 
+/***********************************************************************//**
+ * @brief Return pointer to XML child node
+ *
+ * @param[in] index Child node index [0,...,size()-1].
+ * @return Pointer to XML child node at @p index.
+ *
+ * @exception GException::out_of_range
+ *            Child node index is out of range.
+ *
+ * Returns a pointer to the XML child node with the specified @p index.
+ ***************************************************************************/
+GXmlNode* GXmlNode::operator[](const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
+    }
+    #endif
+
+    // Return pointer
+    return m_nodes[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to XML child node (const version)
+ *
+ * @param[in] index Child node index [0,...,size()-1].
+ * @return Pointer to XML child node at @p index.
+ *
+ * @exception GException::out_of_range
+ *            Child node index is out of range.
+ *
+ * Returns a const pointer to the XML child node with the specified @p index.
+ ***************************************************************************/
+const GXmlNode* GXmlNode::operator[](const int& index) const
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_ACCESS, index, 0, size()-1);
+    }
+    #endif
+
+    // Return pointer
+    return m_nodes[index];
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -135,24 +188,40 @@ GXmlNode& GXmlNode::operator=(const GXmlNode& node)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Append child node to node
+ * @brief Set XML child node
  *
- * @param[in] node Child node.
+ * @param[in] index Child node index [0,...,size()-1].
+ * @param[in] node XML child node.
  *
- * @exception GException::file_open_error
- *            Unable to open XML file (write access requested).
+ * @exception GException::xml_bad_node_type
+ *            Not allowed to append document node.
+ * @exception GException::out_of_range
+ *            Child node index is out of range.
+ *
+ * Set XML child node. A deep copy of the node will be made and the pointer
+ * to this node will be stored.
  ***************************************************************************/
-void GXmlNode::append(GXmlNode* node)
+void GXmlNode::set(const int& index, const GXmlNode& node)
 {
     // Make sure that node is not a document (only the root document is
     // allowed to exist in a XML document
-    if (node->type() == NT_DOCUMENT) {
-        throw GException::xml_bad_node_type(G_APPEND, "GXmlDocument",
+    if (node.type() == NT_DOCUMENT) {
+        throw GException::xml_bad_node_type(G_SET, "GXmlDocument",
                           "Only the root node is of type GXmlDocument.");
     }
 
-    // Append node
-    m_nodes.push_back(node);
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_SET, index, 0, size()-1);
+    }
+    #endif
+
+    // Delete any existing node
+    if (m_nodes[index] != NULL) delete m_nodes[index];
+
+    // Assign new child node by cloning
+    m_nodes[index] = node.clone();
 
     // Return
     return;
@@ -160,41 +229,159 @@ void GXmlNode::append(GXmlNode* node)
 
 
 /***********************************************************************//**
- * @brief Return number of children of XML node
+ * @brief Append XML child node
  *
- * @return Number of children of XML node.
+ * @param[in] node XML child node.
  *
- * Returns the number of child elements of the XML node. Child elements are
- * the elements that are directly contained by XML node.
+ * @exception GException::xml_bad_node_type
+ *            Not allowed to append document node.
+ *
+ * Appends XML child node by making a deep copy of the node and storing its
+ * pointer.
  ***************************************************************************/
-int GXmlNode::children(void) const
+void GXmlNode::append(const GXmlNode& node)
 {
-    // Return number of nodes
-    return m_nodes.size();
+    // Make sure that node is not a document (only the root document is
+    // allowed to exist in a XML document
+    if (node.type() == NT_DOCUMENT) {
+        throw GException::xml_bad_node_type(G_APPEND, "GXmlDocument",
+                          "Only the root node is of type GXmlDocument.");
+    }
+
+    // Append deep copy of child node
+    m_nodes.push_back(node.clone());
+
+    // Return
+    return;
 }
 
 
 /***********************************************************************//**
- * @brief Return pointer to child XML node
+ * @brief Append XML element child node
  *
- * @param[in] index Node index (0,...,children()-1).
- * @return Pointer to child of XML node.
+ * @param[in] segment XML child node.
  *
- * @exception GException::out_of_range
- *            Node index is out of range.
- *
- * Returns a pointer to the child number @p index of the XML node. An
- * exception will be thrown if the @index is not valid.
+ * Appends XML element that is constructed from a text @p segment. The text
+ * segment is parsed and the element name and attributes are extracted using
+ * the GXmlElement::parse_start() method. The method returns a pointer to the
+ * XML element child node that has been appended.
  ***************************************************************************/
-GXmlNode* GXmlNode::child(const int& index) const
+GXmlElement* GXmlNode::append(const std::string& segment)
 {
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= children()) {
-        throw GException::out_of_range(G_CHILD, index, 0, children()-1);
+    // Create a new XML child element from the text segment
+    GXmlElement* ptr = new GXmlElement(segment);
+
+    // Append child element to container
+    m_nodes.push_back(ptr);
+
+    // Return child element
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert XML child node
+ *
+ * @param[in] index Child node index [0,...,size()-1].
+ * @param[in] node XML child node.
+ *
+ * @exception GException::xml_bad_node_type
+ *            Not allowed to append document node.
+ * @exception GException::out_of_range
+ *            Child node index is out of range.
+ *
+ * Inserts the XML child @p node before the node with the specified @p index.
+ * A deep copy of the node will be made and the pointer to this node will be
+ * stored.
+ ***************************************************************************/
+void GXmlNode::insert(const int& index, const GXmlNode& node)
+{
+    // Make sure that node is not a document (only the root document is
+    // allowed to exist in a XML document
+    if (node.type() == NT_DOCUMENT) {
+        throw GException::xml_bad_node_type(G_INSERT, "GXmlDocument",
+                          "Only the root node is of type GXmlDocument.");
     }
 
-    // Return node
-    return m_nodes[index];
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (isempty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+        }
+    }
+    else {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_INSERT, index, 0, size()-1);
+        }
+    }
+    #endif
+
+    // Inserts deep copy of child node
+    m_nodes.insert(m_nodes.begin()+index, node.clone());
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove XML child node
+ *
+ * @param[in] index Child node index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Child node index is out of range.
+ *
+ * Remove XML child node at @p index.
+ ***************************************************************************/
+void GXmlNode::remove(const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_REMOVE, index, 0, size()-1);
+    }
+    #endif
+
+    // Erase child node from container
+    m_nodes.erase(m_nodes.begin() + index);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append all XML child nodes from another XML node
+ *
+ * @param[in] node XML node.
+ *
+ * Append all XML child nodes found in @p node to the actual object. Nodes
+ * are copied deeply so that they live now on their on in the actual object.
+ ***************************************************************************/
+void GXmlNode::extend(const GXmlNode& node)
+{
+    // Do nothing if node container is empty
+    if (!node.isempty()) {
+
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = node.size();
+
+        // Reserve enough space
+        reserve(size() + num);
+
+        // Loop over all child nodes and append pointers to deep copies 
+        for (int i = 0; i < num; ++i) {
+            m_nodes.push_back(node[i]->clone());
+        }
+
+    } // endif: node container was not empty
+    
+    // Return
+    return;
 }
 
 
@@ -210,8 +397,8 @@ int GXmlNode::elements(void) const
 {
     // Compute number of child elements in node
     int elements = 0;
-    for (int i = 0; i < children(); ++i) {
-        if (child(i)->type() == NT_ELEMENT) {
+    for (int i = 0; i < m_nodes.size(); ++i) {
+        if (m_nodes[i]->type() == NT_ELEMENT) {
             elements++;
         }
     }
@@ -235,9 +422,9 @@ int GXmlNode::elements(const std::string& name) const
 {
     // Compute number of child elements in node
     int elements = 0;
-    for (int i = 0; i < children(); ++i) {
-        if (child(i)->type() == NT_ELEMENT) {
-            if (static_cast<GXmlElement*>(child(i))->name() == name) {
+    for (int i = 0; i < m_nodes.size(); ++i) {
+        if (m_nodes[i]->type() == NT_ELEMENT) {
+            if (static_cast<GXmlElement*>(m_nodes[i])->name() == name) {
                 elements++;
             }
         }
@@ -251,29 +438,68 @@ int GXmlNode::elements(const std::string& name) const
 /***********************************************************************//**
  * @brief Return pointer to GXMLElement child
  *
- * @param[in] index Node index (0,...,elements()-1).
+ * @param[in] index Node index [0,...,elements()-1].
  * @return Pointer to GXMLElement child.
  *
  * @exception GException::out_of_range
  *            Child element index is out of range.
  *
  * Returns a pointer to the child number @p index of the XML node. An
- * exception will be thrown if the @index is not valid.
+ * exception will be thrown if the @p index is not valid.
  ***************************************************************************/
-GXmlNode* GXmlNode::element(const int& index) const
+GXmlElement* GXmlNode::element(const int& index)
 {
     // If index is outside boundary then throw an error
     if (index < 0 || index >= elements()) {
         throw GException::out_of_range(G_ELEMENT1, index, 0, elements()-1);
     }
 
-    // Compute number of child elements in node
-    GXmlNode* element  = NULL;
-    int       elements = 0;
-    for (int i = 0; i < children(); ++i) {
-        if (child(i)->type() == NT_ELEMENT) {
+    // Get the requested child element
+    GXmlElement* element  = NULL;
+    int          elements = 0;
+    for (int i = 0; i < m_nodes.size(); ++i) {
+        GXmlElement* src = dynamic_cast<GXmlElement*>(m_nodes[i]);
+        if (src != NULL) {
             if (elements == index) {
-                element = child(i);
+                element = src;
+                break;
+            }
+            elements++;
+        }
+    }
+
+    // Return child element
+    return element;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to GXMLElement child (const variant)
+ *
+ * @param[in] index Node index [0,...,elements()-1].
+ * @return Pointer to GXMLElement child.
+ *
+ * @exception GException::out_of_range
+ *            Child element index is out of range.
+ *
+ * Returns a pointer to the child number @p index of the XML node. An
+ * exception will be thrown if the @p index is not valid.
+ ***************************************************************************/
+const GXmlElement* GXmlNode::element(const int& index) const
+{
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= elements()) {
+        throw GException::out_of_range(G_ELEMENT1, index, 0, elements()-1);
+    }
+
+    // Get the requested child element
+    const GXmlElement* element  = NULL;
+    int                elements = 0;
+    for (int i = 0; i < m_nodes.size(); ++i) {
+        const GXmlElement* src = dynamic_cast<const GXmlElement*>(m_nodes[i]);
+        if (src != NULL) {
+            if (elements == index) {
+                element = src;
                 break;
             }
             elements++;
@@ -289,7 +515,7 @@ GXmlNode* GXmlNode::element(const int& index) const
  * @brief Return pointer on GXMLElement child of a given name
  *
  * @param[in] name Name of child element.
- * @param[in] index Node index (0,...,elements()-1).
+ * @param[in] index Node index [0,...,elements()-1].
  *
  * @exception GException::xml_name_not_found
  *            Child element name not found.
@@ -297,9 +523,9 @@ GXmlNode* GXmlNode::element(const int& index) const
  *            Child element index is out of range.
  *
  * Returns a pointer to the child number @p index with @p name of the XML
- * node. An exception will be thrown if the @index is not valid.
+ * node. An exception will be thrown if the @p index is not valid.
  ***************************************************************************/
-GXmlNode* GXmlNode::element(const std::string& name, const int& index) const
+GXmlElement* GXmlNode::element(const std::string& name, const int& index)
 {
     // Determine number of child elements
     int n = elements(name);
@@ -314,14 +540,65 @@ GXmlNode* GXmlNode::element(const std::string& name, const int& index) const
         throw GException::out_of_range(G_ELEMENT2, index, 0, n-1);
     }
 
-    // Compute number of child elements in node
-    GXmlNode* element  = NULL;
-    int       elements = 0;
-    for (int i = 0; i < children(); ++i) {
-        if (child(i)->type() == NT_ELEMENT) {
-            if (static_cast<GXmlElement*>(child(i))->name() == name) {
+    // Get the requested child element
+    GXmlElement* element  = NULL;
+    int          elements = 0;
+    for (int i = 0; i < m_nodes.size(); ++i) {
+        GXmlElement* src = dynamic_cast<GXmlElement*>(m_nodes[i]);
+        if (src != NULL) {
+            if (src->name() == name) {
                 if (elements == index) {
-                    element = child(i);
+                    element = src;
+                    break;
+                }
+                elements++;
+            }
+        }
+    }
+
+    // Return child element
+    return element;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on GXMLElement child of a given name (const variant)
+ *
+ * @param[in] name Name of child element.
+ * @param[in] index Node index [0,...,elements()-1].
+ *
+ * @exception GException::xml_name_not_found
+ *            Child element name not found.
+ * @exception GException::out_of_range
+ *            Child element index is out of range.
+ *
+ * Returns a pointer to the child number @p index with @p name of the XML
+ * node. An exception will be thrown if the @p index is not valid.
+ ***************************************************************************/
+const GXmlElement* GXmlNode::element(const std::string& name, const int& index) const
+{
+    // Determine number of child elements
+    int n = elements(name);
+
+    // Signal if no children exist
+    if (n < 1) {
+        throw GException::xml_name_not_found(G_ELEMENT2, name);
+    }
+
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= n) {
+        throw GException::out_of_range(G_ELEMENT2, index, 0, n-1);
+    }
+
+    // Get the requested child element
+    const GXmlElement* element  = NULL;
+    int                elements = 0;
+    for (int i = 0; i < m_nodes.size(); ++i) {
+        const GXmlElement* src = dynamic_cast<const GXmlElement*>(m_nodes[i]);
+        if (src != NULL) {
+            if (src->name() == name) {
+                if (elements == index) {
+                    element = src;
                     break;
                 }
                 elements++;
