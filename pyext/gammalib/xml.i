@@ -40,7 +40,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
-//%import(module="gammalib.base") "GContainer.i";
+%import(module="gammalib.base") "GContainer.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
