@@ -51,6 +51,7 @@ class Test(GPythonTestSuite):
         # Append tests
         self.append(self.test_node_array, "Test GNodeArray")
         self.append(self.test_url_file,   "Test GUrlFile")
+        self.append(self.test_url_string, "Test GUrlString")
 
         # Return
         return
@@ -112,4 +113,26 @@ class Test(GPythonTestSuite):
 
         # Return
         return
-        
+ 
+    # Test GUrlString class
+    def test_url_string(self):
+        """
+        Test GUrlString class.
+        """
+        # Test writing
+        url = GUrlString()
+        self.test_value(url.write("abcd", 4), 4)
+        url.putchar(ord("e"))
+
+        # Test reading
+        url.rewind()
+        buffer = ""
+        buffer = url.read(99)
+        self.test_assert(buffer == "abcde",
+                         "Expected \"abcde\" in file, found \""+
+                         buffer+"\n");
+        url.close()
+
+        # Return
+        return
+       
