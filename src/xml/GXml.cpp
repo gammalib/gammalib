@@ -28,8 +28,8 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-//#include <cstdio>
 #include "GUrlFile.hpp"
+#include "GUrlString.hpp"
 #include "GXml.hpp"
 #include "GXmlNode.hpp"
 #include "GXmlDocument.hpp"
@@ -74,7 +74,7 @@ GXml::GXml(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] xml XML document.
+ * @param[in] xml XML object.
  ***************************************************************************/
 GXml::GXml(const GXml& xml)
 {
@@ -97,7 +97,7 @@ GXml::GXml(const GXml& xml)
  * Constructs GXml object by either parsing a text string or a file. If the
  * @p xml argument starts with @p <?xml it is interpreted as a XML file and
  * parsed directly. Otherwise the constructor will interpret @p xml as a
- * filename, and open the file for parsing.
+ * filename, and opens the file for parsing.
  ***************************************************************************/
 GXml::GXml(const std::string& xml)
 {
@@ -106,8 +106,9 @@ GXml::GXml(const std::string& xml)
 
     // If the string is an XML text then parse it directly
     if (xml.compare(0, 5, "<?xml") == 0) {
-        //TODO: Implement GUrlString
-        //parse(NULL, xml);
+        GUrlString url(xml);
+        read(url);
+        url.close();
     }
 
     // ... otherwise interpret the string as a filename
@@ -142,8 +143,8 @@ GXml::~GXml(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] xml XML document.
- * @return XML document.
+ * @param[in] xml XML object.
+ * @return XML object.
  ***************************************************************************/
 GXml& GXml::operator=(const GXml& xml)
 {
@@ -191,7 +192,7 @@ void GXml::clear(void)
 /***********************************************************************//**
  * @brief Clone XML object
  *
- * @return Deep copy of XML object.
+ * @return Pointer to deep copy of XML object.
  ***************************************************************************/
 GXml* GXml::clone(void) const
 {
@@ -201,7 +202,7 @@ GXml* GXml::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Append child node to XML document
+ * @brief Append child node to XML object
  *
  * @param[in] node Child node.
  ***************************************************************************/
@@ -216,14 +217,19 @@ void GXml::append(GXmlNode* node)
 
 
 /***********************************************************************//**
- * @brief Load XML file
+ * @brief Load XML document from file
  *
  * @param[in] filename File name.
  *
- * Loads XML file by reading all lines from the XML file.
- * Any environment variable present in the filename will be expanded.
+ * Loads a XML document from a file by reading from the file's Unified
+ * Resource Locator (URL). The read() method is invoked for this purpose.
  *
- * @todo Interpret URL.
+ * The method uses the GUrlFile file opening constructor to open the URL.
+ * This constructor will automatically expand any environment variables that
+ * are present in the filename.
+ *
+ * @todo Ideally, we would like to extract the URL type from the filename
+ * so that any kind of URL can be used for loading.
  ***************************************************************************/
 void GXml::load(const std::string& filename)
 {
@@ -242,13 +248,19 @@ void GXml::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Save XML file.
+ * @brief Save XML document into file
  *
  * @param[in] filename File name.
  *
- * Save XML document into file.
+ * Saves the XML document into a file by writing into the file's Unified
+ * Resource Locator (URL). The write() method is invoked for this purpose.
  *
- * @todo Interpret URL.
+ * The method uses the GUrlFile file opening constructor to open the URL.
+ * This constructor will automatically expand any environment variables that
+ * are present in the filename.
+ *
+ * @todo Ideally, we would like to extract the URL type from the filename
+ * so that any kind of URL can be used for loading.
  ***************************************************************************/
 void GXml::save(const std::string& filename)
 {
@@ -270,13 +282,16 @@ void GXml::save(const std::string& filename)
  * @brief Read XML document from URL
  *
  * @param[in] url Unified Resource Locator.
+ *
+ * Reads in the XML document by parsing a Unified Resource Locator of any
+ * type.
  ***************************************************************************/
 void GXml::read(GUrl& url)
 {
     // Clear object
     clear();
 
-    // Parse file
+    // Parse URL
     parse(url);
 
     // Return
@@ -289,6 +304,9 @@ void GXml::read(GUrl& url)
  *
  * @param[in] url Unified Resource Locator.
  * @param[in] indent Indentation (default = 0).
+ *
+ * Writes the XML document in a Unified Resource Locator. Formatting of the
+ * document can be adapted using the @p indent parameter.
  ***************************************************************************/
 void GXml::write(GUrl& url, const int& indent) const
 {
@@ -301,9 +319,13 @@ void GXml::write(GUrl& url, const int& indent) const
 
 
 /***********************************************************************//**
- * @brief Return number of children in XML document root
+ * @brief Return number of children of XML document root element
  *
- * @return Number of children in document.
+ * @return Number of children of XML document root element.
+ *
+ * Returns the number of child elements of the XML document root element.
+ * Child elements are the elements that are directly contained by the
+ * XML document root element.
  ***************************************************************************/
 int GXml::children(void) const
 {
@@ -313,11 +335,15 @@ int GXml::children(void) const
 
 
 /***********************************************************************//**
- * @brief Return pointer on document child node
+ * @brief Return pointer to child of XML document root element
  *
- * @param[in] index Index of node (0,1,2,...)
+ * @param[in] index Node index (0,...,children()-1).
+ * @return Pointer to child of XML document root element.
+ *
+ * Returns a pointer to the child number @p index of the XML document root
+ * element. An exception will be thrown if the @index is not valid.
  ***************************************************************************/
-GXmlNode* GXml::child(int index) const
+GXmlNode* GXml::child(const int& index) const
 {
     // Return pointer
     return m_root.child(index);
@@ -325,9 +351,12 @@ GXmlNode* GXml::child(int index) const
 
 
 /***********************************************************************//**
- * @brief Return number of child elements in XML document root
+ * @brief Return number of GXMLElement children in XML document root
  *
- * @return Number of child elements in document.
+ * @return Number of GXMLElement children in XML document root.
+ *
+ * Returns the number of GXMLElement child elements of the XML document root.
+ * GXMLElement child elements are nodes of type NT_ELEMENT.
  ***************************************************************************/
 int GXml::elements(void) const
 {
@@ -337,9 +366,16 @@ int GXml::elements(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of child elements of given name in document root
+ * @brief Return number of GXMLElement children with a given name in XML
+ *        document root
  *
  * @param[in] name Name of child elements.
+ * @return Number of GXMLElement children with a given @p name in XML
+ *         document root.
+ *
+ * Returns the number of GXMLElement child elements of the XML document root
+ * that have a given @p name. GXMLElement child elements are nodes of type
+ * NT_ELEMENT.
  ***************************************************************************/
 int GXml::elements(const std::string& name) const
 {
@@ -349,11 +385,15 @@ int GXml::elements(const std::string& name) const
 
 
 /***********************************************************************//**
- * @brief Return pointer on child element
+ * @brief Return pointer to GXMLElement child
  *
- * @param[in] index Index of child element (0,1,2,...)
+ * @param[in] index Node index (0,...,elements()-1).
+ * @return Pointer to GXMLElement child.
+ *
+ * Returns a pointer to the child number @p index of the XML document root.
+ * An exception will be thrown if the @index is not valid.
  ***************************************************************************/
-GXmlElement* GXml::element(int index) const
+GXmlElement* GXml::element(const int& index) const
 {
     // Return pointer
     return (static_cast<GXmlElement*>(m_root.element(index)));
@@ -361,12 +401,15 @@ GXmlElement* GXml::element(int index) const
 
 
 /***********************************************************************//**
- * @brief Return pointer on child element of a given name
+ * @brief Return pointer on GXMLElement child of a given name
  *
- * @param[in] name Name of child elements.
- * @param[in] index Index of child element (0,1,2,...)
+ * @param[in] name Name of child element.
+ * @param[in] index Node index (0,...,elements()-1).
+ *
+ * Returns a pointer to the child number @p index with @p name of the XML
+ * document root. An exception will be thrown if the @index is not valid.
  ***************************************************************************/
-GXmlElement* GXml::element(const std::string& name, int index) const
+GXmlElement* GXml::element(const std::string& name, const int& index) const
 {
     // Return pointer
     return (static_cast<GXmlElement*>(m_root.element(name, index)));
@@ -603,42 +646,6 @@ void GXml::parse(GUrl& url)
     // Return
     return;
 }
-
-
-/***********************************************************************//**
- * @brief Get next character from file or text string
- *
- * @param[in] fptr File pointer.
- * @param[in] string Text string.
- * @param[in] index Index.
- *
- * If the file pointer is not NULL, the method returns the next character
- * from the file. If the file pointer is NULL, the next character from the
- * text string is returned. If the end of the file or the end of the text
- * string is reached then EOF is returned.
- ***************************************************************************/
-/*
-int GXml::getchar(FILE* fptr, const std::string& string, int& index) const
-{
-    // Initialise character
-    int c = EOF;
-
-    // If we have a valid file pointer then get one character from file ...
-    if (fptr != NULL) {
-        c = fgetc(fptr);
-    }
-
-    // ... otherwise, if we have a valid string then get one character from
-    // string
-    else if (index < string.length()) {
-        c = (int)string[index];
-        index++;
-    }
-
-    // Return character
-    return c;
-}
-*/
 
 
 /***********************************************************************//**

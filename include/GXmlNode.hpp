@@ -77,11 +77,11 @@ public:
     // Methods
     void      append(GXmlNode* node);
     int       children(void) const;
-    GXmlNode* child(int index) const;
+    GXmlNode* child(const int& index) const;
     int       elements(void) const;
     int       elements(const std::string& name) const;
-    GXmlNode* element(int index) const;
-    GXmlNode* element(const std::string& name, int index) const;
+    GXmlNode* element(const int& index) const;
+    GXmlNode* element(const std::string& name, const int& index) const;
 
 protected:
     // Protected methods

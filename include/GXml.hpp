@@ -73,11 +73,11 @@ public:
     void         read(GUrl& url);
     void         write(GUrl& url, const int& indent = 0) const;
     int          children(void) const;
-    GXmlNode*    child(int index) const;
+    GXmlNode*    child(const int& index) const;
     int          elements(void) const;
     int          elements(const std::string& name) const;
-    GXmlElement* element(int index) const;
-    GXmlElement* element(const std::string& name, int index) const;
+    GXmlElement* element(const int& index) const;
+    GXmlElement* element(const std::string& name, const int& index) const;
     std::string  print(void) const;
     std::string  print(const int& indent = 0) const;
 
@@ -98,7 +98,6 @@ protected:
     void       copy_members(const GXml& xml);
     void       free_members(void);
     void       parse(GUrl& url);
-    //int        getchar(GUrl& url, const std::string& string, int& index) const;
     void       process_markup(GXmlNode** current, const std::string& segment);
     void       process_text(GXmlNode** current, const std::string& segment);
     MarkupType get_markuptype(const std::string& segment) const;
