@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include <cstdlib>         // std::getenv() function
+#include <cstdio>          // std::fopen(), etc. functions
 #include <cstring>         // std::memset() function
 #include <unistd.h>        // close() function
 #include <netdb.h>         // getaddrinfo() function

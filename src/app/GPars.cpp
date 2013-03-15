@@ -33,6 +33,7 @@
 #include <unistd.h>        // access() function
 #include <sys/stat.h>      // mkdir() function
 #include <cstdlib>         // std::getenv() function
+#include <cstdio>          // std::fopen(), etc. functions
 #include "GPars.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
