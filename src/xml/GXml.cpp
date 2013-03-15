@@ -1,5 +1,5 @@
 /***************************************************************************
- *                     GXml.cpp - XML class implementation                 *
+ *                          GXml.cpp - XML class                           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -42,7 +42,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_LOAD                                     "GXml::load(std::string&)"
-#define G_PARSE                                      "GXml::parse(GUrl& url)"
+#define G_PARSE                                          "GXml::parse(GUrl&)"
 #define G_PROCESS              "GXml::process(GXmlNode*, const std::string&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -54,7 +54,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                         Constructors/destructors                        =
+ =                        Constructors/destructors                         =
  =                                                                         =
  ==========================================================================*/
 
@@ -167,6 +167,38 @@ GXml& GXml::operator=(const GXml& xml)
 }
 
 
+/***********************************************************************//**
+ * @brief Return pointer to child of XML document root element
+ *
+ * @param[in] index Node index [0,...,size()-1].
+ * @return Pointer to child of XML document root element.
+ *
+ * Returns a pointer to the child number @p index of the XML document root
+ * element. An exception will be thrown if the @p index is not valid.
+ ***************************************************************************/
+GXmlNode* GXml::operator[](const int& index)
+{
+    // Return pointer
+    return m_root[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to child of XML document root element (const variant)
+ *
+ * @param[in] index Node index [0,...,size()-1].
+ * @return Pointer to child of XML document root element.
+ *
+ * Returns a pointer to the child number @p index of the XML document root
+ * element. An exception will be thrown if the @p index is not valid.
+ ***************************************************************************/
+const GXmlNode* GXml::operator[](const int& index) const
+{
+    // Return pointer
+    return m_root[index];
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -202,17 +234,229 @@ GXml* GXml::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Append child node to XML object
+ * @brief Set child node in XML document root
+ *
+ * @param[in] index Child node index [0,...,size()-1].
+ * @param[in] node XML child node.
+ *
+ * Set @p node with @p index of XML document root.
+ ***************************************************************************/
+void GXml::set(const int& index, const GXmlNode& node)
+{
+    // Append node
+    m_root.set(index, node);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append child node to XML document root
  *
  * @param[in] node Child node.
+ *
+ * Appends node to XML document root by making a deep copy of the @p node.
  ***************************************************************************/
-void GXml::append(GXmlNode* node)
+void GXml::append(const GXmlNode& node)
 {
     // Append node
     m_root.append(node);
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append child node to XML document root
+ *
+ * @param[in] segment XML child node.
+ * @return Pointer to appended child node.
+ *
+ * Appends XML element that is constructed from a text @p segment. The text
+ * segment is parsed and the element name and attributes are extracted using
+ * the GXmlElement::parse_start() method. The method returns a pointer to the
+ * XML element child node that has been appended.
+ ***************************************************************************/
+GXmlElement* GXml::append(const std::string& segment)
+{
+    // Append node
+    return m_root.append(segment);
+}
+
+
+/***********************************************************************//**
+ * @brief Insert child node into XML document root
+ *
+ * @param[in] index Child node index [0,...,size()-1].
+ * @param[in] node XML child node.
+ *
+ * Inserts the XML child @p node before the node with the specified @p index.
+ * A deep copy of the node will be made and the pointer to this node will be
+ * stored.
+ ***************************************************************************/
+void GXml::insert(const int& index, const GXmlNode& node)
+{
+    // Insert node
+    m_root.insert(index, node);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove child node from XML document root
+ *
+ * @param[in] index Child node index [0,...,size()-1].
+ *
+ * Remove XML child node at @p index from the XML document root.
+ ***************************************************************************/
+void GXml::remove(const int& index)
+{
+    // Remove node
+    m_root.remove(index);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Reserve space for child nodes in XML document root
+ *
+ * @param[in] num Number of nodes.
+ *
+ * Reserves space for @p num nodes in the XML document root.
+ ***************************************************************************/
+void GXml::reserve(const int& num)
+{
+    // Reservers space node
+    m_root.reserve(num);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append all XML child nodes from another XML node in the XML
+ *        document root
+ *
+ * @param[in] node XML child node.
+ *
+ * Append all XML child nodes found in @p node to the XML document root.
+ * Nodes are copied deeply so that they live now on their on in the actual
+ * object.
+ ***************************************************************************/
+void GXml::extend(const GXmlNode& node)
+{
+    // Extend node
+    m_root.extend(node);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of GXMLElement children in XML document root
+ *
+ * @return Number of GXMLElement children in XML document root.
+ *
+ * Returns the number of GXMLElement child elements of the XML document root.
+ * GXMLElement child elements are nodes of type NT_ELEMENT.
+ ***************************************************************************/
+int GXml::elements(void) const
+{
+    // Return number
+    return m_root.elements();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of GXMLElement children with a given name in XML
+ *        document root
+ *
+ * @param[in] name Name of child elements.
+ * @return Number of GXMLElement children with a given @p name in XML
+ *         document root.
+ *
+ * Returns the number of GXMLElement child elements of the XML document root
+ * that have a given @p name. GXMLElement child elements are nodes of type
+ * NT_ELEMENT.
+ ***************************************************************************/
+int GXml::elements(const std::string& name) const
+{
+    // Return number
+    return m_root.elements(name);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to GXMLElement child
+ *
+ * @param[in] index Node index [0,...,elements()-1].
+ * @return Pointer to GXMLElement child.
+ *
+ * Returns a pointer to the child number @p index of the XML document root.
+ * An exception will be thrown if the @p index is not valid.
+ ***************************************************************************/
+GXmlElement* GXml::element(const int& index)
+{
+    // Return pointer
+    return m_root.element(index);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to GXMLElement child (const variant)
+ *
+ * @param[in] index Node index [0,...,elements()-1].
+ * @return Pointer to GXMLElement child.
+ *
+ * Returns a pointer to the child number @p index of the XML document root.
+ * An exception will be thrown if the @p index is not valid.
+ ***************************************************************************/
+const GXmlElement* GXml::element(const int& index) const
+{
+    // Return pointer
+    return m_root.element(index);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on GXMLElement child of a given name
+ *
+ * @param[in] name Name of child element.
+ * @param[in] index Node index [0,...,elements()-1].
+ * @return Pointer to GXMLElement child.
+ *
+ * Returns a pointer to the child number @p index with @p name of the XML
+ * document root. An exception will be thrown if the @p index is not valid.
+ ***************************************************************************/
+GXmlElement* GXml::element(const std::string& name, const int& index)
+{
+    // Return pointer
+    return m_root.element(name, index);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer on GXMLElement child of a given name (const variant)
+ *
+ * @param[in] name Name of child element.
+ * @param[in] index Node index [0,...,elements()-1].
+ * @return Pointer to GXMLElement child.
+ *
+ * Returns a pointer to the child number @p index with @p name of the XML
+ * document root. An exception will be thrown if the @p index is not valid.
+ ***************************************************************************/
+const GXmlElement* GXml::element(const std::string& name, const int& index) const
+{
+    // Return pointer
+    return m_root.element(name, index);
 }
 
 
@@ -319,104 +563,6 @@ void GXml::write(GUrl& url, const int& indent) const
 
 
 /***********************************************************************//**
- * @brief Return number of children of XML document root element
- *
- * @return Number of children of XML document root element.
- *
- * Returns the number of child elements of the XML document root element.
- * Child elements are the elements that are directly contained by the
- * XML document root element.
- ***************************************************************************/
-int GXml::children(void) const
-{
-    // Return number of document root children
-    return m_root.children();
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to child of XML document root element
- *
- * @param[in] index Node index (0,...,children()-1).
- * @return Pointer to child of XML document root element.
- *
- * Returns a pointer to the child number @p index of the XML document root
- * element. An exception will be thrown if the @index is not valid.
- ***************************************************************************/
-GXmlNode* GXml::child(const int& index) const
-{
-    // Return pointer
-    return m_root.child(index);
-}
-
-
-/***********************************************************************//**
- * @brief Return number of GXMLElement children in XML document root
- *
- * @return Number of GXMLElement children in XML document root.
- *
- * Returns the number of GXMLElement child elements of the XML document root.
- * GXMLElement child elements are nodes of type NT_ELEMENT.
- ***************************************************************************/
-int GXml::elements(void) const
-{
-    // Return number
-    return m_root.elements();
-}
-
-
-/***********************************************************************//**
- * @brief Return number of GXMLElement children with a given name in XML
- *        document root
- *
- * @param[in] name Name of child elements.
- * @return Number of GXMLElement children with a given @p name in XML
- *         document root.
- *
- * Returns the number of GXMLElement child elements of the XML document root
- * that have a given @p name. GXMLElement child elements are nodes of type
- * NT_ELEMENT.
- ***************************************************************************/
-int GXml::elements(const std::string& name) const
-{
-    // Return number
-    return m_root.elements(name);
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to GXMLElement child
- *
- * @param[in] index Node index (0,...,elements()-1).
- * @return Pointer to GXMLElement child.
- *
- * Returns a pointer to the child number @p index of the XML document root.
- * An exception will be thrown if the @index is not valid.
- ***************************************************************************/
-GXmlElement* GXml::element(const int& index) const
-{
-    // Return pointer
-    return (static_cast<GXmlElement*>(m_root.element(index)));
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer on GXMLElement child of a given name
- *
- * @param[in] name Name of child element.
- * @param[in] index Node index (0,...,elements()-1).
- *
- * Returns a pointer to the child number @p index with @p name of the XML
- * document root. An exception will be thrown if the @index is not valid.
- ***************************************************************************/
-GXmlElement* GXml::element(const std::string& name, const int& index) const
-{
-    // Return pointer
-    return (static_cast<GXmlElement*>(m_root.element(name, index)));
-}
-
-
-/***********************************************************************//**
  * @brief Print XML object
  *
  * @param[in] indent Text indentation (default = 0).
@@ -501,7 +647,6 @@ void GXml::free_members(void)
  * @brief Parse XML URL
  *
  * @param[in] url Unified Resource Locator.
- * @param[in] string Text string.
  *
  * @exception GException::xml_syntax_error
  *            XML syntax error.
@@ -521,8 +666,6 @@ void GXml::parse(GUrl& url)
     GXmlNode*   current = &m_root;
 
     // Main parsing loop
-    //while ((c = fgetc(fptr)) != EOF) {
-    //while ((c = getchar(fptr, string, index)) != EOF) {
     while ((c = url.getchar()) != EOF) {
 
         // Convert special characters into line feeds
@@ -667,12 +810,13 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Handle element start tag
     case MT_ELEMENT_START:
         {
-            // Create new element node, set it's parent, append it to the current
-            // node and make it the current node
+            // Create new element node, set it's parent, append it to the
+            // current node and make it the current node
             GXmlElement* element = new GXmlElement(segment);
             element->parent(*current);
-            (*current)->append(element);
-            (*current) = element;
+            (*current)->append(*element);
+            int last = (*current)->size() - 1;
+            (*current) = (*(*current))[last];
         }
         break;
 
@@ -680,9 +824,10 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     case MT_ELEMENT_END:
         {
             // Check if we expect an element end tag
-            if ((*current)->type() != GXmlNode::NT_ELEMENT)
+            if ((*current)->type() != GXmlNode::NT_ELEMENT) {
                 throw GException::xml_syntax_error(G_PROCESS, segment,
                       "unexpected element end tag encountered");
+            }
 
             // Check if we have the correct end tag
             GXmlElement* element = (GXmlElement*)(*current);
@@ -698,7 +843,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
         {
             GXmlElement* element = new GXmlElement(segment);
             element->parent(*current);
-            (*current)->append(element);
+            (*current)->append(*element);
         }
         break;
 
@@ -706,7 +851,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     case MT_COMMENT:
         {
             GXmlComment* comment = new GXmlComment(segment);
-            (*current)->append(comment);
+            (*current)->append(*comment);
         }
         break;
 
@@ -714,29 +859,35 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     case MT_DECLARATION:
         {
             // Verify if declaration tag is allowed
-            if (*current != &m_root)
+            if (*current != &m_root) {
                 throw GException::xml_syntax_error(G_PROCESS, segment,
                       "unexpected declaration markup encountered");
-            if (m_root.children() > 0)
+            }
+            if (!m_root.isempty()) {
                 throw GException::xml_syntax_error(G_PROCESS, segment,
                       "declaration markup only allowed in first line");
+            }
 
             // Create temporary element to read in declaration attributes
             GXmlElement* element = new GXmlElement(segment);
             size_t       pos     = 5;
-            while (pos != std::string::npos)
+            while (pos != std::string::npos) {
                 element->parse_attribute(&pos, segment);
+            }
 
             // Set attribute values
             std::string version    = element->attribute("version");
             std::string encoding   = element->attribute("encoding");
             std::string standalone = element->attribute("standalone");
-            if (version.length() > 0)
+            if (version.length() > 0) {
                 m_root.version(version);
-            if (encoding.length() > 0)
+            }
+            if (encoding.length() > 0) {
                 m_root.encoding(encoding);
-            if (standalone.length() > 0)
+            }
+            if (standalone.length() > 0) {
                 m_root.standalone(standalone);
+            }
 
             // Delete temporary element
             delete element;
@@ -747,7 +898,7 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     case MT_PROCESSING:
         {
             GXmlPI* pi = new GXmlPI(segment);
-            (*current)->append(pi);
+            (*current)->append(*pi);
         }
         break;
 
@@ -781,7 +932,7 @@ void GXml::process_text(GXmlNode** current, const std::string& segment)
 
             // Allocate and append node
             GXmlText* node = new GXmlText(segment);
-            (*current)->append(node);
+            (*current)->append(*node);
 
         } // endif: there was not only whitespace
 
