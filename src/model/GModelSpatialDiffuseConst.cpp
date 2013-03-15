@@ -278,7 +278,7 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
     }
 
     // Get pointer on model parameter
-    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
+    const GXmlElement* par = xml.element("parameter", 0);
 
     // Get value
     if (par->attribute("name") == "Value") {
@@ -325,7 +325,7 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 1 parameter node
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Value\""));
+        xml.append(GXmlElement("parameter name=\"Value\""));
     }
 
     // Verify that XML element has exactly 1 parameter
@@ -335,7 +335,7 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
     }
 
     // Get pointers on both model parameters
-    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
+    GXmlElement* par = xml.element("parameter", 0);
 
     // Set or update parameter
     if (par->attribute("name") == "Value") {

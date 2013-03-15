@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralLogParabola.cpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Michael Mayer                                    *
+ *  copyright (C) 2012-2013 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -585,7 +585,7 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor" ||
@@ -679,10 +679,10 @@ void GModelSpectralLogParabola::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 4 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(new GXmlElement("parameter name=\"Index\""));
-        xml.append(new GXmlElement("parameter name=\"Curvature\""));
-        xml.append(new GXmlElement("parameter name=\"Scale\""));
+        xml.append(GXmlElement("parameter name=\"Prefactor\""));
+        xml.append(GXmlElement("parameter name=\"Index\""));
+        xml.append(GXmlElement("parameter name=\"Curvature\""));
+        xml.append(GXmlElement("parameter name=\"Scale\""));
     }
 
     // Verify that XML element has exactly 4 parameters
@@ -696,7 +696,7 @@ void GModelSpectralLogParabola::write(GXmlElement& xml) const
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor"){

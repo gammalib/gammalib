@@ -230,7 +230,7 @@ void GModelSpatialRadial::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle RA/GLON
         if (par->attribute("name") == "RA") {
@@ -312,8 +312,8 @@ void GModelSpatialRadial::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 2 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"RA\""));
-        xml.append(new GXmlElement("parameter name=\"DEC\""));
+        xml.append(GXmlElement("parameter name=\"RA\""));
+        xml.append(GXmlElement("parameter name=\"DEC\""));
     }
 
     // Determine number of parameter nodes in XML element
@@ -330,7 +330,7 @@ void GModelSpatialRadial::write(GXmlElement& xml) const
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle RA
         if (par->attribute("name") == "RA") {

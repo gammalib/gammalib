@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GMWLObservation.cpp  -  Multi-wavelength observation class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLObservation.cpp
  * @brief Multi-wavelength observation class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -335,7 +335,7 @@ void GMWLObservation::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle Instrument name
         if (par->attribute("name") == "Instrument") {
@@ -408,8 +408,8 @@ void GMWLObservation::write(GXmlElement& xml) const
 {
     // If XML element has 0 nodes then append 2 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Instrument\""));
-        xml.append(new GXmlElement("parameter name=\"Data\""));
+        xml.append(GXmlElement("parameter name=\"Instrument\""));
+        xml.append(GXmlElement("parameter name=\"Data\""));
     }
 
     // Verify that XML element has exactly 2 parameters
@@ -423,7 +423,7 @@ void GMWLObservation::write(GXmlElement& xml) const
     for (int i = 0; i < 2; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle Instrument
         if (par->attribute("name") == "Instrument") {

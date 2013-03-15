@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GTestSuites.cpp  - Test Suites class for GammaLib            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -502,27 +502,27 @@ void GTestSuites::free_members(void)
  ***************************************************************************/
 void GTestSuites::write(GXml& xml) const
 {
-    // Create XML element for Test Suites
-    GXmlElement *element_testsuites = new GXmlElement("testsuites");
+    // Append XML element for Test Suites
+    GXmlElement* testsuites = xml.append("testsuites");
 
     // Set attributes
-    element_testsuites->attribute("name", "GammaLib");
+    testsuites->attribute("name", "GammaLib");
     /*
-    element_testsuites->attribute("test",str(tests()));
-    element_testsuites->attribute("errors",str(errors()));
-    element_testsuites->attribute("failures",str(failures()));
-    element_testsuites->attribute("time","0"); // not used
-    element_testsuites->attribute("timestamp",str(timestamp()));
+    testsuites->attribute("test",str(tests()));
+    testsuites->attribute("errors",str(errors()));
+    testsuites->attribute("failures",str(failures()));
+    testsuites->attribute("time","0"); // not used
+    testsuites->attribute("timestamp",str(timestamp()));
     */
 
     // Loop over all test suites in the container
     for (int i = 0; i < m_testsuites.size(); ++i) {
 
         // Get a pointer on the current test suite
-        GTestSuite *testsuite = m_testsuites[i];
+        GTestSuite* testsuite = m_testsuites[i];
 
-        // Create XML element for this test suite
-        GXmlElement *element_testsuite = new GXmlElement("testsuite");
+        // Append XML element for this test suite
+        GXmlElement* element_testsuite = testsuites->append("testsuite");
 
         // Set attributes
         element_testsuite->attribute("disabled","");  // not used
@@ -543,8 +543,8 @@ void GTestSuites::write(GXml& xml) const
             // Reference to the current test case
             GTestCase& testcase = (*testsuite)[j];
 
-            // Create XML element for this test case
-            GXmlElement *element_testcase = new GXmlElement("testcase");
+            // Append XML element for this test case
+            GXmlElement* element_testcase = element_testsuite->append("testcase");
 
             // Set attributes
             element_testcase->attribute("assertions",""); // not used
@@ -557,8 +557,8 @@ void GTestSuites::write(GXml& xml) const
             // XML element.
             if (!testcase.passed()) {
 
-                // Create XML element for the test case problem
-                GXmlElement* element_testcase_problem = new GXmlElement();
+                // Append XML element for the test case problem
+                GXmlElement* element_testcase_problem = element_testcase->append("error");
 
                 // Set attributes
                 element_testcase_problem->attribute("message",testcase.message());
@@ -571,24 +571,12 @@ void GTestSuites::write(GXml& xml) const
                 else {
                     element_testcase_problem->name("failure");
                 }
- 
-                // Append problem to test case element
-                element_testcase->append(element_testcase_problem);
 
             } // endif: failure or error occured
 
-            // Append test case to testsuite element.
-            element_testsuite->append(element_testcase);
-
         } // endfor: looped over all test cases
 
-        // Append test suite to test suites element
-        element_testsuites->append(element_testsuite);
-
     } // endfor: looped over all test suites
-
-    // Append test suites to XML document
-    xml.append(element_testsuites);
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialProfile.cpp  -  Radial Profile CTA model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialProfile.cpp
  * @brief Radial Profile model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -413,7 +413,7 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
     for (int i = 0; i < 3; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle Width
         if (par->attribute("name") == "Width") {
@@ -500,9 +500,9 @@ void GCTAModelRadialProfile::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 3 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Width\""));
-        xml.append(new GXmlElement("parameter name=\"Core\""));
-        xml.append(new GXmlElement("parameter name=\"Tail\""));
+        xml.append(GXmlElement("parameter name=\"Width\""));
+        xml.append(GXmlElement("parameter name=\"Core\""));
+        xml.append(GXmlElement("parameter name=\"Tail\""));
     }
 
     // Verify that XML element has exactly 3 parameters
@@ -516,7 +516,7 @@ void GCTAModelRadialProfile::write(GXmlElement& xml) const
     for (int i = 0; i < 3; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
         if (par->attribute("name") == "Width") {

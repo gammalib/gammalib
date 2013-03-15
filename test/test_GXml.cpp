@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GXml.hpp  -   Test xml module                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -221,27 +221,27 @@ void TestGXml::test_GXml_construct(void)
     test_try("Test XML file creation");
     try {
         GXml xml;
-        xml.append(new GXmlComment("This is a comment."));
-        xml.append(new GXmlElement("source_library"));
+        xml.append(GXmlComment("This is a comment."));
+        xml.append(GXmlElement("source_library"));
         GXmlElement* lib = xml.element("source_library", 0);
-        lib->append(new GXmlElement("source name=\"LMC\" type=\"DiffuseSource\""));
+        lib->append(GXmlElement("source name=\"LMC\" type=\"DiffuseSource\""));
         GXmlNode* src = lib->element("source", 0);
-        src->append(new GXmlElement("spectrum type=\"PLSuperExpCutoff\""));
+        src->append(GXmlElement("spectrum type=\"PLSuperExpCutoff\""));
         GXmlNode* spec = src->element("spectrum", 0);
-        spec->append(new GXmlElement("parameter free=\"1\" max=\"1000\" min=\"1e-07\""
+        spec->append(GXmlElement("parameter free=\"1\" max=\"1000\" min=\"1e-07\""
                 " name=\"Prefactor\" scale=\"1e-07\""
                 " value=\"0.02754520844\""));
-        spec->append(new GXmlElement("parameter free=\"1\" max=\"5\" min=\"-5\""
+        spec->append(GXmlElement("parameter free=\"1\" max=\"5\" min=\"-5\""
                 " name=\"Index1\" scale=\"1\" value=\"-2.0458781\""));
-        GXmlElement* par = static_cast<GXmlElement*>(spec->element("parameter", 0));
+        GXmlElement* par = spec->element("parameter", 0);
         par->attribute("value", "1.01");
         par->attribute("error", "3.145");
-        par = static_cast<GXmlElement*>(spec->element("parameter", 1));
+        par = spec->element("parameter", 1);
         par->attribute("value", "-2.100");
         par->attribute("error", "9.876");
-        src->append(new GXmlElement("spatialModel file=\"LMC.fits\" type=\"SpatialMap\""));
+        src->append(GXmlElement("spatialModel file=\"LMC.fits\" type=\"SpatialMap\""));
         GXmlNode* spat = src->element("spatialModel", 0);
-        spat->append(new GXmlElement("parameter free=\"0\" max=\"1000\" min=\"0.001\""
+        spat->append(GXmlElement("parameter free=\"0\" max=\"1000\" min=\"0.001\""
                 " name=\"Prefactor\" scale=\"1\" value=\"1\""));
         test_try_success();
     }
@@ -307,13 +307,13 @@ void TestGXml::test_GXml_access(void)
     // Test root document access
     GXml xml;
     xml.load(m_xml_file);
-    test_assert(xml.children() == 3,
+    test_assert(xml.size() == 3,
                 "Test if xml.children()==3",
-                "Unexpected number of children in document "+str(xml.children()));
+                "Unexpected number of children in document "+str(xml.size()));
 
     // Test node access
-    for (int i = 0; i < xml.children(); ++i) {
-        GXmlNode* ptr = xml.child(i);
+    for (int i = 0; i < xml.size(); ++i) {
+        GXmlNode* ptr = xml[i];
     }
     test_assert(xml.elements() == 1,
                 "Test if xml.elements()==1",

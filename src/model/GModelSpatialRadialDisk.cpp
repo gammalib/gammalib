@@ -357,7 +357,7 @@ void GModelSpatialRadialDisk::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle Radius
         if (par->attribute("name") == "Radius") {
@@ -405,7 +405,7 @@ void GModelSpatialRadialDisk::write(GXmlElement& xml) const
     // If XML element has 2 nodes (which should be the location nodes)
     // then append 1 parameter node
     if (xml.elements() == 2) {
-        xml.append(new GXmlElement("parameter name=\"Radius\""));
+        xml.append(GXmlElement("parameter name=\"Radius\""));
     }
 
     // Determine number of parameter nodes in XML element
@@ -422,7 +422,7 @@ void GModelSpatialRadialDisk::write(GXmlElement& xml) const
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle Radius
         if (par->attribute("name") == "Radius") {

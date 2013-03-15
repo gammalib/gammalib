@@ -632,14 +632,14 @@ void GModels::save(const std::string& filename) const
 void GModels::read(const GXml& xml)
 {
     // Get pointer on source library
-    GXmlElement* lib = xml.element("source_library", 0);
+    const GXmlElement* lib = xml.element("source_library", 0);
 
     // Loop over all sources
     int n = lib->elements("source");
     for (int i = 0; i < n; ++i) {
 
         // Get pointer on source
-        GXmlElement* src = static_cast<GXmlElement*>(lib->element("source", i));
+        const GXmlElement* src = lib->element("source", i);
 
         // Get model type
         std::string type = src->attribute("type");
@@ -684,7 +684,7 @@ void GModels::write(GXml& xml) const
 {
     // If there is no source library then append one
     if (xml.elements("source_library") == 0) {
-        xml.append(new GXmlElement("source_library title=\"source library\""));
+        xml.append(GXmlElement("source_library title=\"source library\""));
     }
 
     // Get pointer on source library

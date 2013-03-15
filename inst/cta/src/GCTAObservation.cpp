@@ -371,7 +371,7 @@ void GCTAObservation::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle EventList
         if (par->attribute("name") == "EventList") {
@@ -564,14 +564,14 @@ void GCTAObservation::write(GXmlElement& xml) const
     // If XML element has 0 nodes then append 4 parameter nodes
     if (xml.elements() == 0) {
         if (is_list) {
-            xml.append(new GXmlElement("parameter name=\"EventList\""));
+            xml.append(GXmlElement("parameter name=\"EventList\""));
         }
         else {
-            xml.append(new GXmlElement("parameter name=\"CountsMap\""));
+            xml.append(GXmlElement("parameter name=\"CountsMap\""));
         }
-        xml.append(new GXmlElement("parameter name=\"EffectiveArea\""));
-        xml.append(new GXmlElement("parameter name=\"PointSpreadFunction\""));
-        xml.append(new GXmlElement("parameter name=\"EnergyDispersion\""));
+        xml.append(GXmlElement("parameter name=\"EffectiveArea\""));
+        xml.append(GXmlElement("parameter name=\"PointSpreadFunction\""));
+        xml.append(GXmlElement("parameter name=\"EnergyDispersion\""));
     }
 
     // Verify that XML element has exactly 4 parameters
@@ -585,7 +585,7 @@ void GCTAObservation::write(GXmlElement& xml) const
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle Eventlist
         if (par->attribute("name") == "EventList") {

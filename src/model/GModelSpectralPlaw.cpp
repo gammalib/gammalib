@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelSpectralPlaw.cpp  -  Spectral power law model class        *
+ *         GModelSpectralPlaw.cpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -519,7 +519,7 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
     for (int i = 0; i < 3; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor") {
@@ -583,9 +583,9 @@ void GModelSpectralPlaw::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 3 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Prefactor\""));
-        xml.append(new GXmlElement("parameter name=\"Index\""));
-        xml.append(new GXmlElement("parameter name=\"Scale\""));
+        xml.append(GXmlElement("parameter name=\"Prefactor\""));
+        xml.append(GXmlElement("parameter name=\"Index\""));
+        xml.append(GXmlElement("parameter name=\"Scale\""));
     }
 
     // Verify that XML element has exactly 3 parameters
@@ -599,7 +599,7 @@ void GModelSpectralPlaw::write(GXmlElement& xml) const
     for (int i = 0; i < 3; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
         if (par->attribute("name") == "Prefactor") {

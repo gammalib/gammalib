@@ -318,7 +318,7 @@ void GModelSpatialPointSource::read(const GXmlElement& xml)
     for (int i = 0; i < 2; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle RA/GLON
         if (par->attribute("name") == "RA") {
@@ -399,8 +399,8 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 2 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"RA\""));
-        xml.append(new GXmlElement("parameter name=\"DEC\""));
+        xml.append(GXmlElement("parameter name=\"RA\""));
+        xml.append(GXmlElement("parameter name=\"DEC\""));
     }
 
     // Verify that XML element has exactly 2 parameters
@@ -410,8 +410,8 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
     }
 
     // Get pointers on both model parameters
-    GXmlElement* par1 = static_cast<GXmlElement*>(xml.element("parameter", 0));
-    GXmlElement* par2 = static_cast<GXmlElement*>(xml.element("parameter", 1));
+    GXmlElement* par1 = xml.element("parameter", 0);
+    GXmlElement* par2 = xml.element("parameter", 1);
 
     // Set or update sky direction
     if (par1->attribute("name") == "RA" && par2->attribute("name") == "DEC") {

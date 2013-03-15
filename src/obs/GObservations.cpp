@@ -243,7 +243,7 @@ GObservations* GObservations::clone(void) const
  * @exception GException::out_of_range
  *            Observation index is out of range.
  *
- * Set a deep copy and observation @obs at the specified @p index in the
+ * Set a deep copy and observation @p obs at the specified @p index in the
  * container.
  ***************************************************************************/
 void GObservations::set(const int& index, const GObservation& obs)
@@ -467,14 +467,14 @@ void GObservations::save(const std::string& filename) const
 void GObservations::read(const GXml& xml)
 {
     // Get pointer on observation library
-    GXmlElement* lib = xml.element("observation_list", 0);
+    const GXmlElement* lib = xml.element("observation_list", 0);
 
     // Loop over all observations
     int n = lib->elements("observation");
     for (int i = 0; i < n; ++i) {
 
         // Get pointer on observation
-        GXmlElement* obs = static_cast<GXmlElement*>(lib->element("observation", i));
+        const GXmlElement* obs = lib->element("observation", i);
 
         // Get attributes
         std::string name       = obs->attribute("name");
@@ -529,7 +529,7 @@ void GObservations::write(GXml& xml) const
 {
     // If there is no observation library then append one
     if (xml.elements("observation_list") == 0) {
-        xml.append(new GXmlElement("observation_list title=\"observation list\""));
+        xml.append(GXmlElement("observation_list title=\"observation list\""));
     }
 
     // Get pointer on observation library
@@ -544,7 +544,7 @@ void GObservations::write(GXml& xml) const
         // Search corresponding observation
         int n = xml.elements("observation");
         for (int k = 0; k < n; ++k) {
-            GXmlElement* element = static_cast<GXmlElement*>(xml.element("observation", k));
+            GXmlElement* element = xml.element("observation", k);
             if (element->attribute("name")       == m_obs[i]->name() &&
                 element->attribute("id")         == m_obs[i]->id()   &&
                 element->attribute("instrument") == m_obs[i]->instrument()) {
@@ -556,11 +556,10 @@ void GObservations::write(GXml& xml) const
         // If no observation with corresponding name, ID and instrument was
         // found then append one now
         if (obs == NULL) {
-            obs = new GXmlElement("observation");
+            obs = lib->append("observation");
             obs->attribute("name", m_obs[i]->name());
             obs->attribute("id", m_obs[i]->id());
             obs->attribute("instrument", m_obs[i]->instrument());
-            lib->append(obs);
         }
     
         // Write now observation

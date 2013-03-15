@@ -179,7 +179,7 @@ void GXmlDocument::write(GUrl& url, const int& indent) const
                standalone().c_str());
 
     // Write children into URL
-    for (int i = 0; i < children(); ++i) {
+    for (int i = 0; i < m_nodes.size(); ++i) {
         m_nodes[i]->write(url, indent);
     }
 
@@ -206,7 +206,7 @@ std::string GXmlDocument::print(const int& indent) const
     result.append(" standalone=" + standalone());
 
     // Append children
-    for (int i = 0; i < children(); ++i) {
+    for (int i = 0; i < m_nodes.size(); ++i) {
         result.append("\n" + m_nodes[i]->print(indent));
     }
 

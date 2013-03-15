@@ -123,8 +123,8 @@ GModelSky::GModelSky(const GXmlElement& xml) : GModel(xml)
     init_members();
 
     // Get pointers on spectrum and spatial model
-    GXmlElement* spec = static_cast<GXmlElement*>(xml.element("spectrum", 0));
-    GXmlElement* spat = static_cast<GXmlElement*>(xml.element("spatialModel", 0));
+    const GXmlElement* spec = xml.element("spectrum", 0);
+    const GXmlElement* spat = xml.element("spatialModel", 0);
 
     // Allocate constant
     GModelTemporalConst temporal;
@@ -583,8 +583,8 @@ void GModelSky::read(const GXmlElement& xml)
     clear();
 
     // Get pointers on spectrum and spatial model
-    GXmlElement* spec = static_cast<GXmlElement*>(xml.element("spectrum", 0));
-    GXmlElement* spat = static_cast<GXmlElement*>(xml.element("spatialModel", 0));
+    const GXmlElement* spec = xml.element("spectrum", 0);
+    const GXmlElement* spat = xml.element("spatialModel", 0);
 
     // Allocate constant
     GModelTemporalConst temporal;
@@ -639,11 +639,9 @@ void GModelSky::write(GXmlElement& xml) const
 
     // If no source with corresponding name was found then append one
     if (src == NULL) {
-        src = new GXmlElement("source");
-        src->attribute("name") = name();
-        if (spectral() != NULL) src->append(new GXmlElement("spectrum"));
-        if (spatial()  != NULL) src->append(new GXmlElement("spatialModel"));
-        xml.append(src); // Appends pointer
+        src = xml.append("source");
+        if (spectral() != NULL) src->append(GXmlElement("spectrum"));
+        if (spatial()  != NULL) src->append(GXmlElement("spatialModel"));
     }
 
     // Set model attributes
@@ -656,13 +654,13 @@ void GModelSky::write(GXmlElement& xml) const
 
     // Write spectral model
     if (spectral() != NULL) {
-        GXmlElement* spec = static_cast<GXmlElement*>(src->element("spectrum", 0));
+        GXmlElement* spec = src->element("spectrum", 0);
         spectral()->write(*spec);
     }
 
     // Write spatial model
     if (spatial() != NULL) {
-        GXmlElement* spat = static_cast<GXmlElement*>(src->element("spatialModel", 0));
+        GXmlElement* spat = src->element("spatialModel", 0);
         spatial()->write(*spat);
     }
 

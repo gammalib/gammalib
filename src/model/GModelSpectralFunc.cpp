@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelSpectralFunc.cpp  -  Spectral function model class         *
+ *         GModelSpectralFunc.cpp - Spectral function model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -595,7 +595,7 @@ void GModelSpectralFunc::read(const GXmlElement& xml)
     }
 
     // Get parameter element
-    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
+    const GXmlElement* par = xml.element("parameter", 0);
 
     // Get value
     if (par->attribute("name") == "Normalization") {
@@ -646,7 +646,7 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 1 parameter node
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Normalization\""));
+        xml.append(GXmlElement("parameter name=\"Normalization\""));
     }
 
     // Verify that XML element has exactly 1 parameter
@@ -656,7 +656,7 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
     }
 
     // Get parameter element
-    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
+    GXmlElement* par = xml.element("parameter", 0);
 
     // Set parameyter
     if (par->attribute("name") == "Normalization") {

@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAModelRadialAcceptance.cpp  -  Radial acceptance model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialAcceptance.cpp
  * @brief Radial acceptance model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -619,13 +619,13 @@ void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
     clear();
 
     // Initialise XML elements
-    GXmlElement* rad  = NULL;
-    GXmlElement* spec = NULL;
-    GXmlElement* temp = NULL;
+    const GXmlElement* rad  = NULL;
+    const GXmlElement* spec = NULL;
+    const GXmlElement* temp = NULL;
 
     // Get pointers on spectrum and radial model
-    rad  = static_cast<GXmlElement*>(xml.element("radialModel", 0));
-    spec = static_cast<GXmlElement*>(xml.element("spectrum", 0));
+    rad  = xml.element("radialModel", 0);
+    spec = xml.element("spectrum", 0);
 
     // Clone radial and spectral models
     m_radial   = xml_radial(*rad);
@@ -633,7 +633,7 @@ void GCTAModelRadialAcceptance::read(const GXmlElement& xml)
 
     // Optionally get temporal model
     try {
-        temp = static_cast<GXmlElement*>(xml.element("lightcurve", 0));
+        temp = xml.element("lightcurve", 0);
         m_temporal = xml_temporal(*temp);
     }
     catch (GException::xml_name_not_found &e) {
@@ -673,7 +673,7 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
     // Search corresponding source
     int n = xml.elements("source");
     for (int k = 0; k < n; ++k) {
-        GXmlElement* element = static_cast<GXmlElement*>(xml.element("source", k));
+        GXmlElement* element = xml.element("source", k);
         if (element->attribute("name") == name()) {
             src = element;
             break;
@@ -682,11 +682,9 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
 
     // If no source with corresponding name was found then append one
     if (src == NULL) {
-        src = new GXmlElement("source");
-        src->attribute("name") = name();
-        if (spectral() != NULL) src->append(new GXmlElement("spectrum"));
-        if (radial()   != NULL) src->append(new GXmlElement("radialModel"));
-        xml.append(src);
+        src = xml.append("source");
+        if (spectral() != NULL) src->append(GXmlElement("spectrum"));
+        if (radial()   != NULL) src->append(GXmlElement("radialModel"));
     }
 
     // Set model type, name and optionally instruments
@@ -698,20 +696,20 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
 
     // Write spectral model
     if (spectral() != NULL) {
-        GXmlElement* spec = static_cast<GXmlElement*>(src->element("spectrum", 0));
+        GXmlElement* spec = src->element("spectrum", 0);
         spectral()->write(*spec);
     }
 
     // Write radial model
     if (radial()) {
-        GXmlElement* rad = static_cast<GXmlElement*>(src->element("radialModel", 0));
+        GXmlElement* rad = src->element("radialModel", 0);
         radial()->write(*rad);
     }
 
     // Write temporal model
     if (temporal()) {
         if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
-            GXmlElement* temp = static_cast<GXmlElement*>(src->element("lightcurve", 0));
+            GXmlElement* temp = src->element("lightcurve", 0);
             temporal()->write(*temp);
         }
     }

@@ -742,7 +742,7 @@ std::string GVOClient::get_response_value(const GXml&        xml,
     std::string value = "";
 
     // Search for value of specified member
-    GXmlNode* node = xml.element("methodResponse", 0);
+    const GXmlNode* node = xml.element("methodResponse", 0);
     if (node != NULL) {
         node = node->element("params", 0);
         if (node != NULL) {
@@ -754,7 +754,7 @@ std::string GVOClient::get_response_value(const GXml&        xml,
                     if (node != NULL) {
                         int num = node->elements("member");
                         for (int i = 0; i < num; ++i) {
-                            GXmlNode* member = node->element("member", i);
+                            const GXmlNode* member = node->element("member", i);
                             std::string one_name;
                             std::string one_value;
                             get_name_value_pair(member, one_name, one_value);
@@ -796,9 +796,9 @@ void GVOClient::get_name_value_pair(const GXmlNode* node,
     if (node != NULL) {
 
         // Get name node and extract text content
-        GXmlNode* ptr = node->element("name", 0);
+        const GXmlNode* ptr = node->element("name", 0);
         if (ptr != NULL) {
-            GXmlText* text = static_cast<GXmlText*>(ptr->child(0));
+            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
             if (text != NULL) {
                 name = text->text();
             }
@@ -807,7 +807,7 @@ void GVOClient::get_name_value_pair(const GXmlNode* node,
         // Get value node and extract text content
         ptr = node->element("value", 0);
         if (ptr != NULL) {
-            GXmlText* text = static_cast<GXmlText*>(ptr->child(0));
+            const GXmlText* text = static_cast<const GXmlText*>((*ptr)[0]);
             if (text != NULL) {
                 value = text->text();
             }

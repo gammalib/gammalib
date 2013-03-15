@@ -89,6 +89,10 @@ GXmlElement::GXmlElement(const GXmlElement& node) : GXmlNode(node)
  * @brief Segment constructor
  *
  * @param[in] segment XML segment.
+ *
+ * Constructs a XML element from a text @p segment. The text segment is
+ * parsed and the element name and attributes are extracted using the
+ * parse_start() method.
  ***************************************************************************/
 GXmlElement::GXmlElement(const std::string& segment) : GXmlNode()
 {
@@ -212,7 +216,7 @@ void GXmlElement::write(GUrl& url, const int& indent) const
     }
 
     // If there are no children then write an empty tag
-    if (children() < 1) {
+    if (isempty()) {
         url.printf(" />\n");
     }
 
@@ -222,7 +226,7 @@ void GXmlElement::write(GUrl& url, const int& indent) const
         url.printf(">\n");
 
         // Write children in file
-        for (int i = 0; i < children(); ++i) {
+        for (int i = 0; i < m_nodes.size(); ++i) {
             m_nodes[i]->write(url, indent+g_indent);
         }
 
@@ -256,7 +260,7 @@ std::string GXmlElement::print(const int& indent) const
     }
 
     // Append children
-    for (int i = 0; i < children(); ++i) {
+    for (int i = 0; i < m_nodes.size(); ++i) {
         result.append("\n" + m_nodes[i]->print(indent+g_indent));
     }
 

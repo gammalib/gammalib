@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralNodes.cpp  -  Spectral nodes model class          *
+ *          GModelSpectralNodes.cpp - Spectral nodes model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -627,7 +627,7 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
         GModelPar intensity;
             
         // Get node
-        GXmlElement* node = static_cast<GXmlElement*>(xml.element("node", i));
+        const GXmlElement* node = xml.element("node", i);
 
         // Verify that node XML element has exactly 2 parameters
         if (node->elements() != 2 || node->elements("parameter") != 2) {
@@ -640,7 +640,7 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
         for (int k = 0; k < 2; ++k) {
 
             // Get parameter element
-            GXmlElement* par = static_cast<GXmlElement*>(node->element("parameter", k));
+            const GXmlElement* par = node->element("parameter", k);
 
             // Handle energy
             if (par->attribute("name") == "Energy") {
@@ -728,7 +728,7 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
     // If XML element has 0 nodes then append nodes
     if (xml.elements() == 0) {
         for (int i = 0; i < nodes; ++i) {
-            xml.append(new GXmlElement("node"));
+            xml.append(GXmlElement("node"));
         }
     }
 
@@ -743,13 +743,13 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
     for (int i = 0; i < nodes; ++i) {
 
         // Get node
-        GXmlElement* node = static_cast<GXmlElement*>(xml.element("node", i));
+        GXmlElement* node = xml.element("node", i);
 
         // If XML element has 0 leafes then append energy and intensity
         // element
         if (node->elements() == 0) {
-            node->append(new GXmlElement("parameter name=\"Energy\""));
-            node->append(new GXmlElement("parameter name=\"Intensity\""));
+            node->append(GXmlElement("parameter name=\"Energy\""));
+            node->append(GXmlElement("parameter name=\"Intensity\""));
         }
 
         // Verify that node XML element has exactly 2 parameters
@@ -763,7 +763,7 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
         for (int k = 0; k < 2; ++k) {
 
             // Get parameter element
-            GXmlElement* par = static_cast<GXmlElement*>(node->element("parameter", k));
+            GXmlElement* par = node->element("parameter", k);
 
             // Handle prefactor
             if (par->attribute("name") == "Energy") {

@@ -287,7 +287,7 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
     }
 
     // Get pointer on model parameter
-    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
+    const GXmlElement* par = xml.element("parameter", 0);
 
     // Get value
     if (par->attribute("name") == "Normalization" ||
@@ -342,7 +342,7 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
     // We thus assure that the XML files will be compatible with
     // Fermi-LAT.
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Normalization\""));
+        xml.append(GXmlElement("parameter name=\"Normalization\""));
     }
 
     // Verify that XML element has exactly 1 parameter
@@ -352,7 +352,7 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
     }
 
     // Get pointers on model parameter
-    GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", 0));
+    GXmlElement* par = xml.element("parameter", 0);
 
     // Set or update parameter
     if (par->attribute("name") == "Normalization" ||

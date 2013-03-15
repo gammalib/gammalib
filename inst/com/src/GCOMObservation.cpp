@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GCOMObservation.cpp  -  COMPTEL Observation class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -352,7 +352,7 @@ void GCOMObservation::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle EventList
         if (par->attribute("name") == "DRE") {
@@ -431,11 +431,11 @@ void GCOMObservation::write(GXmlElement& xml) const
 {
     // If XML element has 0 nodes then append 5 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"DRE\""));
-        xml.append(new GXmlElement("parameter name=\"DRB\""));
-        xml.append(new GXmlElement("parameter name=\"DRG\""));
-        xml.append(new GXmlElement("parameter name=\"DRX\""));
-        xml.append(new GXmlElement("parameter name=\"IAQ\""));
+        xml.append(GXmlElement("parameter name=\"DRE\""));
+        xml.append(GXmlElement("parameter name=\"DRB\""));
+        xml.append(GXmlElement("parameter name=\"DRG\""));
+        xml.append(GXmlElement("parameter name=\"DRX\""));
+        xml.append(GXmlElement("parameter name=\"IAQ\""));
     }
 
     // Verify that XML element has exactly 5 parameters
@@ -449,7 +449,7 @@ void GCOMObservation::write(GXmlElement& xml) const
     for (int i = 0; i < 5; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle DRE
         if (par->attribute("name") == "DRE") {

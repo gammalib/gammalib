@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GLATObservation.cpp  -  Fermi/LAT Observation class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATObservation.cpp
  * @brief Fermi/LAT Observation class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -334,7 +334,7 @@ void GLATObservation::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle Unbinned format
         if (par->attribute("name") == "FT1") {
@@ -448,16 +448,16 @@ void GLATObservation::write(GXmlElement& xml) const
     // If XML element has 0 nodes then append 4 parameter nodes
     if (xml.elements() == 0) {
         if (is_list) {
-            xml.append(new GXmlElement("parameter name=\"FT1\""));
-            xml.append(new GXmlElement("parameter name=\"FT2\""));
-            xml.append(new GXmlElement("parameter name=\"LiveTimeCube\""));
-            xml.append(new GXmlElement("parameter name=\"IRF\""));
+            xml.append(GXmlElement("parameter name=\"FT1\""));
+            xml.append(GXmlElement("parameter name=\"FT2\""));
+            xml.append(GXmlElement("parameter name=\"LiveTimeCube\""));
+            xml.append(GXmlElement("parameter name=\"IRF\""));
         }
         else {
-            xml.append(new GXmlElement("parameter name=\"CountsMap\""));
-            xml.append(new GXmlElement("parameter name=\"ExposureMap\""));
-            xml.append(new GXmlElement("parameter name=\"LiveTimeCube\""));
-            xml.append(new GXmlElement("parameter name=\"IRF\""));
+            xml.append(GXmlElement("parameter name=\"CountsMap\""));
+            xml.append(GXmlElement("parameter name=\"ExposureMap\""));
+            xml.append(GXmlElement("parameter name=\"LiveTimeCube\""));
+            xml.append(GXmlElement("parameter name=\"IRF\""));
         }
     }
 
@@ -472,7 +472,7 @@ void GLATObservation::write(GXmlElement& xml) const
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle FT1
         if (par->attribute("name") == "FT1") {

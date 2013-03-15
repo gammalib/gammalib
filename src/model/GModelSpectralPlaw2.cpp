@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelSpectralPlaw2.cpp  -  Spectral power law model class       *
+ *         GModelSpectralPlaw2.cpp - Spectral power law model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -545,7 +545,7 @@ void GModelSpectralPlaw2::read(const GXmlElement& xml)
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
         if (par->attribute("name") == "Integral") {
@@ -616,10 +616,10 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
 
     // If XML element has 0 nodes then append 4 parameter nodes
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Integral\""));
-        xml.append(new GXmlElement("parameter name=\"Index\""));
-        xml.append(new GXmlElement("parameter name=\"LowerLimit\""));
-        xml.append(new GXmlElement("parameter name=\"UpperLimit\""));
+        xml.append(GXmlElement("parameter name=\"Integral\""));
+        xml.append(GXmlElement("parameter name=\"Index\""));
+        xml.append(GXmlElement("parameter name=\"LowerLimit\""));
+        xml.append(GXmlElement("parameter name=\"UpperLimit\""));
     }
 
     // Verify that XML element has exactly 4 parameters
@@ -633,7 +633,7 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
     for (int i = 0; i < 4; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle prefactor
         if (par->attribute("name") == "Integral") {

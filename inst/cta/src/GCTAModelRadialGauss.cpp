@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GCTAModelRadialGauss.cpp  -  Radial Gaussian CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAModelRadialGauss.cpp
  * @brief Radial Gaussian model class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -414,16 +414,17 @@ double GCTAModelRadialGauss::omega(void) const
 void GCTAModelRadialGauss::read(const GXmlElement& xml)
 {
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_READ, xml,
               "Radial Gaussian model requires exactly 1 parameter.");
+    }
 
     // Extract model parameters
     int  npar[]   = {0};
     for (int i = 0; i < 1; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle Sigma
         if (par->attribute("name") == "Sigma") {
@@ -448,9 +449,10 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
     } // endfor: looped over all parameters
 
     // Verify that all parameters were found
-    if (npar[0] != 1)
+    if (npar[0] != 1) {
         throw GException::model_invalid_parnames(G_READ, xml,
               "Radial Gaussian model requires \"Sigma\" parameter.");
+    }
 
     // Return
     return;
@@ -475,30 +477,33 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
 void GCTAModelRadialGauss::write(GXmlElement& xml) const
 {
     // Set model type
-    if (xml.attribute("type") == "")
+    if (xml.attribute("type") == "") {
         xml.attribute("type", type());
+    }
 
     // Verify model type
-    if (xml.attribute("type") != type())
+    if (xml.attribute("type") != type()) {
         throw GException::model_invalid_spatial(G_WRITE, xml.attribute("type"),
               "Radial Gaussian model is not of type \""+type()+"\".");
+    }
 
     // If XML element has 0 nodes then append 1 parameter node
     if (xml.elements() == 0) {
-        xml.append(new GXmlElement("parameter name=\"Sigma\""));
+        xml.append(GXmlElement("parameter name=\"Sigma\""));
     }
 
     // Verify that XML element has exactly 1 parameter
-    if (xml.elements() != 1 || xml.elements("parameter") != 1)
+    if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_WRITE, xml,
               "Radial Gaussian model requires exactly 1 parameter.");
+    }
 
     // Set or update model parameter attributes
     int npar[] = {0};
     for (int i = 0; i < 1; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle sigma
         if (par->attribute("name") == "Sigma") {
@@ -509,9 +514,10 @@ void GCTAModelRadialGauss::write(GXmlElement& xml) const
     } // endfor: looped over all parameters
 
     // Check of all required parameters are present
-    if (npar[0] != 1)
+    if (npar[0] != 1) {
         throw GException::model_invalid_parnames(G_WRITE, xml,
               "Radial Gaussian model requires \"Sigma\" parameter.");
+    }
 
     // Return
     return;

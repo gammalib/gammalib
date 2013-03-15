@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GCOMModelDRBFitting.cpp  -  COMPTEL DRB model fitting class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -537,7 +537,7 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
         GModelPar normalization;
             
         // Get node
-        GXmlElement* node = static_cast<GXmlElement*>(xml.element("node", i));
+        const GXmlElement* node = xml.element("node", i);
 
         // Verify that node XML element has exactly 2 parameters
         if (node->elements() != 2 || node->elements("parameter") != 2) {
@@ -550,7 +550,7 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
         for (int k = 0; k < 2; ++k) {
 
             // Get parameter element
-            GXmlElement* par = static_cast<GXmlElement*>(node->element("parameter", k));
+            const GXmlElement* par = node->element("parameter", k);
 
             // Handle energy
             if (par->attribute("name") == "Phibar") {
@@ -649,7 +649,7 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
     // Search corresponding source
     int n = xml.elements("source");
     for (int k = 0; k < n; ++k) {
-        GXmlElement* element = static_cast<GXmlElement*>(xml.element("source", k));
+        GXmlElement* element = xml.element("source", k);
         if (element->attribute("name") == name()) {
             src = element;
             break;
@@ -659,13 +659,12 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
     // If no source with corresponding name was found then append one.
     // Set also the type and the instrument.
     if (src == NULL) {
-        src = new GXmlElement("source");
+        src = xml.append("source");
         src->attribute("name", name());
         src->attribute("type", type());
         if (instruments().length() > 0) {
             src->attribute("instrument", instruments());
         }
-        xml.append(src);
     }
 
     // Verify model type
@@ -680,7 +679,7 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
     // If XML element has 0 nodes then append nodes
     if (src->elements() == 0) {
         for (int i = 0; i < nodes; ++i) {
-            src->append(new GXmlElement("node"));
+            src->append(GXmlElement("node"));
         }
     }
 
@@ -695,13 +694,13 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
     for (int i = 0; i < nodes; ++i) {
 
         // Get node
-        GXmlElement* node = static_cast<GXmlElement*>(src->element("node", i));
+        GXmlElement* node = src->element("node", i);
 
         // If XML element has 0 leafs then append energy and intensity
         // element
         if (node->elements() == 0) {
-            node->append(new GXmlElement("parameter name=\"Phibar\""));
-            node->append(new GXmlElement("parameter name=\"Normalization\""));
+            node->append(GXmlElement("parameter name=\"Phibar\""));
+            node->append(GXmlElement("parameter name=\"Normalization\""));
         }
 
         // Verify that node XML element has exactly 2 parameters
@@ -715,7 +714,7 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
         for (int k = 0; k < 2; ++k) {
 
             // Get parameter element
-            GXmlElement* par = static_cast<GXmlElement*>(node->element("parameter", k));
+            GXmlElement* par = node->element("parameter", k);
 
             // Handle prefactor
             if (par->attribute("name") == "Phibar") {

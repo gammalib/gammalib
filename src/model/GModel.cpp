@@ -583,15 +583,14 @@ void GModel::read_scales(const GXmlElement& xml)
     if (xml.elements("scaling") != 0) {
 
         // Get pointer on first instrument scale factors
-        GXmlElement* scales = static_cast<GXmlElement*>(xml.element("scaling", 0));
+        const GXmlElement* scales = xml.element("scaling", 0);
 
         // Determine number of scale factors
         int nscales = scales->elements("instrument");
 
         // Read all scale factors
         for (int i = 0; i < nscales; ++i) {
-            GXmlElement* par =
-                static_cast<GXmlElement*>(scales->element("instrument", i));
+            const GXmlElement* par = scales->element("instrument", i);
             GModelPar scale;
             scale.read(*par);
             scale.name(toupper(strip_whitespace(par->attribute("name"))));
@@ -635,16 +634,15 @@ void GModel::write_scales(GXmlElement& xml) const
         // If no <scaling> tag exists then add one now with the required
         // number of instruments ...
         if (xml.elements("scaling") == 0) {
-            scale = new GXmlElement("scaling");
+            scale = xml.append("scaling");
             for (int i = 0; i < num; ++i) {
-                scale->append(new GXmlElement("instrument"));
+                scale->append(GXmlElement("instrument"));
             }
-            xml.append(scale);
         }
 
         // ... otherwise get first tag
         else {
-            scale = static_cast<GXmlElement*>(xml.element("scaling", 0));
+            scale = xml.element("scaling", 0);
         }
 
         // Verify that scaling tag  has the required number of instruments
@@ -657,7 +655,7 @@ void GModel::write_scales(GXmlElement& xml) const
         for (int i = 0; i < num; ++i) {
 
             // Get instrument element
-            GXmlElement* inst = static_cast<GXmlElement*>(scale->element("instrument", i));
+            GXmlElement* inst = scale->element("instrument", i);
 
             // Set instrument name
             inst->attribute("name", m_scales[i].name());

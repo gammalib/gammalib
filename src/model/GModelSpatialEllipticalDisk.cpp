@@ -246,11 +246,9 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  * \f[
  * f(\theta,\phi) = \left \{
  *  \begin{array}{l l}
- *     \displaystyle
  *     {\tt m\_norm}
- *     & \mbox{if $\theta \le $ \theta_0} \\
+ *     & \mbox{if} \, \, \theta \le \theta_0 \\
  *     \\
- *     \displaystyle
  *     0 & \mbox{else}
  *  \end{array}
  *  \right .
@@ -346,7 +344,7 @@ double GModelSpatialEllipticalDisk::eval_gradients(const double& theta,
  * @param[in] ran Random number generator.
  *
  * Draws an arbitrary sky position from the 2D disk distribution.
- * @TODO test function
+ * @todo test function
  ***************************************************************************/
 GSkyDir GModelSpatialEllipticalDisk::mc(GRan& ran) const
 {
@@ -428,7 +426,7 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        const GXmlElement* par = xml.element("parameter", i);
 
         // Handle semiminor radius
         if (par->attribute("name") == "MinorRadius") {
@@ -486,8 +484,8 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
     // If XML element has 3 nodes (which should be the location and PA nodes)
     // then append 2 parameter nodes
     if (xml.elements() == 3) {
-        xml.append(new GXmlElement("parameter name=\"MinorRadius\""));
-        xml.append(new GXmlElement("parameter name=\"MajorRadius\""));
+        xml.append(GXmlElement("parameter name=\"MinorRadius\""));
+        xml.append(GXmlElement("parameter name=\"MajorRadius\""));
     }
 
     // Determine number of parameter nodes in XML element
@@ -504,7 +502,7 @@ void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
     for (int i = 0; i < npars; ++i) {
 
         // Get parameter element
-        GXmlElement* par = static_cast<GXmlElement*>(xml.element("parameter", i));
+        GXmlElement* par = xml.element("parameter", i);
 
         // Handle semiminor radius
         if (par->attribute("name") == "MinorRadius") {
