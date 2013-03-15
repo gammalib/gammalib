@@ -8,6 +8,7 @@
         Review of public interfaces of all classes
         Add Virtual Observatory support
         Introduce GUrl classes for transparent URL handling
+        Make use of GUrl class in XML I/O
 
 2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

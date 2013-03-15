@@ -147,7 +147,10 @@ The following URL types have been implemented so far:
 
 14. XML module
 --------------
-None
+The XML module classes now make use of the GUrl abstract interface
+to allow for generic URL input / output of the XML document. Before,
+only flat file I/O has been supported. Now, I/O can go through any
+media for which a URL class has been implemented.
 
 
 15. VO module
