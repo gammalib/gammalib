@@ -57,20 +57,18 @@ public:
     // Operators
     GXmlElement& operator=(const GXmlElement& node);
 
-    // Implemented virtual methods
+    // Methods
     virtual void         clear(void);
     virtual GXmlElement* clone(void) const;
+    std::string          name(void) const { return m_name; }
+    void                 name(const std::string& name) { m_name=name; }
+    std::string          attribute(const std::string& name) const;
+    void                 attribute(const std::string& name, const std::string& value);
+    GXmlNode*            parent(void) const { return m_parent; }
+    void                 parent(GXmlNode* node) { m_parent = node; }
     virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const { return NT_ELEMENT; }
     virtual std::string  print(const int& indent = 0) const;
-
-    // Methods
-    std::string  name(void) const { return m_name; }
-    std::string  attribute(const std::string& name) const;
-    GXmlNode*    parent(void) const { return m_parent; }
-    void         name(const std::string& name) { m_name=name; }
-    void         parent(GXmlNode* node) { m_parent = node; }
-    void         attribute(const std::string& name, const std::string& value);
 
 protected:
     // Protected methods
@@ -82,9 +80,9 @@ protected:
     void parse_attribute(size_t* pos, const std::string& segment);
 
     // Protected data members
-    std::string                 m_name;       //!< Element name
-    GXmlNode*                   m_parent;     //!< Pointer on parent node
-    std::vector<GXmlAttribute*> m_attr;       //!< Attributes
+    std::string                 m_name;     //!< Element name
+    GXmlNode*                   m_parent;   //!< Pointer on parent node
+    std::vector<GXmlAttribute*> m_attr;     //!< Attributes
 };
 
 #endif /* GXMLELEMENT_HPP */
