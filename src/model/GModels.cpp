@@ -164,7 +164,7 @@ GModels& GModels::operator= (const GModels& models)
 /***********************************************************************//**
  * @brief Return pointer to model
  *
- * @param[in] index Model index (0,...,size()-1).
+ * @param[in] index Model index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -188,7 +188,7 @@ GModel* GModels::operator[](const int& index)
 /***********************************************************************//**
  * @brief Return pointer to model (const version)
  *
- * @param[in] index Model index (0,...,size()-1).
+ * @param[in] index Model index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
@@ -322,7 +322,7 @@ void GModels::append(const GModel& model)
 /***********************************************************************//**
  * @brief Insert model into container
  *
- * @param[in] index Model index (0,...,size()-1).
+ * @param[in] index Model index [0,...,size()-1].
  * @param[in] model Model.
  *
  * @exception GException::out_of_range
@@ -394,7 +394,7 @@ void GModels::insert(const std::string& name, const GModel& model)
 /***********************************************************************//**
  * @brief Remove model from container
  *
- * @param[in] index Model index (0,...,size()-1).
+ * @param[in] index Model index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
