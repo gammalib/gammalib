@@ -43,7 +43,7 @@ public:
     GUrlFile(const GUrlFile& url);
     virtual ~GUrlFile(void);
 
-    // Pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void      clear(void);
     virtual GUrlFile* clone(void) const;
     virtual void      open(const std::string& url, const std::string& mode);
