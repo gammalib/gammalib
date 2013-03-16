@@ -256,9 +256,6 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
     // Initialise value
     double value = 0.0;
 
-    // Initialise scaling factor
-    double scale = 1.0;
-
     // Get bin index
     int index = bin->index();
 
@@ -267,6 +264,9 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
     
     // Continue only if bin size is positive
     if (size > 0.0) {
+
+        // Initialise scaling factor
+        double scale = 1.0;
 
         // Get DRB model value
         value = observation->drb().pixels()[index] / size;
@@ -297,19 +297,19 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
         // Compute background value
         value *= scale;
 
-    } // endif: binsize was positive
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(value) || isinfinite(value)) {
+            std::cout << "*** ERROR: GCOMModelDRBFitting::eval";
+            std::cout << "(index=" << index << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (value=" << value;
+            std::cout << ", scale=" << scale;
+            std::cout << ")" << std::endl;
+        }
+        #endif
 
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
-        std::cout << "*** ERROR: GCOMModelDRBFitting::eval";
-        std::cout << "(index=" << index << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", scale=" << scale;
-        std::cout << ")" << std::endl;
-    }
-    #endif
+    } // endif: binsize was positive
 
     // Return
     return value;
@@ -352,9 +352,6 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
         const_cast<GCOMModelDRBFitting*>(this)->m_values[i].gradient(0.0);
     }
 
-    // Initialise scaling factor
-    double scale = 1.0;
-
     // Get bin index
     int index = bin->index();
 
@@ -363,6 +360,9 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
     
     // Continue only if bin size is positive
     if (size > 0.0) {
+
+        // Initialise scaling factor
+        double scale = 1.0;
 
         // Get DRB model value
         value = observation->drb().pixels()[index] / size;
@@ -421,19 +421,19 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
         // Compute background value
         value *= scale;
 
-    } // endif: binsize was positive
+        // Compile option: Check for NaN/Inf
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(value) || isinfinite(value)) {
+            std::cout << "*** ERROR: GCOMModelDRBFitting::eval_gradients";
+            std::cout << "(index=" << index << "):";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (value=" << value;
+            std::cout << ", scale=" << scale;
+            std::cout << ")" << std::endl;
+        }
+        #endif
 
-    // Compile option: Check for NaN/Inf
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
-        std::cout << "*** ERROR: GCOMModelDRBFitting::eval_gradients";
-        std::cout << "(index=" << index << "):";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (value=" << value;
-        std::cout << ", scale=" << scale;
-        std::cout << ")" << std::endl;
-    }
-    #endif
+    } // endif: binsize was positive
 
     // Return
     return value;
