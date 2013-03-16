@@ -356,6 +356,7 @@ void TestGCOMObservation::test_event_bin(void)
 
         // size method
         test_value(bin.size(), 0.0, 1.0e-10, "Test size() method.");
+        test_value(bin4->size(), 0.0, 1.0e-10, "Test size() method.");
 
         // dir method
         GCOMInstDir dir = bin.dir();
@@ -379,6 +380,7 @@ void TestGCOMObservation::test_event_bin(void)
 
         // print method
         std::string text = bin.print();
+        test_assert(text == "1", "Test print() method.");
 
         // omega method
         test_value(bin.omega(), 0.0, 1.0e-10, "Test omega() method.");
