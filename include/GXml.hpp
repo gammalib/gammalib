@@ -192,10 +192,10 @@ public:
     GXml*              clone(void) const;
     int                size(void) const { return m_root.size(); }
     bool               isempty(void) const { return m_root.isempty(); }
-    void               set(const int& index, const GXmlNode& node);
-    void               append(const GXmlNode& node);
+    GXmlNode*          set(const int& index, const GXmlNode& node);
+    GXmlNode*          append(const GXmlNode& node);
     GXmlElement*       append(const std::string& segment);
-    void               insert(const int& index, const GXmlNode& node);
+    GXmlNode*          insert(const int& index, const GXmlNode& node);
     void               remove(const int& index);
     void               reserve(const int& num);
     void               extend(const GXmlNode& node);

@@ -83,10 +83,10 @@ public:
     virtual GXmlNode*          clone(void) const = 0;
     virtual int                size(void) const { return m_nodes.size(); }
     virtual bool               isempty(void) const { return m_nodes.empty(); }
-    virtual void               set(const int& index, const GXmlNode& node);
-    virtual void               append(const GXmlNode& node);
+    virtual GXmlNode*          set(const int& index, const GXmlNode& node);
+    virtual GXmlNode*          append(const GXmlNode& node);
     virtual GXmlElement*       append(const std::string& segment);
-    virtual void               insert(const int& index, const GXmlNode& node);
+    virtual GXmlNode*          insert(const int& index, const GXmlNode& node);
     virtual void               remove(const int& index);
     virtual void               reserve(const int& num) { return m_nodes.reserve(num); }
     virtual void               extend(const GXmlNode& node);

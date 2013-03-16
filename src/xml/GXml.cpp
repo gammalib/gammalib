@@ -238,16 +238,14 @@ GXml* GXml::clone(void) const
  *
  * @param[in] index Child node index [0,...,size()-1].
  * @param[in] node XML child node.
+ * @return Pointer to deep copy of child node.
  *
  * Set @p node with @p index of XML document root.
  ***************************************************************************/
-void GXml::set(const int& index, const GXmlNode& node)
+GXmlNode* GXml::set(const int& index, const GXmlNode& node)
 {
-    // Append node
-    m_root.set(index, node);
-
-    // Return
-    return;
+    // Set node and return pointer
+    return (m_root.set(index, node));
 }
 
 
@@ -255,16 +253,14 @@ void GXml::set(const int& index, const GXmlNode& node)
  * @brief Append child node to XML document root
  *
  * @param[in] node Child node.
+ * @return Pointer to appended child node.
  *
  * Appends node to XML document root by making a deep copy of the @p node.
  ***************************************************************************/
-void GXml::append(const GXmlNode& node)
+GXmlNode* GXml::append(const GXmlNode& node)
 {
-    // Append node
-    m_root.append(node);
-
-    // Return
-    return;
+    // Append node and return pointer
+    return (m_root.append(node));
 }
 
 
@@ -281,8 +277,8 @@ void GXml::append(const GXmlNode& node)
  ***************************************************************************/
 GXmlElement* GXml::append(const std::string& segment)
 {
-    // Append node
-    return m_root.append(segment);
+    // Append node and return pointer
+    return (m_root.append(segment));
 }
 
 
@@ -291,18 +287,16 @@ GXmlElement* GXml::append(const std::string& segment)
  *
  * @param[in] index Child node index [0,...,size()-1].
  * @param[in] node XML child node.
+ * @return Pointer to inserted child node.
  *
  * Inserts the XML child @p node before the node with the specified @p index.
  * A deep copy of the node will be made and the pointer to this node will be
  * stored.
  ***************************************************************************/
-void GXml::insert(const int& index, const GXmlNode& node)
+GXmlNode* GXml::insert(const int& index, const GXmlNode& node)
 {
-    // Insert node
-    m_root.insert(index, node);
-
-    // Return
-    return;
+    // Insert node and return pointer
+    return (m_root.insert(index, node));
 }
 
 

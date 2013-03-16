@@ -192,6 +192,7 @@ const GXmlNode* GXmlNode::operator[](const int& index) const
  *
  * @param[in] index Child node index [0,...,size()-1].
  * @param[in] node XML child node.
+ * @return Pointer to deep copy of child node
  *
  * @exception GException::xml_bad_node_type
  *            Not allowed to append document node.
@@ -201,7 +202,7 @@ const GXmlNode* GXmlNode::operator[](const int& index) const
  * Set XML child node. A deep copy of the node will be made and the pointer
  * to this node will be stored.
  ***************************************************************************/
-void GXmlNode::set(const int& index, const GXmlNode& node)
+GXmlNode* GXmlNode::set(const int& index, const GXmlNode& node)
 {
     // Make sure that node is not a document (only the root document is
     // allowed to exist in a XML document
@@ -223,8 +224,8 @@ void GXmlNode::set(const int& index, const GXmlNode& node)
     // Assign new child node by cloning
     m_nodes[index] = node.clone();
 
-    // Return
-    return;
+    // Return pointer
+    return m_nodes[index];
 }
 
 
@@ -232,6 +233,7 @@ void GXmlNode::set(const int& index, const GXmlNode& node)
  * @brief Append XML child node
  *
  * @param[in] node XML child node.
+ * @return Pointer to appended child node
  *
  * @exception GException::xml_bad_node_type
  *            Not allowed to append document node.
@@ -239,7 +241,7 @@ void GXmlNode::set(const int& index, const GXmlNode& node)
  * Appends XML child node by making a deep copy of the node and storing its
  * pointer.
  ***************************************************************************/
-void GXmlNode::append(const GXmlNode& node)
+GXmlNode* GXmlNode::append(const GXmlNode& node)
 {
     // Make sure that node is not a document (only the root document is
     // allowed to exist in a XML document
@@ -248,11 +250,14 @@ void GXmlNode::append(const GXmlNode& node)
                           "Only the root node is of type GXmlDocument.");
     }
 
-    // Append deep copy of child node
-    m_nodes.push_back(node.clone());
+    // Clone child node
+    GXmlNode* ptr = node.clone();
 
-    // Return
-    return;
+    // Append deep copy of child node
+    m_nodes.push_back(ptr);
+
+    // Return pointer
+    return ptr;
 }
 
 
@@ -260,6 +265,7 @@ void GXmlNode::append(const GXmlNode& node)
  * @brief Append XML element child node
  *
  * @param[in] segment XML child node.
+ * @return Pointer to appended child node
  *
  * Appends XML element that is constructed from a text @p segment. The text
  * segment is parsed and the element name and attributes are extracted using
@@ -284,6 +290,7 @@ GXmlElement* GXmlNode::append(const std::string& segment)
  *
  * @param[in] index Child node index [0,...,size()-1].
  * @param[in] node XML child node.
+ * @return Pointer to inserted child node
  *
  * @exception GException::xml_bad_node_type
  *            Not allowed to append document node.
@@ -294,7 +301,7 @@ GXmlElement* GXmlNode::append(const std::string& segment)
  * A deep copy of the node will be made and the pointer to this node will be
  * stored.
  ***************************************************************************/
-void GXmlNode::insert(const int& index, const GXmlNode& node)
+GXmlNode* GXmlNode::insert(const int& index, const GXmlNode& node)
 {
     // Make sure that node is not a document (only the root document is
     // allowed to exist in a XML document
@@ -317,11 +324,14 @@ void GXmlNode::insert(const int& index, const GXmlNode& node)
     }
     #endif
 
-    // Inserts deep copy of child node
-    m_nodes.insert(m_nodes.begin()+index, node.clone());
+    // Clone child node
+    GXmlNode* ptr = node.clone();
 
-    // Return
-    return;
+    // Inserts deep copy of child node
+    m_nodes.insert(m_nodes.begin()+index, ptr);
+
+    // Return pointer
+    return ptr;
 }
 
 
