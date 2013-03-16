@@ -295,10 +295,8 @@ double GRan::exp(const double& lambda)
  ***************************************************************************/
 double GRan::poisson(const double& lambda)
 {
-    // Declare variables
+    // Declare result
     double em;
-    double t;
-    double y;
 
     // Use direct method for small numbers ...
     if (lambda < 12.0) {
@@ -306,8 +304,8 @@ double GRan::poisson(const double& lambda)
             m_oldm = lambda;
             m_g    = std::exp(-lambda);
         }
-        em = -1.0;
-        t  =  1.0;
+        em       = -1.0;
+        double t =  1.0;
         do {
             em += 1.0;
             t  *= uniform();
@@ -316,6 +314,7 @@ double GRan::poisson(const double& lambda)
 
     // ... otherwise use rejection method        
     else {
+        double t;
         if (lambda != m_oldm) {
             m_oldm = lambda;
             m_sq   = std::sqrt(2.0*lambda);
@@ -323,6 +322,7 @@ double GRan::poisson(const double& lambda)
             m_g    = lambda * m_alxm - gammln(lambda+1.0);
         }
         do {
+            double y;
             do {
                 y  = std::tan(pi * uniform());
                 em = m_sq * y + lambda;

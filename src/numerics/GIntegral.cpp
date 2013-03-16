@@ -194,13 +194,15 @@ GIntegral* GIntegral::clone(void) const
 double GIntegral::romb(double a, double b, int k)
 {
     // Initialise result
-    bool   converged = false;
-    double result    = 0.0;
-    double ss        = 0.0;
-    double dss       = 0.0;
+    double result = 0.0;
     
     // Continue only if integration range is valid
     if (b > a) {
+
+        // Initialise variables
+        bool   converged = false;
+        double ss        = 0.0;
+        double dss       = 0.0;
 
         // Allocate temporal storage
         double* s = new double[m_max_iter+2];
