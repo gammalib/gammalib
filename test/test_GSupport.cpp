@@ -359,7 +359,7 @@ void TestGSupport::test_url_file(void)
     // Test file reading using scanf() method
     result.clear();
     url.open("test_url.dat", "r");
-    url.scanf("%s", buffer);
+    url.scanf("%99s", buffer);
     result = std::string(buffer, 21);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
@@ -432,7 +432,7 @@ void TestGSupport::test_url_string(void)
     char buffer2[100];
     result.clear();
     url.rewind();
-    url.scanf("%s", buffer2);
+    url.scanf("%99s", buffer2);
     result = std::string(buffer2, 21);
     test_assert(result.compare("abcdefghijklm419.9xyz") == 0,
                 "Expected \"abcdefghijklm419.9xyz\" in file, found \""+
