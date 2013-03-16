@@ -503,7 +503,7 @@ void TestGSky::test_GSkymap_healpix_io(void)
 {
     // Set filenames
     const std::string file1 = "test_skymap_hpx_1.fits";
-    const std::string file2 = "test_skymap_hpx_2.fits";
+    //const std::string file2 = "test_skymap_hpx_2.fits";
 
     // Define Healpix map for comparison
     GSkymap refmap("HPX", "GAL", 4, "RING", 1);
