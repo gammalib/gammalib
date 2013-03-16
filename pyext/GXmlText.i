@@ -43,15 +43,15 @@ public:
     explicit GXmlText(const std::string& text);
     virtual ~GXmlText(void);
 
-    // Implemented virtual methods
+    // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GXmlText*   clone(void) const;
     virtual void        write(GUrl& url, const int& indent = 0) const;
     virtual NodeType    type(void) const;
 
     // Other methods
-    const std::string& text(void) const;
-    void               text(const std::string& text);
+    const std::string&  text(void) const;
+    void                text(const std::string& text);
 };
 
 

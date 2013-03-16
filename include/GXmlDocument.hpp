@@ -53,7 +53,7 @@ public:
     // Operators
     GXmlDocument& operator= (const GXmlDocument& node);
 
-    // Implemented virtual methods
+    // Implemented pure virtual base class methods
     void          clear(void);
     GXmlDocument* clone(void) const;
     void          write(GUrl& url, const int& indent = 0) const;
@@ -61,12 +61,12 @@ public:
     std::string   print(const int& indent = 0) const;
 
     // Methods
-    std::string version(void) const { return m_version.value(); }
-    std::string encoding(void) const { return m_encoding.value(); }
-    std::string standalone(void) const { return m_standalone.value(); }
-    void        version(const std::string& version) { m_version.value(version); }
-    void        encoding(const std::string& encoding) { m_encoding.value(encoding); }
-    void        standalone(const std::string& standalone) { m_standalone.value(standalone); }
+    std::string   version(void) const { return m_version.value(); }
+    std::string   encoding(void) const { return m_encoding.value(); }
+    std::string   standalone(void) const { return m_standalone.value(); }
+    void          version(const std::string& version) { m_version.value(version); }
+    void          encoding(const std::string& encoding) { m_encoding.value(encoding); }
+    void          standalone(const std::string& standalone) { m_standalone.value(standalone); }
 
 protected:
     // Protected methods

@@ -43,11 +43,15 @@ public:
     explicit GXmlPI(const std::string& segment);
     virtual ~GXmlPI(void);
 
-    // Implemented virtual methods
-    virtual void        clear(void);
-    virtual GXmlPI*     clone(void) const;
-    virtual void        write(GUrl& url, const int& indent = 0) const;
-    virtual NodeType    type(void) const;
+    // Implemented pure virtual base class methods
+    virtual void       clear(void);
+    virtual GXmlPI*    clone(void) const;
+    virtual void       write(GUrl& url, const int& indent = 0) const;
+    virtual NodeType   type(void) const;
+
+    // Other methods
+    const std::string& pi(void) const;
+    void               pi(const std::string& pi);
 };
 
 

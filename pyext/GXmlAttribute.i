@@ -44,13 +44,13 @@ public:
     virtual ~GXmlAttribute(void);
 
     // Methods
-    void           clear(void);
-    GXmlAttribute* clone(void) const;
-    void           write(GUrl& url) const;
-    std::string    name(void) const;
-    std::string    value(void) const;
-    void           name(const std::string& name);
-    void           value(std::string value);
+    void               clear(void);
+    GXmlAttribute*     clone(void) const;
+    void               write(GUrl& url) const;
+    const std::string& name(void) const;
+    std::string        value(void) const;
+    void               name(const std::string& name);
+    void               value(std::string value);
 };
 
 

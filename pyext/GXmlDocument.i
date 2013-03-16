@@ -42,19 +42,19 @@ public:
     GXmlDocument(const GXmlDocument& node);
     virtual ~GXmlDocument(void);
 
-    // Implemented virtual methods
+    // Implemented pure virtual base class methods
     void          clear(void);
     GXmlDocument* clone(void) const;
     void          write(GUrl& url, const int& indent = 0) const;
     NodeType      type(void) const;
 
     // Methods
-    std::string version(void) const;
-    std::string encoding(void) const;
-    std::string standalone(void) const;
-    void        version(const std::string& version);
-    void        encoding(const std::string& encoding);
-    void        standalone(const std::string& standalone);
+    std::string   version(void) const;
+    std::string   encoding(void) const;
+    std::string   standalone(void) const;
+    void          version(const std::string& version);
+    void          encoding(const std::string& encoding);
+    void          standalone(const std::string& standalone);
 };
 
 

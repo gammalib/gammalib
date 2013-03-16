@@ -52,7 +52,7 @@ public:
     // Operators
     GXmlPI& operator=(const GXmlPI& node);
 
-    // Implemented virtual methods
+    // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GXmlPI*     clone(void) const;
     virtual void        write(GUrl& url, const int& indent = 0) const;
@@ -60,8 +60,8 @@ public:
     virtual std::string print(const int& indent = 0) const;
 
     // Other methods
-    const std::string& pi(void) const { return m_pi; }
-    void               pi(const std::string& pi) { m_pi=pi; }
+    const std::string&  pi(void) const { return m_pi; }
+    void                pi(const std::string& pi) { m_pi=pi; }
 
 protected:
     // Protected methods

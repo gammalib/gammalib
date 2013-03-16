@@ -60,7 +60,7 @@ public:
     // Methods
     virtual void         clear(void);
     virtual GXmlElement* clone(void) const;
-    std::string          name(void) const { return m_name; }
+    const std::string&   name(void) const { return m_name; }
     void                 name(const std::string& name) { m_name=name; }
     std::string          attribute(const std::string& name) const;
     void                 attribute(const std::string& name, const std::string& value);

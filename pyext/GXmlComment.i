@@ -43,7 +43,7 @@ public:
     explicit GXmlComment(const std::string& segment);
     virtual ~GXmlComment(void);
 
-    // Implemented virtual methods
+    // Implemented pure virtual base class methods
     virtual void         clear(void);
     virtual GXmlComment* clone(void) const;
     virtual void         write(GUrl& url, const int& indent = 0) const;

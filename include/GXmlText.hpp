@@ -60,8 +60,8 @@ public:
     virtual std::string print(const int& indent = 0) const;
 
     // Other methods
-    const std::string& text(void) const { return m_text; }
-    void               text(const std::string& text) { m_text=text; }
+    const std::string&  text(void) const { return m_text; }
+    void                text(const std::string& text) { m_text=text; }
 
 protected:
     // Protected methods

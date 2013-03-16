@@ -55,14 +55,14 @@ public:
     GXmlAttribute& operator=(const GXmlAttribute& attr);
 
     // Methods
-    void           clear(void);
-    GXmlAttribute* clone(void) const;
-    void           write(GUrl& url) const;
-    std::string    name(void) const { return m_name; }
-    std::string    value(void) const;
-    void           name(const std::string& name) { m_name=name; }
-    void           value(std::string value);
-    std::string    print(void) const;
+    void               clear(void);
+    GXmlAttribute*     clone(void) const;
+    void               write(GUrl& url) const;
+    const std::string& name(void) const { return m_name; }
+    std::string        value(void) const;
+    void               name(const std::string& name) { m_name=name; }
+    void               value(std::string value);
+    std::string        print(void) const;
 
 protected:
     // Protected methods
@@ -71,8 +71,8 @@ protected:
     void free_members(void);
 
     // Protected data members
-    std::string m_name;       //!< Attribute name
-    std::string m_value;      //!< Attribute value
+    std::string m_name;     //!< Attribute name
+    std::string m_value;    //!< Attribute value
 };
 
 #endif /* GXMLATTRIBUTE_HPP */

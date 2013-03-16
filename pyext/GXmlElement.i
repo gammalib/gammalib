@@ -43,19 +43,17 @@ public:
     explicit GXmlElement(const std::string& segment);
     virtual ~GXmlElement(void);
 
-    // Implemented virtual methods
+    // Methods
     virtual void         clear(void);
     virtual GXmlElement* clone(void) const;
+    const std::string&   name(void) const;
+    void                 name(const std::string& name);
+    std::string          attribute(const std::string& name) const;
+    void                 attribute(const std::string& name, const std::string& value);
+    GXmlNode*            parent(void) const;
+    void                 parent(GXmlNode* node);
     virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const;
-
-    // Methods
-    std::string name(void) const;
-    std::string attribute(const std::string& name) const;
-    GXmlNode*   parent(void) const;
-    void        name(const std::string& name);
-    void        parent(GXmlNode* node);
-    void        attribute(const std::string& name, const std::string& value);
 };
 
 
