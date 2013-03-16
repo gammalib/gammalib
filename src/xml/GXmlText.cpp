@@ -188,15 +188,12 @@ GXmlText* GXmlText::clone(void) const
  * @brief Write XML text into URL
  *
  * @param[in] url Unified Resource Locator.
- * @param[in] indent Text indentation (default = 0).
+ * @param[in] indent Text indentation (parameter ignored).
+ *
+ * Writes the text into the URL.
  ***************************************************************************/
 void GXmlText::write(GUrl& url, const int& indent) const
 {
-    // Prepend indentation
-    for (int k = 0; k < indent; ++k) {
-        url.printf(" ");
-    }
-
     // Write text
     url.printf("%s", m_text.c_str());
 
