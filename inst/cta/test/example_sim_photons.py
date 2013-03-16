@@ -19,7 +19,7 @@ def simulate(xmlname, e_min, e_max, area, duration):
     Simulate CTA observation.
     """
     # Allocate MC parameters
-    dir = GSkyDir()
+    dir  = GSkyDir()
     emin = GEnergy()
     emax = GEnergy()
     tmin = GTime(0.0)
@@ -66,12 +66,7 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
         plt.title("MC simulated photon spectrum (" + str(e_min) + '-' + str(e_max) + " TeV)")
 
         # Setup energy range covered by data
-        emin = GEnergy()
-        emax = GEnergy()
-        emin.TeV(e_min)
-        emax.TeV(e_max)
-        ebds = GEbounds()
-        ebds.setlog(emin, emax, ebins)
+        ebds = GEbounds(ebins, GEnergy(e_min, "TeV"), GEnergy(e_max, "TeV"))
 
         # Create energy axis
         energy = []

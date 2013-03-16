@@ -2,7 +2,7 @@
 # ==========================================================================
 # This script tests the model computations using the CTA response function.
 #
-# Copyright (C) 2011-2012 Jurgen Knodlseder
+# Copyright (C) 2011-2013 Jurgen Knodlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -160,18 +160,13 @@ def observation(ra=0.0, dec=0.0, emin=0.1, emax=100.0,
     obs.pointing(pnt)
 
     # Set
-    ebounds = GEbounds()
-    e_min = GEnergy()
-    e_max = GEnergy()
-    e_min.TeV(emin)
-    e_max.TeV(emax)
-    ebounds.setlog(e_min, e_max, ebins)
-    gti = GGti()
-    tmin = GTime(0.0)
-    tmax = GTime(duration)
+    ebounds = GEbounds(ebins, GEnergy(emin, "TeV"), GEnergy(emax, "TeV"))
+    gti     = GGti()
+    tmin    = GTime(0.0)
+    tmax    = GTime(duration)
     gti.append(tmin, tmax)
-    map = GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
-    cube = GCTAEventCube(map, ebounds, gti)
+    map     = GSkymap("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, ebins)
+    cube    = GCTAEventCube(map, ebounds, gti)
     obs.events(cube)
 
     # Set ontime, livetime, and deadtime correction factor
@@ -180,7 +175,7 @@ def observation(ra=0.0, dec=0.0, emin=0.1, emax=100.0,
     obs.deadc(deadc)
 
     # Optionally show observation
-    # print obs
+    # print(obs)
 
     # Return observation
     return obs
@@ -219,7 +214,7 @@ def test_grad(model, ra=0.0, dec=0.0, filename="gradmap.fits", ipar=2):
     Test gradient computation.
     """
     # Print model
-    print model
+    print(model)
 
     # Set CTA observation
     obs = observation(ra=ra, dec=dec, npix=npix)
