@@ -102,9 +102,9 @@ public:
     GObservations* clone(void) const;
     int            size(void) const { return m_obs.size(); }
     bool           isempty(void) const { return m_obs.empty(); }
-    void           set(const int& index, const GObservation& obs);
-    void           append(const GObservation& obs);
-    void           insert(const int& index, const GObservation& obs);
+    GObservation*  set(const int& index, const GObservation& obs);
+    GObservation*  append(const GObservation& obs);
+    GObservation*  insert(const int& index, const GObservation& obs);
     void           remove(const int& index);
     void           reserve(const int& num) { return m_obs.reserve(num); }
     void           extend(const GObservations& obs);

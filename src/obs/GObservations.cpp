@@ -239,6 +239,7 @@ GObservations* GObservations::clone(void) const
  *
  * @param[in] index Observation index [0,...,size()-1].
  * @param[in] obs Observation.
+ * @return Pointer to deep copy of observation.
  *
  * @exception GException::out_of_range
  *            Observation index is out of range.
@@ -246,7 +247,7 @@ GObservations* GObservations::clone(void) const
  * Set a deep copy and observation @p obs at the specified @p index in the
  * container.
  ***************************************************************************/
-void GObservations::set(const int& index, const GObservation& obs)
+GObservation* GObservations::set(const int& index, const GObservation& obs)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -261,8 +262,8 @@ void GObservations::set(const int& index, const GObservation& obs)
     // Store pointer to a deep copy of the observation
     m_obs[index] = obs.clone();
 
-    // Return
-    return;
+    // Return pointer
+    return m_obs[index];
 }
 
 
@@ -270,16 +271,20 @@ void GObservations::set(const int& index, const GObservation& obs)
  * @brief Append observation to container
  *
  * @param[in] obs Observation.
+ * @return Pointer to deep copy of observation.
  *
  * Appends a deep copy of an observation to the container.
  ***************************************************************************/
-void GObservations::append(const GObservation& obs)
+GObservation* GObservations::append(const GObservation& obs)
 {
-    // Clone observation and append to list
-    m_obs.push_back(obs.clone());
+    // Clone observation
+    GObservation* ptr = obs.clone();
+    
+    // Append to list
+    m_obs.push_back(ptr);
 
-    // Return
-    return;
+    // Return pointer
+    return ptr;
 }
 
 
@@ -288,6 +293,7 @@ void GObservations::append(const GObservation& obs)
  *
  * @param[in] index Observation index (0,...,size()-1).
  * @param[in] obs Observation.
+ * @return Pointer to deep copy of observation.
  *
  * @exception GException::out_of_range
  *            Observation index is out of range.
@@ -295,7 +301,7 @@ void GObservations::append(const GObservation& obs)
  * Inserts a deep copy of an observation into the container before the
  * observation with the specified @p index.
  ***************************************************************************/
-void GObservations::insert(const int& index, const GObservation& obs)
+GObservation* GObservations::insert(const int& index, const GObservation& obs)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -311,11 +317,14 @@ void GObservations::insert(const int& index, const GObservation& obs)
     }
     #endif
 
-    // Clone observation and insert into list
-    m_obs.insert(m_obs.begin()+index, obs.clone());
+    // Clone observation
+    GObservation* ptr = obs.clone();
 
-    // Return
-    return;
+    // Clone observation and insert into list
+    m_obs.insert(m_obs.begin()+index, ptr);
+
+    // Return pointer
+    return ptr;
 }
 
 
