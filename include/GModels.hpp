@@ -82,11 +82,11 @@ public:
     GModels*      clone(void) const;
     int           size(void) const { return m_models.size(); }
     bool          isempty(void) const { return m_models.empty(); }
-    void          set(const int& index, const GModel& model);
-    void          set(const std::string& name, const GModel& model);
-    void          append(const GModel& model);
-    void          insert(const int& index, const GModel& model);
-    void          insert(const std::string& name, const GModel& model);
+    GModel*       set(const int& index, const GModel& model);
+    GModel*       set(const std::string& name, const GModel& model);
+    GModel*       append(const GModel& model);
+    GModel*       insert(const int& index, const GModel& model);
+    GModel*       insert(const std::string& name, const GModel& model);
     void          remove(const int& index);
     void          remove(const std::string& name);
     void          reserve(const int& num) { return m_models.reserve(num); }
