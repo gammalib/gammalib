@@ -898,7 +898,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
     }
 
     // Get event attributes
-    const GSkyDir& obsDir = dir->dir();
+    //const GSkyDir& obsDir = dir->dir();
     const GEnergy& obsEng = event.energy();
 
     // Get source attributes
@@ -1229,7 +1229,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
     }
 
     // Get event attributes
-    const GSkyDir& obsDir = dir->dir();
+    //const GSkyDir& obsDir = dir->dir();
     const GEnergy& obsEng = event.energy();
 
     // Get source attributes
