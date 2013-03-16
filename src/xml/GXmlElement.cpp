@@ -222,20 +222,40 @@ void GXmlElement::write(GUrl& url, const int& indent) const
 
     // ... otherwise finish start tag, write children and write end tag
     else {
-        // Finish start tag
-        url.printf(">\n");
 
-        // Write children in file
-        for (int i = 0; i < m_nodes.size(); ++i) {
-            m_nodes[i]->write(url, indent+g_indent);
-        }
+        // Case A: The element contains a single text leaf
+        if ((m_nodes.size() == 1) && (m_nodes[0]->type() == NT_TEXT)) {
 
-        // Write end tag
-        for (int k = 0; k < indent; ++k) {
-            url.printf(" ");
+            // Finish start tag
+            url.printf(">");
+
+            // Write text leaf
+            m_nodes[0]->write(url, 0);
+
+            // Write end tag
+            url.printf("</%s>\n", m_name.c_str());
         }
-        url.printf("</%s>\n", m_name.c_str());
-    }
+        
+        // Case B: ... otherwise it contains markup
+        else {
+
+            // Finish start tag
+            url.printf(">\n");
+
+            // Write children in file
+            for (int i = 0; i < m_nodes.size(); ++i) {
+                m_nodes[i]->write(url, indent+g_indent);
+            }
+
+            // Write end tag
+            for (int k = 0; k < indent; ++k) {
+                url.printf(" ");
+            }
+            url.printf("</%s>\n", m_name.c_str());
+        
+        } // endelse: element contained markup
+        
+    } // endelse: finished start tag
 
     // Return
     return;
