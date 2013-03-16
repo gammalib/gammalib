@@ -312,11 +312,10 @@ void TestGFits::set(void)
 void TestGFits::test_create(void)
 {
     // Remove FITS file
-    int rc = 0;
-    rc = system("rm -rf test_empty.fits");
-    rc = system("rm -rf test_empty_image.fits");
-    rc = system("rm -rf test.fits");
-    rc = system("rm -rf test_create_bintable.fits");
+    system("rm -rf test_empty.fits");
+    system("rm -rf test_empty_image.fits");
+    system("rm -rf test.fits");
+    system("rm -rf test_create_bintable.fits");
 
     // Create empty FITS file
     test_try("Create empty FITS file");
@@ -886,7 +885,7 @@ void TestGFits::test_bintable_double(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -936,7 +935,7 @@ void TestGFits::test_bintable_float(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -987,7 +986,7 @@ void TestGFits::test_bintable_short(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -1038,7 +1037,7 @@ void TestGFits::test_bintable_short(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -1089,7 +1088,7 @@ void TestGFits::test_bintable_long(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -1140,7 +1139,7 @@ void TestGFits::test_bintable_longlong(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -1191,7 +1190,7 @@ void TestGFits::test_bintable_ulong(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -1242,7 +1241,7 @@ void TestGFits::test_bintable_string(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -1293,7 +1292,7 @@ void TestGFits::test_bintable_logical(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
@@ -1344,7 +1343,7 @@ void TestGFits::test_bintable_bit(void)
 
     // Remove FITS file
     std::string cmd = "rm -rf "+ filename;
-    int rc = system(cmd.c_str());
+    system(cmd.c_str());
 
     // Set number of rows and vector columns
     int nrows = 3;
