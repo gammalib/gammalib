@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpatial.hpp  -  Spatial model abstract base class         *
+ *          GModelSpatial.hpp - Spatial model abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpatial.hpp
  * @brief Abstract spatial model base class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSPATIAL_HPP
@@ -73,7 +73,8 @@ public:
     virtual std::string    print(void) const = 0;
 
     // Methods
-    int size(void) const { return m_pars.size(); }
+    int  size(void) const;
+    void autoscale(void);
 
 protected:
     // Protected methods

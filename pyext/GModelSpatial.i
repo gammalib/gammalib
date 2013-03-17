@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GModelSpatial.i  -  Spatial model abstract base class         *
+ *            GModelSpatial.i - Spatial model abstract base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelSpatial.i
- * @brief Abstract spatial model base class Python interface
- * @author J. Knodlseder
+ * @brief Abstract spatial model base class interface
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -51,6 +51,10 @@ public:
     virtual GSkyDir        mc(GRan& ran) const = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
+
+    // Methods
+    int  size(void) const;
+    void autoscale(void);
 };
 
 
@@ -62,10 +66,12 @@ public:
         return tochar(self->print());
     }
     GModelPar& __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     GModelPar& __getitem__(const std::string& name) {
         return (*self)[name];
@@ -75,8 +81,9 @@ public:
             (*self)[index] = val;
             return;
         }
-        else
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
     void __setitem__(const std::string& name, const GModelPar& val) {
         (*self)[name] = val;

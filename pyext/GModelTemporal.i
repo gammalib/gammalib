@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelTemporal.i  -  Abstract temporal model base class         *
+ *          GModelTemporal.i - Abstract temporal model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelTemporal.i
- * @brief Abstract temporal model base class Python interface definition
- * @author J. Knodlseder
+ * @brief Abstract temporal model base class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -55,7 +55,8 @@ public:
     virtual void            write(GXmlElement& xml) const = 0;
 
     // Methods
-    int size(void) const { return m_pars.size(); }
+    int  size(void) const;
+    void autoscale(void);
 };
 
 

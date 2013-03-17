@@ -76,7 +76,8 @@ public:
     virtual std::string     print(void) const = 0;
 
     // Methods
-    int size(void) const { return m_pars.size(); }
+    int  size(void) const;
+    void autoscale(void);
     
 protected:
     // Protected methods

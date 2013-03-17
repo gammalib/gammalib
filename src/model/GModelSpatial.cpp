@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpatial.cpp  -  Abstract spatial model base class         *
+ *          GModelSpatial.cpp - Abstract spatial model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -223,6 +223,40 @@ const GModelPar& GModelSpatial::operator[](const std::string& name) const
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return number of parameters
+ *
+ * @return Number of parameters in spatial model component.
+ *
+ * Returns the number of parameters in the spatial model component.
+ ***************************************************************************/
+int GModelSpatial::size(void) const
+{
+    // Return number of parameters
+    return (m_pars.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Autoscale parameters
+ *
+ * Sets the scale factors for all parameters so that the values are unity.
+ ***************************************************************************/
+void GModelSpatial::autoscale(void)
+{
+    // Loop over all parameters
+    for (int i = 0; i < m_pars.size(); ++i) {
+        if (m_pars[i] != NULL) {
+            m_pars[i]->autoscale();
+        }
+    }
+
+    // Return
+    return;
+}
+
+
 
 /*==========================================================================
  =                                                                         =
