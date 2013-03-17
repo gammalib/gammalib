@@ -5,6 +5,7 @@ depcomp
 pyext/build/
 .libs
 .deps
+inst/spi/test/data/*.xml
 
 # Generated files
 pyext/gammalib/*.py
@@ -19,9 +20,7 @@ m4/lt~obsolete.m4
 *.o
 *.lo
 *.la
-*.fits
 *.log
-*.xml
 *.aux
 *.pdf
 *.toc
@@ -34,6 +33,7 @@ m4/lt~obsolete.m4
 .DS_Store
 .libs
 .deps
+*.fits
 Makefile
 stamp-h1
 Makefile.in
@@ -56,6 +56,9 @@ configure
 src/gammalib-setup
 doc/Doxyfile.bak
 test/test_url.dat
+test/*.xml
+test/reports/*.xml
+examples/python/*.xml
 
 # Binaries
 test/test_GApplication
