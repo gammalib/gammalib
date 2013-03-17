@@ -6,11 +6,11 @@
 #   with GammaLib
 #
 # Usage
-#   ./xml_create.py
+#   ./xml_howto.py
 #
 # -------------------------------------------------------------------------
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2013 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ from math import *
 # =================== #
 def create_xml():
     """
-    Create XML document example.
+    Illustrates the creation of an XML document.
     
     This function creates a simple XML document that illustrates how an
     XML document can be constructed with GammaLib. In this example, the
@@ -90,7 +90,7 @@ def create_xml():
 # ======================= #
 def manipulate_xml(xml):
     """
-    Example for manipulating an XML document.
+    Illustrates the manipulation of an XML document.
     
     This function illustrates the manipulation of an XML document by
     using the remove(), insert(), set() and extend() methods.
@@ -187,6 +187,23 @@ def manipulate_xml(xml):
     return xml
 
 
+# ================ #
+# XML document I/O #
+# ================ #
+def xml_io(xml):
+    """
+    Illustrates input/output for an XML document.
+    """
+    # Save the XML document into a file
+    xml.save("xml_howto.xml")
+
+    # Reload the XML document
+    xml.load("xml_howto.xml")
+    
+    # Return
+    return xml
+
+
 # ================= #
 # Show XML document #
 # ================= #
@@ -235,5 +252,13 @@ if __name__ == '__main__':
     # Show XML document
     print("2. manipulate_xml() output")
     print("==========================")
+    show_xml(xml)
+    
+    # Perform I/O
+    xml = xml_io(xml)
+    
+    # Show XML document
+    print("3. xml_io() output")
+    print("==================")
     show_xml(xml)
     
