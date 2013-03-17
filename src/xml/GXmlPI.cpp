@@ -82,7 +82,9 @@ GXmlPI::GXmlPI(const GXmlPI& node) : GXmlNode(node)
 /***********************************************************************//**
  * @brief Segment constructor
  *
- * @param[in] segment Text for instance building.
+ * @param[in] segment Text segment.
+ *
+ * Constructs a Processing Instruction from a text @p segment.
  ***************************************************************************/
 GXmlPI::GXmlPI(const std::string& segment) : GXmlNode()
 {
@@ -189,6 +191,8 @@ GXmlPI* GXmlPI::clone(void) const
  *
  * @param[in] url Unified Resource Locator.
  * @param[in] indent Text indentation (default = 0).
+ *
+ * Writes a Processing Instruction into a @p url object.
  ***************************************************************************/
 void GXmlPI::write(GUrl& url, const int& indent) const
 {
@@ -247,7 +251,7 @@ void GXmlPI::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] node Object from which members which should be copied.
+ * @param[in] node Processing Instruction.
  ***************************************************************************/
 void GXmlPI::copy_members(const GXmlPI& node)
 {

@@ -82,7 +82,9 @@ GXmlComment::GXmlComment(const GXmlComment& node) : GXmlNode(node)
 /***********************************************************************//**
  * @brief Segment constructor
  *
- * @param[in] segment Text for instance building.
+ * @param[in] segment Text segement.
+ *
+ * Constructs a comment from the text given in @p segment.
  ***************************************************************************/
 GXmlComment::GXmlComment(const std::string& segment) : GXmlNode()
 {
@@ -189,6 +191,8 @@ GXmlComment* GXmlComment::clone(void) const
  *
  * @param[in] url Unified Resource Locator.
  * @param[in] indent Text indentation (default = 0).
+ *
+ * Writes the XML comment into a @p url object.
  ***************************************************************************/
 void GXmlComment::write(GUrl& url, const int& indent) const
 {

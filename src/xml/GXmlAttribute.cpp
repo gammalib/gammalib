@@ -63,7 +63,7 @@ GXmlAttribute::GXmlAttribute(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] attr XML attribute.
+ * @param[in] attr Element attribute.
  ***************************************************************************/
 GXmlAttribute::GXmlAttribute(const GXmlAttribute& attr)
 {
@@ -84,7 +84,7 @@ GXmlAttribute::GXmlAttribute(const GXmlAttribute& attr)
  * @param[in] name Attribute name.
  * @param[in] value Attribute value.
  *
- * Construct object from attribute name and value.
+ * Construct attribute form a p@ name and a @p value.
  ***************************************************************************/
 GXmlAttribute::GXmlAttribute(const std::string& name, const std::string& value)
 {
@@ -122,8 +122,8 @@ GXmlAttribute::~GXmlAttribute(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] attr XML attribute.
- * @return XML attribute.
+ * @param[in] attr Element attribute.
+ * @return Element attribute.
  ***************************************************************************/
 GXmlAttribute& GXmlAttribute::operator=(const GXmlAttribute& attr)
 {
@@ -153,9 +153,9 @@ GXmlAttribute& GXmlAttribute::operator=(const GXmlAttribute& attr)
  ==========================================================================*/
 
  /***********************************************************************//**
- * @brief Clear XML attribute
+ * @brief Clear element attribute
  *
- * Resets XML attribute to a clean initial state.
+ * Resets element attribute to a clean initial state.
  ***************************************************************************/
 void GXmlAttribute::clear(void)
 {
@@ -171,9 +171,9 @@ void GXmlAttribute::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone XML attribute
+ * @brief Clone element attribute
  *
- * @return Pointer to deep copy of XML attribute
+ * @return Pointer to deep copy of an element attribute.
  ***************************************************************************/
 GXmlAttribute* GXmlAttribute::clone(void) const
 {
@@ -187,7 +187,7 @@ GXmlAttribute* GXmlAttribute::clone(void) const
  *
  * @param[in] url Unified Resource Locator.
  *
- * Writes the XML attribute into the @p url object.
+ * Writes the element attribute into the @p url.
  ***************************************************************************/
 void GXmlAttribute::write(GUrl& url) const
 {
@@ -200,9 +200,9 @@ void GXmlAttribute::write(GUrl& url) const
 
 
 /***********************************************************************//**
- * @brief Print attribute
+ * @brief Print element attribute
  *
- * @return String containing attribute.
+ * @return String containing element attribute.
  ***************************************************************************/
 std::string GXmlAttribute::print(void) const
 {
@@ -219,6 +219,8 @@ std::string GXmlAttribute::print(void) const
 
 /***********************************************************************//**
  * @brief Returns attribute value
+ *
+ * @return String containing the attribute value without hyphens.
  *
  * Returns the attribute value by stripping the hyphens.
  ***************************************************************************/
@@ -246,8 +248,8 @@ std::string GXmlAttribute::value(void) const
  * @exception GException::xml_attribute_value
  *            Invalid XML attribute value.
  *
- * Set attribute value. The method automatically adds the proper hyphens to
- * the value string if they do not exist.
+ * Sets the value of the attribute. The method automatically adds the proper
+ * hyphens to the value string if they do not exist.
  ***************************************************************************/
 void GXmlAttribute::value(std::string value)
 {
@@ -336,7 +338,7 @@ void GXmlAttribute::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] attr XML attribute.
+ * @param[in] attr Element attribute.
  ***************************************************************************/
 void GXmlAttribute::copy_members(const GXmlAttribute& attr)
 {

@@ -39,8 +39,13 @@
  *
  * @brief XML document node class
  *
- * This class implements the root node of an XML document. It contains the
- * three special attributes 'version', 'encoding', and 'standalone'.
+ * This class implements the root node of an XML document. The root node is
+ * a Processing Instruction which contains the following attributes:
+ * - @p version
+ * - @p encoding
+ * - @p standalone
+ *
+ * All three attributes are systematically written.
  ***************************************************************************/
 class GXmlDocument : public GXmlNode {
 
@@ -51,7 +56,7 @@ public:
     virtual ~GXmlDocument(void);
 
     // Operators
-    GXmlDocument& operator= (const GXmlDocument& node);
+    GXmlDocument& operator=(const GXmlDocument& node);
 
     // Implemented pure virtual base class methods
     void          clear(void);

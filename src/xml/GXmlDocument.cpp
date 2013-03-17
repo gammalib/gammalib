@@ -169,6 +169,8 @@ GXmlDocument* GXmlDocument::clone(void) const
  *
  * @param[in] url Unified Resource Locator.
  * @param[in] indent Text indentation (default = 0).
+ *
+ * Writes the XML document into a @p url object.
  ***************************************************************************/
 void GXmlDocument::write(GUrl& url, const int& indent) const
 {

@@ -39,8 +39,17 @@
  * @brief XML attribute class
  *
  * This class implements an attribute of an XML element. An attribute
- * consists of a name-value pair. Note that the hyphens are stored for the
- * attribute value. Allowed hyphens are " and '.
+ * consists of a name-value pair. There can only be one attribute with a
+ * given name. Here an example of an XML element with attributes:
+ *
+ *     <element type="singleton" name="gamma-ray">
+ *
+ * The element has two attributes:
+ * - @p type has a value of "singleton"
+ * - @p name has a value of "gamma-ray"
+ *
+ * The hyphens are stored together with the attribute value. Allowed hyphens
+ * are " and '.
  ***************************************************************************/
 class GXmlAttribute : public GBase {
 
@@ -72,7 +81,7 @@ protected:
 
     // Protected data members
     std::string m_name;     //!< Attribute name
-    std::string m_value;    //!< Attribute value
+    std::string m_value;    //!< Attribute value including hyphens
 };
 
 #endif /* GXMLATTRIBUTE_HPP */
