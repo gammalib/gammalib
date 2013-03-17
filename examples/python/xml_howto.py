@@ -27,7 +27,6 @@
 #
 # ==========================================================================
 from gammalib import *
-from math import *
 
 
 # =================== #
@@ -169,10 +168,14 @@ def manipulate_xml(xml):
     # 'info'. This illustrates the logic of the attribute() method: if the
     # attribute name does not exist the attribute will be added, otherwise
     # it will be modified.
+    #
+    # Finally, the 'case' attribute is removed using the remove_attribute()
+    # method.
     last.name('new3')
     last.attribute('type', 'none')
     last.attribute('case', 'mixed')
     last.attribute('type', 'info')
+    last.remove_attribute('case')
 
     # Now we make again a text replacement, but instead of chaning the
     # text of the last element we change the text of the last element with
@@ -229,7 +232,7 @@ def show_xml(xml):
 # ======================== #
 if __name__ == '__main__':
     """
-    Simulate photons.
+    Example script for creating and handling XML documents.
     """
     # Dump header
     print("")
