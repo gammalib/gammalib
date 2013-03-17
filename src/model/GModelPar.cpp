@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GModelPar.cpp  -  Model parameter class               *
+ *                    GModelPar.cpp - Model parameter class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -49,7 +49,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                     GModelPar constructors/destructors                  =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -71,7 +71,7 @@ GModelPar::GModelPar(void)
  *
  * @param[in] name Parameter name.
  * @param[in] value Parameter value.
- * @param[in] scale Parameter scaling (default: 1.0).
+ * @param[in] scale Parameter scaling (default = 1.0).
  *
  * Constructs a model parameter from parameter name, value and scaling. The
  * real value of the parameter is the specified value times the scaling.
@@ -134,6 +134,7 @@ GModelPar::~GModelPar(void)
  * @brief Assignment operator
  *
  * @param[in] par Model parameter.
+ * @return Model parameter.
  ***************************************************************************/
 GModelPar& GModelPar::operator=(const GModelPar& par)
 { 
@@ -163,8 +164,8 @@ GModelPar& GModelPar::operator=(const GModelPar& par)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
-***************************************************************************/
+ * @brief Clear model parameter
+ ***************************************************************************/
 void GModelPar::clear(void)
 {
     // Free class members
@@ -179,10 +180,13 @@ void GModelPar::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone model parameter
+ *
+ * @return Pointer to deep copy of model parameter.
+ ***************************************************************************/
 GModelPar* GModelPar::clone(void) const
 {
+    // Clone model parameter
     return new GModelPar(*this);
 }
 
@@ -200,9 +204,10 @@ GModelPar* GModelPar::clone(void) const
 void GModelPar::real_value(const double& value)
 {
     // Throw error if scale is 0
-    if (m_scale == 0.0)
+    if (m_scale == 0.0) {
         throw GException::model_invalid_parscale(G_REAL_VALUE, m_scale,
               "Zero scale not allowed for model parameter.");
+    }
     
     // Compute value
     double val = value / m_scale;
@@ -228,9 +233,10 @@ void GModelPar::real_value(const double& value)
 void GModelPar::real_error(const double& error)
 {
     // Throw error if scale is 0
-    if (m_scale == 0.0)
+    if (m_scale == 0.0) {
         throw GException::model_invalid_parscale(G_REAL_ERROR, m_scale,
               "Zero scale not allowed for model parameter.");
+    }
     
     // Compute error
     double err = error / m_scale;
@@ -255,13 +261,15 @@ void GModelPar::value(const double& value)
 {
     // If there is a minimum boundary and if value is below this boundary
     // then throw an error
-    if (m_hasmin && value < m_min)
+    if (m_hasmin && value < m_min) {
         throw GException::out_of_range(G_VALUE, value, m_min, m_max);
+    }
 
     // If there is a maximum boundary and if value is above this boundary
     // then throw an error
-    if (m_hasmax && value > m_max)
+    if (m_hasmax && value > m_max) {
         throw GException::out_of_range(G_VALUE, value, m_min, m_max);
+    }
 
     // Assign value
     m_value = value;
@@ -282,8 +290,9 @@ void GModelPar::value(const double& value)
 void GModelPar::min(const double& min)
 {
     // If minimum is above actual value then throw error
-    if (m_value < min)
+    if (m_value < min) {
         throw GException::out_of_range(G_MIN, m_value, min, m_max);
+    }
 
     // Assign minimum
     m_min = min;
@@ -307,8 +316,9 @@ void GModelPar::min(const double& min)
 void GModelPar::max(const double& max)
 {
     // If maximum is below value then throw error
-    if (m_value > max)
+    if (m_value > max) {
         throw GException::out_of_range(G_MAX, m_value, m_min, max);
+    }
 
     // Assign maximum
     m_max = max;
@@ -334,8 +344,9 @@ void GModelPar::max(const double& max)
 void GModelPar::range(const double& min, const double& max)
 {
     // If maximum is below value then throw error
-    if (m_value < min || m_value > max || min > max)
+    if (m_value < min || m_value > max || min > max) {
         throw GException::out_of_range(G_RANGE, m_value, min, max);
+    }
 
     // Assign range
     m_min = min;
@@ -345,6 +356,46 @@ void GModelPar::range(const double& min, const double& max)
     m_hasmin = true;
     m_hasmax = true;
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Autoscale parameter
+ *
+ * Sets the value to unity and the scale factor to the real value of the
+ * parameter. The method will also adjust the error and the gradient
+ * accodringly. If parameter boundaries exist they will also be adjusted
+ * accordingly.
+ *
+ * The method does nothing if the actual value is zero.
+ ***************************************************************************/
+void GModelPar::autoscale(void)
+{
+    // Continue only if the value is non-zero
+    if (m_value != 0.0) {
+
+        // Set the scale factor
+        m_scale *= m_value;
+
+        // Get inverse scaling factor
+        double invscale = 1.0 / m_value;
+
+        // Set values, error, gradient, min and max
+        m_value    *= invscale;
+        m_error    *= invscale;
+        m_gradient *= invscale;
+        if (m_hasmin) {
+            m_min *= invscale;
+        }
+        if (m_hasmax) {
+            m_max *= invscale;
+        }
+
+
+    } // endif: value was non-zero
+
     // Return
     return;
 }

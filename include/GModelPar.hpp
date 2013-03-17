@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GModelPar.hpp  -  Model parameter class                *
+ *                   GModelPar.hpp - Model parameter class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -102,6 +102,7 @@ public:
     void        free(void) { m_free=true; }
     void        fix(void) { m_free=false; }
     void        hasgrad(const bool& grad) { m_hasgrad=grad; }
+    void        autoscale(void);
     void        read(const GXmlElement& xml);
     void        write(GXmlElement& xml) const;
     std::string print(void) const;

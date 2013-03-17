@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GModelPar.i  -  Model parameter class Python interface        *
+ *                    GModelPar.i - Model parameter class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -82,6 +82,7 @@ public:
     void        free(void);
     void        fix(void);
     void        hasgrad(const bool& grad);
+    void        autoscale(void);
     void        read(const GXmlElement& xml);
     void        write(GXmlElement& xml) const;
 };
