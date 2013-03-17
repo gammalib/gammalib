@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelSpectral.cpp  -  Abstract spectral model base class        *
+ *         GModelSpectral.cpp - Abstract spectral model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -223,6 +223,39 @@ const GModelPar& GModelSpectral::operator[](const std::string& name) const
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Return number of parameters
+ *
+ * @return Number of parameters in spectral model component.
+ *
+ * Returns the number of parameters in the spectral model component.
+ ***************************************************************************/
+int GModelSpectral::size(void) const
+{
+    // Return number of parameters
+    return (m_pars.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Autoscale parameters
+ *
+ * Sets the scale factors for all parameters so that the values are unity.
+ ***************************************************************************/
+void GModelSpectral::autoscale(void)
+{
+    // Loop over all parameters
+    for (int i = 0; i < m_pars.size(); ++i) {
+        if (m_pars[i] != NULL) {
+            m_pars[i]->autoscale();
+        }
+    }
+
+    // Return
+    return;
+}
+
 
 /*==========================================================================
  =                                                                         =

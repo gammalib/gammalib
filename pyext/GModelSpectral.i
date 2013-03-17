@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectral.i  -  Abstract spectral model base class         *
+ *          GModelSpectral.i - Abstract spectral model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,12 +20,13 @@
  ***************************************************************************/
 /**
  * @file GModelSpectral.i
- * @brief Abstract spectral model base class Python interface definition
- * @author J. Knodlseder
+ * @brief Abstract spectral model base class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpectral.hpp"
+#include "GTools.hpp"
 %}
 
 
@@ -55,7 +56,8 @@ public:
     virtual void            write(GXmlElement& xml) const = 0;
 
     // Methods
-    int size(void) const;
+    int  size(void) const;
+    void autoscale(void);
 };
 
 
