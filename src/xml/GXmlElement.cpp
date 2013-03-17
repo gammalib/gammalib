@@ -245,6 +245,9 @@ void GXmlElement::write(GUrl& url, const int& indent) const
             // Write children in file
             for (int i = 0; i < m_nodes.size(); ++i) {
                 m_nodes[i]->write(url, indent+g_indent);
+                if (m_nodes[i]->type() == NT_TEXT) {
+                    url.printf("\n");
+                }
             }
 
             // Write end tag
