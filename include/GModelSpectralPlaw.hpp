@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpectralPlaw.hpp  -  Spectral power law model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralPlaw.hpp
  * @brief Power law spectral model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSPECTRALPLAW_HPP
@@ -53,7 +53,8 @@ class GModelSpectralPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
-    explicit GModelSpectralPlaw(const double& norm, const double& index);
+    explicit GModelSpectralPlaw(const double& norm, const double& index,
+                                const double& pivot);
     explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
@@ -75,7 +76,6 @@ public:
     virtual std::string         print(void) const;
 
     // Other methods
-    void   autoscale(void);
     double norm(void) const { return m_norm.real_value(); }
     double index(void) const { return m_index.real_value(); }
     double pivot(void) const { return m_pivot.real_value(); }

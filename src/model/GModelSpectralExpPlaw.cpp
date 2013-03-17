@@ -97,6 +97,9 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double& norm,
     m_index.real_value(index);
     m_ecut.real_value(ecut);
 
+    // Autoscale parameters
+    autoscale();
+
     // Return
     return;
 }
@@ -523,41 +526,6 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin, const GEnergy& emax,
 
     // Return energy
     return energy;
-}
-
-
-/***********************************************************************//**
- * @brief Autoscale normalization
- *
- * Based on the actual value of the m_norm parameter, set the scale of m_norm
- * so that the value will be 1. If minimum and/or maximum value boundaries
- * exist, the boundaries are also modified accordingly.
- ***************************************************************************/
-void GModelSpectralExpPlaw::autoscale(void)
-{
-    // Autoscale normalization to a value of 1.0
-    if (m_norm.value() != 0.0) {
-
-        // Get inverse scaling factor
-        double invscale = 1.0 / m_norm.value();
-
-        // Set values, error, min and max
-        m_norm.value(m_norm.value() * invscale);
-        m_norm.error(m_norm.error() * invscale);
-        if (m_norm.hasmin()) {
-            m_norm.min(m_norm.min() * invscale);
-        }
-        if (m_norm.hasmax()) {
-            m_norm.max(m_norm.max() * invscale);
-        }
-
-        // Set scale
-        m_norm.scale(1.0 / invscale);
-
-    }
-
-    // Return
-    return;
 }
 
 

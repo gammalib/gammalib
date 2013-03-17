@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GModelSpectralLogParabola.hpp - Log parabola spectral model class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Michael Mayer                                    *
+ *  copyright (C) 2012-2013 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -85,7 +85,6 @@ public:
     virtual std::string                print(void) const;
 
     // Other methods
-    void   autoscale(void);
     double norm(void) const { return m_norm.real_value(); }
     double index(void) const { return m_index.real_value(); }
     double curvature(void) const { return m_curvature.real_value(); }

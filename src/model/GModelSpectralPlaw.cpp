@@ -74,16 +74,20 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Parameter constructor
  *
  * @param[in] norm Power law normalization.
  * @param[in] index Power law index.
+ * @param[in] pivot Pivot energy.
  *
- * Construct a spectral power law from a normalization value and a spectral
- * index.
+ * Construct a spectral power law using the model parameters:
+ * - power law normalization value @p norm (ph/cm2/s/MeV)
+ * - spectral @p index
+ * - @p pivot energy (MeV)
  ***************************************************************************/
 GModelSpectralPlaw::GModelSpectralPlaw(const double& norm,
-                                       const double& index) : GModelSpectral()
+                                       const double& index,
+                                       const double& pivot) : GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -91,6 +95,10 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double& norm,
     // Set parameters
     m_norm.real_value(norm);
     m_index.real_value(index);
+    m_pivot.real_value(pivot);
+
+    // Perform autoscaling of parameter
+    autoscale();
 
     // Return
     return;
@@ -452,41 +460,6 @@ GEnergy GModelSpectralPlaw::mc(const GEnergy& emin, const GEnergy& emax,
 
     // Return energy
     return energy;
-}
-
-
-/***********************************************************************//**
- * @brief Autoscale normalization
- *
- * Based on the actual value of the m_norm parameter, set the scale of m_norm
- * so that the value will be 1. If minimum and/or maximum value boundaries
- * exist, the boundaries are also modified accordingly.
- ***************************************************************************/
-void GModelSpectralPlaw::autoscale(void)
-{
-    // Autoscale normalization to a value of 1.0
-    if (m_norm.value() != 0.0) {
-
-        // Get inverse scaling factor
-        double invscale = 1.0 / m_norm.value();
-
-        // Set values, error, min and max
-        m_norm.value(m_norm.value() * invscale);
-        m_norm.error(m_norm.error() * invscale);
-        if (m_norm.hasmin()) {
-            m_norm.min(m_norm.min() * invscale);
-        }
-        if (m_norm.hasmax()) {
-            m_norm.max(m_norm.max() * invscale);
-        }
-
-        // Set scale
-        m_norm.scale(1.0 / invscale);
-
-    }
-
-    // Return
-    return;
 }
 
 

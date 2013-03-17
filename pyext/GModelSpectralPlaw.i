@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralPlaw.i  -  Spectral power law model class         *
+ *          GModelSpectralPlaw.i - Spectral power law model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralPlaw.i
- * @brief Power law spectral model class Python interface definition
- * @author J. Knodlseder
+ * @brief Power law spectral model class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,7 +39,8 @@ class GModelSpectralPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
-    explicit GModelSpectralPlaw(const double& norm, const double& index);
+    explicit GModelSpectralPlaw(const double& norm, const double& index,
+                                const double& pivot);
     explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
@@ -57,7 +58,6 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    void   autoscale(void);
     double norm(void) const;
     double index(void) const;
     double pivot(void) const;

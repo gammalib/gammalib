@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralExpPlaw.hpp - Exponential cut off power law model     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,7 +77,6 @@ public:
     virtual std::string            print(void) const;
 
     // Other methods
-    void   autoscale(void);
     double norm(void) const { return m_norm.real_value(); }
     double index(void) const { return m_index.real_value(); }
     double ecut(void) const { return m_ecut.real_value(); }

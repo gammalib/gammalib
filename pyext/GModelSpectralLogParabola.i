@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GModelSpectralLogParabola.i - Log parabola spectral model class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Michael Mayer                                    *
+ *  copyright (C) 2012-2013 by Michael Mayer                               *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,6 @@ public:
     virtual void                       write(GXmlElement& xml) const;
 
     // Other methods
-    void   autoscale(void);
     double norm(void) const;
     double index(void) const;
     double curvature(void) const;
