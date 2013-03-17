@@ -195,10 +195,115 @@ GXmlElement* GXmlElement::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Write node into URL
+ * @brief Return attribute value
+ *
+ * @param[in] name Attribute name.
+ * @return String containing attribute value.
+ *
+ * Returns the value of the attribute @p name. If the requested attribute was
+ * not found an empty string is returned.
+ ***************************************************************************/
+std::string GXmlElement::attribute(const std::string& name) const
+{
+    // Initialise empty value (i.e. attribute not found)
+    std::string value = "";
+
+    // Search attribute value in list of attributes
+    for (int i = 0; i < m_attr.size(); ++i) {
+        if (m_attr[i]->name() == name) {
+            value = m_attr[i]->value();
+            break;
+        }
+    }
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Set attribute value
+ *
+ * @param[in] name Attribute name.
+ * @param[in] value Attribute value.
+ *
+ * Sets an attribute of the element. If the attribute name exists the value
+ * is modified. If the attribute does not yet exist it is created and
+ * added to the list of attributes.
+ *
+ * Note that this logical assures that only one attribute with a given name
+ * will exist in the element.
+ ***************************************************************************/
+void GXmlElement::attribute(const std::string& name, const std::string& value)
+{
+    // Initialise attribute NULL pointer
+    GXmlAttribute* attr = NULL;
+
+    // Search attribute name in list of attributes
+    for (int i = 0; i < m_attr.size(); ++i) {
+        if (m_attr[i]->name() == name) {
+            attr = m_attr[i];
+            break;
+        }
+    }
+
+    // If no attribute with specified name has been found then add a new
+    // attribute to the list of attributes
+    if (attr == NULL) {
+        attr = new GXmlAttribute;
+        attr->name(name);
+        m_attr.push_back(attr);
+    }
+
+    // Set or update value of attribute
+    attr->value(value);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove attribute from element
+ *
+ * @param[in] name Attribute name.
+ *
+ * Remove the attribute with @p name from the XML element. If the requested
+ * attribute was not found the method does nothing.
+ ***************************************************************************/
+void GXmlElement::remove_attribute(const std::string& name)
+{
+    // Do nothing if there are no attributes
+    if (!m_attr.empty()) {
+
+        // Store number of attributes.
+        int num = m_attr.size();
+
+        // Search attribute name in list of attributes and erase attribute
+        // when it has been found. Note that if several attributes with the
+        // same name exist (which should never be the case!), only the
+        // first attribute is removed
+        for (int i = 0; i < num; ++i) {
+            if (m_attr[i]->name() == name) {
+                m_attr.erase(m_attr.begin() + i);
+                break;
+            }
+        }
+
+    } // endif: there were attributes
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write element into URL
  *
  * @param[in] url Unified Resource Locator.
- * @param[in] indent Text indentation (default: 0).
+ * @param[in] indent Text indentation (default = 0).
+ *
+ * Writes the element into a Unified Resource Locator.
  ***************************************************************************/
 void GXmlElement::write(GUrl& url, const int& indent) const
 {
@@ -289,70 +394,6 @@ std::string GXmlElement::print(const int& indent) const
 
     // Return
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return attribute value
- *
- * @param[in] name Attribute name.
- *
- * If the requested attribute was not found an empty string is returned.
- ***************************************************************************/
-std::string GXmlElement::attribute(const std::string& name) const
-{
-    // Initialise empty value (i.e. attribute not found)
-    std::string value = "";
-
-    // Search attribute value in list of attributes
-    for (int i = 0; i < m_attr.size(); ++i) {
-        if (m_attr[i]->name() == name) {
-            value = m_attr[i]->value();
-            break;
-        }
-    }
-
-    // Return value
-    return value;
-}
-
-
-/***********************************************************************//**
- * @brief Set attribute value
- *
- * @param[in] name Attribute name.
- * @param[in] value Attribute value.
- *
- * Sets an attribute of the element. If the attribute name exist the value
- * is modified. If the attribute does not yet exist it is created and
- * added to the list of attributes.
- ***************************************************************************/
-void GXmlElement::attribute(const std::string& name, const std::string& value)
-{
-    // Initialise attribute NULL pointer
-    GXmlAttribute* attr = NULL;
-
-    // Search attribute value in list of attributes
-    for (int i = 0; i < m_attr.size(); ++i) {
-        if (m_attr[i]->name() == name) {
-            attr = m_attr[i];
-            break;
-        }
-    }
-
-    // If no attribute with specified name has been found then add a new
-    // attribute to the list of attributes
-    if (attr == NULL) {
-        attr = new GXmlAttribute;
-        attr->name(name);
-        m_attr.push_back(attr);
-    }
-
-    // Set or update value of attribute
-    attr->value(value);
-
-    // Return
-    return;
 }
 
 

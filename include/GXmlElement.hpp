@@ -64,6 +64,7 @@ public:
     void                 name(const std::string& name) { m_name=name; }
     std::string          attribute(const std::string& name) const;
     void                 attribute(const std::string& name, const std::string& value);
+    void                 remove_attribute(const std::string& name);
     GXmlNode*            parent(void) const { return m_parent; }
     void                 parent(GXmlNode* node) { m_parent = node; }
     virtual void         write(GUrl& url, const int& indent = 0) const;
