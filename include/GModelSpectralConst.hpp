@@ -72,7 +72,7 @@ public:
     virtual std::string          print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.Value(); }
+    double norm(void) const { return m_norm.value(); }
 
 protected:
     // Protected methods

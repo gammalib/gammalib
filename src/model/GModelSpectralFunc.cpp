@@ -718,11 +718,11 @@ void GModelSpectralFunc::init_members(void)
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Normalization");
-    m_norm.Scale(1.0);
-    m_norm.Value(1.0);
-    m_norm.Range(0.0,1000.0);
+    m_norm.scale(1.0);
+    m_norm.value(1.0);
+    m_norm.range(0.0,1000.0);
     m_norm.free();
-    m_norm.Gradient(0.0);
+    m_norm.gradient(0.0);
     m_norm.hasgrad(true);
 
     // Set parameter pointer(s)

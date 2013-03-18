@@ -993,12 +993,12 @@ void GModelSpectralNodes::set_eval_cache(void) const
     for (int i = 0; i < m_energies.size(); ++i) {
     
         // Set log10(energy)
-        double log10energy = std::log10(m_energies[i].Value());
+        double log10energy = std::log10(m_energies[i].value());
         m_old_energies.push_back(log10energy);
         m_log_energies.append(log10energy);
 
         // Set log10(intensity)
-        double log10value = std::log10(m_values[i].Value());
+        double log10value = std::log10(m_values[i].value());
         m_old_values.push_back(log10value);
         m_log_values.push_back(log10value);
 
@@ -1029,8 +1029,8 @@ void GModelSpectralNodes::set_flux_cache(void) const
 
     // Store linear energies and values
     for (int i = 0; i < m_energies.size(); ++i) {
-        m_lin_energies.append(m_energies[i].Value());
-        m_lin_values.push_back(m_values[i].Value());
+        m_lin_energies.append(m_energies[i].value());
+        m_lin_values.push_back(m_values[i].value());
     }
 
     // Loop over all nodes-1
@@ -1039,8 +1039,8 @@ void GModelSpectralNodes::set_flux_cache(void) const
         // Get energies and function values
         double emin = m_lin_energies[i];
         double emax = m_lin_energies[i+1];
-        double fmin = m_values[i].Value();
-        double fmax = m_values[i+1].Value();
+        double fmin = m_values[i].value();
+        double fmax = m_values[i+1].value();
     
         // Compute pivot energy (MeV). We use here the geometric mean of
         // the node boundaries.
@@ -1087,7 +1087,7 @@ void GModelSpectralNodes::update_eval_cache(void) const
 {
     // Update energies
     for (int i = 0; i < m_energies.size(); ++i) {
-        double energy = m_energies[i].Value();
+        double energy = m_energies[i].value();
         if (energy != m_old_energies[i]) {
             m_log_energies[i] = std::log10(energy);
             m_old_energies[i] = energy;
@@ -1096,7 +1096,7 @@ void GModelSpectralNodes::update_eval_cache(void) const
 
     // Update intensities
     for (int i = 0; i < m_values.size(); ++i) {
-        double value = m_values[i].Value();
+        double value = m_values[i].value();
         if (value != m_old_values[i]) {
             m_log_values[i] = std::log10(value);
             m_old_values[i] = value;
@@ -1124,14 +1124,14 @@ void GModelSpectralNodes::update_flux_cache(void) const
         // Get energies and function values
         double emin = m_lin_energies[i];
         double emax = m_lin_energies[i+1];
-        double fmin = m_values[i].Value();
-        double fmax = m_values[i+1].Value();
+        double fmin = m_values[i].value();
+        double fmax = m_values[i+1].value();
 
         // Update values only if energies or function values have changed
-        if (emin != m_energies[i].Value() ||
-            emax != m_energies[i+1].Value() ||
-            fmin != m_values[i].Value() ||
-            fmax != m_values[i+1].Value()) {
+        if (emin != m_energies[i].value() ||
+            emax != m_energies[i+1].value() ||
+            fmin != m_values[i].value() ||
+            fmax != m_values[i+1].value()) {
     
             // Compute pivot energy (MeV). We use here the geometric mean
             // of the node boundaries.

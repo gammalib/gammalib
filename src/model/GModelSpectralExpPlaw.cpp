@@ -93,9 +93,9 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double& norm,
     init_members();
 
     // Set parameters
-    m_norm.Value(norm);
-    m_index.Value(index);
-    m_ecut.Value(ecut);
+    m_norm.value(norm);
+    m_index.value(index);
+    m_ecut.value(ecut);
 
     // Autoscale parameters
     autoscale();
@@ -737,42 +737,42 @@ void GModelSpectralExpPlaw::init_members(void)
     m_norm.clear();
     m_norm.name("Prefactor");
     m_norm.unit("ph/cm2/s/MeV");
-    m_norm.Scale(1.0);
-    m_norm.Value(1.0);          // default: 1.0
-    m_norm.Min(0.0);            // min:     0.0
+    m_norm.scale(1.0);
+    m_norm.value(1.0);          // default: 1.0
+    m_norm.min(0.0);            // min:     0.0
     m_norm.free();
-    m_norm.Gradient(0.0);
+    m_norm.gradient(0.0);
     m_norm.hasgrad(true);
 
     // Initialise powerlaw index
     m_index.clear();
     m_index.name("Index");
-    m_index.Scale(1.0);
-    m_index.Value(-2.0);        // default: -2.0
-    m_index.Range(-10.0,+10.0); // range:   [-10,+10]
+    m_index.scale(1.0);
+    m_index.value(-2.0);        // default: -2.0
+    m_index.range(-10.0,+10.0); // range:   [-10,+10]
     m_index.free();
-    m_index.Gradient(0.0);
+    m_index.gradient(0.0);
     m_index.hasgrad(true);
 
     // Initialise cut off energy
     m_ecut.clear();
     m_ecut.name("Cutoff");
     m_ecut.unit("MeV");
-    m_ecut.Scale(1.0);
-    m_ecut.Value(1000.0);       // default: 1000.0
-    m_ecut.Min(0.1);            // min:     0.1
+    m_ecut.scale(1.0);
+    m_ecut.value(1000.0);       // default: 1000.0
+    m_ecut.min(0.1);            // min:     0.1
     m_ecut.free();
-    m_ecut.Gradient(0.0);
+    m_ecut.gradient(0.0);
     m_ecut.hasgrad(true);
 
     // Initialise pivot energy
     m_pivot.clear();
     m_pivot.name("PivotEnergy");
     m_pivot.unit("MeV");
-    m_pivot.Scale(1.0);
-    m_pivot.Value(100.0);
+    m_pivot.scale(1.0);
+    m_pivot.value(100.0);
     m_pivot.fix();
-    m_pivot.Gradient(0.0);
+    m_pivot.gradient(0.0);
     m_pivot.hasgrad(true);
 
     // Set parameter pointer(s)

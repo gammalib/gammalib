@@ -79,10 +79,10 @@ public:
     virtual std::string          print(void) const;
 
     // Other methods
-    double integral(void) const { return m_integral.Value(); }
-    double index(void) const { return m_index.Value(); }
-    double emin(void) const { return m_emin.Value(); }
-    double emax(void) const { return m_emax.Value(); }
+    double integral(void) const { return m_integral.value(); }
+    double index(void) const { return m_index.value(); }
+    double emin(void) const { return m_emin.value(); }
+    double emax(void) const { return m_emax.value(); }
 
 protected:
     // Protected methods

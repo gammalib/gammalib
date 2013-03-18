@@ -324,9 +324,9 @@ void GModelTemporalConst::init_members(void)
     m_norm.clear();
     m_norm.name("Constant");
     m_norm.unit("(relative value)");
-    m_norm.Value(1.0);
+    m_norm.value(1.0);
     m_norm.fix();
-    m_norm.Gradient(0.0);
+    m_norm.gradient(0.0);
     m_norm.hasgrad(true);
 
     // Set parameter pointer(s)

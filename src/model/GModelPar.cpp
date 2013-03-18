@@ -33,13 +33,10 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_VALUE                                   "GModelPar::Value(double&)"
-#define G_ERROR                                   "GModelPar::Error(double&)"
 #define G_FACTOR_VALUE                     "GModelPar::factor_value(double&)"
 #define G_FACTOR_MIN                         "GModelPar::factor_min(double&)"
 #define G_FACTOR_MAX                         "GModelPar::factor_max(double&)"
-#define G_FACTOR_RANGE            "GModelPar::factor_range(double&, double&)"
-#define G_SCALE                                   "GModelPar::Scale(double&)"
+#define G_SCALE                                   "GModelPar::scale(double&)"
 #define G_READ                                "GModelPar::read(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -82,7 +79,7 @@ GModelPar::GModelPar(void)
  * @p value of zero, the scale factor will be set to unity and the 
  * @p factor_value will be set to @p value.
  ***************************************************************************/
-GModelPar::GModelPar(const std::string& name, const double& value, int i)
+GModelPar::GModelPar(const std::string& name, const double& value)
 {
     // Initialise members
     init_members();
@@ -109,11 +106,11 @@ GModelPar::GModelPar(const std::string& name, const double& value, int i)
  * @brief Parameter constructor
  *
  * @param[in] name Parameter name.
- * @param[in] factor Parameter factor.
+ * @param[in] factor Parameter value factor.
  * @param[in] scale Parameter scaling.
  *
- * Constructs a model parameter from a parameter @p name, @p factor and
- * @p scale factor.
+ * Constructs a model parameter from a parameter @p name, value @p factor
+ * and @p scale factor.
  ***************************************************************************/
 GModelPar::GModelPar(const std::string& name,
                      const double&      factor,
@@ -241,7 +238,7 @@ GModelPar* GModelPar::clone(void) const
  * The method calls factor_value() for assigning the value factor, and this
  * method will verify that the value lies within the specified boundaries.
  ***************************************************************************/
-void GModelPar::Value(const double& value)
+void GModelPar::value(const double& value)
 {
     // Set value factor. The GModelPar class makes sure that m_scale is
     // never 0, so no test is needed here
@@ -260,7 +257,7 @@ void GModelPar::Value(const double& value)
  * Sets the parameter error. The method stores the error factor which is
  * obtained by dividing the @p error by the scale factor.
  ***************************************************************************/
-void GModelPar::Error(const double& error)
+void GModelPar::error(const double& error)
 {
     // Set error factor. The GModelPar class makes sure that m_scale is
     // never 0, so no test is needed here
@@ -279,7 +276,7 @@ void GModelPar::Error(const double& error)
  * Sets the parameter gradient. The method stores the gradient factor which
  * is obtained by dividing @p gradient by the scale factor.
  ***************************************************************************/
-void GModelPar::Gradient(const double& gradient)
+void GModelPar::gradient(const double& gradient)
 {
     // Set gradient factor. The GModelPar class makes sure that m_scale is
     // never 0, so no test is needed here
@@ -298,7 +295,7 @@ void GModelPar::Gradient(const double& gradient)
  * Sets the minimum parameter boundary. The method stores the minimum
  * boundary factor which is obtained by dividing @p min by the scale factor.
  ***************************************************************************/
-void GModelPar::Min(const double& min)
+void GModelPar::min(const double& min)
 {
     // Set minimum boundary factor. The GModelPar class makes sure that
     // m_scale is never 0, so no test is needed here
@@ -317,7 +314,7 @@ void GModelPar::Min(const double& min)
  * Sets the maximum parameter boundary. The method stores the maximum
  * boundary factor which is obtained by dividing @p max by the scale factor.
  ***************************************************************************/
-void GModelPar::Max(const double& max)
+void GModelPar::max(const double& max)
 {
     // Set maximum boundary factor. The GModelPar class makes sure that
     // m_scale is never 0, so no test is needed here
@@ -337,11 +334,11 @@ void GModelPar::Max(const double& max)
  * Sets the minimum and maximum parameter boundaries. The method calls the
  * min() and max() methods to set the boundaries.
  ***************************************************************************/
-void GModelPar::Range(const double& min, const double& max)
+void GModelPar::range(const double& min, const double& max)
 {
     // Set minimum and maximum
-    this->Min(min);
-    this->Max(max);
+    this->min(min);
+    this->max(max);
 	
     // Return
     return;
@@ -493,7 +490,7 @@ void GModelPar::factor_range(const double& min, const double& max)
  *
  * An exception is thrown if a scale factor of 0 is specified.
  ***************************************************************************/
-void GModelPar::Scale(const double& scale)
+void GModelPar::scale(const double& scale)
 {
     // Make sure that scale is not zero
     if (scale == 0.0) {
@@ -795,22 +792,22 @@ std::string GModelPar::print(void) const
     result.append(parformat(" "+name()));
 
     // Append value
-    result.append(str(Value()));
+    result.append(str(value()));
 
     // For free parameters, append statistical uncertainty
     if (m_free) {
-        result.append(" +/- "+str(std::abs(Error())));
+        result.append(" +/- "+str(std::abs(error())));
     }
 
     // Append parameter limites if they exist
     if (m_hasmin && m_hasmax) {
-        result.append(" ["+str(Min()) + ","+str(Max())+"]");
+        result.append(" ["+str(min()) + ","+str(max())+"]");
     }
     else if (m_hasmin) {
-        result.append(" ["+str(Min()) + ",infty[");
+        result.append(" ["+str(min()) + ",infty[");
     }
     else if (m_hasmax) {
-        result.append(" ]-infty,"+str(Max())+"]");
+        result.append(" ]-infty,"+str(max())+"]");
     }
 
     // Append parameter unit

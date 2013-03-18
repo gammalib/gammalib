@@ -82,11 +82,11 @@ public:
     virtual std::string               print(void) const;
 
     // Other methods
-    double  radius(void) const { return m_radius.Value(); }
-    double  width(void) const { return m_width.Value(); }
+    double  radius(void) const { return m_radius.value(); }
+    double  width(void) const { return m_width.value(); }
     bool    small_angle(void) const { return m_small_angle; }
-    void    radius(const double& radius) { m_radius.Value(radius); }
-    void    width(const double& width) { m_width.Value(width); }
+    void    radius(const double& radius) { m_radius.value(radius); }
+    void    width(const double& width) { m_width.value(width); }
     void    small_angle(const bool& small_angle) { m_small_angle = small_angle; }
 
 protected:

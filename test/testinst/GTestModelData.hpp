@@ -101,7 +101,7 @@ public:
                                        }
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const {
-                                  double result = m_pars[0]->Value();
+                                  double result = m_pars[0]->value();
                                   return result;
                               }
 

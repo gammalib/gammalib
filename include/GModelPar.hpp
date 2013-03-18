@@ -89,7 +89,7 @@ class GModelPar : public GBase {
 public:
     // Constructors and destructors
     GModelPar(void);
-    explicit GModelPar(const std::string& name, const double& value, int i);
+    explicit GModelPar(const std::string& name, const double& value);
     explicit GModelPar(const std::string& name, const double& factor, const double& scale);
     GModelPar(const GModelPar& par);
     virtual ~GModelPar(void);
@@ -98,60 +98,60 @@ public:
     GModelPar& operator=(const GModelPar& par);
 
     // Attribute methods 
-    double      Value(void) const;
-    double      Error(void) const { return m_factor_error*m_scale; }
-    double      Gradient(void) const { return m_factor_gradient*m_scale; }
-    double      Min(void) const { return m_factor_min*m_scale; }
-    double      Max(void) const { return m_factor_max*m_scale; }
-    void        Value(const double& value);
-    void        Error(const double& error);
-    void        Gradient(const double& gradient);
-    void        Min(const double& min);
-    void        Max(const double& max);
-    void        Range(const double& min, const double& max);
+    double value(void) const;
+    double error(void) const;
+    double gradient(void) const;
+    double min(void) const;
+    double max(void) const;
+    void   value(const double& value);
+    void   error(const double& error);
+    void   gradient(const double& gradient);
+    void   min(const double& min);
+    void   max(const double& max);
+    void   range(const double& min, const double& max);
 
     // Factorization methods
-    const double& factor_value(void) const { return m_factor_value; }
-    const double& factor_error(void) const { return m_factor_error; }
-    const double& factor_gradient(void) const { return m_factor_gradient; }
-    const double& factor_min(void) const { return m_factor_min; }
-    const double& factor_max(void) const { return m_factor_max; }
-    const double& scale(void) const { return m_scale; }
+    const double& factor_value(void) const;
+    const double& factor_error(void) const;
+    const double& factor_gradient(void) const;
+    const double& factor_min(void) const;
+    const double& factor_max(void) const;
+    const double& scale(void) const;
     void          factor_value(const double& value);
-    void          factor_error(const double& error) { m_factor_error=error; }
-    void          factor_gradient(const double& gradient) { m_factor_gradient=gradient; }
+    void          factor_error(const double& error);
+    void          factor_gradient(const double& gradient);
     void          factor_min(const double& min);
     void          factor_max(const double& max);
     void          factor_range(const double& min, const double& max);
-    void          Scale(const double& scale);
+    void          scale(const double& scale);
 
     // Boundary methods
-    bool        hasmin(void) const { return m_hasmin; }
-    bool        hasmax(void) const { return m_hasmax; }
-    bool        hasrange(void) const { return m_hasmin && m_hasmax; }
-    void        remove_min(void) { m_hasmin=false; }
-    void        remove_max(void) { m_hasmax=false; }
-    void        remove_range(void) { m_hasmin=false; m_hasmax=false; }
+    bool hasmin(void) const { return m_hasmin; }
+    bool hasmax(void) const { return m_hasmax; }
+    bool hasrange(void) const { return m_hasmin && m_hasmax; }
+    void remove_min(void) { m_hasmin=false; }
+    void remove_max(void) { m_hasmax=false; }
+    void remove_range(void) { m_hasmin=false; m_hasmax=false; }
 
     // Property methods
-    bool        isfree(void) const { return m_free; }
-    bool        isfixed(void) const { return !m_free; }
-    bool        hasgrad(void) const { return m_hasgrad; }
-    void        free(void) { m_free=true; }
-    void        fix(void) { m_free=false; }
-    void        hasgrad(const bool& grad) { m_hasgrad=grad; }
+    bool isfree(void) const { return m_free; }
+    bool isfixed(void) const { return !m_free; }
+    bool hasgrad(void) const { return m_hasgrad; }
+    void free(void) { m_free=true; }
+    void fix(void) { m_free=false; }
+    void hasgrad(const bool& grad) { m_hasgrad=grad; }
 
     // Other methods
-    void        clear(void);
-    GModelPar*  clone(void) const;
-    std::string name(void) const { return m_name; }
-    std::string unit(void) const { return m_unit; }
-    void        name(const std::string& name) { m_name=name; }
-    void        unit(const std::string& unit) { m_unit=unit; }
-    void        autoscale(void);
-    void        read(const GXmlElement& xml);
-    void        write(GXmlElement& xml) const;
-    std::string print(void) const;
+    void               clear(void);
+    GModelPar*         clone(void) const;
+    const std::string& name(void) const { return m_name; }
+    const std::string& unit(void) const { return m_unit; }
+    void               name(const std::string& name) { m_name=name; }
+    void               unit(const std::string& unit) { m_unit=unit; }
+    void               autoscale(void);
+    void               read(const GXmlElement& xml);
+    void               write(GXmlElement& xml) const;
+    std::string        print(void) const;
 
 protected:
     // Protected methods
@@ -178,14 +178,189 @@ protected:
 /***********************************************************************//**
  * @brief Return parameter value
  *
- * @return True parameter value.
+ * @return Parameter value.
  *
- * Returns the true parameter value
+ * Returns the parameter value. The parameter value is computed by
+ * multiplying the value factor by the scale factor.
  ***************************************************************************/
 inline
-double GModelPar::Value(void) const
+double GModelPar::value(void) const
 {
-    return (m_factor_value*m_scale);
+    return (m_factor_value * m_scale);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter error
+ *
+ * @return Parameter error.
+ *
+ * Returns the parameter error. The parameter error is computed by
+ * multiplying the error factor by the scale factor.
+ ***************************************************************************/
+inline
+double GModelPar::error(void) const
+{
+    return (m_factor_error * m_scale);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter gradient
+ *
+ * @return Parameter gradient.
+ *
+ * Returns the parameter gradient. The parameter gradient is computed by
+ * multiplying the gradient factor by the scale factor.
+ ***************************************************************************/
+inline
+double GModelPar::gradient(void) const
+{
+    return (m_factor_gradient * m_scale);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter minimum boundary
+ *
+ * @return Parameter minimum boundary.
+ *
+ * Returns the parameter minimum boundary. The parameter minimum boundary is
+ * computed by multiplying the minimum boundary factor by the scale factor.
+ ***************************************************************************/
+inline
+double GModelPar::min(void) const
+{
+    return (m_factor_min * m_scale);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter maximum boundary
+ *
+ * @return Parameter maximum boundary.
+ *
+ * Returns the parameter maximum boundary. The parameter maximum boundary is
+ * computed by multiplying the maximum boundary factor by the scale factor.
+ ***************************************************************************/
+inline
+double GModelPar::max(void) const
+{
+    return (m_factor_max * m_scale);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter value factor
+ *
+ * @return Parameter value factor.
+ *
+ * Returns the parameter value factor.
+ ***************************************************************************/
+inline
+const double& GModelPar::factor_value(void) const
+{
+    return (m_factor_value);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter error factor
+ *
+ * @return Parameter error factor.
+ *
+ * Returns the parameter error factor.
+ ***************************************************************************/
+inline
+const double& GModelPar::factor_error(void) const
+{
+    return (m_factor_error);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter gradient factor
+ *
+ * @return Parameter gradient factor.
+ *
+ * Returns the parameter gradient factor.
+ ***************************************************************************/
+inline
+const double& GModelPar::factor_gradient(void) const
+{
+    return (m_factor_gradient);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter minimum boundary factor
+ *
+ * @return Parameter minimum boundary factor.
+ *
+ * Returns the parameter minimum boundary factor.
+ ***************************************************************************/
+inline
+const double& GModelPar::factor_min(void) const
+{
+    return (m_factor_min);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter maximum boundary factor
+ *
+ * @return Parameter maximum boundary factor.
+ *
+ * Returns the parameter maximum boundary factor.
+ ***************************************************************************/
+inline
+const double& GModelPar::factor_max(void) const
+{
+    return (m_factor_max);
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter scale
+ *
+ * @return Parameter scale factor.
+ *
+ * Returns the parameter scale factor.
+ ***************************************************************************/
+inline
+const double& GModelPar::scale(void) const
+{
+    return (m_scale);
+}
+
+
+/***********************************************************************//**
+ * @brief Set parameter error factor
+ *
+ * @param[in] Parameter error factor.
+ *
+ * Sets the parameter error factor.
+ ***************************************************************************/
+inline
+void GModelPar::factor_error(const double& error)
+{
+    m_factor_error = error;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set parameter gradient factor
+ *
+ * @param[in] Parameter gradient factor.
+ *
+ * Sets the parameter gradient factor.
+ ***************************************************************************/
+inline
+void GModelPar::factor_gradient(const double& gradient)
+{
+    m_factor_gradient = gradient;
+    return;
 }
 
 #endif /* GMODELPAR_HPP */

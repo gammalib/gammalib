@@ -75,8 +75,8 @@ public:
     virtual void   write(GXmlElement& xml) const;
 
     // Other methods
-    double  ra(void) const { return m_ra.Value(); }
-    double  dec(void) const { return m_dec.Value(); }
+    double  ra(void) const { return m_ra.value(); }
+    double  dec(void) const { return m_dec.value(); }
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
 

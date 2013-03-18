@@ -273,7 +273,7 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
 
         // If model is a scaling factor then use the single parameter as such
         if (m_scale) {
-            scale = m_values[0].Value();
+            scale = m_values[0].value();
         }
 
         // ... otherwise perform a linear interpolation
@@ -289,8 +289,8 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
             m_nodes.set_value(phibar);
 
             // Get scale factor
-            scale = m_values[m_nodes.inx_left()].Value()  * m_nodes.wgt_left() +
-                    m_values[m_nodes.inx_right()].Value() * m_nodes.wgt_right();
+            scale = m_values[m_nodes.inx_left()].value()  * m_nodes.wgt_left() +
+                    m_values[m_nodes.inx_right()].value() * m_nodes.wgt_right();
 
         } // endelse: performed linear interpolation
 
@@ -372,7 +372,7 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
         if (m_scale) {
 
             // Get scale factor
-            scale = m_values[0].Value();
+            scale = m_values[0].value();
         
             // Compute partial derivative
             double grad = (m_values[0].isfree()) ? value * m_values[0].scale() : 0.0;
@@ -401,8 +401,8 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
             double wgt_right = m_nodes.wgt_right();
 
             // Get scale factor
-            scale = m_values[inx_left].Value()  * wgt_left +
-                    m_values[inx_right].Value() * wgt_right;
+            scale = m_values[inx_left].value()  * wgt_left +
+                    m_values[inx_right].value() * wgt_right;
 
             // Gradient for left node
             if (m_values[inx_left].isfree()) {
@@ -893,7 +893,7 @@ void GCOMModelDRBFitting::set_cache(void) const
 
         // Set Phibar node array. Signal if one of the Phibar values is free
         for (int i = 0; i < num; ++i) {
-            double phibar = m_phibars[i].Value();
+            double phibar = m_phibars[i].value();
             m_nodes.append(phibar);
             m_old_phibars.push_back(phibar);
             if (m_phibars[i].isfree()) {
@@ -924,7 +924,7 @@ void GCOMModelDRBFitting::update_cache(void) const
     
         // Update Phibar values
         for (int i = 0; i < num; ++i) {
-            double phibar = m_phibars[i].Value();
+            double phibar = m_phibars[i].value();
             if (phibar != m_old_phibars[i]) {
                 m_nodes[i]       = phibar;
                 m_old_phibars[i] = phibar;

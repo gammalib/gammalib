@@ -77,10 +77,10 @@ public:
     virtual std::string            print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.Value(); }
-    double index(void) const { return m_index.Value(); }
-    double ecut(void) const { return m_ecut.Value(); }
-    double pivot(void) const { return m_pivot.Value(); }
+    double norm(void) const { return m_norm.value(); }
+    double index(void) const { return m_index.value(); }
+    double ecut(void) const { return m_ecut.value(); }
+    double pivot(void) const { return m_pivot.value(); }
 
 protected:
     // Protected methods

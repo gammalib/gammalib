@@ -547,7 +547,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
 
         // If required, apply instrument specific model scaling
         if (!m_scales.empty()) {
-            npred *= scale(obs.instrument()).Value();
+            npred *= scale(obs.instrument()).value();
         }
 
         // Compile option: Check for NaN/Inf
@@ -1085,7 +1085,7 @@ double GModelSky::spatial(const GEvent& event,
 
         // If required, apply instrument specific model scaling
         if (!m_scales.empty()) {
-            irf *= scale(obs.instrument()).Value();
+            irf *= scale(obs.instrument()).value();
         }
 
         // Case A: evaluate gradients

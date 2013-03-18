@@ -590,22 +590,22 @@ void GModelSpatialRadialShell::init_members(void)
     m_radius.clear();
     m_radius.name("Radius");
     m_radius.unit("deg");
-    m_radius.Value(0.0);
-    m_radius.Min(0.0);
+    m_radius.value(0.0);
+    m_radius.min(0.0);
     m_radius.free();
-    m_radius.Scale(1.0);
-    m_radius.Gradient(0.0);
+    m_radius.scale(1.0);
+    m_radius.gradient(0.0);
     m_radius.hasgrad(false);  // Radial components never have gradients
 
     // Initialise Width
     m_width.clear();
     m_width.name("Width");
     m_width.unit("deg");
-    m_width.Value(2.778e-4);
-    m_width.Min(2.778e-4);   // 1 arcsec
+    m_width.value(2.778e-4);
+    m_width.min(2.778e-4);   // 1 arcsec
     m_width.free();
-    m_width.Scale(1.0);
-    m_width.Gradient(0.0);
+    m_width.scale(1.0);
+    m_width.gradient(0.0);
     m_width.hasgrad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)

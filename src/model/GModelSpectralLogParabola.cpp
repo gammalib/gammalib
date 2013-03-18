@@ -93,9 +93,9 @@ GModelSpectralLogParabola::GModelSpectralLogParabola(const double& norm,
     init_members();
 
     // Set parameters
-    m_norm.Value(norm);
-    m_index.Value(index);
-    m_curvature.Value(curvature);
+    m_norm.value(norm);
+    m_index.value(index);
+    m_curvature.value(curvature);
 
     // Autoscale parameters
     autoscale();
@@ -571,7 +571,7 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
         // Change sign if index is defined Fermi-like
         else if(par->attribute("name") == "alpha") {
         	m_index.read(*par);
-        	m_index.Value(-m_index.Value());
+        	m_index.value(-m_index.value());
         	npar[1]++;
         }
 
@@ -584,7 +584,7 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
         // Change sign if curvature is defined Fermi-like
         else if(par->attribute("name") == "beta") {
         	m_curvature.read(*par);
-        	m_curvature.Value(-m_curvature.Value());
+        	m_curvature.value(-m_curvature.value());
         	npar[2]++;
         }
 
@@ -741,41 +741,41 @@ void GModelSpectralLogParabola::init_members(void)
     m_norm.clear();
     m_norm.name("Prefactor");
     m_norm.unit("ph/cm2/s/MeV");
-    m_norm.Scale(1.0);
-    m_norm.Value(1.0);          // default: 1.0
-    m_norm.Min(0.1);            // min:     0.0
+    m_norm.scale(1.0);
+    m_norm.value(1.0);          // default: 1.0
+    m_norm.min(0.1);            // min:     0.0
     m_norm.free();
-    m_norm.Gradient(0.0);
+    m_norm.gradient(0.0);
     m_norm.hasgrad(true);
 
     // Initialise powerlaw index
     m_index.clear();
     m_index.name("Index");
-    m_index.Scale(1.0);
-    m_index.Value(-2.0);        // default: -2.0
-    m_index.Range(-10.0,+10.0); // range:   [-10,+10]
+    m_index.scale(1.0);
+    m_index.value(-2.0);        // default: -2.0
+    m_index.range(-10.0,+10.0); // range:   [-10,+10]
     m_index.free();
-    m_index.Gradient(0.0);
+    m_index.gradient(0.0);
     m_index.hasgrad(true);
 
     // Initialise curvature
     m_curvature.clear();
     m_curvature.name("Curvature");
-    m_curvature.Scale(1.0);
-    m_curvature.Value(-0.1);        // default: -2.0
-    m_curvature.Range(-10.0,+10.0); // range:   [-10,+10]
+    m_curvature.scale(1.0);
+    m_curvature.value(-0.1);        // default: -2.0
+    m_curvature.range(-10.0,+10.0); // range:   [-10,+10]
     m_curvature.free();
-    m_curvature.Gradient(0.0);
+    m_curvature.gradient(0.0);
     m_curvature.hasgrad(true);
 
     // Initialise pivot energy
     m_pivot.clear();
     m_pivot.name("PivotEnergy");
     m_pivot.unit("MeV");
-    m_pivot.Scale(1.0);
-    m_pivot.Value(100.0);       // default: 100
+    m_pivot.scale(1.0);
+    m_pivot.value(100.0);       // default: 100
     m_pivot.fix();
-    m_pivot.Gradient(0.0);
+    m_pivot.gradient(0.0);
     m_pivot.hasgrad(true);
 
     // Set parameter pointer(s)

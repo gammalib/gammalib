@@ -70,8 +70,8 @@ public:
     virtual std::string              print(void) const;
 
     // Other methods
-    double radius(void) const { return m_radius.Value(); }
-    void   radius(const double& radius) { m_radius.Value(radius); }
+    double radius(void) const { return m_radius.value(); }
+    void   radius(const double& radius) { m_radius.value(radius); }
 
 protected:
     // Protected methods

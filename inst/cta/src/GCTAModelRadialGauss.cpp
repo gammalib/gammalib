@@ -433,11 +433,11 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
             m_sigma.read(*par);
             
             // Check parameter
-            if (m_sigma.Value() <= 0.0) {
+            if (m_sigma.value() <= 0.0) {
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Sigma\" parameter is required to be positive.");
             }
-            if (!m_sigma.hasmin() || m_sigma.Min() <= 0.0) {
+            if (!m_sigma.hasmin() || m_sigma.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Sigma\" parameter requires positive minimum boundary.");
             }
@@ -558,11 +558,11 @@ void GCTAModelRadialGauss::init_members(void)
     m_sigma.clear();
     m_sigma.name("Sigma");
     m_sigma.unit("deg2");
-    m_sigma.Value(7.71728e-8); // (1 arcsec)^2
-    m_sigma.Min(7.71728e-8);   // (1 arcsec)^2
+    m_sigma.value(7.71728e-8); // (1 arcsec)^2
+    m_sigma.min(7.71728e-8);   // (1 arcsec)^2
     m_sigma.free();
-    m_sigma.Scale(1.0);
-    m_sigma.Gradient(0.0);
+    m_sigma.scale(1.0);
+    m_sigma.gradient(0.0);
     m_sigma.hasgrad(true);
 
     // Set parameter pointer(s)

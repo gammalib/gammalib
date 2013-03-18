@@ -418,11 +418,11 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
         // Handle Width
         if (par->attribute("name") == "Width") {
             m_width.read(*par);
-            if (m_width.Value() <= 0.0) {
+            if (m_width.value() <= 0.0) {
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Width\" parameter is required to be positive.");
             }
-            if (!m_width.hasmin() || m_width.Min() <= 0.0) {
+            if (!m_width.hasmin() || m_width.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Width\" parameter requires positive minimum boundary.");
             }
@@ -432,11 +432,11 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
         // Handle Core
         if (par->attribute("name") == "Core") {
             m_core.read(*par);
-            if (m_core.Value() <= 0.0) {
+            if (m_core.value() <= 0.0) {
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Core\" parameter is required to be positive.");
             }
-            if (!m_core.hasmin() || m_core.Min() <= 0.0) {
+            if (!m_core.hasmin() || m_core.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Core\" parameter requires positive minimum boundary.");
             }
@@ -446,11 +446,11 @@ void GCTAModelRadialProfile::read(const GXmlElement& xml)
         // Handle Tail
         if (par->attribute("name") == "Tail") {
             m_tail.read(*par);
-            if (m_tail.Value() <= 0.0) {
+            if (m_tail.value() <= 0.0) {
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Core\" parameter is required to be positive.");
             }
-            if (!m_tail.hasmin() || m_tail.Min() <= 0.0) {
+            if (!m_tail.hasmin() || m_tail.min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Core\" parameter requires positive minimum boundary.");
             }
@@ -584,31 +584,31 @@ void GCTAModelRadialProfile::init_members(void)
     m_width.clear();
     m_width.name("Width");
     m_width.unit("deg");
-    m_width.Scale(1.0);
-    m_width.Value(1.5);          // default: 1.5 deg
-    m_width.Min(0.1);            // min:     0.1 deg
+    m_width.scale(1.0);
+    m_width.value(1.5);          // default: 1.5 deg
+    m_width.min(0.1);            // min:     0.1 deg
     m_width.free();
-    m_width.Gradient(0.0);
+    m_width.gradient(0.0);
     m_width.hasgrad(false);
 
     // Initialise core parameter
     m_core.clear();
     m_core.name("Core");
-    m_core.Scale(1.0);
-    m_core.Value(3.0);           // default: 3.0
-    m_core.Min(1.0);             // min:     1.0 (could even be larger)
+    m_core.scale(1.0);
+    m_core.value(3.0);           // default: 3.0
+    m_core.min(1.0);             // min:     1.0 (could even be larger)
     m_core.free();
-    m_core.Gradient(0.0);
+    m_core.gradient(0.0);
     m_core.hasgrad(false);
 
     // Initialise tail parameter
     m_tail.clear();
     m_tail.name("Tail");
-    m_tail.Scale(1.0);
-    m_tail.Value(5.0);           // default: 5.0
-    m_tail.Min(1.0);             // min:     1.0
+    m_tail.scale(1.0);
+    m_tail.value(5.0);           // default: 5.0
+    m_tail.min(1.0);             // min:     1.0
     m_tail.fix();
-    m_tail.Gradient(0.0);
+    m_tail.gradient(0.0);
     m_tail.hasgrad(false);
 
     // Set parameter pointer(s)

@@ -486,11 +486,11 @@ void GModelSpatialRadialGauss::init_members(void)
     m_sigma.clear();
     m_sigma.name("Sigma");
     m_sigma.unit("deg");
-    m_sigma.Value(2.778e-4); // 1 arcsec
-    m_sigma.Min(2.778e-4);   // 1 arcsec
+    m_sigma.value(2.778e-4); // 1 arcsec
+    m_sigma.min(2.778e-4);   // 1 arcsec
     m_sigma.free();
-    m_sigma.Scale(1.0);
-    m_sigma.Gradient(0.0);
+    m_sigma.scale(1.0);
+    m_sigma.gradient(0.0);
     m_sigma.hasgrad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)

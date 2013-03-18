@@ -91,15 +91,15 @@ GCTAModelRadialPolynom::GCTAModelRadialPolynom(const std::vector<double>& coeffs
         GModelPar par;
 
         // Set value
-        par.Value(coeffs[i]);
+        par.value(coeffs[i]);
 
         // Set other attributes
         std::string name = "coeff"+str(i);
         par.name(name);
         par.unit("");
         par.free();
-        par.Scale(1.0);
-        par.Gradient(0.0);
+        par.scale(1.0);
+        par.gradient(0.0);
         par.hasgrad(true);
 
         // Push coefficient on list
@@ -262,9 +262,9 @@ double GCTAModelRadialPolynom::eval(const double& offset) const
     if (ncoeffs > 0) {
 
         // Compute value
-        value = m_coeffs[ncoeffs-1].Value();
+        value = m_coeffs[ncoeffs-1].value();
         for (int i = ncoeffs-2; i >= 0; i--) {
-            value = value * offset + m_coeffs[i].Value();
+            value = value * offset + m_coeffs[i].value();
         }
 
     } // endif: there were coefficients
@@ -276,7 +276,7 @@ double GCTAModelRadialPolynom::eval(const double& offset) const
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
         for (int i = 0; i < ncoeffs; ++i) {
-            std::cout << ", c" << i << "=" << m_coeffs[i].Value();
+            std::cout << ", c" << i << "=" << m_coeffs[i].value();
         }
         std::cout << ")" << std::endl;
     }
@@ -323,9 +323,9 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
     if (ncoeffs > 0) {
 
         // Compute value
-        value = m_coeffs[ncoeffs-1].Value();
+        value = m_coeffs[ncoeffs-1].value();
         for (int i = ncoeffs-2; i >= 0; i--) {
-            value = value * offset + m_coeffs[i].Value();
+            value = value * offset + m_coeffs[i].value();
         }
 
         // Initialise theta^i for the first coefficient
@@ -354,7 +354,7 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
         for (int i = 0; i < ncoeffs; ++i) {
-            std::cout << ", c_" << i << "=" << m_coeffs[i].Value();
+            std::cout << ", c_" << i << "=" << m_coeffs[i].value();
         }
         std::cout << ")" << std::endl;
     }

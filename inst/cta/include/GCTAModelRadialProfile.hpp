@@ -79,12 +79,12 @@ public:
     virtual std::string             print(void) const;
 
     // Other methods
-    double width(void) const { return m_width.Value(); }
-    double core(void) const { return m_core.Value(); }
-    double tail(void) const { return m_tail.Value(); }
-    void   width(const double& width) { m_width.Value(width); }
-    void   core(const double& core) { m_core.Value(core); }
-    void   tail(const double& tail) { m_tail.Value(tail); }
+    double width(void) const { return m_width.value(); }
+    double core(void) const { return m_core.value(); }
+    double tail(void) const { return m_tail.value(); }
+    void   width(const double& width) { m_width.value(width); }
+    void   core(const double& core) { m_core.value(core); }
+    void   tail(const double& tail) { m_tail.value(tail); }
 
 protected:
     // Protected methods
