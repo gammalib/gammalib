@@ -40,48 +40,61 @@ class GModelPar : public GBase {
 public:
     // Constructors and destructors
     GModelPar(void);
-    GModelPar(const std::string& name, const double& value, 
-              const double& scale = 1.0);
-    GModelPar(const GModelPar& par);
+    explicit GModelPar(const std::string& name, const double& value, int i);
+    explicit GModelPar(const std::string& name, const double& factor, const double& scale);
     virtual ~GModelPar(void);
 
-    // Methods
+    // Attribute methods 
+    double      Value(void) const;
+    double      Error(void) const { return m_factor_error*m_scale; }
+    double      Gradient(void) const { return m_factor_gradient*m_scale; }
+    double      Min(void) const { return m_factor_min*m_scale; }
+    double      Max(void) const { return m_factor_max*m_scale; }
+    void        Value(const double& value);
+    void        Error(const double& error);
+    void        Gradient(const double& min);
+    void        Min(const double& min);
+    void        Max(const double& max);
+    void        Range(const double& min, const double& max);
+
+    // Factorization methods
+    const double& factor_value(void) const { return m_factor_value; }
+    const double& factor_error(void) const { return m_factor_error; }
+    const double& factor_gradient(void) const { return m_factor_gradient; }
+    const double& factor_min(void) const { return m_factor_min; }
+    const double& factor_max(void) const { return m_factor_max; }
+    const double& scale(void) const { return m_scale; }
+    void          factor_value(const double& value);
+    void          factor_error(const double& error) { m_factor_error=error; }
+    void          factor_gradient(const double& gradient) { m_factor_gradient=gradient; }
+    void          factor_min(const double& min);
+    void          factor_max(const double& max);
+    void          factor_range(const double& min, const double& max);
+    void          Scale(const double& scale);
+
+    // Boundary methods
+    bool        hasmin(void) const { return m_hasmin; }
+    bool        hasmax(void) const { return m_hasmax; }
+    bool        hasrange(void) const { return m_hasmin && m_hasmax; }
+    void        remove_min(void) { m_hasmin=false; }
+    void        remove_max(void) { m_hasmax=false; }
+    void        remove_range(void) { m_hasmin=false; m_hasmax=false; }
+
+    // Property methods
+    bool        isfree(void) const { return m_free; }
+    bool        isfixed(void) const { return !m_free; }
+    bool        hasgrad(void) const { return m_hasgrad; }
+    void        free(void) { m_free=true; }
+    void        fix(void) { m_free=false; }
+    void        hasgrad(const bool& grad) { m_hasgrad=grad; }
+
+    // Other methods
     void        clear(void);
     GModelPar*  clone(void) const;
-    std::string name(void) const;
-    std::string unit(void) const;
-    double      real_value(void) const;
-    double      real_error(void) const;
-    double      real_gradient(void) const;
-    double      real_min(void) const;
-    double      real_max(void) const;
-    double      value(void) const;
-    double      error(void) const;
-    double      gradient(void) const;
-    double      min(void) const;
-    double      max(void) const;
-    double      scale(void) const;
-    bool        isfree(void) const;
-    bool        hasmin(void) const;
-    bool        hasmax(void) const;
-    bool        hasgrad(void) const;
-    void        name(const std::string& name);
-    void        unit(const std::string& unit);
-    void        real_value(const double& value);
-    void        real_error(const double& error);
-    void        value(const double& value);
-    void        error(const double& error);
-    void        gradient(const double& gradient);
-    void        min(const double& min);
-    void        max(const double& max);
-    void        scale(const double& scale);
-    void        range(const double& min, const double& max);
-    void        remove_min(void);
-    void        remove_max(void);
-    void        remove_range(void);
-    void        free(void);
-    void        fix(void);
-    void        hasgrad(const bool& grad);
+    std::string name(void) const { return m_name; }
+    std::string unit(void) const { return m_unit; }
+    void        name(const std::string& name) { m_name=name; }
+    void        unit(const std::string& unit) { m_unit=unit; }
     void        autoscale(void);
     void        read(const GXmlElement& xml);
     void        write(GXmlElement& xml) const;
