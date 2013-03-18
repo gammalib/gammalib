@@ -75,10 +75,10 @@ public:
     virtual std::string                  print(void) const;
 
     // Other methods
-    double semiminor(void) const { return m_semiminor.real_value(); }
-    double semimajor(void) const { return m_semimajor.real_value(); }
-    void   semiminor(const double& semiminor) { m_semiminor.real_value(semiminor); }
-    void   semimajor(const double& semimajor) { m_semimajor.real_value(semimajor); }
+    double semiminor(void) const { return m_semiminor.Value(); }
+    double semimajor(void) const { return m_semimajor.Value(); }
+    void   semiminor(const double& semiminor) { m_semiminor.Value(semiminor); }
+    void   semimajor(const double& semimajor) { m_semimajor.Value(semimajor); }
 
 protected:
     // Protected methods

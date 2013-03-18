@@ -348,8 +348,8 @@ void GModelSpatialPointSource::read(const GXmlElement& xml)
     if (has_glon && has_glat) {
         GSkyDir dir;
         dir.lb_deg(ra(), dec()),
-        m_ra.real_value(dir.ra_deg());
-        m_dec.real_value(dir.dec_deg());
+        m_ra.Value(dir.ra_deg());
+        m_dec.Value(dir.dec_deg());
     }
     else if (has_glon || has_glat) {
         throw GException::model_invalid_parnames(G_READ, xml,
@@ -480,8 +480,8 @@ GSkyDir GModelSpatialPointSource::dir(void) const
 void GModelSpatialPointSource::dir(const GSkyDir& dir)
 {
     // Assign Right Ascension and Declination
-    m_ra.real_value(dir.ra_deg());
-    m_dec.real_value(dir.dec_deg());
+    m_ra.Value(dir.ra_deg());
+    m_dec.Value(dir.dec_deg());
 
     // Return
     return;
@@ -504,8 +504,8 @@ void GModelSpatialPointSource::init_members(void)
     m_ra.name("RA");
     m_ra.unit("deg");
     m_ra.fix();
-    m_ra.scale(1.0);
-    m_ra.gradient(0.0);
+    m_ra.Scale(1.0);
+    m_ra.Gradient(0.0);
     m_ra.hasgrad(false);
 
     // Initialise Declination
@@ -513,8 +513,8 @@ void GModelSpatialPointSource::init_members(void)
     m_dec.name("DEC");
     m_dec.unit("deg");
     m_dec.fix();
-    m_dec.scale(1.0);
-    m_dec.gradient(0.0);
+    m_dec.Scale(1.0);
+    m_dec.Gradient(0.0);
     m_dec.hasgrad(false);
 
     // Set parameter pointer(s)

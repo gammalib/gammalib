@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GModelSpectralPlaw.hpp  -  Spectral power law model class        *
+ *         GModelSpectralPlaw.hpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -76,9 +76,9 @@ public:
     virtual std::string         print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.real_value(); }
-    double index(void) const { return m_index.real_value(); }
-    double pivot(void) const { return m_pivot.real_value(); }
+    double norm(void) const { return m_norm.Value(); }
+    double index(void) const { return m_index.Value(); }
+    double pivot(void) const { return m_pivot.Value(); }
 
 protected:
     // Protected methods

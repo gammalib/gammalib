@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelTemporalConst.hpp  -  Temporal constant model class        *
+ *         GModelTemporalConst.hpp - Temporal constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,7 +70,7 @@ public:
     virtual std::string          print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.real_value(); }
+    double norm(void) const { return m_norm.Value(); }
 
 protected:
     // Protected methods

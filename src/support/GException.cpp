@@ -43,6 +43,42 @@ const char* GExceptionHandler::what() const throw()
 
 
 /***********************************************************************//**
+ * @brief Invalid value
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::invalid_value::invalid_value(const std::string& origin,
+                                         const std::string& message)
+{
+    // Set origin
+    m_origin  = origin;
+    m_message = "Invalid value.\n"+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invalid argument
+ *
+ * @param[in] origin Name of method that has thrown the exception.
+ * @param[in] message Error message.
+ ***************************************************************************/
+GException::invalid_argument::invalid_argument(const std::string& origin,
+                                               const std::string& message)
+{
+    // Set origin
+    m_origin  = origin;
+    m_message = "Invalid argument.\n"+message;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Feature not implement
  *
  * @param[in] origin Name of method that has thrown the exception.

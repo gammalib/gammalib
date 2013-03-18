@@ -36,7 +36,7 @@ def ptsrc_model(ra=0.0, dec=0.0):
     spatial = GModelSpatialPointSource(pos)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0)
+    spectral = GModelSpectralPlaw(1.0, -2.0, 100.0)
 
     # Set sky model
     model = GModelSky(spatial, spectral)
@@ -60,7 +60,7 @@ def shell_model(ra=0.3, dec=0.3, radius=0.3, width=0.1):
     radial = GModelSpatialRadialShell(center, radius, width, False)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0)
+    spectral = GModelSpectralPlaw(1.0, -2.0, 100.0)
 
     # Set sky model
     model = GModelSky(radial, spectral)
@@ -84,7 +84,7 @@ def disk_model(ra=359.6, dec=-0.2, radius=0.4):
     radial = GModelSpatialRadialDisk(center, radius)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0)
+    spectral = GModelSpectralPlaw(1.0, -2.0, 100.0)
 
     # Set sky model
     model = GModelSky(radial, spectral)
@@ -108,7 +108,7 @@ def gauss_model(ra=359.6, dec=+0.1, sigma=0.2):
     radial = GModelSpatialRadialGauss(center, sigma)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0)
+    spectral = GModelSpectralPlaw(1.0, -2.0, 100.0)
 
     # Set sky model
     model = GModelSky(radial, spectral)
@@ -128,7 +128,7 @@ def diffuse_model(file="../../../test/data/cena_lobes_parkes.fits"):
     spatial = GModelSpatialDiffuseMap(file)
 
     # Set spectral model
-    spectral = GModelSpectralPlaw(1.0, -2.0)
+    spectral = GModelSpectralPlaw(1.0, -2.0, 100.0)
 
     # Set sky model
     model = GModelSky(spatial, spectral)

@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GTestModelData.hpp - Test data model class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -101,7 +101,7 @@ public:
                                        }
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const {
-                                  double result = m_pars[0]->real_value();
+                                  double result = m_pars[0]->Value();
                                   return result;
                               }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelSpectralConst.hpp  -  Spectral constant model class        *
+ *         GModelSpectralConst.hpp - Spectral constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralConst.hpp
  * @brief Constant spectral model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSPECTRALCONST_HPP
@@ -72,7 +72,7 @@ public:
     virtual std::string          print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.real_value(); }
+    double norm(void) const { return m_norm.Value(); }
 
 protected:
     // Protected methods

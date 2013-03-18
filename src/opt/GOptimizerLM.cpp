@@ -281,7 +281,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             int    grad_imax = -1;
             for (int ipar = 0; ipar < m_npars; ++ipar) {
                 if (pars.par(ipar).isfree()) {
-                    double grad = pars.par(ipar).gradient();
+                    double grad = pars.par(ipar).factor_gradient();
                     if (grad > grad_max) {
                         grad_max  = grad;
                         grad_imax = ipar;
@@ -578,7 +578,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         // Save parameter values in vector
         GVector save_pars(m_npars);
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            save_pars[ipar] = pars.par(ipar).value();
+            save_pars[ipar] = pars.par(ipar).factor_value();
         }
 
         // Setup matrix and vector for covariance computation
@@ -640,9 +640,9 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
             if (pars.par(ipar).isfree()) {
 
                 // Get actual parameter value and limits
-                double p     = pars.par(ipar).value();
-                double p_min = pars.par(ipar).min();
-                double p_max = pars.par(ipar).max();
+                double p     = pars.par(ipar).factor_value();
+                double p_min = pars.par(ipar).factor_min();
+                double p_max = pars.par(ipar).factor_max();
 
                 // Compute new parameter value
                 p += (*grad)[ipar] * step;
@@ -705,7 +705,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
                 }
 
                 // Set new parameter value
-                pars.par(ipar).value(p);
+                pars.par(ipar).factor_value(p);
 
             } // endif: Parameter was free
 
@@ -752,7 +752,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         // Determine how many parameters have changed
         int par_change = 0;
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            if (pars.par(ipar).value() != save_pars[ipar])
+            if (pars.par(ipar).factor_value() != save_pars[ipar])
                 par_change++;
         }
 
@@ -789,7 +789,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
             *grad     = save_grad;
             *covar    = save_covar;
             for (int ipar = 0; ipar < m_npars; ++ipar) {
-                pars.par(ipar).value(save_pars[ipar]);
+                pars.par(ipar).factor_value(save_pars[ipar]);
             }
         }
 
@@ -843,10 +843,10 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
                 unit[ipar] = 1.0;
                 GVector x  = covar->cholesky_solver(unit,1);
                 if (x[ipar] >= 0.0) {
-                    pars.par(ipar).error(sqrt(x[ipar]));
+                    pars.par(ipar).factor_error(sqrt(x[ipar]));
                 }
                 else {
-                    pars.par(ipar).error(0.0);
+                    pars.par(ipar).factor_error(0.0);
                     m_status = G_LM_BAD_ERRORS;
                 }
                 unit[ipar] = 0.0;
@@ -940,9 +940,9 @@ double GOptimizerLM::step_size(const GVector& grad, const GOptimizerPars& pars)
         for (int ipar = 0; ipar < pars.npars(); ++ipar) {
 
             // Get parameter attributes
-            double p     = pars.par(ipar).value();
-            double p_min = pars.par(ipar).min();
-            double p_max = pars.par(ipar).max();
+            double p     = pars.par(ipar).factor_value();
+            double p_min = pars.par(ipar).factor_min();
+            double p_max = pars.par(ipar).factor_max();
             double delta = grad[ipar];
 
             // Check if a parameter minimum requires a reduced step size

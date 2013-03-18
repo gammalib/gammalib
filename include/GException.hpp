@@ -62,19 +62,38 @@ protected:
 class GException : public GExceptionHandler {
 public:
 
-    // Feature not implemented
-    class feature_not_implemented : public GExceptionHandler {
+    // --- LOGIC EXCEPTIONS (what client could have tested) ---
+
+    // Invalid value
+    class invalid_value : public GExceptionHandler {
     public:
-        feature_not_implemented(std::string origin,
-                                std::string message = "");
+        invalid_value(const std::string& origin,
+                      const std::string& message);
     };
 
     // Invalid argument
     class invalid_argument : public GExceptionHandler {
     public:
         invalid_argument(const std::string& origin,
+                         const std::string& message);
+        invalid_argument(const std::string& origin,
                          const std::string& argument,
-                         const std::string& message = "");
+                         const std::string& message);
+    };
+
+
+    // --- RUNTIME EXCEPTIONS (not testable by client) ---
+
+
+    // --- OLD EXCEPTIONS ---
+
+
+
+    // Feature not implemented
+    class feature_not_implemented : public GExceptionHandler {
+    public:
+        feature_not_implemented(std::string origin,
+                                std::string message = "");
     };
 
     // Invalid type conversion

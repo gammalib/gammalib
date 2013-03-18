@@ -330,7 +330,7 @@ GModelPar GModel::scale(const std::string& instrument) const
 
     // Initialise unit scale factor
     GModelPar scale;
-    scale.real_value(1.0);
+    scale.Value(1.0);
     scale.name(uinstrument);
     scale.fix();
 
@@ -708,7 +708,7 @@ std::string GModel::print_attributes(void) const
             }
             result.append(m_scales[i].name());
             result.append("=");
-            result.append(str(m_scales[i].real_value()));
+            result.append(str(m_scales[i].Value()));
         }
         result.append(", others unity");
     }

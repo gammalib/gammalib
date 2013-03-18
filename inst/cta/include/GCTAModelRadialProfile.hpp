@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GCTAModelRadialProfile.hpp  -  Radial Profile CTA model class      *
+ *       GCTAModelRadialProfile.hpp - Radial Profile CTA model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -79,12 +79,12 @@ public:
     virtual std::string             print(void) const;
 
     // Other methods
-    double width(void) const { return m_width.real_value(); }
-    double core(void) const { return m_core.real_value(); }
-    double tail(void) const { return m_tail.real_value(); }
-    void   width(const double& width) { m_width.real_value(width); }
-    void   core(const double& core) { m_core.real_value(core); }
-    void   tail(const double& tail) { m_tail.real_value(tail); }
+    double width(void) const { return m_width.Value(); }
+    double core(void) const { return m_core.Value(); }
+    double tail(void) const { return m_tail.Value(); }
+    void   width(const double& width) { m_width.Value(width); }
+    void   core(const double& core) { m_core.Value(core); }
+    void   tail(const double& tail) { m_tail.Value(tail); }
 
 protected:
     // Protected methods

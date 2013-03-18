@@ -237,7 +237,7 @@ double GModelSpatialDiffuseMap::eval(const GSkyDir& srcDir) const
     double intensity = m_map(srcDir);
 
     // Return intensity times normalization factor
-    return (intensity * m_value.real_value());
+    return (intensity * m_value.Value());
 }
 
 
@@ -261,10 +261,10 @@ double GModelSpatialDiffuseMap::eval_gradients(const GSkyDir& srcDir) const
     double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
 
     // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseMap*>(this)->m_value.gradient(g_value);
+    const_cast<GModelSpatialDiffuseMap*>(this)->m_value.factor_gradient(g_value);
 
     // Return intensity times normalization factor
-    return (intensity * m_value.real_value());
+    return (intensity * m_value.Value());
 }
 
 
@@ -479,10 +479,10 @@ void GModelSpatialDiffuseMap::init_members(void)
     // Initialise Value
     m_value.clear();
     m_value.name("Prefactor");
-    m_value.value(1.0);
-    m_value.scale(1.0);
-    m_value.range(0.001, 1000.0);
-    m_value.gradient(0.0);
+    m_value.Value(1.0);
+    m_value.Scale(1.0);
+    m_value.Range(0.001, 1000.0);
+    m_value.Gradient(0.0);
     m_value.fix();
     m_value.hasgrad(true);
 

@@ -482,11 +482,11 @@ void GModelSpatialRadialDisk::init_members(void)
     m_radius.clear();
     m_radius.name("Radius");
     m_radius.unit("deg");
-    m_radius.value(2.778e-4); // 1 arcsec
-    m_radius.min(2.778e-4);   // 1 arcsec
+    m_radius.Value(2.778e-4); // 1 arcsec
+    m_radius.Min(2.778e-4);   // 1 arcsec
     m_radius.free();
-    m_radius.scale(1.0);
-    m_radius.gradient(0.0);
+    m_radius.Scale(1.0);
+    m_radius.Gradient(0.0);
     m_radius.hasgrad(false);  // Radial components never have gradients
 
     // Set parameter pointer(s)

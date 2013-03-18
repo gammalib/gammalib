@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GModelSpectralPlaw2.hpp  -  Spectral power law model class        *
+ *        GModelSpectralPlaw2.hpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralPlaw2.hpp
  * @brief Flux normalized power law spectral model class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSPECTRALPLAW2_HPP
@@ -79,10 +79,10 @@ public:
     virtual std::string          print(void) const;
 
     // Other methods
-    double integral(void) const { return m_integral.real_value(); }
-    double index(void) const { return m_index.real_value(); }
-    double emin(void) const { return m_emin.real_value(); }
-    double emax(void) const { return m_emax.real_value(); }
+    double integral(void) const { return m_integral.Value(); }
+    double index(void) const { return m_index.Value(); }
+    double emin(void) const { return m_emin.Value(); }
+    double emax(void) const { return m_emax.Value(); }
 
 protected:
     // Protected methods

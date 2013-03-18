@@ -226,7 +226,7 @@ double GModelSpatialDiffuseConst::eval(const GSkyDir& srcDir) const
 double GModelSpatialDiffuseConst::eval_gradients(const GSkyDir& srcDir) const
 {
     // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseConst*>(this)->m_value.gradient(0.0);
+    const_cast<GModelSpatialDiffuseConst*>(this)->m_value.factor_gradient(0.0);
 
     // Return value
     return 1.0;
@@ -390,10 +390,10 @@ void GModelSpatialDiffuseConst::init_members(void)
     m_value.clear();
     m_value.name("Value");
     m_value.fix();
-    m_value.value(1.0);
-    m_value.scale(1.0);
-    m_value.range(0.0, 10.0);
-    m_value.gradient(0.0);
+    m_value.Value(1.0);
+    m_value.Scale(1.0);
+    m_value.Range(0.0, 10.0);
+    m_value.Gradient(0.0);
     m_value.hasgrad(true);
 
     // Set parameter pointer(s)

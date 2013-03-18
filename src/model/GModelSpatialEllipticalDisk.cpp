@@ -286,7 +286,7 @@ double GModelSpatialEllipticalDisk::eval(const double& theta,
         update();
 
         // Perform computations
-        double diff_angle = posangle - m_posangle.real_value()*deg2rad;
+        double diff_angle = posangle - m_posangle.Value()*deg2rad;
         double cosinus    = std::cos(diff_angle);
         double sinus      = std::sin(diff_angle);
         double arg1       = m_semiminor_rad * cosinus;
@@ -577,22 +577,22 @@ void GModelSpatialEllipticalDisk::init_members(void)
     m_semiminor.clear();
     m_semiminor.name("MinorRadius");
     m_semiminor.unit("deg");
-    m_semiminor.value(2.778e-4); // 1 arcsec
-    m_semiminor.min(2.778e-4);   // 1 arcsec
+    m_semiminor.Value(2.778e-4); // 1 arcsec
+    m_semiminor.Min(2.778e-4);   // 1 arcsec
     m_semiminor.free();
-    m_semiminor.scale(1.0);
-    m_semiminor.gradient(0.0);
+    m_semiminor.Scale(1.0);
+    m_semiminor.Gradient(0.0);
     m_semiminor.hasgrad(false);  // Elliptical components never have gradients
 
     // Initialise semi-major axis
     m_semimajor.clear();
     m_semimajor.name("MajorRadius");
     m_semimajor.unit("deg");
-    m_semimajor.value(2.778e-4); // 1 arcsec
-    m_semimajor.min(2.778e-4);   // 1 arcsec
+    m_semimajor.Value(2.778e-4); // 1 arcsec
+    m_semimajor.Min(2.778e-4);   // 1 arcsec
     m_semimajor.free();
-    m_semimajor.scale(1.0);
-    m_semimajor.gradient(0.0);
+    m_semimajor.Scale(1.0);
+    m_semimajor.Gradient(0.0);
     m_semimajor.hasgrad(false);  // Elliptical components never have gradients
 
     // Set parameter pointer(s)

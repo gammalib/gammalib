@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GCTAModelRadialGauss.hpp  -  Radial Gaussian CTA model class       *
+ *       GCTAModelRadialGauss.hpp - Radial Gaussian CTA model class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,8 +77,8 @@ public:
     virtual std::string           print(void) const;
 
     // Other methods
-    double sigma(void) const { return m_sigma.real_value(); }
-    void   sigma(const double& sigma) { m_sigma.real_value(sigma); }
+    double sigma(void) const { return m_sigma.Value(); }
+    void   sigma(const double& sigma) { m_sigma.Value(sigma); }
 
 protected:
     // Protected methods

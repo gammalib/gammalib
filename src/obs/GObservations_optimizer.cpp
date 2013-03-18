@@ -400,7 +400,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     for (int ipar = 0; ipar < pars.npars(); ++ipar) {
         if (pars.par(ipar).isfree()) {
             GModelPar* par = (GModelPar*)&pars.par(ipar);
-            par->gradient((*m_gradient)[ipar]);
+            par->factor_gradient((*m_gradient)[ipar]);
         }
     }
 

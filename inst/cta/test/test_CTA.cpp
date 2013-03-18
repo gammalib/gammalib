@@ -529,8 +529,8 @@ void TestGCTAOptimize::test_unbinned_optimizer(void)
             for (int k = 0; k < model->size(); ++k) {
                 GModelPar par  = (*model)[k];
                 std::string msg = "Verify optimization result for " + par.print();
-                test_value(par.real_value(), fit_results[j++], 5.0e-5, msg);
-                test_value(par.real_error(), fit_results[j++], 5.0e-5, msg);
+                test_value(par.Value(), fit_results[j++], 5.0e-5, msg);
+                test_value(par.Error(), fit_results[j++], 5.0e-5, msg);
             }
         }
     }
@@ -591,8 +591,8 @@ void TestGCTAOptimize::test_binned_optimizer(void)
             for (int k = 0; k < model->size(); ++k) {
                 GModelPar par  = (*model)[k];
                 std::string msg = "Verify optimization result for " + par.print();
-                test_value(par.real_value(), fit_results[j++], 5.0e-5, msg);
-                test_value(par.real_error(), fit_results[j++], 5.0e-5, msg);
+                test_value(par.Value(), fit_results[j++], 5.0e-5, msg);
+                test_value(par.Error(), fit_results[j++], 5.0e-5, msg);
             }
         }
     }

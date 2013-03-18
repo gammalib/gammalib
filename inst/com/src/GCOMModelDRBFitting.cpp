@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GCOMModelDRBFitting.cpp  -  COMPTEL DRB model fitting class       *
+ *        GCOMModelDRBFitting.cpp - COMPTEL DRB model fitting class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -273,7 +273,7 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
 
         // If model is a scaling factor then use the single parameter as such
         if (m_scale) {
-            scale = m_values[0].real_value();
+            scale = m_values[0].Value();
         }
 
         // ... otherwise perform a linear interpolation
@@ -289,8 +289,8 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
             m_nodes.set_value(phibar);
 
             // Get scale factor
-            scale = m_values[m_nodes.inx_left()].real_value()  * m_nodes.wgt_left() +
-                    m_values[m_nodes.inx_right()].real_value() * m_nodes.wgt_right();
+            scale = m_values[m_nodes.inx_left()].Value()  * m_nodes.wgt_left() +
+                    m_values[m_nodes.inx_right()].Value() * m_nodes.wgt_right();
 
         } // endelse: performed linear interpolation
 
@@ -349,7 +349,7 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
     // Initialise value and gradients
     double value = 0.0;
     for (int i = 0; i < m_values.size(); ++i) {
-        const_cast<GCOMModelDRBFitting*>(this)->m_values[i].gradient(0.0);
+        const_cast<GCOMModelDRBFitting*>(this)->m_values[i].factor_gradient(0.0);
     }
 
     // Get bin index
@@ -372,13 +372,13 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
         if (m_scale) {
 
             // Get scale factor
-            scale = m_values[0].real_value();
+            scale = m_values[0].Value();
         
             // Compute partial derivative
             double grad = (m_values[0].isfree()) ? value * m_values[0].scale() : 0.0;
 
             // Set gradient (circumvent const correctness)
-            const_cast<GCOMModelDRBFitting*>(this)->m_values[0].gradient(grad);
+            const_cast<GCOMModelDRBFitting*>(this)->m_values[0].factor_gradient(grad);
 
         }
 
@@ -401,19 +401,19 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
             double wgt_right = m_nodes.wgt_right();
 
             // Get scale factor
-            scale = m_values[inx_left].real_value()  * wgt_left +
-                    m_values[inx_right].real_value() * wgt_right;
+            scale = m_values[inx_left].Value()  * wgt_left +
+                    m_values[inx_right].Value() * wgt_right;
 
             // Gradient for left node
             if (m_values[inx_left].isfree()) {
                 double grad = wgt_left * value * m_values[inx_left].scale();
-                const_cast<GCOMModelDRBFitting*>(this)->m_values[inx_left].gradient(grad);
+                const_cast<GCOMModelDRBFitting*>(this)->m_values[inx_left].factor_gradient(grad);
             }
 
             // Gradient for right node
             if (m_values[inx_right].isfree()) {
                 double grad = wgt_right * value * m_values[inx_right].scale();
-                const_cast<GCOMModelDRBFitting*>(this)->m_values[inx_right].gradient(grad);
+                const_cast<GCOMModelDRBFitting*>(this)->m_values[inx_right].factor_gradient(grad);
             }
 
         } // endelse: performed linear interpolation
@@ -893,7 +893,7 @@ void GCOMModelDRBFitting::set_cache(void) const
 
         // Set Phibar node array. Signal if one of the Phibar values is free
         for (int i = 0; i < num; ++i) {
-            double phibar = m_phibars[i].real_value();
+            double phibar = m_phibars[i].Value();
             m_nodes.append(phibar);
             m_old_phibars.push_back(phibar);
             if (m_phibars[i].isfree()) {
@@ -924,7 +924,7 @@ void GCOMModelDRBFitting::update_cache(void) const
     
         // Update Phibar values
         for (int i = 0; i < num; ++i) {
-            double phibar = m_phibars[i].real_value();
+            double phibar = m_phibars[i].Value();
             if (phibar != m_old_phibars[i]) {
                 m_nodes[i]       = phibar;
                 m_old_phibars[i] = phibar;

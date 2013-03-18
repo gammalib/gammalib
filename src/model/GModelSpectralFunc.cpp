@@ -291,7 +291,7 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng) const
     double g_norm  = (m_norm.isfree())  ? m_norm.scale() * func : 0.0;
 
     // Set gradients (circumvent const correctness)
-    const_cast<GModelSpectralFunc*>(this)->m_norm.gradient(g_norm);
+    const_cast<GModelSpectralFunc*>(this)->m_norm.factor_gradient(g_norm);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -718,11 +718,11 @@ void GModelSpectralFunc::init_members(void)
     // Initialise powerlaw normalisation
     m_norm.clear();
     m_norm.name("Normalization");
-    m_norm.scale(1.0);
-    m_norm.value(1.0);
-    m_norm.range(0.0,1000.0);
+    m_norm.Scale(1.0);
+    m_norm.Value(1.0);
+    m_norm.Range(0.0,1000.0);
     m_norm.free();
-    m_norm.gradient(0.0);
+    m_norm.Gradient(0.0);
     m_norm.hasgrad(true);
 
     // Set parameter pointer(s)

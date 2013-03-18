@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GCTAModelRadialPolynom.cpp  -  Radial Polynom CTA model class      *
+ *       GCTAModelRadialPolynom.cpp - Radial Polynom CTA model class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -91,15 +91,15 @@ GCTAModelRadialPolynom::GCTAModelRadialPolynom(const std::vector<double>& coeffs
         GModelPar par;
 
         // Set value
-        par.real_value(coeffs[i]);
+        par.Value(coeffs[i]);
 
         // Set other attributes
         std::string name = "coeff"+str(i);
         par.name(name);
         par.unit("");
         par.free();
-        par.scale(1.0);
-        par.gradient(0.0);
+        par.Scale(1.0);
+        par.Gradient(0.0);
         par.hasgrad(true);
 
         // Push coefficient on list
@@ -262,9 +262,9 @@ double GCTAModelRadialPolynom::eval(const double& offset) const
     if (ncoeffs > 0) {
 
         // Compute value
-        value = m_coeffs[ncoeffs-1].real_value();
+        value = m_coeffs[ncoeffs-1].Value();
         for (int i = ncoeffs-2; i >= 0; i--) {
-            value = value * offset + m_coeffs[i].real_value();
+            value = value * offset + m_coeffs[i].Value();
         }
 
     } // endif: there were coefficients
@@ -276,7 +276,7 @@ double GCTAModelRadialPolynom::eval(const double& offset) const
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
         for (int i = 0; i < ncoeffs; ++i) {
-            std::cout << ", c" << i << "=" << m_coeffs[i].real_value();
+            std::cout << ", c" << i << "=" << m_coeffs[i].Value();
         }
         std::cout << ")" << std::endl;
     }
@@ -323,9 +323,9 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
     if (ncoeffs > 0) {
 
         // Compute value
-        value = m_coeffs[ncoeffs-1].real_value();
+        value = m_coeffs[ncoeffs-1].Value();
         for (int i = ncoeffs-2; i >= 0; i--) {
-            value = value * offset + m_coeffs[i].real_value();
+            value = value * offset + m_coeffs[i].Value();
         }
 
         // Initialise theta^i for the first coefficient
@@ -338,7 +338,7 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
             double grad = offset_power * m_coeffs[i].scale();
 
             // Store gradient
-            const_cast<GCTAModelRadialPolynom*>(this)->m_coeffs[i].gradient(grad);
+            const_cast<GCTAModelRadialPolynom*>(this)->m_coeffs[i].factor_gradient(grad);
 
             // Increase offset power for next coefficient
             offset_power *= offset;
@@ -354,7 +354,7 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
         for (int i = 0; i < ncoeffs; ++i) {
-            std::cout << ", c_" << i << "=" << m_coeffs[i].real_value();
+            std::cout << ", c_" << i << "=" << m_coeffs[i].Value();
         }
         std::cout << ")" << std::endl;
     }

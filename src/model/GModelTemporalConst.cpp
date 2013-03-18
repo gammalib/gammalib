@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelTemporalConst.cpp  -  Temporal constant model class        *
+ *         GModelTemporalConst.cpp - Temporal constant model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -210,7 +210,7 @@ double GModelTemporalConst::eval_gradients(const GTime& srcTime) const
     double g_norm = (m_norm.isfree()) ? m_norm.scale() : 0.0;
 
     // Set gradients (circumvent const correctness)
-    const_cast<GModelTemporalConst*>(this)->m_norm.gradient(g_norm);
+    const_cast<GModelTemporalConst*>(this)->m_norm.factor_gradient(g_norm);
 
     // Return
     return value;
@@ -324,9 +324,9 @@ void GModelTemporalConst::init_members(void)
     m_norm.clear();
     m_norm.name("Constant");
     m_norm.unit("(relative value)");
-    m_norm.value(1.0);
+    m_norm.Value(1.0);
     m_norm.fix();
-    m_norm.gradient(0.0);
+    m_norm.Gradient(0.0);
     m_norm.hasgrad(true);
 
     // Set parameter pointer(s)

@@ -1,5 +1,5 @@
 /***************************************************************************
- *      GCTAModelRadialGauss.cpp  -  Radial Gaussian CTA model class       *
+ *       GCTAModelRadialGauss.cpp - Radial Gaussian CTA model class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -284,7 +284,7 @@ double GCTAModelRadialGauss::eval_gradients(const double& offset) const
     double g_sigma = value * arg2 / sigma() * m_sigma.scale();
 
     // Set gradients (circumvent const correctness)
-    const_cast<GCTAModelRadialGauss*>(this)->m_sigma.gradient(g_sigma);
+    const_cast<GCTAModelRadialGauss*>(this)->m_sigma.factor_gradient(g_sigma);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -433,11 +433,11 @@ void GCTAModelRadialGauss::read(const GXmlElement& xml)
             m_sigma.read(*par);
             
             // Check parameter
-            if (m_sigma.real_value() <= 0.0) {
+            if (m_sigma.Value() <= 0.0) {
                 throw GException::model_invalid_parvalue(G_READ, xml,
                       "\"Sigma\" parameter is required to be positive.");
             }
-            if (!m_sigma.hasmin() || m_sigma.real_min() <= 0.0) {
+            if (!m_sigma.hasmin() || m_sigma.Min() <= 0.0) {
                 throw GException::model_invalid_parlimit(G_READ, xml,
                       "\"Sigma\" parameter requires positive minimum boundary.");
             }
@@ -558,11 +558,11 @@ void GCTAModelRadialGauss::init_members(void)
     m_sigma.clear();
     m_sigma.name("Sigma");
     m_sigma.unit("deg2");
-    m_sigma.value(7.71728e-8); // (1 arcsec)^2
-    m_sigma.min(7.71728e-8);   // (1 arcsec)^2
+    m_sigma.Value(7.71728e-8); // (1 arcsec)^2
+    m_sigma.Min(7.71728e-8);   // (1 arcsec)^2
     m_sigma.free();
-    m_sigma.scale(1.0);
-    m_sigma.gradient(0.0);
+    m_sigma.Scale(1.0);
+    m_sigma.Gradient(0.0);
     m_sigma.hasgrad(true);
 
     // Set parameter pointer(s)

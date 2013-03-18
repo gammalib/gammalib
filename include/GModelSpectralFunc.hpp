@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelSpectralFunc.hpp  -  Spectral function model class         *
+ *         GModelSpectralFunc.hpp - Spectral function model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,7 +75,7 @@ public:
     virtual std::string         print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.real_value(); }
+    double norm(void) const { return m_norm.Value(); }
 
 protected:
     // Protected methods

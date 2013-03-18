@@ -424,7 +424,7 @@ GVector GModelSky::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
     if (size() > 0) {
         gradients = GVector(size());
         for (int i = 0; i < size(); ++i) {
-            gradients[i] = m_pars[i]->gradient();
+            gradients[i] = m_pars[i]->factor_gradient();
         }
     }
 
@@ -547,7 +547,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
 
         // If required, apply instrument specific model scaling
         if (!m_scales.empty()) {
-            npred *= scale(obs.instrument()).real_value();
+            npred *= scale(obs.instrument()).Value();
         }
 
         // Compile option: Check for NaN/Inf
@@ -1085,7 +1085,7 @@ double GModelSky::spatial(const GEvent& event,
 
         // If required, apply instrument specific model scaling
         if (!m_scales.empty()) {
-            irf *= scale(obs.instrument()).real_value();
+            irf *= scale(obs.instrument()).Value();
         }
 
         // Case A: evaluate gradients
@@ -1116,7 +1116,7 @@ double GModelSky::spatial(const GEvent& event,
                 double fact = temp * irf;
                 if (fact != 1.0) {
                     for (int i = 0; i < spectral()->size(); ++i) {
-                        (*spectral())[i].gradient((*spectral())[i].gradient() * fact);
+                        (*spectral())[i].factor_gradient((*spectral())[i].factor_gradient() * fact);
                     }
                 }
             }
@@ -1126,7 +1126,7 @@ double GModelSky::spatial(const GEvent& event,
                 double fact = spec * irf;
                 if (fact != 1.0) {
                     for (int i = 0; i < temporal()->size(); ++i) {
-                        (*temporal())[i].gradient((*temporal())[i].gradient() * fact);
+                        (*temporal())[i].factor_gradient((*temporal())[i].factor_gradient() * fact);
                     }
                 }
             }

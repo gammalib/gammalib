@@ -93,9 +93,9 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double& norm,
     init_members();
 
     // Set parameters
-    m_norm.real_value(norm);
-    m_index.real_value(index);
-    m_pivot.real_value(pivot);
+    m_norm.Value(norm);
+    m_index.Value(index);
+    m_pivot.Value(pivot);
 
     // Perform autoscaling of parameter
     autoscale();
@@ -306,12 +306,12 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng) const
     // Compute partial derivatives of the parameter values
     double g_norm  = (m_norm.isfree())  ? m_norm.scale() * power : 0.0;
     double g_index = (m_index.isfree()) ? value * m_index.scale() * std::log(energy) : 0.0;
-    double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.value() : 0.0;
+    double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.factor_value() : 0.0;
 
     // Set gradients (circumvent const correctness)
-    const_cast<GModelSpectralPlaw*>(this)->m_norm.gradient(g_norm);
-    const_cast<GModelSpectralPlaw*>(this)->m_index.gradient(g_index);
-    const_cast<GModelSpectralPlaw*>(this)->m_pivot.gradient(g_pivot);
+    const_cast<GModelSpectralPlaw*>(this)->m_norm.factor_gradient(g_norm);
+    const_cast<GModelSpectralPlaw*>(this)->m_index.factor_gradient(g_index);
+    const_cast<GModelSpectralPlaw*>(this)->m_pivot.factor_gradient(g_pivot);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -640,31 +640,31 @@ void GModelSpectralPlaw::init_members(void)
     m_norm.clear();
     m_norm.name("Prefactor");
     m_norm.unit("ph/cm2/s/MeV");
-    m_norm.scale(1.0);
-    m_norm.value(1.0);          // default: 1.0
-    m_norm.min(0.0);            // min:     0.0
+    m_norm.Scale(1.0);
+    m_norm.Value(1.0);          // default: 1.0
+    m_norm.Min(0.0);            // min:     0.0
     m_norm.free();
-    m_norm.gradient(0.0);
+    m_norm.Gradient(0.0);
     m_norm.hasgrad(true);
 
     // Initialise powerlaw index
     m_index.clear();
     m_index.name("Index");
-    m_index.scale(1.0);
-    m_index.value(-2.0);        // default: -2.0
-    m_index.range(-10.0,+10.0); // range:   [-10,+10]
+    m_index.Scale(1.0);
+    m_index.Value(-2.0);        // default: -2.0
+    m_index.Range(-10.0,+10.0); // range:   [-10,+10]
     m_index.free();
-    m_index.gradient(0.0);
+    m_index.Gradient(0.0);
     m_index.hasgrad(true);
 
     // Initialise pivot energy
     m_pivot.clear();
     m_pivot.name("PivotEnergy");
     m_pivot.unit("MeV");
-    m_pivot.scale(1.0);
-    m_pivot.value(100.0);       // default: 100
+    m_pivot.Scale(1.0);
+    m_pivot.Value(100.0);       // default: 100
     m_pivot.fix();
-    m_pivot.gradient(0.0);
+    m_pivot.Gradient(0.0);
     m_pivot.hasgrad(true);
 
     // Set parameter pointer(s)

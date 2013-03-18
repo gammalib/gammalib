@@ -1,5 +1,5 @@
 /***************************************************************************
- *     GCTAModelRadialAcceptance.cpp  -  Radial acceptance model class     *
+ *      GCTAModelRadialAcceptance.cpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -385,7 +385,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
         double fact = spec * temp * deadc;
         if (fact != 1.0) {
             for (int i = 0; i < radial()->size(); ++i)
-                (*radial())[i].gradient( (*radial())[i].gradient() * fact );
+                (*radial())[i].factor_gradient( (*radial())[i].factor_gradient() * fact );
         }
     }
 
@@ -394,7 +394,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
         double fact = rad * temp * deadc;
         if (fact != 1.0) {
             for (int i = 0; i < spectral()->size(); ++i)
-                (*spectral())[i].gradient( (*spectral())[i].gradient() * fact );
+                (*spectral())[i].factor_gradient( (*spectral())[i].factor_gradient() * fact );
         }
     }
 
@@ -403,7 +403,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
         double fact = rad * spec * deadc;
         if (fact != 1.0) {
             for (int i = 0; i < temporal()->size(); ++i)
-                (*temporal())[i].gradient( (*temporal())[i].gradient() * fact );
+                (*temporal())[i].factor_gradient( (*temporal())[i].factor_gradient() * fact );
         }
     }
 

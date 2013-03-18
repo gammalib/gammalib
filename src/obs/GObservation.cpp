@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.cpp  -  Abstract observation base class          *
+ *            GObservation.cpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -514,7 +514,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
 
         // If model has a gradient then use it
         if (model[ipar].hasgrad()) {
-            grad = model[ipar].gradient();
+            grad = model[ipar].factor_gradient();
         }
 
         // ... otherwise compute it numerically
@@ -527,7 +527,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             GModelPar current = (*ptr)[ipar];
 
             // Get actual parameter value
-            double x = model[ipar].value();
+            double x = model[ipar].factor_value();
 
             // Set fixed step size for computation of derivative.
             // By default, the step size is fixed to 0.0002, but if this would
@@ -538,7 +538,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             const double step_size = 0.0002;
             double       dx        = step_size;
             if (model[ipar].hasmin()) {
-                double dx_min = x - model[ipar].min();
+                double dx_min = x - model[ipar].factor_min();
                 if (dx_min == 0.0) {
                     dx = step_size * x;
                     if (dx == 0.0) {
@@ -551,7 +551,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
                 }
             }
             if (model[ipar].hasmax()) {
-                double dx_max = model[ipar].max() - x;
+                double dx_max = model[ipar].factor_max() - x;
                 if (dx_max == 0.0) {
                     dx = step_size * x;
                     if (dx == 0.0) {
@@ -603,7 +603,7 @@ double GObservation::model_func::eval(double x)
     GModel* model = const_cast<GModel*>(m_model);
 
     // Set value
-    (*model)[m_ipar].value(x);
+    (*model)[m_ipar].factor_value(x);
 
     // Compute model value
     double value = model->eval(*m_event, *m_parent);
@@ -682,7 +682,7 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
         GModelPar current = (*ptr)[ipar];
 
         // Get actual parameter value
-        double x = model[ipar].value();
+        double x = model[ipar].factor_value();
 
         // Determine fixed step size for computation of derivative.
         // By default, the step size is fixed to 0.0002, but if this would
@@ -693,7 +693,7 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
         const double step_size = 0.0002;
         double       dx        = step_size;
         if (model[ipar].hasmin()) {
-            double dx_min = x - model[ipar].min();
+            double dx_min = x - model[ipar].factor_min();
             if (dx_min == 0.0) {
                 dx = step_size * x;
                 if (dx == 0.0) {
@@ -706,7 +706,7 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
             }
         }
         if (model[ipar].hasmax()) {
-            double dx_max = model[ipar].max() - x;
+            double dx_max = model[ipar].factor_max() - x;
             if (dx_max == 0.0) {
                 dx = step_size * x;
                 if (dx == 0.0) {
@@ -755,7 +755,7 @@ double GObservation::npred_func::eval(double x)
     GModel* model = const_cast<GModel*>(m_model);
 
     // Set value
-    (*model)[m_ipar].value(x);
+    (*model)[m_ipar].factor_value(x);
 
     // Compute Npred value
     double npred = m_parent->npred_temp(*model);

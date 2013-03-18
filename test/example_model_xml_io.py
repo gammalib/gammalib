@@ -21,7 +21,7 @@ center.radec_deg(42.0, 43.0)
 # Spectral index: -2.1
 # ===================================================
 point_spatial  = GModelSpatialPointSource(center)
-point_spectrum = GModelSpectralPlaw(1.0e-7, -2.1)
+point_spectrum = GModelSpectralPlaw(1.0e-7, -2.1, 100.0)
 point = GModelSky(point_spatial, point_spectrum)
 point.name('My point source')
 
@@ -32,7 +32,7 @@ point.name('My point source')
 # Spectral index: -2.4
 # ===================================================
 gauss_spatial  = GModelSpatialRadialGauss(center, 3.0)
-gauss_spectrum = GModelSpectralPlaw(4.2e-7, -2.4)
+gauss_spectrum = GModelSpectralPlaw(4.2e-7, -2.4, 100.0)
 gauss = GModelSky(gauss_spatial, gauss_spectrum)
 gauss.name('My Gaussian source')
 
@@ -44,7 +44,7 @@ gauss.name('My Gaussian source')
 models = GModels()
 models.append(point)
 models.append(gauss)
-print models
+print(models)
 
 #
 # Write the model container to XML file and delete the container
@@ -59,5 +59,5 @@ del models
 # Print again the content of the container.
 # ==============================================================
 models2 = GModels(filename)
-print
-print models2
+print("")
+print(models2)

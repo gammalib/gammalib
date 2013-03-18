@@ -77,12 +77,12 @@ public:
     virtual void   write(GXmlElement& xml) const;
 
     // Other methods
-    double  ra(void) const { return m_ra.real_value(); }
-    double  dec(void) const { return m_dec.real_value(); }
-    double  posangle(void) const { return m_posangle.real_value(); }
+    double  ra(void) const { return m_ra.Value(); }
+    double  dec(void) const { return m_dec.Value(); }
+    double  posangle(void) const { return m_posangle.Value(); }
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
-    void    posangle(const double& posangle) { m_posangle.real_value(posangle); }
+    void    posangle(const double& posangle) { m_posangle.Value(posangle); }
 
 protected:
     // Protected methods

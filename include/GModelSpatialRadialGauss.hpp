@@ -69,8 +69,8 @@ public:
     virtual std::string               print(void) const;
 
     // Other methods
-    double  sigma(void) const { return m_sigma.real_value(); }
-    void    sigma(const double& sigma) { m_sigma.real_value(sigma); }
+    double  sigma(void) const { return m_sigma.Value(); }
+    void    sigma(const double& sigma) { m_sigma.Value(sigma); }
 
 protected:
     // Protected methods

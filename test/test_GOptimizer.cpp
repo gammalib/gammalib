@@ -129,7 +129,7 @@ void TestGOptimizer::test_optimizer(const int& mode)
                                  "Optimizer did not converge"); 
 
     // Check if value is correct
-    test_value(result.value(), RATE, result.error()*3); 
+    test_value(result.factor_value(), RATE, result.factor_error()*3); 
 
     // Return
     return;

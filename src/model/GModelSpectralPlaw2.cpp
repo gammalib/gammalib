@@ -89,8 +89,8 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(const double& integral,
     init_members();
 
     // Set parameters
-    m_integral.real_value(integral);
-    m_index.real_value(index);
+    m_integral.Value(integral);
+    m_index.Value(index);
 
     // Return
     return;
@@ -308,7 +308,7 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng) const
 
     // Integral flux gradient
     if (m_integral.isfree()) {
-         g_integral = value / m_integral.value();
+         g_integral = value / m_integral.factor_value();
     }
 
     // Index gradient
@@ -317,8 +317,8 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng) const
     }
 
     // Set gradients
-    const_cast<GModelSpectralPlaw2*>(this)->m_integral.gradient(g_integral);
-    const_cast<GModelSpectralPlaw2*>(this)->m_index.gradient(g_index);
+    const_cast<GModelSpectralPlaw2*>(this)->m_integral.factor_gradient(g_integral);
+    const_cast<GModelSpectralPlaw2*>(this)->m_index.factor_gradient(g_index);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -708,43 +708,43 @@ void GModelSpectralPlaw2::init_members(void)
     m_integral.clear();
     m_integral.name("Integral");
     m_integral.unit("ph/cm2/s");
-    m_integral.scale(1.0);
-    m_integral.value(1.0);       // default: 1.0
-    m_integral.range(0.0, 10.0); // range:   [0,10]
+    m_integral.Scale(1.0);
+    m_integral.Value(1.0);       // default: 1.0
+    m_integral.Range(0.0, 10.0); // range:   [0,10]
     m_integral.free();
-    m_integral.gradient(0.0);
+    m_integral.Gradient(0.0);
     m_integral.hasgrad(true);
 
     // Initialise powerlaw index
     m_index.clear();
     m_index.name("Index");
-    m_index.scale(1.0);
-    m_index.value(-2.0);        // default: -2.0
-    m_index.range(-10.0,+10.0); // range:   [-10,+10]
+    m_index.Scale(1.0);
+    m_index.Value(-2.0);        // default: -2.0
+    m_index.Range(-10.0,+10.0); // range:   [-10,+10]
     m_index.free();
-    m_index.gradient(0.0);
+    m_index.Gradient(0.0);
     m_index.hasgrad(true);
 
     // Initialise lower limit
     m_emin.clear();
     m_emin.name("LowerLimit");
     m_emin.unit("MeV");
-    m_emin.scale(1.0);
-    m_emin.value(100.0);         // default: 100
-    m_emin.range(0.001, 1.0e15); // range:   [0.001, 1e15]
+    m_emin.Scale(1.0);
+    m_emin.Value(100.0);         // default: 100
+    m_emin.Range(0.001, 1.0e15); // range:   [0.001, 1e15]
     m_emin.fix();
-    m_emin.gradient(0.0);
+    m_emin.Gradient(0.0);
     m_emin.hasgrad(false);
 
     // Initialise upper limit
     m_emax.clear();
     m_emax.name("UpperLimit");
     m_emax.unit("MeV");
-    m_emax.scale(1.0);
-    m_emax.value(500000.0);      // default: 500000
-    m_emin.range(0.001, 1.0e15); // range:   [0.001, 1e15]
+    m_emax.Scale(1.0);
+    m_emax.Value(500000.0);      // default: 500000
+    m_emin.Range(0.001, 1.0e15); // range:   [0.001, 1e15]
     m_emax.fix();
-    m_emax.gradient(0.0);
+    m_emax.Gradient(0.0);
     m_emax.hasgrad(false);
 
     // Set parameter pointer(s)

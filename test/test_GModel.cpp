@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  test_GModel.cpp  -  test GModel class                  *
+ *                   test_GModel.cpp - test GModel class                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -73,23 +73,20 @@ void TestGModel::set(void)
 void TestGModel::test_model_par(void)
 {
     // Set model parameter
-    GModelPar par;
-    par.value(47.01);
-    par.error(2.003);
-    par.scale(2.0);
-    par.name("Test parameter");
+    GModelPar par("Test parameter", 47.01, 2.0);
+    par.factor_error(2.003);
     par.unit("MeV");
     par.free();
-    par.min(2.0);
-    par.max(200.0);
+    par.factor_min(2.0);
+    par.factor_max(200.0);
     par.remove_min();
     par.remove_max();
 
     // Check parameter access
-    test_value(par.real_value(), 94.02);
-    test_value(par.value(), 47.01);
-    test_value(par.real_error(), 4.006);
-    test_value(par.error(), 2.003);
+    test_value(par.Value(), 94.02);
+    test_value(par.factor_value(), 47.01);
+    test_value(par.Error(), 4.006);
+    test_value(par.factor_error(), 2.003);
     test_value(par.scale(), 2.0);
     test_assert(par.name() == "Test parameter", "Parameter name");
     test_assert(par.unit() == "MeV", "Parameter unit");
@@ -100,8 +97,8 @@ void TestGModel::test_model_par(void)
 
     // Set model parameter
     GModelPar par2("Another test parameter", 3.14, 3.0);
-    test_value(par2.real_value(), 9.42);
-    test_value(par2.value(), 3.14);
+    test_value(par2.Value(), 9.42);
+    test_value(par2.factor_value(), 3.14);
     test_value(par2.scale(), 3.0);
     test_assert(par2.name() == "Another test parameter", "Parameter name");
     test_assert(par2.isfree(), "Parameter freezing");
@@ -141,7 +138,7 @@ void TestGModel::test_model(void)
     GModelSpectralPlaw power_law;
     test_try("Setup spectral model");
     try {
-        power_law = GModelSpectralPlaw(1.0e-7, -2.1);
+        power_law = GModelSpectralPlaw(1.0e-7, -2.1, 100.0);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -178,25 +175,25 @@ void TestGModel::test_model(void)
     }
 
     // Set model scaling
-    GModelPar lat("LAT", 1.0);
-    GModelPar cta("CTA", 0.5);
+    GModelPar lat("LAT", 1.0, 0); // @todo Remove last argument
+    GModelPar cta("CTA", 0.5, 0); // @todo Remove last argument
     crab.scale(lat);
     crab.scale(lat); // In purpose to check if parameter is appended only once
     crab.scale(cta);
 
     // Test model scaling
-    test_value(crab.scale("LAT").real_value(), 1.0);
-    test_value(crab.scale("CTA").real_value(), 0.5);
-    test_value(crab.scale("COM").real_value(), 1.0);
+    test_value(crab.scale("LAT").Value(), 1.0);
+    test_value(crab.scale("CTA").Value(), 0.5);
+    test_value(crab.scale("COM").Value(), 1.0);
 
     // Test saving and loading
     GModels models2;
     models2.append(crab);
     models2.save("test_instrument.xml");
     models2.load("test_instrument.xml");
-    test_value(models2[0]->scale("LAT").real_value(), 1.0);
-    test_value(models2[0]->scale("CTA").real_value(), 0.5);
-    test_value(models2[0]->scale("COM").real_value(), 1.0);
+    test_value(models2[0]->scale("LAT").Value(), 1.0);
+    test_value(models2[0]->scale("CTA").Value(), 0.5);
+    test_value(models2[0]->scale("COM").Value(), 1.0);
 
     // Exit test
     return;
