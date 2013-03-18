@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-March, 14th, 2013
+March, 18th, 2013
 
 
 1. Introduction
@@ -22,6 +22,12 @@ GEbounds
   from the last position to the first position in the argument list.
   The emin, emax, emean and elogmean methods now take a const integer
   reference as argument instead of an integer value.
+
+GModelPar
+  The "real_" prefix has been stripped from the methods operating on
+  true attributes, and the methods operating on unscaled attributes
+  have been prefixed with "factor_". Some missing methods have been
+  added. The name() and unit() methods now returns a const reference.
 
 GModels
   The set() method has been added for model setting.
@@ -62,6 +68,8 @@ from GContainer:
 - GOptimizerPars (and hence GModels)
 - GPhotons
 - GTimes
+- GXml
+- GXmlNode
 
 Appropriate methods have been implemented in these classes to handle
 containers. They are not detailed here.
