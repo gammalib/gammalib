@@ -189,9 +189,6 @@ GOptimizerLM* GOptimizerLM::clone(void) const
  ***************************************************************************/
 void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 {
-    // Perform LM optimization
-    //optimize(&fct, &pars);
-
     // Get number of parameters. Continue only if there are free parameters
     m_npars = pars.npars();
     m_nfree = pars.nfree();

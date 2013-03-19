@@ -282,7 +282,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                         {
                             std::cout << "Unbinned Poisson (" << i << "):";
                             std::cout << " Npred=" << npred;
-                            std::cout << " Grad="<< *copy_wrk_grad << std::endl;
+                            std::cout << " Grad="<< cpy_wrk_grad << std::endl;
                             std::cout << "Sum:";
                             std::cout << " Npred=" << *cpy_npred;
                             std::cout << " Grad=" << *cpy_gradient << std::endl;

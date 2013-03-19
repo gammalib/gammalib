@@ -663,7 +663,7 @@ void GObservations::init_members(void)
     // Initialise members
     m_obs.clear();
     m_models.clear();
-    m_fct.set(this);
+    m_fct.set(this);  //!< Makes sure that optimizer points to this instance
 
     // Return
     return;
@@ -680,9 +680,10 @@ void GObservations::init_members(void)
  ***************************************************************************/
 void GObservations::copy_members(const GObservations& obs)
 {
-    // Copy attributes
+    // Copy attributes. WARNING: The member m_fct SHALL not be copied to not
+    // corrupt its m_this pointer which should always point to the proper
+    // observation. See note in init_members().
     m_models = obs.m_models;
-    m_fct    = obs.m_fct;
 
     // Copy observations
     m_obs.clear();
