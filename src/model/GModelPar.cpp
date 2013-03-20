@@ -33,6 +33,7 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_CONSTRUCT    "GModelPar::GModelPar(std::string&, double&, double&)"
 #define G_FACTOR_VALUE                     "GModelPar::factor_value(double&)"
 #define G_FACTOR_MIN                         "GModelPar::factor_min(double&)"
 #define G_FACTOR_MAX                         "GModelPar::factor_max(double&)"
@@ -107,15 +108,26 @@ GModelPar::GModelPar(const std::string& name, const double& value)
  *
  * @param[in] name Parameter name.
  * @param[in] factor Parameter value factor.
- * @param[in] scale Parameter scaling.
+ * @param[in] scale Parameter scaling (non-zero value).
+ *
+ * @exception GException::invalid_argument
+ *            Sacle factor of 0 specified.
  *
  * Constructs a model parameter from a parameter @p name, value @p factor
- * and @p scale factor.
+ * and @p scale factor. The @p scale factor needs to be a non-zero value.
+ * If the @p scale factor is zero, an exception is thrown.
  ***************************************************************************/
 GModelPar::GModelPar(const std::string& name,
                      const double&      factor,
                      const double&      scale)
 {
+    // Make sure that scale is not zero
+    if (scale == 0.0) {
+        std::string msg = "Specified a model scale factor of 0.\n"
+                          "Model parameters need a non-zero scale factor.";
+        throw GException::invalid_argument(G_CONSTRUCT, msg);
+    }
+
     // Initialise members
     init_members();
 
@@ -201,6 +213,8 @@ GModelPar& GModelPar::operator=(const GModelPar& par)
 
 /***********************************************************************//**
  * @brief Clear model parameter
+ *
+ * Resets model parameter to a clean initial state.
  ***************************************************************************/
 void GModelPar::clear(void)
 {
