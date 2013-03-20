@@ -72,39 +72,185 @@ void TestGModel::set(void)
  ***************************************************************************/
 void TestGModel::test_model_par(void)
 {
-    // Set model parameter
-    GModelPar par("Test parameter", 47.01, 2.0);
-    par.factor_error(2.003);
-    par.unit("MeV");
-    par.free();
-    par.factor_min(2.0);
-    par.factor_max(200.0);
-    par.remove_min();
-    par.remove_max();
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelPar par;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test parameter constructor (value version)
+    test_try("Test parameter constructor");
+    try {
+        GModelPar par("Test parameter", 47.0);
+        test_value(par.value(), 47.0);
+        test_value(par.error(), 0.0);
+        test_value(par.gradient(), 0.0);
+        test_value(par.min(), 0.0);
+        test_value(par.max(), 0.0);
+        test_assert(!par.hasmin(), "Parameter shall have no minimum.");
+        test_assert(!par.hasmax(), "Parameter shall have no maximum.");
+        test_assert(!par.hasrange(), "Parameter shall have no range.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test invalid parameter constructor (factor & scale version)
+    test_try("Test invalid parameter constructor");
+    try {
+        GModelPar par("Test parameter", 1.0, 0.0);
+        test_try_failure("Parameter constructor with zero scale factor"
+                         " shall throw an exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
-    // Check parameter access
-    test_value(par.value(), 94.02);
-    test_value(par.factor_value(), 47.01);
-    test_value(par.error(), 4.006);
-    test_value(par.factor_error(), 2.003);
-    test_value(par.scale(), 2.0);
-    test_assert(par.name() == "Test parameter", "Parameter name");
-    test_assert(par.unit() == "MeV", "Parameter unit");
-    test_assert(par.isfree(), "Parameter freezing");
-    test_assert(par.print() == 
-                "  Test parameter ...........: 94.02 +/- 4.006 MeV (free,scale=2)",
-                "Parameter printing");
+    // Test valid parameter constructor (factor & scale version)
+    test_try("Test invalid parameter constructor");
+    try {
+        GModelPar par("Test parameter", 47.01, 2.0);
+        par.factor_error(2.003);
+        par.factor_gradient(51.0);
+        par.unit("MeV");
+        par.free();
+        test_value(par.value(), 94.02);
+        test_value(par.error(), 4.006);
+        test_value(par.gradient(), 102.0);
+        test_value(par.factor_value(), 47.01);
+        test_value(par.factor_error(), 2.003);
+        test_value(par.factor_gradient(), 51.0);
+        test_value(par.scale(), 2.0);
+        test_assert(par.name() == "Test parameter", "Parameter name");
+        test_assert(par.unit() == "MeV", "Parameter unit");
+        test_assert(par.isfree(), "Parameter freezing");
+        test_assert(par.print() == 
+                    "  Test parameter ...........: 94.02 +/- 4.006 MeV"
+                    " (free,scale=2)", "Parameter printing");
+        GModelPar par2("Another test parameter", 3.14, 3.0);
+        test_value(par2.value(), 9.42);
+        test_value(par2.factor_value(), 3.14);
+        test_value(par2.scale(), 3.0);
+        test_assert(par2.name() == "Another test parameter", "Parameter name");
+        test_assert(par2.isfree(), "Parameter freezing");
+        test_assert(par2.print() == 
+                    "  Another test parameter ...: 9.42 +/- 0  (free,scale=3)",
+                    "Parameter printing");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
-    // Set model parameter
-    GModelPar par2("Another test parameter", 3.14, 3.0);
-    test_value(par2.value(), 9.42);
-    test_value(par2.factor_value(), 3.14);
-    test_value(par2.scale(), 3.0);
-    test_assert(par2.name() == "Another test parameter", "Parameter name");
-    test_assert(par2.isfree(), "Parameter freezing");
-    test_assert(par2.print() == 
-                "  Another test parameter ...: 9.42 +/- 0  (free,scale=3)",
-                "Parameter printing");
+    // Test boundary handling 1
+    test_try("Test boundary handling (1/4)");
+    try {
+        GModelPar par("Test boundary", 1.0);
+        test_assert(!par.hasmin(), "Parameter shall have no minimum.");
+        test_assert(!par.hasmax(), "Parameter shall have no maximum.");
+        test_assert(!par.hasrange(), "Parameter shall have no range.");
+        par.min(0.5);
+        test_assert(par.hasmin(), "Parameter shall have minimum.");
+        test_assert(!par.hasmax(), "Parameter shall have no maximum.");
+        test_assert(!par.hasrange(), "Parameter shall have no range.");
+        par.max(2.0);
+        test_assert(par.hasmin(), "Parameter shall have minimum.");
+        test_assert(par.hasmax(), "Parameter shall have maximum.");
+        test_assert(par.hasrange(), "Parameter shall have range.");
+        par.value(5.0);
+        test_try_failure("Setting a parameter outside boundaries shall"
+                         " generate an exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test boundary handling 2/4
+    test_try("Test boundary handling (2/4)");
+    try {
+        GModelPar par("Test boundary", 1.0);
+        par.min(2.0);
+        test_try_failure("Setting the minimum boundary that is larger"
+                         " than the parameter value shall generate an"
+                         " exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test boundary handling 3/4
+    test_try("Test boundary handling (3/4)");
+    try {
+        GModelPar par("Test boundary", 1.0);
+        par.max(0.5);
+        test_try_failure("Setting the maximum boundary that is smaller"
+                         " than the parameter value shall generate an"
+                         " exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test boundary handling 4/4
+    test_try("Test boundary handling (4/4)");
+    try {
+        GModelPar par("Test boundary", 1.0);
+        par.range(2.0, 0.5);
+        test_try_failure("Setting the minimum boundary that is larger"
+                         " than the maximum boundary shall generate an"
+                         " exception.");
+    }
+    catch (GException::invalid_argument &e) {
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test rescaling
+    test_try("Test rescaling");
+    try {
+        GModelPar par("Test parameter", 3.0);
+        par.error(3.0);
+        par.gradient(3.0);
+        par.min(3.0);
+        par.max(3.0);
+        par.scale(1.0);
+        test_value(par.scale(), 1.0);
+        test_value(par.factor_value(), 3.0);
+        test_value(par.factor_error(), 3.0);
+        test_value(par.factor_gradient(), 3.0);
+        test_value(par.factor_min(), 3.0);
+        test_value(par.factor_max(), 3.0);
+        par.autoscale();
+        test_value(par.scale(), 3.0);
+        test_value(par.factor_value(), 1.0);
+        test_value(par.factor_error(), 1.0);
+        test_value(par.factor_gradient(), 1.0);
+        test_value(par.factor_min(), 1.0);
+        test_value(par.factor_max(), 1.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Exit test
     return;
@@ -123,7 +269,6 @@ void TestGModel::test_model(void)
         GSkyDir dir;
         dir.radec_deg(83.6331, +22.0145);
         point_source = GModelSpatialPointSource(dir);
-
         test_try_success();
     }
     catch (std::exception &e) {
