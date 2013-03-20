@@ -52,11 +52,45 @@ class GObservation;
  * In addition, eval_gradients() also sets the parameter gradients of the
  * model.
  *
- * This abstract virtual base class implements the methods that handle the
- * model name and the applicable instruments. It also implements friend
- * operators for logging.
+ * A model has the following attributes:
+ * - @p name
+ * - @p type
+ * - @p instruments
+ * - @p ids
+ * - @p scales
  *
- * As the class holds simpliy a collection of model parameters, it should
+ * The model @p name is a text string that names the model. The name()
+ * methods allow setting and retrieving the model name. The model handling
+ * does not actual depend on the value of this text string.
+ *
+ * The model @p type is a text string that specifies the kind of the model.
+ * Examples are @p PointSource, @p ExtendedSource or @p DiffuseSource for
+ * sky models. The type() method allows retrieving the model type. The model
+ * handling does not actual depend on the value of this text string.
+ *
+ * The model @p instruments is a list of text strings that specifies the
+ * instruments to which the model applies. The isvalid() method will check
+ * a given instrument name against that list to verify if the model applies
+ * to an instrument. The instruments() method returns a comma separated
+ * list of all instruments. Another instance of this method allows setting
+ * the instrument list from a comma separated list. If the @p instruments
+ * list is empty, the model applies to all instruments. 
+ *
+ * The model @p ids is a list of text strings that specifies the observation
+ * identifiers to which the model applies. This allows specifying of models
+ * for a specific list of observations. The isvalid() method will check
+ * a given observation identifier against that list to verify if the model
+ * applies. The ids() method returns a comma separated list of all
+ * observation identifiers. Another instance of this method allows setting
+ * the observation identifiers from a comma separated list. If the @p ids
+ * list is empty, the model applies to all observation identifiers.
+ *
+ * The model @p scales is a list of model parameters that specify an
+ * instrument dependent scaling factor. This allows to prescale a model for
+ * a given instrument. The scale() methods allow to set and to retrieve the
+ * scale factor for a specific instrument.
+ *
+ * As the class holds simply a collection of model parameters, it should
  * neither deal with allocation and deallocation, nor with cloning of
  * model parameters. This will be done by the classes that actually
  * implement the model parameters.
@@ -92,9 +126,9 @@ public:
     virtual std::string print(void) const = 0;
 
     // Implemented methods
-    int                 size(void) const { return m_pars.size(); }
-    std::string         name(void) const { return m_name; }
-    void                name(const std::string& name) { m_name=name; }
+    int                 size(void) const;
+    const std::string&  name(void) const;
+    void                name(const std::string& name);
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
     GModelPar           scale(const std::string& instrument) const;
@@ -120,5 +154,48 @@ protected:
     std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of parameters in model
+ *
+ * @return Number of parameters in model.
+ *
+ * Returns the number of parameters in the model.
+ ***************************************************************************/
+inline
+int GModel::size(void) const
+{
+    return (m_pars.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter name
+ *
+ * @return Parameter name.
+ *
+ * Returns the parameter name.
+ ***************************************************************************/
+inline
+const std::string& GModel::name(void) const
+{
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Set parameter name
+ *
+ * @param[in] Parameter name.
+ *
+ * Set the parameter name.
+ ***************************************************************************/
+inline
+void GModel::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
 
 #endif /* GMODEL_HPP */

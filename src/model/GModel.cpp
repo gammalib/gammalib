@@ -162,6 +162,9 @@ GModel& GModel::operator=(const GModel& model)
  *
  * @exception GException::out_of_range
  *            Parameter index is out of range.
+ *
+ * Returns a reference to the model parameter of the specified @p index.
+ * Throws an exception if @p index is not valid.
  ***************************************************************************/
 GModelPar& GModel::operator[](const int& index)
 {
@@ -185,6 +188,9 @@ GModelPar& GModel::operator[](const int& index)
  *
  * @exception GException::out_of_range
  *            Parameter index is out of range.
+ *
+ * Returns a const reference to the model parameter of the specified
+ * @p index. Throws an exception if @p index is not valid.
  ***************************************************************************/
 const GModelPar& GModel::operator[](const int& index) const
 {
@@ -208,6 +214,9 @@ const GModelPar& GModel::operator[](const int& index) const
  *
  * @exception GException::par_not_found
  *            Parameter with specified name not found in container.
+ *
+ * Returns a reference to the model parameter of the specified @p name.
+ * Throws an exception if no parameter with @p name is found.
  ***************************************************************************/
 GModelPar& GModel::operator[](const std::string& name)
 {
@@ -237,6 +246,9 @@ GModelPar& GModel::operator[](const std::string& name)
  *
  * @exception GException::par_not_found
  *            Parameter with specified name not found in container.
+ *
+ * Returns a const reference to the model parameter of the specified
+ * @p name. Throws an exception if no parameter with @p name is found.
  ***************************************************************************/
 const GModelPar& GModel::operator[](const std::string& name) const
 {
@@ -294,8 +306,8 @@ std::string GModel::instruments(void) const
  * @param[in] instruments String of instruments.
  *
  * Sets the instruments to which the model applies from a comma separated
- * list of strings. If the instrument string is empty the model is considered
- * to apply to all instruments.
+ * list of strings. If the @p instrument string is empty the model is
+ * considered to apply to all instruments.
  ***************************************************************************/
 void GModel::instruments(const std::string& instruments)
 {
@@ -320,8 +332,8 @@ void GModel::instruments(const std::string& instruments)
  *
  * @param[in] instrument Instrument.
  *
- * Returns the model scale factor for a given instrument. If the instrument
- * name is not found, the method returns a scale factor of unity.
+ * Returns the model scale factor for a given @p instrument. If the
+ * @p instrument is not found, the method returns a scale factor of unity.
  ***************************************************************************/
 GModelPar GModel::scale(const std::string& instrument) const
 {

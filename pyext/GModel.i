@@ -59,7 +59,7 @@ public:
 
     // Implemented methods
     int                 size(void) const;
-    std::string         name(void) const;
+    const std::string&  name(void) const;
     void                name(const std::string& name);
     std::string         instruments(void) const;
     void                instruments(const std::string& instruments);
