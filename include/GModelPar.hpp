@@ -126,28 +126,28 @@ public:
     void          scale(const double& scale);
 
     // Boundary methods
-    bool hasmin(void) const { return m_hasmin; }
-    bool hasmax(void) const { return m_hasmax; }
-    bool hasrange(void) const { return m_hasmin && m_hasmax; }
-    void remove_min(void) { m_hasmin=false; }
-    void remove_max(void) { m_hasmax=false; }
-    void remove_range(void) { m_hasmin=false; m_hasmax=false; }
+    bool hasmin(void) const;
+    bool hasmax(void) const;
+    bool hasrange(void) const;
+    void remove_min(void);
+    void remove_max(void);
+    void remove_range(void);
 
     // Property methods
-    bool isfree(void) const { return m_free; }
-    bool isfixed(void) const { return !m_free; }
-    bool hasgrad(void) const { return m_hasgrad; }
-    void free(void) { m_free=true; }
-    void fix(void) { m_free=false; }
-    void hasgrad(const bool& grad) { m_hasgrad=grad; }
+    bool isfree(void) const;
+    bool isfixed(void) const;
+    bool hasgrad(void) const;
+    void free(void);
+    void fix(void);
+    void hasgrad(const bool& grad);
 
     // Other methods
     void               clear(void);
     GModelPar*         clone(void) const;
-    const std::string& name(void) const { return m_name; }
-    const std::string& unit(void) const { return m_unit; }
-    void               name(const std::string& name) { m_name=name; }
-    void               unit(const std::string& unit) { m_unit=unit; }
+    const std::string& name(void) const;
+    const std::string& unit(void) const;
+    void               name(const std::string& name);
+    void               unit(const std::string& unit);
     void               autoscale(void);
     void               read(const GXmlElement& xml);
     void               write(GXmlElement& xml) const;
@@ -360,6 +360,240 @@ inline
 void GModelPar::factor_gradient(const double& gradient)
 {
     m_factor_gradient = gradient;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if parameter has minimum boundary
+ *
+ * @return True if parameter has minimum boundary, false otherwise.
+ *
+ * Signals if the parameter has a minimum boundary.
+ ***************************************************************************/
+inline
+bool GModelPar::hasmin(void) const
+{
+    return m_hasmin;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if parameter has maximum boundary
+ *
+ * @return True if parameter has maximum boundary, false otherwise.
+ *
+ * Signals if the parameter has a maximum boundary.
+ ***************************************************************************/
+inline
+bool GModelPar::hasmax(void) const
+{
+    return m_hasmax;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if parameter has minimum and maximum boundaries
+ *
+ * @return True if parameter has minimum and maximum boundaries, false
+ *         otherwise.
+ *
+ * Signals if the parameter has a minimum and a maximum boundary.
+ ***************************************************************************/
+inline
+bool GModelPar::hasrange(void) const
+{
+    return (m_hasmin && m_hasmax);
+}
+
+
+/***********************************************************************//**
+ * @brief Removes minimum boundary
+ *
+ * Removes minimum boundary from the model parameter.
+ ***************************************************************************/
+inline
+void GModelPar::remove_min(void)
+{
+    m_hasmin = false;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Removes maximum boundary
+ *
+ * Removes maximum boundary from the model parameter.
+ ***************************************************************************/
+inline
+void GModelPar::remove_max(void)
+{
+    m_hasmax = false;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Removes minimum and maximum boundary
+ *
+ * Removes minimum and maximum boundary from the model parameter.
+ ***************************************************************************/
+inline
+void GModelPar::remove_range(void)
+{
+    m_hasmin = false;
+    m_hasmax = false;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if parameter is free
+ *
+ * @return True if parameter is free, false otherwise.
+ *
+ * Signals if the parameter is free, i.e. that it shall be fitted in a
+ * parameter optimization process.
+ ***************************************************************************/
+inline
+bool GModelPar::isfree(void) const
+{
+    return m_free;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if parameter is fixed
+ *
+ * @return True if parameter is fixed, false otherwise.
+ *
+ * Signals if the parameter is fixed, i.e. that it shall NOT be fitted in a
+ * parameter optimization process.
+ ***************************************************************************/
+inline
+bool GModelPar::isfixed(void) const
+{
+    return (!m_free);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if parameter gradient is computed analytically
+ *
+ * @return True if parameter is gradient is computed analytically, false
+ *         otherwise.
+ *
+ * Signals if the parameter gradient is computed analytically. This property
+ * is used in the model optimization process to identify parameters for which
+ * gradients need to be computed numerically.
+ ***************************************************************************/
+inline
+bool GModelPar::hasgrad(void) const
+{
+    return m_hasgrad;
+}
+
+
+/***********************************************************************//**
+ * @brief Free a parameter
+ *
+ * Frees a parameter for model fitting. The parameter shall be fitted in a
+ * parameter optimization process.
+ ***************************************************************************/
+inline
+void GModelPar::free(void)
+{
+    m_free = true;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fix a parameter
+ *
+ * Fixes a parameter for model fitting. The parameter shall NOT be altered
+ * in a parameter optimization process.
+ ***************************************************************************/
+inline
+void GModelPar::fix(void)
+{
+    m_free = false;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set gradient property
+ *
+ * @param[in] grad Gradient flag
+ *
+ * Sets the gradient property of the model parameter. If @p grad is set to
+ * true, the parameter gradient will be computed analytically by the method
+ * that evaluates the model. If false, the gradients needs to be computed
+ * numerically.
+ ***************************************************************************/
+inline
+void GModelPar::hasgrad(const bool& grad)
+{
+    m_hasgrad = grad;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter name
+ *
+ * @return Parameter name.
+ *
+ * Returns the parameter name.
+ ***************************************************************************/
+inline
+const std::string& GModelPar::name(void) const
+{
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter unit
+ *
+ * @return Parameter unit.
+ *
+ * Returns the parameter unit.
+ ***************************************************************************/
+inline
+const std::string& GModelPar::unit(void) const
+{
+    return m_unit;
+}
+
+
+/***********************************************************************//**
+ * @brief Set parameter name
+ *
+ * @param[in] Parameter name.
+ *
+ * Sets the parameter name.
+ ***************************************************************************/
+inline
+void GModelPar::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set parameter unit
+ *
+ * @param[in] Parameter unit.
+ *
+ * Sets the parameter unit.
+ ***************************************************************************/
+inline
+void GModelPar::unit(const std::string& unit)
+{
+    m_unit = unit;
     return;
 }
 
