@@ -31,6 +31,7 @@
 #include <cstring>
 #include <iostream>
 #include <vector>
+#include <cstdio>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
