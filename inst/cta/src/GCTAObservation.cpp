@@ -628,7 +628,7 @@ void GCTAObservation::write(GXmlElement& xml) const
                     const GCTAAeffPerfTable* perf =
                           dynamic_cast<const GCTAAeffPerfTable*>(m_response->aeff());
                     if (perf != NULL) {
-                        sigma    = arf->sigma();
+                        sigma = perf->sigma();
                     }
                     
                 } // endif: effective area was valid
