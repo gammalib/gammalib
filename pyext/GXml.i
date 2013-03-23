@@ -80,9 +80,7 @@ public:
     int                elements(void) const;
     int                elements(const std::string& name) const;
     GXmlElement*       element(const int& index);
-    const GXmlElement* element(const int& index) const;
     GXmlElement*       element(const std::string& name, const int& index);
-    const GXmlElement* element(const std::string& name, const int& index) const;
     void               load(const std::string& filename);
     void               save(const std::string& filename);
     void               read(GUrl& url);
