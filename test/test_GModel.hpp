@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void set(void);
     void    test_model_par(void);
+    void    test_sky_model(void);
     void    test_model(void);
     void    test_models(void);
     void    test_spectral_model(void);

@@ -54,7 +54,8 @@ void TestGModel::set(void)
     m_xml_model_elliptical_disk = "data/model_elliptical_disk.xml";
 
     // Add tests
-    add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test model parameter handling");
+    add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
+    add_test(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
     add_test(static_cast<pfunction>(&TestGModel::test_model), "Test model handling");
     add_test(static_cast<pfunction>(&TestGModel::test_models), "Test models");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model");
@@ -66,9 +67,7 @@ void TestGModel::set(void)
 
 
 /***********************************************************************//**
- * @brief Test model parameter handling.
- *
- * Test setting and reading back of parameter value attributes.
+ * @brief Test GModelPar class
  ***************************************************************************/
 void TestGModel::test_model_par(void)
 {
@@ -247,6 +246,75 @@ void TestGModel::test_model_par(void)
         test_value(par.factor_min(), 1.0);
         test_value(par.factor_max(), 1.0);
         test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSky class
+ ***************************************************************************/
+void TestGModel::test_sky_model(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSky sky;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test type constructor
+    test_try("Test type constructor");
+    try {
+        GModelSky sky("My type");
+        test_assert(sky.type() == "My type", "Model type \"My type\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor, value and gradients
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml         xml(m_xml_file);
+        GXmlElement* element = xml.element(0)->element(0);
+        GModelSky    sky(*element);
+        test_value(sky.size(), 6);
+        test_assert(sky.name() == "1FGL J0005.7+3815",
+                    "Expected source name \"1FGL J0005.7+3815\"");
+        test_assert(sky.instruments() == "", "Expected no instruments");
+        test_assert(sky.ids() == "", "Expected no observation identifiers");
+        test_assert(sky.type() == "PointSource", "Expected \"PointSource\"");
+        test_assert(sky.spatial() != NULL, "Expected spatial component");
+        test_assert(sky.spectral() != NULL, "Expected spectral component");
+        test_assert(sky.temporal() != NULL, "Expected temporal component");
+        test_try_success();
+
+        // Test value
+        GSkyDir dir;
+        dir.radec_deg(83.6331, 22.0145);
+        GEnergy energy(100.0, "MeV");
+        GTime   time(0.0);
+        test_value(sky.value(dir, energy, time), 1.73e-07);
+
+        // Test gradient
+        GVector vector = sky.gradients(dir, energy, time);
+        test_value(vector[0], 0.0);
+        test_value(vector[1], 0.0);
+        test_value(vector[2], 1e-07);
+        test_value(vector[3], 0.0);
+        test_value(vector[4], 0.0);
+        test_value(vector[5], 0.0);
     }
     catch (std::exception &e) {
         test_try_failure(e);
