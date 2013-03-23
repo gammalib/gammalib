@@ -95,9 +95,7 @@ public:
     virtual int                elements(void) const;
     virtual int                elements(const std::string& name) const;
     virtual GXmlElement*       element(const int& index);
-    virtual const GXmlElement* element(const int& index) const;
     virtual GXmlElement*       element(const std::string& name, const int& index);
-    virtual const GXmlElement* element(const std::string& name, const int& index) const;
     virtual void               write(GUrl& url, const int& indent) const = 0;
     virtual NodeType           type(void) const = 0;
 };
