@@ -32,6 +32,7 @@
 #include "GModelSpatialDiffuse.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GSkymap.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -40,7 +41,7 @@
  *
  * @brief Spatial map cube model
  *
- * This class implements the spatial component of the factorised source
+ * This class implements the spatial component of the factorized source
  * model for a map cube. A map cube is a set of sky maps for different
  * energies.
  *
@@ -54,16 +55,20 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
+    explicit GModelSpatialDiffuseCube(const double& value,
+                                      const std::string& filename);
+    explicit GModelSpatialDiffuseCube(const double& value,
+                                      const GSkymap& map);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
     virtual ~GModelSpatialDiffuseCube(void);
 
     // Operators
-    virtual GModelSpatialDiffuseCube& operator= (const GModelSpatialDiffuseCube& model);
+    virtual GModelSpatialDiffuseCube& operator=(const GModelSpatialDiffuseCube& model);
 
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpatialDiffuseCube* clone(void) const;
-    virtual std::string               type(void) const { return "MapCubeFunction"; }
+    virtual std::string               type(void) const;
     virtual double                    eval(const GSkyDir& srcDir) const;
     virtual double                    eval_gradients(const GSkyDir& srcDir) const;
     virtual GSkyDir                   mc(GRan& ran) const;
@@ -71,16 +76,143 @@ public:
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(void) const;
 
+    // Other methods
+    double             value(void) const;
+    void               value(const double& value);
+    const std::string& filename(void) const;
+    void               filename(const std::string& filename);
+    const GSkymap&     cube(void) const;
+    void               cube(const GSkymap& map);
+    bool               isloaded(void) const;
+
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GModelSpatialDiffuseCube& model);
     void free_members(void);
-    void load_cube(const std::string& filename);
 
     // Protected members
-    GModelPar   m_value;           //!< Value
-    std::string m_filename;        //!< Name of map cube
+    GModelPar   m_value;      //!< Value
+    std::string m_filename;   //!< Name of map cube
+    GSkymap     m_cube;       //!< Map cube
+    bool        m_loaded;     //!< Signals that map cube has been loaded
 };
+
+
+/***********************************************************************//**
+ * @brief Return spatial model type
+ *
+ * @return "MapCubeFunction".
+ *
+ * Returns the type of the spatial map cube model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialDiffuseCube::type(void) const
+{
+    return "MapCubeFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Get model value
+ *
+ * @return Model value.
+ *
+ * Returns the value of the spatial map cube model.
+ ***************************************************************************/
+inline
+double GModelSpatialDiffuseCube::value(void) const
+{
+    return (m_value.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set model value
+ *
+ * @param[in] value Model value.
+ *
+ * Set the value of the spatial map cube model.
+ ***************************************************************************/
+inline
+void GModelSpatialDiffuseCube::value(const double& value)
+{
+    m_value.value(value);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get file name
+ *
+ * @return File name.
+ *
+ * Returns the file name of the spatial map cube model.
+ ***************************************************************************/
+inline
+const std::string& GModelSpatialDiffuseCube::filename(void) const
+{
+    return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Set file name
+ *
+ * @param[in] filename File name.
+ *
+ * Set the file name of the spatial map cube model.
+ ***************************************************************************/
+inline
+void GModelSpatialDiffuseCube::filename(const std::string& filename)
+{
+    m_filename = filename;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get map cube
+ *
+ * @return Map cube.
+ *
+ * Returns the file name of the spatial map cube model.
+ ***************************************************************************/
+inline
+const GSkymap& GModelSpatialDiffuseCube::cube(void) const
+{
+    return (m_cube);
+}
+
+
+/***********************************************************************//**
+ * @brief Set map cube
+ *
+ * @param[in] map Sky map.
+ *
+ * Set the map cube of the spatial map cube model.
+ ***************************************************************************/
+inline
+void GModelSpatialDiffuseCube::cube(const GSkymap& map)
+{
+    m_cube   = map;
+    m_loaded = true;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if map cube has been loaded
+ *
+ * @return True if map cube has been loaded, false otherwise.
+ *
+ * Signals if a map cube is present (either by loading it from a file or by
+ * assigning it from a GSkymap).
+ ***************************************************************************/
+inline
+bool GModelSpatialDiffuseCube::isloaded(void) const
+{
+    return (m_loaded);
+}
 
 #endif /* GMODELSPATIALDIFFUSECUBE_HPP */

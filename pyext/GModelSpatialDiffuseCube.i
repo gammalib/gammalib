@@ -40,6 +40,10 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
+    explicit GModelSpatialDiffuseCube(const double& value,
+                                      const std::string& filename);
+    explicit GModelSpatialDiffuseCube(const double& value,
+                                      const GSkymap& map);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
     virtual ~GModelSpatialDiffuseCube(void);
 
@@ -52,6 +56,15 @@ public:
     virtual GSkyDir                   mc(GRan& ran) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
+
+    // Other methods
+    double             value(void) const;
+    void               value(const double& value);
+    const std::string& filename(void) const;
+    void               filename(const std::string& filename);
+    const GSkymap&     cube(void) const;
+    void               cube(const GSkymap& map);
+    bool               isloaded(void) const;
 };
 
 

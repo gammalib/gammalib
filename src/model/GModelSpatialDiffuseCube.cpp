@@ -79,9 +79,9 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(void) :
  *
  * @param[in] xml XML element.
  *
- * Creates instance of spatial map cube model by extracting information from
- * an XML element. See GModelSpatialDiffuseCube::read() for more information about
- * the expected structure of the XML element.
+ * Constructs map cube model by extracting information from an XML element.
+ * See the read() method for more information about the expected structure
+ * of the XML element.
  ***************************************************************************/
 GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GXmlElement& xml) :
                           GModelSpatialDiffuse()
@@ -98,9 +98,71 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GXmlElement& xml) :
 
 
 /***********************************************************************//**
+ * @brief Value constructor
+ *
+ * @param[in] value Normalisation factor.
+ * @param[in] filename File name.
+ *
+ * Constructs map cube model by assigning the normalisation factor and the
+ * filename of the map cube. Note that the map cube file is not opened, only
+ * the filename is stored for use when required.
+ ***************************************************************************/
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const double&      value,
+                                                   const std::string& filename) :
+                          GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set parameter
+    m_value.value(value);
+
+    // Set filename by expanding any environment variable that may be
+    // present
+    m_filename = expand_env(filename);
+
+    // Perform autoscaling of parameter
+    autoscale();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Value constructor
+ *
+ * @param[in] value Normalisation factor.
+ * @param[in] map Sky map.
+ *
+ * Constructs map cube model by assigning the normalisation factor and by
+ * loading a map cube from a sky map. The filename will remain blank.
+ ***************************************************************************/
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const double&  value,
+                                                   const GSkymap& map) :
+                          GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set parameter
+    m_value.value(value);
+
+    // Perform autoscaling of parameter
+    autoscale();
+
+    // Set map cube
+    cube(map);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Spatial map cube model.
+ * @param[in] model Map cube model.
  ***************************************************************************/
 GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model) :
                           GModelSpatialDiffuse(model)
@@ -138,8 +200,8 @@ GModelSpatialDiffuseCube::~GModelSpatialDiffuseCube(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Spatial map cube model.
- * @return Spatial map cube model.
+ * @param[in] model Map cube model.
+ * @return Map cube model.
  ***************************************************************************/
 GModelSpatialDiffuseCube& GModelSpatialDiffuseCube::operator= (const GModelSpatialDiffuseCube& model)
 {
@@ -172,7 +234,7 @@ GModelSpatialDiffuseCube& GModelSpatialDiffuseCube::operator= (const GModelSpati
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear map cube model
  ***************************************************************************/
 void GModelSpatialDiffuseCube::clear(void)
 {
@@ -192,12 +254,13 @@ void GModelSpatialDiffuseCube::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone map cube model
  *
- * @return Pointer to deep copy of diffuse model.
+ * @return Pointer to deep copy of map cube model.
  ***************************************************************************/
 GModelSpatialDiffuseCube* GModelSpatialDiffuseCube::clone(void) const
 {
+    // Clone map cube model
     return new GModelSpatialDiffuseCube(*this);
 }
 
@@ -275,11 +338,25 @@ GSkyDir GModelSpatialDiffuseCube::mc(GRan& ran) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the map cube information from an XML element. The XML element is
- * required to have 1 parameter named either "Normalization" or "Value".
+ * Read the map cube information from an XML element. The XML element should
+ * have either the format
+ *
+ *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *     </spatialModel>
+ *
+ * or alternatively
+ *
+ *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *       <parameter name="Value" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
 {
+    // Clear model
+    clear();
+
     // Verify that XML element has exactly 1 parameters
     if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_READ, xml,
@@ -300,8 +377,8 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
               " \"Normalization\" parameter.");
     }
 
-    // Load map cube from file
-    load_cube(xml.attribute("file"));
+    // Save filename
+    m_filename = expand_env(xml.attribute("file"));
 
     // Return
     return;
@@ -320,9 +397,20 @@ void GModelSpatialDiffuseCube::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the map cube information into an XML element. The XML element has to
- * be of type "MapCubeFunction" and will have 1 parameter leaf named either
- * "Value" or "Normalization" (default).
+ * Write the map cube information into an XML element. The XML element will
+ * have either the format
+ *
+ *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *       <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *     </spatialModel>
+ *
+ * or alternatively
+ *
+ *     <spatialModel type="MapCubeFunction" file="test_file.fits">
+ *       <parameter name="Value" scale="1" value="1" min="0.1" max="10" free="0"/>
+ *     </spatialModel>
+ *
+ * The latter format is the default for newly written XML elements. 
  ***************************************************************************/
 void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
 {
@@ -381,13 +469,18 @@ std::string GModelSpatialDiffuseCube::print(void) const
     std::string result;
 
     // Append header
-    result.append("=== GModelSpatialDiffuseCube ===\n");
+    result.append("=== GModelSpatialDiffuseCube ===");
 
     // Append parameters
-    result.append(parformat("Map cube file")+m_filename);
-    result.append(parformat("Number of parameters")+str(size()));
+    result.append("\n"+parformat("Map cube file")+m_filename);
+    result.append("\n"+parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
+    }
+
+    // Append sky map
+    if (m_loaded) {
+        result.append("\n"+m_cube.print());
     }
 
     // Return result
@@ -422,6 +515,8 @@ void GModelSpatialDiffuseCube::init_members(void)
 
     // Initialise other members
     m_filename.clear();
+    m_cube.clear();
+    m_loaded = false;
 
     // Return
     return;
@@ -438,6 +533,8 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
     // Copy members
     m_value    = model.m_value;
     m_filename = model.m_filename;
+    m_cube     = model.m_cube;
+    m_loaded   = model.m_loaded;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -453,28 +550,6 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
  ***************************************************************************/
 void GModelSpatialDiffuseCube::free_members(void)
 {
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Load map cube from file
- *
- * @param[in] filename File name.
- *
- * Any environment variable present in the filename will be expanded.
- *
- * @todo Implement method. 
- ***************************************************************************/
-void GModelSpatialDiffuseCube::load_cube(const std::string& filename)
-{
-    // Expand environment variables
-    std::string fname = expand_env(filename);
-
-    // Set filename
-    m_filename = fname;
-
     // Return
     return;
 }
