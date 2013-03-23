@@ -102,6 +102,7 @@ GModelSpatial::~GModelSpatial(void)
  * @brief Assignment operator
  *
  * @param[in] model Spatial model.
+ * @return Spatial model.
  ***************************************************************************/
 GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
 {
@@ -125,19 +126,23 @@ GModelSpatial& GModelSpatial::operator= (const GModelSpatial& model)
 
 
 /***********************************************************************//**
- * @brief Returns model parameter
+ * @brief Return model parameter
  *
  * @param[in] index Parameter index [0,...,size()-1].
+ * @return Model parameter reference.
  *
  * @exception GException::out_of_range
  *            Parameter index is out of range.
+ *
+ * Returns reference to the model parameter of specified @p index.
  ***************************************************************************/
 GModelPar& GModelSpatial::operator[](const int& index)
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    }
     #endif
 
     // Return reference
@@ -149,16 +154,20 @@ GModelPar& GModelSpatial::operator[](const int& index)
  * @brief Returns model parameter (const version)
  *
  * @param[in] index Parameter index [0,...,size()-1].
+ * @return Model parameter reference.
  *
  * @exception GException::out_of_range
  *            Parameter index is out of range.
+ *
+ * Returns reference to the model parameter of specified @p index.
  ***************************************************************************/
 const GModelPar& GModelSpatial::operator[](const int& index) const
 {
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
+    }
     #endif
 
     // Return reference
@@ -167,25 +176,30 @@ const GModelPar& GModelSpatial::operator[](const int& index) const
 
 
 /***********************************************************************//**
- * @brief Returns reference to model parameter
+ * @brief Returns model parameter
  *
  * @param[in] name Parameter name.
+ * @return Model parameter reference.
  *
  * @exception GException::par_not_found
  *            Parameter with specified name not found in container.
+ *
+ * Returns reference to the model parameter of specified @p name.
  ***************************************************************************/
 GModelPar& GModelSpatial::operator[](const std::string& name)
 {
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
+        if (m_pars[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
+    if (index >= size()) {
         throw GException::par_not_found(G_ACCESS2, name);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -193,25 +207,30 @@ GModelPar& GModelSpatial::operator[](const std::string& name)
 
 
 /***********************************************************************//**
- * @brief Returns reference to model parameter (const version)
+ * @brief Returns model parameter (const version)
  *
  * @param[in] name Parameter name.
+ * @return Model parameter reference.
  *
  * @exception GException::par_not_found
  *            Parameter with specified name not found in container.
+ *
+ * Returns reference to the model parameter of specified @p name.
  ***************************************************************************/
 const GModelPar& GModelSpatial::operator[](const std::string& name) const
 {
     // Get parameter index
     int index = 0;
     for (; index < size(); ++index) {
-        if (m_pars[index]->name() == name)
+        if (m_pars[index]->name() == name) {
             break;
+        }
     }
 
     // Throw exception if parameter name was not found
-    if (index >= size())
+    if (index >= size()) {
         throw GException::par_not_found(G_ACCESS2, name);
+    }
 
     // Return reference
     return *(m_pars[index]);
@@ -223,20 +242,6 @@ const GModelPar& GModelSpatial::operator[](const std::string& name) const
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Return number of parameters
- *
- * @return Number of parameters in spatial model component.
- *
- * Returns the number of parameters in the spatial model component.
- ***************************************************************************/
-int GModelSpatial::size(void) const
-{
-    // Return number of parameters
-    return (m_pars.size());
-}
-
 
 /***********************************************************************//**
  * @brief Autoscale parameters
@@ -255,7 +260,6 @@ void GModelSpatial::autoscale(void)
     // Return
     return;
 }
-
 
 
 /*==========================================================================

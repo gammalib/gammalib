@@ -43,8 +43,7 @@
  * @brief Abstract spatial model base class
  *
  * This class implements the spatial component of the factorized gamma-ray
- * source model. A typical example of a spatial component is a point source
- * (implemented by the derived class GModelSpatialPtsrc).
+ * source model.
  ***************************************************************************/
 class GModelSpatial : public GBase {
 
@@ -55,7 +54,7 @@ public:
     virtual ~GModelSpatial(void);
 
     // Operators
-    virtual GModelSpatial&   operator= (const GModelSpatial& model);
+    virtual GModelSpatial&   operator=(const GModelSpatial& model);
     virtual GModelPar&       operator[](const int& index);
     virtual const GModelPar& operator[](const int& index) const;
     virtual GModelPar&       operator[](const std::string& name);
@@ -85,5 +84,18 @@ protected:
     // Proteced members
     std::vector<GModelPar*> m_pars;  //!< Parameter pointers
 };
+
+/***********************************************************************//**
+ * @brief Return number of parameters
+ *
+ * @return Number of parameters in spatial model component.
+ *
+ * Returns the number of parameters in the spatial model component.
+ ***************************************************************************/
+inline
+int GModelSpatial::size(void) const
+{
+    return (m_pars.size());
+}
 
 #endif /* GMODELSPATIAL_HPP */
