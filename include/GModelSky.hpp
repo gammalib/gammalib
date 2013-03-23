@@ -96,7 +96,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GModelSky*  clone(void) const;
-    virtual std::string type(void) const { return m_type; }
+    virtual std::string type(void) const;
     virtual double      eval(const GEvent& event,
                              const GObservation& obs) const;
     virtual double      eval_gradients(const GEvent& event,
@@ -109,9 +109,9 @@ public:
     virtual std::string print(void) const;
 
     // Other methods
-    GModelSpatial*      spatial(void) const { return m_spatial; }
-    GModelSpectral*     spectral(void) const { return m_spectral; }
-    GModelTemporal*     temporal(void) const { return m_temporal; }
+    GModelSpatial*      spatial(void) const;
+    GModelSpectral*     spectral(void) const;
+    GModelTemporal*     temporal(void) const;
     double              value(const GSkyDir& srcDir,
                               const GEnergy& srcEng,
                               const GTime& srcTime);
@@ -150,5 +150,68 @@ protected:
     GModelSpectral* m_spectral;   //!< Spectral model
     GModelTemporal* m_temporal;   //!< Temporal model
 };
+
+
+/***********************************************************************//**
+ * @brief Return sky model type
+ *
+ * @return Sky model type.
+ *
+ * Returns the type of the sky model. The type is an arbitrary string that
+ * is used in the XML declaration of the model to describe the model type.
+ ***************************************************************************/
+inline
+std::string GModelSky::type(void) const
+{
+    return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial model component
+ *
+ * @return Pointer to spatial model component.
+ *
+ * Returns a pointer to the spatial model component of the model. The pointer
+ * is of type GModelSpatial. Note that a NULL pointer may be returned if the
+ * sky model has no spatial model component.
+ ***************************************************************************/
+inline
+GModelSpatial* GModelSky::spatial(void) const
+{
+    return (m_spatial);
+}
+
+
+/***********************************************************************//**
+ * @brief Return spectral model component
+ *
+ * @return Pointer to spectral model component.
+ *
+ * Returns a pointer to the spectral model component of the model. The
+ * pointer is of type GModelSpectral. Note that a NULL pointer may be
+ * returned if the sky model has no spectral model component.
+ ***************************************************************************/
+inline
+GModelSpectral* GModelSky::spectral(void) const
+{
+    return (m_spectral);
+}
+
+
+/***********************************************************************//**
+ * @brief Return temporal model component
+ *
+ * @return Pointer to temporal model component.
+ *
+ * Returns a pointer to the temporal model component of the model. The
+ * pointer is of type GModelTemporal. Note that a NULL pointer may be
+ * returned if the sky model has no temporal model component.
+ ***************************************************************************/
+inline
+GModelTemporal* GModelSky::temporal(void) const
+{
+    return (m_temporal);
+}
 
 #endif /* GMODELSKY_HPP */

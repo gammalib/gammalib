@@ -94,7 +94,10 @@ GModelSky::GModelSky(void) : GModel()
  *
  * @param[in] type Model type.
  *
- * Construct empty sky model of specified type.
+ * Construct an empty sky model of the specified @p type. This constructor
+ * does basically the same than the void constructor with the only difference
+ * that the m_type member of the class is set to the specified @p type
+ * string.
  ***************************************************************************/
 GModelSky::GModelSky(const std::string& type) : GModel()
 {
@@ -114,8 +117,10 @@ GModelSky::GModelSky(const std::string& type) : GModel()
  *
  * @param[in] xml XML element.
  *
- * Construct sky model from the spectral and spatial model information found
- * in the XML element.
+ * Constructs a sky model from the model information that is found in the
+ * @p xml element. Only the spatial and spectral information is handled by
+ * this constructor. For the temporal component, a constant model of type
+ * GModelTemporalConst will be allocated.
  ***************************************************************************/
 GModelSky::GModelSky(const GXmlElement& xml) : GModel(xml)
 {
@@ -150,6 +155,10 @@ GModelSky::GModelSky(const GXmlElement& xml) : GModel(xml)
  *
  * @param[in] spatial Spatial XML element.
  * @param[in] spectral Spectral XML element.
+ *
+ * Constructs a sky model from the @p spatial and @p spectral information
+ * that is found in the respective XML elements. For the temporal component,
+ * a constant model of type GModelTemporalConst will be allocated.
  ***************************************************************************/
 GModelSky::GModelSky(const GXmlElement& spatial, const GXmlElement& spectral) :
            GModel()
@@ -182,6 +191,9 @@ GModelSky::GModelSky(const GXmlElement& spatial, const GXmlElement& spectral) :
  * @param[in] spatial Spatial XML element.
  * @param[in] spectral Spectral XML element.
  * @param[in] temporal Temporal XML element.
+ *
+ * Constructs a sky model from the @p spatial, @p spectral and @p temporal
+ * information that is found in the respective XML elements.
  ***************************************************************************/
 GModelSky::GModelSky(const GXmlElement& spatial,
                      const GXmlElement& spectral,
@@ -212,8 +224,12 @@ GModelSky::GModelSky(const GXmlElement& spatial,
  *
  * @param[in] spatial Spatial model component.
  * @param[in] spectral Spectral model component.
+ *
+ * Constructs a sky model from @p spatial and @p spectral model components.
+ * For the temporal component, a constant model of type GModelTemporalConst
+ * will be allocated.
  ***************************************************************************/
-GModelSky::GModelSky(const GModelSpatial& spatial,
+GModelSky::GModelSky(const GModelSpatial&  spatial,
                      const GModelSpectral& spectral) : 
            GModel()
 {
@@ -245,6 +261,9 @@ GModelSky::GModelSky(const GModelSpatial& spatial,
  * @param[in] spatial Spatial model component.
  * @param[in] spectral Spectral model component.
  * @param[in] temporal Temporal model component.
+ *
+ * Constructs a sky model from @p spatial, @p spectral and @p temporal model
+ * components.
  ***************************************************************************/
 GModelSky::GModelSky(const GModelSpatial& spatial,
                      const GModelSpectral& spectral,
@@ -344,9 +363,9 @@ GModelSky& GModelSky::operator= (const GModelSky& model)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear sky model
  *
- * This method properly resets the instance to an initial state.
+ * This method properly resets the sky model to an initial state.
  ***************************************************************************/
 void GModelSky::clear(void)
 {
@@ -364,25 +383,34 @@ void GModelSky::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone sky model
  *
  * @return Pointer to deep copy of sky model.
  ***************************************************************************/
 GModelSky* GModelSky::clone(void) const
 {
+    // Clone sky model
     return new GModelSky(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Returns value of source model
+ * @brief Return value of sky model
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
+ * @return Value of sky model
  *
- * This method evaluates the factorized source model for a given true photon
- * arrival direction, true photon energy and true photon arrival time.
+ * Returns the value of the factorized source model for a given
+ * - true photon arrival direction @p srcDir,
+ * - true photon energy @p srcEng, and
+ * - true photon arrival time @p srcTime.
+ * If no spatial model components exist, a value of 1 will be returned.
+ *
+ * @todo We probably should return a value of 0 is no model components exist.
+ * But we may also make sure that the model never has NULL pointers, which
+ * would avoid all the pointer checks.
  ***************************************************************************/
 double GModelSky::value(const GSkyDir& srcDir, const GEnergy& srcEng,
                         const GTime& srcTime)
@@ -401,15 +429,20 @@ double GModelSky::value(const GSkyDir& srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Returns parameter gradients of source model
+ * @brief Return parameter gradients of sky model
  *
  * @param[in] srcDir True photon direction.
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
+ * @return Vector of parameter gradients
  *
- * This method returns the parameter gradients of the factorized source model
- * for a given true photon arrival direction, true photon energy and true
- * photon arrival time.
+ * Returns a vector of parameter gradients for the factorized source model
+ * for a given
+ * - true photon arrival direction @p srcDir,
+ * - true photon energy @p srcEng, and
+ * - true photon arrival time @p srcTime.
+ * If there are no parameters in the sky model, an empty vector will be
+ * returned.
  ***************************************************************************/
 GVector GModelSky::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
                              const GTime& srcTime)
@@ -434,13 +467,18 @@ GVector GModelSky::gradients(const GSkyDir& srcDir, const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Evaluate model
+ * @brief Evaluate sky model for a given event of an observation
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @return Value of sky model
  *
- * This method evaluates the source model for a given event within a given
- * observation.
+ * Evalutes the value of the sky model for an @p event of a specific
+ * observation @p obs. This method will subsequently call the following
+ * methods:
+ * - temporal() (performs integral over time dispersion)
+ * - spectral() (performs integral over energy dispersion)
+ * - spatial() (performs integral over spatial dispersion)
  ***************************************************************************/
 double GModelSky::eval(const GEvent& event, const GObservation& obs) const
 {
@@ -453,13 +491,22 @@ double GModelSky::eval(const GEvent& event, const GObservation& obs) const
 
 
 /***********************************************************************//**
- * @brief Evaluate model and parameter gradients
+ * @brief Evaluate sky model and parameter gradients for a given event of an
+ *        observation
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @return Value of sky model
  *
- * This method evaluates the source model and model gradients for a given
- * event within a given observation.
+ * Evalutes the value of the sky model and of the parameter for an @p event
+ * of a specific observation @p obs. This method will subsequently call the
+ * following methods:
+ * - temporal() (performs integral over time dispersion)
+ * - spectral() (performs integral over energy dispersion)
+ * - spatial() (performs integral over spatial dispersion)
+ *
+ * While the value of the sky model is returned by the method, the parameter
+ * gradients are set as GModelPar members.
  ***************************************************************************/
 double GModelSky::eval_gradients(const GEvent& event, 
                                  const GObservation& obs) const
@@ -478,6 +525,7 @@ double GModelSky::eval_gradients(const GEvent& event,
  * @param[in] obsEng Measured photon energy.
  * @param[in] obsTime Measured photon arrival time.
  * @param[in] obs Observation.
+ * @return Spatially integrated sky model.
  *
  * @exception GException::no_response
  *            No valid instrument response function defined.
@@ -576,6 +624,36 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
  * @brief Read sky model from XML element
  *
  * @param[in] xml XML element.
+ *
+ * Reads the sky model from an XML element. The XML element is expected to
+ * respect the following format:
+ *
+ *     <source name=".." type=".." instrument=".." id="..">
+ *       <spectrum type="..">
+ *         ..
+ *       </spectrum>
+ *       <spatialModel type="..">
+ *         ..
+ *       </spatialModel>
+ *     </source>
+ *
+ * Optionally, the model may also contain scale parameters following the
+ * format:
+ *
+ *     <source name=".." type=".." instrument=".." id="..">
+ *       <spectrum type="..">
+ *         ..
+ *       </spectrum>
+ *       <spatialModel type="..">
+ *         ..
+ *       </spatialModel>
+ *       <scaling>
+ *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
+ *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
+ *       </scaling>
+ *     </source>
+ *
+ * (see GModel::read_scales() for more information on instrument scales).
  ***************************************************************************/
 void GModelSky::read(const GXmlElement& xml)
 {
@@ -621,6 +699,26 @@ void GModelSky::read(const GXmlElement& xml)
  * @brief Write model into XML element
  *
  * @param[in] xml Source library.
+ *
+ * Writes the sky model into an XML source library. The format written to
+ * the @p xml element is as follows:
+ *
+ *     <source name=".." type=".." instrument=".." id="..">
+ *       <spectrum type="..">
+ *         ..
+ *       </spectrum>
+ *       <spatialModel type="..">
+ *         ..
+ *       </spatialModel>
+ *       <scaling>
+ *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
+ *         <instrument name=".." scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
+ *       </scaling>
+ *     </source>
+ *
+ * The scaling element will only be written optionally in case that instrument
+ * dependent scaling factors exist (see GModel::write_scales() for more
+ * information on instrument scales).
  ***************************************************************************/
 void GModelSky::write(GXmlElement& xml) const
 {
@@ -682,19 +780,23 @@ void GModelSky::write(GXmlElement& xml) const
  * @param[in] emax Maximum photon energy.
  * @param[in] tmin Minimum photon arrival time.
  * @param[in] tmax Maximum photon arrival time.
- * @param[in] ran Random number generator. 
+ * @param[in,out] ran Random number generator.
+ * @return List of photons
  *
- * This method returns a list of photons that has been derived by Monte Carlo
- * simulation from the model. A simulation region is define by specification
- * of a simulation cone (a circular region on the sky),
- * of an energy range [emin, emax], and
- * of a time interval [tmin, tmax].
+ * Returns a list of photons that has been derived by Monte Carlo simulation
+ * from the model. A simulation region is define by specification of
+ * - a simulation cone, which is a circular region on the sky defined by
+ *   a centre direction @p dir and a @p radius,
+ * - an energy range [@p emin, @p emax], and
+ * - a time interval [@p tmin, @p tmax].
+ *
  * The simulation cone may eventually cover the entire sky (by setting
  * the radius to 180 degrees), yet simulations will be more efficient if
  * only the sky region will be simulated that is actually observed by the
  * telescope.
  *
- * @todo Check usage for diffuse models
+ * @todo Check overlap of simulation cone for diffuse models to speed up
+ *       computations.
  * @todo Implement photon arrival direction simulation for diffuse models
  * @todo Implement unique model ID to assign as Monte Carlo ID
  ***************************************************************************/
@@ -715,9 +817,9 @@ GPhotons GModelSky::mc(const double& area,
 
         // Check if model will produce any photons in the specified
         // simulation region. If the model is a point source we check if the
-        // source is located within the simulation code. If the model is a
+        // source is located within the simulation cone. If the model is a
         // diffuse source we check if the source overlaps with the simulation
-        // code
+        // cone
         bool use_model = true;
         if (ptsrc != NULL) {
             if (dir.dist(ptsrc->dir()) > radius) {
@@ -725,7 +827,7 @@ GPhotons GModelSky::mc(const double& area,
             }
         }
         else {
-            //TODO
+            //TODO (for the moment we always simulate!!!)
         }
 
         // Continue only if model overlaps with simulation region
@@ -871,7 +973,8 @@ void GModelSky::free_members(void)
 /***********************************************************************//**
  * @brief Set parameter pointers
  *
- * Gathers all parameter pointers from the model.
+ * Gathers all parameter pointers from the model into a flat array of model
+ * pointers. 
  ***************************************************************************/
 void GModelSky::set_pointers(void)
 {
@@ -912,7 +1015,11 @@ void GModelSky::set_pointers(void)
 /***********************************************************************//**
  * @brief Set model type based on spatial model component
  *
- * Gathers all parameter pointers from the model.
+ * Set the model type depending on the class type of the spatial model
+ * component.
+ *
+ * @todo A method could be implemented in the GModelSpatial class that
+ *       determines the model type. This is however not very critical.
  ***************************************************************************/
 void GModelSky::set_type(void)
 {
