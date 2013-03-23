@@ -80,8 +80,8 @@ public:
     // Methods
     void          clear(void);
     GModels*      clone(void) const;
-    int           size(void) const { return m_models.size(); }
-    bool          isempty(void) const { return m_models.empty(); }
+    int           size(void) const;
+    bool          isempty(void) const;
     GModel*       set(const int& index, const GModel& model);
     GModel*       set(const std::string& name, const GModel& model);
     GModel*       append(const GModel& model);
@@ -89,7 +89,7 @@ public:
     GModel*       insert(const std::string& name, const GModel& model);
     void          remove(const int& index);
     void          remove(const std::string& name);
-    void          reserve(const int& num) { return m_models.reserve(num); }
+    void          reserve(const int& num);
     void          extend(const GModels& models);
     void          load(const std::string& filename);
     void          save(const std::string& filename) const;
@@ -110,5 +110,48 @@ protected:
     // Proteced members
     std::vector<GModel*> m_models;  //!< List of models
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of models in container
+ *
+ * @return Number of models in container.
+ *
+ * Returns the number of models in the model container.
+ ***************************************************************************/
+inline
+int GModels::size(void) const
+{
+    return (m_models.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if there are no models in container
+ *
+ * @return True if container is empty, false otherwise.
+ *
+ * Signals if the model container does not contain any model.
+ ***************************************************************************/
+inline
+bool GModels::isempty(void) const
+{
+    return (m_models.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for models in container
+ *
+ * @param[in] num Number of models
+ *
+ * Reserves space for @p num models in the container.
+ ***************************************************************************/
+inline
+void GModels::reserve(const int& num)
+{
+    m_models.reserve(num);
+    return;
+}
 
 #endif /* GMODELS_HPP */
