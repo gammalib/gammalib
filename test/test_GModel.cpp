@@ -47,9 +47,9 @@ void TestGModel::set(void)
     // Set attributes
     m_xml_file                  = "data/crab.xml";
     m_xml_model_point_nodes     = "data/model_point_nodes.xml";
-    m_xml_model_diffuse_const   = "data/model_spatial_const.xml";
+    m_xml_model_diffuse_const   = "data/model_diffuse_const.xml";
     m_xml_model_diffuse_cube    = "data/model_diffuse_cube.xml";
-    m_xml_model_diffuse_map     = "data/model_spatial_map.xml";
+    m_xml_model_diffuse_map     = "data/model_diffuse_map.xml";
     m_xml_model_radial_disk     = "data/model_radial_disk.xml";
     m_xml_model_radial_gauss    = "data/model_radial_gauss.xml";
     m_xml_model_radial_shell    = "data/model_radial_shell.xml";
