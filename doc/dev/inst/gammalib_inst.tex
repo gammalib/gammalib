@@ -156,15 +156,17 @@ process and are of the order of a few time the rms in the time and energy measur
 
 Computation of Eq.~(\ref{eq:model}) in this general form is implemented in \this\ by the 
 virtual method\break {\tt GObservation::model()}.
-The following diagram gives the call tree of this method:
-\begin{verbatim}
-  GObservation::model()          - compute Eq. (1) for all source models
-    GModelSky::eval_gradients()  - compute Eq. (1) for one source model
-      GModelSky::temporal()      - perform integration over time (dt)
-        GModelSky::spectral()    - perform integration over energy (dE)
-          GModelSky::spatial()   - compute sky position integrated value
-            GResponse::irf()     - perform integration over sky positions (dp)
-\end{verbatim}
+Figure \ref{fig:modeleval} shows the call tree of this method.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{figure}[!t]
+\center
+\epsfig{figure=model-evaluation.eps, width=10cm}
+\caption{Call tree of {\tt GObservation::model()} for sky model evaluation.}
+ \label{fig:modeleval}
+\end{figure}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 The integration over sky positions $\vec{p}$, expressed as a zenith angle $\theta$ and an
 azimuth angle $\phi$, is given by
 \begin{equation}
