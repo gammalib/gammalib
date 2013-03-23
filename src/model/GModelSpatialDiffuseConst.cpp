@@ -77,8 +77,8 @@ GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(void) :
  * @param[in] xml XML element.
  *
  * Constructs isotropic spatial model by extracting information from an XML
- * element. See GModelSpatialDiffuseConst::read() for more information about
- * the expected structure of the XML element.
+ * element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GXmlElement& xml) :
                            GModelSpatialDiffuse()
@@ -308,6 +308,9 @@ GSkyDir GModelSpatialDiffuseConst::mc(GRan& ran) const
  ***************************************************************************/
 void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
 {
+    // Clear model
+    clear();
+
     // Verify that XML element has exactly 1 parameters
     if (xml.elements() != 1 || xml.elements("parameter") != 1) {
         throw GException::model_invalid_parnum(G_READ, xml,
