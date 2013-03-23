@@ -48,6 +48,7 @@ void TestGModel::set(void)
     m_xml_file                  = "data/crab.xml";
     m_xml_model_point_nodes     = "data/model_point_nodes.xml";
     m_xml_model_diffuse_const   = "data/model_spatial_const.xml";
+    m_xml_model_diffuse_cube    = "data/model_diffuse_cube.xml";
     m_xml_model_diffuse_map     = "data/model_spatial_map.xml";
     m_xml_model_radial_disk     = "data/model_radial_disk.xml";
     m_xml_model_radial_gauss    = "data/model_radial_gauss.xml";
@@ -58,6 +59,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
     add_test(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
+    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
     add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
     //
@@ -397,6 +399,103 @@ void TestGModel::test_diffuse_const(void)
 
 
 /***********************************************************************//**
+ * @brief Test GModelSpatialDiffuseCube class
+ ***************************************************************************/
+void TestGModel::test_diffuse_cube(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialDiffuseCube model;
+        test_assert(model.type() == "MapCubeFunction",
+                                    "Model type \"MapCubeFunction\" expected.");
+        test_assert(!model.isloaded(), "Map cube is not yet loaded");
+        test_assert(model.filename() == "", "Model filename \"\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test filename value constructor
+    test_try("Test filename value constructor");
+    try {
+        GModelSpatialDiffuseCube model(3.0, "file.fits");
+        test_value(model.value(), 3.0);
+        test_assert(model.filename() == "file.fits", "Expected \"file.fits\"");
+        test_assert(!model.isloaded(), "Map cube is not yet loaded");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test skymap value constructor
+    test_try("Test skymap value constructor");
+    try {
+        GSkymap map("HPX", "GAL", 16, "RING", 10);
+        GModelSpatialDiffuseCube model(3.0, map);
+        test_value(model.value(), 3.0);
+        test_assert(model.filename() == "", "Expected \"\"");
+        test_assert(model.isloaded(), "Map cube is loaded");
+        //test_assert(model.cube() == map, "Map cube is not the expected one");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and attribute methods
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                     xml(m_xml_model_diffuse_cube);
+        GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialDiffuseCube model(*element);
+        test_value(model.size(), 1);
+        test_assert(model.type() == "MapCubeFunction", "Expected \"MapCubeFunction\"");
+        test_value(model.value(), 1.0);
+        test_assert(!model.isloaded(), "Map cube is not yet loaded");
+        test_assert(model.filename() == "test_file.fits",
+                                        "Model filename \"test_file.fits\" expected.");
+
+        // Test value method
+        model.value(3.9);
+        test_value(model.value(), 3.9);
+
+        // Test filename method
+        model.filename("Help me!");
+        test_assert(model.filename() == "Help me!",
+                                        "Model filename \"Help me!\" expected.");
+
+        // Test cube method
+        model.cube(GSkymap("HPX", "GAL", 16, "RING", 10));
+        test_value(model.cube().npix(), 3072);
+
+        // Test operator access
+        test_value(model["Normalization"].value(), 3.9);
+        test_value(model["Normalization"].error(), 0.0);
+        test_value(model["Normalization"].gradient(), 0.0);
+        model["Normalization"].value(2.1);
+        model["Normalization"].error(1.9);
+        model["Normalization"].gradient(0.8);
+        test_value(model["Normalization"].value(), 2.1);
+        test_value(model["Normalization"].error(), 1.9);
+        test_value(model["Normalization"].gradient(), 0.8);
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test model handling.
  ***************************************************************************/
 void TestGModel::test_model(void)
@@ -533,6 +632,7 @@ void TestGModel::test_spatial_model(void)
 {
     // Test spatial models XML interface
     test_xml_model("GModelSpatialDiffuseConst",   m_xml_model_diffuse_const);
+    test_xml_model("GModelSpatialDiffuseCube",    m_xml_model_diffuse_cube);
     test_xml_model("GModelSpatialDiffuseMap",     m_xml_model_diffuse_map);
     test_xml_model("GModelSpatialRadialDisk",     m_xml_model_radial_disk);
     test_xml_model("GModelSpatialRadialGauss",    m_xml_model_radial_gauss);
