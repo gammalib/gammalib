@@ -47,10 +47,12 @@ public:
     virtual void set(void);
     void    test_model_par(void);
     void    test_sky_model(void);
+    void    test_diffuse_const(void);
+    //
     void    test_model(void);
     void    test_models(void);
-    void    test_spectral_model(void);
     void    test_spatial_model(void);
+    void    test_spectral_model(void);
 
 private:        
     // Private methods
@@ -59,7 +61,8 @@ private:
     // Private attributes
     std::string m_xml_file;
     std::string m_xml_model_point_nodes;
-    std::string m_xml_model_spatial_map;
+    std::string m_xml_model_diffuse_const;
+    std::string m_xml_model_diffuse_map;
     std::string m_xml_model_radial_disk;
     std::string m_xml_model_radial_gauss;
     std::string m_xml_model_radial_shell;

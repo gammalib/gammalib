@@ -47,7 +47,8 @@ void TestGModel::set(void)
     // Set attributes
     m_xml_file                  = "data/crab.xml";
     m_xml_model_point_nodes     = "data/model_point_nodes.xml";
-    m_xml_model_spatial_map     = "data/model_spatial_map.xml";
+    m_xml_model_diffuse_const   = "data/model_spatial_const.xml";
+    m_xml_model_diffuse_map     = "data/model_spatial_map.xml";
     m_xml_model_radial_disk     = "data/model_radial_disk.xml";
     m_xml_model_radial_gauss    = "data/model_radial_gauss.xml";
     m_xml_model_radial_shell    = "data/model_radial_shell.xml";
@@ -56,10 +57,12 @@ void TestGModel::set(void)
     // Add tests
     add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
     add_test(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
+    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
+    add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
+    add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
+    //
     add_test(static_cast<pfunction>(&TestGModel::test_model), "Test model handling");
     add_test(static_cast<pfunction>(&TestGModel::test_models), "Test models");
-    add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model");
-    add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model");
 
     // Return
     return;
@@ -298,7 +301,6 @@ void TestGModel::test_sky_model(void)
         test_assert(sky.spatial() != NULL, "Expected spatial component");
         test_assert(sky.spectral() != NULL, "Expected spectral component");
         test_assert(sky.temporal() != NULL, "Expected temporal component");
-        test_try_success();
 
         // Test value
         GSkyDir dir;
@@ -315,6 +317,75 @@ void TestGModel::test_sky_model(void)
         test_value(vector[3], 0.0);
         test_value(vector[4], 0.0);
         test_value(vector[5], 0.0);
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialDiffuseConst class
+ ***************************************************************************/
+void TestGModel::test_diffuse_const(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialDiffuseConst model;
+        test_assert(model.type() == "ConstantValue",
+                                    "Model type \"ConstantValue\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpatialDiffuseConst model(3.0);
+        test_value(model.value(), 3.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                      xml(m_xml_model_diffuse_const);
+        GXmlElement*              element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialDiffuseConst model(*element);
+        test_value(model.size(), 1);
+        test_assert(model.type() == "ConstantValue", "Expected \"ConstantValue\"");
+        test_value(model.value(), 1.0);
+
+        // Test value method
+        model.value(3.9);
+        test_value(model.value(), 3.9);
+
+        // Test operator access
+        test_value(model["Value"].value(), 3.9);
+        test_value(model["Value"].error(), 0.0);
+        test_value(model["Value"].gradient(), 0.0);
+        model["Value"].value(2.1);
+        model["Value"].error(1.9);
+        model["Value"].gradient(0.8);
+        test_value(model["Value"].value(), 2.1);
+        test_value(model["Value"].error(), 1.9);
+        test_value(model["Value"].gradient(), 0.8);
+
+        // Success if we reached this point
+        test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
@@ -454,8 +525,27 @@ void TestGModel::test_xml_model(const std::string& name,
 
 }
 
+
 /***********************************************************************//**
- * @brief Test spectral model
+ * @brief Test spatial model XML reading and writing
+ ***************************************************************************/
+void TestGModel::test_spatial_model(void)
+{
+    // Test spatial models XML interface
+    test_xml_model("GModelSpatialDiffuseConst",   m_xml_model_diffuse_const);
+    test_xml_model("GModelSpatialDiffuseMap",     m_xml_model_diffuse_map);
+    test_xml_model("GModelSpatialRadialDisk",     m_xml_model_radial_disk);
+    test_xml_model("GModelSpatialRadialGauss",    m_xml_model_radial_gauss);
+    test_xml_model("GModelSpatialRadialShell",    m_xml_model_radial_shell);
+    test_xml_model("GModelSpatialEllipticalDisk", m_xml_model_elliptical_disk);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test spectral model XML reading and writing
  ***************************************************************************/
 void TestGModel::test_spectral_model(void)
 {
@@ -466,21 +556,6 @@ void TestGModel::test_spectral_model(void)
     return;
 }
 
-/***********************************************************************//**
- * @brief Test spacial model
- ***************************************************************************/
-void TestGModel::test_spatial_model(void)
-{
-    // Test spatial models XML interface
-    test_xml_model("GModelSpatialMap",  m_xml_model_spatial_map);
-    test_xml_model("GModelRadialDisk",  m_xml_model_radial_disk);
-    test_xml_model("GModelRadialGauss", m_xml_model_radial_gauss);
-    test_xml_model("GModelRadialShell", m_xml_model_radial_shell);
-    test_xml_model("GModelSpatialEllipticalDisk", m_xml_model_elliptical_disk);
-
-    // Return
-    return;
-}
 
 /***********************************************************************//**
  * @brief Test models.
