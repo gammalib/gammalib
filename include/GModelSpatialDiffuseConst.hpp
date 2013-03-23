@@ -49,22 +49,27 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseConst(void);
     explicit GModelSpatialDiffuseConst(const GXmlElement& xml);
+    explicit GModelSpatialDiffuseConst(const double& value);
     GModelSpatialDiffuseConst(const GModelSpatialDiffuseConst& model);
     virtual ~GModelSpatialDiffuseConst(void);
 
     // Operators
-    GModelSpatialDiffuseConst& operator= (const GModelSpatialDiffuseConst& model);
+    GModelSpatialDiffuseConst& operator=(const GModelSpatialDiffuseConst& model);
 
     // Implemented pure virtual base class methods
     virtual void                       clear(void);
     virtual GModelSpatialDiffuseConst* clone(void) const;
-    virtual std::string                type(void) const { return "ConstantValue"; }
+    virtual std::string                type(void) const;
     virtual double                     eval(const GSkyDir& srcDir) const;
     virtual double                     eval_gradients(const GSkyDir& srcDir) const;
     virtual GSkyDir                    mc(GRan& ran) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;
     virtual std::string                print(void) const;
+
+    // Other methods
+    double value(void) const;
+    void   value(const double& value);
 
 protected:
     // Protected methods
@@ -73,7 +78,50 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_value;         //!< Value
+    GModelPar m_value;    //!< Value
 };
+
+
+/***********************************************************************//**
+ * @brief Return spatial model type
+ *
+ * @return "ConstantValue".
+ *
+ * Returns the type of the isotropic spatial model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialDiffuseConst::type(void) const
+{
+    return "ConstantValue";
+}
+
+
+/***********************************************************************//**
+ * @brief Get model value
+ *
+ * @return Model value.
+ *
+ * Returns the value of the isotropic spatial model.
+ ***************************************************************************/
+inline
+double GModelSpatialDiffuseConst::value(void) const
+{
+    return (m_value.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set model value
+ *
+ * @param[in] value Model value.
+ *
+ * Set the value of the isotropic spatial model.
+ ***************************************************************************/
+inline
+void GModelSpatialDiffuseConst::value(const double& value)
+{
+    m_value.value(value);
+    return;
+}
 
 #endif /* GMODELSPATIALDIFFUSECONST_HPP */

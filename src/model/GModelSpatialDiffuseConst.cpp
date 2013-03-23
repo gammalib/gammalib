@@ -76,8 +76,8 @@ GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(void) :
  *
  * @param[in] xml XML element.
  *
- * Creates instance of isotropic spatial model by extracting information from
- * an XML element. See GModelSpatialDiffuseConst::read() for more information about
+ * Constructs isotropic spatial model by extracting information from an XML
+ * element. See GModelSpatialDiffuseConst::read() for more information about
  * the expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GXmlElement& xml) :
@@ -88,6 +88,32 @@ GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const GXmlElement& xml) :
 
     // Read information from XML element
     read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Value constructor
+ *
+ * @param[in] value Isotropic value.
+ *
+ * Constructs isotropic spatial model by assigning the value of the diffuse
+ * emission. This constructor explicitly sets the m_value parameter of the
+ * model.
+ ***************************************************************************/
+GModelSpatialDiffuseConst::GModelSpatialDiffuseConst(const double& value) :
+                           GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set parameter
+    m_value.value(value);
+
+    // Perform autoscaling of parameter
+    autoscale();
 
     // Return
     return;
@@ -169,7 +195,7 @@ GModelSpatialDiffuseConst& GModelSpatialDiffuseConst::operator=(const GModelSpat
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear isotropic spatial model
  ***************************************************************************/
 void GModelSpatialDiffuseConst::clear(void)
 {
@@ -189,12 +215,13 @@ void GModelSpatialDiffuseConst::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone isotropic spatial model
  *
- * @return Pointer to deep copy of diffuse model.
+ * @return Pointer to deep copy of isotropic spatial model.
  ***************************************************************************/
 GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
 {
+    // Clone isotropic spatial model
     return new GModelSpatialDiffuseConst(*this);
 }
 
@@ -205,12 +232,12 @@ GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
  * @param[in] srcDir True photon arrival direction.
  *
  * Evaluates the spatial part for an isotropic source model. By definition
- * this value is independent from the sky direction and is unity.
+ * this value is independent from the sky direction.
  ***************************************************************************/
 double GModelSpatialDiffuseConst::eval(const GSkyDir& srcDir) const
 {
     // Return value
-    return 1.0;
+    return (m_value.value());
 }
 
 
@@ -225,32 +252,37 @@ double GModelSpatialDiffuseConst::eval(const GSkyDir& srcDir) const
  ***************************************************************************/
 double GModelSpatialDiffuseConst::eval_gradients(const GSkyDir& srcDir) const
 {
-    // Set gradient to 0 (circumvent const correctness)
-    const_cast<GModelSpatialDiffuseConst*>(this)->m_value.factor_gradient(0.0);
+    // Compute function value
+    double value = m_value.value();
+
+    // Compute partial derivatives of the parameter values
+    double g_norm = (m_value.isfree()) ? m_value.scale() : 0.0;
+
+    // Set gradient (circumvent const correctness)
+    const_cast<GModelSpatialDiffuseConst*>(this)->m_value.factor_gradient(g_norm);
 
     // Return value
-    return 1.0;
+    return value;
 }
 
 
 /***********************************************************************//**
- * @brief Returns MC sky direction
+ * @brief Return MC sky direction
  *
  * @param[in] ran Random number generator.
  *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented
- *
- * @todo Implement method
+ * Returns an abitrary position on the celestial sphere.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseConst::mc(GRan& ran) const
 {
-    // Allocate sky direction
-    GSkyDir dir;
+    // Simulate Right Ascension and Declination
+    double ra  = twopi * ran.uniform();
+    double dec = std::acos(1.0 - 2.0 * ran.uniform());
 
-    // Dump warning that method is not yet implemented
-    throw GException::feature_not_implemented(G_MC);
-    
+    // Set sky direction
+    GSkyDir dir;
+    dir.radec(ra, dec);
+
     // Return sky direction
     return dir;
 }
@@ -267,7 +299,12 @@ GSkyDir GModelSpatialDiffuseConst::mc(GRan& ran) const
  *            Invalid model parameter names found in XML element.
  *
  * Read the isotropic source model information from an XML element. The XML
- * element is required to have 1 parameter named "Value".
+ * element is expected to have the following format:
+ *
+ *     <spatialModel type="ConstantValue">
+ *       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
 {
@@ -307,8 +344,12 @@ void GModelSpatialDiffuseConst::read(const GXmlElement& xml)
  *            Invalid model parameter names found in XML element.
  *
  * Write the isotropic source model information into an XML element. The XML
- * element has to be of type "ConstantValue" and will have 1 parameter leaf
- * named "Value".
+ * element will have the following format:
+ *
+ *     <spatialModel type="ConstantValue">
+ *       <parameter name="Value" scale="1" value="1" min="1"  max="1" free="0"/>
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 {

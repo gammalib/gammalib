@@ -40,6 +40,7 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseConst(void);
     explicit GModelSpatialDiffuseConst(const GXmlElement& xml);
+    explicit GModelSpatialDiffuseConst(const double& value);
     GModelSpatialDiffuseConst(const GModelSpatialDiffuseConst& model);
     virtual ~GModelSpatialDiffuseConst(void);
 
@@ -52,6 +53,10 @@ public:
     virtual GSkyDir                    mc(GRan& ran) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;
+
+    // Other methods
+    double value(void) const;
+    void   value(const double& value);
 };
 
 
