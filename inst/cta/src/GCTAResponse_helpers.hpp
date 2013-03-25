@@ -47,17 +47,26 @@
  * @class cta_npsf_kern_rad_azsym
  *
  * @brief Integration kernel for npsf() method
+ *
+ * This class implements the integration kernel needed for the npsf() method.
+ * method. It performs an azimuthal integration of the Point Spread Function
+ * (PSF) for a given offset angle \f$delta\f$ using
+ *
+ * \f[
+ *    K(\delta) = \int_{0}^{\phi} PSF(\delta) d\phi
+ * \f]
+ * (an offset angle of \f$\delta=0\f$ corresponds to the centre of the PSF).
  ***************************************************************************/
 class cta_npsf_kern_rad_azsym : public GFunction {
 public:
-    cta_npsf_kern_rad_azsym(const  GCTAResponse* rsp,
-                            double roi,
-                            double psf,
-                            double logE,
-                            double theta,
-                            double phi,
-                            double zenith,
-                            double azimuth) :
+    cta_npsf_kern_rad_azsym(const GCTAResponse& rsp,
+                            const double&       roi,
+                            const double&       psf,
+                            const double&       logE,
+                            const double&       theta,
+                            const double&       phi,
+                            const double&       zenith,
+                            const double&       azimuth) :
                             m_rsp(rsp),
                             m_roi(roi),
                             m_cosroi(std::cos(roi)),
@@ -71,17 +80,17 @@ public:
                             m_azimuth(azimuth) { }
     double eval(double delta);
 protected:
-    const GCTAResponse* m_rsp;     //!< Pointer to response function
-    double              m_roi;     //!< ROI radius in radians
+    const GCTAResponse& m_rsp;     //!< CTA response function
+    const double&       m_roi;     //!< ROI radius in radians
     double              m_cosroi;  //!< Cosine of ROI radius
-    double              m_psf;     //!< PSF-ROI centre distance in radians
+    const double&       m_psf;     //!< PSF-ROI centre distance in radians
     double              m_cospsf;  //!< Cosine of PSF-ROI centre distance
     double              m_sinpsf;  //!< Sine of PSF-ROI centre distance
-    double              m_logE;    //!< Log10 of true photon energy (E/TeV).
-    double              m_theta;   //!< Offset angle of source in camera system
-    double              m_phi;     //!< Azimuth angle of source in camera system
-    double              m_zenith;  //!< Zenith angle of source in Earth system
-    double              m_azimuth; //!< Azimuth angle of source in Earth system
+    const double&       m_logE;    //!< Log10 of true photon energy (E/TeV).
+    const double&       m_theta;   //!< Offset angle of source in camera system
+    const double&       m_phi;     //!< Azimuth angle of source in camera system
+    const double&       m_zenith;  //!< Zenith angle of source in Earth system
+    const double&       m_azimuth; //!< Azimuth angle of source in Earth system
 };
 
 
@@ -89,6 +98,29 @@ protected:
  * @class cta_irf_radial_kern_rho
  *
  * @brief Kernel for radial model zenith angle integration of IRF
+ *
+ * This class implements the integration kernel \f$K(\rho)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
+ * \f]
+ *
+ * of radial spatial models. The eval() method computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *                     \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *                     IRF(\rho, \omega) d\omega
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
+ * - \f$IRF(\rho, \omega)\f$ is the IRF
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  ***************************************************************************/
 class cta_irf_radial_kern_rho : public GFunction {
 public:
@@ -147,6 +179,19 @@ protected:
  * @class cta_irf_radial_kern_omega
  *
  * @brief Kernel for radial model azimuth angle IRF integration
+ *
+ * This class implements the computation of the IRF in the reference frame
+ * of the radial source model. It computes
+ *
+ * \f[
+ *    IRF(\rho, \omega)
+ * \f]
+ *
+ * where
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  ***************************************************************************/
 class cta_irf_radial_kern_omega : public GFunction {
 public:
@@ -198,6 +243,31 @@ protected:
  * @class cta_npred_radial_kern_rho
  *
  * @brief Kernel for zenith angle Npred integration of radial model
+ *
+ * This class implements the integration kernel \f$K(\rho)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
+ * \f]
+ *
+ * of radial spatial models. The eval() method computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *                     \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *                     N_{\rm pred}(\rho,\omega) d\omega
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
+ * - \f$N_{\rm pred}(\rho,\omega)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest,
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  ***************************************************************************/
 class cta_npred_radial_kern_rho : public GFunction {
 public:
@@ -243,6 +313,21 @@ protected:
  * @class cta_npred_radial_kern_omega
  *
  * @brief Kernel for azimuth angle Npred integration of radial model
+ *
+ * This class implements the computation of the data space integral of the
+ * Instrument Response Function for a point spread function over the Region
+ * Of Interest in the reference frame of the radial source model. It
+ * computes
+ *
+ * \f[
+ *    N_{\rm pred}(\rho,\omega)
+ * \f]
+ *
+ * where
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  ***************************************************************************/
 class cta_npred_radial_kern_omega : public GFunction {
 public:
@@ -276,6 +361,30 @@ protected:
  * @class cta_irf_elliptical_kern_rho
  *
  * @brief Kernel for elliptical model zenith angle integration of IRF
+ *
+ * This class implements the integration kernel \f$K(\rho)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
+ * \f]
+ *
+ * of elliptical spatial models. The eval() method computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *                     S_{\rm p}(\rho, \omega | E, t) \, IRF(\rho, \omega)
+ *                     d\omega
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical model,
+ * - \f$IRF(\rho, \omega)\f$ is the IRF
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  ***************************************************************************/
 class cta_irf_elliptical_kern_rho : public GFunction {
 public:
@@ -337,6 +446,20 @@ public:
  * @class cta_irf_elliptical_kern_omega
  *
  * @brief Kernel for ellitpical model azimuth angle IRF integration
+ *
+ * This class implements the computation of
+ *
+ * \f[
+ *    S_{\rm p}(\rho, \omega | E, t) \, IRF(\rho, \omega)
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the elliptical model,
+ * - \f$IRF(\rho, \omega)\f$ is the IRF
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  ***************************************************************************/
 class cta_irf_elliptical_kern_omega : public GFunction {
 public:
@@ -394,6 +517,32 @@ public:
  * @class cta_npred_elliptical_kern_rho
  *
  * @brief Kernel for zenith angle Npred integration of elliptical model
+ *
+ * This class implements the integration kernel \f$K(\rho)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho | E, t) d\rho
+ * \f]
+ *
+ * of elliptical elliptical models. The eval() method computes
+ *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *                     S_{\rm p}(\rho,\omega | E, t) \,
+ *                     N_{\rm pred}(\rho,\omega) d\omega
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho,\omega | E, t)\f$ is the elliptical model,
+ * - \f$N_{\rm pred}(\rho,\omega)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest,
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  ***************************************************************************/
 class cta_npred_elliptical_kern_rho : public GFunction {
 public:
@@ -439,6 +588,23 @@ protected:
  * @class cta_npred_elliptical_kern_omega
  *
  * @brief Kernel for azimuth angle Npred integration of elliptical model
+ *
+ * This class implements the computation of
+ *
+ * \f[
+ *    S_{\rm p}(\rho,\omega | E, t) \, N_{\rm pred}(\rho,\omega)
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho,\omega | E, t)\f$ is the elliptical model,
+ * - \f$N_{\rm pred}(\rho,\omega)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest in the reference frame of the elliptical source
+ *   model
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  ***************************************************************************/
 class cta_npred_elliptical_kern_omega : public GFunction {
 public:
@@ -475,6 +641,31 @@ protected:
  * @class cta_irf_diffuse_kern_theta
  *
  * @brief Kernel for IRF offest angle integration of the diffuse source model
+ *
+ * This class implements the integration kernel \f$K(\theta)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{0}^{\theta_{\rm max}} K(\theta | E, t) d\theta
+ * \f]
+ *
+ * of diffuse models. The eval() method computes
+ *
+ * \f[
+ *    K(\theta | E, t) = \sin \theta \times PSF(\theta)
+ *                       \int_{0}^{2\pi}
+ *                       S_{\rm p}(\theta, \phi | E, t) \,
+ *                       Aeff(\theta, \phi) \,
+ *                       Edisp(\theta, \phi) d\phi
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\theta, \phi | E, t)\f$ is the diffuse model,
+ * - \f$PSF(\theta)\f$ is the azimuthally symmetric Point Spread Function,
+ * - \f$Aeff(\theta, \phi)\f$ is the effective area,
+ * - \f$Edisp(\theta, \phi)\f$ is the energy dispersion,
+ * - \f$\theta\f$ is the distance from the PSF centre, and
+ * - \f$\phi\f$ is the azimuth angle.
  ***************************************************************************/
 class cta_irf_diffuse_kern_theta : public GFunction {
 public:
@@ -529,6 +720,21 @@ protected:
  * @class cta_irf_diffuse_kern_phi
  *
  * @brief Kernel for IRF azimuth angle integration of the diffuse source model
+ *
+ * This class implements the computation of
+ *
+ * \f[
+ *    S_{\rm p}(\theta, \phi | E, t) \,
+ *    Aeff(\theta, \phi) \,
+ *    Edisp(\theta, \phi)
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\theta, \phi | E, t)\f$ is the diffuse model,
+ * - \f$Aeff(\theta, \phi)\f$ is the effective area,
+ * - \f$Edisp(\theta, \phi)\f$ is the energy dispersion,
+ * - \f$\theta\f$ is the distance from the PSF centre, and
+ * - \f$\phi\f$ is the azimuth angle.
  ***************************************************************************/
 class cta_irf_diffuse_kern_phi : public GFunction {
 public:
@@ -580,6 +786,31 @@ protected:
  * @class cta_npred_diffuse_kern_theta
  *
  * @brief Kernel for Npred offest angle integration of diffuse model
+ *
+ * This class implements the integration kernel \f$K(\theta)\f$ for the
+ * integration
+ *
+ * \f[
+ *    \int_{0}^{\theta_{\rm max}} K(\theta | E, t) d\theta
+ * \f]
+ *
+ * of diffuse models. The eval() method computes
+ *
+ * \f[
+ *    K(\theta | E, t) = \sin \theta \times
+ *                       \int_{0}^{2\pi}
+ *                       S_{\rm p}(\theta, \phi | E, t) \,
+ *                       N_{\rm pred}(\theta, \phi) d\phi
+ * \f]
+ * 
+ * where
+ * - \f$S_{\rm p}(\theta, \phi | E, t)\f$ is the diffuse model,
+ * - \f$N_{\rm pred}(\theta, \phi)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest in the reference frame of the diffuse source
+ *   model
+ * - \f$\theta\f$ is the distance from the ROI centre, and
+ * - \f$\phi\f$ is the azimuth angle.
  ***************************************************************************/
 class cta_npred_diffuse_kern_theta : public GFunction {
 public:
@@ -610,6 +841,21 @@ protected:
  * @class cta_npred_diffuse_kern_phi
  *
  * @brief Kernel for Npred azimuth angle integration of diffuse model
+ *
+ * This class implements the computation of
+ *
+ * \f[
+ *    S_{\rm p}(\theta, \phi | E, t) \, N_{\rm pred}(\theta, \phi)
+ * \f]
+ * 
+ * where
+ * - \f$S_{\rm p}(\theta, \phi | E, t)\f$ is the diffuse model,
+ * - \f$N_{\rm pred}(\theta, \phi)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest in the reference frame of the diffuse source
+ *   model
+ * - \f$\theta\f$ is the distance from the ROI centre, and
+ * - \f$\phi\f$ is the azimuth angle.
  ***************************************************************************/
 class cta_npred_diffuse_kern_phi : public GFunction {
 public:

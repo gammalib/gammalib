@@ -56,13 +56,16 @@
  * @brief Integration kernel for npsf() method
  *
  * @param[in] delta Distance from PSF centre (radians).
+ * @return Azimuthally integrated PSF.
  *
- * This method implements the integration kernel needed for the npsf()
- * method. It performs an azimuthal integration of the PSF for a given
- * offset angle delta (an offset angle of 0 corresponds to the centre of
- * the PSF):
- * \f[\int_{0}^{\phi} PSF(\delta) d\phi\f]
+ * Computes
+ *
+ * \f
+ *   [\int_{0}^{\phi} PSF(\delta) d\phi
+ * \f]
  * 
+ * for a given offset angle \f$\delta\f$.
+ *
  * The azimuthal integration is performed over an arclength given by
  * \f$\phi\f$. The method actually assumes that the PSF is azimuthally
  * symmetric, hence it just multiplies the PSF value by the arclength times
@@ -85,7 +88,8 @@ double cta_npsf_kern_rad_azsym::eval(double delta)
     if (phi > 0) {
     
         // Compute PSF value
-        value = m_rsp->psf(delta, m_theta, m_phi, m_zenith, m_azimuth, m_logE) * phi * std::sin(delta);
+        value = m_rsp.psf(delta, m_theta, m_phi, m_zenith, m_azimuth, m_logE) * 
+                          phi * std::sin(delta);
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
@@ -105,9 +109,10 @@ double cta_npsf_kern_rad_azsym::eval(double delta)
     return value;
 }
 
+
 /*==========================================================================
  =                                                                         =
- =                  Helper class methods for extended sources              =
+ =                  Helper class methods for radial models                 =
  =                                                                         =
  ==========================================================================*/
 
@@ -116,19 +121,15 @@ double cta_npsf_kern_rad_azsym::eval(double delta)
  *
  * @param[in] rho Zenith angle with respect to model centre [radians].
  *
- * This method evaluates the kernel \f$K(\rho)\f$ for the zenith angle
- * integration
+ * Computes the kernel 
  *
- * \f[\int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho) d\rho\f]
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *                     \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *                     IRF(\rho, \omega) d\omega
+ * \f]
  *
- * of the product between model and IRF, where
- *
- * \f[K(\rho) = \sin \rho \times M(\rho) \times
- *              \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
- *              IRF(\rho, \omega) d\omega\f]
- *
- * \f$M(\rho)\f$ is the azimuthally symmetric source model, and
- * \f$IRF(\rho, \omega)\f$ is the instrument response function.
+ * for the zenith angle integration of radial models.
  ***************************************************************************/
 double cta_irf_radial_kern_rho::eval(double rho)
 {
@@ -151,7 +152,7 @@ double cta_irf_radial_kern_rho::eval(double rho)
         double omega_min = -domega;
         double omega_max = +domega;
 
-        // Evaluate sky model M(rho)
+        // Evaluate sky model
         double model = m_model.eval(rho, m_srcEng, m_srcTime);
 
         // Precompute cosine and sine terms for azimuthal integration
@@ -208,17 +209,13 @@ double cta_irf_radial_kern_rho::eval(double rho)
  *
  * @param[in] omega Azimuth angle (radians).
  *
- * This method evaluates the product
+ * Computes the kernel 
  *
- * \f[IRF(\rho,\omega) \times M(\rho,\omega)\f]
+ * \f[
+ *    IRF(\rho,\omega)
+ * \f]
  *
- * where
- * \f$IRF(\rho,\omega)\f$ is the instrument response function,
- * \f$M(\rho,\omega)\f$ is the spatial component of the radial model,
- * \f$\rho\f$ is the offset angle with respect to the model centre, and
- * \f$\omega\f$ is the position angle with respect to the connecting line
- * between model centre \f$\vec{m}\f$ and the observed photon arrival 
- * direction \f$\vec{p'}\f$.
+ * for the azimuth angle integration of radial models.
  *
  * From the model coordinates \f$(\rho,\omega)\f$, the method computes the
  * angle between the true (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) 
@@ -289,19 +286,19 @@ double cta_irf_radial_kern_omega::eval(double omega)
  *
  * @param[in] rho Radial model zenith angle (radians).
  *
- * Integrates the spatial component of the radial source model multiplied
- * by Npred for a given model offset angle over all azimuth angles that fall
- * within the ROI+PSF radius using
+ * Computes
  *
- * \f[K(\rho) = \sin \rho \times M(\rho) \times
- *              \int_{\omega_{\rm min}}^{\omega_{\rm max}}
- *              N_{\rm pred}(\rho,\omega)
- *              d\omega\f],
- *
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *                     \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *                     N_{\rm pred}(\rho,\omega) d\omega
+ * \f]
+ * 
  * The azimuth angle integration range 
  * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
  * is limited to an arc around the vector connecting the model centre to
- * the ROI centre. This limitation assures proper converges properly.
+ * the ROI centre. This limitation assures that the integration converges
+ * properly.
  ***************************************************************************/
 double cta_npred_radial_kern_rho::eval(double rho)
 {
@@ -390,7 +387,7 @@ double cta_npred_radial_kern_omega::eval(double omega)
     // Set Photon
     GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
-    // Compute Npred for this sky direction
+    // Compute point source Npred for this sky direction
     double npred = m_rsp.npred(photon, m_obs);
 
     // Debug: Check for NaN
@@ -413,7 +410,7 @@ double cta_npred_radial_kern_omega::eval(double omega)
 
 /*==========================================================================
  =                                                                         =
- =                Helper class methods for elliptical sources              =
+ =                Helper class methods for elliptical models               =
  =                                                                         =
  ==========================================================================*/
 
@@ -422,22 +419,14 @@ double cta_npred_radial_kern_omega::eval(double omega)
  *
  * @param[in] rho Zenith angle with respect to model centre [radians].
  *
- * This method evaluates the kernel \f$K(\rho)\f$ for the zenith angle
- * integration
+ * Computes
  *
- * \f[\int_{\rho_{\rm min}}^{\rho_{\rm max}} K(\rho) d\rho\f]
- *
- * of the product between model and IRF, where
- *
- * \f[K(\rho) = \sin \rho \times
- *              \int_{\omega_{\rm min}}^{\omega_{\rm max}} M(\rho, \omega)
- *              IRF(\rho, \omega) d\omega\f]
- * \f$M(\rho, \omega)\f$ is the elliptical source model,
- * \f$IRF(\rho, \omega)\f$ is the instrument response function,
- * \f$\rho\f$ is the offset angle with respect to the model centre, and
- * \f$\omega\f$ is the position angle with respect to the connecting line
- * between model centre \f$\vec{m}\f$ and the observed photon arrival 
- * direction \f$\vec{p'}\f$.
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *                     S_{\rm p}(\rho, \omega | E, t) \, IRF(\rho, \omega)
+ *                     d\omega
+ * \f]
  ***************************************************************************/
 double cta_irf_elliptical_kern_rho::eval(double rho)
 {
@@ -515,17 +504,11 @@ double cta_irf_elliptical_kern_rho::eval(double rho)
  *
  * @param[in] omega Azimuth angle (radians).
  *
- * This method evaluates the product
+ * Computes
  *
- * \f[IRF(\rho,\omega) \times M(\rho,\omega)\f]
- *
- * where
- * \f$IRF(\rho,\omega)\f$ is the instrument response function,
- * \f$M(\rho,\omega)\f$ is the spatial component of the elliptical model,
- * \f$\rho\f$ is the offset angle with respect to the model centre, and
- * \f$\omega\f$ is the position angle with respect to the connecting line
- * between model centre \f$\vec{m}\f$ and the observed photon arrival 
- * direction \f$\vec{p'}\f$.
+ * \f[
+ *    S_{\rm p}(\rho, \omega | E, t) \, IRF(\rho, \omega)
+ * \f]
  *
  * From the model coordinates \f$(\rho,\omega)\f$, the method computes the
  * angle between the true (\f$\vec{p}\f$) and observed (\f$\vec{p'}\f$) 
@@ -609,13 +592,14 @@ double cta_irf_elliptical_kern_omega::eval(double omega)
  *
  * @param[in] rho Elliptical model offset angle (radians).
  *
- * Integrates the spatial component of the elliptical source model multiplied
- * by Npred for a given model offset angle over all azimuth angles that fall
- * within the ROI+PSF radius using
+ * Computes
  *
- * \f[K(\rho) = \sin \rho \times \int_{\omega_{\rm min}}^{\omega_{\rm max}}
- *              M(\rho,\omega) N_{\rm pred}(\rho,\omega)
- *              d\omega\f],
+ * \f[
+ *    K(\rho | E, t) = \sin \rho \times
+ *                     \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *                     S_{\rm p}(\rho,\omega | E, t) \,
+ *                     N_{\rm pred}(\rho,\omega) d\omega
+ * \f]
  *
  * The azimuth angle integration range 
  * \f$[\omega_{\rm min}, \omega_{\rm max}\f$
@@ -686,15 +670,11 @@ double cta_npred_elliptical_kern_rho::eval(double rho)
  *
  * @param[in] omega Azimuth angle (radians).
  *
- * Computes the product of the elliptical model with Npred using
+ * Computes
  *
- * \f[M(\rho,\omega) \times N_{\rm pred}(\rho,\omega)\f]
- *
- * where
- * \f$M(\rho,\omega)\f$ is the spatial component of the elliptical model,
- * \f$Npred(\rho,\omega)\f$ is the point source IRF integral over the ROI,
- * and \f$(\rho,\omega)\f$ are the zenith and azimuth angles of a spherical
- * coordinate system that is centred on the source model centre.
+ * \f[
+ *    S_{\rm p}(\rho,\omega | E, t) \, N_{\rm pred}(\rho,\omega)
+ * \f]
  ***************************************************************************/
 double cta_npred_elliptical_kern_omega::eval(double omega)
 {
@@ -748,7 +728,7 @@ double cta_npred_elliptical_kern_omega::eval(double omega)
 
 /*==========================================================================
  =                                                                         =
- =                  Helper class methods for diffuse sources               =
+ =                  Helper class methods for diffuse models                =
  =                                                                         =
  ==========================================================================*/
 
@@ -758,19 +738,18 @@ double cta_npred_elliptical_kern_omega::eval(double omega)
  * @param[in] theta Offset angle with respect to observed photon direction
  *                  (radians).
  *
- * This method provides the kernel for the IRF offset angle integration of
- * the diffuse source model.
+ * Computes
  *
- * It computes
+ * \f[
+ *    K(\theta | E, t) = \sin \theta \times PSF(\theta)
+ *                       \int_{0}^{2\pi}
+ *                       S_{\rm p}(\theta, \phi | E, t) \,
+ *                       Aeff(\theta, \phi) \,
+ *                       Edisp(\theta, \phi) d\phi
+ * \f]
  *
- * \f[irf(\theta) = \sin \theta \times
- *    \int_{0}^{2\pi} M(\theta, \phi) IRF(\theta, \phi) d\phi\f]
- *
- * where \f$M(\theta, \phi)\f$ is the spatial component of the diffuse
- * source model and \f$IRF(\theta, \phi)\f$ is the response function.
- *
- * As we assume so far an azimuthally symmetric point spread function, the
- * PSF computation is done outside the azimuthal integration kernel?
+ * The PSF is assumed to be azimuthally symmetric, hence the PSF is computed
+ * outside the azimuthal integration.
  *
  * Note that the integration is only performed for \f$\theta>0\f$. Otherwise
  * zero is returned.
@@ -851,16 +830,13 @@ double cta_irf_diffuse_kern_theta::eval(double theta)
  *
  * @param[in] phi Azimuth angle around observed photon direction (radians).
  *
- * This method provides the kernel for the IRF azimuth angle integration of
- * the diffuse source model.
+ * Computes
  *
- * It computes
- *
- * \f[irf = M(\theta, \phi) Aeff(\theta, \phi) Edisp(\theta, \phi)\f]
- *
- * where \f$M(\theta, \phi)\f$ is the spatial component of the diffuse
- * source model, \f$Aeff(\theta, \phi)\f$ is the effective area, and
- * \f$Edisp(\theta, \phi)\f$ is the energy dispersion.
+ * \f[
+ *    S_{\rm p}(\theta, \phi | E, t) \,
+ *    Aeff(\theta, \phi) \,
+ *    Edisp(\theta, \phi)
+ * \f]
  *
  * As the coordinates \f$(\theta, \phi)\f$ are given in the reference frame
  * of the observed photon direction, some coordinate transformations have
@@ -944,6 +920,15 @@ double cta_irf_diffuse_kern_phi::eval(double phi)
  *
  * @param[in] theta Offset angle with respect to ROI centre (radians).
  *
+ * Computes
+ *
+ * \f[
+ *    K(\theta | E, t) = \sin \theta \times
+ *                       \int_{0}^{2\pi}
+ *                       S_{\rm p}(\theta, \phi | E, t) \,
+ *                       N_{\rm pred}(\theta, \phi) d\phi
+ * \f]
+ * 
  * This method integrates a diffuse model for a given offset angle with
  * respect to the ROI centre over all azimuth angles (from 0 to 2pi). The
  * integration is only performed for positive offset angles, otherwise 0 is
@@ -1005,6 +990,12 @@ double cta_npred_diffuse_kern_theta::eval(double theta)
  * @brief Kernel for Npred azimuth angle integration of diffuse model
  *
  * @param[in] phi Azimuth angle with respect to ROI centre (radians).
+ *
+ * Computes
+ *
+ * \f[
+ *    S_{\rm p}(\theta, \phi | E, t) \, N_{\rm pred}(\theta, \phi)
+ * \f]
  *
  * @todo Re-consider formula for possible simplification (dumb matrix
  *       multiplication is definitely not the fastest way to do that

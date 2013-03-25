@@ -846,13 +846,27 @@ std::string GCTAResponse::print(void) const
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
- * Performs integration of the model times IRF over the true photon arrival
- * direction in the coordinate system of the source model for azimuthally
- * independent models \f$M(\rho)\f$:
+ * Integrates the product of the model and the IRF over the true photon
+ * arrival direction using
  *
- * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
- *    \int_{\rho_{\rm min}}^{\rho_{\rm max}} M(\rho) IRF(\rho, \omega)
- *    \sin \rho \, d\rho d\omega\f]
+ * \f[
+ *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
+ *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    IRF(\rho, \omega) d\omega d\rho
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
+ * - \f$IRF(\rho, \omega)\f$ is the IRF
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
+ *
+ * The integration is performed in the coordinate system of the source
+ * model spanned by \f$\rho\f$ and \f$\omega\f$ which allows to benefit
+ * from the symmetry of the source model.
  *
  * The source centre is located at \f$\vec{m}\f$, and a spherical system
  * is defined around this location with \f$(\omega,\rho)\f$ being the
@@ -1024,14 +1038,23 @@ double GCTAResponse::irf_radial(const GEvent&       event,
  * @exception GCTAException::bad_model_type
  *            Model is not an elliptical model.
  *
- * Performs integration of the model times IRF over the true photon arrival
- * direction in the coordinate system of the source model for elliptical
- * models \f$M(\rho,\omega)\f$:
+ * Integrates the product of the model and the IRF over the true photon
+ * arrival direction using
  *
- * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ * \f[
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
- *    M(\rho, \omega) IRF(\rho,\omega)
- *    \sin \rho \, d\rho d\omega\f],
+ *    \sin \rho \times
+ *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    S_{\rm p}(\rho, \omega | E, t) \, IRF(\rho, \omega) d\omega d\rho
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho, \omega | E, t)\f$ is the radial model,
+ * - \f$IRF(\rho, \omega)\f$ is the IRF
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  *
  * The source model centre is located at \f$\vec{m}\f$, and a spherical
  * coordinate system is defined around this location with \f$(\rho,\omega)\f$
@@ -1188,20 +1211,29 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * Performs integration of the spatial component of the diffuse source model
- * multiplied by the IRF over the true photon arrival directions for a given
- * observed arrival direction.
+ * Integrates the product of the model and the IRF over the true photon
+ * arrival direction using
+ *
+ * \f[
+ *    \int_{0}^{\theta_{\rm max}}
+ *    \sin \theta \times PSF(\theta)
+ *    \int_{0}^{2\pi}
+ *    S_{\rm p}(\theta, \phi | E, t) \,
+ *    Aeff(\theta, \phi) \,
+ *    Edisp(\theta, \phi) d\phi
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\theta, \phi | E, t)\f$ is the diffuse model,
+ * - \f$PSF(\theta)\f$ is the azimuthally symmetric Point Spread Function,
+ * - \f$Aeff(\theta, \phi)\f$ is the effective area,
+ * - \f$Edisp(\theta, \phi)\f$ is the energy dispersion,
+ * - \f$\theta\f$ is the distance from the PSF centre, and
+ * - \f$\phi\f$ is the azimuth angle.
  *
  * The integration is performed in the reference of the observed arrival
  * direction. Integration is done first over the azimuth angle \f$\phi\f$ and
- * then over the offset angle \f$\theta\f$. Specifically, the method computes
- *
- * \f[\int_{0}^{\theta_{\rm max}}
- *    \int_{0}^{2\pi}
- *    M(\theta, \phi) IRF(\theta, \phi) d\phi \sin \theta d\theta\f]
- *
- * Here, \f$M(\theta, \phi)\f$ is the spatial component of the diffuse source
- * model and \f$IRF(\theta, \phi)\f$ is the point spread function.
+ * then over the offset angle \f$\theta\f$.
  *
  * The integration kernels for this method are implemented by the response
  * helper classes cta_irf_diffuse_kern_theta and cta_irf_diffuse_kern_phi.
@@ -1344,13 +1376,26 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
- * Integrates the spatial component of the radial source model multiplied
- * by Npred over the region of interest using
+ * Integrates the product of the radial model and Npred over the Region Of
+ * Interest using
  *
- * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ * \f[
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
- *    M(\rho,\omega) Npred(\rho,\omega)
- *    \sin \rho d\rho d\omega\f],
+ *    \sin \rho \times S_{\rm p}(\rho | E, t) \times
+ *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    N_{\rm pred}(\rho, \omega) d\omega
+ *    d\rho
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho | E, t)\f$ is the radial model,
+ * - \f$N_{\rm pred}(\rho,\omega)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest,
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  *
  * The integration is performed in a spherical coordinate system that is
  * centred on the source model centre \f$\vec{m}\f$, with \f$(\rho,\omega)\f$
@@ -1509,13 +1554,27 @@ double GCTAResponse::npred_radial(const GSource& source,
  * @exception GCTAException::bad_model_type
  *            Model is not an elliptical model.
  *
- * Integrates the spatial component of the elliptical source model multiplied
- * by Npred over the region of interest using
+ * Integrates the product of the elliptical model and Npred over the Region
+ * Of Interest using
  *
- * \f[\int_{\omega_{\rm min}}^{\omega_{\rm max}}
+ * \f[
  *    \int_{\rho_{\rm min}}^{\rho_{\rm max}}
- *    M(\rho,\omega) Npred(\rho,\omega)
- *    \sin \rho d\rho d\omega\f],
+ *    \sin \rho \times
+ *    \int_{\omega_{\rm min}}^{\omega_{\rm max}} 
+ *    S_{\rm p}(\rho,\omega | E, t) \,
+ *    N_{\rm pred}(\rho,\omega) d\omega
+ *    d\rho
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\rho,\omega | E, t)\f$ is the elliptical model,
+ * - \f$N_{\rm pred}(\rho,\omega)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest,
+ * - \f$\rho\f$ is the distance from the model centre, and
+ * - \f$\omega\f$ is the azimuth angle is the position angle with respect to
+ *   the connecting line between the model centre and the observed photon
+ *   arrival direction.
  *
  * The integration is performed in a spherical coordinate system that is
  * centred on the source model centre \f$\vec{m}\f$, with \f$(\rho,\omega)\f$
@@ -1674,8 +1733,26 @@ double GCTAResponse::npred_elliptical(const GSource& source,
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
- * This method provides the intergal of the diffuse source model over the
- * region of interest. The integration is performed in the ROI system.
+ * Integrates the product of the diffuse model and Npred over the Region
+ * Of Interest using
+ *
+ * \f[
+ *    \int_{0}^{\theta_{\rm max}}
+ *    \sin \theta \times
+ *    \int_{0}^{2\pi}
+ *    S_{\rm p}(\theta, \phi | E, t) \,
+ *    N_{\rm pred}(\theta, \phi) d\phi
+ *    d\theta
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\theta, \phi | E, t)\f$ is the diffuse model,
+ * - \f$N_{\rm pred}(\theta, \phi)\f$ is the data space integral of the
+ *   Instrument Response Function for a point spread function over the
+ *   Region Of Interest in the reference frame of the diffuse source
+ *   model
+ * - \f$\theta\f$ is the distance from the ROI centre, and
+ * - \f$\phi\f$ is the azimuth angle.
  *
  * Note that the integration precision was adjusted trading-off between
  * computation time and computation precision. A value of 1e-4 was judged
@@ -1990,7 +2067,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
         if (rmax > rmin) {
 
             // Setup integration kernel
-            cta_npsf_kern_rad_azsym integrand(this,
+            cta_npsf_kern_rad_azsym integrand(*this,
                                               roi_radius,
                                               roi_psf_distance,
                                               srcLogEng,
