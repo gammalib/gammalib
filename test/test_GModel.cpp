@@ -45,6 +45,7 @@ void TestGModel::set(void)
     name("GModel");
 
     // Set attributes
+    m_map_file                  = "data/cena_lobes_parkes.fits";
     m_xml_file                  = "data/crab.xml";
     m_xml_model_point_nodes     = "data/model_point_nodes.xml";
     m_xml_model_diffuse_const   = "data/model_diffuse_const.xml";
@@ -60,6 +61,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
+    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
     add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
     //
@@ -482,6 +484,98 @@ void TestGModel::test_diffuse_cube(void)
         test_value(model["Normalization"].value(), 2.1);
         test_value(model["Normalization"].error(), 1.9);
         test_value(model["Normalization"].gradient(), 0.8);
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialDiffuseMap class
+ ***************************************************************************/
+void TestGModel::test_diffuse_map(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialDiffuseMap model;
+        test_assert(model.type() == "SpatialMap",
+                                    "Model type \"SpatialMap\" expected.");
+        test_assert(model.filename() == "", "Model filename \"\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test filename value constructor
+    test_try("Test filename value constructor");
+    try {
+        GModelSpatialDiffuseMap model(m_map_file, 3.0);
+        test_value(model.value(), 3.0);
+        test_assert(model.filename() == m_map_file, "Expected \""+m_map_file+"\"");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test skymap value constructor
+    test_try("Test skymap value constructor");
+    try {
+        GSkymap map("HPX", "GAL", 16, "RING", 10);
+        GModelSpatialDiffuseCube model(map, 3.0);
+        test_value(model.value(), 3.0);
+        test_assert(model.filename() == "", "Expected \"\"");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and attribute methods
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                    xml(m_xml_model_diffuse_map);
+        GXmlElement*            element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialDiffuseMap model(*element);
+        test_value(model.size(), 1);
+        test_assert(model.type() == "SpatialMap", "Expected \"SpatialMap\"");
+        test_value(model.value(), 1.0);
+        test_assert(model.filename() == m_map_file,
+                                        "Model filename \""+m_map_file+"\" expected.");
+
+        // Test value method
+        model.value(3.9);
+        test_value(model.value(), 3.9);
+
+        // Test load method
+        model.load(m_map_file);
+        test_assert(model.filename() == m_map_file,
+                                        "Model filename \""+m_map_file+"\" expected.");
+
+        // Test map method
+        model.map(GSkymap("HPX", "GAL", 16, "RING", 10));
+        test_value(model.map().npix(), 3072);
+
+        // Test operator access
+        test_value(model["Prefactor"].value(), 3.9);
+        test_value(model["Prefactor"].error(), 0.0);
+        test_value(model["Prefactor"].gradient(), 0.0);
+        model["Prefactor"].value(2.1);
+        model["Prefactor"].error(1.9);
+        model["Prefactor"].gradient(0.8);
+        test_value(model["Prefactor"].value(), 2.1);
+        test_value(model["Prefactor"].error(), 1.9);
+        test_value(model["Prefactor"].gradient(), 0.8);
 
         // Success if we reached this point
         test_try_success();

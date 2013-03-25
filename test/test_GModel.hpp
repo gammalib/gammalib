@@ -49,6 +49,7 @@ public:
     void    test_sky_model(void);
     void    test_diffuse_const(void);
     void    test_diffuse_cube(void);
+    void    test_diffuse_map(void);
     //
     void    test_model(void);
     void    test_models(void);
@@ -60,6 +61,7 @@ private:
     void test_xml_model(const std::string& name, const std::string& filename);
     
     // Private attributes
+    std::string m_map_file;
     std::string m_xml_file;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_diffuse_const;
