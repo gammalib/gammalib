@@ -902,8 +902,9 @@ double GCTAResponse::irf_radial(const GEvent&       event,
     const GEnergy& obsEng = event.energy();
 
     // Get source attributes
-    const GSkyDir& centre = model->dir();
-    const GEnergy& srcEng = source.energy();
+    const GSkyDir& centre  = model->dir();
+    const GEnergy& srcEng  = source.energy();
+    const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -962,10 +963,12 @@ double GCTAResponse::irf_radial(const GEvent&       event,
     if (rho_max > rho_min) {
 
         // Setup integration kernel
-        cta_irf_radial_kern_rho integrand(this,
-                                          model,
+        cta_irf_radial_kern_rho integrand(*this,
+                                          *model,
                                           zenith,
                                           azimuth,
+                                          srcEng,
+                                          srcTime,
                                           srcLogEng,
                                           obsLogEng,
                                           zeta,
@@ -1071,8 +1074,9 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     const GEnergy& obsEng = event.energy();
 
     // Get source attributes
-    const GSkyDir& centre = model->dir();
-    const GEnergy& srcEng = source.energy();
+    const GSkyDir& centre  = model->dir();
+    const GEnergy& srcEng  = source.energy();
+    const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -1131,10 +1135,12 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     if (rho_max > rho_min) {
 
         // Setup integration kernel
-        cta_irf_elliptical_kern_rho integrand(this,
-                                              model,
+        cta_irf_elliptical_kern_rho integrand(*this,
+                                              *model,
                                               zenith,
                                               azimuth,
+                                              srcEng,
+                                              srcTime,
                                               srcLogEng,
                                               obsLogEng,
                                               zeta,
@@ -1233,7 +1239,8 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
     const GEnergy& obsEng = event.energy();
 
     // Get source attributes
-    const GEnergy& srcEng = source.energy();
+    const GEnergy& srcEng  = source.energy();
+    const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -1277,15 +1284,17 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
         rot = transpose(ry * rz);
 
         // Setup integration kernel
-        cta_irf_diffuse_kern_theta integrand(this,
-                                             model,
+        cta_irf_diffuse_kern_theta integrand(*this,
+                                             *model,
                                              theta,
                                              phi,
                                              zenith,
                                              azimuth,
+                                             srcEng,
+                                             srcTime,
                                              srcLogEng,
                                              obsLogEng,
-                                             &rot,
+                                             rot,
                                              eta);
 
         // Integrate over zenith angle
@@ -1444,12 +1453,12 @@ double GCTAResponse::npred_radial(const GSource& source,
         double omega0 = centre.posang(events->roi().centre().dir());
 
         // Setup integration kernel
-        cta_npred_radial_kern_rho integrand(this,
-                                            model,
-                                            &(source.energy()),
-                                            &(source.time()),
-                                            ctaobs,
-                                            &rot,
+        cta_npred_radial_kern_rho integrand(*this,
+                                            *model,
+                                            source.energy(),
+                                            source.time(),
+                                            *ctaobs,
+                                            rot,
                                             roi_model_distance,
                                             roi_psf_radius,
                                             omega0);
@@ -1609,12 +1618,12 @@ double GCTAResponse::npred_elliptical(const GSource& source,
         double omega0 = centre.posang(events->roi().centre().dir());
 
         // Setup integration kernel
-        cta_npred_elliptical_kern_rho integrand(this,
-                                                model,
-                                                &(source.energy()),
-                                                &(source.time()),
-                                                ctaobs,
-                                                &rot,
+        cta_npred_elliptical_kern_rho integrand(*this,
+                                                *model,
+                                                source.energy(),
+                                                source.time(),
+                                                *ctaobs,
+                                                rot,
                                                 roi_model_distance,
                                                 roi_psf_radius,
                                                 omega0);
@@ -1747,12 +1756,12 @@ double GCTAResponse::npred_diffuse(const GSource& source,
         rot = transpose(ry * rz);
         
         // Setup integration kernel
-        cta_npred_diffuse_kern_theta integrand(this,
-                                               model,
-                                               &(source.energy()),
-                                               &(source.time()),
-                                               ctaobs,
-                                               &rot);
+        cta_npred_diffuse_kern_theta integrand(*this,
+                                               *model,
+                                               source.energy(),
+                                               source.time(),
+                                               *ctaobs,
+                                               rot);
 
         // Integrate over theta
         GIntegral integral(&integrand);

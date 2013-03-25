@@ -430,12 +430,12 @@ double GResponse::npred_radial(const GSource& source,
         if (theta_max > theta_min) {
 
             // Setup integration kernel
-            GResponse::npred_radial_kern_theta integrand(this,
-                                                         spatial,
-                                                         &(source.energy()),
-                                                         &(source.time()),
-                                                         &obs,
-                                                         &rot);
+            GResponse::npred_radial_kern_theta integrand(*this,
+                                                         *spatial,
+                                                         source.energy(),
+                                                         source.time(),
+                                                         obs,
+                                                         rot);
 
             // Integrate over theta
             GIntegral integral(&integrand);
@@ -506,12 +506,12 @@ double GResponse::npred_elliptical(const GSource& source,
         if (theta_max > theta_min) {
 
             // Setup integration kernel
-            GResponse::npred_elliptical_kern_theta integrand(this,
-                                                             spatial,
-                                                             &(source.energy()),
-                                                             &(source.time()),
-                                                             &obs,
-                                                             &rot);
+            GResponse::npred_elliptical_kern_theta integrand(*this,
+                                                             *spatial,
+                                                             source.energy(),
+                                                             source.time(),
+                                                             obs,
+                                                             rot);
 
             // Integrate over theta
             GIntegral integral(&integrand);
@@ -616,7 +616,7 @@ double GResponse::npred_radial_kern_theta::eval(double theta)
     double npred = 0.0;
 
     // Get radial model value
-    double model = m_spatial->eval(theta);
+    double model = m_spatial.eval(theta, m_srcEng, m_srcTime);
 
     // Compute sine of offset angle
     double sin_theta = std::sin(theta);
@@ -665,17 +665,17 @@ double GResponse::npred_radial_kern_phi::eval(double phi)
     GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
 
     // Rotate from native into celestial system
-    GVector cel = *m_rot * native;
+    GVector cel = m_rot * native;
 
     // Set sky direction
     GSkyDir srcDir;
     srcDir.celvector(cel);
 
     // Set photon
-    GPhoton photon(srcDir, *m_srcEng, *m_srcTime);
+    GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
     // Compute Npred for this sky direction
-    double npred = m_rsp->npred(photon, *m_obs);
+    double npred = m_rsp.npred(photon, m_obs);
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
@@ -752,20 +752,20 @@ double GResponse::npred_elliptical_kern_phi::eval(double phi)
     GVector native(-cos_phi*m_sin_theta, sin_phi*m_sin_theta, m_cos_theta);
 
     // Rotate from native into celestial system
-    GVector cel = *m_rot * native;
+    GVector cel = m_rot * native;
 
     // Set sky direction
     GSkyDir srcDir;
     srcDir.celvector(cel);
 
     // Set photon
-    GPhoton photon(srcDir, *m_srcEng, *m_srcTime);
+    GPhoton photon(srcDir, m_srcEng, m_srcTime);
 
     // Get elliptical model value
-    double model = m_spatial->eval(m_theta, phi);
+    double model = m_spatial.eval(m_theta, phi, m_srcEng, m_srcTime);
 
     // Compute Npred for this sky direction
-    double npred = m_rsp->npred(photon, *m_obs) * model;
+    double npred = m_rsp.npred(photon, m_obs) * model;
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
