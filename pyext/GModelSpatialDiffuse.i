@@ -41,7 +41,7 @@ public:
     GModelSpatialDiffuse(const GModelSpatialDiffuse& model);
     virtual ~GModelSpatialDiffuse(void);
 
-    // Pure virtual methods
+    // Pure virtual base class methods
     virtual void                  clear(void) = 0;
     virtual GModelSpatialDiffuse* clone(void) const = 0;
     virtual std::string           type(void) const = 0;

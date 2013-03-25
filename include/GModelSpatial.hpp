@@ -46,7 +46,16 @@
  * @brief Abstract spatial model base class
  *
  * This class implements the spatial component of the factorized gamma-ray
- * source model.
+ * source model. The spatial component is given by
+ *
+ * \f[
+ *    S_{\rm p}(\vec{p} | E, t)
+ * \f]
+ *
+ * where
+ * - \f$\vec{p}\f$ is the true photon arrival direction,
+ * - \f$E\f$ is the true photon energy, and
+ * - \f$t\f$ is the true photon arrival time.
  ***************************************************************************/
 class GModelSpatial : public GBase {
 

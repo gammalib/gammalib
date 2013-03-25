@@ -94,6 +94,15 @@ class GObservation;
  * for a specific event, given an observation. The eval() method returns
  * the model value, the eval_gradients() returns the model value and sets
  * the analytical gradients for all model parameters.
+ * Note that the eval() and eval_gradients() methods call protected
+ * methods that handle time dispersion, energy dispersion and the point
+ * spread function (spatial dispersion). Dispersion is handled by
+ * integrating over the relevant intervals of the source properties.
+ * Integration of the model is done by three nested integrals.
+ * The outmost integral integrates over time (method integrate_time()),
+ * the next integral integrates over energy (method integrate_energy()),
+ * and the innermost integral integrates over the point spread function
+ * (method integrate_dir()).
  *
  * The npred() method returns the integral over the model for a given
  * observed energy and time.
@@ -109,13 +118,6 @@ class GObservation;
  * that these pointers can be NULL (for example if no model has been yet
  * defined), so the validity of the pointers needs to be checked before
  * using them.
- *
- * Protected methods are implemented to handle source parameter integrations
- * depending on the requirements. Integration of the model (method fct) is
- * first done over all sky directions (method spatial), then over all
- * energies (method spectral) and then over all times (method temporal).
- * The eval() and eval_gradients() methods call temporal() to perform the
- * nested integrations.
  ***************************************************************************/
 class GModelSky : public GModel {
 

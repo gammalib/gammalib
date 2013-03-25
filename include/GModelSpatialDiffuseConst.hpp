@@ -41,7 +41,8 @@
  * @brief Isotropic spatial model
  *
  * This class implements the spatial component of the factorised source
- * model for an isotropic source.
+ * model for an isotropic source. The model has a single parameter which
+ * is the normalization factor of the model.
  ***************************************************************************/
 class GModelSpatialDiffuseConst : public GModelSpatialDiffuse {
 

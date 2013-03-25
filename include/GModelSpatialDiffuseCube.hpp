@@ -178,7 +178,7 @@ void GModelSpatialDiffuseCube::filename(const std::string& filename)
  *
  * @return Map cube.
  *
- * Returns the file name of the spatial map cube model.
+ * Returns the map cube.
  ***************************************************************************/
 inline
 const GSkymap& GModelSpatialDiffuseCube::cube(void) const

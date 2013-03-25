@@ -87,7 +87,7 @@ protected:
     void update(void) const;
 
     // Protected members
-    GModelPar      m_radius;        //!< Disk radius (degrees)
+    GModelPar m_radius;    //!< Disk radius (degrees)
 
     // Cached members used for pre-computations
     mutable double m_last_radius;   //!< Last disk radius

@@ -77,7 +77,7 @@ public:
     virtual double               theta_max(void) const = 0;
     virtual std::string          print(void) const = 0;
 
-    // Implemented virtual base class methods
+    // Implemented pure virtual base class methods
     virtual double eval(const GPhoton& photon) const;
     virtual double eval_gradients(const GPhoton& photon) const;
     virtual void   read(const GXmlElement& xml);
