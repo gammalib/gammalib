@@ -51,7 +51,10 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseMap(void);
     explicit GModelSpatialDiffuseMap(const GXmlElement& xml);
-    explicit GModelSpatialDiffuseMap(const std::string& filename);
+    explicit GModelSpatialDiffuseMap(const std::string& filename,
+                                     const double&      value = 1.0);
+    explicit GModelSpatialDiffuseMap(const GSkymap& map,
+                                     const double&  value = 1.0);
     GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model);
     virtual ~GModelSpatialDiffuseMap(void);
 
@@ -71,12 +74,20 @@ public:
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(void) const;
 
+    // Other methods
+    double             value(void) const;
+    void               value(const double& value);
+    const std::string& filename(void) const;
+    void               load(const std::string& filename);
+    const GSkymap&     map(void) const;
+    void               map(const GSkymap& map);
+
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GModelSpatialDiffuseMap& model);
     void free_members(void);
-    void load_map(const std::string& filename);
+    void prepare_map(void);
 
     // Protected members
     GModelPar           m_value;        //!< Value
@@ -98,5 +109,77 @@ std::string GModelSpatialDiffuseMap::type(void) const
     return "SpatialMap";
 }
 
+
+/***********************************************************************//**
+ * @brief Get model value
+ *
+ * @return Model value.
+ *
+ * Returns the value of the spatial map model.
+ ***************************************************************************/
+inline
+double GModelSpatialDiffuseMap::value(void) const
+{
+    return (m_value.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set model value
+ *
+ * @param[in] value Model value.
+ *
+ * Set the value of the spatial map model.
+ ***************************************************************************/
+inline
+void GModelSpatialDiffuseMap::value(const double& value)
+{
+    m_value.value(value);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get file name
+ *
+ * @return File name.
+ *
+ * Returns the file name of the spatial map model.
+ ***************************************************************************/
+inline
+const std::string& GModelSpatialDiffuseMap::filename(void) const
+{
+    return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Get map
+ *
+ * @return Sky map.
+ *
+ * Returns the sky map.
+ ***************************************************************************/
+inline
+const GSkymap& GModelSpatialDiffuseMap::map(void) const
+{
+    return (m_map);
+}
+
+
+/***********************************************************************//**
+ * @brief Set map cube
+ *
+ * @param[in] map Sky map.
+ *
+ * Set the sky map.
+ ***************************************************************************/
+inline
+void GModelSpatialDiffuseMap::map(const GSkymap& map)
+{
+    m_map = map;
+    prepare_map();
+    return;
+}
 
 #endif /* GMODELSPATIALDIFFUSEMAP_HPP */

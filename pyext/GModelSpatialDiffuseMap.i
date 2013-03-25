@@ -40,7 +40,10 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseMap(void);
     explicit GModelSpatialDiffuseMap(const GXmlElement& xml);
-    explicit GModelSpatialDiffuseMap(const std::string& filename);
+    explicit GModelSpatialDiffuseMap(const std::string& filename,
+                                     const double&      value = 1.0);
+    explicit GModelSpatialDiffuseMap(const GSkymap& map,
+                                     const double&  value = 1.0);
     GModelSpatialDiffuseMap(const GModelSpatialDiffuseMap& model);
     virtual ~GModelSpatialDiffuseMap(void);
 
@@ -55,6 +58,14 @@ public:
                                         GRan& ran) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
+
+    // Other methods
+    double             value(void) const;
+    void               value(const double& value);
+    const std::string& filename(void) const;
+    void               load(const std::string& filename);
+    const GSkymap&     map(void) const;
+    void               map(const GSkymap& map);
 };
 
 

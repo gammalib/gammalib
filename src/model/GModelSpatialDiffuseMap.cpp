@@ -76,9 +76,9 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(void) :
  *
  * @param[in] xml XML element.
  *
- * Creates instance of spatial map model by extracting information from an
- * XML element. See GModelSpatialDiffuseMap::read() for more information about the
- * expected structure of the XML element.
+ * Constructs spatial map model by extracting information from an XML
+ * element. See the method read() for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GXmlElement& xml) :
                          GModelSpatialDiffuse()
@@ -97,19 +97,52 @@ GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Filename constructor
  *
- * @param[in] filename Name of FITS file.
+ * @param[in] filename File name.
+ * @param[in] value Normalization factor (defaults to 1).
  *
- * Creates instance of spatial map model by loading a skymap from a FITS
- * file.
+ * Constructs spatial map model by loading a skymap from the file specified
+ * by @p filename and by setting the normalization @p value.
  ***************************************************************************/
-GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const std::string& filename) :
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const std::string& filename,
+                                                 const double&      value) :
                          GModelSpatialDiffuse()
 {
     // Initialise members
     init_members();
 
+    // Set normalization parameter
+    m_value.value(value);
+
     // Load skymap
-    load_map(filename);
+    load(filename);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Sky map constructor
+ *
+ * @param[in] map Sky map.
+ * @param[in] value Normalization factor (defaults to 1).
+ *
+ * Constructs spatial map model by setting the sky @p map and by setting the
+ * normalization @p value.
+ ***************************************************************************/
+GModelSpatialDiffuseMap::GModelSpatialDiffuseMap(const GSkymap& map,
+                                                 const double&  value) :
+                         GModelSpatialDiffuse()
+{
+    // Initialise members
+    init_members();
+
+    // Set normalization parameter
+    m_value.value(value);
+
+    // Set and prepare skymap
+    m_map = map;
+    prepare_map();
 
     // Return
     return;
@@ -368,7 +401,7 @@ void GModelSpatialDiffuseMap::read(const GXmlElement& xml)
     }
 
     // Load skymap
-    load_map(xml.attribute("file"));
+    load(xml.attribute("file"));
 
     // Return
     return;
@@ -465,6 +498,36 @@ std::string GModelSpatialDiffuseMap::print(void) const
 }
 
 
+/***********************************************************************//**
+ * @brief Load skymap into the model class
+ *
+ * @param[in] filename Sky map file.
+ *
+ * Loads skymap into the model class. The method calls the protected method
+ * prepare_map() that prepares the map for usage by the class.
+ ***************************************************************************/
+void GModelSpatialDiffuseMap::load(const std::string& filename)
+{
+    // Initialise skymap
+    m_map.clear();
+
+    // Store filename of skymap (for XML writing). Note that we do not
+    // expand any environment variable at this level, so that if we write
+    // back the XML element we write the filepath with the environment
+    // variables
+    m_filename = filename;
+
+    // Load skymap
+    m_map.load(expand_env(m_filename));
+
+    // Prepare sky map
+    prepare_map();
+
+    // Return
+    return;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                            Private methods                              =
@@ -533,30 +596,23 @@ void GModelSpatialDiffuseMap::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Load skymap into the model class
+ * @brief Prepare sky map after loading
  *
- * Loads skymap into the model class. After loading, the map is normalized
- * so that the total flux in the map amounts to 1 ph/cm2/s. Negative skymap
- * pixels are set to zero intensity.
+ * Prepares a sky map after loading. The map is normalized so that the total
+ * flux in the map amounts to 1 ph/cm2/s. Negative skymap pixels are set to
+ * zero intensity.
  *
  * The method also initialises a cache for Monte Carlo sampling of the
  * skymap. This Monte Carlo cache consists of a linear array that maps a
  * value between 0 and 1 into the skymap pixel.
+ *
+ * Note that if the GSkymap object contains multiple maps, only the first
+ * map is used.
  ***************************************************************************/
-void GModelSpatialDiffuseMap::load_map(const std::string& filename)
+void GModelSpatialDiffuseMap::prepare_map(void)
 {
-    // Initialise skymap and cache
-    m_map.clear();
+    // Initialise cache
     m_mc_cache.clear();
-
-    // Store filename of skymap (for XML writing). Note that we do not
-    // expand any environment variable at this level, so that if we write
-    // back the XML element we write the filepath with the environment
-    // variable
-    m_filename = filename;
-
-    // Load skymap
-    m_map.load(expand_env(m_filename));
 
     // Determine number of skymap pixels
     int npix = m_map.npix();
