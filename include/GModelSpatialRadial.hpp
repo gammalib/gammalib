@@ -86,6 +86,8 @@ public:
     // Other methods
     double  ra(void) const;
     double  dec(void) const;
+    void    ra(const double& ra);
+    void    dec(const double& dec);
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
 
@@ -116,6 +118,21 @@ double GModelSpatialRadial::ra(void) const
 
 
 /***********************************************************************//**
+ * @brief Set Right Ascencion of model centre
+ *
+ * @param[in] ra Right Ascension (degrees).
+ *
+ * Sets the Right Ascension of the model centre in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialRadial::ra(const double& ra)
+{
+    m_ra.value(ra);
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Return Declination of model centre
  *
  * @return Declination of model centre (degrees).
@@ -126,6 +143,21 @@ inline
 double GModelSpatialRadial::dec(void) const
 {
     return (m_dec.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set Declination of model centre
+ *
+ * @param[in] dec Declination (degrees).
+ *
+ * Sets the Declination of the model centre in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialRadial::dec(const double& dec)
+{
+    m_dec.value(dec);
+    return;
 }
 
 #endif /* GMODELSPATIALRADIAL_HPP */

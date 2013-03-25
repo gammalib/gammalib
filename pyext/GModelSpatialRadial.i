@@ -67,6 +67,8 @@ public:
     // Other methods
     double  ra(void) const;
     double  dec(void) const;
+    void    ra(const double& ra);
+    void    dec(const double& dec);
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
 };
