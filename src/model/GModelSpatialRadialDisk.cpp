@@ -74,6 +74,9 @@ GModelSpatialRadialDisk::GModelSpatialRadialDisk(void) : GModelSpatialRadial()
  *
  * @param[in] dir Sky position of disk centre.
  * @param[in] radius Disk radius (degrees).
+ *
+ * Constructs radial disk model from the sky position of the disk centre
+ * (@p dir) and the disk @p radius in degrees.
  ***************************************************************************/
 GModelSpatialRadialDisk::GModelSpatialRadialDisk(const GSkyDir& dir,
                                                  const double&  radius) :
@@ -210,6 +213,8 @@ void GModelSpatialRadialDisk::clear(void)
 
 /***********************************************************************//**
  * @brief Clone radial disk model
+ *
+ * @return Pointer to deep copy of radial disk model.
  ***************************************************************************/
 GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
 {
@@ -226,11 +231,10 @@ GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
  * @param[in] time Photon arrival time.
  * @return Model value.
  *
- * Evaluates the spatial part for a disk source model. The disk source
- * model is a radial function \f$f(\theta)\f$, where \f$\theta\f$ is the
- * angular separation between disk centre and the actual location:
+ * Evaluates the spatial component for a disk source model using
+ *
  * \f[
- *    f(\theta) = \left \{
+ *    S_{\rm p}(\vec{p} | E, t) = \left \{
  *    \begin{array}{l l}
  *       \displaystyle
  *       {\tt m\_norm}
@@ -243,10 +247,10 @@ GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
  * \f]
  *
  * where
- *
- * \f[ {\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)} \f]
- *
- * is a normalization constant (see the update() method).
+ * - \f$\theta\f$ is the angular separation between disk centre and the
+ *   sky direction of interest, and
+ * - \f${\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)} \f$ is a normalization
+ *   constant (see the update() method for details).
  ***************************************************************************/
 double GModelSpatialRadialDisk::eval(const double&  theta,
                                      const GEnergy& energy,
@@ -329,6 +333,8 @@ GSkyDir GModelSpatialRadialDisk::mc(const GEnergy& energy,
 
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
+ *
+ * @return Maximum model radius (in radians).
  ***************************************************************************/
 double GModelSpatialRadialDisk::theta_max(void) const
 {
@@ -347,11 +353,23 @@ double GModelSpatialRadialDisk::theta_max(void) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the point source information from an XML element. The XML element
- * is required to have 3 parameters.
- * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
- * disk radius is named "Radius".
+ * Reads the radial disk model information from an XML element. The XML
+ * element shall have either the format 
  *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Radius" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
+ *
+ * or
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="GLON"   scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="GLAT"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Radius" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
+ * 
  * @todo Implement a test of the radius and radius boundary. The radius
  *       and radius minimum should be >0.
  ***************************************************************************/
@@ -411,8 +429,15 @@ void GModelSpatialRadialDisk::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the Disk source information into an XML element. The XML element
- * will have 3 parameter leafs named "RA", "DEC" and "Radius"
+ * Writes the radial disk model information into an XML element. The XML
+ * element will have the format 
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Radius" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialRadialDisk::write(GXmlElement& xml) const
 {
@@ -558,7 +583,9 @@ void GModelSpatialRadialDisk::free_members(void)
  * @brief Update precomputation cache
  *
  * Computes the normalization
- * \f[{\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)}\f]
+ * \f[
+ *    {\tt m\_norm} = \frac{1}{2 \pi (1 - \cos r)}
+ * \f]
  *
  * Note that this is the correct normalization on the sphere for any
  * disk radius r. For small r it is very similar to the cartesian

@@ -76,15 +76,21 @@ GModelSpatialRadialShell::GModelSpatialRadialShell(void) : GModelSpatialRadial()
  * @param[in] dir Sky position of shell centre.
  * @param[in] radius Inner shell radius (degrees).
  * @param[in] width Shell width (degrees).
- * @param[in] small_angle Use small angle approximation
+ * @param[in] small_angle Use small angle approximation (default to true).
  *
- * The small angle approximation is (a little) faster, but incorrect for
- * shells larger than a few degrees.
+ * Constructs the shell model from the shell centre (@p dir), the inner
+ * shell @p radius, and the shell @p width. The optional parameters
+ * @p small_angle specifies whether the small angle approximation
+ * should be used or not. The small angle approximation is (a little) faster,
+ * but incorrect for shells larger than a few degrees.
+ *
+ * @todo Measure speed difference between small angle approximation and
+ *       full computation.
  ***************************************************************************/
 GModelSpatialRadialShell::GModelSpatialRadialShell(const GSkyDir& dir,
-                                     const double&  radius,
-                                     const double&  width,
-                                     const bool& small_angle) :
+                                                   const double&  radius,
+                                                   const double&  width,
+                                                   const bool&    small_angle) :
                           GModelSpatialRadial()
 {
     // Initialise members
@@ -106,9 +112,9 @@ GModelSpatialRadialShell::GModelSpatialRadialShell(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * Creates instance of shell spatial model by extracting information from an
- * XML element. See GModelSpatialRadialShell::read() for more information about the
- * expected structure of the XML element.
+ * Constructs shell spatial model by extracting information from an XML
+ * element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpatialRadialShell::GModelSpatialRadialShell(const GXmlElement& xml) :
                           GModelSpatialRadial()
@@ -199,7 +205,7 @@ GModelSpatialRadialShell& GModelSpatialRadialShell::operator=(const GModelSpatia
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear radial shell model
  ***************************************************************************/
 void GModelSpatialRadialShell::clear(void)
 {
@@ -219,12 +225,13 @@ void GModelSpatialRadialShell::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone radial shell model
  *
- * @return Pointer to deep copy of model.
+ * @return Pointer to deep copy of radial shell model.
  ***************************************************************************/
 GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
 {
+    // Clone radial shell model
     return new GModelSpatialRadialShell(*this);
 }
 
@@ -243,7 +250,7 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
  *
  * In the small angle approximation,
  * \f[
- * f(\theta) = {\tt m\_norm} \left \{
+ * S_{\rm p}(\vec{p} | E, t) = {\tt m\_norm} \left \{
  *  \begin{array}{l l}
  *     \displaystyle
  *     \sqrt{ \theta_{\rm out}^2 - \theta^2 } -
@@ -264,7 +271,7 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
  *
  * In the general form that is also valid for large angles
  * \f[
- * f(\theta) = {\tt m\_norm} \left \{
+ * S_{\rm p}(\vec{p} | E, t) = {\tt m\_norm} \left \{
  *  \begin{array}{l l}
  *     \displaystyle
  *     \sqrt{ \sin^2 \theta_{\rm out} - \sin^2 \theta } -
@@ -408,6 +415,8 @@ GSkyDir GModelSpatialRadialShell::mc(const GEnergy& energy,
 
 /***********************************************************************//**
  * @brief Return maximum model radius (in radians)
+ *
+ * @return Maximum model radius (in radians).
  ***************************************************************************/
 double GModelSpatialRadialShell::theta_max(void) const
 {
@@ -426,10 +435,24 @@ double GModelSpatialRadialShell::theta_max(void) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the point source information from an XML element. The XML element
- * is required to have 4 parameters.
- * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
- * shell inner and outer radius are named "Radius" and "Width".
+ * Reads the radial shell model information from an XML element. The XML
+ * element shall have either the format 
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="Width"  scale="1.0" value="0.10"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
+ *
+ * or
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="GLON"   scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="GLAT"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="Width"  scale="1.0" value="0.10"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
  *
  * @todo Implement tests of the radius and radius boundary and the width and
  *       width boundary. The radius and radius boundary should be >=0, the
@@ -508,9 +531,16 @@ void GModelSpatialRadialShell::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the radial shell source information into an XML element. The XML
- * element will have 4 parameter leafs named "RA", "DEC", "Radius" and 
- * "Width". The location leafs are handled by the GModelRadial base class.
+ * Writes the radial shell model information into an XML element. The XML
+ * element will have the format 
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="RA"     scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"    scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Radius" scale="1.0" value="0.30"    min="0.01" max="10"  free="1"/>
+ *       <parameter name="Width"  scale="1.0" value="0.10"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialRadialShell::write(GXmlElement& xml) const
 {

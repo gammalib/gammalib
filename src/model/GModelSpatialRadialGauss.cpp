@@ -75,8 +75,8 @@ GModelSpatialRadialGauss::GModelSpatialRadialGauss(void) : GModelSpatialRadial()
  * @param[in] dir Sky position of Gaussian.
  * @param[in] sigma Width of Gaussian (in degrees).
  *
- * Creates instance of a Gaussian spatial model using a sky direction and
- * a Gaussian width parameter \f$\sigma\f$ (in degrees).
+ * Constructs a Gaussian spatial model using a sky direction (@p dir) and
+ * a Gaussian width parameter @p sigma in degrees.
  ***************************************************************************/
 GModelSpatialRadialGauss::GModelSpatialRadialGauss(const GSkyDir& dir,
                                                    const double&  sigma) :
@@ -99,9 +99,9 @@ GModelSpatialRadialGauss::GModelSpatialRadialGauss(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * Creates instance of a Gaussian spatial model by extracting information
- * from an XML element. See GModelSpatialRadialGauss::read() for more information
- * about the expected structure of the XML element.
+ * Constructs a Gaussian spatial model by extracting information from an XML
+ * element. See the method read() for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpatialRadialGauss::GModelSpatialRadialGauss(const GXmlElement& xml) :
                           GModelSpatialRadial()
@@ -192,7 +192,7 @@ GModelSpatialRadialGauss& GModelSpatialRadialGauss::operator=(const GModelSpatia
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear radial Gauss model
  ***************************************************************************/
 void GModelSpatialRadialGauss::clear(void)
 {
@@ -212,10 +212,11 @@ void GModelSpatialRadialGauss::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone radial Gauss model
  ***************************************************************************/
 GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
 {
+    // Clone radial Gauss model
     return new GModelSpatialRadialGauss(*this);
 }
 
@@ -228,13 +229,17 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * @param[in] time Photon arrival time.
  * @return Model value.
  *
- * Evaluates the spatial part for a Gaussian source model. The Gaussian
- * source model is defined as
- * \f[f(\theta)=\frac{1}{2 \pi \sigma^2} \exp 
- *    \left(-\frac{1}{2}\frac{\theta^2}{\sigma^2} \right)\f]
+ * Evaluates the spatial component for a Gaussian source model using
+ *
+ * \f[
+ *    S_{\rm p}(\vec{p} | E, t) =
+ *    \frac{1}{2 \pi \sigma^2} \exp 
+ *    \left(-\frac{1}{2}\frac{\theta^2}{\sigma^2} \right)
+ * \f]
+ *
  * where
- * \f$\theta\f$ is the angular separation from the source direction, and
- * \f$\sigma\f$ is the Gaussian width.
+ * - \f$\theta\f$ is the angular separation from the source direction, and
+ * - \f$\sigma\f$ is the Gaussian width.
  *
  * @todo The Gaussian function is only correct in the small angle
  *       approximation.
@@ -341,10 +346,22 @@ double GModelSpatialRadialGauss::theta_max(void) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the Gaussian source information from an XML element. The XML element
- * is required to have 3 parameters. 
- * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
- * Gaussian width is named "Sigma".
+ * Reads the radial Gauss model information from an XML element. The XML
+ * element shall have either the format 
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
+ *
+ * or
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="GLON"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
  *
  * @todo Implement a test of the sigma and sigma boundary. The sigma
  *       and sigma minimum should be >0.
@@ -407,9 +424,15 @@ void GModelSpatialRadialGauss::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the Gaussian source information into an XML element. The XML element
- * will have 3 parameter leafs named "RA", "DEC" and "Sigma". The location
- * leafs are handled by the GModelRadial base class.
+ * Writes the radial disk model information into an XML element. The XML
+ * element will have the format 
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialRadialGauss::write(GXmlElement& xml) const
 {

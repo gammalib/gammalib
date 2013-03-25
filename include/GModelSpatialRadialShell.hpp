@@ -60,8 +60,9 @@ public:
     // Constructors and destructors
     GModelSpatialRadialShell(void);
     explicit GModelSpatialRadialShell(const GSkyDir& dir,
-                               const double& radius, const double& width,
-                               const bool& small_angle = true);
+                                      const double&  radius,
+                                      const double&  width,
+                                      const bool&    small_angle = true);
     explicit GModelSpatialRadialShell(const GXmlElement& xml);
     GModelSpatialRadialShell(const GModelSpatialRadialShell& model);
     virtual ~GModelSpatialRadialShell(void);
