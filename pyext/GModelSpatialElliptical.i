@@ -68,10 +68,12 @@ public:
     // Other methods
     double  ra(void) const;
     double  dec(void) const;
+    void    ra(const double& ra);
+    void    dec(const double& dec);
     double  posangle(void) const;
+    void    posangle(const double& posangle);
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
-    void    posangle(const double& posangle);
 };
 
 
