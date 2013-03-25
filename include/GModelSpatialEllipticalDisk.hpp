@@ -50,8 +50,8 @@ public:
     // Constructors and destructors
     GModelSpatialEllipticalDisk(void);
     explicit GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                         const double&  semiminor,
                                          const double&  semimajor,
+                                         const double&  semiminor,
                                          const double&  posangle);
     explicit GModelSpatialEllipticalDisk(const GXmlElement& xml);
     GModelSpatialEllipticalDisk(const GModelSpatialEllipticalDisk& model);

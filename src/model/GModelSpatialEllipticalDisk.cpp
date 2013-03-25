@@ -75,15 +75,17 @@ GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(void) :
  * @brief Disk constructor
  *
  * @param[in] dir Sky position of disk centre.
- * @param[in] semiminor Semi-minor axis (degrees).
  * @param[in] semimajor Semi-major axis (degrees).
+ * @param[in] semiminor Semi-minor axis (degrees).
  * @param[in] posangle Position angle of semi-major axis (degrees).
  *
- * Construct elliptical disk model from model parameters.
+ * Construct elliptical disk model from sky position of the ellipse centre
+ * (@p dir), the @p semimajor and @p semiminor axes, and the position
+ * angle (@p posangle).
  ***************************************************************************/
 GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GSkyDir& dir,
-                                                         const double&  semiminor,
                                                          const double&  semimajor,
+                                                         const double&  semiminor,
                                                          const double&  posangle) :
                              GModelSpatialElliptical()
 {
@@ -106,9 +108,9 @@ GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GSkyDir& dir,
  *
  * @param[in] xml XML element.
  *
- * Creates instance of Elliptical disk model by extracting information from
- * an XML element. See GModelSpatialEllipticalDisk::read() for more
- * information about the expected structure of the XML element.
+ * Constructs elliptical disk model by extracting information from an XML
+ * element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpatialEllipticalDisk::GModelSpatialEllipticalDisk(const GXmlElement& xml) :
                              GModelSpatialElliptical()
@@ -199,7 +201,7 @@ GModelSpatialEllipticalDisk& GModelSpatialEllipticalDisk::operator=(const GModel
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear elliptical disk model
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::clear(void)
 {
@@ -219,12 +221,13 @@ void GModelSpatialEllipticalDisk::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone elliptical disk model
  *
  * @return Pointer to deep copy of elliptical disk model.
  ***************************************************************************/
 GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
 {
+    // Clone elliptical disk model
     return new GModelSpatialEllipticalDisk(*this);
 }
 
@@ -239,7 +242,8 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  * @return Model value.
  *
  * Evaluates the spatial component for an elliptical disk source model. The
- * disk source model is an elliptical function \f$f(\theta, \phi)\f$, where
+ * disk source model is an elliptical function
+ * \f$S_{\rm p}(\theta, \phi | E, t)\f$, where
  * \f$\theta\f$ is the angular separation between elliptical disk centre and
  * the actual location and \f$\phi\f$ the position angle with respect to the
  * ellipse centre, counted counterclockwise from North.
@@ -247,7 +251,7 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  * The function \f$f(\theta, \phi)\f$ is given by
  *
  * \f[
- * f(\theta,\phi) = \left \{
+ * S_{\rm p}(\theta, \phi | E, t) = \left \{
  *  \begin{array}{l l}
  *     {\tt m\_norm}
  *     & \mbox{if} \, \, \theta \le \theta_0 \\
@@ -422,11 +426,26 @@ double GModelSpatialEllipticalDisk::theta_max(void) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the elliptical disk information from an XML element. The XML element
- * is required to have 5 parameters.
- * The position is named either "RA" and "DEC" or "GLON" and "GLAT", the
- * rotation angle "PA", the semi-semiminor axis "MinorRadius" and the semi-semimajor
- * axis "MajorRadius"
+ * Reads the elliptical disk model information from an XML element. The XML
+ * element shall have either the format 
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="RA"          scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
+ *       <parameter name="MinorRadius" scale="1.0" value="0.5"     min="0.001" max="10"  free="1"/>
+ *       <parameter name="MajorRadius" scale="1.0" value="2.0"     min="0.001" max="10"  free="1"/>
+ *     </spatialModel>
+ *
+ * or
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="GLON"        scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="GLAT"        scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
+ *       <parameter name="MinorRadius" scale="1.0" value="0.5"     min="0.001" max="10"  free="1"/>
+ *       <parameter name="MajorRadius" scale="1.0" value="2.0"     min="0.001" max="10"  free="1"/>
+ *     </spatialModel>
  *
  * @todo Implement a test of the ellipse boundary. The axes
  *       and axes minimum should be >0.
@@ -496,9 +515,17 @@ void GModelSpatialEllipticalDisk::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the Disk source information into an XML element. The XML element
- * will have 5 parameter leafs named "RA", "DEC", "PA", "MinorRadius" and
- * "MajorRadius"
+ * Write the elliptical disk model information into an XML element. The XML
+ * element will have the format 
+ *
+ *     <spatialModel type="DiskFunction">
+ *       <parameter name="RA"          scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC"         scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
+ *       <parameter name="PA"          scale="1.0" value="45.0"    min="-360"  max="360" free="1"/>
+ *       <parameter name="MinorRadius" scale="1.0" value="0.5"     min="0.001" max="10"  free="1"/>
+ *       <parameter name="MajorRadius" scale="1.0" value="2.0"     min="0.001" max="10"  free="1"/>
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::write(GXmlElement& xml) const
 {
@@ -677,7 +704,10 @@ void GModelSpatialEllipticalDisk::free_members(void)
  * @brief Update precomputation cache
  *
  * Computes the normalization
- * \f[{\tt m\_norm} = \frac{1}{2 \pi (1 - \cos a) (1 - \cos b)}\f]
+ * \f[
+ *    {\tt m\_norm} = \frac{1}{2 \pi (1 - \cos a) (1 - \cos b)}
+ * \f]
+ *
  * @todo check this formula
  ***************************************************************************/
 void GModelSpatialEllipticalDisk::update() const
