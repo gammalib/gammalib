@@ -337,7 +337,7 @@ const double& GModelPar::scale(void) const
 /***********************************************************************//**
  * @brief Set parameter error factor
  *
- * @param[in] Parameter error factor.
+ * @param[in] error Parameter error factor.
  *
  * Sets the parameter error factor.
  ***************************************************************************/
@@ -352,7 +352,7 @@ void GModelPar::factor_error(const double& error)
 /***********************************************************************//**
  * @brief Set parameter gradient factor
  *
- * @param[in] Parameter gradient factor.
+ * @param[in] gradient Parameter gradient factor.
  *
  * Sets the parameter gradient factor.
  ***************************************************************************/
@@ -571,7 +571,7 @@ const std::string& GModelPar::unit(void) const
 /***********************************************************************//**
  * @brief Set parameter name
  *
- * @param[in] Parameter name.
+ * @param[in] name Parameter name.
  *
  * Sets the parameter name.
  ***************************************************************************/
@@ -586,7 +586,7 @@ void GModelPar::name(const std::string& name)
 /***********************************************************************//**
  * @brief Set parameter unit
  *
- * @param[in] Parameter unit.
+ * @param[in] unit Parameter unit.
  *
  * Sets the parameter unit.
  ***************************************************************************/

@@ -187,7 +187,7 @@ const std::string& GModel::name(void) const
 /***********************************************************************//**
  * @brief Set parameter name
  *
- * @param[in] Parameter name.
+ * @param[in] name Parameter name.
  *
  * Set the parameter name.
  ***************************************************************************/
