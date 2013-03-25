@@ -276,7 +276,7 @@ double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * Returns an abitrary position on the celestial sphere.
+ * Returns an arbitrary position on the celestial sphere.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseConst::mc(const GEnergy& energy,
                                       const GTime&   time,
