@@ -57,21 +57,27 @@ public:
     // Operators
     virtual GModelSpatialRadialDisk& operator=(const GModelSpatialRadialDisk& model);
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void                     clear(void);
     virtual GModelSpatialRadialDisk* clone(void) const;
-    virtual std::string              type(void) const { return "DiskFunction"; }
-    virtual double                   eval(const double& theta) const;
-    virtual double                   eval_gradients(const double& theta) const;
-    virtual GSkyDir                  mc(GRan& ran) const;
+    virtual std::string              type(void) const;
+    virtual double                   eval(const double&  theta,
+                                          const GEnergy& energy,
+                                          const GTime&   time) const;
+    virtual double                   eval_gradients(const double&  theta,
+                                                    const GEnergy& energy,
+                                                    const GTime&   time) const;
+    virtual GSkyDir                  mc(const GEnergy& energy,
+                                        const GTime&   time,
+                                        GRan&          ran) const;
     virtual double                   theta_max(void) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(void) const;
 
     // Other methods
-    double radius(void) const { return m_radius.value(); }
-    void   radius(const double& radius) { m_radius.value(radius); }
+    double radius(void) const;
+    void   radius(const double& radius);
 
 protected:
     // Protected methods
@@ -88,5 +94,48 @@ protected:
     mutable double m_radius_rad;    //!< Radius in radians
     mutable double m_norm;          //!< Normalization
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "DiskFunction".
+ *
+ * Returns the type of the radial disk model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialRadialDisk::type(void) const
+{
+    return "DiskFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Return disk radius
+ *
+ * @return Disk radius (degrees).
+ *
+ * Returns the radius of the disk in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialRadialDisk::radius(void) const
+{
+    return (m_radius.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set disk radius
+ *
+ * @param[in] radius Disk radius (degrees).
+ *
+ * Sets the radius of the disk in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialDisk::radius(const double& radius)
+{
+    m_radius.value(radius);
+    return;
+}
 
 #endif /* GMODELSPATIALRADIALDISK_HPP */

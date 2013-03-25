@@ -69,9 +69,11 @@ public:
     virtual void                      clear(void);
     virtual GModelSpatialDiffuseCube* clone(void) const;
     virtual std::string               type(void) const;
-    virtual double                    eval(const GSkyDir& srcDir) const;
-    virtual double                    eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual double                    eval(const GPhoton& photon) const;
+    virtual double                    eval_gradients(const GPhoton& photon) const;
+    virtual GSkyDir                   mc(const GEnergy& energy,
+                                         const GTime& time,
+                                         GRan& ran) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(void) const;

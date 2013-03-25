@@ -61,10 +61,12 @@ public:
     // Implemented pure virtual methods
     virtual void                     clear(void);
     virtual GModelSpatialDiffuseMap* clone(void) const;
-    virtual std::string              type(void) const { return "SpatialMap"; }
-    virtual double                   eval(const GSkyDir& srcDir) const;
-    virtual double                   eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir                  mc(GRan& ran) const;
+    virtual std::string              type(void) const;
+    virtual double                   eval(const GPhoton& photon) const;
+    virtual double                   eval_gradients(const GPhoton& photon) const;
+    virtual GSkyDir                  mc(const GEnergy& energy,
+                                        const GTime& time,
+                                        GRan& ran) const;
     virtual void                     read(const GXmlElement& xml);
     virtual void                     write(GXmlElement& xml) const;
     virtual std::string              print(void) const;
@@ -82,5 +84,19 @@ protected:
     std::string         m_filename;     //!< Name of skymap
     std::vector<double> m_mc_cache;     //!< Monte Carlo cache
 };
+
+/***********************************************************************//**
+ * @brief Return spatial model type
+ *
+ * @return "SpatialMap".
+ *
+ * Returns the type of the spatial map model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialDiffuseMap::type(void) const
+{
+    return "SpatialMap";
+}
+
 
 #endif /* GMODELSPATIALDIFFUSEMAP_HPP */

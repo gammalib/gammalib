@@ -51,11 +51,17 @@ public:
     virtual void                         clear(void);
     virtual GModelSpatialEllipticalDisk* clone(void) const;
     virtual std::string                  type(void) const;
-    virtual double                       eval(const double& theta,
-                                              const double& posangle) const;
-    virtual double                       eval_gradients(const double& theta,
-                                                        const double& posangle) const;
-    virtual GSkyDir                      mc(GRan& ran) const;
+    virtual double                       eval(const double&  theta,
+                                              const double&  posangle,
+                                              const GEnergy& energy,
+                                              const GTime&   time) const;
+    virtual double                       eval_gradients(const double&  theta,
+                                                        const double&  posangle,
+                                                        const GEnergy& energy,
+                                                        const GTime&   time) const;
+    virtual GSkyDir                      mc(const GEnergy& energy,
+                                            const GTime& time,
+                                            GRan& ran) const;
     virtual double                       theta_max(void) const;
     virtual void                         read(const GXmlElement& xml);
     virtual void                         write(GXmlElement& xml) const;
@@ -75,10 +81,10 @@ public:
     GModelSpatialEllipticalDisk copy() {
         return (*self);
     }
-    double eval(const GSkyDir& srcDir) const {
-        return self->GModelSpatialElliptical::eval(srcDir);
+    double eval(const GPhoton& photon) const {
+        return self->GModelSpatialElliptical::eval(photon);
     }
-    double eval_gradients(const GSkyDir& srcDir) const {
-        return self->GModelSpatialElliptical::eval_gradients(srcDir);
+    double eval_gradients(const GPhoton& photon) const {
+        return self->GModelSpatialElliptical::eval_gradients(photon);
     }
 };

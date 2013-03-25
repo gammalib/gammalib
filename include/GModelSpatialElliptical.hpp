@@ -33,6 +33,9 @@
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GPhoton.hpp"
 #include "GXmlElement.hpp"
 #include "GRan.hpp"
 
@@ -62,27 +65,33 @@ public:
     virtual void                     clear(void) = 0;
     virtual GModelSpatialElliptical* clone(void) const = 0;
     virtual std::string              type(void) const = 0;
-    virtual double                   eval(const double& theta,
-                                          const double& posangle) const = 0;
-    virtual double                   eval_gradients(const double& theta,
-                                                    const double& posangle) const = 0;
-    virtual GSkyDir                  mc(GRan& ran) const = 0;
+    virtual double                   eval(const double&  theta,
+                                          const double&  posangle,
+                                          const GEnergy& energy,
+                                          const GTime&   time) const = 0;
+    virtual double                   eval_gradients(const double&  theta,
+                                                    const double&  posangle,
+                                                    const GEnergy& energy,
+                                                    const GTime&   time) const = 0;
+    virtual GSkyDir                  mc(const GEnergy& energy,
+                                        const GTime& time,
+                                        GRan& ran) const = 0;
     virtual double                   theta_max(void) const = 0;
     virtual std::string              print(void) const = 0;
 
-    // Implemented virtual methods
-    virtual double eval(const GSkyDir& srcDir) const;
-    virtual double eval_gradients(const GSkyDir& srcDir) const;
+    // Implemented virtual base class methods
+    virtual double eval(const GPhoton& photon) const;
+    virtual double eval_gradients(const GPhoton& photon) const;
     virtual void   read(const GXmlElement& xml);
     virtual void   write(GXmlElement& xml) const;
 
     // Other methods
-    double  ra(void) const { return m_ra.value(); }
-    double  dec(void) const { return m_dec.value(); }
-    double  posangle(void) const { return m_posangle.value(); }
+    double  ra(void) const;
+    double  dec(void) const;
+    double  posangle(void) const;
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
-    void    posangle(const double& posangle) { m_posangle.value(posangle); }
+    void    posangle(const double& posangle);
 
 protected:
     // Protected methods
@@ -95,5 +104,64 @@ protected:
     GModelPar m_dec;      //!< Declination (deg)
     GModelPar m_posangle; //!< Position angle from North, counterclockwise (deg)
 };
+
+
+/***********************************************************************//**
+ * @brief Return Right Ascencion of model centre
+ *
+ * @return Right Ascencion of model centre (degrees).
+ *
+ * Returns the Right Ascension of the model centre in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialElliptical::ra(void) const
+{
+    return (m_ra.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return Declination of model centre
+ *
+ * @return Declination of model centre (degrees).
+ *
+ * Returns the Declination of the model centre in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialElliptical::dec(void) const
+{
+    return (m_dec.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return Position Angle of model
+ *
+ * @return Position Angle of model (degrees).
+ *
+ * Returns the Position Angle of model in degrees, measured counterclockwise
+ * from celestial North.
+ ***************************************************************************/
+inline
+double GModelSpatialElliptical::posangle(void) const
+{
+    return (m_posangle.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set Position Angle of model
+ *
+ * @param[in] posangle Position Angle of model (degrees).
+ *
+ * Sets the Position Angle of model in degrees, measured counterclockwise
+ * from celestial North.
+ ***************************************************************************/
+inline
+void GModelSpatialElliptical::posangle(const double& posangle)
+{
+    m_posangle.value(posangle);
+    return;
+}
 
 #endif /* GMODELSPATIALELLIPTICAL_HPP */

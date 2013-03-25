@@ -97,8 +97,8 @@ GModelSpatialRadialDisk::GModelSpatialRadialDisk(const GSkyDir& dir,
  * @param[in] xml XML element.
  *
  * Creates instance of radial disk model by extracting information from an
- * XML element. See GModelSpatialRadialDisk::read() for more information about the
- * expected structure of the XML element.
+ * XML element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpatialRadialDisk::GModelSpatialRadialDisk(const GXmlElement& xml) :
                          GModelSpatialRadial()
@@ -189,7 +189,7 @@ GModelSpatialRadialDisk& GModelSpatialRadialDisk::operator=(const GModelSpatialR
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear radial disk model
  ***************************************************************************/
 void GModelSpatialRadialDisk::clear(void)
 {
@@ -209,10 +209,11 @@ void GModelSpatialRadialDisk::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone radial disk model
  ***************************************************************************/
 GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
 {
+    // Clone radial disk model
     return new GModelSpatialRadialDisk(*this);
 }
 
@@ -221,21 +222,24 @@ GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
  * @brief Evaluate function (in units of sr^-1)
  *
  * @param[in] theta Angular distance from disk centre (radians).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @return Model value.
  *
  * Evaluates the spatial part for a disk source model. The disk source
  * model is a radial function \f$f(\theta)\f$, where \f$\theta\f$ is the
  * angular separation between disk centre and the actual location:
  * \f[
- * f(\theta) = \left \{
- *  \begin{array}{l l}
- *     \displaystyle
- *     {\tt m\_norm}
- *     & \mbox{if $\theta \le $ radius} \\
- *     \\
- *    \displaystyle
- *    0 & \mbox{if $\theta > $ radius}
- *  \end{array}
- *  \right .
+ *    f(\theta) = \left \{
+ *    \begin{array}{l l}
+ *       \displaystyle
+ *       {\tt m\_norm}
+ *       & \mbox{if $\theta \le $ radius} \\
+ *       \\
+ *      \displaystyle
+ *      0 & \mbox{if $\theta > $ radius}
+ *    \end{array}
+ *    \right .
  * \f]
  *
  * where
@@ -244,7 +248,9 @@ GModelSpatialRadialDisk* GModelSpatialRadialDisk::clone(void) const
  *
  * is a normalization constant (see the update() method).
  ***************************************************************************/
-double GModelSpatialRadialDisk::eval(const double& theta) const
+double GModelSpatialRadialDisk::eval(const double&  theta,
+                                     const GEnergy& energy,
+                                     const GTime&   time) const
 {
     // Update precomputation cache
     update();
@@ -273,6 +279,9 @@ double GModelSpatialRadialDisk::eval(const double& theta) const
  * @brief Evaluate function and gradients (in units of sr^-1)
  *
  * @param[in] theta Angular distance from disk centre (radians).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @return Model value.
  *
  * Evaluates the function value. No gradient computation is implemented as
  * radial models will be convolved with the instrument response and thus
@@ -280,21 +289,29 @@ double GModelSpatialRadialDisk::eval(const double& theta) const
  *
  * See the eval() method for more information.
  ***************************************************************************/
-double GModelSpatialRadialDisk::eval_gradients(const double& theta) const
+double GModelSpatialRadialDisk::eval_gradients(const double&  theta,
+                                               const GEnergy& energy,
+                                               const GTime&   time) const
 {
     // Return value
-    return (eval(theta));
+    return (eval(theta, energy, time));
 }
 
 
 /***********************************************************************//**
- * @brief Returns MC sky direction
+ * @brief Return MC sky direction
  *
- * @param[in] ran Random number generator.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @param[in,out] ran Random number generator.
+ * @return Sky direction.
  *
- * Draws an arbitrary sky position from the 2D disk distribution.
+ * Draws an arbitrary sky direction from the 2D disk distribution as function
+ * of the photon @p energy and arrival @p time.
  ***************************************************************************/
-GSkyDir GModelSpatialRadialDisk::mc(GRan& ran) const
+GSkyDir GModelSpatialRadialDisk::mc(const GEnergy& energy,
+                                    const GTime&   time,
+                                    GRan&          ran) const
 {
     // Simulate offset from photon arrival direction
     double cosrad = std::cos(radius()*deg2rad);

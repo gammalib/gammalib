@@ -62,17 +62,19 @@ public:
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpatialPointSource* clone(void) const;
-    virtual std::string               type(void) const { return "SkyDirFunction"; }
-    virtual double                    eval(const GSkyDir& srcDir) const;
-    virtual double                    eval_gradients(const GSkyDir& srcDir) const;
-    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const GPhoton& photon) const;
+    virtual double                    eval_gradients(const GPhoton& photon) const;
+    virtual GSkyDir                   mc(const GEnergy& energy,
+                                         const GTime& time,
+                                         GRan& ran) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(void) const;
 
     // Other methods
-    double  ra(void) const { return m_ra.value(); }
-    double  dec(void) const { return m_dec.value(); }
+    double  ra(void) const;
+    double  dec(void) const;
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
 
@@ -86,5 +88,48 @@ protected:
     GModelPar m_ra;          //!< Right Ascension (deg)
     GModelPar m_dec;         //!< Declination (deg)
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "SkyDirFunction".
+ *
+ * Returns the type of the spatial model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialPointSource::type(void) const
+{
+    return "SkyDirFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Return Right Ascencion of model centre
+ *
+ * @return Right Ascencion of model centre (degrees).
+ *
+ * Returns the Right Ascension of the model centre in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialPointSource::ra(void) const
+{
+    return (m_ra.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return Declination of model centre
+ *
+ * @return Declination of model centre (degrees).
+ *
+ * Returns the Declination of the model centre in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialPointSource::dec(void) const
+{
+    return (m_dec.value());
+}
+
 
 #endif /* GMODELSPATIALPOINTSOURCE_HPP */

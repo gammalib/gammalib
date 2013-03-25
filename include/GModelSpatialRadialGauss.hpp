@@ -32,6 +32,8 @@
 #include "GModelSpatialRadial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 #include "GXmlElement.hpp"
 
 
@@ -59,18 +61,24 @@ public:
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpatialRadialGauss* clone(void) const;
-    virtual std::string               type(void) const { return "GaussFunction"; }
-    virtual double                    eval(const double& theta) const;
-    virtual double                    eval_gradients(const double& theta) const;
-    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const double&  theta,
+                                           const GEnergy& energy,
+                                           const GTime& time) const;
+    virtual double                    eval_gradients(const double& theta,
+                                                     const GEnergy& energy,
+                                                     const GTime& time) const;
+    virtual GSkyDir                   mc(const GEnergy& energy,
+                                         const GTime& time,
+                                         GRan& ran) const;
     virtual double                    theta_max(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(void) const;
 
     // Other methods
-    double  sigma(void) const { return m_sigma.value(); }
-    void    sigma(const double& sigma) { m_sigma.value(sigma); }
+    double  sigma(void) const;
+    void    sigma(const double& sigma);
 
 protected:
     // Protected methods
@@ -81,5 +89,48 @@ protected:
     // Protected members
     GModelPar m_sigma;      //!< Gaussian width (deg)
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "GaussFunction".
+ *
+ * Returns the type of the radial Gauss model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialRadialGauss::type(void) const
+{
+    return "GaussFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Return Gaussian sigma
+ *
+ * @return Gaussian sigma (degrees).
+ *
+ * Returns the Gaussian sigma in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialRadialGauss::sigma(void) const
+{
+    return (m_sigma.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set Gaussian sigma
+ *
+ * @param[in] sigma Gaussian sigma (degrees).
+ *
+ * Sets the Gaussian sigma in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialGauss::sigma(const double& sigma)
+{
+    m_sigma.value(sigma);
+    return;
+}
 
 #endif /* GMODELSPATIALRADIALGAUSS_HPP */

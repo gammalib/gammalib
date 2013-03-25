@@ -71,7 +71,7 @@ GModelSpatialPointSource::GModelSpatialPointSource(void) : GModelSpatial()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Sky direction constructor
  *
  * @param[in] dir Sky direction.
  *
@@ -97,8 +97,8 @@ GModelSpatialPointSource::GModelSpatialPointSource(const GSkyDir& dir) :
  * @param[in] xml XML element.
  *
  * Construct a point source spatial model by extracting information from an
- * XML element. See GModelSpatialPointSource::read() for more information
- * about the expected structure of the XML element.
+ * XML element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpatialPointSource::GModelSpatialPointSource(const GXmlElement& xml) :
                           GModelSpatial()
@@ -189,7 +189,7 @@ GModelSpatialPointSource& GModelSpatialPointSource::operator=(const GModelSpatia
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear point source model
  ***************************************************************************/
 void GModelSpatialPointSource::clear(void)
 {
@@ -207,12 +207,13 @@ void GModelSpatialPointSource::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone point source model
  *
- * @return Pointer to deep copy of point source spatial model.
+ * @return Pointer to deep copy of point source model.
  ***************************************************************************/
 GModelSpatialPointSource* GModelSpatialPointSource::clone(void) const
 {
+    // Clone point source model
     return new GModelSpatialPointSource(*this);
 }
 
@@ -220,18 +221,18 @@ GModelSpatialPointSource* GModelSpatialPointSource::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] srcDir True photon arrival direction.
- * @return Model value (1 if srcDir corresponds to source direction, 0 else).
+ * @param[in] photon Incident photon.
+ * @return Model value.
  *
  * Evaluates the spatial part for a point source model. It implements a delta
  * function with respect to the coordinates of the source. For numerical
- * reasons a certain tolerance is accepted (typically 0.1 arcsec, i.e. well
+ * reasons, a certain tolerance is accepted (typically 0.1 arcsec, i.e. well
  * below the angular resolution of gamma-ray telescopes).
  ***************************************************************************/
-double GModelSpatialPointSource::eval(const GSkyDir& srcDir) const
+double GModelSpatialPointSource::eval(const GPhoton& photon) const
 {
     // Set value dependent on source distance
-    double value = (srcDir.dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
+    double value = (photon.dir().dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
 
     // Return value
     return value;
@@ -241,8 +242,8 @@ double GModelSpatialPointSource::eval(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcDir True photon arrival direction.
- * @return Model value (1 if srcDir corresponds to source direction, 0 else).
+ * @param[in] photon Incident photon.
+ * @return Model value.
  *
  * Evaluates the spatial part for a point source model and the gradient.
  * It implements a delta function with respect to the coordinates of the
@@ -252,28 +253,31 @@ double GModelSpatialPointSource::eval(const GSkyDir& srcDir) const
  *
  * This method does not provide valid parameter gradients.
  ***************************************************************************/
-double GModelSpatialPointSource::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialPointSource::eval_gradients(const GPhoton& photon) const
 {
-    // Set value dependent on source distance
-    double value = (srcDir.dist_deg(dir()) < tolerance) ? 1.0 : 0.0;
-
     // Return value
-    return value;
+    return (eval(photon));
 }
 
 
 /***********************************************************************//**
  * @brief Returns MC sky direction
  *
- * @param[in] ran Random number generator.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * This method always returns the directon of the point source.
+ * Draws an arbitrary sky direction for the point source model. As the point
+ * source is a point in the sky, the methods always returns the directon of
+ * the point source.
  ***************************************************************************/
-GSkyDir GModelSpatialPointSource::mc(GRan& ran) const
+GSkyDir GModelSpatialPointSource::mc(const GEnergy& energy,
+                                     const GTime&   time,
+                                     GRan&          ran) const
 {
-    // Return point source direction
-    return dir();
+    // Return sky direction
+    return (dir());
 }
 
 
@@ -460,6 +464,8 @@ std::string GModelSpatialPointSource::print(void) const
  * @brief Return position of point source
  *
  * @return Point source sky direction.
+ *
+ * Returns the sky direction of the point source.
  ***************************************************************************/
 GSkyDir GModelSpatialPointSource::dir(void) const
 {
@@ -476,6 +482,8 @@ GSkyDir GModelSpatialPointSource::dir(void) const
 
 /***********************************************************************//**
  * @brief Set position of point source
+ *
+ * Sets the sky direction of the point source.
  ***************************************************************************/
 void GModelSpatialPointSource::dir(const GSkyDir& dir)
 {

@@ -268,14 +268,15 @@ GModelSpatialDiffuseCube* GModelSpatialDiffuseCube::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident photon.
+ * @return Model value.
  *
  * @exception GException::feature_not_implemented
  *            Method not yet implemented
  *
  * @todo Implement method.
  ***************************************************************************/
-double GModelSpatialDiffuseCube::eval(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
 {
     // Dump warning that method is not yet implemented
     throw GException::feature_not_implemented(G_EVAL);
@@ -288,11 +289,12 @@ double GModelSpatialDiffuseCube::eval(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident photon.
+ * @return Model value.
  *
  * @todo Implement method.
  ***************************************************************************/
-double GModelSpatialDiffuseCube::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
 {
     // Dump warning that method is not yet implemented
     throw GException::feature_not_implemented(G_EVAL_GRADIENTS);
@@ -308,14 +310,19 @@ double GModelSpatialDiffuseCube::eval_gradients(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Returns MC sky direction
  *
- * @param[in] ran Random number generator.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @param[in,out] ran Random number generator.
+ * @return Sky direction.
  *
  * @exception GException::feature_not_implemented
  *            Method not yet implemented
  *
  * @todo Implement method.
  ***************************************************************************/
-GSkyDir GModelSpatialDiffuseCube::mc(GRan& ran) const
+GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
+                                     const GTime&   time,
+                                     GRan&          ran) const
 {
     // Allocate sky direction
     GSkyDir dir;

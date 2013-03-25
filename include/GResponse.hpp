@@ -117,12 +117,12 @@ protected:
     // Npred theta integration kernel for radial model
     class npred_radial_kern_theta : public GFunction {
     public:
-        npred_radial_kern_theta(const GResponse*           rsp,
-                                const GModelSpatialRadial* spatial,
-                                const GEnergy*             srcEng,
-                                const GTime*               srcTime,
-                                const GObservation*        obs,
-                                const GMatrix*             rot) :
+        npred_radial_kern_theta(const GResponse&           rsp,
+                                const GModelSpatialRadial& spatial,
+                                const GEnergy&             srcEng,
+                                const GTime&               srcTime,
+                                const GObservation&        obs,
+                                const GMatrix&             rot) :
                                 m_rsp(rsp),
                                 m_spatial(spatial),
                                 m_srcEng(srcEng),
@@ -131,24 +131,24 @@ protected:
                                 m_rot(rot) { }
         double eval(double theta);
     protected:
-        const GResponse*           m_rsp;      //!< Pointer to response
-        const GModelSpatialRadial* m_spatial;  //!< Pointer to spatial model
-        const GEnergy*             m_srcEng;   //!< Pointer to true photon energy
-        const GTime*               m_srcTime;  //!< Pointer to true photon arrival time
-        const GObservation*        m_obs;      //!< Pointer to observation
-        const GMatrix*             m_rot;      //!< Pointer to rotation matrix
+        const GResponse&           m_rsp;      //!< Response
+        const GModelSpatialRadial& m_spatial;  //!< Spatial model
+        const GEnergy&             m_srcEng;   //!< True photon energy
+        const GTime&               m_srcTime;  //!< True photon arrival time
+        const GObservation&        m_obs;      //!< Observation
+        const GMatrix&             m_rot;      //!< Rotation matrix
     };
 
     // Npred phi integration kernel for radial model
     class npred_radial_kern_phi : public GFunction {
     public:
-        npred_radial_kern_phi(const GResponse*    rsp,
-                              const GEnergy*      srcEng,
-                              const GTime*        srcTime,
-                              const GObservation* obs,
-                              const GMatrix*      rot,
-                              double              theta,
-                              double              sin_theta) :
+        npred_radial_kern_phi(const GResponse&    rsp,
+                              const GEnergy&      srcEng,
+                              const GTime&        srcTime,
+                              const GObservation& obs,
+                              const GMatrix&      rot,
+                              const double&       theta,
+                              const double&       sin_theta) :
                               m_rsp(rsp),
                               m_srcEng(srcEng),
                               m_srcTime(srcTime),
@@ -159,25 +159,25 @@ protected:
                               m_sin_theta(sin_theta) { }
         double eval(double phi);
     protected:
-        const GResponse*    m_rsp;           //!< Pointer to response
-        const GEnergy*      m_srcEng;        //!< Pointer to true photon energy
-        const GTime*        m_srcTime;       //!< Pointer to true photon arrival time
-        const GObservation* m_obs;           //!< Pointer to observation
-        const GMatrix*      m_rot;           //!< Pointer to rotation matrix
-        double              m_theta;         //!< Offset angle (radians)
-        double              m_cos_theta;     //!< cosine of offset angle
-        double              m_sin_theta;     //!< Sine of offset angle
+        const GResponse&    m_rsp;       //!< Response
+        const GEnergy&      m_srcEng;    //!< True photon energy
+        const GTime&        m_srcTime;   //!< True photon arrival time
+        const GObservation& m_obs;       //!< Observation
+        const GMatrix&      m_rot;       //!< Rotation matrix
+        const double&       m_theta;     //!< Offset angle (radians)
+        double              m_cos_theta; //!< cosine of offset angle
+        const double&       m_sin_theta; //!< Sine of offset angle
     };
 
     // Npred theta integration kernel for elliptical model
     class npred_elliptical_kern_theta : public GFunction {
     public:
-        npred_elliptical_kern_theta(const GResponse*               rsp,
-                                    const GModelSpatialElliptical* spatial,
-                                    const GEnergy*                 srcEng,
-                                    const GTime*                   srcTime,
-                                    const GObservation*            obs,
-                                    const GMatrix*                 rot) :
+        npred_elliptical_kern_theta(const GResponse&               rsp,
+                                    const GModelSpatialElliptical& spatial,
+                                    const GEnergy&                 srcEng,
+                                    const GTime&                   srcTime,
+                                    const GObservation&            obs,
+                                    const GMatrix&                 rot) :
                                     m_rsp(rsp),
                                     m_spatial(spatial),
                                     m_srcEng(srcEng),
@@ -186,25 +186,25 @@ protected:
                                     m_rot(rot) { }
         double eval(double theta);
     protected:
-        const GResponse*               m_rsp;      //!< Pointer to response
-        const GModelSpatialElliptical* m_spatial;  //!< Pointer to spatial model
-        const GEnergy*                 m_srcEng;   //!< Pointer to true photon energy
-        const GTime*                   m_srcTime;  //!< Pointer to true photon arrival time
-        const GObservation*            m_obs;      //!< Pointer to observation
-        const GMatrix*                 m_rot;      //!< Pointer to rotation matrix
+        const GResponse&               m_rsp;      //!< Response
+        const GModelSpatialElliptical& m_spatial;  //!< Spatial model
+        const GEnergy&                 m_srcEng;   //!< True photon energy
+        const GTime&                   m_srcTime;  //!< True photon arrival time
+        const GObservation&            m_obs;      //!< Observation
+        const GMatrix&                 m_rot;      //!< Rotation matrix
     };
 
     // Npred phi integration kernel for elliptical model
     class npred_elliptical_kern_phi : public GFunction {
     public:
-        npred_elliptical_kern_phi(const GResponse*               rsp,
-                                  const GModelSpatialElliptical* spatial,
-                                  const GEnergy*                 srcEng,
-                                  const GTime*                   srcTime,
-                                  const GObservation*            obs,
-                                  const GMatrix*                 rot,
-                                  double                         theta,
-                                  double                         sin_theta) :
+        npred_elliptical_kern_phi(const GResponse&               rsp,
+                                  const GModelSpatialElliptical& spatial,
+                                  const GEnergy&                 srcEng,
+                                  const GTime&                   srcTime,
+                                  const GObservation&            obs,
+                                  const GMatrix&                 rot,
+                                  const double&                  theta,
+                                  const double&                  sin_theta) :
                                   m_rsp(rsp),
                                   m_spatial(spatial),
                                   m_srcEng(srcEng),
@@ -216,15 +216,15 @@ protected:
                                   m_sin_theta(sin_theta) { }
         double eval(double phi);
     protected:
-        const GResponse*               m_rsp;       //!< Pointer to response
-        const GModelSpatialElliptical* m_spatial;   //!< Pointer to spatial model
-        const GEnergy*                 m_srcEng;    //!< Pointer to true photon energy
-        const GTime*                   m_srcTime;   //!< Pointer to true photon arrival time
-        const GObservation*            m_obs;       //!< Pointer to observation
-        const GMatrix*                 m_rot;       //!< Pointer to rotation matrix
-        double                         m_theta;     //!< Offset angle (radians)
+        const GResponse&               m_rsp;       //!< Response
+        const GModelSpatialElliptical& m_spatial;   //!< Spatial model
+        const GEnergy&                 m_srcEng;    //!< True photon energy
+        const GTime&                   m_srcTime;   //!< True photon arrival time
+        const GObservation&            m_obs;       //!< Observation
+        const GMatrix&                 m_rot;       //!< Rotation matrix
+        const double&                  m_theta;     //!< Offset angle (radians)
         double                         m_cos_theta; //!< cosine of offset angle
-        double                         m_sin_theta; //!< Sine of offset angle
+        const double&                  m_sin_theta; //!< Sine of offset angle
     };
 
 };

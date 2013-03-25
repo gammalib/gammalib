@@ -72,22 +72,28 @@ public:
     // Implemented pure virtual methods
     virtual void                      clear(void);
     virtual GModelSpatialRadialShell* clone(void) const;
-    virtual std::string               type(void) const { return "ShellFunction"; }
-    virtual double                    eval(const double& theta) const;
-    virtual double                    eval_gradients(const double& theta) const;
-    virtual GSkyDir                   mc(GRan& ran) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const double&  theta,
+                                           const GEnergy& energy,
+                                           const GTime& time) const;
+    virtual double                    eval_gradients(const double& theta,
+                                                     const GEnergy& energy,
+                                                     const GTime& time) const;
+    virtual GSkyDir                   mc(const GEnergy& energy,
+                                         const GTime& time,
+                                         GRan& ran) const;
     virtual double                    theta_max(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
     virtual std::string               print(void) const;
 
     // Other methods
-    double  radius(void) const { return m_radius.value(); }
-    double  width(void) const { return m_width.value(); }
-    bool    small_angle(void) const { return m_small_angle; }
-    void    radius(const double& radius) { m_radius.value(radius); }
-    void    width(const double& width) { m_width.value(width); }
-    void    small_angle(const bool& small_angle) { m_small_angle = small_angle; }
+    double      radius(void) const;
+    double      width(void) const;
+    const bool& small_angle(void) const;
+    void        radius(const double& radius);
+    void        width(const double& width);
+    void        small_angle(const bool& small_angle);
 
 protected:
     // Protected methods
@@ -112,5 +118,108 @@ protected:
     mutable double  m_x_out;         //!< m_theta_out^2 or sin(m_theta_out)^2
     mutable double  m_norm;          //!< Shell normalization
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "ShellFunction".
+ *
+ * Returns the type of the radial shell model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialRadialShell::type(void) const
+{
+    return "ShellFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Return shell radius
+ *
+ * @return Shell radius (degrees).
+ *
+ * Returns the shell radius in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialRadialShell::radius(void) const
+{
+    return (m_radius.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set shell radius 
+ *
+ * @param[in] radius Shell radius (degrees).
+ *
+ * Sets the shell radius in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialShell::radius(const double& radius)
+{
+    m_radius.value(radius);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return shell width
+ *
+ * @return Shell width (degrees).
+ *
+ * Returns the shell width in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialRadialShell::width(void) const
+{
+    return (m_width.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set width radius 
+ *
+ * @param[in] width Shell width (degrees).
+ *
+ * Sets the shell width in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialShell::width(const double& width)
+{
+    m_width.value(width);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return shell approximation flag
+ *
+ * @return True if small angle approximation is taken.
+ *
+ * Signals if the small angle approximation is taken.
+ ***************************************************************************/
+inline
+const bool& GModelSpatialRadialShell::small_angle(void) const
+{
+    return (m_small_angle);
+}
+
+
+/***********************************************************************//**
+ * @brief Set shell approximation flag
+ *
+ * @param[in] small_angle Shell approximation flag.
+ *
+ * Sets the shell approximation flag. True specifies that the small angle
+ * approximation shall be taken, false specifies that the correct spherical
+ * computation shall be used.
+ ***************************************************************************/
+inline
+void GModelSpatialRadialShell::small_angle(const bool& small_angle)
+{
+    m_small_angle = small_angle;
+    return;
+}
 
 #endif /* GMODELSPATIALRADIALSHELL_HPP */

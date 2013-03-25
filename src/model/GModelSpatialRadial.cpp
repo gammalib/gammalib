@@ -66,9 +66,9 @@ GModelSpatialRadial::GModelSpatialRadial(void) : GModelSpatial()
  *
  * @param[in] xml XML element.
  *
- * Creates instance of a radial spatial model by extracting information
- * from an XML element. See GModelSpatialRadial::read() for more information about
- * the expected structure of the XML element.
+ * Constructs a radial spatial model by extracting information from an XML
+ * element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpatialRadial::GModelSpatialRadial(const GXmlElement& xml) : 
                      GModelSpatial()
@@ -82,6 +82,7 @@ GModelSpatialRadial::GModelSpatialRadial(const GXmlElement& xml) :
     // Return
     return;
 }
+
 
 /***********************************************************************//**
  * @brief Copy constructor
@@ -125,6 +126,7 @@ GModelSpatialRadial::~GModelSpatialRadial(void)
  * @brief Assignment operator
  *
  * @param[in] model Radial spatial model.
+ * @return Radial spatial model.
  ***************************************************************************/
 GModelSpatialRadial& GModelSpatialRadial::operator=(const GModelSpatialRadial& model)
 {
@@ -159,18 +161,18 @@ GModelSpatialRadial& GModelSpatialRadial::operator=(const GModelSpatialRadial& m
 /***********************************************************************//**
  * @brief Return model value
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident Photon.
  *
- * Evaluates the radial spatial model for a given true photon arrival
- * direction.
+ * Evaluates the radial spatial model value for a specific incident
+ * @p photon.
  ***************************************************************************/
-double GModelSpatialRadial::eval(const GSkyDir& srcDir) const
+double GModelSpatialRadial::eval(const GPhoton& photon) const
 {
     // Compute distance from source (in radians)
-    double theta = srcDir.dist(dir());
+    double theta = photon.dir().dist(dir());
 
     // Evaluate model
-    double value = eval(theta);
+    double value = eval(theta, photon.energy(), photon.time());
 
     // Return result
     return value;
@@ -180,18 +182,18 @@ double GModelSpatialRadial::eval(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Return model value and set analytical gradients
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident Photon.
  *
- * Evaluates the radial spatial model for a given true photon arrival
- * direction.
+ * Evaluates the radial spatial model value and analytical model parameter
+ * gradients for a specific incident @p photon.
  ***************************************************************************/
-double GModelSpatialRadial::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialRadial::eval_gradients(const GPhoton& photon) const
 {
     // Compute distance from source (in radians)
-    double theta = srcDir.dist(dir());
+    double theta = photon.dir().dist(dir());
 
     // Evaluate model and set gradients
-    double value = eval_gradients(theta);
+    double value = eval_gradients(theta, photon.energy(), photon.time());
 
     // Return result
     return value;
@@ -208,9 +210,23 @@ double GModelSpatialRadial::eval_gradients(const GSkyDir& srcDir) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the radial source location information from an XML element. The XML
- * element is required to have at least 2 parameters.
- * The location is named either "RA" and "DEC" or "GLON" and "GLAT".
+ * Reads the radial source location and position angle information from an
+ * XML element in the following format
+ *
+ *     <spatialModel type="...">
+ *       <parameter name="RA"  scale="1" value="83.63" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC" scale="1" value="22.01" min="-90"  max="90"  free="1"/>
+ *       ...
+ *     </spatialModel>
+ *
+ * or
+ *
+ *     <spatialModel type="...">
+ *       <parameter name="GLON" scale="1" value="83.63" min="-360" max="360" free="1"/>
+ *       <parameter name="GLAT" scale="1" value="22.01" min="-90"  max="90"  free="1"/>
+ *       ...
+ *     </spatialModel>
+ *
  ***************************************************************************/
 void GModelSpatialRadial::read(const GXmlElement& xml)
 {
@@ -291,8 +307,14 @@ void GModelSpatialRadial::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the radial source location information into an XML element. The XML
- * element will have at least 2 parameter leafs named "RA" and "DEC".
+ * Writes the radial source location and position angle information into an
+ * XML element in the following format
+ *
+ *     <spatialModel type="...">
+ *       <parameter name="RA"  scale="1" value="83.63" min="-360" max="360" free="1"/>
+ *       <parameter name="DEC" scale="1" value="22.01" min="-90"  max="90"  free="1"/>
+ *       ...
+ *     </spatialModel>
  *
  * @todo The case that an existing spatial XML element with "GLON" and "GLAT"
  *       as coordinates is not supported.

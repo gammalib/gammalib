@@ -233,6 +233,9 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] theta Angular distance from shell centre (radians).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @return Model value.
  *
  * Evaluates the spatial part for a shell source model. The shell source
  * model is a radial function \f$f(\theta)\f$, where \f$\theta\f$ is the
@@ -281,7 +284,9 @@ GModelSpatialRadialShell* GModelSpatialRadialShell::clone(void) const
  * Here, \f$\theta_{\rm in}\f$ and \f$\theta_{\rm out}\f$ are the shell inner
  * and outer radius.
  ***************************************************************************/
-double GModelSpatialRadialShell::eval(const double& theta) const
+double GModelSpatialRadialShell::eval(const double&  theta,
+                                      const GEnergy& energy,
+                                      const GTime&   time) const
 {
     // Update precomputation cache
     update();
@@ -333,26 +338,35 @@ double GModelSpatialRadialShell::eval(const double& theta) const
  * @brief Evaluate function and gradients
  *
  * @param[in] theta Angular distance from shell centre (radians).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @return Model value.
  *
- * This method simply calls GModelSpatialRadialShell::eval() as no analytical
- * gradients will be computed. See GModelSpatialRadialShell::eval() for details
- * about the implemented method.
+ * This method simply calls the eval() method as no analytical gradients will
+ * be computed. See the eval() method for details.
  ***************************************************************************/
-double GModelSpatialRadialShell::eval_gradients(const double& theta) const
+double GModelSpatialRadialShell::eval_gradients(const double&  theta,
+                                                const GEnergy& energy,
+                                                const GTime&   time) const
 {
     // Return value
-    return (eval(theta));
+    return (eval(theta, energy, time));
 }
 
 
 /***********************************************************************//**
  * @brief Returns MC sky direction
  *
- * @param[in] ran Random number generator.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @param[in,out] ran Random number generator.
+ * @return Sky direction.
  *
  * Draws an arbitrary sky position from the 2D shell distribution.
  ***************************************************************************/
-GSkyDir GModelSpatialRadialShell::mc(GRan& ran) const
+GSkyDir GModelSpatialRadialShell::mc(const GEnergy& energy,
+                                     const GTime&   time,
+                                     GRan&          ran) const
 {
     // Update precomputation cache
     update();
@@ -370,7 +384,7 @@ GSkyDir GModelSpatialRadialShell::mc(GRan& ran) const
     double theta         = 0.0;
     do {
         theta = ran.uniform() * theta_max;
-        value = eval(theta) * std::sin(theta);
+        value = eval(theta, energy, time) * std::sin(theta);
         u     = ran.uniform() * u_max;
         #if defined(G_DEBUG_MC)
         n_samples++;

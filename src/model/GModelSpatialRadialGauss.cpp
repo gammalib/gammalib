@@ -224,6 +224,9 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * @brief Evaluate function
  *
  * @param[in] theta Angular distance from Gaussian centre (radians).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @return Model value.
  *
  * Evaluates the spatial part for a Gaussian source model. The Gaussian
  * source model is defined as
@@ -236,7 +239,9 @@ GModelSpatialRadialGauss* GModelSpatialRadialGauss::clone(void) const
  * @todo The Gaussian function is only correct in the small angle
  *       approximation.
  ***************************************************************************/
-double GModelSpatialRadialGauss::eval(const double& theta) const
+double GModelSpatialRadialGauss::eval(const double&  theta,
+                                      const GEnergy& energy,
+                                      const GTime&   time) const
 {
     // Compute value
     double sigma_rad = sigma() * deg2rad;
@@ -266,28 +271,38 @@ double GModelSpatialRadialGauss::eval(const double& theta) const
  * @brief Evaluate function and gradients
  *
  * @param[in] theta Angular distance from Gaussian centre (radians).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @return Model value.
  *
- * This method simply calls GModelRadialShell::eval() as no analytical
- * gradients will be computed. See GModelRadialShell::eval() for details
- * about the implemented method.
+ * This method simply calls the eval() method as no analytical gradients
+ * will be computed. See the eval() method for more details.
  ***************************************************************************/
-double GModelSpatialRadialGauss::eval_gradients(const double& theta) const
+double GModelSpatialRadialGauss::eval_gradients(const double&  theta,
+                                                const GEnergy& energy,
+                                                const GTime&   time) const
 {
     // Return value
-    return (eval(theta));
+    return (eval(theta, energy, time));
 }
 
 
 /***********************************************************************//**
  * @brief Returns MC sky direction
  *
- * @param[in] ran Random number generator.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @param[in,out] ran Random number generator.
+ * @return Sky direction.
  *
- * Draws an arbitrary sky position from the 2D Gaussian distribution.
+ * Draws an arbitrary sky direction from the 2D Gaussian distribution as
+ * function of the photon @p energy and arrival @p time.
  *
  * @todo This method is only valid in the small angle approximation.
  ***************************************************************************/
-GSkyDir GModelSpatialRadialGauss::mc(GRan& ran) const
+GSkyDir GModelSpatialRadialGauss::mc(const GEnergy& energy,
+                                     const GTime&   time,
+                                     GRan&          ran) const
 {
     // Simulate offset from photon arrival direction
     double theta = sigma() * ran.chisq2();

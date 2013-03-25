@@ -224,17 +224,17 @@ GModelSpatialDiffuseMap* GModelSpatialDiffuseMap::clone(void) const
 /***********************************************************************//**
  * @brief Return intensity of skymap
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident photon.
  * @return Sky map intensity.
  *
  * Returns the intensity of the skymap at the specified sky direction
  * multiplied by the normalization factor. If the sky direction falls outside
  * the skymap, an intensity of 0 is returned.
  ***************************************************************************/
-double GModelSpatialDiffuseMap::eval(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseMap::eval(const GPhoton& photon) const
 {
     // Get skymap intensity
-    double intensity = m_map(srcDir);
+    double intensity = m_map(photon.dir());
 
     // Return intensity times normalization factor
     return (intensity * m_value.value());
@@ -244,7 +244,7 @@ double GModelSpatialDiffuseMap::eval(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Return intensity of skymap and gradient
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident photon.
  * @return Sky map intensity.
  *
  * Returns the intensity of the skymap at the specified sky direction
@@ -252,10 +252,10 @@ double GModelSpatialDiffuseMap::eval(const GSkyDir& srcDir) const
  * with respect to the normalization factor. If the sky direction falls
  * outside the skymap, an intensity of 0 is returned.
  ***************************************************************************/
-double GModelSpatialDiffuseMap::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseMap::eval_gradients(const GPhoton& photon) const
 {
     // Get skymap intensity
-    double intensity = m_map(srcDir);
+    double intensity = m_map(photon.dir());
 
     // Compute partial derivatives of the parameter values
     double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
@@ -271,23 +271,23 @@ double GModelSpatialDiffuseMap::eval_gradients(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Returns MC sky direction
  *
- * @param[in] ran Random number generator.
+ * @param[in] energy Photon energy (ignored).
+ * @param[in] time Photon arrival time (ignored).
+ * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented
- *
- * This method returns a random sky direction according to the intensity
- * distribution of the model sky map. It makes use of a cache array that
- * contains the normalized cumulative flux values of the skymap. Using a
- * uniform random number, this cache array is scanned using a bi-section
- * method to determine the skymap pixel for which the position should be
- * returned. To avoid binning problems, the exact position within the pixel
- * is set by a uniform random number generator (neglecting thus pixel
- * distortions). The fractional skymap pixel is then converted into a sky
- * direction.
+ * Returns a random sky direction according to the intensity distribution of
+ * the model sky map. It makes use of a cache array that contains the
+ * normalized cumulative flux values of the skymap. Using a uniform random
+ * number, this cache array is scanned using a bi-section method to determine
+ * the skymap pixel for which the position should be returned. To avoid
+ * binning problems, the exact position within the pixel is set by a uniform
+ * random number generator (neglecting thus pixel distortions). The
+ * fractional skymap pixel is then converted into a sky direction.
  ***************************************************************************/
-GSkyDir GModelSpatialDiffuseMap::mc(GRan& ran) const
+GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
+                                    const GTime&   time,
+                                    GRan&          ran) const
 {
     // Allocate sky direction
     GSkyDir dir;

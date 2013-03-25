@@ -67,8 +67,8 @@ GModelSpatialElliptical::GModelSpatialElliptical(void) : GModelSpatial()
  * @param[in] xml XML element.
  *
  * Constructs an elliptical spatial model component by extracting information
- * from an XML element. See read() for more information about the expected
- * structure of the XML element.
+ * from an XML element. See the read() method for more information about the
+ * expected structure of the XML element.
  ***************************************************************************/
 GModelSpatialElliptical::GModelSpatialElliptical(const GXmlElement& xml) : 
                          GModelSpatial()
@@ -160,19 +160,20 @@ GModelSpatialElliptical& GModelSpatialElliptical::operator=(const GModelSpatialE
 /***********************************************************************//**
  * @brief Return model value
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident Photon.
  *
- * Evaluates the elliptical spatial model for a given true photon arrival
- * direction.
+ * Evaluates the elliptical spatial model value for a specific incident
+ * @p photon.
  ***************************************************************************/
-double GModelSpatialElliptical::eval(const GSkyDir& srcDir) const
+double GModelSpatialElliptical::eval(const GPhoton& photon) const
 {
     // Compute distance from source and position angle (in radians)
-    double theta  = dir().dist(srcDir);
-    double posang = dir().posang(srcDir);
+    const GSkyDir& srcDir = photon.dir();
+    double theta          = dir().dist(srcDir);
+    double posang         = dir().posang(srcDir);
 
     // Evaluate model
-    double value = eval(theta, posang);
+    double value = eval(theta, posang, photon.energy(), photon.time());
 
     // Return result
     return value;
@@ -182,19 +183,21 @@ double GModelSpatialElliptical::eval(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Return model value and set analytical gradients
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident Photon.
  *
- * Evaluates the elliptical spatial model for a given true photon arrival
- * direction.
+ * Evaluates the elliptical spatial model value and analytical model
+ * parameter gradients for a specific incident @p photon.
  ***************************************************************************/
-double GModelSpatialElliptical::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialElliptical::eval_gradients(const GPhoton& photon) const
 {
     // Compute distance from source and position angle (in radians)
-    double theta  = dir().dist(srcDir);
-    double posang = dir().posang(srcDir);
+    const GSkyDir& srcDir = photon.dir();
+    double theta          = dir().dist(srcDir);
+    double posang         = dir().posang(srcDir);
 
     // Evaluate model and set gradients
-    double value = eval_gradients(theta, posang);
+    double value = eval_gradients(theta, posang, photon.energy(),
+                                  photon.time());
 
     // Return result
     return value;
@@ -211,7 +214,7 @@ double GModelSpatialElliptical::eval_gradients(const GSkyDir& srcDir) const
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the elliptical source location and position angle information from
+ * Reads the elliptical source location and position angle information from
  * an XML element in the following format
  *
  *     <spatialModel type="...">
@@ -316,7 +319,7 @@ void GModelSpatialElliptical::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the elliptical source location and position angle information into
+ * Writes the elliptical source location and position angle information into
  * an XML element in the following format
  *
  *     <spatialModel type="...">

@@ -32,7 +32,10 @@
 #include <vector>
 #include "GBase.hpp"
 #include "GModelPar.hpp"
+#include "GPhoton.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
 #include "GXmlElement.hpp"
 #include "GRan.hpp"
 
@@ -64,9 +67,10 @@ public:
     virtual void           clear(void) = 0;
     virtual GModelSpatial* clone(void) const = 0;
     virtual std::string    type(void) const = 0;
-    virtual double         eval(const GSkyDir& srcDir) const = 0;
-    virtual double         eval_gradients(const GSkyDir& srcDir) const = 0;
-    virtual GSkyDir        mc(GRan& ran) const = 0;
+    virtual double         eval(const GPhoton& photon) const = 0;
+    virtual double         eval_gradients(const GPhoton& photon) const = 0;
+    virtual GSkyDir        mc(const GEnergy& energy, const GTime& time,
+                              GRan& ran) const = 0;
     virtual void           read(const GXmlElement& xml) = 0;
     virtual void           write(GXmlElement& xml) const = 0;
     virtual std::string    print(void) const = 0;
@@ -84,6 +88,7 @@ protected:
     // Proteced members
     std::vector<GModelPar*> m_pars;  //!< Parameter pointers
 };
+
 
 /***********************************************************************//**
  * @brief Return number of parameters

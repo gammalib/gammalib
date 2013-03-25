@@ -63,22 +63,28 @@ public:
     // Implemented pure virtual base class methods
     virtual void                         clear(void);
     virtual GModelSpatialEllipticalDisk* clone(void) const;
-    virtual std::string                  type(void) const { return "EllipticalDisk"; }
-    virtual double                       eval(const double& theta,
-                                              const double& posangle) const;
-    virtual double                       eval_gradients(const double& theta,
-                                                        const double& posangle) const;
-    virtual GSkyDir                      mc(GRan& ran) const;
+    virtual std::string                  type(void) const;
+    virtual double                       eval(const double&  theta,
+                                              const double&  posangle,
+                                              const GEnergy& energy,
+                                              const GTime&   time) const;
+    virtual double                       eval_gradients(const double&  theta,
+                                                        const double&  posangle,
+                                                        const GEnergy& energy,
+                                                        const GTime&   time) const;
+    virtual GSkyDir                      mc(const GEnergy& energy,
+                                            const GTime& time,
+                                            GRan& ran) const;
     virtual double                       theta_max(void) const;
     virtual void                         read(const GXmlElement& xml);
     virtual void                         write(GXmlElement& xml) const;
     virtual std::string                  print(void) const;
 
     // Other methods
-    double semiminor(void) const { return m_semiminor.value(); }
-    double semimajor(void) const { return m_semimajor.value(); }
-    void   semiminor(const double& semiminor) { m_semiminor.value(semiminor); }
-    void   semimajor(const double& semimajor) { m_semimajor.value(semimajor); }
+    double semiminor(void) const;
+    double semimajor(void) const;
+    void   semiminor(const double& semiminor);
+    void   semimajor(const double& semimajor);
 
 protected:
     // Protected methods
@@ -98,5 +104,77 @@ protected:
     mutable double m_semimajor_rad;    //!< Radius in radians
     mutable double m_norm;             //!< Normalization
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "EllipticalDisk".
+ *
+ * Returns the type of the elliptical disk model.
+ ***************************************************************************/
+inline
+std::string GModelSpatialEllipticalDisk::type(void) const
+{
+    return "EllipticalDisk";
+}
+
+
+/***********************************************************************//**
+ * @brief Return semi-minor axis of ellipse
+ *
+ * @return Semi-minor axis of ellipse (degrees).
+ *
+ * Returns the semi-minor axis of the ellipse in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialEllipticalDisk::semiminor(void) const
+{
+    return (m_semiminor.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set semi-minor axis of ellipse
+ *
+ * @param[in] semiminor Semi-minor axis of ellipse (degrees)
+ *
+ * Sets the semi-minor axis of the ellipse in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialEllipticalDisk::semiminor(const double& semiminor)
+{
+    m_semiminor.value(semiminor);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return semi-major axis of ellipse
+ *
+ * @return Semi-major axis of ellipse (degrees).
+ *
+ * Returns the semi-major axis of the ellipse in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialEllipticalDisk::semimajor(void) const
+{
+    return (m_semimajor.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set semi-major axis of ellipse
+ *
+ * @param[in] semimajor Semi-major axis of ellipse (degrees)
+ *
+ * Sets the semi-major axis of the ellipse in degrees.
+ ***************************************************************************/
+inline
+void GModelSpatialEllipticalDisk::semimajor(const double& semimajor)
+{
+    m_semimajor.value(semimajor);
+    return;
+}
 
 #endif /* GMODELSPATIALELLIPTICALDISK_HPP */

@@ -59,26 +59,36 @@ class GObservation;
  * a spectral and a temporal component. The factorization is given by
  *
  * \f[
- *    S(\vec{p}, E, t) = S_{\rm p}(\vec{p}, E, t) \,
- *                       S_{\rm E}(\vec{p}, E, t) \,
- *                       S_{\rm t}(\vec{p}, E, t)
+ *    S(\vec{p}, E, t) = S_{\rm p}(\vec{p} | E, t) \,
+ *                       S_{\rm E}(E | t) \,
+ *                       S_{\rm t}(t)
  * \f]
  *
  * where
- * - \f$S_{\rm p}(\vec{p}, E, t)\f$ is the spatial,
- * - \f$S_{\rm E}(\vec{p}, E, t)\f$ is the spectral, and
- * - \f$S_{\rm t}(\vec{p}, E, t)\f$ is the temporal component of the
- *   model.
+ * - \f$S_{\rm p}(\vec{p} | E, t)\f$ is the spatial component,
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral component, and
+ * - \f$S_{\rm t}(t)\f$ is the temporal component.
  *
- * Note that the spatial, spectral and temporal components depend on the
- * three photon properties (true sky direction \f$\vec{p}\f$, true energy
- * \f$E\f$ and true arrival time \f$t\f$) so that any correlation between
- * these properties can be implemented. The factorization is in the sens
- * that the spatial component shall return a normalization that depends
- * on the spatial morphology distribution, the spectral component shall
- * return an intensity that depends on the spectral energy distribution,
- * and the temporal component shall return a normalization that depends
- * on the light curve of the source.
+ * The spatial component describes the energy and time dependent morphology
+ * of the source. It satisfies
+ * \f[
+ *    \int_{\Omega} S_{\rm p}(\vec{p} | E, t) d\Omega = 1
+ * \f]
+ * for all \f$E\f$ and \f$t\f$, hence the spatial component does not
+ * impact the spatially integrated spectral and temporal properties of the
+ * source.
+ *
+ * The spectral component describes the spatially integrated time dependent
+ * spectral distribution of the source. It satisfies
+ * \f[
+ *    \int_{E} S_{\rm E}(E | t) dE = \Phi
+ * \f]
+ * for all \f$t\f$, where \f$\Phi\f$ is the spatially and spectrally
+ * integrated total source flux. The spectral component does not impact
+ * the temporal properties of the integrated flux \f$\Phi\f$.
+ *
+ * The temporal component describes the temporal variation of the total
+ * integrated flux \f$\Phi\f$ of the source.
  *
  * The class has two methods for model evaluation that evaluate the model
  * for a specific event, given an observation. The eval() method returns

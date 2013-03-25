@@ -414,7 +414,7 @@ double GModelSky::value(const GPhoton& photon)
     double source = 1.0;
 
     // Evaluate source model
-    if (m_spatial  != NULL) source *= m_spatial->eval(photon.dir());
+    if (m_spatial  != NULL) source *= m_spatial->eval(photon);
     if (m_spectral != NULL) source *= m_spectral->eval(photon.energy());
     if (m_temporal != NULL) source *= m_temporal->eval(photon.time());
 
@@ -436,7 +436,7 @@ double GModelSky::value(const GPhoton& photon)
 GVector GModelSky::gradients(const GPhoton& photon)
 {
     // Evaluate source model gradients
-    if (m_spatial  != NULL) m_spatial->eval_gradients(photon.dir());
+    if (m_spatial  != NULL) m_spatial->eval_gradients(photon);
     if (m_spectral != NULL) m_spectral->eval_gradients(photon.energy());
     if (m_temporal != NULL) m_temporal->eval_gradients(photon.time());
 
@@ -787,6 +787,8 @@ void GModelSky::write(GXmlElement& xml) const
  *       computations.
  * @todo Implement photon arrival direction simulation for diffuse models
  * @todo Implement unique model ID to assign as Monte Carlo ID
+ *
+ * @todo THIS METHOD SO FAR ONLY WORKS FOR FACTORIZED SOURCE MODELS!!!!!
  ***************************************************************************/
 GPhotons GModelSky::mc(const double& area,
                        const GSkyDir& dir,  const double&  radius,
@@ -853,11 +855,12 @@ GPhotons GModelSky::mc(const double& area,
                 // Set photon arrival time
                 photon.time(times[i]);
 
-                // Set incident photon direction
-                photon.dir(m_spatial->mc(ran));
-
                 // Set photon energy
                 photon.energy(m_spectral->mc(emin, emax, ran));
+                //photon.energy(m_spectral->mc(emin, emax, photon.time(), ran));
+
+                // Set incident photon direction
+                photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
 
                 // Append photon
                 photons.append(photon);

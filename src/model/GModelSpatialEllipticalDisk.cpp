@@ -234,6 +234,9 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  *
  * @param[in] theta Angular distance from disk centre (radians).
  * @param[in] posangle Position angle (counterclockwise from North) (radians).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @return Model value.
  *
  * Evaluates the spatial component for an elliptical disk source model. The
  * disk source model is an elliptical function \f$f(\theta, \phi)\f$, where
@@ -273,8 +276,10 @@ GModelSpatialEllipticalDisk* GModelSpatialEllipticalDisk::clone(void) const
  *
  * (see the update() method).
  ***************************************************************************/
-double GModelSpatialEllipticalDisk::eval(const double& theta,
-                                         const double& posangle) const
+double GModelSpatialEllipticalDisk::eval(const double&  theta,
+                                         const double&  posangle,
+                                         const GEnergy& energy,
+                                         const GTime&   time) const
 {
     // Initialise value
     double value = 0.0;
@@ -323,6 +328,9 @@ double GModelSpatialEllipticalDisk::eval(const double& theta,
  *
  * @param[in] theta Angular distance from disk centre (radians).
  * @param[in] posangle Position angle (counterclockwise from North) (radians).
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @return Model value.
  *
  * Evaluates the function value. No gradient computation is implemented as
  * Elliptical models will be convolved with the instrument response and thus
@@ -330,44 +338,60 @@ double GModelSpatialEllipticalDisk::eval(const double& theta,
  *
  * See the eval() method for more information.
  ***************************************************************************/
-double GModelSpatialEllipticalDisk::eval_gradients(const double& theta,
-                                                   const double& posangle) const
+double GModelSpatialEllipticalDisk::eval_gradients(const double&  theta,
+                                                   const double&  posangle,
+                                                   const GEnergy& energy,
+                                                   const GTime&   time) const
 {
     // Return value
-    return (eval(theta, posangle));
+    return (eval(theta, posangle, energy, time));
 }
 
 
 /***********************************************************************//**
  * @brief Returns MC sky direction
  *
- * @param[in] ran Random number generator.
+ * @param[in] energy Photon energy.
+ * @param[in] time Photon arrival time.
+ * @param[in,out] ran Random number generator.
+ * @return Sky direction.
  *
  * Draws an arbitrary sky position from the 2D disk distribution.
- * @todo test function
+ *
+ * @todo Test function
  ***************************************************************************/
-GSkyDir GModelSpatialEllipticalDisk::mc(GRan& ran) const
+GSkyDir GModelSpatialEllipticalDisk::mc(const GEnergy& energy,
+                                        const GTime&   time,
+                                        GRan&          ran) const
 {
     // Update precomputation cache
 	update();
 
-	// Initialise a radial disk model with radius of the semimajor axis
-	GModelSpatialRadialDisk disk = GModelSpatialRadialDisk(dir(), semimajor());
-
-	// Initialise SkyDir
-	GSkyDir dir = GSkyDir();
+	// Initialise photon
+    GPhoton photon;
+    photon.energy(energy);
+    photon.time(time);
 
 	// Draw randomly from the radial disk
 	// and reject the value if its outside the ellipse
 	do {
 
-		// Set SkyDir to random position
-		dir = disk.mc(ran);
+        // Simulate offset from photon arrival direction
+        double cosrad = std::cos(semimajor()*deg2rad);
+        double theta  = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) * rad2deg;
+        double phi    = 360.0 * ran.uniform();
 
-	} while(GModelSpatialElliptical::eval(dir) <= 0.0);
+        // Rotate sky direction by offset
+        GSkyDir sky_dir = dir();
+        sky_dir.rotate_deg(phi, theta);
 
-	// Return SkyDir
-	return dir;
+        // Set photon sky direction
+        photon.dir(sky_dir);
+
+	} while(GModelSpatialElliptical::eval(photon) <= 0.0);
+
+	// Return photon direction
+	return (photon.dir());
 
 }
 

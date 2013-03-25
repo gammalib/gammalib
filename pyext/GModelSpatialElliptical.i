@@ -46,16 +46,22 @@ public:
     virtual void                     clear(void) = 0;
     virtual GModelSpatialElliptical* clone(void) const = 0;
     virtual std::string              type(void) const = 0;
-    virtual double                   eval(const double& theta,
-                                          const double& posangle) const = 0;
-    virtual double                   eval_gradients(const double& theta,
-                                                    const double& posangle) const = 0;
-    virtual GSkyDir                  mc(GRan& ran) const = 0;
+    virtual double                   eval(const double&  theta,
+                                          const double&  posangle,
+                                          const GEnergy& energy,
+                                          const GTime&   time) const = 0;
+    virtual double                   eval_gradients(const double&  theta,
+                                                    const double&  posangle,
+                                                    const GEnergy& energy,
+                                                    const GTime&   time) const = 0;
+    virtual GSkyDir                  mc(const GEnergy& energy,
+                                        const GTime& time,
+                                        GRan& ran) const = 0;
     virtual double                   theta_max(void) const = 0;
 
     // Implemented virtual methods
-    virtual double eval(const GSkyDir& srcDir) const;
-    virtual double eval_gradients(const GSkyDir& srcDir) const;
+    virtual double eval(const GPhoton& photon) const;
+    virtual double eval_gradients(const GPhoton& photon) const;
     virtual void   read(const GXmlElement& xml);
     virtual void   write(GXmlElement& xml) const;
 

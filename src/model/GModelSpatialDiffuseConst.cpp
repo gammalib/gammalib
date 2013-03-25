@@ -229,12 +229,13 @@ GModelSpatialDiffuseConst* GModelSpatialDiffuseConst::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident photon (ignored).
+ * @return Model value.
  *
  * Evaluates the spatial part for an isotropic source model. By definition
  * this value is independent from the sky direction.
  ***************************************************************************/
-double GModelSpatialDiffuseConst::eval(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseConst::eval(const GPhoton& photon) const
 {
     // Return value
     return (m_value.value());
@@ -244,13 +245,14 @@ double GModelSpatialDiffuseConst::eval(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcDir True photon arrival direction.
+ * @param[in] photon Incident photon (ignored).
+ * @return Model value.
  *
  * Evaluates the spatial part for an isotropic source model and set the
  * parameter gradient. By definition, the value and gradient is independent
  * from the sky direction. The value is 1, the parameter gradient is 0.
  ***************************************************************************/
-double GModelSpatialDiffuseConst::eval_gradients(const GSkyDir& srcDir) const
+double GModelSpatialDiffuseConst::eval_gradients(const GPhoton& photon) const
 {
     // Compute function value
     double value = m_value.value();
@@ -269,11 +271,16 @@ double GModelSpatialDiffuseConst::eval_gradients(const GSkyDir& srcDir) const
 /***********************************************************************//**
  * @brief Return MC sky direction
  *
- * @param[in] ran Random number generator.
+ * @param[in] energy Photon energy (ignored).
+ * @param[in] time Photon arrival time (ignored).
+ * @param[in,out] ran Random number generator.
+ * @return Sky direction.
  *
  * Returns an abitrary position on the celestial sphere.
  ***************************************************************************/
-GSkyDir GModelSpatialDiffuseConst::mc(GRan& ran) const
+GSkyDir GModelSpatialDiffuseConst::mc(const GEnergy& energy,
+                                      const GTime&   time,
+                                      GRan&          ran) const
 {
     // Simulate Right Ascension and Declination
     double ra  = twopi * ran.uniform();

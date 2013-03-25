@@ -33,6 +33,9 @@
 #include "GModelSpatial.hpp"
 #include "GModelPar.hpp"
 #include "GSkyDir.hpp"
+#include "GEnergy.hpp"
+#include "GTime.hpp"
+#include "GPhoton.hpp"
 #include "GXmlElement.hpp"
 #include "GRan.hpp"
 
@@ -62,21 +65,27 @@ public:
     virtual void                 clear(void) = 0;
     virtual GModelSpatialRadial* clone(void) const = 0;
     virtual std::string          type(void) const = 0;
-    virtual double               eval(const double& theta) const = 0;
-    virtual double               eval_gradients(const double& theta) const = 0;
-    virtual GSkyDir              mc(GRan& ran) const = 0;
+    virtual double               eval(const double&  theta,
+                                      const GEnergy& energy,
+                                      const GTime& time) const = 0;
+    virtual double               eval_gradients(const double& theta,
+                                                const GEnergy& energy,
+                                                const GTime& time) const = 0;
+    virtual GSkyDir              mc(const GEnergy& energy,
+                                    const GTime& time,
+                                    GRan& ran) const = 0;
     virtual double               theta_max(void) const = 0;
     virtual std::string          print(void) const = 0;
 
-    // Implemented virtual methods
-    virtual double eval(const GSkyDir& srcDir) const;
-    virtual double eval_gradients(const GSkyDir& srcDir) const;
+    // Implemented virtual base class methods
+    virtual double eval(const GPhoton& photon) const;
+    virtual double eval_gradients(const GPhoton& photon) const;
     virtual void   read(const GXmlElement& xml);
     virtual void   write(GXmlElement& xml) const;
 
     // Other methods
-    double  ra(void) const { return m_ra.value(); }
-    double  dec(void) const { return m_dec.value(); }
+    double  ra(void) const;
+    double  dec(void) const;
     GSkyDir dir(void) const;
     void    dir(const GSkyDir& dir);
 
@@ -90,5 +99,33 @@ protected:
     GModelPar m_ra;    //!< Right Ascension (deg)
     GModelPar m_dec;   //!< Declination (deg)
 };
+
+
+/***********************************************************************//**
+ * @brief Return Right Ascencion of model centre
+ *
+ * @return Right Ascencion of model centre (degrees).
+ *
+ * Returns the Right Ascension of the model centre in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialRadial::ra(void) const
+{
+    return (m_ra.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return Declination of model centre
+ *
+ * @return Declination of model centre (degrees).
+ *
+ * Returns the Declination of the model centre in degrees.
+ ***************************************************************************/
+inline
+double GModelSpatialRadial::dec(void) const
+{
+    return (m_dec.value());
+}
 
 #endif /* GMODELSPATIALRADIAL_HPP */
