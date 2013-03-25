@@ -164,12 +164,8 @@ public:
     GModelSpatial*      spatial(void) const;
     GModelSpectral*     spectral(void) const;
     GModelTemporal*     temporal(void) const;
-    double              value(const GSkyDir& srcDir,
-                              const GEnergy& srcEng,
-                              const GTime& srcTime);
-    GVector             gradients(const GSkyDir& srcDir,
-                                  const GEnergy& srcEng,
-                                  const GTime& srcTime);
+    double              value(const GPhoton& photon);
+    GVector             gradients(const GPhoton& photon);
     GPhotons            mc(const double& area,
                            const GSkyDir& dir, const double& radius,
                            const GEnergy& emin, const GEnergy& emax,

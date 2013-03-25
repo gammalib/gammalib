@@ -309,10 +309,10 @@ void TestGModel::test_sky_model(void)
         dir.radec_deg(83.6331, 22.0145);
         GEnergy energy(100.0, "MeV");
         GTime   time(0.0);
-        test_value(sky.value(dir, energy, time), 1.73e-07);
+        test_value(sky.value(GPhoton(dir, energy, time)), 1.73e-07);
 
         // Test gradient
-        GVector vector = sky.gradients(dir, energy, time);
+        GVector vector = sky.gradients(GPhoton(dir, energy, time));
         test_value(vector[0], 0.0);
         test_value(vector[1], 0.0);
         test_value(vector[2], 1e-07);

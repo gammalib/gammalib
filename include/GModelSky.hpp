@@ -37,6 +37,7 @@
 #include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
+#include "GPhoton.hpp"
 #include "GPhotons.hpp"
 #include "GRan.hpp"
 #include "GVector.hpp"
@@ -54,14 +55,50 @@ class GObservation;
  *
  * @brief Sky model class
  *
- * This class implements a sky model that is factorised into a spatial,
- * a spectral and a temporal component.
+ * This class implements a sky model that is factorized into a spatial,
+ * a spectral and a temporal component. The factorization is given by
  *
- * The class has two methods for model evaluation. The eval() method
- * evaluates the model for a given observed photon direction, photon energy
- * and photon arrival time, given a reponse function and a pointing. The
- * eval_gradients() also evaluates the model, but also sets the gradients
- * of the model.
+ * \f[
+ *    S(\vec{p}, E, t) = S_{\rm p}(\vec{p}, E, t) \,
+ *                       S_{\rm E}(\vec{p}, E, t) \,
+ *                       S_{\rm t}(\vec{p}, E, t)
+ * \f]
+ *
+ * where
+ * - \f$S_{\rm p}(\vec{p}, E, t)\f$ is the spatial,
+ * - \f$S_{\rm E}(\vec{p}, E, t)\f$ is the spectral, and
+ * - \f$S_{\rm t}(\vec{p}, E, t)\f$ is the temporal component of the
+ *   model.
+ *
+ * Note that the spatial, spectral and temporal components depend on the
+ * three photon properties (true sky direction \f$\vec{p}\f$, true energy
+ * \f$E\f$ and true arrival time \f$t\f$) so that any correlation between
+ * these properties can be implemented. The factorization is in the sens
+ * that the spatial component shall return a normalization that depends
+ * on the spatial morphology distribution, the spectral component shall
+ * return an intensity that depends on the spectral energy distribution,
+ * and the temporal component shall return a normalization that depends
+ * on the light curve of the source.
+ *
+ * The class has two methods for model evaluation that evaluate the model
+ * for a specific event, given an observation. The eval() method returns
+ * the model value, the eval_gradients() returns the model value and sets
+ * the analytical gradients for all model parameters.
+ *
+ * The npred() method returns the integral over the model for a given
+ * observed energy and time.
+ *
+ * The read() and write() methods allow reading of model information from
+ * and writing to an XML element. The type() method returns the model type
+ * that has been found in an XML element.
+ *
+ * The model factorization is implemented by the abstract model component
+ * classes GModelSpatial, GModelSpectral and GModelTemporal. The GModelSky
+ * class holds pointers to derived instances of these classes, which can
+ * be accessed using the spatial(), spectral() and temporal() methods. Note
+ * that these pointers can be NULL (for example if no model has been yet
+ * defined), so the validity of the pointers needs to be checked before
+ * using them.
  *
  * Protected methods are implemented to handle source parameter integrations
  * depending on the requirements. Integration of the model (method fct) is
@@ -112,12 +149,8 @@ public:
     GModelSpatial*      spatial(void) const;
     GModelSpectral*     spectral(void) const;
     GModelTemporal*     temporal(void) const;
-    double              value(const GSkyDir& srcDir,
-                              const GEnergy& srcEng,
-                              const GTime& srcTime);
-    GVector             gradients(const GSkyDir& srcDir,
-                                  const GEnergy& srcEng,
-                                  const GTime& srcTime);
+    double              value(const GPhoton& photon);
+    GVector             gradients(const GPhoton& photon);
     GPhotons            mc(const double& area,
                            const GSkyDir& dir, const double& radius,
                            const GEnergy& emin, const GEnergy& emax,
@@ -134,13 +167,18 @@ protected:
     GModelSpatial*  xml_spatial(const GXmlElement& spatial) const;
     GModelSpectral* xml_spectral(const GXmlElement& spectral) const;
     GModelTemporal* xml_temporal(const GXmlElement& temporal) const;
-    double          spatial(const GEvent& event, const GEnergy& srcEng,
-                            const GTime& srcTime, const GObservation& obs,
-                            bool grad) const;
-    double          spectral(const GEvent& event, const GTime& srcTime,
-                             const GObservation& obs, bool grad) const;
-    double          temporal(const GEvent& event, const GObservation& obs,
-                             bool grad) const;
+    double          integrate_time(const GEvent& event,
+                                   const GObservation& obs,
+                                   bool grad) const;
+    double          integrate_energy(const GEvent& event,
+                                     const GTime& srcTime,
+                                     const GObservation& obs,
+                                     bool grad) const;
+    double          integrate_dir(const GEvent& event,
+                                  const GEnergy& srcEng,
+                                  const GTime& srcTime,
+                                  const GObservation& obs,
+                                  bool grad) const;
     bool            valid_model(void) const;
     std::string     print_model(void) const;
 
