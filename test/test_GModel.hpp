@@ -50,6 +50,10 @@ public:
     void    test_diffuse_const(void);
     void    test_diffuse_cube(void);
     void    test_diffuse_map(void);
+    void    test_radial_disk(void);
+    void    test_radial_gauss(void);
+    void    test_radial_shell(void);
+    void    test_elliptical_disk(void);
     //
     void    test_model(void);
     void    test_models(void);

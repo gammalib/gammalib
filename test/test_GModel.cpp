@@ -62,6 +62,11 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
+    add_test(static_cast<pfunction>(&TestGModel::test_radial_disk), "Test GModelSpatialRadialDisk");
+    add_test(static_cast<pfunction>(&TestGModel::test_radial_gauss), "Test GModelSpatialRadialGauss");
+    add_test(static_cast<pfunction>(&TestGModel::test_radial_shell), "Test GModelSpatialRadialShell");
+    add_test(static_cast<pfunction>(&TestGModel::test_elliptical_disk), "Test GModelSpatialEllipticalDisk");
+    //
     add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
     //
@@ -576,6 +581,372 @@ void TestGModel::test_diffuse_map(void)
         test_value(model["Prefactor"].value(), 2.1);
         test_value(model["Prefactor"].error(), 1.9);
         test_value(model["Prefactor"].gradient(), 0.8);
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialRadialDisk class
+ ***************************************************************************/
+void TestGModel::test_radial_disk(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialRadialDisk model;
+        test_assert(model.type() == "DiskFunction",
+                                    "Model type \"DiskFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        GModelSpatialRadialDisk model(dir, 3.0);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.radius(), 3.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and attribute methods
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                    xml(m_xml_model_radial_disk);
+        GXmlElement*            element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialRadialDisk model(*element);
+        test_value(model.size(), 3);
+        test_assert(model.type() == "DiskFunction", "Expected \"DiskFunction\"");
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.radius(), 0.45);
+
+        // Test ra method
+        model.ra(100.0);
+        test_value(model.ra(), 100.0);
+
+        // Test dec method
+        model.dec(10.0);
+        test_value(model.dec(), 10.0);
+
+        // Test dir method
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        model.dir(dir);
+        test_assert(model.dir() == dir, "Test sky direction");
+
+        // Test radius method
+        model.radius(3.9);
+        test_value(model.radius(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"RA", "DEC", "Radius"};
+        for (int i = 0; i < 3; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialRadialGauss class
+ ***************************************************************************/
+void TestGModel::test_radial_gauss(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialRadialGauss model;
+        test_assert(model.type() == "GaussFunction",
+                                    "Model type \"GaussFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        GModelSpatialRadialGauss model(dir, 3.0);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.sigma(), 3.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and attribute methods
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                     xml(m_xml_model_radial_gauss);
+        GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialRadialGauss model(*element);
+        test_value(model.size(), 3);
+        test_assert(model.type() == "GaussFunction", "Expected \"GaussFunction\"");
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.sigma(), 0.20);
+
+        // Test ra method
+        model.ra(100.0);
+        test_value(model.ra(), 100.0);
+
+        // Test dec method
+        model.dec(10.0);
+        test_value(model.dec(), 10.0);
+
+        // Test dir method
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        model.dir(dir);
+        test_assert(model.dir() == dir, "Test sky direction");
+
+        // Test sigma method
+        model.sigma(3.9);
+        test_value(model.sigma(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"RA", "DEC", "Sigma"};
+        for (int i = 0; i < 3; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialRadialShell class
+ ***************************************************************************/
+void TestGModel::test_radial_shell(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialRadialShell model;
+        test_assert(model.type() == "ShellFunction",
+                                    "Model type \"ShellFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        GModelSpatialRadialShell model(dir, 3.0, 1.0);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.radius(), 3.0);
+        test_value(model.width(), 1.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and attribute methods
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                     xml(m_xml_model_radial_shell);
+        GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialRadialShell model(*element);
+        test_value(model.size(), 4);
+        test_assert(model.type() == "ShellFunction", "Expected \"ShellFunction\"");
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.radius(), 0.30);
+        test_value(model.width(), 0.10);
+
+        // Test ra method
+        model.ra(100.0);
+        test_value(model.ra(), 100.0);
+
+        // Test dec method
+        model.dec(10.0);
+        test_value(model.dec(), 10.0);
+
+        // Test dir method
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        model.dir(dir);
+        test_assert(model.dir() == dir, "Test sky direction");
+
+        // Test radius method
+        model.radius(3.9);
+        test_value(model.radius(), 3.9);
+
+        // Test width method
+        model.width(3.9);
+        test_value(model.width(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"RA", "DEC", "Radius", "Width"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialEllipticalDisk class
+ ***************************************************************************/
+void TestGModel::test_elliptical_disk(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialEllipticalDisk model;
+        test_assert(model.type() == "EllipticalDisk",
+                                    "Model type \"EllipticalDisk\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        GModelSpatialEllipticalDisk model(dir, 3.0, 2.0, 45.0);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.posangle(), 45.0);
+        test_value(model.semimajor(), 3.0);
+        test_value(model.semiminor(), 2.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and attribute methods
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                        xml(m_xml_model_elliptical_disk);
+        GXmlElement*                element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialEllipticalDisk model(*element);
+        test_value(model.size(), 5);
+        test_assert(model.type() == "EllipticalDisk", "Expected \"EllipticalDisk\"");
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), 22.0145);
+        test_value(model.posangle(), 45.0);
+        test_value(model.semimajor(), 2.0);
+        test_value(model.semiminor(), 0.5);
+
+        // Test ra method
+        model.ra(100.0);
+        test_value(model.ra(), 100.0);
+
+        // Test dec method
+        model.dec(10.0);
+        test_value(model.dec(), 10.0);
+
+        // Test dir method
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        model.dir(dir);
+        test_assert(model.dir() == dir, "Test sky direction");
+
+        // Test posangle method
+        model.posangle(3.9);
+        test_value(model.posangle(), 3.9);
+
+        // Test semimajor method
+        model.semimajor(3.9);
+        test_value(model.semimajor(), 3.9);
+
+        // Test semiminor method
+        model.semiminor(3.9);
+        test_value(model.semiminor(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"RA", "DEC", "PA", "MinorRadius", "MajorRadius"};
+        for (int i = 0; i < 5; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
 
         // Success if we reached this point
         test_try_success();
