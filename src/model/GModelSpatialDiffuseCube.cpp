@@ -45,7 +45,6 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 #define G_MC                            "GModelSpatialDiffuseCube::mc(GRan&)"
 #define G_READ                 "GModelSpatialDiffuseCube::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
-#define G_LOAD_CUBE       "GModelSpatialDiffuseCube::load_cube(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -98,17 +97,17 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GXmlElement& xml) :
 
 
 /***********************************************************************//**
- * @brief Value constructor
+ * @brief Filename constructor
  *
- * @param[in] value Normalisation factor.
  * @param[in] filename File name.
+ * @param[in] value Normalization factor (defaults to 1).
  *
- * Constructs map cube model by assigning the normalisation factor and the
- * filename of the map cube. Note that the map cube file is not opened, only
- * the filename is stored for use when required.
+ * Constructs map cube model by assigning the normalization @p value and the
+ * @p filename of the map cube. Note that the map cube file is not opened,
+ * only the filename is stored for use when required.
  ***************************************************************************/
-GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const double&      value,
-                                                   const std::string& filename) :
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const std::string& filename,
+                                                   const double&      value) :
                           GModelSpatialDiffuse()
 {
     // Initialise members
@@ -117,9 +116,8 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const double&      value,
     // Set parameter
     m_value.value(value);
 
-    // Set filename by expanding any environment variable that may be
-    // present
-    m_filename = expand_env(filename);
+    // Set filename
+    m_filename = filename;
 
     // Perform autoscaling of parameter
     autoscale();
@@ -130,16 +128,16 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const double&      value,
 
 
 /***********************************************************************//**
- * @brief Value constructor
+ * @brief Sky map constructor
  *
- * @param[in] value Normalisation factor.
  * @param[in] map Sky map.
+ * @param[in] value Normalization factor (defaults to 1).
  *
- * Constructs map cube model by assigning the normalisation factor and by
- * loading a map cube from a sky map. The filename will remain blank.
+ * Constructs map cube model by assigning the normalisation @p value and by
+ * loading a @p map cube from a sky map. The filename will remain blank.
  ***************************************************************************/
-GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const double&  value,
-                                                   const GSkymap& map) :
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap& map,
+                                                   const double&  value) :
                           GModelSpatialDiffuse()
 {
     // Initialise members

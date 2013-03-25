@@ -420,7 +420,7 @@ void TestGModel::test_diffuse_cube(void)
     // Test filename value constructor
     test_try("Test filename value constructor");
     try {
-        GModelSpatialDiffuseCube model(3.0, "file.fits");
+        GModelSpatialDiffuseCube model("file.fits", 3.0);
         test_value(model.value(), 3.0);
         test_assert(model.filename() == "file.fits", "Expected \"file.fits\"");
         test_assert(!model.isloaded(), "Map cube is not yet loaded");
@@ -434,7 +434,7 @@ void TestGModel::test_diffuse_cube(void)
     test_try("Test skymap value constructor");
     try {
         GSkymap map("HPX", "GAL", 16, "RING", 10);
-        GModelSpatialDiffuseCube model(3.0, map);
+        GModelSpatialDiffuseCube model(map, 3.0);
         test_value(model.value(), 3.0);
         test_assert(model.filename() == "", "Expected \"\"");
         test_assert(model.isloaded(), "Map cube is loaded");

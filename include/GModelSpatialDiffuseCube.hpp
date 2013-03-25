@@ -55,10 +55,10 @@ public:
     // Constructors and destructors
     GModelSpatialDiffuseCube(void);
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
-    explicit GModelSpatialDiffuseCube(const double& value,
-                                      const std::string& filename);
-    explicit GModelSpatialDiffuseCube(const double& value,
-                                      const GSkymap& map);
+    explicit GModelSpatialDiffuseCube(const std::string& filename,
+                                      const double&      value = 1.0);
+    explicit GModelSpatialDiffuseCube(const GSkymap& map,
+                                      const double&  value = 1.0);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
     virtual ~GModelSpatialDiffuseCube(void);
 
