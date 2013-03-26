@@ -235,7 +235,8 @@ GModelSpectralExpPlaw* GModelSpectralExpPlaw::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
  * @return Model value.
  *
  * The power law function is defined as
@@ -250,7 +251,8 @@ GModelSpectralExpPlaw* GModelSpectralExpPlaw::clone(void) const
  *       may result. We should add a test that prevents using invalid
  *       values.
  ***************************************************************************/
-double GModelSpectralExpPlaw::eval(const GEnergy& srcEng) const
+double GModelSpectralExpPlaw::eval(const GEnergy& srcEng,
+                                   const GTime&   srcTime) const
 {
     // Compute function value
     double energy = srcEng.MeV();
@@ -285,7 +287,8 @@ double GModelSpectralExpPlaw::eval(const GEnergy& srcEng) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
  * @return Model value.
  *
  * The power law function is defined as
@@ -309,7 +312,8 @@ double GModelSpectralExpPlaw::eval(const GEnergy& srcEng) const
  *       may result. We should add a test that prevents using invalid
  *       values.
  ***************************************************************************/
-double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng) const
+double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng,
+                                             const GTime&   srcTime)
 {
     // Compute function value
     double energy = srcEng.MeV();
@@ -449,7 +453,8 @@ double GModelSpectralExpPlaw::eflux(const GEnergy& emin, const GEnergy& emax) co
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
- * @param[in] ran Random number generator.
+ * @param[in] time True photon arrival time.
+ * @param[in,out] ran Random number generator.
  * @return Energy.
  *
  * @exception GException::erange_invalid
@@ -460,14 +465,15 @@ double GModelSpectralExpPlaw::eflux(const GEnergy& emin, const GEnergy& emax) co
  * method. First, a random energy within [emin, emax] is drawn from an
  * exponential distribution.
  ***************************************************************************/
-GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin, const GEnergy& emax,
-                                  GRan& ran) const
+GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
+                                  const GEnergy& emax,
+                                  const GTime&   time,
+                                  GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
         throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
               "Minimum energy < maximum energy required.");
-        
     }
 
     // Allocate energy

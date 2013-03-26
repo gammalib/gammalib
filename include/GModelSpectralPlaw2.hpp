@@ -65,15 +65,22 @@ public:
     // Operators
     virtual GModelSpectralPlaw2& operator= (const GModelSpectralPlaw2& model);
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void                 clear(void);
     virtual GModelSpectralPlaw2* clone(void) const;
-    virtual std::string          type(void) const { return "PowerLaw2"; }
-    virtual double               eval(const GEnergy& srcEng) const;
-    virtual double               eval_gradients(const GEnergy& srcEng) const;
-    virtual double               flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double               eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual std::string          type(void) const;
+    virtual double               eval(const GEnergy& srcEng,
+                                      const GTime&   srcTime) const;
+    virtual double               eval_gradients(const GEnergy& srcEng,
+                                                const GTime&   srcTime);
+    virtual double               flux(const GEnergy& emin,
+                                      const GEnergy& emax) const;
+    virtual double               eflux(const GEnergy& emin,
+                                       const GEnergy& emax) const;
+    virtual GEnergy              mc(const GEnergy& emin,
+                                    const GEnergy& emax,
+                                    const GTime&   time,
+                                    GRan&          ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
     virtual std::string          print(void) const;
@@ -114,5 +121,19 @@ protected:
     mutable double  m_last_g_integral; //!< Last integral flux gradient
     mutable double  m_last_g_index;    //!< Last spectral index gradient
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "PowerLaw2".
+ *
+ * Returns the type of the spectral power law model.
+ ***************************************************************************/
+inline
+std::string GModelSpectralPlaw2::type(void) const
+{
+    return "PowerLaw2";
+}
 
 #endif /* GMODELSPECTRALPLAW2_HPP */

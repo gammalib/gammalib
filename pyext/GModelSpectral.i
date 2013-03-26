@@ -47,11 +47,16 @@ public:
     virtual void            clear(void) = 0;
     virtual GModelSpectral* clone(void) const = 0;
     virtual std::string     type(void) const = 0;
-    virtual double          eval(const GEnergy& srcEng) const = 0;
-    virtual double          eval_gradients(const GEnergy& srcEng) const = 0;
-    virtual double          flux(const GEnergy& emin, const GEnergy& emax) const = 0;
-    virtual double          eflux(const GEnergy& emin, const GEnergy& emax) const = 0;
-    virtual GEnergy         mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const = 0;
+    virtual double          eval(const GEnergy& srcEng,
+                                 const GTime& srcTime) const = 0;
+    virtual double          eval_gradients(const GEnergy& srcEng,
+                                           const GTime& srcTime) = 0;
+    virtual double          flux(const GEnergy& emin,
+                                 const GEnergy& emax) const = 0;
+    virtual double          eflux(const GEnergy& emin,
+                                  const GEnergy& emax) const = 0;
+    virtual GEnergy         mc(const GEnergy& emin, const GEnergy& emax,
+                               const GTime& time, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;
     virtual void            write(GXmlElement& xml) const = 0;
 
@@ -69,10 +74,12 @@ public:
         return tochar(self->print());
     }
     GModelPar& __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     GModelPar& __getitem__(const std::string& name) {
         return (*self)[name];
@@ -82,8 +89,9 @@ public:
             (*self)[index] = val;
             return;
         }
-        else
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
     void __setitem__(const std::string& name, const GModelPar& val) {
         (*self)[name] = val;

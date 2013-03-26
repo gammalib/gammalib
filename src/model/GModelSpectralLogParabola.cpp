@@ -232,10 +232,11 @@ GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate model
  *
- * @param[in] srcEng True energy of photon.
- * @return Function value.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
  * The logparabola function is defined as
  * \f[I(E)=norm (E/pivot)^{index-curvature*log(E/pivot)}\f]
@@ -250,7 +251,8 @@ GModelSpectralLogParabola* GModelSpectralLogParabola::clone(void) const
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
  * may result.
  ***************************************************************************/
-double GModelSpectralLogParabola::eval(const GEnergy& srcEng) const
+double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
+                                       const GTime&   srcTime) const
 {
     // Compute function value
     double energy   = srcEng.MeV() / pivot();
@@ -282,8 +284,9 @@ double GModelSpectralLogParabola::eval(const GEnergy& srcEng) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcEng True energy of photon.
- * @return Function value.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
  * The logparabol function is defined as
  * \f[I(E)=norm (E/pivot)^{index-curvature\ln(E/pivot)}\f]
@@ -304,7 +307,8 @@ double GModelSpectralLogParabola::eval(const GEnergy& srcEng) const
  * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
  * may result.
  ***************************************************************************/
-double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng) const
+double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng,
+                                                 const GTime&   srcTime)
 {
     // Compute function value
     double energy   = srcEng.MeV() / pivot();
@@ -433,7 +437,8 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
- * @param[in] ran Random number generator.
+ * @param[in] time True photon arrival time.
+ * @param[in,out] ran Random number generator.
  * @return Energy.
  *
  * @exception GException::feature_not_implemented
@@ -444,7 +449,8 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
  ***************************************************************************/
 GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
                                       const GEnergy& emax,
-                                      GRan& ran) const
+                                      const GTime&   time,
+                                      GRan&          ran) const
 {
 		if (emin >= emax) {
 	        throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
@@ -455,7 +461,7 @@ GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
 	    GEnergy energy;
 
 	    // Update cache
-	    update_mc_cache(emin, emax);
+	    update_mc_cache(emin, emax, time);
 
 	    // Initialise energy
 	    double eng;
@@ -845,11 +851,13 @@ void GModelSpectralLogParabola::free_members(void)
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
+ * @param[in] time True photon arrival time.
  *
  * Updates the precomputation cache for Monte Carlo simulations.
  ***************************************************************************/
 void GModelSpectralLogParabola::update_mc_cache(const GEnergy& emin,
-                                            const GEnergy& emax) const
+                                                const GEnergy& emax,
+                                                const GTime&   time) const
 
 {
 	// Only update if boundaries have changed
@@ -876,10 +884,11 @@ void GModelSpectralLogParabola::update_mc_cache(const GEnergy& emin,
 
 			// Plaw index defined by the slope of a straight line in the
             // log-log-plane
-			index_pl = std::log(eval(emin)/eval(emax))/std::log(emin.MeV()/emax.MeV());
+			index_pl = std::log(eval(emin,time)/eval(emax,time)) / 
+                       std::log(emin.MeV()/emax.MeV());
 
 			// Plaw norm defined such that Plaw = LogParabola at emin
-			m_mc_norm = eval(emin)/std::pow(emin.MeV()/pivot(),index_pl);
+			m_mc_norm = eval(emin,time) / std::pow(emin.MeV()/pivot(),index_pl);
 
 		}
 

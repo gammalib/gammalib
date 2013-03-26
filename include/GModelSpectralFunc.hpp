@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralFunc.hpp
  * @brief Spectral function model class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSPECTRALFUNC_HPP
@@ -61,15 +61,20 @@ public:
     // Operators
     virtual GModelSpectralFunc& operator=(const GModelSpectralFunc& model);
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void                clear(void);
     virtual GModelSpectralFunc* clone(void) const;
-    virtual std::string         type(void) const { return "FileFunction"; }
-    virtual double              eval(const GEnergy& srcEng) const;
-    virtual double              eval_gradients(const GEnergy& srcEng) const;
-    virtual double              flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double              eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual std::string         type(void) const;
+    virtual double              eval(const GEnergy& srcEng,
+                                     const GTime&   srcTime) const;
+    virtual double              eval_gradients(const GEnergy& srcEng,
+                                               const GTime&   srcTime);
+    virtual double              flux(const GEnergy& emin,
+                                     const GEnergy& emax) const;
+    virtual double              eflux(const GEnergy& emin,
+                                      const GEnergy& emax) const;
+    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax,
+                                   const GTime& time, GRan& ran) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(void) const;
@@ -109,5 +114,19 @@ protected:
     mutable std::vector<double> m_mc_max;    //!< Upper boundary for MC
     mutable std::vector<double> m_mc_exp;    //!< Exponent for MC
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "FileFunction".
+ *
+ * Returns the type of the spectral function model.
+ ***************************************************************************/
+inline
+std::string GModelSpectralFunc::type(void) const
+{
+    return "FileFunction";
+}
 
 #endif /* GMODELSPECTRALFUNC_HPP */

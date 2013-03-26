@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralConst.i  -  Spectral constant model class         *
+ *          GModelSpectralConst.i - Spectral constant model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralConst.i
- * @brief Spectral contant model class Python interface definition
- * @author J. Knodlseder
+ * @brief Spectral constant model class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -40,23 +40,30 @@ public:
     // Constructors and destructors
     GModelSpectralConst(void);
     explicit GModelSpectralConst(const GXmlElement& xml);
+    explicit GModelSpectralConst(const double& norm);
     GModelSpectralConst(const GModelSpectralConst& model);
     virtual ~GModelSpectralConst(void);
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void                 clear(void);
     virtual GModelSpectralConst* clone(void) const;
     virtual std::string          type(void) const;
-    virtual double               eval(const GEnergy& srcEng) const;
-    virtual double               eval_gradients(const GEnergy& srcEng) const;
-    virtual double               flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double               eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual double               eval(const GEnergy& srcEng,
+                                      const GTime& srcTime) const;
+    virtual double               eval_gradients(const GEnergy& srcEng,
+                                                const GTime& srcTime);
+    virtual double               flux(const GEnergy& emin,
+                                      const GEnergy& emax) const;
+    virtual double               eflux(const GEnergy& emin,
+                                       const GEnergy& emax) const;
+    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax,
+                                    const GTime& time, GRan& ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
     double norm(void) const;
+    void   norm(const double& norm);
 };
 
 

@@ -223,7 +223,9 @@ GModelSpectralPlaw2* GModelSpectralPlaw2::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
  * The power law function is defined as
  * \f[I(E)=integral (index+1)/(emax^{index+1}-emin^{index+1}) E^{index}\f]
@@ -235,7 +237,8 @@ GModelSpectralPlaw2* GModelSpectralPlaw2::clone(void) const
  * \f$emin\f$ is the lower energy limit, and
  * \f$emax\f$ is the upper energy limit.
  ***************************************************************************/
-double GModelSpectralPlaw2::eval(const GEnergy& srcEng) const
+double GModelSpectralPlaw2::eval(const GEnergy& srcEng,
+                                 const GTime&   srcTime) const
 {
     // Update precomputed values
     update(srcEng);
@@ -265,7 +268,9 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
  * The power law function is defined as
  * \f[I(E)=integral (index+1)/(emax^{index+1}-emin^{index+1}) E^{index}\f]
@@ -294,7 +299,8 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng) const
  *
  * No partial derivatives are supported for the energy boundaries.
  ***************************************************************************/
-double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng) const
+double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng,
+                                           const GTime&   srcTime)
 {
     // Initialise gradients
     double g_integral = 0.0;
@@ -471,7 +477,8 @@ double GModelSpectralPlaw2::eflux(const GEnergy& emin, const GEnergy& emax) cons
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
- * @param[in] ran Random number generator.
+ * @param[in] time True photon arrival time.
+ * @param[in,out] ran Random number generator.
  * @return Energy.
  *
  * @exception GException::erange_invalid
@@ -479,14 +486,15 @@ double GModelSpectralPlaw2::eflux(const GEnergy& emin, const GEnergy& emax) cons
  *
  * Returns Monte Carlo energy by randomly drawing from a power law.
  ***************************************************************************/
-GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin, const GEnergy& emax,
-                                GRan& ran) const
+GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin,
+                                const GEnergy& emax,
+                                const GTime&   time,
+                                GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
         throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
               "Minimum energy < maximum energy required.");
-        
     }
 
     // Allocate energy

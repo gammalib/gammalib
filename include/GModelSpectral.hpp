@@ -33,6 +33,7 @@
 #include "GBase.hpp"
 #include "GModelPar.hpp"
 #include "GEnergy.hpp"
+#include "GTime.hpp"
 #include "GRan.hpp"
 #include "GXmlElement.hpp"
 
@@ -42,8 +43,25 @@
  *
  * @brief Abstract spectral model base class
  *
- * This class implements the spectral component of the factorised source
- * model.
+ * This class implements the spectral component of the factorized source
+ * model
+ *
+ * \f[
+ *    S_{\rm E}(E | t)
+ * \f]
+ *
+ * where
+ * - \f$E\f$ is the true photon energy, and
+ * - \f$t\f$ is the true photon arrival time.
+ *
+ * The spectral component describes the spatially integrated time dependent
+ * spectral distribution of the source. It satisfies
+ * \f[
+ *    \int_{E} S_{\rm E}(E | t) dE = \Phi
+ * \f]
+ * for all \f$t\f$, where \f$\Phi\f$ is the spatially and spectrally
+ * integrated total source flux. The spectral component does not impact
+ * the temporal properties of the integrated flux \f$\Phi\f$.
  ***************************************************************************/
 class GModelSpectral : public GBase {
 
@@ -64,11 +82,16 @@ public:
     virtual void            clear(void) = 0;
     virtual GModelSpectral* clone(void) const = 0;
     virtual std::string     type(void) const = 0;
-    virtual double          eval(const GEnergy& srcEng) const = 0;
-    virtual double          eval_gradients(const GEnergy& srcEng) const = 0;
-    virtual double          flux(const GEnergy& emin, const GEnergy& emax) const = 0;
-    virtual double          eflux(const GEnergy& emin, const GEnergy& emax) const = 0;
-    virtual GEnergy         mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const = 0;
+    virtual double          eval(const GEnergy& srcEng,
+                                 const GTime& srcTime) const = 0;
+    virtual double          eval_gradients(const GEnergy& srcEng,
+                                           const GTime& srcTime) = 0;
+    virtual double          flux(const GEnergy& emin,
+                                 const GEnergy& emax) const = 0;
+    virtual double          eflux(const GEnergy& emin,
+                                  const GEnergy& emax) const = 0;
+    virtual GEnergy         mc(const GEnergy& emin, const GEnergy& emax,
+                               const GTime& time, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;
     virtual void            write(GXmlElement& xml) const = 0;
     virtual std::string     print(void) const = 0;

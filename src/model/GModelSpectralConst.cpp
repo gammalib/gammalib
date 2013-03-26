@@ -42,7 +42,7 @@ const GModelSpectralRegistry g_spectral_const_registry(&g_spectral_const_seed);
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                "GModelSpectralConst::flux(GEnergy&, GEnergy&)"
 #define G_EFLUX              "GModelSpectralConst::eflux(GEnergy&, GEnergy&)"
-#define G_MC             "GModelSpectralConst::mc(GEnergy&, GEnergy&, GRan&)"
+#define G_MC     "GModelSpectralConst::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                      "GModelSpectralConst::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralConst::write(GXmlElement&)"
 
@@ -77,9 +77,9 @@ GModelSpectralConst::GModelSpectralConst(void) : GModelSpectral()
  *
  * @param[in] xml XML element.
  *
- * Creates instance of a constant spectral model by extracting information
- * from an XML element. See GModelSpectralConst::read() for more information
- * about the expected structure of the XML element.
+ * Constructs constant spectral model by extracting information from an XML
+ * element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
                      GModelSpectral()
@@ -89,6 +89,27 @@ GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
 
     // Read information from XML element
     read(xml);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Value constructor
+ *
+ * @param[in] norm Normalization factor (ph/cm2/s).
+ *
+ * Constructs constant spectral model by setting the normalization factor.
+ ***************************************************************************/
+GModelSpectralConst::GModelSpectralConst(const double& norm) :
+                     GModelSpectral()
+{
+    // Initialise members
+    init_members();
+
+    // Set normalization factor
+    m_norm.value(norm);
 
     // Return
     return;
@@ -136,8 +157,8 @@ GModelSpectralConst::~GModelSpectralConst(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Spectral constant model.
- * @return Spectral model.
+ * @param[in] model Constant spectral model.
+ * @return Constant spectral model.
  ***************************************************************************/
 GModelSpectralConst& GModelSpectralConst::operator=(const GModelSpectralConst& model)
 {
@@ -170,7 +191,7 @@ GModelSpectralConst& GModelSpectralConst::operator=(const GModelSpectralConst& m
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear constant spectral model
  ***************************************************************************/
 void GModelSpectralConst::clear(void)
 {
@@ -188,28 +209,36 @@ void GModelSpectralConst::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone constant spectral model
  *
- * @return Pointer to deep copy of spectral model.
+ * @return Pointer to deep copy of constant spectral model.
  ***************************************************************************/
 GModelSpectralConst* GModelSpectralConst::clone(void) const
 {
+    // Clone constant spectral model
     return new GModelSpectralConst(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate model
  *
- * @param[in] srcEng True energy of photon.
- * @return Model value.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
- * The spectral model is defined as
- * \f[I(E)=norm\f]
+ * The spectral model is defined by
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ * \f]
+ *
  * where
- * \f$norm\f$ is the normalization of the function.
+ * \f${\tt m\_norm}\f$ is the normalization constant in units of 
+ * ph/cm2/s/MeV.
  ***************************************************************************/
-double GModelSpectralConst::eval(const GEnergy& srcEng) const
+double GModelSpectralConst::eval(const GEnergy& srcEng,
+                                 const GTime&   srcTime) const
 {
     // Compute function value
     double value = norm();
@@ -222,21 +251,32 @@ double GModelSpectralConst::eval(const GEnergy& srcEng) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcEng True energy of photon.
- * @return Model value.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
- * The spectral model is defined as
- * \f[I(E)=norm\f]
+ * The spectral model is defined by
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ * \f]
+ *
  * where
- * \f$norm=n_s n_v\f$ is the normalization of the function.
- * Note that the normalization is factorised into a scaling factor and a
- * value and that the method is expected to return the gradient with respect
- * to the parameter value \f$n_v\f$.
+ * \f${\tt m\_norm}\f$ is the normalization constant in units of 
+ * ph/cm2/s/MeV.
  *
- * The partial derivative of the normalization value is given by
- * \f[dI/dn_v=n_s\f]
+ * The normalization constant is factorized into a scale factor and a value
+ * factor. The partial derivative with respect to the normalization constant
+ * value factor is given by
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}
+ *         {\delta {\tt m\_norm.factor\_value()}} =
+ *    {\tt m\_norm.scale()}
+ * \f]
  ***************************************************************************/
-double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
+double GModelSpectralConst::eval_gradients(const GEnergy& srcEng,
+                                           const GTime&   srcTime)
 {
     // Compute function value
     double value = norm();
@@ -244,8 +284,8 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
     // Compute partial derivatives of the parameter values
     double g_norm = (m_norm.isfree()) ? m_norm.scale() : 0.0;
 
-    // Set gradients (circumvent const correctness)
-    const_cast<GModelSpectralConst*>(this)->m_norm.factor_gradient(g_norm);
+    // Set gradient
+    m_norm.factor_gradient(g_norm);
 
     // Return
     return value;
@@ -253,7 +293,7 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
 
 
 /***********************************************************************//**
- * @brief Returns model photon flux between [emin, emax] (units: ph/cm2/s)
+ * @brief Returns model photon flux between [emin, emax] (ph/cm2/s)
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
@@ -263,14 +303,21 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng) const
  *            Energy range is invalid (emin < emax required).
  *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ *
+ * \f[
+ *    \int_{E_{\rm min}}^{E_{\rm max}} S_{\rm E}(E | t) dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ *   energy, respectively, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
+ *
+ * @todo What about returning a zero flux if the energy range is invalid?
  ***************************************************************************/
-double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralConst::flux(const GEnergy& emin,
+                                 const GEnergy& emax) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
@@ -288,7 +335,7 @@ double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
 
 
 /***********************************************************************//**
- * @brief Returns model energy flux between [emin, emax] (units: erg/cm2/s)
+ * @brief Returns model energy flux between [emin, emax] (erg/cm2/s)
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
@@ -298,24 +345,31 @@ double GModelSpectralConst::flux(const GEnergy& emin, const GEnergy& emax) const
  *            Energy range is invalid (emin < emax required).
  *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ *
+ * \f[
+ *    \int_{E_{\rm min}}^{E_{\rm max}} S_{\rm E}(E | t) E dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
+ *   energy, respectively, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
+ *
+ * @todo What about returning a zero flux if the energy range is invalid?
  ***************************************************************************/
-double GModelSpectralConst::eflux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralConst::eflux(const GEnergy& emin,
+                                  const GEnergy& emax) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
         throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
               "Minimum energy < maximum energy required.");
-        
     }
 
     // Compute flux for a constant model
-    double flux = norm() * 0.5 * (emax.MeV()*emax.MeV() - emin.MeV()*emin.MeV());
+    double flux = norm() * 0.5 * (emax.MeV()*emax.MeV() - 
+                                  emin.MeV()*emin.MeV());
 
     // Convert from MeV/cm2/s to erg/cm2/s
     flux *= MeV2erg;
@@ -330,7 +384,8 @@ double GModelSpectralConst::eflux(const GEnergy& emin, const GEnergy& emax) cons
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
- * @param[in] ran Random number generator.
+ * @param[in] time True photon arrival time.
+ * @param[in,out] ran Random number generator.
  * @return Energy.
  *
  * @exception GException::erange_invalid
@@ -339,14 +394,15 @@ double GModelSpectralConst::eflux(const GEnergy& emin, const GEnergy& emax) cons
  * Returns Monte Carlo energy by randomly drawing from a constant between
  * the minimum and maximum photon energy.
  ***************************************************************************/
-GEnergy GModelSpectralConst::mc(const GEnergy& emin, const GEnergy& emax,
-                                GRan& ran) const
+GEnergy GModelSpectralConst::mc(const GEnergy& emin,
+                                const GEnergy& emax,
+                                const GTime&   time,
+                                GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
         throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
               "Minimum energy < maximum energy required.");
-        
     }
 
     // Allocate energy
@@ -373,9 +429,18 @@ GEnergy GModelSpectralConst::mc(const GEnergy& emin, const GEnergy& emax,
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter name found in XML element.
  *
- * Read the function information from an XML element and load the nodes
- * from the associated file. The XML element is required to have a parameter
- * named "Normalization" or "Value".
+ * Reads the spectral information from an XML element having either the
+ * format
+ *
+ *     <spectrum type="ConstantValue">
+ *       <parameter name="Value" scale="1" min="0" max="1000" value="1" free="1"/>
+ *     </spectrum>
+ *
+ * or the format
+ *
+ *     <spectrum type="ConstantValue">
+ *       <parameter name="Normalization" scale="1" min="0" max="1000" value="1" free="1"/>
+ *     </spectrum>
  ***************************************************************************/
 void GModelSpectralConst::read(const GXmlElement& xml)
 {
@@ -416,9 +481,11 @@ void GModelSpectralConst::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the spectral constant information into an XML element. The XML
- * element has to be of type "ConstantValue" and will have 1 parameter leaf
- * named "Normalization" or "Value" (default).
+ * Writes the spectral information into an XML element with the format
+ *
+ *     <spectrum type="ConstantValue">
+ *       <parameter name="Value" scale="1" min="0" max="1000" value="1" free="1"/>
+ *     </spectrum>
  ***************************************************************************/
 void GModelSpectralConst::write(GXmlElement& xml) const
 {

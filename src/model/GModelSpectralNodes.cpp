@@ -199,7 +199,9 @@ GModelSpectralNodes* GModelSpectralNodes::clone(void) const
 /***********************************************************************//**
  * @brief Evaluate function
  *
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
  * The spectral model is defined as a piecewise power law between spectral
  * nodes \f$(E_i, I_i)\f$,
@@ -220,7 +222,8 @@ GModelSpectralNodes* GModelSpectralNodes::clone(void) const
  * \f$(\log E_2, \log I_2)\f$
  * to the requested energy \f$\log E\f$.
  ***************************************************************************/
-double GModelSpectralNodes::eval(const GEnergy& srcEng) const
+double GModelSpectralNodes::eval(const GEnergy& srcEng,
+                                 const GTime&   srcTime) const
 {
     // Update evaluation cache
     update_eval_cache();
@@ -250,7 +253,9 @@ double GModelSpectralNodes::eval(const GEnergy& srcEng) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
  * The spectral model is defined as a piecewise power law between spectral
  * nodes \f$(E_i, I_i)\f$,
@@ -275,7 +280,8 @@ double GModelSpectralNodes::eval(const GEnergy& srcEng) const
  * \f[dI/dv_i=I(E) w_i / v_i\f]
  * for \f$i=1,2\f$ and \f$0\f$ for all other nodes.
  ***************************************************************************/
-double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng) const
+double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng,
+                                           const GTime&   srcTime)
 {
     // Update evaluation cache
     update_eval_cache();
@@ -525,20 +531,22 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
- * @param[in] ran Random number generator.
+ * @param[in] time True photon arrival time.
+ * @param[in,out] ran Random number generator.
  * @return Energy.
  *
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
  ***************************************************************************/
-GEnergy GModelSpectralNodes::mc(const GEnergy& emin, const GEnergy& emax,
-                               GRan& ran) const
+GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
+                                const GEnergy& emax,
+                                const GTime&   time,
+                                GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
         throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
               "Minimum energy < maximum energy required.");
-        
     }
 
     // Allocate energy

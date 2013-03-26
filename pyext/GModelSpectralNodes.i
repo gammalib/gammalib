@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GModelSpectralNodes.i  -  Spectral nodes model class           *
+ *           GModelSpectralNodes.i - Spectral nodes model class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralNodes.i
  * @brief Spectral nodes model class Python interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -47,11 +47,18 @@ public:
     virtual void                 clear(void);
     virtual GModelSpectralNodes* clone(void) const;
     virtual std::string          type(void) const;
-    virtual double               eval(const GEnergy& srcEng) const;
-    virtual double               eval_gradients(const GEnergy& srcEng) const;
-    virtual double               flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double               eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual double               eval(const GEnergy& srcEng,
+                                      const GTime&   srcTime) const;
+    virtual double               eval_gradients(const GEnergy& srcEng,
+                                                const GTime&   srcTime);
+    virtual double               flux(const GEnergy& emin,
+                                      const GEnergy& emax) const;
+    virtual double               eflux(const GEnergy& emin,
+                                       const GEnergy& emax) const;
+    virtual GEnergy              mc(const GEnergy& emin,
+                                    const GEnergy& emax,
+                                    const GTime&   time,
+                                    GRan&          ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
 };

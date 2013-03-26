@@ -40,11 +40,15 @@
  *
  * @brief Constant spectral model class
  *
- * This class implements a constant as the spectral component of the
- * gamma-ray sky model. The function is defined as
- * \f[I(E)=norm\f]
+ * This class implements a constant spectrum. The model is defined by
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ * \f]
+ *
  * where
- * \f$norm\f$ is the normalization constant.
+ * \f${\tt m\_norm}\f$ is the normalization constant in units of
+ * ph/cm2/s/MeV.
  ***************************************************************************/
 class GModelSpectralConst : public GModelSpectral {
 
@@ -52,27 +56,36 @@ public:
     // Constructors and destructors
     GModelSpectralConst(void);
     explicit GModelSpectralConst(const GXmlElement& xml);
+    explicit GModelSpectralConst(const double& norm);
     GModelSpectralConst(const GModelSpectralConst& model);
     virtual ~GModelSpectralConst(void);
 
     // Operators
     virtual GModelSpectralConst& operator=(const GModelSpectralConst& model);
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void                 clear(void);
     virtual GModelSpectralConst* clone(void) const;
-    virtual std::string          type(void) const { return "ConstantValue"; }
-    virtual double               eval(const GEnergy& srcEng) const;
-    virtual double               eval_gradients(const GEnergy& srcEng) const;
-    virtual double               flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double               eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual std::string          type(void) const;
+    virtual double               eval(const GEnergy& srcEng,
+                                      const GTime&   srcTime) const;
+    virtual double               eval_gradients(const GEnergy& srcEng,
+                                                const GTime&   srcTime);
+    virtual double               flux(const GEnergy& emin,
+                                      const GEnergy& emax) const;
+    virtual double               eflux(const GEnergy& emin,
+                                       const GEnergy& emax) const;
+    virtual GEnergy              mc(const GEnergy& emin,
+                                    const GEnergy& emax,
+                                    const GTime&   time,
+                                    GRan&          ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
     virtual std::string          print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.value(); }
+    double norm(void) const;
+    void   norm(const double& norm);
 
 protected:
     // Protected methods
@@ -81,7 +94,50 @@ protected:
     void free_members(void);
 
     // Protected members
-    GModelPar m_norm;      //!< Normalization factor
+    GModelPar m_norm;  //!< Normalization factor
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "ConstantValue".
+ *
+ * Returns the type of the constant spectral model.
+ ***************************************************************************/
+inline
+std::string GModelSpectralConst::type(void) const
+{
+    return "ConstantValue";
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization factor
+ *
+ * @return Normalization factor (ph/cm2/s/MeV).
+ *
+ * Returns the normalization factor.
+ ***************************************************************************/
+inline
+double GModelSpectralConst::norm(void) const
+{
+    return (m_norm.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set normalization factor 
+ *
+ * @param[in] norm Normalization factor (ph/cm2/s/MeV).
+ *
+ * Sets the normalization factor.
+ ***************************************************************************/
+inline
+void GModelSpectralConst::norm(const double& norm)
+{
+    m_norm.value(norm);
+    return;
+}
 
 #endif /* GMODELSPECTRALCONST_HPP */

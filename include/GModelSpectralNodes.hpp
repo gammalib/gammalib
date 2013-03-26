@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralNodes.hpp  -  Spectral nodes model class          *
+ *          GModelSpectralNodes.hpp - Spectral nodes model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralNodes.hpp
  * @brief Spectral nodes model class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELSPECTRALNODES_HPP
@@ -76,12 +76,19 @@ public:
     // Implemented pure virtual methods
     virtual void                 clear(void);
     virtual GModelSpectralNodes* clone(void) const;
-    virtual std::string          type(void) const { return "NodeFunction"; }
-    virtual double               eval(const GEnergy& srcEng) const;
-    virtual double               eval_gradients(const GEnergy& srcEng) const;
-    virtual double               flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double               eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy              mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual std::string          type(void) const;
+    virtual double               eval(const GEnergy& srcEng,
+                                      const GTime&   srcTime) const;
+    virtual double               eval_gradients(const GEnergy& srcEng,
+                                                const GTime&   srcTime);
+    virtual double               flux(const GEnergy& emin,
+                                      const GEnergy& emax) const;
+    virtual double               eflux(const GEnergy& emin,
+                                       const GEnergy& emax) const;
+    virtual GEnergy              mc(const GEnergy& emin,
+                                    const GEnergy& emax,
+                                    const GTime&   time,
+                                    GRan&          ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
     virtual std::string          print(void) const;
@@ -127,5 +134,19 @@ protected:
     mutable std::vector<double> m_mc_max;       //!< Upper boundary for MC
     mutable std::vector<double> m_mc_exp;       //!< Exponent for MC
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "NodeFunction".
+ *
+ * Returns the type of the spectral node function model.
+ ***************************************************************************/
+inline
+std::string GModelSpectralNodes::type(void) const
+{
+    return "NodeFunction";
+}
 
 #endif /* GMODELSPECTRALNODES_HPP */

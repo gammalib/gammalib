@@ -107,8 +107,8 @@ GModelSpectralFunc::GModelSpectralFunc(const std::string& filename)
  * from an XML element. See GModelSpectralFunc::read() for more information
  * about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml)
-                                       : GModelSpectral()
+GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml) :
+                    GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -126,8 +126,8 @@ GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml)
  *
  * @param[in] model Spectral function model.
  ***************************************************************************/
-GModelSpectralFunc::GModelSpectralFunc(const GModelSpectralFunc& model)
-                                       : GModelSpectral(model)
+GModelSpectralFunc::GModelSpectralFunc(const GModelSpectralFunc& model) :
+                    GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -222,9 +222,11 @@ GModelSpectralFunc* GModelSpectralFunc::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate function
+ * @brief Evaluate model
  *
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
  * The spectral model is defined as
  * \f[I(E)=norm f(E)\f]
@@ -233,7 +235,8 @@ GModelSpectralFunc* GModelSpectralFunc::clone(void) const
  * Note that the node energies are stored as log10 of energy in units of
  * MeV.
  ***************************************************************************/
-double GModelSpectralFunc::eval(const GEnergy& srcEng) const
+double GModelSpectralFunc::eval(const GEnergy& srcEng,
+                                const GTime&   srcTime) const
 {
     // Interpolate function. This is done in log10-log10 space, but the
     // linear value is returned.
@@ -264,7 +267,9 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng) const
 /***********************************************************************//**
  * @brief Evaluate function and gradients
  *
- * @param[in] srcEng True energy of photon.
+ * @param[in] srcEng True photon energy.
+ * @param[in] srcTime True photon arrival time.
+ * @return Model value (ph/cm2/s/MeV).
  *
  * The spectral model is defined as
  * \f[I(E)=norm f(E)\f]
@@ -277,7 +282,8 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng) const
  * The partial derivative of the normalization value is given by
  * \f[dI/dn_v=n_s f(E)\f]
  ***************************************************************************/
-double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng) const
+double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng,
+                                          const GTime&   srcTime)
 {
     // Interpolate function. This is done in log10-log10 space, but the
     // linear value is returned.
@@ -507,7 +513,8 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
  *
  * @param[in] emin Minimum photon energy.
  * @param[in] emax Maximum photon energy.
- * @param[in] ran Random number generator.
+ * @param[in] time True photon arrival time.
+ * @param[in,out] ran Random number generator.
  * @return Energy.
  *
  * @exception GException::erange_invalid
@@ -516,14 +523,15 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
  * Simulates a random energy in the interval [emin, emax] for a spectral
  * function.
  ***************************************************************************/
-GEnergy GModelSpectralFunc::mc(const GEnergy& emin, const GEnergy& emax,
-                               GRan& ran) const
+GEnergy GModelSpectralFunc::mc(const GEnergy& emin,
+                               const GEnergy& emax,
+                               const GTime&   time,
+                               GRan&          ran) const
 {
     // Throw an exception if energy range is invalid
     if (emin >= emax) {
         throw GException::erange_invalid(G_MC, emin.MeV(), emax.MeV(),
               "Minimum energy < maximum energy required.");
-        
     }
 
     // Allocate energy

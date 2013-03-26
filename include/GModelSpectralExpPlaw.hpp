@@ -41,37 +41,51 @@
  *
  * @brief Exponential cut off power law spectral class
  *
- * This class implements a power law as the spectral component of the
- * gamma-ray sky model. The power law is defined as
- * \f[I(E)=norm (E/pivot)^{index} \exp(-E/ecut)\f]
+ * This class implements a power law spectrum with exponential cut off. The
+ * model is defined by
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ *    \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ * \f]
+ *
  * where
- * \f$norm\f$ is the normalization or prefactor,
- * \f$pivot\f$ is the pivot energy,
- * \f$index\f$ is the spectral index, and
- * \f$ecut\f$ is the cut off energy.
+ * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ * - \f${\tt m\_pivot}\f$ is the pivot energy,
+ * - \f${\tt m\_index}\f$ is the spectral index, and
+ * - \f${\tt m\_ecut}\f$ is the cut off energy.
  ***************************************************************************/
 class GModelSpectralExpPlaw : public GModelSpectral {
 
 public:
     // Constructors and destructors
     GModelSpectralExpPlaw(void);
-    explicit GModelSpectralExpPlaw(const double& norm, const double& index, const double& ecut);
+    explicit GModelSpectralExpPlaw(const double& norm, const double& index,
+                                   const double& ecut);
     explicit GModelSpectralExpPlaw(const GXmlElement& xml);
     GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model);
     virtual ~GModelSpectralExpPlaw(void);
 
     // Operators
-    virtual GModelSpectralExpPlaw& operator= (const GModelSpectralExpPlaw& model);
+    virtual GModelSpectralExpPlaw& operator=(const GModelSpectralExpPlaw& model);
 
     // Implemented pure virtual methods
     virtual void                   clear(void);
     virtual GModelSpectralExpPlaw* clone(void) const;
-    virtual std::string            type(void) const { return "ExpCutoff"; }
-    virtual double                 eval(const GEnergy& srcEng) const;
-    virtual double                 eval_gradients(const GEnergy& srcEng) const;
-    virtual double                 flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double                 eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy                mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual std::string            type(void) const;
+    virtual double                 eval(const GEnergy& srcEng,
+                                        const GTime&   srcTime) const;
+    virtual double                 eval_gradients(const GEnergy& srcEng,
+                                                  const GTime&   srcTime);
+    virtual double                 flux(const GEnergy& emin,
+                                        const GEnergy& emax) const;
+    virtual double                 eflux(const GEnergy& emin,
+                                         const GEnergy& emax) const;
+    virtual GEnergy                mc(const GEnergy& emin,
+                                      const GEnergy& emax,
+                                      const GTime&   time,
+                                      GRan&          ran) const;
     virtual void                   read(const GXmlElement& xml);
     virtual void                   write(GXmlElement& xml) const;
     virtual std::string            print(void) const;
@@ -140,5 +154,19 @@ protected:
     mutable double m_mc_pow_emin;   //!< Power of minimum energy
     mutable double m_mc_pow_ewidth; //!< Power of energy width
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "ExpCutoff".
+ *
+ * Returns the type of the exponentially cut off power law model.
+ ***************************************************************************/
+inline
+std::string GModelSpectralExpPlaw::type(void) const
+{
+    return "ExpCutoff";
+}
 
 #endif /* GMODELSPECTRALEXPPLAW_HPP */

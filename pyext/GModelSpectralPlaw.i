@@ -49,11 +49,18 @@ public:
     virtual void                clear(void);
     virtual GModelSpectralPlaw* clone(void) const;
     virtual std::string         type(void) const;
-    virtual double              eval(const GEnergy& srcEng) const;
-    virtual double              eval_gradients(const GEnergy& srcEng) const;
-    virtual double              flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double              eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual double              eval(const GEnergy& srcEng,
+                                     const GTime&   srcTime) const;
+    virtual double              eval_gradients(const GEnergy& srcEng,
+                                               const GTime&   srcTime);
+    virtual double              flux(const GEnergy& emin,
+                                     const GEnergy& emax) const;
+    virtual double              eflux(const GEnergy& emin,
+                                      const GEnergy& emax) const;
+    virtual GEnergy             mc(const GEnergy& emin,
+                                   const GEnergy& emax,
+                                   const GTime&   time,
+                                   GRan&          ran) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
 

@@ -60,7 +60,7 @@ public:
     GModelSpectralLogParabola(void);
     explicit GModelSpectralLogParabola(const double& norm,
                                        const double& index,
-                                       const double &curvature);
+                                       const double& curvature);
     explicit GModelSpectralLogParabola(const GXmlElement& xml);
     GModelSpectralLogParabola(const GModelSpectralLogParabola& model);
     virtual ~GModelSpectralLogParabola(void);
@@ -71,15 +71,19 @@ public:
     // Implemented pure virtual methods
     virtual void                       clear(void);
     virtual GModelSpectralLogParabola* clone(void) const;
-    virtual std::string                type(void) const { return "LogParabola"; }
-    virtual double                     eval(const GEnergy& srcEng) const;
-    virtual double                     eval_gradients(const GEnergy& srcEng) const;
+    virtual std::string                type(void) const;
+    virtual double                     eval(const GEnergy& srcEng,
+                                            const GTime&   srcTime) const;
+    virtual double                     eval_gradients(const GEnergy& srcEng,
+                                                      const GTime&   srcTime);
     virtual double                     flux(const GEnergy& emin,
                                             const GEnergy& emax) const;
     virtual double                     eflux(const GEnergy& emin,
                                              const GEnergy& emax) const;
     virtual GEnergy                    mc(const GEnergy& emin,
-                                          const GEnergy& emax, GRan& ran) const;
+                                          const GEnergy& emax,
+                                          const GTime&   time,
+                                          GRan&          ran) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;
     virtual std::string                print(void) const;
@@ -95,7 +99,8 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpectralLogParabola& model);
     void free_members(void);
-    void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
+    void update_mc_cache(const GEnergy& emin, const GEnergy& emax,
+                         const GTime&   time) const;
 
     // Class to determine to the integral photon flux
     class flux_kern : public GFunction {
@@ -145,5 +150,19 @@ protected:
     mutable double m_mc_pow_ewidth; //!< Power of energy width
     mutable double m_mc_norm; 	    //!< Norm of powerlaw model at logparabola pivot energy
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "LogParabola".
+ *
+ * Returns the type of the log parabola spectral model.
+ ***************************************************************************/
+inline
+std::string GModelSpectralLogParabola::type(void) const
+{
+    return "LogParabola";
+}
 
 #endif /* GMODELSPECTRALLOGPARABOLA_HPP */

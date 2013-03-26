@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GModelSpectralPlaw.hpp - Spectral power law model class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,12 +65,19 @@ public:
     // Implemented pure virtual methods
     virtual void                clear(void);
     virtual GModelSpectralPlaw* clone(void) const;
-    virtual std::string         type(void) const { return "PowerLaw"; }
-    virtual double              eval(const GEnergy& srcEng) const;
-    virtual double              eval_gradients(const GEnergy& srcEng) const;
-    virtual double              flux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual double              eflux(const GEnergy& emin, const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax, GRan& ran) const;
+    virtual std::string         type(void) const;
+    virtual double              eval(const GEnergy& srcEng,
+                                     const GTime&   srcTime) const;
+    virtual double              eval_gradients(const GEnergy& srcEng,
+                                               const GTime&   srcTime);
+    virtual double              flux(const GEnergy& emin,
+                                     const GEnergy& emax) const;
+    virtual double              eflux(const GEnergy& emin,
+                                      const GEnergy& emax) const;
+    virtual GEnergy             mc(const GEnergy& emin,
+                                   const GEnergy& emax,
+                                   const GTime&   time,
+                                   GRan&          ran) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(void) const;
@@ -91,5 +98,19 @@ protected:
     GModelPar m_index;           //!< Spectral index
     GModelPar m_pivot;           //!< Pivot energy
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "PowerLaw".
+ *
+ * Returns the type of the spectral power law model.
+ ***************************************************************************/
+inline
+std::string GModelSpectralPlaw::type(void) const
+{
+    return "PowerLaw";
+}
 
 #endif /* GMODELSPECTRALPLAW_HPP */
