@@ -415,7 +415,8 @@ double GModelSky::value(const GPhoton& photon)
 
     // Evaluate source model
     if (m_spatial  != NULL) source *= m_spatial->eval(photon);
-    if (m_spectral != NULL) source *= m_spectral->eval(photon.energy());
+    if (m_spectral != NULL) source *= m_spectral->eval(photon.energy(),
+                                                       photon.time());
     if (m_temporal != NULL) source *= m_temporal->eval(photon.time());
 
     // Return
@@ -437,7 +438,8 @@ GVector GModelSky::gradients(const GPhoton& photon)
 {
     // Evaluate source model gradients
     if (m_spatial  != NULL) m_spatial->eval_gradients(photon);
-    if (m_spectral != NULL) m_spectral->eval_gradients(photon.energy());
+    if (m_spectral != NULL) m_spectral->eval_gradients(photon.energy(),
+                                                       photon.time());
     if (m_temporal != NULL) m_temporal->eval_gradients(photon.time());
 
     // Set vector of gradients
@@ -575,7 +577,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
 
         // Compute response components
         double npred_spatial  = rsp->npred(source, obs);
-        double npred_spectral = spectral()->eval(srcEng);
+        double npred_spectral = spectral()->eval(srcEng, srcTime);
         double npred_temporal = temporal()->eval(srcTime);
                 
         // Compute response
@@ -856,8 +858,7 @@ GPhotons GModelSky::mc(const double& area,
                 photon.time(times[i]);
 
                 // Set photon energy
-                photon.energy(m_spectral->mc(emin, emax, ran));
-                //photon.energy(m_spectral->mc(emin, emax, photon.time(), ran));
+                photon.energy(m_spectral->mc(emin, emax, photon.time(), ran));
 
                 // Set incident photon direction
                 photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
@@ -1354,7 +1355,7 @@ double GModelSky::integrate_dir(const GEvent&       event,
         if (grad) {
 
             // Evaluate source model
-            double spec = (spectral() != NULL) ? spectral()->eval_gradients(srcEng)  : 1.0;
+            double spec = (spectral() != NULL) ? spectral()->eval_gradients(srcEng, srcTime) : 1.0;
             double temp = (temporal() != NULL) ? temporal()->eval_gradients(srcTime) : 1.0;
 
             // Set value
@@ -1399,7 +1400,7 @@ double GModelSky::integrate_dir(const GEvent&       event,
         else {
 
             // Evaluate source model
-            double spec = (m_spectral != NULL) ? m_spectral->eval(srcEng) : 1.0;
+            double spec = (m_spectral != NULL) ? m_spectral->eval(srcEng, srcTime) : 1.0;
             double temp = (m_temporal != NULL) ? m_temporal->eval(srcTime) : 1.0;
 
             // Set value
