@@ -56,6 +56,15 @@
  * - \f$\vec{p}\f$ is the true photon arrival direction,
  * - \f$E\f$ is the true photon energy, and
  * - \f$t\f$ is the true photon arrival time.
+ *
+ * The spatial component describes the energy and time dependent morphology
+ * of the source. It satisfies
+ * \f[
+ *    \int_{\Omega} S_{\rm p}(\vec{p} | E, t) d\Omega = 1
+ * \f]
+ * for all \f$E\f$ and \f$t\f$, hence the spatial component does not
+ * impact the spatially integrated spectral and temporal properties of the
+ * source.
  ***************************************************************************/
 class GModelSpatial : public GBase {
 
