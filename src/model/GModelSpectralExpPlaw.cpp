@@ -491,7 +491,8 @@ double GModelSpectralExpPlaw::eflux(const GEnergy& emin,
  * Simulates a random energy in the interval [emin, emax] for an
  * exponentially cut off power law. The simulation is done using a rejection
  * method. First, a random energy within [emin, emax] is drawn from an
- * exponential distribution.
+ * power law distribution. Then the energy is accepted or rejected based
+ * on an acceptance fraction that is computed from the exponential cut off.
  ***************************************************************************/
 GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
                                   const GEnergy& emax,
