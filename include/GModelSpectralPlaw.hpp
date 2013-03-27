@@ -40,13 +40,17 @@
  *
  * @brief Power law spectral model class
  *
- * This class implements a power law as the spectral component of the
- * gamma-ray sky model. The power law is defined as
- * \f[I(E)=norm (E/pivot)^{index}\f]
+ * This class implements a power law spectrum. The model is defined by
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ * \f]
+ *
  * where
- * \f$norm\f$ is the normalization or prefactor,
- * \f$pivot\f$ is the pivot energy, and
- * \f$index\f$ is the spectral index.
+ * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ * - \f${\tt m\_index}\f$ is the spectral index, and
+ * - \f${\tt m\_pivot}\f$ is the pivot energy.
  ***************************************************************************/
 class GModelSpectralPlaw : public GModelSpectral {
 
@@ -54,7 +58,7 @@ public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
     explicit GModelSpectralPlaw(const double& norm, const double& index,
-                                const double& pivot);
+                                const GEnergy& pivot);
     explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
     virtual ~GModelSpectralPlaw(void);
@@ -83,20 +87,37 @@ public:
     virtual std::string         print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.value(); }
-    double index(void) const { return m_index.value(); }
-    double pivot(void) const { return m_pivot.value(); }
+    double  norm(void) const;
+    double  index(void) const;
+    GEnergy pivot(void) const;
+    void    norm(const double& norm);
+    void    index(const double& index);
+    void    pivot(const GEnergy& pivot);
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GModelSpectralPlaw& model);
     void free_members(void);
+    void update_eval_cache(const GEnergy& energy) const;
+    void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
-    GModelPar m_norm;            //!< Normalization factor
-    GModelPar m_index;           //!< Spectral index
-    GModelPar m_pivot;           //!< Pivot energy
+    GModelPar m_norm;                //!< Normalization factor
+    GModelPar m_index;               //!< Spectral index
+    GModelPar m_pivot;               //!< Pivot energy
+
+    // Cached members used for pre-computations
+    mutable GEnergy m_last_energy;   //!< Last energy value
+    mutable double  m_last_index;    //!< Last index parameter
+    mutable double  m_last_pivot;    //!< Last pivot parameter
+    mutable double  m_last_e_norm;   //!< Last E/Epivot value
+    mutable double  m_last_power;    //!< Last power value
+    mutable double  m_mc_emin;       //!< Minimum energy
+    mutable double  m_mc_emax;       //!< Maximum energy
+    mutable double  m_mc_exponent;   //!< Exponent (index+1)
+    mutable double  m_mc_pow_emin;   //!< Power of minimum energy
+    mutable double  m_mc_pow_ewidth; //!< Power of energy width
 };
 
 
@@ -111,6 +132,95 @@ inline
 std::string GModelSpectralPlaw::type(void) const
 {
     return "PowerLaw";
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization factor
+ *
+ * @return Normalization factor (ph/cm2/s/MeV).
+ *
+ * Returns the normalization factor.
+ ***************************************************************************/
+inline
+double GModelSpectralPlaw::norm(void) const
+{
+    return (m_norm.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set normalization factor 
+ *
+ * @param[in] norm Normalization factor (ph/cm2/s/MeV).
+ *
+ * Sets the normalization factor.
+ ***************************************************************************/
+inline
+void GModelSpectralPlaw::norm(const double& norm)
+{
+    m_norm.value(norm);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return power law index
+ *
+ * @return Power law index.
+ *
+ * Returns the power law index.
+ ***************************************************************************/
+inline
+double GModelSpectralPlaw::index(void) const
+{
+    return (m_index.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set power law index 
+ *
+ * @param[in] index Power law index.
+ *
+ * Sets the power law index.
+ ***************************************************************************/
+inline
+void GModelSpectralPlaw::index(const double& index)
+{
+    m_index.value(index);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pivot energy
+ *
+ * @return Pivot energy.
+ *
+ * Returns the pivot energy.
+ ***************************************************************************/
+inline
+GEnergy GModelSpectralPlaw::pivot(void) const
+{
+    GEnergy energy;
+    energy.MeV(m_pivot.value());
+    return energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Set pivot energy
+ *
+ * @param[in] pivot Pivot energy.
+ *
+ * Sets the pivot energy.
+ ***************************************************************************/
+inline
+void GModelSpectralPlaw::pivot(const GEnergy& pivot)
+{
+    m_pivot.value(pivot.MeV());
+    return;
 }
 
 #endif /* GMODELSPECTRALPLAW_HPP */

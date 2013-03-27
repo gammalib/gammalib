@@ -41,9 +41,7 @@ const GModelSpectralPlaw     g_spectral_plaw_seed;
 const GModelSpectralRegistry g_spectral_plaw_registry(&g_spectral_plaw_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_FLUX                 "GModelSpectralPlaw::flux(GEnergy&, GEnergy&)"
-#define G_EFLUX               "GModelSpectralPlaw::eflux(GEnergy&, GEnergy&)"
-#define G_MC              "GModelSpectralPlaw::mc(GEnergy&, GEnergy&, GRan&)"
+#define G_MC      "GModelSpectralPlaw::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                       "GModelSpectralPlaw::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpectralPlaw::write(GXmlElement&)"
 
@@ -80,14 +78,15 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
  * @param[in] index Power law index.
  * @param[in] pivot Pivot energy.
  *
- * Construct a spectral power law using the model parameters:
+ * Constructs a spectral power law using the model parameters
  * - power law normalization value @p norm (ph/cm2/s/MeV)
  * - spectral @p index
- * - @p pivot energy (MeV)
+ * - @p pivot energy.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const double& norm,
-                                       const double& index,
-                                       const double& pivot) : GModelSpectral()
+GModelSpectralPlaw::GModelSpectralPlaw(const double&  norm,
+                                       const double&  index,
+                                       const GEnergy& pivot) :
+                    GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -95,7 +94,7 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double& norm,
     // Set parameters
     m_norm.value(norm);
     m_index.value(index);
-    m_pivot.value(pivot);
+    m_pivot.value(pivot.MeV());  // Internally stored in MeV
 
     // Perform autoscaling of parameter
     autoscale();
@@ -110,9 +109,9 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double& norm,
  *
  * @param[in] xml XML element containing position information.
  *
- * Creates instance of a power law spectral model by extracting information
- * from an XML element. See GModelSpectralPlaw::read() for more information
- * about the expected structure of the XML element.
+ * Constructs a power law spectral model by extracting information from an
+ * XML element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpectralPlaw::GModelSpectralPlaw(const GXmlElement& xml) : GModelSpectral()
 {
@@ -169,6 +168,7 @@ GModelSpectralPlaw::~GModelSpectralPlaw(void)
  * @brief Assignment operator
  *
  * @param[in] model Spectral power law model.
+ * @return Spectral power law model.
  ***************************************************************************/
 GModelSpectralPlaw& GModelSpectralPlaw::operator=(const GModelSpectralPlaw& model)
 {
@@ -201,8 +201,8 @@ GModelSpectralPlaw& GModelSpectralPlaw::operator=(const GModelSpectralPlaw& mode
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
-***************************************************************************/
+ * @brief Clear spectral power law model
+ ***************************************************************************/
 void GModelSpectralPlaw::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
@@ -219,10 +219,13 @@ void GModelSpectralPlaw::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone spectral power law model
+ *
+ * @return Pointer to deep copy of spectral power law model.
+ ***************************************************************************/
 GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
 {
+    // Clone spectral power law model
     return new GModelSpectralPlaw(*this);
 }
 
@@ -234,37 +237,38 @@ GModelSpectralPlaw* GModelSpectralPlaw::clone(void) const
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The power law function is defined as
- * \f[I(E)=norm (E/pivot)^{index}\f]
- * where
- * \f$norm\f$ is the normalization or prefactor,
- * \f$pivot\f$ is the pivot energy, and
- * \f$index\f$ is the spectral index.
+ * Evaluates
  *
- * @todo For the moment the pivot energy is fixed to units of MeV. This may
- * not be ideal and should eventually be improved in the futur.
- * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
- * may result.
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ * \f]
+ *
+ * where
+ * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ * - \f${\tt m\_index}\f$ is the spectral index, and
+ * - \f${\tt m\_pivot}\f$ is the pivot energy.
+ *
+ * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
 double GModelSpectralPlaw::eval(const GEnergy& srcEng,
                                 const GTime&   srcTime) const
 {
+    // Update the evaluation cache
+    update_eval_cache(srcEng);
+
     // Compute function value
-    double energy = srcEng.MeV() / pivot();
-    double power  = std::pow(energy, index());
-    double value  = norm() * power;
+    double value = m_norm.value() * m_last_power;
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw::eval";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", energy=" << energy;
-        std::cout << ", index=" << index();
-        std::cout << ", pivot=" << pivot();
-        std::cout << ", power=" << power;
+        std::cout << ", power=" << m_last_power;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -281,58 +285,71 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng,
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The power law function is defined as
- * \f[I(E)=norm (E/pivot)^{index}\f]
+ * Evaluates
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ * \f]
+ *
  * where
- * \f$norm=n_s n_v\f$ is the normalization or prefactor,
- * \f$pivot=p_s p_v\f$ is the pivot energy, and
- * \f$index=i_s i_v\f$ is the spectral index.
- * Note that each parameter is factorised into a scaling factor and a value
- * and that the method is expected to return the gradient with respect to
- * the parameter value (i.e. n_v, p_v, and i_v in this case).
+ * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ * - \f${\tt m\_index}\f$ is the spectral index, and
+ * - \f${\tt m\_pivot}\f$ is the pivot energy.
  *
- * The partial derivatives of the parameter values are given by
- * \f[dI/dn_v=n_s (E/pivot)^{index}\f]
- * \f[dI/dp_v=norm (E/pivot)^{index} (-index) / p_v\f]
- * \f[dI/di_v=norm (E/pivot)^{index} i_s \ln(E/pivot)\f]
+ * The method also evaluates the partial derivatives of the model with
+ * respect to the parameters using
  *
- * @todo For the moment the pivot energy is fixed to units of MeV. This may
- * not be ideal and should eventually be improved in the futur.
- * Furthermore, the method expects that energy!=0. Otherwise Inf or NaN
- * may result.
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_norm}}
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_index}} =
+ *      S_{\rm E}(E | t) \, \ln(E/{\tt m_pivot})
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_pivot}} =
+ *      -S_{\rm E}(E | t) \,
+ *      \left( \frac{{\tt m\_index}}{{\tt m\_pivot}} \right)
+ * \f]
+ *
+ * @todo The method expects that energy!=0. Otherwise Inf or NaN may result.
  ***************************************************************************/
 double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
                                           const GTime&   srcTime)
 {
+    // Update the evaluation cache
+    update_eval_cache(srcEng);
+
     // Compute function value
-    double energy = srcEng.MeV() / pivot();
-    double power  = std::pow(energy, index());
-    double value  = norm() * power;
+    double value = m_norm.value() * m_last_power;
 
     // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.isfree())  ? m_norm.scale() * power : 0.0;
-    double g_index = (m_index.isfree()) ? value * m_index.scale() * std::log(energy) : 0.0;
-    double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.factor_value() : 0.0;
+    double g_norm  = (m_norm.isfree())
+                     ? m_norm.scale() * m_last_power : 0.0;
+    double g_index = (m_index.isfree())
+                     ? value * m_index.scale() * std::log(m_last_e_norm) : 0.0;
+    double g_pivot = (m_pivot.isfree())
+                     ? -value * m_last_index / m_pivot.factor_value() : 0.0;
 
-    // Set gradients (circumvent const correctness)
-    const_cast<GModelSpectralPlaw*>(this)->m_norm.factor_gradient(g_norm);
-    const_cast<GModelSpectralPlaw*>(this)->m_index.factor_gradient(g_index);
-    const_cast<GModelSpectralPlaw*>(this)->m_pivot.factor_gradient(g_pivot);
+    // Set gradients
+    m_norm.factor_gradient(g_norm);
+    m_index.factor_gradient(g_index);
+    m_pivot.factor_gradient(g_pivot);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw::eval_gradients";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", energy=" << energy;
-        std::cout << ", index=" << index();
-        std::cout << ", pivot=" << pivot();
-        std::cout << ", power=" << power;
-        std::cout << ", g_norm=" << g_norm;
-        std::cout << ", g_index=" << g_index;
-        std::cout << ", g_pivot=" << g_pivot;
+        std::cout << ", e_norm=" << m_last_e_norm;
+        std::cout << ", power=" << m_last_power;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -349,29 +366,33 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
  * @param[in] emax Maximum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ *
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
  ***************************************************************************/
-double GModelSpectralPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralPlaw::flux(const GEnergy& emin,
+                                const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
+    // Initialise flux
+    double flux = 0.0;
+    
+    // Compute only if integration range is valid
+    if (emin < emax) {
 
-    // Compute photon flux
-    double flux = norm() * plaw_photon_flux(emin.MeV(), emax.MeV(),
-                                            pivot(), index());
+        // Compute photon flux
+        flux = m_norm.value() * plaw_photon_flux(emin.MeV(),
+                                                 emax.MeV(),
+                                                 m_pivot.value(),
+                                                 m_index.value());
+
+    } // endif: integration range was valid
     
     // Return flux
     return flux;
@@ -385,35 +406,39 @@ double GModelSpectralPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] emax Maximum photon energy.
  * @return Energy flux (erg/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ *
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) E \, dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
  ***************************************************************************/
-double GModelSpectralPlaw::eflux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralPlaw::eflux(const GEnergy& emin,
+                                 const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
+    // Initialise flux
+    double eflux = 0.0;
+    
+    // Compute only if integration range is valid
+    if (emin < emax) {
 
-    // Compute energy flux
-    double flux = norm() * plaw_energy_flux(emin.MeV(), emax.MeV(),
-                                            pivot(), index());
+        // Compute photon flux
+        eflux = m_norm.value() * plaw_energy_flux(emin.MeV(),
+                                                  emax.MeV(),
+                                                  m_pivot.value(),
+                                                  m_index.value());
 
-    // Convert from MeV/cm2/s to erg/cm2/s
-    flux *= MeV2erg;
+        // Convert from MeV/cm2/s to erg/cm2/s
+        eflux *= MeV2erg;
+
+    } // endif: integration range was valid
 
     // Return flux
-    return flux;
+    return eflux;
 }
 
 
@@ -442,29 +467,34 @@ GEnergy GModelSpectralPlaw::mc(const GEnergy& emin,
               "Minimum energy < maximum energy required.");
     }
 
-    // Allocate energy
-    GEnergy energy;
+    // Update cache
+    update_mc_cache(emin, emax);
+
+    // Get uniform random number
+    double u = ran.uniform();
+
+    // Initialise energy
+    double eng;
 
     // Case A: Index is not -1
     if (index() != -1.0) {
-        double exponent = index() + 1.0;
-        double e_max    = std::pow(emax.MeV(), exponent);
-        double e_min    = std::pow(emin.MeV(), exponent);
-        double u        = ran.uniform();
-        double eng      = (u > 0.0) 
-                          ? std::exp(std::log(u * (e_max - e_min) + e_min) / exponent)
-                          : 0.0;
-        energy.MeV(eng);
+        if (u > 0.0) {
+            eng = std::exp(std::log(u * m_mc_pow_ewidth + m_mc_pow_emin) /
+                           m_mc_exponent);
+        }
+        else {
+            eng = 0.0;
+        }
     }
 
     // Case B: Index is -1
     else {
-        double e_max = std::log(emax.MeV());
-        double e_min = std::log(emin.MeV());
-        double u     = ran.uniform();
-        double eng   = std::exp(u * (e_max - e_min) + e_min);
-        energy.MeV(eng);
+        eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
     }
+
+    // Set energy
+    GEnergy energy;
+    energy.MeV(eng);
 
     // Return energy
     return energy;
@@ -481,9 +511,14 @@ GEnergy GModelSpectralPlaw::mc(const GEnergy& emin,
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the spectral power law information from an XML element. The XML
- * element is required to have 3 parameters with names "Prefactor", "Index",
- * and "Scale".
+ * Reads the spectral information from an XML element. The format of the XML
+ * elements is
+ *
+ *     <spectrum type="PowerLaw">
+ *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
  *
  * @todo Add parameter validity check
  ***************************************************************************/
@@ -545,9 +580,14 @@ void GModelSpectralPlaw::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the spectral power law information into an XML element. The XML
- * element has to be of type "PowerLaw" and will have 3 parameter leafs
- * named "Prefactor", "Index", and "Scale".
+ * Writes the spectral information into an XML element. The format of the XML
+ * element is
+ *
+ *     <spectrum type="PowerLaw">
+ *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index"     scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
  ***************************************************************************/
 void GModelSpectralPlaw::write(GXmlElement& xml) const
 {
@@ -615,6 +655,8 @@ void GModelSpectralPlaw::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print powerlaw information
+ *
+ * @return String containing model information.
  ***************************************************************************/
 std::string GModelSpectralPlaw::print(void) const
 {
@@ -623,6 +665,8 @@ std::string GModelSpectralPlaw::print(void) const
 
     // Append header
     result.append("=== GModelSpectralPlaw ===\n");
+
+    // Append information
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
@@ -681,6 +725,20 @@ void GModelSpectralPlaw::init_members(void)
     m_pars.push_back(&m_index);
     m_pars.push_back(&m_pivot);
 
+    // Initialise eval cache
+    m_last_energy.clear();
+    m_last_index  = 1.0e30;
+    m_last_pivot  = 1.0e30;
+    m_last_e_norm = 0.0;
+    m_last_power  = 0.0;
+
+    // Initialise MC cache
+    m_mc_emin       = 0.0;
+    m_mc_emax       = 0.0;
+    m_mc_exponent   = 0.0;
+    m_mc_pow_emin   = 0.0;
+    m_mc_pow_ewidth = 0.0;
+
     // Return
     return;
 }
@@ -704,6 +762,20 @@ void GModelSpectralPlaw::copy_members(const GModelSpectralPlaw& model)
     m_pars.push_back(&m_index);
     m_pars.push_back(&m_pivot);
 
+    // Copy eval cache
+    m_last_energy = model.m_last_energy;
+    m_last_index  = model.m_last_index;
+    m_last_pivot  = model.m_last_pivot;
+    m_last_e_norm = model.m_last_e_norm;
+    m_last_power  = model.m_last_power;
+
+    // Copy MC cache
+    m_mc_emin       = model.m_mc_emin;
+    m_mc_emax       = model.m_mc_emax;
+    m_mc_exponent   = model.m_mc_exponent;
+    m_mc_pow_emin   = model.m_mc_pow_emin;
+    m_mc_pow_ewidth = model.m_mc_pow_ewidth;
+
     // Return
     return;
 }
@@ -719,8 +791,83 @@ void GModelSpectralPlaw::free_members(void)
 }
 
 
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
+/***********************************************************************//**
+ * @brief Update eval precomputation cache
+ *
+ * @param[in] energy Energy.
+ *
+ * Updates the precomputation cache for eval() and eval_gradients() methods.
+ ***************************************************************************/
+void GModelSpectralPlaw::update_eval_cache(const GEnergy& energy) const
+{
+    // Get parameter values (takes 2 multiplications which are difficult
+    // to avoid)
+    double index = m_index.value();
+    double pivot = m_pivot.value();
+    
+    // If the energy or one of the parameters index or pivot energy has
+    // changed then recompute the cache
+    if ((m_last_energy != energy) ||
+        (m_last_index  != index)  ||
+        (m_last_pivot  != pivot)) {
+
+        // Store actual energy and parameter values
+        m_last_energy = energy;
+        m_last_index  = index;
+        m_last_pivot  = pivot;
+
+        // Compute and store value
+        double eng    = energy.MeV();
+        m_last_e_norm = eng / m_last_pivot;
+        m_last_power  = std::pow(m_last_e_norm, m_last_index);
+
+    } // endif: recomputation was required
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update Monte Carlo pre computation cache
+ *
+ * @param[in] emin Minimum photon energy.
+ * @param[in] emax Maximum photon energy.
+ *
+ * Updates the precomputation cache for Monte Carlo simulations.
+ ***************************************************************************/
+void GModelSpectralPlaw::update_mc_cache(const GEnergy& emin,
+                                         const GEnergy& emax) const
+
+{
+    // Case A: Index is not -1
+    if (index() != -1.0) {
+
+        // Change in energy boundaries?
+        if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
+            m_mc_emin       = emin.MeV();
+            m_mc_emax       = emax.MeV();
+            m_mc_exponent   = index() + 1.0;
+            m_mc_pow_emin   = std::pow(m_mc_emin, m_mc_exponent);
+            m_mc_pow_ewidth = std::pow(m_mc_emax, m_mc_exponent) - m_mc_pow_emin;
+        }
+
+    }
+
+    // Case B: Index is -1
+    else {
+
+        // Change in energy boundaries?
+        if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
+            m_mc_emin       = emin.MeV();
+            m_mc_emax       = emax.MeV();
+            m_mc_exponent   = 0.0;
+            m_mc_pow_emin   = std::log(m_mc_emin);
+            m_mc_pow_ewidth = std::log(m_mc_emax) - m_mc_pow_emin;
+        }
+
+    }
+
+    // Return
+    return;
+}
