@@ -6,6 +6,24 @@
 # it will create a Monte Carlo sample of photons.
 #
 # If matplotlib is installed, the spectrum will be displayed on the screen.
+#
+# --------------------------------------------------------------------------
+#
+# Copyright (C) 2013 Juergen Knoedlseder
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
 # ==========================================================================
 from gammalib import *
 from math import *
@@ -84,15 +102,16 @@ def show_photons(photons, xmlname, e_min, e_max, area, duration, ebins=30):
 
         # Get model values
         models = GModels(xmlname)
-        crab = models[0]
-        model = []
+        crab   = models[0]
+        model  = []
         d = GSkyDir()
         d.radec_deg(83.6331, 22.0145)
         t = GTime()
         for i in range(ebds.size()):
-            eval = ebds.elogmean(i)
+            eval   = ebds.elogmean(i)
             ewidth = ebds.emax(i) - ebds.emin(i)
-            f = crab.value(d, eval, t) * area * duration * ewidth.MeV()
+            f      = crab.value(GPhoton(d, eval, t)) * \
+                     area * duration * ewidth.MeV()
             model.append(f)
 
         # Plot data
@@ -128,10 +147,10 @@ if __name__ == '__main__':
     Simulate photons.
     """
     # Dump header
-    print
-    print "********************"
-    print "* Simulate photons *"
-    print "********************"
+    print("")
+    print("********************")
+    print("* Simulate photons *")
+    print("********************")
 
     # Set XML names
     xmlnames = ["data/crab.xml",
