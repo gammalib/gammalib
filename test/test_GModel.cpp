@@ -986,7 +986,7 @@ void TestGModel::test_model(void)
     GModelSpectralPlaw power_law;
     test_try("Setup spectral model");
     try {
-        power_law = GModelSpectralPlaw(1.0e-7, -2.1, 100.0);
+        power_law = GModelSpectralPlaw(1.0e-7, -2.1, GEnergy(100.0, "MeV"));
         test_try_success();
     }
     catch (std::exception &e) {

@@ -313,9 +313,12 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event,
     double offset = cta_dir->dist_deg(pnt->dir());
 
     // Evaluate function and gradients
-    double rad  = (radial()   != NULL) ? radial()->eval(offset) : 1.0;
-    double spec = (spectral() != NULL) ? spectral()->eval(event.energy()) : 1.0;
-    double temp = (temporal() != NULL) ? temporal()->eval(event.time()) : 1.0;
+    double rad  = (radial()   != NULL)
+                  ? radial()->eval(offset) : 1.0;
+    double spec = (spectral() != NULL)
+                  ? spectral()->eval(event.energy(), event.time()) : 1.0;
+    double temp = (temporal() != NULL)
+                  ? temporal()->eval(event.time()) : 1.0;
 
     // Compute value
     double value = rad * spec * temp;
@@ -369,9 +372,12 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
     double offset = cta_dir->dist_deg(pnt->dir());
 
     // Evaluate function and gradients
-    double rad  = (radial()   != NULL) ? radial()->eval_gradients(offset) : 1.0;
-    double spec = (spectral() != NULL) ? spectral()->eval_gradients(event.energy()) : 1.0;
-    double temp = (temporal() != NULL) ? temporal()->eval_gradients(event.time()) : 1.0;
+    double rad  = (radial()   != NULL)
+                  ? radial()->eval_gradients(offset) : 1.0;
+    double spec = (spectral() != NULL)
+                  ? spectral()->eval_gradients(event.energy(), event.time()) : 1.0;
+    double temp = (temporal() != NULL)
+                  ? temporal()->eval_gradients(event.time()) : 1.0;
 
     // Compute value
     double value = rad * spec * temp;
@@ -470,7 +476,7 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
         npred = integral.romb(rmin, rmax);
 
         // Multiply in spectral and temporal components
-        npred *= spectral()->eval(obsEng);
+        npred *= spectral()->eval(obsEng, obsTime);
         npred *= temporal()->eval(obsTime);
 
         // Apply deadtime correction
@@ -550,7 +556,8 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
                 // Get event arrival times from temporal model
                 GTimes times = m_temporal->mc(rate,
                                               obs.events()->gti().tstart(itime),
-                                              obs.events()->gti().tstop(itime), ran);
+                                              obs.events()->gti().tstop(itime),
+                                              ran);
 
                 // Get number of events
                 int n_events = times.size();
@@ -577,6 +584,7 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
                     // Set event energy
                     GEnergy energy = spectral()->mc(obs.events()->ebounds().emin(ieng),
                                                     obs.events()->ebounds().emax(ieng),
+                                                    times[i],
                                                     ran);
 
                     // Allocate event
