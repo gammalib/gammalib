@@ -349,22 +349,22 @@ double GModelSpectralConst::eflux(const GEnergy& emin,
                                   const GEnergy& emax) const
 {
     // Initialise flux
-    double flux = 0.0;
+    double eflux = 0.0;
     
     // Compute only if integration range is valid
     if (emin < emax) {
 
         // Compute flux for a constant model
-        flux = m_norm.value() * 0.5 * (emax.MeV()*emax.MeV() - 
-                                       emin.MeV()*emin.MeV());
+        eflux = m_norm.value() * 0.5 * (emax.MeV()*emax.MeV() - 
+                                        emin.MeV()*emin.MeV());
 
         // Convert from MeV/cm2/s to erg/cm2/s
-        flux *= MeV2erg;
+        eflux *= MeV2erg;
     
     } // endif: integration range was valid
 
     // Return
-    return flux;
+    return eflux;
 }
 
 
