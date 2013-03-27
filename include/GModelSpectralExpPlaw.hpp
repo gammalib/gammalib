@@ -157,8 +157,8 @@ protected:
     mutable double  m_last_index;    //!< Last index parameter
     mutable double  m_last_ecut;     //!< Last energy cut-off parameter
     mutable double  m_last_pivot;    //!< Last pivot parameter
-    mutable double  m_last_e_norm;    //!< Last E/Epivot value
-    mutable double  m_last_e_cut;     //!< Last E/Ecut value
+    mutable double  m_last_e_norm;   //!< Last E/Epivot value
+    mutable double  m_last_e_cut;    //!< Last E/Ecut value
     mutable double  m_last_power;    //!< Last power value
     mutable double  m_mc_emin;       //!< Minimum energy
     mutable double  m_mc_emax;       //!< Maximum energy

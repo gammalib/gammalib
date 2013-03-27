@@ -42,8 +42,6 @@ const GModelSpectralExpPlaw  g_spectral_expplaw_seed;
 const GModelSpectralRegistry g_spectral_expplaw_registry(&g_spectral_expplaw_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_FLUX              "GModelSpectralExpPlaw::flux(GEnergy&, GEnergy&)"
-#define G_EFLUX            "GModelSpectralExpPlaw::eflux(GEnergy&, GEnergy&)"
 #define G_MC   "GModelSpectralExpPlaw::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                    "GModelSpectralExpPlaw::read(GXmlElement&)"
 #define G_WRITE                  "GModelSpectralExpPlaw::write(GXmlElement&)"
@@ -313,36 +311,24 @@ double GModelSpectralExpPlaw::eval(const GEnergy& srcEng,
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
- *      \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *      \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_norm}}
  * \f]
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_index}} =
- *      \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *      \exp \left( \frac{-E}{\tt m\_ecut} \right)
- *      \ln(E/{\tt m_pivot})
+ *      S_{\rm E}(E | t) \, \ln(E/{\tt m_pivot})
  * \f]
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_ecut}} =
- *      \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *      \exp \left( \frac{-E}{\tt m\_ecut} \right)
- *      \left( \frac{E}{{\tt m\_ecut}^2} \right)
+ *      S_{\rm E}(E | t) \, \left( \frac{E}{{\tt m\_ecut}^2} \right)
  * \f]
  *
  * \f[
  *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_pivot}} =
- *      -\left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
- *      \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ *      -S_{\rm E}(E | t) \,
  *      \left( \frac{{\tt m\_index}}{{\tt m\_pivot}} \right)
  * \f]
- *
- * The partial derivatives of the parameter values are given by
- * \f[dI/dn_v=n_s  (E/pivot)^{index} \exp(-E/ecut)\f]
- * \f[dI/di_v=norm (E/pivot)^{index} \exp(-E/ecut) i_s \ln(E/pivot)\f]
- * \f[dI/dc_v=norm (E/pivot)^{index} \exp(-E/ecut) (E/ecut^2) c_s \f]
- * \f[dI/dp_v=norm (E/pivot)^{index} \exp(-E/ecut) (-index) / p_v\f]
  *
  * @todo The method expects that pivot!=0 and ecut!=0. Otherwise Inf or NaN
  *       may result. We should add a test that prevents using invalid
@@ -369,7 +355,7 @@ double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng,
     double g_pivot = (m_pivot.isfree())
                      ? -value * m_last_index / m_pivot.factor_value() : 0.0;
 
-    // Set gradients (circumvent const correctness)
+    // Set gradients
     m_norm.factor_gradient(g_norm);
     m_index.factor_gradient(g_index);
     m_ecut.factor_gradient(g_ecut);
@@ -580,8 +566,8 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the spectral power law information from an XML element. The format
- * of the XML elements is
+ * Reads the spectral information from an XML element. The format of the XML
+ * elements is
  *
  *     <spectrum type="ExpCutoff">
  *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
@@ -655,8 +641,8 @@ void GModelSpectralExpPlaw::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the spectral power law information into an XML element. The format
- * of the XML element is
+ * Writes the spectral information into an XML element. The format of the XML
+ * element is
  *
  *     <spectrum type="ExpCutoff">
  *       <parameter name="Prefactor" scale=".." value=".." min=".." max=".." free=".."/>
