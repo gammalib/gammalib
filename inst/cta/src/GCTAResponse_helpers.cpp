@@ -60,8 +60,8 @@
  *
  * Computes
  *
- * \f
- *   [\int_{0}^{\phi} PSF(\delta) d\phi
+ * \f[
+ *    \int_{0}^{\phi} PSF(\delta) d\phi
  * \f]
  * 
  * for a given offset angle \f$\delta\f$.
