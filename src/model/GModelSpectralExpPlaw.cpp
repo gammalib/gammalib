@@ -44,7 +44,7 @@ const GModelSpectralRegistry g_spectral_expplaw_registry(&g_spectral_expplaw_see
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX              "GModelSpectralExpPlaw::flux(GEnergy&, GEnergy&)"
 #define G_EFLUX            "GModelSpectralExpPlaw::eflux(GEnergy&, GEnergy&)"
-#define G_MC           "GModelSpectralExpPlaw::mc(GEnergy&, GEnergy&, GRan&)"
+#define G_MC   "GModelSpectralExpPlaw::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                    "GModelSpectralExpPlaw::read(GXmlElement&)"
 #define G_WRITE                  "GModelSpectralExpPlaw::write(GXmlElement&)"
 
@@ -79,14 +79,16 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(void) : GModelSpectral()
  *
  * @param[in] norm Power law normalization.
  * @param[in] index Power law index.
- * @param[in] ecut Cut off energy (in MeV).
+ * @param[in] ecut Cut off energy.
+ * @param[in] pivot Pivot energy.
  *
- * Construct an exponential cut off power law from a normalization value,
- * a spectral index and a cut off energy.
+ * Construct an exponentially cut off power law from a normalization value,
+ * a spectral index, a cut off energy and a pivot energy.
  ***************************************************************************/
-GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double& norm,
-                                             const double& index,
-                                             const double& ecut) :
+GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double&  norm,
+                                             const double&  index,
+                                             const GEnergy& ecut,
+                                             const GEnergy& pivot) :
                        GModelSpectral()
 {
     // Initialise members
@@ -95,7 +97,8 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double& norm,
     // Set parameters
     m_norm.value(norm);
     m_index.value(index);
-    m_ecut.value(ecut);
+    m_ecut.value(ecut.MeV());   // Internally stored in MeV
+    m_pivot.value(pivot.MeV()); // Internally stored in MeV
 
     // Autoscale parameters
     autoscale();
@@ -110,10 +113,9 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double& norm,
  *
  * @param[in] xml XML element.
  *
- * Creates instance of an exponential cut off power law spectral model by
- * extracting information from an XML element.
- * See GModelSpectralExpPlaw::read() for more information about the expected
- * structure of the XML element.
+ * Constructs an exponentially cut off power law spectral model by extracting
+ * information from an XML element. See the read() method for more
+ * information about the expected structure of the XML element.
  ***************************************************************************/
 GModelSpectralExpPlaw::GModelSpectralExpPlaw(const GXmlElement& xml) :
                        GModelSpectral()
@@ -132,7 +134,7 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Exponential cut off power law model.
+ * @param[in] model Exponentially cut off power law model.
  ***************************************************************************/
 GModelSpectralExpPlaw::GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model) :
                        GModelSpectral(model)
@@ -170,8 +172,8 @@ GModelSpectralExpPlaw::~GModelSpectralExpPlaw(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Exponential cut off power law model.
- * @return Exponential cut off power law model.
+ * @param[in] model Exponentially cut off power law model.
+ * @return Exponentially cut off power law model.
  ***************************************************************************/
 GModelSpectralExpPlaw& GModelSpectralExpPlaw::operator=(const GModelSpectralExpPlaw& model)
 {
@@ -204,7 +206,7 @@ GModelSpectralExpPlaw& GModelSpectralExpPlaw::operator=(const GModelSpectralExpP
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear exponentially cut off power law model
  ***************************************************************************/
 void GModelSpectralExpPlaw::clear(void)
 {
@@ -222,12 +224,13 @@ void GModelSpectralExpPlaw::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone exponentially cut off power law model
  *
  * @return Pointer to deep copy of exponentially cut off power law model.
  ***************************************************************************/
 GModelSpectralExpPlaw* GModelSpectralExpPlaw::clone(void) const
 {
+    // Clone exponentially cut off power law model
     return new GModelSpectralExpPlaw(*this);
 }
 
@@ -239,13 +242,19 @@ GModelSpectralExpPlaw* GModelSpectralExpPlaw::clone(void) const
  * @param[in] srcTime True photon arrival time.
  * @return Model value.
  *
- * The power law function is defined as
- * \f[I(E)=norm (E/pivot)^{index} \exp(-E/ecut)\f]
+ * Evaluates
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ *    \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ * \f]
+ *
  * where
- * \f$norm\f$ is the normalization or prefactor,
- * \f$pivot\f$ is the pivot energy, and
- * \f$index\f$ is the spectral index, and
- * \f$ecut\f$ is the cut off energy.
+ * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ * - \f${\tt m\_pivot}\f$ is the pivot energy,
+ * - \f${\tt m\_index}\f$ is the spectral index, and
+ * - \f${\tt m\_ecut}\f$ is the cut off energy.
  *
  * @todo The method expects that pivot!=0 and ecut!=0. Otherwise Inf or NaN
  *       may result. We should add a test that prevents using invalid
@@ -254,27 +263,21 @@ GModelSpectralExpPlaw* GModelSpectralExpPlaw::clone(void) const
 double GModelSpectralExpPlaw::eval(const GEnergy& srcEng,
                                    const GTime&   srcTime) const
 {
+    // Update the evaluation cache
+    update_eval_cache(srcEng);
+
     // Compute function value
-    double energy = srcEng.MeV();
-    double e_norm = energy / pivot();
-    double e_cut  = energy / ecut();
-    double power  = std::pow(e_norm, index()) * std::exp(-e_cut);
-    double value  = norm() * power;
+    double value = m_norm.value() * m_last_power;
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralExpPlaw::eval";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", energy=" << energy;
-        std::cout << ", index=" << index();
-        std::cout << ", ecut=" << ecut();
-        std::cout << ", pivot=" << pivot();
-        std::cout << ", e_norm=" << e_norm;
-        std::cout << ", e_cut=" << e_cut;
-        std::cout << ", power=" << power;
+        std::cout << ", power=" << m_last_power;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -291,16 +294,49 @@ double GModelSpectralExpPlaw::eval(const GEnergy& srcEng,
  * @param[in] srcTime True photon arrival time.
  * @return Model value.
  *
- * The power law function is defined as
- * \f[I(E)=norm (E/pivot)^{index} \exp(-E/ecut)\f]
+ * Evaluates
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ *    \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ *    \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ * \f]
+ *
  * where
- * \f$norm=n_s n_v\f$ is the normalization or prefactor,
- * \f$index=i_s i_v\f$ is the spectral index,
- * \f$ecut=c_s c_v\f$ is the cut off energy, and
- * \f$pivot=p_s p_v\f$ is the pivot energy.
- * Note that each parameter is factorised into a scaling factor and a value
- * and that the method is expected to return the gradient with respect to
- * the parameter value (i.e. n_v, p_v, i_v, and c_v in this case).
+ * - \f${\tt m\_norm}\f$ is the normalization or prefactor,
+ * - \f${\tt m\_index}\f$ is the spectral index,
+ * - \f${\tt m\_ecut}\f$ is the cut off energy, and
+ * - \f${\tt m\_pivot}\f$ is the pivot energy.
+ *
+ * The method also evaluates the partial derivatives of the model with
+ * respect to the parameters using
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
+ *      \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ *      \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_index}} =
+ *      \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ *      \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ *      \ln(E/{\tt m_pivot})
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_ecut}} =
+ *      \left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ *      \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ *      \left( \frac{E}{{\tt m\_ecut}^2} \right)
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_pivot}} =
+ *      -\left( \frac{E}{\tt m\_pivot} \right)^{\tt m\_index}
+ *      \exp \left( \frac{-E}{\tt m\_ecut} \right)
+ *      \left( \frac{{\tt m\_index}}{{\tt m\_pivot}} \right)
+ * \f]
  *
  * The partial derivatives of the parameter values are given by
  * \f[dI/dn_v=n_s  (E/pivot)^{index} \exp(-E/ecut)\f]
@@ -315,43 +351,41 @@ double GModelSpectralExpPlaw::eval(const GEnergy& srcEng,
 double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng,
                                              const GTime&   srcTime)
 {
-    // Compute function value
-    double energy = srcEng.MeV();
-    double e_norm = energy / pivot();
-    double e_cut  = energy / ecut();
-    double power  = std::pow(e_norm, index()) * std::exp(-e_cut);
-    double value  = norm() * power;
+    // Update the evaluation cache
+    update_eval_cache(srcEng);
 
-    // Compute partial derivatives of the parameter values
-    double g_norm  = (m_norm.isfree())  ? m_norm.scale() * power : 0.0;
-    double g_index = (m_index.isfree()) ? value * m_index.scale() * std::log(e_norm) : 0.0;
-    double g_ecut  = (m_ecut.isfree())  ? value * e_cut/m_ecut.factor_value() : 0.0;
-    double g_pivot = (m_pivot.isfree()) ? -value * index() / m_pivot.factor_value() : 0.0;
+    // Compute function value
+    double value = m_norm.value() * m_last_power;
+
+    // Compute partial derivatives with respect to the parameter factor
+    // values. The partial derivatives with respect to the parameter
+    // values are obtained by division by the scale factor.
+    double g_norm  = (m_norm.isfree())
+                     ? m_norm.scale() * m_last_power : 0.0;
+    double g_index = (m_index.isfree())
+                     ? value * m_index.scale() * std::log(m_last_e_norm) : 0.0;
+    double g_ecut  = (m_ecut.isfree())
+                     ? value * m_last_e_cut / m_ecut.factor_value() : 0.0;
+    double g_pivot = (m_pivot.isfree())
+                     ? -value * m_last_index / m_pivot.factor_value() : 0.0;
 
     // Set gradients (circumvent const correctness)
-    const_cast<GModelSpectralExpPlaw*>(this)->m_norm.factor_gradient(g_norm);
-    const_cast<GModelSpectralExpPlaw*>(this)->m_index.factor_gradient(g_index);
-    const_cast<GModelSpectralExpPlaw*>(this)->m_ecut.factor_gradient(g_ecut);
-    const_cast<GModelSpectralExpPlaw*>(this)->m_pivot.factor_gradient(g_pivot);
+    m_norm.factor_gradient(g_norm);
+    m_index.factor_gradient(g_index);
+    m_ecut.factor_gradient(g_ecut);
+    m_pivot.factor_gradient(g_pivot);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralExpPlaw::eval_gradients";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", energy=" << energy;
-        std::cout << ", index=" << index();
-        std::cout << ", ecut=" << ecut();
-        std::cout << ", pivot=" << pivot();
-        std::cout << ", e_norm=" << e_norm;
-        std::cout << ", e_cut=" << e_cut;
-        std::cout << ", power=" << power;
-        std::cout << ", g_norm=" << g_norm;
-        std::cout << ", g_index=" << g_index;
-        std::cout << ", g_ecut=" << g_ecut;
-        std::cout << ", g_pivot=" << g_pivot;
+        std::cout << ", e_norm=" << m_last_e_norm;
+        std::cout << ", e_cut=" << m_last_e_cut;
+        std::cout << ", power=" << m_last_power;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -368,35 +402,39 @@ double GModelSpectralExpPlaw::eval_gradients(const GEnergy& srcEng,
  * @param[in] emax Maximum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ *
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
+ * The integration is done numerically.
  ***************************************************************************/
-double GModelSpectralExpPlaw::flux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralExpPlaw::flux(const GEnergy& emin,
+                                   const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
+    // Initialise flux
+    double flux = 0.0;
+    
+    // Compute only if integration range is valid
+    if (emin < emax) {
 
-    // Setup integration kernel
-    flux_kernel integrand(norm(), index(), pivot(), ecut());
-    GIntegral integral(&integrand);
+        // Setup integration kernel
+        flux_kernel integrand(m_norm.value(),  m_index.value(),
+                              m_pivot.value(), m_ecut.value());
+        GIntegral integral(&integrand);
 
-    // Get integration boundaries in MeV
-    double e_min = emin.MeV();
-    double e_max = emax.MeV();
+        // Get integration boundaries in MeV
+        double e_min = emin.MeV();
+        double e_max = emax.MeV();
 
-    // Perform integration
-    double flux = integral.romb(e_min, e_max);
+        // Perform integration
+        flux = integral.romb(e_min, e_max);
+
+    } // endif: integration range was valid
 
     // Return
     return flux;
@@ -410,38 +448,42 @@ double GModelSpectralExpPlaw::flux(const GEnergy& emin, const GEnergy& emax) con
  * @param[in] emax Maximum photon energy.
  * @return Energy flux (erg/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ *
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) E \, dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
+ * The integration is done numerically.
  ***************************************************************************/
-double GModelSpectralExpPlaw::eflux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralExpPlaw::eflux(const GEnergy& emin,
+                                    const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
+    // Initialise flux
+    double eflux = 0.0;
+    
+    // Compute only if integration range is valid
+    if (emin < emax) {
 
-    // Setup integration kernel
-    eflux_kernel integrand(norm(), index(), pivot(), ecut());
-    GIntegral integral(&integrand);
+        // Setup integration kernel
+        eflux_kernel integrand(m_norm.value(),  m_index.value(),
+                               m_pivot.value(), m_ecut.value());
+        GIntegral integral(&integrand);
 
-    // Get integration boundaries in MeV
-    double e_min = emin.MeV();
-    double e_max = emax.MeV();
+        // Get integration boundaries in MeV
+        double e_min = emin.MeV();
+        double e_max = emax.MeV();
 
-    // Perform integration
-    double eflux = integral.romb(e_min, e_max);
+        // Perform integration
+        eflux = integral.romb(e_min, e_max);
 
-    // Convert from MeV/cm2/s to erg/cm2/s
-    eflux *= MeV2erg;
+        // Convert from MeV/cm2/s to erg/cm2/s
+        eflux *= MeV2erg;
+
+    } // endif: integration range was valid
 
     // Return
     return eflux;
@@ -487,6 +529,7 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
     
     // Initialse acceptance fraction
     double acceptance_fraction;
+    double inv_ecut = 1.0 / m_ecut.value();
 
     // Use rejection method to draw a random energy. We first draw
     // analytically from a power law, and then compare the power law
@@ -513,18 +556,10 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
         else {
             eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
         }
-
-        // Compute powerlaw at given energy
-        double e_norm = eng / pivot();
-        double plaw   = std::pow(e_norm, index());
-
-        // Compute exponential cutoff at given energy
-        double e_cut   = eng / ecut();
-        double expplaw = plaw * std::exp(-e_cut);
-
+        
         // Compute acceptance fraction
-        acceptance_fraction = expplaw / plaw;
-    
+        acceptance_fraction = std::exp(-eng * inv_ecut);
+
     } while (ran.uniform() > acceptance_fraction);
     
     // Set energy
@@ -554,7 +589,6 @@ GEnergy GModelSpectralExpPlaw::mc(const GEnergy& emin,
  *       <parameter name="Cutoff"    scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
  *     </spectrum>
- *
  ***************************************************************************/
 void GModelSpectralExpPlaw::read(const GXmlElement& xml)
 {
@@ -630,7 +664,6 @@ void GModelSpectralExpPlaw::read(const GXmlElement& xml)
  *       <parameter name="Cutoff"    scale=".." value=".." min=".." max=".." free=".."/>
  *       <parameter name="Scale"     scale=".." value=".." min=".." max=".." free=".."/>
  *     </spectrum>
- *
  ***************************************************************************/
 void GModelSpectralExpPlaw::write(GXmlElement& xml) const
 {
@@ -788,6 +821,15 @@ void GModelSpectralExpPlaw::init_members(void)
     m_pars.push_back(&m_ecut);
     m_pars.push_back(&m_pivot);
 
+    // Initialise eval cache
+    m_last_energy.clear();
+    m_last_index  = 1.0e30;
+    m_last_ecut   = 1.0e30;
+    m_last_pivot  = 1.0e30;
+    m_last_e_norm = 0.0;
+    m_last_e_cut  = 0.0;
+    m_last_power  = 0.0;
+
     // Initialise MC cache
     m_mc_emin       = 0.0;
     m_mc_emax       = 0.0;
@@ -820,6 +862,15 @@ void GModelSpectralExpPlaw::copy_members(const GModelSpectralExpPlaw& model)
     m_pars.push_back(&m_ecut);
     m_pars.push_back(&m_pivot);
 
+    // Copy eval cache
+    m_last_energy = model.m_last_energy;
+    m_last_index  = model.m_last_index;
+    m_last_ecut   = model.m_last_ecut;
+    m_last_pivot  = model.m_last_pivot;
+    m_last_e_norm = model.m_last_e_norm;
+    m_last_e_cut  = model.m_last_e_cut;
+    m_last_power  = model.m_last_power;
+
     // Copy MC cache
     m_mc_emin       = model.m_mc_emin;
     m_mc_emax       = model.m_mc_emax;
@@ -837,6 +888,48 @@ void GModelSpectralExpPlaw::copy_members(const GModelSpectralExpPlaw& model)
  ***************************************************************************/
 void GModelSpectralExpPlaw::free_members(void)
 {
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update eval precomputation cache
+ *
+ * @param[in] energy Energy.
+ *
+ * Updates the precomputation cache for eval() and eval_gradients() methods.
+ ***************************************************************************/
+void GModelSpectralExpPlaw::update_eval_cache(const GEnergy& energy) const
+{
+    // Get parameter values (takes 3 multiplications which are difficult
+    // to avoid)
+    double index = m_index.value();
+    double ecut  = m_ecut.value();
+    double pivot = m_pivot.value();
+    
+    // If the energy or one of the parameters index, cut-off or pivot
+    // energy has changed then recompute the cache
+    if ((m_last_energy != energy) ||
+        (m_last_index  != index)  ||
+        (m_last_ecut   != ecut)   ||
+        (m_last_pivot  != pivot)) {
+
+        // Store actual energy and parameter values
+        m_last_energy = energy;
+        m_last_index  = index;
+        m_last_ecut   = ecut;
+        m_last_pivot  = pivot;
+
+        // Compute and store value
+        double eng    = energy.MeV();
+        m_last_e_norm = eng / m_last_pivot;
+        m_last_e_cut  = eng / m_last_ecut;
+        m_last_power  = std::pow(m_last_e_norm, m_last_index) *
+                        std::exp(-m_last_e_cut);
+
+    } // endif: recomputation was required
+
     // Return
     return;
 }
@@ -862,8 +955,8 @@ void GModelSpectralExpPlaw::update_mc_cache(const GEnergy& emin,
             m_mc_emin       = emin.MeV();
             m_mc_emax       = emax.MeV();
             m_mc_exponent   = index() + 1.0;
-            m_mc_pow_emin   = std::pow(emin.MeV(), m_mc_exponent);
-            m_mc_pow_ewidth = std::pow(emax.MeV(), m_mc_exponent) - m_mc_pow_emin;
+            m_mc_pow_emin   = std::pow(m_mc_emin, m_mc_exponent);
+            m_mc_pow_ewidth = std::pow(m_mc_emax, m_mc_exponent) - m_mc_pow_emin;
         }
 
     }
@@ -876,8 +969,8 @@ void GModelSpectralExpPlaw::update_mc_cache(const GEnergy& emin,
             m_mc_emin       = emin.MeV();
             m_mc_emax       = emax.MeV();
             m_mc_exponent   = 0.0;
-            m_mc_pow_emin   = std::log(emin.MeV());
-            m_mc_pow_ewidth = std::log(emax.MeV()) - m_mc_pow_emin;
+            m_mc_pow_emin   = std::log(m_mc_emin);
+            m_mc_pow_ewidth = std::log(m_mc_emax) - m_mc_pow_emin;
         }
 
     }
@@ -895,8 +988,8 @@ void GModelSpectralExpPlaw::update_mc_cache(const GEnergy& emin,
 double GModelSpectralExpPlaw::flux_kernel::eval(double energy)
 {
     // Evaluate function value
-    double e_norm = energy / m_pivot;
-    double e_cut  = energy / m_ecut;
+    double e_norm = energy * m_inv_pivot;
+    double e_cut  = energy * m_inv_ecut;
     double power  = std::pow(e_norm, m_index) * std::exp(-e_cut);
     double value  = m_norm * power;
 
@@ -913,8 +1006,8 @@ double GModelSpectralExpPlaw::flux_kernel::eval(double energy)
 double GModelSpectralExpPlaw::eflux_kernel::eval(double energy)
 {
     // Evaluate function value
-    double e_norm = energy / m_pivot;
-    double e_cut  = energy / m_ecut;
+    double e_norm = energy * m_inv_pivot;
+    double e_cut  = energy * m_inv_ecut;
     double power  = std::pow(e_norm, m_index) * std::exp(-e_cut);
     double value  = m_norm * power * energy;
 
