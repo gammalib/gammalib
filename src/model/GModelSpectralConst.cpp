@@ -98,7 +98,7 @@ GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Value constructor
  *
- * @param[in] norm Normalization factor (ph/cm2/s).
+ * @param[in] norm Normalization factor (ph/cm2/s/MeV).
  *
  * Constructs constant spectral model by setting the normalization factor.
  ***************************************************************************/
@@ -221,13 +221,13 @@ GModelSpectralConst* GModelSpectralConst::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Evaluate model
+ * @brief Evaluate model value
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The spectral model is defined by
+ * Evaluates
  *
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
@@ -241,7 +241,7 @@ double GModelSpectralConst::eval(const GEnergy& srcEng,
                                  const GTime&   srcTime) const
 {
     // Compute function value
-    double value = norm();
+    double value = m_norm.value();
 
     // Return
     return value;
@@ -249,13 +249,13 @@ double GModelSpectralConst::eval(const GEnergy& srcEng,
 
 
 /***********************************************************************//**
- * @brief Evaluate function and gradients
+ * @brief Evaluate model value and gradient
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The spectral model is defined by
+ * Evaluates
  *
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
@@ -265,26 +265,24 @@ double GModelSpectralConst::eval(const GEnergy& srcEng,
  * \f${\tt m\_norm}\f$ is the normalization constant in units of 
  * ph/cm2/s/MeV.
  *
- * The normalization constant is factorized into a scale factor and a value
- * factor. The partial derivative with respect to the normalization constant
- * value factor is given by
+ * The method also evaluates the partial derivative of the model with respect
+ * to the m_norm parameter using
  *
  * \f[
- *    \frac{\delta S_{\rm E}(E | t)}
- *         {\delta {\tt m\_norm.factor\_value()}} =
- *    {\tt m\_norm.scale()}
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} = 1
  * \f]
  ***************************************************************************/
 double GModelSpectralConst::eval_gradients(const GEnergy& srcEng,
                                            const GTime&   srcTime)
 {
     // Compute function value
-    double value = norm();
+    double value = m_norm.value();
 
     // Compute partial derivatives of the parameter values
     double g_norm = (m_norm.isfree()) ? m_norm.scale() : 0.0;
 
-    // Set gradient
+    // Set factor gradient (the parameter gradient is obtained by dividing
+    // the factor gradient by the scale factor)
     m_norm.factor_gradient(g_norm);
 
     // Return
@@ -299,35 +297,30 @@ double GModelSpectralConst::eval_gradients(const GEnergy& srcEng,
  * @param[in] emax Maximum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
  *
  * \f[
- *    \int_{E_{\rm min}}^{E_{\rm max}} S_{\rm E}(E | t) dE
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) dE
  * \f]
  *
  * where
- * - \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- *   energy, respectively, and
+ * - [@p emin, @p emax] is an energy interval, and
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
- *
- * @todo What about returning a zero flux if the energy range is invalid?
  ***************************************************************************/
 double GModelSpectralConst::flux(const GEnergy& emin,
                                  const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
+    // Initialise flux
+    double flux = 0.0;
+    
+    // Compute only if integration range is valid
+    if (emin < emax) {
 
-    // Compute flux for a constant model
-    double flux = norm() * (emax.MeV() - emin.MeV());
+        // Compute flux for a constant model
+        flux = m_norm.value() * (emax.MeV() - emin.MeV());
+    
+    } // endif: integration range was valid
 
     // Return
     return flux;
@@ -341,38 +334,34 @@ double GModelSpectralConst::flux(const GEnergy& emin,
  * @param[in] emax Maximum photon energy.
  * @return Energy flux (erg/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
  *
  * \f[
- *    \int_{E_{\rm min}}^{E_{\rm max}} S_{\rm E}(E | t) E dE
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) E \, dE
  * \f]
  *
  * where
- * - \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- *   energy, respectively, and
+ * - [@p emin, @p emax] is an energy interval, and
  * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  * The integration is done analytically.
- *
- * @todo What about returning a zero flux if the energy range is invalid?
  ***************************************************************************/
 double GModelSpectralConst::eflux(const GEnergy& emin,
                                   const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-    }
+    // Initialise flux
+    double flux = 0.0;
+    
+    // Compute only if integration range is valid
+    if (emin < emax) {
 
-    // Compute flux for a constant model
-    double flux = norm() * 0.5 * (emax.MeV()*emax.MeV() - 
-                                  emin.MeV()*emin.MeV());
+        // Compute flux for a constant model
+        flux = m_norm.value() * 0.5 * (emax.MeV()*emax.MeV() - 
+                                       emin.MeV()*emin.MeV());
 
-    // Convert from MeV/cm2/s to erg/cm2/s
-    flux *= MeV2erg;
+        // Convert from MeV/cm2/s to erg/cm2/s
+        flux *= MeV2erg;
+    
+    } // endif: integration range was valid
 
     // Return
     return flux;
