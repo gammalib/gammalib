@@ -43,6 +43,10 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL              "GObservations::optimizer::eval(GOptimizerPars&)"
 
+/* __ Constants __________________________________________________________ */
+const int g_matrix_stack_size    = 10000;    //!< Maximum size of stack
+const int g_matrix_stack_entries =  1000;    //!< Maximum number of entries
+
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
@@ -218,14 +222,14 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_gradient = new GVector(npars);
         m_covar    = new GSparseMatrix(npars,npars);
         m_wrk_grad = new GVector(npars);
-        m_covar->stack_init(npars,10000);
-        
+        m_covar->stack_init(g_matrix_stack_size, g_matrix_stack_entries);
+
         // Allocate vectors to save working variables of each thread
         std::vector<GVector*>       vect_cpy_grad;
         std::vector<GSparseMatrix*> vect_cpy_covar;
         std::vector<double*>        vect_cpy_value;
         std::vector<double*>        vect_cpy_npred;
-        
+
         // Here OpenMP will paralellize the execution. The following code will
         // be executed by the differents threads. In order to avoid protecting
         // attributes ( m_value,m_npred, m_gradient and m_covar), each thread
@@ -242,8 +246,8 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             GSparseMatrix* cpy_covar    = new GSparseMatrix(npars,npars);
             double*        cpy_npred    = new double(0.0);
             double*        cpy_value    = new double(0.0);
-            cpy_covar->stack_init(npars,10000);
-            
+            cpy_covar->stack_init(g_matrix_stack_size, g_matrix_stack_entries);
+
             // Push variable copies into vector. This is a critical zone to
             // avoid multiple thread pushing simultaneously.
             #pragma omp critical
@@ -259,19 +263,19 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             #pragma omp for
             // Loop over all observations
             for (int i = 0; i < m_this->size(); ++i) {
-    
+
                 // Extract statistics for this observation
                 std::string statistics = m_this->m_obs[i]->statistics();
-    
+
                 // Unbinned analysis
                 if (dynamic_cast<const GEventList*>(m_this->m_obs[i]->events()) != NULL) {
-    
+
                     // Poisson statistics
                     if (toupper(statistics) == "POISSON") {
-    
+
                         // Determine Npred value and gradient for this observation
                         double npred = m_this->m_obs[i]->npred(cpy_model, &cpy_wrk_grad);
-    
+
                         // Update the Npred value, gradient.
                         *cpy_npred    += npred;
                         *cpy_gradient += cpy_wrk_grad;
@@ -288,7 +292,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                             std::cout << " Grad=" << *cpy_gradient << std::endl;
                         }
                         #endif
-    
+
                         // Update the log-likelihood
                         poisson_unbinned(*(m_this->m_obs[i]), 
                                           cpy_model,
@@ -296,23 +300,23 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                                          *cpy_gradient,
                                          *cpy_value,
                                           cpy_wrk_grad);
-    
+
                         // Add the Npred value to the log-likelihood
                         *cpy_value += npred;
-    
+
                     } // endif: Poisson statistics
-    
+
                     // ... otherwise throw an exception
                     else {
                         throw GException::invalid_statistics(G_EVAL, statistics,
                             "Unbinned optimization requires Poisson statistics.");
                     }
-    
+
                 } // endif: unbinned analysis
-    
+
                 // ... or binned analysis
                 else {
-    
+
                     // Poisson statistics
                     if (toupper(statistics) == "POISSON") {
                         #if G_EVAL_DEBUG
@@ -326,7 +330,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                                        *cpy_npred,
                                         cpy_wrk_grad);
                     }
-    
+
                     // ... or Gaussian statistics
                     else if (toupper(statistics) == "GAUSSIAN") {
                         #if G_EVAL_DEBUG
@@ -340,19 +344,20 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                                         *cpy_npred,
                                          cpy_wrk_grad);
                     }
-    
+
                     // ... or unsupported
                     else {
                         throw GException::invalid_statistics(G_EVAL, statistics,
-                            "Binned optimization requires Poisson or Gaussian statistics.");
+                              "Binned optimization requires Poisson or Gaussian"
+                              " statistics.");
                     }
-    
+
                 } // endelse: binned analysis
-    
+
             } // endfor: looped over observations
-            
+
         } // end pragma omp parallel
-        
+
         // Now the computation is finished, update attributes.
         // For each omp section, a thread will be created.
         #pragma omp sections
@@ -394,7 +399,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_covar->stack_destroy();
 
     } while(0); // endwhile: main loop
-    
+
     // Copy over the parameter gradients for all parameters that are
     // free (so that we can access the gradients from outside)
     for (int ipar = 0; ipar < pars.npars(); ++ipar) {
@@ -493,7 +498,6 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
     int*    inx    = new int[npars];
     double* values = new double[npars];
 
-    
     // Iterate over all events
     for (int i = 0; i < obs.events()->size(); ++i) {
 
@@ -763,7 +767,7 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
             #if G_OPT_DEBUG
             n_zero_data++;
             #endif
-            
+
             // Update Poissonian statistics (excluding factorial term for
             // faster computation)
             value += model;
@@ -940,7 +944,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
         // Update Gaussian statistics
         double fa = data - model;
         value  += 0.5 * (fa * fa * weight);
-            
+
         // Skip bin now if there are no non-zero derivatives
         if (ndev < 1) {
             continue;
