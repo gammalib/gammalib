@@ -39,9 +39,9 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_OPT            //!< Define to debug optimize() method
-//#define G_DEBUG_ITER           //!< Define to debug iteration() method
-
+//#define G_DEBUG_OPT              //!< Define to debug optimize() method
+//#define G_DEBUG_ITER             //!< Define to debug iteration() method
+//#define G_DEBUG_SHOW_GRAD_COVAR  //!< Define to show grad and covar
 
 /*==========================================================================
  =                                                                         =
@@ -260,6 +260,10 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
         std::cout << "Initial iteration: func=" << m_value << ", Lambda="
                   << m_lambda << std::endl;
         #endif
+        #if defined(G_DEBUG_SHOW_GRAD_COVAR)
+        *m_logger << *fct.gradient() << std::endl;
+        *m_logger << *fct.covar() << std::endl;
+        #endif
 
         // Initialise iteration flags
         bool check_for_freeze = true;
@@ -308,6 +312,10 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             std::cout << "Iteration " << m_iter << ": func=" 
                       << m_value << ", Lambda=" << m_lambda
                       << ", delta=" << delta << std::endl;
+            #endif
+            #if defined(G_DEBUG_SHOW_GRAD_COVAR)
+            *m_logger << *fct.gradient() << std::endl;
+            *m_logger << *fct.covar() << std::endl;
             #endif
 
             // Reset lambda increment if we had success
