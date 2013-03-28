@@ -250,10 +250,13 @@ void GCTAPsfPerfTable::load(const std::string& filename)
     const int n = 1000;
     char  line[n];
 
+    // Expand environment variables
+    std::string fname = expand_env(filename);
+
     // Open performance table readonly
-    FILE* fptr = std::fopen(filename.c_str(), "r");
+    FILE* fptr = std::fopen(fname.c_str(), "r");
     if (fptr == NULL) {
-        throw GCTAException::file_open_error(G_LOAD, filename);
+        throw GCTAException::file_open_error(G_LOAD, fname);
     }
 
     // Read lines
