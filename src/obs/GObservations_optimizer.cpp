@@ -43,10 +43,6 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL              "GObservations::optimizer::eval(GOptimizerPars&)"
 
-/* __ Constants __________________________________________________________ */
-const int g_matrix_stack_size    = 10000;    //!< Maximum size of stack
-const int g_matrix_stack_entries =  1000;    //!< Maximum number of entries
-
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
@@ -222,7 +218,11 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_gradient = new GVector(npars);
         m_covar    = new GSparseMatrix(npars,npars);
         m_wrk_grad = new GVector(npars);
-        m_covar->stack_init(g_matrix_stack_size, g_matrix_stack_entries);
+
+        // Set stack size and number of entries
+        int stack_size  = (2*npars > 100000) ? 2*npars : 100000;
+        int max_entries = (2*npars > 10000)  ? 2*npars : 10000;
+        m_covar->stack_init(stack_size, max_entries);
 
         // Allocate vectors to save working variables of each thread
         std::vector<GVector*>       vect_cpy_grad;
@@ -246,7 +246,9 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             GSparseMatrix* cpy_covar    = new GSparseMatrix(npars,npars);
             double*        cpy_npred    = new double(0.0);
             double*        cpy_value    = new double(0.0);
-            cpy_covar->stack_init(g_matrix_stack_size, g_matrix_stack_entries);
+
+            // Set stack size and number of entries
+            cpy_covar->stack_init(stack_size, max_entries);
 
             // Push variable copies into vector. This is a critical zone to
             // avoid multiple thread pushing simultaneously.
@@ -355,6 +357,9 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                 } // endelse: binned analysis
 
             } // endfor: looped over observations
+
+            // Release stack
+            cpy_covar->stack_destroy();
 
         } // end pragma omp parallel
 
