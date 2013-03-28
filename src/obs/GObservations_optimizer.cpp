@@ -221,7 +221,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
         // Set stack size and number of entries
         int stack_size  = (2*npars > 100000) ? 2*npars : 100000;
-        int max_entries = (2*npars > 10000)  ? 2*npars : 10000;
+        int max_entries =  2*npars;
         m_covar->stack_init(stack_size, max_entries);
 
         // Allocate vectors to save working variables of each thread
