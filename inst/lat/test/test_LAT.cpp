@@ -566,7 +566,7 @@ void TestGLATOptimize::test_binned_optimizer_p6(void)
 {
     // Set expected fit results
     double fit_results[] = {1, 0,
-                            3.214411831, 0.7448929041,
+                            3.214411831, 0.744781,
                             1, 0,
                             1, 0,
                             0.8068908818, 0.08764042542,
@@ -574,7 +574,7 @@ void TestGLATOptimize::test_binned_optimizer_p6(void)
                             83.6331, 0,
                             22.0145, 0,
                             2.103749294e-06, 1.560611406e-07,
-                            -2.126826057, 0.05439406853,
+                            -2.126826057, 0.053618,
                             100, 0,
                             500000, 0,
                             1, 0};
@@ -597,7 +597,7 @@ void TestGLATOptimize::test_binned_optimizer_p7(void)
 {
     // Set expected fit results
     double fit_results[] = {1, 0,
-                            2.896021569, 0.4414139445,
+                            2.896021569, 0.441842,
                             1, 0,
                             1, 0,
                             0.8629520722, 0.06376048926,

@@ -545,7 +545,7 @@ void TestGCOMOptimize::test_binned_optimizer(void)
 
     // Perform LM optimization
     double fit_results[] = {83.4258, 0.157307,
-                            21.5953, 0.143873,
+                            21.5952, 0.143873,
                             0.001907, 8.31055e-05,
                             -2.05, 0,
                             1, 0,
@@ -599,7 +599,7 @@ void TestGCOMOptimize::test_binned_optimizer(void)
                             47, 0,
                             29.9617, 0.377506,
                             49, 0,
-                            27.9992, 0.372667};
+                            27.9993, 0.372603};
     test_try("Perform LM optimization");
     try {
         GOptimizerLM opt;

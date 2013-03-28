@@ -577,7 +577,7 @@ void TestGCTAOptimize::test_binned_optimizer(void)
                             1, 0,
                             2.933677595, 0.06639644824,
                             6.550723074e-05, 1.945714239e-06,
-                            -1.833781187, -0.0161464076,
+                            -1.833781187, -0.0160819,
                             1000000, 0,
                             1, 0};
     test_try("Perform LM optimization");
