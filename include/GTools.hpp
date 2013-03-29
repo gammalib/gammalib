@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GTools.hpp - GammaLib tools                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <cfloat>
 
 /* __ Namespaces _________________________________________________________ */
 
@@ -103,7 +104,41 @@ double                   plaw_energy_flux(const double& emin,
                                           const double& epivot,
                                           const double& gamma);
 bool                     file_exists(const std::string& filename);
-bool                     isinfinite(double x);
-bool                     isnotanumber(double x);
+bool                     isinfinite(const double& x);
+bool                     isnotanumber(const double& x);
+
+
+/***********************************************************************//**
+ * @brief Signal if argument is infinite
+ *
+ * @param[in] x Argument.
+ * @return True if argument @p x is infinite, false otherwise.
+ *
+ * Signals if the argument @p x is infinite.
+ *
+ * This function has been copied from gnulib.
+ ***************************************************************************/
+inline
+bool isinfinite(const double& x)
+{
+  return (x < -DBL_MAX || x > DBL_MAX);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if argument is not a number
+ *
+ * @param[in] x Argument.
+ * @return True if argument @p x is not a number, false otherwise.
+ *
+ * Signals if the argument @p x is not a number.
+ *
+ * This function is a very simple kluge. It may not work on all systems.
+ ***************************************************************************/
+inline
+bool isnotanumber(const double& x)
+{
+  return (x != x);
+}
 
 #endif /* GTOOLS_HPP */
