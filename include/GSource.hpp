@@ -53,10 +53,10 @@ class GSource : public GBase {
 public:
     // Constructors and destructors
     GSource(void);
-    explicit GSource(const std::string&   name,
-                     const GModelSpatial& model,
-                     const GEnergy&       energy,
-                     const GTime&         time);
+    explicit GSource(const std::string& name,
+                     GModelSpatial*     model,
+                     const GEnergy&     energy,
+                     const GTime&       time);
     GSource(const GSource& src);
     virtual ~GSource(void);
  

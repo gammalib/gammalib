@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GSource.cpp - Source class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,21 +65,21 @@ GSource::GSource(void)
  * @brief Source constructor
  *
  * @param[in] name Source name.
- * @param[in] model Spatial model.
+ * @param[in] model Spatial model pointer.
  * @param[in] energy Energy.
  * @param[in] time Time.
  ***************************************************************************/
-GSource::GSource(const std::string&   name,
-                 const GModelSpatial& model,
-                 const GEnergy&       energy,
-                 const GTime&         time)
+GSource::GSource(const std::string& name,
+                 GModelSpatial*     model,
+                 const GEnergy&     energy,
+                 const GTime&       time)
 { 
     // Initialise private members
     init_members();
 
     // Set members
     m_name   = name;
-    m_model  = model.clone();
+    m_model  = model;
     m_energy = energy;
     m_time   = time;
 
