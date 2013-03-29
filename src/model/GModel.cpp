@@ -33,7 +33,7 @@
 #include "GModel.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS2                          "GModel::operator[](std::string&)"
+#define G_ACCESS                           "GModel::operator[](std::string&)"
 #define G_AT                                               "GModel::at(int&)"
 #define G_WRITE_SCALES                   "GModel::write_scales(GXmlElement&)"
 
@@ -178,7 +178,7 @@ GModelPar& GModel::operator[](const std::string& name)
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_ACCESS2, name);
+        throw GException::par_not_found(G_ACCESS, name);
     }
 
     // Return reference
@@ -210,7 +210,7 @@ const GModelPar& GModel::operator[](const std::string& name) const
 
     // Throw exception if parameter name was not found
     if (index >= size()) {
-        throw GException::par_not_found(G_ACCESS2, name);
+        throw GException::par_not_found(G_ACCESS, name);
     }
 
     // Return reference
@@ -302,8 +302,10 @@ std::string GModel::instruments(void) const
  * @param[in] instruments String of instruments.
  *
  * Sets the instruments to which the model applies from a comma separated
- * list of strings. If the @p instrument string is empty the model is
- * considered to apply to all instruments.
+ * list of strings. The instrument names are case sensitive.
+ *
+ * If the @p instrument string is empty, the model is considered to apply to
+ * all instruments.
  ***************************************************************************/
 void GModel::instruments(const std::string& instruments)
 {
@@ -315,7 +317,7 @@ void GModel::instruments(const std::string& instruments)
 
     // Attach all instruments
     for (int i = 0; i < inst.size(); ++i) {
-        m_instruments.push_back(toupper(strip_whitespace(inst[i])));
+        m_instruments.push_back(strip_whitespace(inst[i]));
     }
 
     // Return
@@ -328,24 +330,24 @@ void GModel::instruments(const std::string& instruments)
  *
  * @param[in] instrument Instrument.
  *
- * Returns the model scale factor for a given @p instrument. If the
- * @p instrument is not found, the method returns a scale factor of unity.
+ * Returns the model scale factor for a given @p instrument. The search is
+ * case sensitive.
+ *
+ * If the @p instrument is not found, the method returns a scale factor of
+ * unity.
  ***************************************************************************/
 GModelPar GModel::scale(const std::string& instrument) const
 {
-    // Convert instrument to upper case string
-    std::string uinstrument = toupper(strip_whitespace(instrument));
-
     // Initialise unit scale factor
     GModelPar scale;
     scale.value(1.0);
-    scale.name(uinstrument);
+    scale.name(instrument);
     scale.fix();
 
     // Search for instrument and recover scale factor if the instrument
     // has been found.
     for (int i = 0; i < m_scales.size(); ++i) {
-        if (m_scales[i].name() == uinstrument) {
+        if (m_scales[i].name() == instrument) {
             scale = m_scales[i];
             break;
         }
@@ -361,27 +363,25 @@ GModelPar GModel::scale(const std::string& instrument) const
  *
  * @param[in] par Model parameter for scaling.
  *
- * Sets the model parameter for a given instrument. The instrument name will
- * be determined from the model parameter name. The model parameter name
- * will be converted to upper case and any leading and trailing whitespace
- * will be stripped.
+ * Sets the model parameter for a given instrument. The instrument name is
+ * case sensitive, but any leading to trailing white space will be stripped.
  *
  * If the instrument is not yet defined it will be appended to the list of
  * instruments.
  ***************************************************************************/
 void GModel::scale(const GModelPar& par)
 {
-    // Convert instrument to upper case string
-    std::string uinstrument = toupper(strip_whitespace(par.name()));
+    // String leading and trailing while space
+    std::string instrument = strip_whitespace(par.name());
 
     // Search for instrument and copy the model parameter if the instrument
     // has been found. Make sure that the instrument name is in upper case.
     bool found = false;
     for (int i = 0; i < m_scales.size(); ++i) {
-        if (m_scales[i].name() == uinstrument) {
+        if (m_scales[i].name() == instrument) {
             found       = true;
             m_scales[i] = par;
-            m_scales[i].name(uinstrument);
+            m_scales[i].name(instrument);
             break;
         }
     }
@@ -390,7 +390,7 @@ void GModel::scale(const GModelPar& par)
     // of instruments.
     if (!found) {
         m_scales.push_back(par);
-        m_scales[m_scales.size()-1].name(uinstrument);
+        m_scales[m_scales.size()-1].name(instrument);
     }
 
     // Return
@@ -429,8 +429,11 @@ std::string GModel::ids(void) const
  * @param[in] ids String of observation identifiers.
  *
  * Sets the observation identifiers to which the model applies from a comma
- * separated list of strings. If the observation identifier string is empty,
- * the model is considered to apply to all observation identifiers.
+ * separated list of strings. The observation identifiers are case sensitive,
+ * but any leading and trailing whitespace will be stripped.
+ *
+ * If the observation identifier string is empty, the model is considered to
+ * apply to all observation identifiers.
  ***************************************************************************/
 void GModel::ids(const std::string& ids)
 {
@@ -442,7 +445,7 @@ void GModel::ids(const std::string& ids)
 
     // Attach all observation identifiers
     for (int i = 0; i < id.size(); ++i) {
-        m_ids.push_back(toupper(strip_whitespace(id[i])));
+        m_ids.push_back(strip_whitespace(id[i]));
     }
 
     // Return
@@ -458,7 +461,7 @@ void GModel::ids(const std::string& ids)
  * @return Validity flag
  *
  * Checks if specified instrument name and observation identifier is in list
- * of applicable instruments and identifiers. The check is case insensitive.
+ * of applicable instruments and identifiers. The check is case sensitive.
  *
  * If the list of applicable instruments is empty, the model applies to all
  * possible instruments. If the list of applicable observation identifiers
@@ -473,15 +476,12 @@ bool GModel::isvalid(const std::string& instrument,
     // Check if model applies to instrument
     if (!m_instruments.empty()) {
 
-        // Convert instrument name to upper case
-        std::string uinstrument = toupper(instrument);
-
         // Initialise validity flag
         valid = false;
 
         // Check if instrument is in list
         for (int i = 0; i < m_instruments.size(); ++i) {
-            if (uinstrument == m_instruments[i]) {
+            if (instrument == m_instruments[i]) {
                 valid = true;
                 break;
             }
@@ -492,15 +492,12 @@ bool GModel::isvalid(const std::string& instrument,
     // Check if model applies to observation identifier
     if (valid && !m_ids.empty()) {
 
-        // Convert observation identifier to upper case
-        std::string uid = toupper(id);
-
         // Initialise validity flag
         valid = false;
 
         // Check if name is in list
         for (int i = 0; i < m_ids.size(); ++i) {
-            if (uid == m_ids[i]) {
+            if (id == m_ids[i]) {
                 valid = true;
                 break;
             }
@@ -576,9 +573,9 @@ void GModel::free_members(void)
  *         <instrument name="LAT" scale="1.0" min="0.1" max="10.0" value="1.0" free="0"/>
  *         <instrument name="CTA" scale="1.0" min="0.1" max="10.0" value="0.5" free="0"/>
  *      </scaling>
- * 
- * The  name of each instrument will be converted to upper case and any
- * leading or trailing whitespace will be removed. 
+ *
+ * The instrument name is case sensitive, but any leading and trailing white
+ * space will be removed.
  *
  * If no scaling tag is found, all instrument scale factors will be cleared.
  ***************************************************************************/
@@ -601,7 +598,7 @@ void GModel::read_scales(const GXmlElement& xml)
             const GXmlElement* par = scales->element("instrument", i);
             GModelPar scale;
             scale.read(*par);
-            scale.name(toupper(strip_whitespace(par->attribute("name"))));
+            scale.name(strip_whitespace(par->attribute("name")));
             m_scales.push_back(scale);
         }
 
