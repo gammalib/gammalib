@@ -1,5 +1,5 @@
 /***************************************************************************
- *                       GVector.cpp  -  Vector class                      *
+ *                        GVector.cpp - Vector class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -33,7 +33,7 @@
 
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                                  "GVector::operator[](int&)"
+#define G_AT                                              "GVector::at(int&)"
 #define G_CROSS                                      "cross(GVector,GVector)"
 
 
@@ -226,50 +226,6 @@ GVector& GVector::operator= (const GVector& v)
 }
 
 
-/***********************************************************************//**
- * @brief Vector element access operator
- *
- * @param[in] inx Vector element index to be accessed [0,...,size()-1]
- *
- * @exception GException::out_of_range
- *            Element index is out of range.
- ***************************************************************************/
-double& GVector::operator[](const int& inx)
-{
-    // Compile option: raise an exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= size()) {
-        throw GException::out_of_range(G_ACCESS, inx, size()-1);
-    }
-    #endif
-
-    // Return vector element
-    return m_data[inx];
-}
-
-
-/***********************************************************************//**
- * @brief Vector element access operator (const variant)
- *
- * @param[in] inx Vector element index to be accessed [0,...,size()-1]
- *
- * @exception GException::out_of_range
- *            Element index is out of range.
- ***************************************************************************/
-const double& GVector::operator[](const int& inx) const
-{
-    // Compile option: raise an exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= size()) {
-        throw GException::out_of_range(G_ACCESS, inx, size()-1);
-    }
-    #endif
-
-    // Return vector element
-    return m_data[inx];
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -299,6 +255,46 @@ GVector* GVector::clone(void) const
 {
     // Clone this image
     return new GVector(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Vector element access with range checking
+ *
+ * @param[in] inx Vector element index to be accessed [0,...,size()-1]
+ *
+ * @exception GException::out_of_range
+ *            Element index is out of range.
+ ***************************************************************************/
+double& GVector::at(const int& inx)
+{
+    // Raise an exception if index is out of range
+    if (inx < 0 || inx >= size()) {
+        throw GException::out_of_range(G_AT, inx, size()-1);
+    }
+
+    // Return vector element
+    return m_data[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Vector element access with range checking (const variant)
+ *
+ * @param[in] inx Vector element index to be accessed [0,...,size()-1]
+ *
+ * @exception GException::out_of_range
+ *            Element index is out of range.
+ ***************************************************************************/
+const double& GVector::at(const int& inx) const
+{
+    // Raise an exception if index is out of range
+    if (inx < 0 || inx >= size()) {
+        throw GException::out_of_range(G_AT, inx, size()-1);
+    }
+
+    // Return vector element
+    return m_data[inx];
 }
 
 

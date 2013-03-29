@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GVector.i - Vector class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,19 +48,21 @@ public:
     virtual ~GVector(void);
 
     // Vector operators
-    GVector& operator+= (const GVector& v);
-    GVector& operator-= (const GVector& v);
-    GVector& operator+= (const double& v);
-    GVector& operator-= (const double& v);
-    GVector& operator*= (const double& v);
-    GVector& operator/= (const double& v);
-    GVector  operator- () const;
+    GVector& operator+=(const GVector& v);
+    GVector& operator-=(const GVector& v);
+    GVector& operator+=(const double& v);
+    GVector& operator-=(const double& v);
+    GVector& operator*=(const double& v);
+    GVector& operator/=(const double& v);
+    GVector  operator-() const;
 
     // Vector functions
-    void     clear(void);
-    GVector* clone(void) const;
-    int      size(void) const;
-    int      non_zeros(void) const;
+    void          clear(void);
+    GVector*      clone(void) const;
+    int           size(void) const;
+    double&       at(const int& inx);
+    const double& at(const int& inx) const;
+    int           non_zeros(void) const;
 };
 
 
@@ -72,16 +74,20 @@ public:
         return tochar(self->print());
     }
     double __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     void __setitem__(const int& index, const double& val) {
-        if (index>=0 && index < self->size())
+        if (index>=0 && index < self->size()) {
             (*self)[index] = val;
-        else
+        }
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
     GVector __add__(const GVector &a) {
         return (*self) + a;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                         GVector.hpp  -  Vector class                    *
+ *                          GVector.hpp - Vector class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -112,11 +112,13 @@ public:
     GVector  operator-() const;
 
     // Vector methods
-    void        clear(void);
-    GVector*    clone(void) const;
-    int         size(void) const;
-    int         non_zeros(void) const;
-    std::string print(void) const;
+    void          clear(void);
+    GVector*      clone(void) const;
+    int           size(void) const;
+    double&       at(const int& inx);
+    const double& at(const int& inx) const;
+    int           non_zeros(void) const;
+    std::string   print(void) const;
 
 private:
     // Private methods
@@ -131,89 +133,151 @@ private:
 };
 
 
-/***************************************************************************
- *                               Inline members                            *
+/***********************************************************************//**
+ * @brief Vector element access operator
+ *
+ * @param[in] inx Vector element index to be accessed [0,...,size()-1]
+ * @return Reference to vector element.
  ***************************************************************************/
-// Vector unary addition operator
 inline
-GVector& GVector::operator+= (const GVector& v)
+double& GVector::operator[](const int& inx)
 {
-    if (m_num != v.m_num)
+    // Return vector element
+    return m_data[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Vector element access operator (const variant)
+ *
+ * @param[in] inx Vector element index to be accessed [0,...,size()-1]
+ * @return Reference to vector element.
+ ***************************************************************************/
+inline
+const double& GVector::operator[](const int& inx) const
+{
+    // Return vector element
+    return m_data[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Vector unary addition operator
+ ***************************************************************************/
+inline
+GVector& GVector::operator+=(const GVector& v)
+{
+    if (m_num != v.m_num) {
         throw GException::vector_mismatch("GVector::operator+=(GVector)",
                                           m_num, v.m_num);
-    for (int i = 0; i < m_num; ++i)
+    }
+    for (int i = 0; i < m_num; ++i) {
         m_data[i] += v.m_data[i];
+    }
     return *this;
 }
 
-// Vector unary subtraction operator
+
+/***********************************************************************//**
+ * @brief Vector unary subtraction operator
+ ***************************************************************************/
 inline
-GVector& GVector::operator-= (const GVector& v)
+GVector& GVector::operator-=(const GVector& v)
 {
-    if (m_num != v.m_num)
+    if (m_num != v.m_num) {
         throw GException::vector_mismatch("GVector::operator-=(GVector)",
                                           m_num, v.m_num);
-    for (int i = 0; i < m_num; ++i)
+    }
+    for (int i = 0; i < m_num; ++i) {
         m_data[i] -= v.m_data[i];
+    }
     return *this;
 }
 
-// Scalar assignment operator
+
+/***********************************************************************//**
+ * @brief Scalar assignment operator
+ ***************************************************************************/
 inline
-GVector& GVector::operator= (const double& v)
+GVector& GVector::operator=(const double& v)
 {
-    for (int i = 0; i < m_num; ++i)
+    for (int i = 0; i < m_num; ++i) {
         m_data[i] = v;
+    }
     return *this;
 }
 
-// Scalar unary addition operator
+
+/***********************************************************************//**
+ * @brief Scalar unary addition operator
+ ***************************************************************************/
 inline
-GVector& GVector::operator+= (const double& v)
+GVector& GVector::operator+=(const double& v)
 {
-    for (int i = 0; i < m_num; ++i)
+    for (int i = 0; i < m_num; ++i) {
         m_data[i] += v;
+    }
     return *this;
 }
 
-// Scalar unary subtraction operator
+
+/***********************************************************************//**
+ * @brief Scalar unary subtraction operator
+ ***************************************************************************/
 inline
-GVector& GVector::operator-= (const double& v)
+GVector& GVector::operator-=(const double& v)
 {
-    for (int i = 0; i < m_num; ++i)
+    for (int i = 0; i < m_num; ++i) {
         m_data[i] -= v;
+    }
     return *this;
 }
 
-// Scalar unary multiplication operator
+/***********************************************************************//**
+ * @brief Scalar unary multiplication operator
+ ***************************************************************************/
 inline
-GVector& GVector::operator*= (const double& v)
+GVector& GVector::operator*=(const double& v)
 {
-    for (int i = 0; i < m_num; ++i)
+    for (int i = 0; i < m_num; ++i) {
         m_data[i] *= v;
+    }
     return *this;
 }
 
-// Scalar unary division operator
+
+/***********************************************************************//**
+ * @brief Scalar unary division operator
+ ***************************************************************************/
 inline
-GVector& GVector::operator/= (const double& v)
+GVector& GVector::operator/=(const double& v)
 {
-    for (int i = 0; i < m_num; ++i)
+    for (int i = 0; i < m_num; ++i) {
         m_data[i] /= v;
+    }
     return *this;
 }
 
-// Unary minus operator
+
+/***********************************************************************//**
+ * @brief Unary minus operator
+ ***************************************************************************/
 inline
-GVector GVector::operator- ( ) const
+GVector GVector::operator-( ) const
 {
     GVector result = *this;
-    for (int i = 0; i < m_num; ++i)
+    for (int i = 0; i < m_num; ++i) {
         result.m_data[i] = -result.m_data[i];
+    }
     return result;
 }
 
-// Return size of vector
+
+/***********************************************************************//**
+ * @brief Return size of vector
+ *
+ * @return Size of vector
+ ***************************************************************************/
 inline
 int GVector::size() const
 {
