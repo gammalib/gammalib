@@ -728,7 +728,16 @@ double modulo(double v1, double v2)
  *
  * @param[in] arg Argument.
  *
- * Returns the arcus cosine by restricting the argument to [-1,1].
+ * Returns the arc cosine by restricting the argument to [-1,1].
+ *
+ * If the compile option G_USE_ASIN_FOR_ACOS is defined, the function will
+ * compute
+ *
+ * \f[
+ *    acos(x) = \frac{\pi}{2} - asin(x)
+ * \f]
+ *
+ * which happens to be faster on most systems.
  ***************************************************************************/
 double arccos(const double& arg)
 {
@@ -871,30 +880,4 @@ bool file_exists(const std::string& filename)
 
     // Return result
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Checks if argument is infinite
- *
- * @param[in] x Argument.
- *
- * This function has been copied from gnulib.
- ***************************************************************************/
-bool isinfinite(double x)
-{
-  return (x < -DBL_MAX || x > DBL_MAX);
-}
-
-
-/***********************************************************************//**
- * @brief Checks if argument is not a number
- *
- * @param[in] x Argument.
- *
- * This function is a very simple kluge. It may not work on all systems.
- ***************************************************************************/
-bool isnotanumber(double x)
-{
-  return (x != x);
 }
