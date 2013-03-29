@@ -33,8 +33,8 @@
 #include "GModel.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                                  "GModel::operator[](int&)"
 #define G_ACCESS2                          "GModel::operator[](std::string&)"
+#define G_AT                                               "GModel::at(int&)"
 #define G_WRITE_SCALES                   "GModel::write_scales(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -155,58 +155,6 @@ GModel& GModel::operator=(const GModel& model)
 
 
 /***********************************************************************//**
- * @brief Returns reference to model parameter by index
- *
- * @param[in] index Parameter index [0,...,size()-1].
- * @return Reference to model parameter.
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- *
- * Returns a reference to the model parameter of the specified @p index.
- * Throws an exception if @p index is not valid.
- ***************************************************************************/
-GModelPar& GModel::operator[](const int& index)
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    }
-    #endif
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to model parameter by index (const version)
- *
- * @param[in] index Parameter index [0,...,size()-1].
- * @return Const reference to model parameter.
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- *
- * Returns a const reference to the model parameter of the specified
- * @p index. Throws an exception if @p index is not valid.
- ***************************************************************************/
-const GModelPar& GModel::operator[](const int& index) const
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    }
-    #endif
-
-    // Return reference
-    return *(m_pars[index]);
-}
-
-
-/***********************************************************************//**
  * @brief Returns reference to model parameter by name
  *
  * @param[in] name Parameter name.
@@ -275,6 +223,54 @@ const GModelPar& GModel::operator[](const std::string& name) const
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter by index
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Reference to model parameter.
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ *
+ * Returns a reference to the model parameter of the specified @p index.
+ * Throws an exception if @p index is not valid.
+ ***************************************************************************/
+GModelPar& GModel::at(const int& index)
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, index, 0, size()-1);
+    }
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter by index (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Const reference to model parameter.
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ *
+ * Returns a const reference to the model parameter of the specified
+ * @p index. Throws an exception if @p index is not valid.
+ ***************************************************************************/
+const GModelPar& GModel::at(const int& index) const
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, index, 0, size()-1);
+    }
+
+    // Return reference
+    return *(m_pars[index]);
+}
+
 
 /***********************************************************************//**
  * @brief Returns instruments to which model applies

@@ -127,6 +127,8 @@ public:
 
     // Implemented methods
     int                 size(void) const;
+    GModelPar&          at(const int& index);
+    const GModelPar&    at(const int& index) const;
     const std::string&  name(void) const;
     void                name(const std::string& name);
     std::string         instruments(void) const;
@@ -154,6 +156,38 @@ protected:
     std::vector<std::string> m_ids;          //!< Identifiers to which model applies
     std::vector<GModelPar*>  m_pars;         //!< Pointers to all model parameters
 };
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter by index
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Reference to model parameter.
+ *
+ * Returns a reference to the model parameter of the specified @p index.
+ ***************************************************************************/
+inline
+GModelPar& GModel::operator[](const int& index)
+{
+    // Return reference
+    return *(m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to model parameter by index (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Const reference to model parameter.
+ *
+ * Returns a const reference to the model parameter of the specified
+ ***************************************************************************/
+inline
+const GModelPar& GModel::operator[](const int& index) const
+{
+    // Return reference
+    return *(m_pars[index]);
+}
 
 
 /***********************************************************************//**
