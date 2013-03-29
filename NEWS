@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-March, 18th, 2013
+March, 29th, 2013
 
 
 1. Introduction
@@ -139,7 +139,9 @@ None
 
 12. Sky module
 --------------
-None
+Add a sin() and cos() pre computation cache to speed up repeated
+distance computations using dist() or dist_deg(). Coordinate access
+methods are now declared inline to provide also faster data access.
 
 
 13. Support module

@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GSkyDir.hpp  -  Class that implements a sky direction          *
+ *                     GSkyDir.hpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,9 @@
 #include <string>
 #include "GBase.hpp"
 #include "GVector.hpp"
+
+/* __ Compile options ____________________________________________________ */
+#define G_SINCOS_CACHE
 
 
 /***********************************************************************//**
@@ -63,28 +66,28 @@ public:
     GSkyDir& operator= (const GSkyDir& dir);
 
     // Methods
-    void        clear(void);
-    GSkyDir*    clone(void) const;
-    void        radec(const double& ra, const double& dec);
-    void        radec_deg(const double& ra, const double& dec);
-    void        lb(const double& l, const double& b);
-    void        lb_deg(const double& l, const double& b);
-    void        celvector(const GVector& vector);
-    void        rotate_deg(const double& phi, const double& theta);
-    double      l(void) const;
-    double      l_deg(void) const;
-    double      b(void) const;
-    double      b_deg(void) const;
-    double      ra(void) const;
-    double      ra_deg(void) const;
-    double      dec(void) const;
-    double      dec_deg(void) const;
-    GVector     celvector(void) const;
-    double      dist(const GSkyDir& dir) const;
-    double      dist_deg(const GSkyDir& dir) const;
-    double      posang(const GSkyDir& dir) const;
-    double      posang_deg(const GSkyDir& dir) const;
-    std::string print(void) const;
+    void          clear(void);
+    GSkyDir*      clone(void) const;
+    void          radec(const double& ra, const double& dec);
+    void          radec_deg(const double& ra, const double& dec);
+    void          lb(const double& l, const double& b);
+    void          lb_deg(const double& l, const double& b);
+    void          celvector(const GVector& vector);
+    void          rotate_deg(const double& phi, const double& theta);
+    const double& l(void) const;
+    const double& b(void) const;
+    const double& ra(void) const;
+    const double& dec(void) const;
+    double        l_deg(void) const;
+    double        b_deg(void) const;
+    double        ra_deg(void) const;
+    double        dec_deg(void) const;
+    GVector       celvector(void) const;
+    double        dist(const GSkyDir& dir) const;
+    double        dist_deg(const GSkyDir& dir) const;
+    double        posang(const GSkyDir& dir) const;
+    double        posang_deg(const GSkyDir& dir) const;
+    std::string   print(void) const;
 
 private:
     // Private methods
@@ -103,6 +106,77 @@ private:
     double m_b;          //!< Galactic latitude in radians
     double m_ra;         //!< Right Ascension in radians
     double m_dec;        //!< Declination in radians
+
+    // Sincos cache
+    #if defined(G_SINCOS_CACHE)
+    mutable bool   m_has_lb_cache;
+    mutable bool   m_has_radec_cache;
+    mutable double m_sin_b;
+    mutable double m_cos_b;
+    mutable double m_sin_dec;
+    mutable double m_cos_dec;
+    #endif
 };
+
+
+/***********************************************************************//**
+ * @brief Return galactic longitude in radians
+ *
+ * @return Galactic longitude in radians.
+ ***************************************************************************/
+inline
+const double& GSkyDir::l(void) const
+{
+    if (!m_has_lb && m_has_radec) {
+        equ2gal();
+    }
+    return m_l;
+}
+
+
+/***********************************************************************//**
+ * @brief Return galactic latitude in radians
+ *
+ * @return Galactic latitude in radians.
+ ***************************************************************************/
+inline
+const double& GSkyDir::b(void) const
+{
+    if (!m_has_lb && m_has_radec) {
+        equ2gal();
+    }
+    return m_b;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Right Ascension in radians
+ *
+ * @return Right Ascension in radians.
+ ***************************************************************************/
+inline
+const double& GSkyDir::ra(void) const
+{
+    if (!m_has_radec && m_has_lb) {
+        gal2equ();
+    }
+    return m_ra;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Declination in radians
+ *
+ * @return Declination in radians.
+ ***************************************************************************/
+inline
+const double& GSkyDir::dec(void) const
+{
+    if (!m_has_radec && m_has_lb) {
+        gal2equ();
+    }
+    return m_dec;
+}
+
 
 #endif /* GSKYDIR_HPP */

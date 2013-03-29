@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GSkyDir.cpp  -  Class that implements a sky direction          *
+ *                     GSkyDir.hpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -105,6 +105,7 @@ GSkyDir::~GSkyDir(void)
  * @brief Assignment operator
  *
  * @param[in] dir Sky direction.
+ * @return Sky direction.
  ***************************************************************************/
 GSkyDir& GSkyDir::operator= (const GSkyDir& dir)
 {
@@ -150,11 +151,13 @@ void GSkyDir::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone sky direction
+ *
+ * @return Pointer to deep copy of sky direction.
  ***************************************************************************/
 GSkyDir* GSkyDir::clone(void) const
 {
-    // Clone this image
+    // Clone sky direction
     return new GSkyDir(*this);
 }
 
@@ -164,12 +167,18 @@ GSkyDir* GSkyDir::clone(void) const
  *
  * @param[in] ra Right Ascension in radians.
  * @param[in] dec Declination in radians.
+ *
+ * Sets Right Ascension and Declination in radians.
  ***************************************************************************/
 void GSkyDir::radec(const double& ra, const double& dec)
 {
     // Set attributes
     m_has_lb    = false;
     m_has_radec = true;
+    #if defined(G_SINCOS_CACHE)
+    m_has_lb_cache    = false;
+    m_has_radec_cache = false;
+    #endif
 
     // Set direction
     m_ra  = ra;
@@ -185,12 +194,18 @@ void GSkyDir::radec(const double& ra, const double& dec)
  *
  * @param[in] ra Right Ascension in degrees.
  * @param[in] dec Declination in degrees.
+ *
+ * Sets Right Ascension and Declination in degrees.
  ***************************************************************************/
 void GSkyDir::radec_deg(const double& ra, const double& dec)
 {
     // Set attributes
     m_has_lb    = false;
     m_has_radec = true;
+    #if defined(G_SINCOS_CACHE)
+    m_has_lb_cache    = false;
+    m_has_radec_cache = false;
+    #endif
 
     // Set direction
     m_ra  = ra  * deg2rad;
@@ -206,12 +221,18 @@ void GSkyDir::radec_deg(const double& ra, const double& dec)
  *
  * @param[in] l Galactic longitude in radians.
  * @param[in] b Galactic latitude in radians.
+ *
+ * Sets Galactic longitude and latitude in radians.
  ***************************************************************************/
 void GSkyDir::lb(const double& l, const double& b)
 {
     // Set attributes
     m_has_lb    = true;
     m_has_radec = false;
+    #if defined(G_SINCOS_CACHE)
+    m_has_lb_cache    = false;
+    m_has_radec_cache = false;
+    #endif
 
     // Set direction
     m_l = l;
@@ -227,12 +248,18 @@ void GSkyDir::lb(const double& l, const double& b)
  *
  * @param[in] l Galactic longitude in degrees.
  * @param[in] b Galactic latitude in degrees.
+ *
+ * Sets Galactic longitude and latitude in degrees.
  ***************************************************************************/
 void GSkyDir::lb_deg(const double& l, const double& b)
 {
     // Set attributes
     m_has_lb    = true;
     m_has_radec = false;
+    #if defined(G_SINCOS_CACHE)
+    m_has_lb_cache    = false;
+    m_has_radec_cache = false;
+    #endif
 
     // Set direction
     m_l = l * deg2rad;
@@ -247,12 +274,27 @@ void GSkyDir::lb_deg(const double& l, const double& b)
  * @brief Set sky direction from 3D vector in celestial coordinates
  *
  * @param[in] vector 3D vector.
+ *
+ * Convert a 3-dimensional vector in celestial coordinates into a sky
+ * direction. The transformation is given by
+ *
+ * \f[
+ *    \alpha = \atan \left( \frac{x_1}{x_0} \right)
+ * \f]
+ *
+ * \f[
+ *    \delta = \asin x_2
+ * \f]
  ***************************************************************************/
 void GSkyDir::celvector(const GVector& vector)
 {
     // Set attributes
     m_has_lb    = false;
     m_has_radec = true;
+    #if defined(G_SINCOS_CACHE)
+    m_has_lb_cache    = false;
+    m_has_radec_cache = false;
+    #endif
 
     // Convert vector into sky position
     m_dec = std::asin(vector[2]);
@@ -277,8 +319,9 @@ void GSkyDir::celvector(const GVector& vector)
 void GSkyDir::rotate_deg(const double& phi, const double& theta)
 {
     // If we have no equatorial coordinates then get them now
-    if (!m_has_radec && m_has_lb)
+    if (!m_has_radec && m_has_lb) {
         gal2equ();
+    }
 
     // Allocate Euler and rotation matrices
     GMatrix ry;
@@ -311,28 +354,19 @@ void GSkyDir::rotate_deg(const double& phi, const double& theta)
 }
 
 
-/***********************************************************************//**
- * @brief Returns galactic longitude in radians
- ***************************************************************************/
-double GSkyDir::l(void) const
-{
-    // If we have no galactic coordinates then get them now
-    if (!m_has_lb && m_has_radec)
-        equ2gal();
-
-    // Return galactic longitude
-    return m_l;
-}
 
 
 /***********************************************************************//**
- * @brief Returns galactic longitude in degrees
+ * @brief Return galactic longitude in degrees
+ *
+ * @return Galactic longitude in degrees.
  ***************************************************************************/
 double GSkyDir::l_deg(void) const
 {
     // If we have no galactic coordinates then get them now
-    if (!m_has_lb && m_has_radec)
+    if (!m_has_lb && m_has_radec) {
         equ2gal();
+    }
 
     // Return galactic longitude
     return m_l * rad2deg;
@@ -340,27 +374,16 @@ double GSkyDir::l_deg(void) const
 
 
 /***********************************************************************//**
- * @brief Returns galactic latitude in radians
- ***************************************************************************/
-double GSkyDir::b(void) const
-{
-    // If we have no galactic coordinates then get them now
-    if (!m_has_lb && m_has_radec)
-        equ2gal();
-
-    // Return galactic latitude
-    return m_b;
-}
-
-
-/***********************************************************************//**
  * @brief Returns galactic latitude in degrees
+ *
+ * @return Galactic latitude in degrees.
  ***************************************************************************/
 double GSkyDir::b_deg(void) const
 {
     // If we have no galactic coordinates then get them now
-    if (!m_has_lb && m_has_radec)
+    if (!m_has_lb && m_has_radec) {
         equ2gal();
+    }
 
     // Return galactic latitude
     return m_b * rad2deg;
@@ -368,27 +391,16 @@ double GSkyDir::b_deg(void) const
 
 
 /***********************************************************************//**
- * @brief Returns Right Ascension in radians
- ***************************************************************************/
-double GSkyDir::ra(void) const
-{
-    // If we have no equatorial coordinates then get them now
-    if (!m_has_radec && m_has_lb)
-        gal2equ();
-
-    // Return Right Ascension
-    return m_ra;
-}
-
-
-/***********************************************************************//**
  * @brief Returns Right Ascension in degrees
+ *
+ * @return Right Ascension in degrees.
  ***************************************************************************/
 double GSkyDir::ra_deg(void) const
 {
     // If we have no equatorial coordinates then get them now
-    if (!m_has_radec && m_has_lb)
+    if (!m_has_radec && m_has_lb) {
         gal2equ();
+    }
 
     // Return Right Ascension
     return m_ra * rad2deg;
@@ -396,27 +408,16 @@ double GSkyDir::ra_deg(void) const
 
 
 /***********************************************************************//**
- * @brief Returns Declination in radians
- ***************************************************************************/
-double GSkyDir::dec(void) const
-{
-    // If we have no equatorial coordinates then get them now
-    if (!m_has_radec && m_has_lb)
-        gal2equ();
-
-    // Return Declination
-    return m_dec;
-}
-
-
-/***********************************************************************//**
  * @brief Returns Declination in degrees
+ *
+ * @return Declination in degrees.
  ***************************************************************************/
 double GSkyDir::dec_deg(void) const
 {
     // If we have no equatorial coordinates then get them now
-    if (!m_has_radec && m_has_lb)
+    if (!m_has_radec && m_has_lb) {
         gal2equ();
+    }
 
     // Return Declination
     return m_dec * rad2deg;
@@ -424,20 +425,32 @@ double GSkyDir::dec_deg(void) const
 
 
 /***********************************************************************//**
- * @brief Returns sky direction as 3D vector in celestial coordinates
+ * @brief Return sky direction as 3D vector in celestial coordinates
+ *
+ * @return Sky direction as 3D vector in celestial coordinates.
  ***************************************************************************/
 GVector GSkyDir::celvector(void) const
 {
     // If we have no equatorial coordinates then get them now
-    if (!m_has_radec && m_has_lb)
+    if (!m_has_radec && m_has_lb) {
         gal2equ();
+    }
 
     // Compute 3D vector
     double  cosra  = std::cos(m_ra);
     double  sinra  = std::sin(m_ra);
+    #if defined(G_SINCOS_CACHE)
+    if (!m_has_radec_cache) {
+        m_has_radec_cache = true;
+        m_sin_dec         = std::sin(m_dec);
+        m_cos_dec         = std::cos(m_dec);
+    }
+    GVector vector(m_cos_dec*cosra, m_cos_dec*sinra, m_sin_dec);
+    #else
     double  cosdec = std::cos(m_dec);
     double  sindec = std::sin(m_dec);
     GVector vector(cosdec*cosra, cosdec*sinra, sindec);
+    #endif
 
     // Return vector
     return vector;
@@ -448,6 +461,9 @@ GVector GSkyDir::celvector(void) const
  * @brief Compute angular distance between sky directions in radians
  *
  * @param[in] dir Sky direction to which distance is to be computed.
+ * @return Angular distance in radians.
+ *
+ * Computes the angular distance between two sky directions in radians.
  ***************************************************************************/
 double GSkyDir::dist(const GSkyDir& dir) const
 {
@@ -456,25 +472,82 @@ double GSkyDir::dist(const GSkyDir& dir) const
 
     // Compute dependent on coordinate system availability. This speeds
     // up things by avoiding unnecessary coordinate transformations.
-    if (m_has_lb && dir.m_has_lb) {
-        cosdis = std::sin(m_b)*std::sin(dir.m_b) +
-                 std::cos(m_b)*std::cos(dir.m_b) * std::cos(dir.m_l - m_l);
-    }
-    else if (m_has_radec && dir.m_has_radec) {
-        cosdis = std::sin(m_dec)*std::sin(dir.m_dec) +
-                 std::cos(m_dec)*std::cos(dir.m_dec) * std::cos(dir.m_ra - m_ra);
-    }
-    else if (m_has_lb) {
-        cosdis = std::sin(m_b)*std::sin(dir.b()) +
-                 std::cos(m_b)*std::cos(dir.b()) * std::cos(dir.l() - m_l);
+    if (m_has_lb) {
+        #if defined(G_SINCOS_CACHE)
+        if (!m_has_lb_cache) {
+            m_has_lb_cache = true;
+            m_sin_b        = std::sin(m_b);
+            m_cos_b        = std::cos(m_b);
+        }
+        #endif
+        if (dir.m_has_lb) {
+            #if defined(G_SINCOS_CACHE)
+            if (!dir.m_has_lb_cache) {
+                dir.m_has_lb_cache = true;
+                dir.m_sin_b        = std::sin(dir.m_b);
+                dir.m_cos_b        = std::cos(dir.m_b);
+            }
+            cosdis = m_sin_b * dir.m_sin_b +
+                     m_cos_b * dir.m_cos_b *
+                     std::cos(dir.m_l - m_l);
+            #else
+            cosdis = std::sin(m_b) * std::sin(dir.m_b) +
+                     std::cos(m_b) * std::cos(dir.m_b) *
+                     std::cos(dir.m_l - m_l);
+            #endif
+        }
+        else {
+            #if defined(G_SINCOS_CACHE)
+            cosdis = m_sin_b * std::sin(dir.b()) +
+                     m_cos_b * std::cos(dir.b()) *
+                     std::cos(dir.l() - m_l);
+            #else
+            cosdis = std::sin(m_b) * std::sin(dir.b()) +
+                     std::cos(m_b) * std::cos(dir.b()) *
+                     std::cos(dir.l() - m_l);
+            #endif
+        }
     }
     else if (m_has_radec) {
-        cosdis = sin(m_dec)*sin(dir.dec()) +
-                 cos(m_dec)*cos(dir.dec()) * std::cos(dir.ra() - m_ra);
+        #if defined(G_SINCOS_CACHE)
+        if (!m_has_radec_cache) {
+            m_has_radec_cache = true;
+            m_sin_dec         = std::sin(m_dec);
+            m_cos_dec         = std::cos(m_dec);
+        }
+        #endif
+        if (dir.m_has_radec) {
+            #if defined(G_SINCOS_CACHE)
+            if (!dir.m_has_radec_cache) {
+                dir.m_has_radec_cache = true;
+                dir.m_sin_dec         = std::sin(dir.m_dec);
+                dir.m_cos_dec         = std::cos(dir.m_dec);
+            }
+            cosdis = m_sin_dec * dir.m_sin_dec +
+                     m_cos_dec * dir.m_cos_dec *
+                     std::cos(dir.m_ra - m_ra);
+            #else
+            cosdis = std::sin(m_dec) * std::sin(dir.m_dec) +
+                     std::cos(m_dec) * std::cos(dir.m_dec) *
+                     std::cos(dir.m_ra - m_ra);
+            #endif
+        }
+        else {
+            #if defined(G_SINCOS_CACHE)
+            cosdis = m_sin_dec * sin(dir.dec()) +
+                     m_cos_dec * cos(dir.dec()) *
+                     std::cos(dir.ra() - m_ra);
+            #else
+            cosdis = sin(m_dec) * sin(dir.dec()) +
+                     cos(m_dec) * cos(dir.dec()) *
+                     std::cos(dir.ra() - m_ra);
+            #endif
+        }
     }
     else {
-        cosdis = std::sin(dec())*std::sin(dir.dec()) +
-                 std::cos(dec())*std::cos(dir.dec()) * std::cos(dir.ra() - ra());
+        cosdis = std::sin(dec()) * std::sin(dir.dec()) +
+                 std::cos(dec()) * std::cos(dir.dec()) *
+                 std::cos(dir.ra() - ra());
     }
 
     // Compute distance (use argument save GTools function)
@@ -489,6 +562,9 @@ double GSkyDir::dist(const GSkyDir& dir) const
  * @brief Compute angular distance between sky directions in degrees
  *
  * @param[in] dir Sky direction to which distance is to be computed.
+ * @return Angular distance in degrees.
+ *
+ * Computes the angular distance between two sky directions in degrees.
  ***************************************************************************/
 double GSkyDir::dist_deg(const GSkyDir& dir) const
 {
@@ -501,6 +577,7 @@ double GSkyDir::dist_deg(const GSkyDir& dir) const
  * @brief Compute position angle between sky directions in radians
  *
  * @param[in] dir Sky direction.
+ * @return Position angle in radians.
  *
  * Computes the position angle using
  * \f[PA = \arctan \left( 
@@ -522,25 +599,68 @@ double GSkyDir::posang(const GSkyDir& dir) const
 
     // Compute dependent on coordinate system availability. This speeds
     // up things by avoiding unnecessary coordinate transformations.
-    if (m_has_lb && dir.m_has_lb) {
-        arg_1 = std::sin(dir.m_l - m_l);
-        arg_2 = std::cos(m_b)*std::tan(dir.m_b) - std::sin(m_b)*std::cos(dir.m_l - m_l);
-    }
-    else if (m_has_radec && dir.m_has_radec) {
-        arg_1 = std::sin(dir.m_ra - m_ra);
-        arg_2 = std::cos(m_dec)*std::tan(dir.m_dec) - std::sin(m_dec)*std::cos(dir.m_ra - m_ra);
-    }
-    else if (m_has_lb) {
-        arg_1 = std::sin(dir.l() - m_l);
-        arg_2 = std::cos(m_b)*std::tan(dir.b()) - std::sin(m_b)*std::cos(dir.l() - m_l);
+    if (m_has_lb) {
+        #if defined(G_SINCOS_CACHE)
+        if (!m_has_lb_cache) {
+            m_has_lb_cache = true;
+            m_sin_b        = std::sin(m_b);
+            m_cos_b        = std::cos(m_b);
+        }
+        #endif
+        if (dir.m_has_lb) {
+            arg_1 = std::sin(dir.m_l - m_l);
+            #if defined(G_SINCOS_CACHE)
+            arg_2 = m_cos_b * std::tan(dir.m_b) -
+                    m_sin_b * std::cos(dir.m_l - m_l);
+            #else
+            arg_2 = std::cos(m_b) * std::tan(dir.m_b) -
+                    std::sin(m_b) * std::cos(dir.m_l - m_l);
+            #endif
+        }
+        else {
+            arg_1 = std::sin(dir.l() - m_l);
+            #if defined(G_SINCOS_CACHE)
+            arg_2 = m_cos_b * std::tan(dir.b()) -
+                    m_sin_b * std::cos(dir.l() - m_l);
+            #else
+            arg_2 = std::cos(m_b) * std::tan(dir.b()) -
+                    std::sin(m_b) * std::cos(dir.l() - m_l);
+            #endif
+        }
     }
     else if (m_has_radec) {
-        arg_1 = std::sin(dir.ra() - m_ra);
-        arg_2 = std::cos(m_dec)*std::tan(dir.dec()) - std::sin(m_dec)*std::cos(dir.ra() - m_ra);
+        #if defined(G_SINCOS_CACHE)
+        if (!m_has_radec_cache) {
+            m_has_radec_cache = true;
+            m_sin_dec         = std::sin(m_dec);
+            m_cos_dec         = std::cos(m_dec);
+        }
+        #endif
+        if (dir.m_has_radec) {
+            arg_1 = std::sin(dir.m_ra - m_ra);
+            #if defined(G_SINCOS_CACHE)
+            arg_2 = m_cos_dec * std::tan(dir.m_dec) -
+                    m_sin_dec * std::cos(dir.m_ra - m_ra);
+            #else
+            arg_2 = std::cos(m_dec) * std::tan(dir.m_dec) -
+                    std::sin(m_dec) * std::cos(dir.m_ra - m_ra);
+            #endif
+        }
+        else {
+            arg_1 = std::sin(dir.ra() - m_ra);
+            #if defined(G_SINCOS_CACHE)
+            arg_2 = m_cos_dec * std::tan(dir.dec()) -
+                    m_sin_dec * std::cos(dir.ra() - m_ra);
+            #else
+            arg_2 = std::cos(m_dec) * std::tan(dir.dec()) -
+                    std::sin(m_dec) * std::cos(dir.ra() - m_ra);
+            #endif
+        }
     }
     else {
         arg_1 = std::sin(dir.ra() - ra());
-        arg_2 = std::cos(dec())*std::tan(dir.dec()) - std::sin(dec())*std::cos(dir.ra() - ra());
+        arg_2 = std::cos(dec())*std::tan(dir.dec()) -
+                std::sin(dec())*std::cos(dir.ra() - ra());
     }
 
     // Compute position angle
@@ -555,8 +675,11 @@ double GSkyDir::posang(const GSkyDir& dir) const
  * @brief Compute position angle between sky directions in degrees
  *
  * @param[in] dir Sky direction.
+ * @return Position angle in degrees.
  *
- * See GSkyDir::posang for more information about the computation of the
+ * Returns the position angle of a sky direction in degrees.
+ *
+ * See the posang() method for more information about the computation of the
  * position angle.
  ***************************************************************************/
 double GSkyDir::posang_deg(const GSkyDir& dir) const
@@ -567,7 +690,9 @@ double GSkyDir::posang_deg(const GSkyDir& dir) const
 
 
 /***********************************************************************//**
- * @brief Print vector information
+ * @brief Print sky direction information
+ *
+ * @return String containing sky direction information.
  ***************************************************************************/
 std::string GSkyDir::print(void) const
 {
@@ -575,12 +700,15 @@ std::string GSkyDir::print(void) const
     std::string result;
 
     // Put coordinates in string
-    if (m_has_lb)
+    if (m_has_lb) {
         result = "(l,b)=("+str(m_l*rad2deg)+","+str(m_b*rad2deg)+")";
-    else if (m_has_radec)
+    }
+    else if (m_has_radec) {
         result = "(RA,Dec)=("+str(m_ra*rad2deg)+","+str(m_dec*rad2deg)+")";
-    else
+    }
+    else {
         result = "(RA,Dec)=(not initialised)";
+    }
 
     // Return result
     return result;
@@ -606,6 +734,16 @@ void GSkyDir::init_members(void)
     m_ra        = 0.0;
     m_dec       = 0.0;
 
+    // Initialise sincos cache
+    #if defined(G_SINCOS_CACHE)
+    m_has_lb_cache    = false;
+    m_has_radec_cache = false;
+    m_sin_b           = 0.0;
+    m_cos_b           = 0.0;
+    m_sin_dec         = 0.0;
+    m_cos_dec         = 0.0;
+    #endif
+
     // Return
     return;
 }
@@ -625,6 +763,16 @@ void GSkyDir::copy_members(const GSkyDir& dir)
     m_b         = dir.m_b;
     m_ra        = dir.m_ra;
     m_dec       = dir.m_dec;
+
+    // Copy sincos cache
+    #if defined(G_SINCOS_CACHE)
+    m_has_lb_cache    = dir.m_has_lb_cache;
+    m_has_radec_cache = dir.m_has_radec_cache;
+    m_sin_b           = dir.m_sin_b;
+    m_cos_b           = dir.m_cos_b;
+    m_sin_dec         = dir.m_sin_dec;
+    m_cos_dec         = dir.m_cos_dec;
+    #endif
 
     // Return
     return;
@@ -744,35 +892,49 @@ bool operator==(const GSkyDir &a, const GSkyDir &b)
 
     // Compute dependent on coordinate system availability. This speeds
     // up things by avoiding unnecessary coordinate transformations.
-    if (a.m_has_lb && b.m_has_lb) {
-        if (std::abs(a.m_b) == 90.0)
-            equal = (a.m_b == b.m_b);
-        else
-            equal = (a.m_b == b.m_b && a.m_l == b.m_l);
-    }
-    else if (a.m_has_radec && b.m_has_radec) {
-        if (std::abs(a.m_dec) == 90.0)
-            equal = (a.m_dec == b.m_dec);
-        else
-            equal = (a.m_dec == b.m_dec && a.m_ra == b.m_ra);
-    }
-    else if (a.m_has_lb) {
-        if (std::abs(a.m_b) == 90.0)
-            equal = (a.m_b == b.b());
-        else
-            equal = (a.m_b == b.b() && a.m_l == b.l());
+    if (a.m_has_lb) {
+        if (b.m_has_lb) {
+            if (std::abs(a.m_b) == 90.0) {
+                equal = (a.m_b == b.m_b);
+            }
+            else {
+                equal = (a.m_b == b.m_b && a.m_l == b.m_l);
+            }
+        }
+        else {
+            if (std::abs(a.m_b) == 90.0) {
+                equal = (a.m_b == b.b());
+            }
+            else {
+                equal = (a.m_b == b.b() && a.m_l == b.l());
+            }
+        }
     }
     else if (a.m_has_radec) {
-        if (std::abs(a.m_dec) == 90.0)
+        if (b.m_has_radec) {
+            if (std::abs(a.m_dec) == 90.0) {
+                equal = (a.m_dec == b.m_dec);
+            }
+            else {
+            equal = (a.m_dec == b.m_dec && a.m_ra == b.m_ra);
+            }
+        }
+        else {
+            if (std::abs(a.m_dec) == 90.0) {
             equal = (a.m_dec == b.dec());
-        else
-            equal = (a.m_dec == b.dec() && a.m_ra == b.ra());
+            }
+            else {
+                equal = (a.m_dec == b.dec() && a.m_ra == b.ra());
+            }
+        }
     }
     else {
-        if (std::abs(b.dec()) == 90.0)
+        if (std::abs(b.dec()) == 90.0) {
             equal = (b.dec() == a.dec());
-        else
+        }
+        else {
             equal = (b.dec() == a.dec() && b.ra() == a.ra());
+        }
     }
 
     // Return equality
