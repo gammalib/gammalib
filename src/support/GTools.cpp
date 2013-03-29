@@ -1,7 +1,7 @@
 /***************************************************************************
- *                          GTools.cpp  -  GammaLib tools                  *
+ *                       GTools.cpp - GammaLib tools                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GTools.cpp
  * @brief Gammalib tools implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -39,6 +39,9 @@
 #include <sstream>
 #include <algorithm>
 #include "GTools.hpp"
+
+/* __ Compile options ____________________________________________________ */
+#define G_USE_ASIN_FOR_ACOS             //!< Use asin for acos computations
 
 /* __ Coding definitions _________________________________________________ */
 #define G_PARFORMAT_LENGTH 29
@@ -78,8 +81,9 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
         if (start != std::string::npos && stop != std::string::npos) {
 
             // Continue only if stop is larger then or equal to  start
-            if (start <= stop)
+            if (start <= stop) {
                 result = arg.substr(start, stop-start+1);
+            }
 
         } // endif: start and stop were valid
 
@@ -113,35 +117,35 @@ std::string expand_env(const std::string& arg)
 
     // Initialise result with argument
     std::string result = arg;
-    
+
     // Initialise parse parameters
     size_t index    = 0;
     bool   in_quote = false;
-    
+
     // Loop over string
     while (index < result.length()) {
-        
+
         // If we have an escaped character then skip the current character
         // and the next one
         if (result[index] == '\\') {
             index += 2;
             continue;
         }
-        
+
         // If we have a single quote then toggle the quote state
         if (result[index] == '\'') {
             in_quote = !in_quote;
             index++;
             continue;
         }
-        
+
         // Don't expand environment variables inside single quotes. Note
         // that double quotes are ok.
         if (in_quote) {
             index++;
             continue;
         }
-        
+
         // Find delimiter which indicates beginning of an environment variable
         size_t begin_length = 0;
         int    delim_idx    = 0;
@@ -152,10 +156,10 @@ std::string expand_env(const std::string& arg)
                 break;
             }
         }
-        
+
         // If we found a delimiter then process the environment variable
         if (begin_length > 0) {
-            
+
             // Search for the termination delimiter of the environment
             // variable. There is a special case for delimiter 4:
             // It has always an end_length of zero as the / is not a real
@@ -179,53 +183,53 @@ std::string expand_env(const std::string& arg)
                     i_end++;
                 }
             }
-            
+
             // If termination delimiter has been found then expand the
             // environment variable
             if (i_end < result.length() || delim_idx == 4) {
-            
+
                 // Extract environment variable name
                 std::string name        = result.substr(i_start, i_end-i_start);
                 size_t      name_length = name.length();
 
                 // Erase delimiters and environment variable
                 result.erase(index, begin_length+name_length+end_length);
-                
+
                 // Get the environment variable from the operating system
                 const char* env = std::getenv(name.c_str());
-                
+
                 // If the environment variable has been found then replace
                 // it by its value
                 if (env != NULL) {
-                
+
                     // Set replacement string and its length
                     std::string replace(env);
                     size_t      replace_length = replace.length();
-                    
+
                     // Insert replacement string
                     result.insert(index, replace);
-                    
+
                     // Advance pointer
                     index += replace_length;
-                    
+
                 } // endif: environment variable has been found
-            
+
             } // endif: termination delimiter found
-            
+
             // If no environment variable has been found then set index=i_end+1
             else {
                 index = i_end + 1;
             }
-            
+
         } // endif: we found an environment variable delimiter
-        
+
         // ... otherwise advance to next character
         else {
             index++;
         }
 
     } // endwhile: looped over string
-    
+
     // Return result
     return result;
 }
@@ -374,8 +378,9 @@ char* tochar(const std::string& arg)
     char* str = new char[arg.length()+1];
 
     // Copy characters
-    for (std::size_t i = 0; i < arg.length(); ++i)
+    for (std::size_t i = 0; i < arg.length(); ++i) {
         str[i] = arg[i];
+    }
 
     // Set line end character
     str[arg.length()] = '\0';
@@ -731,12 +736,19 @@ double arccos(const double& arg)
     double arccos;
 
     // Compute acos
-    if (arg >= 1)
+    if (arg >= 1) {
         arccos = 0.0;
-    else if (arg <= -1.0)
+    }
+    else if (arg <= -1.0) {
         arccos = pi;
-    else
+    }
+    else {
+        #if defined(G_USE_ASIN_FOR_ACOS)
+        arccos = pihalf - std::asin(arg);
+        #else
         arccos = std::acos(arg);
+        #endif
+    }
 
     // Return result
     return arccos;
@@ -765,7 +777,7 @@ double plaw_photon_flux(const double& emin, const double& emax,
 {
     // Initialise flux
     double flux = 0.0;
-    
+
     // Continue only if emax > emin
     if (emax > emin) {
 
@@ -810,7 +822,7 @@ double plaw_energy_flux(const double& emin, const double& emax,
 {
     // Initialise flux
     double flux = 0.0;
-    
+
     // Continue only if emax > emin
     if (emax > emin) {
 
@@ -853,8 +865,9 @@ bool file_exists(const std::string& filename)
     int ret = stat(filename.c_str(), &info);
 
     // Check if file is a regular file
-    if (ret == 0 && S_ISREG(info.st_mode))
+    if (ret == 0 && S_ISREG(info.st_mode)) {
         result = true;
+    }
 
     // Return result
     return result;
