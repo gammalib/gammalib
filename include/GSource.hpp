@@ -41,10 +41,12 @@
  * @brief Class that handles gamma-ray sources
  *
  * The GSource class stores the physical attributes of a gamma-ray source,
- * which is the distribution of photon arrival directions (i.e. the spatial
- * source model), the photon energy, and the photon arrival time. The class
- * is very similar to the GPhoton class, yet instead of a given photon
- * arrival direction it contains a sky model member.
+ * which is the distribution of photon arrival directions in form of a
+ * spatial source model), the photon energy, and the photon arrival time.
+ * The class is very similar to the GPhoton class, yet instead of a given
+ * photon arrival direction it contains a spatial model pointer. Note that
+ * the class does not allocate or deallocate the spatial model pointer,
+ * it just is a carrier of a pointer which is handled outside the class.
  *
  * Each source also has a name so that it can be identified.
  ***************************************************************************/

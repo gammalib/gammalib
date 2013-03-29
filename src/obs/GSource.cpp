@@ -238,10 +238,8 @@ void GSource::init_members(void)
  ***************************************************************************/
 void GSource::copy_members(const GSource& src)
 {
-    // Clone spatial model
-    m_model = (src.m_model != NULL) ? src.m_model->clone() : NULL;
-
     // Copy members
+    m_model  = src.m_model;
     m_name   = src.m_name;
     m_energy = src.m_energy;
     m_time   = src.m_time;
@@ -256,12 +254,6 @@ void GSource::copy_members(const GSource& src)
  ***************************************************************************/
 void GSource::free_members(void)
 {
-    // Free spatial model
-    if (m_model != NULL) delete m_model;
-
-    // Signal model as free
-    m_model = NULL;
-
     // Return
     return;
 }
