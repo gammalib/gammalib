@@ -108,16 +108,17 @@ protected:
     GModelPar m_pivot;               //!< Pivot energy
 
     // Cached members used for pre-computations
-    mutable GEnergy m_last_energy;   //!< Last energy value
-    mutable double  m_last_index;    //!< Last index parameter
-    mutable double  m_last_pivot;    //!< Last pivot parameter
-    mutable double  m_last_e_norm;   //!< Last E/Epivot value
-    mutable double  m_last_power;    //!< Last power value
-    mutable double  m_mc_emin;       //!< Minimum energy
-    mutable double  m_mc_emax;       //!< Maximum energy
-    mutable double  m_mc_exponent;   //!< Exponent (index+1)
-    mutable double  m_mc_pow_emin;   //!< Power of minimum energy
-    mutable double  m_mc_pow_ewidth; //!< Power of energy width
+    mutable GEnergy m_last_energy;     //!< Last energy value
+    mutable double  m_last_index;      //!< Last index parameter
+    mutable double  m_last_pivot;      //!< Last pivot parameter
+    mutable double  m_last_e_norm;     //!< Last E/Epivot value
+    mutable double  m_last_log_e_norm; //!< Last ln(E/Epivot) value
+    mutable double  m_last_power;      //!< Last power value
+    mutable double  m_mc_emin;         //!< Minimum energy
+    mutable double  m_mc_emax;         //!< Maximum energy
+    mutable double  m_mc_exponent;     //!< Exponent (index+1)
+    mutable double  m_mc_pow_emin;     //!< Power of minimum energy
+    mutable double  m_mc_pow_ewidth;   //!< Power of energy width
 };
 
 
