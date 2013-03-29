@@ -506,28 +506,31 @@ void GObservation::free_members(void)
 double GObservation::model_grad(const GModel& model, const GEvent& event,
                                 int ipar) const
 {
-   // Initialise gradient
+    // Initialise gradient
     double grad = 0.0;
 
+    // Get reference on model parameter to avoid repreated operator access
+    const GModelPar& par = model[ipar];
+
     // Compute gradient only if parameter is free
-    if (model[ipar].isfree()) {
+    if (par.isfree()) {
 
         // If model has a gradient then use it
-        if (model[ipar].hasgrad()) {
-            grad = model[ipar].factor_gradient();
+        if (par.hasgrad()) {
+            grad = par.factor_gradient();
         }
 
         // ... otherwise compute it numerically
         else {
 
-            // Get non-const model pointer (circumvent const correctness)
-            GModel* ptr = (GModel*)&model;
+            // Get non-const model pointer
+            GModelPar* ptr = const_cast<GModelPar*>(&par);
 
             // Save current model parameter
-            GModelPar current = (*ptr)[ipar];
+            GModelPar current = par;
 
             // Get actual parameter value
-            double x = model[ipar].factor_value();
+            double x = par.factor_value();
 
             // Set fixed step size for computation of derivative.
             // By default, the step size is fixed to 0.0002, but if this would
@@ -538,7 +541,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             const double step_size = 0.0002;
             double       dx        = step_size;
             if (model[ipar].hasmin()) {
-                double dx_min = x - model[ipar].factor_min();
+                double dx_min = x - par.factor_min();
                 if (dx_min == 0.0) {
                     dx = step_size * x;
                     if (dx == 0.0) {
@@ -551,7 +554,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
                 }
             }
             if (model[ipar].hasmax()) {
-                double dx_max = model[ipar].factor_max() - x;
+                double dx_max = par.factor_max() - x;
                 if (dx_max == 0.0) {
                     dx = step_size * x;
                     if (dx == 0.0) {
@@ -566,7 +569,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             #endif
 
             // Remove any boundaries to avoid limitations
-            (*ptr)[ipar].remove_range();
+            ptr->remove_range();
 
             // Setup derivative function
             GObservation::model_func function(this, model, event, ipar);
@@ -581,7 +584,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
             #endif
 
             // Restore current model parameter
-            (*ptr)[ipar] = current;
+            *ptr = current;
 
         } // endelse: computed gradient numerically
 
