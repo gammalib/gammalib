@@ -1057,7 +1057,7 @@ GEnergy GModelSpectralNodes::energy(const int& index) const
  * @exception GException::out_of_range
  *            Index is out of range.
  *
- * Returns the energy of node @p index.
+ * Sets the energy of node @p index.
  ***************************************************************************/
 void GModelSpectralNodes::energy(const int& index, const GEnergy& energy)
 {
@@ -1083,12 +1083,12 @@ void GModelSpectralNodes::energy(const int& index, const GEnergy& energy)
  * @brief Return node intensity
  *
  * @param[in] index Node index [0,...,nodes()-1].
- * @return Energy of node @p index.
+ * @return Intensity of node @p index.
  *
  * @exception GException::out_of_range
  *            Index is out of range.
  *
- * Returns the energy of node @p index.
+ * Returns the intensity of node @p index.
  ***************************************************************************/
 double GModelSpectralNodes::intensity(const int& index) const
 {
@@ -1108,12 +1108,12 @@ double GModelSpectralNodes::intensity(const int& index) const
  * @brief Set node intensity
  *
  * @param[in] index Node index [0,...,nodes()-1].
- * @param[in] energy Node energy.
+ * @param[in] intensity Node Intensity.
  *
  * @exception GException::out_of_range
  *            Index is out of range.
  *
- * Returns the energy of node @p index.
+ * Set the intensity of node @p index.
  ***************************************************************************/
 void GModelSpectralNodes::intensity(const int& index, const double& intensity)
 {
