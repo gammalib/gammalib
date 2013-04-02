@@ -279,11 +279,11 @@ void GSkyDir::lb_deg(const double& l, const double& b)
  * direction. The transformation is given by
  *
  * \f[
- *    \alpha = \atan \left( \frac{x_1}{x_0} \right)
+ *    \alpha = \arctan \left( \frac{x_1}{x_0} \right)
  * \f]
  *
  * \f[
- *    \delta = \asin x_2
+ *    \delta = \arcsin x_2
  * \f]
  ***************************************************************************/
 void GSkyDir::celvector(const GVector& vector)

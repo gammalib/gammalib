@@ -155,7 +155,7 @@ GObservations& GObservations::operator=(const GObservations& obs)
 /***********************************************************************//**
  * @brief Return pointer to observation
  *
- * @param[in] index Observation index (0,...,size()-1)
+ * @param[in] index Observation index [0,...,size()-1].
  * @return Observation.
  *
  * @exception GException::out_of_range
@@ -180,7 +180,7 @@ GObservation* GObservations::operator[](const int& index)
 /***********************************************************************//**
  * @brief Return pointer to observation (const version)
  *
- * @param[in] index Observation index (0,...,size()-1)
+ * @param[in] index Observation index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Operation index is out of range.
@@ -291,7 +291,7 @@ GObservation* GObservations::append(const GObservation& obs)
 /***********************************************************************//**
  * @brief Insert observation into container
  *
- * @param[in] index Observation index (0,...,size()-1).
+ * @param[in] index Observation index [0,...,size()-1].
  * @param[in] obs Observation.
  * @return Pointer to deep copy of observation.
  *
@@ -331,7 +331,7 @@ GObservation* GObservations::insert(const int& index, const GObservation& obs)
 /***********************************************************************//**
  * @brief Remove observation from container
  *
- * @param[in] index Observation index (0,...,size()-1).
+ * @param[in] index Observation index [0,...,size()-1].
  *
  * @exception GException::out_of_range
  *            Observation index is out of range.
