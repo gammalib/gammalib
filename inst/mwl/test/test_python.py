@@ -93,7 +93,7 @@ def fit_spectrum(filename, xmlname):
         yval = 0.0
         for model in obs.models():
             if model.type() == "PointSource":
-                yval += model.value(d, e, t) * energy * energy * 1.6021765e-6
+                yval += model.value(GPhoton(d, e, t)) * energy * energy * 1.6021765e-6
         y.append(yval)
     plt.plot(x, y)
 

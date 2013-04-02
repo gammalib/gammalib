@@ -2,7 +2,7 @@
 #
 # Run all test and example scripts that come with the package
 #
-# Copyright (C) 2011 Juergen Knoedlseder
+# Copyright (C) 2011-2013 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -18,6 +18,17 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 # =====================================================================
 base=$PWD
+
+
+# examples
+# ========
+echo
+echo "=====> examples"
+cd examples/python
+./models_howto.py
+./xml_howto.py
+./xml_html_create.py
+cd $base
 
 
 # test

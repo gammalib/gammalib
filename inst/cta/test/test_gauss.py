@@ -35,11 +35,13 @@ def gauss(dir, sigma):
     # Compute derivative
     dh = 0.0001
     s  = GSkyDir()
+    e  = GEnergy()
+    t  = GTime()
     f1 = GModelSpatialRadialGauss(s, sigma)
     f2 = GModelSpatialRadialGauss(s, sigma + dh)
-    v1 = f1.eval_gradients(dir)
+    v1 = f1.eval_gradients(GPhoton(dir, e, t))
     g1 = f1[2].gradient()
-    v2 = f2.eval_gradients(dir)
+    v2 = f2.eval_gradients(GPhoton(dir, e, t))
     g2 = f2[2].gradient()
     g  = (v2 - v1) / dh
 
@@ -79,10 +81,12 @@ def show_gaussian(sigma):
         f_expected = []
         sigma_rad  = sigma * (pi / 180.0)
         norm       = 1.0 / (2.0 * pi * sigma_rad * sigma_rad)
+        eng        = GEnergy()
+        time       = GTime()
         for t in theta:
             s = GSkyDir()
             s.radec_deg(0.0, t)
-            f = gauss.eval(s)
+            f = gauss.eval(GPhoton(s, eng, time))
             e = norm * exp(-0.5 * t * t / sigma / sigma)
             f_gauss.append(f)
             f_expected.append(e)
