@@ -129,6 +129,7 @@ public:
     int                 size(void) const;
     GModelPar&          at(const int& index);
     const GModelPar&    at(const int& index) const;
+    bool                haspar(const std::string& name) const;
     const std::string&  name(void) const;
     void                name(const std::string& name);
     std::string         instruments(void) const;

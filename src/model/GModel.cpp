@@ -273,6 +273,33 @@ const GModelPar& GModel::at(const int& index) const
 
 
 /***********************************************************************//**
+ * @brief Signals if parameter name exists
+ *
+ * @param[in] name Parameter name.
+ * @return True if parameter with specified @p name exists.
+ *
+ * Searches all parameter names for a match with the specified @p name. If
+ * the specified name has been found, true is returned.
+ ***************************************************************************/
+bool GModel::haspar(const std::string& name) const
+{
+    // Default found flag to false
+    bool found = false;
+
+    // Search for parameter name
+    for (int i = 0; i < size(); ++i) {
+        if (m_pars[i]->name() == name) {
+            found = true;
+            break;
+        }
+    }
+
+    // Return
+    return found;
+}
+
+
+/***********************************************************************//**
  * @brief Returns instruments to which model applies
  *
  * Returns a comma separated list of instruments to which model applies. If
