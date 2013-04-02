@@ -53,6 +53,7 @@ void TestGModel::set(void)
     m_xml_model_point_eplaw       = "data/model_point_eplaw.xml";
     m_xml_model_point_logparabola = "data/model_point_logparabola.xml";
     m_xml_model_point_nodes       = "data/model_point_nodes.xml";
+    m_xml_model_point_filefct     = "data/model_point_filefct.xml";
     m_xml_model_diffuse_const     = "data/model_diffuse_const.xml";
     m_xml_model_diffuse_cube      = "data/model_diffuse_cube.xml";
     m_xml_model_diffuse_map       = "data/model_diffuse_map.xml";
@@ -82,6 +83,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
     add_test(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
     add_test(static_cast<pfunction>(&TestGModel::test_nodes), "Test GModelSpectralNodes");
+    add_test(static_cast<pfunction>(&TestGModel::test_filefct), "Test GModelSpectralFunc");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
 
     // Add other tests
@@ -1063,8 +1065,8 @@ void TestGModel::test_plaw(void)
     // Test value constructor
     test_try("Test value constructor");
     try {
-        GModelSpectralPlaw model(1.0, -2.1, GEnergy(100.0, "MeV"));
-        test_value(model.prefactor(), 1.0);
+        GModelSpectralPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"));
+        test_value(model.prefactor(), 2.0);
         test_value(model.index(), -2.1);
         test_value(model.pivot().MeV(), 100.0);
         test_try_success();
@@ -1145,8 +1147,8 @@ void TestGModel::test_plaw2(void)
     // Test value constructor
     test_try("Test value constructor");
     try {
-        GModelSpectralPlaw2 model(1.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
-        test_value(model.integral(), 1.0);
+        GModelSpectralPlaw2 model(2.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+        test_value(model.integral(), 2.0);
         test_value(model.index(), -2.1);
         test_value(model.emin().MeV(), 10.0);
         test_value(model.emax().MeV(), 100.0);
@@ -1231,8 +1233,8 @@ void TestGModel::test_eplaw(void)
     // Test value constructor
     test_try("Test value constructor");
     try {
-        GModelSpectralExpPlaw model(1.0, -2.1, GEnergy(100.0, "MeV"), GEnergy(1.0, "GeV"));
-        test_value(model.prefactor(), 1.0);
+        GModelSpectralExpPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"), GEnergy(1.0, "GeV"));
+        test_value(model.prefactor(), 2.0);
         test_value(model.index(), -2.1);
         test_value(model.pivot().MeV(), 100.0);
         test_value(model.cutoff().GeV(), 1.0);
@@ -1317,8 +1319,8 @@ void TestGModel::test_logparabola(void)
     // Test value constructor
     test_try("Test value constructor");
     try {
-        GModelSpectralLogParabola model(1.0, -2.1, GEnergy(100.0, "MeV"), -0.2);
-        test_value(model.prefactor(), 1.0);
+        GModelSpectralLogParabola model(2.0, -2.1, GEnergy(100.0, "MeV"), -0.2);
+        test_value(model.prefactor(), 2.0);
         test_value(model.index(), -2.1);
         test_value(model.pivot().MeV(), 100.0);
         test_value(model.curvature(), -0.2);
@@ -1474,6 +1476,80 @@ void TestGModel::test_nodes(void)
         // Test operator access
         const char* strarray[] = {"Energy0", "Energy1", "Intensity0", "Intensity1"};
         for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralFunc class
+ ***************************************************************************/
+void TestGModel::test_filefct(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralFunc model;
+        test_assert(model.type() == "FileFunction",
+                                    "Model type \"FileFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralFunc model("data/filefunction.txt", 2.0);
+        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+        test_value(model.norm(), 2.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+   
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml               xml(m_xml_model_point_filefct);
+        GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralFunc model(*element);
+        test_value(model.size(), 1);
+        test_assert(model.type() == "FileFunction", "Expected \"FileFunction\"");
+        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+        test_value(model.norm(), 1.0);
+
+        // Test filename method
+        model.filename("data/filefunction.txt");
+        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+
+        // Test norm method
+        model.norm(3.0);
+        test_value(model.norm(), 3.0);
+
+        // Test operator access
+        const char* strarray[] = {"Normalization"};
+        for (int i = 0; i < 1; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value
             model[keyname].value(2.1);

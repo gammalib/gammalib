@@ -54,17 +54,18 @@ public:
     void    test_radial_gauss(void);
     void    test_radial_shell(void);
     void    test_elliptical_disk(void);
+    void    test_spatial_model(void);
     void    test_const(void);
     void    test_plaw(void);
     void    test_plaw2(void);
     void    test_eplaw(void);
     void    test_logparabola(void);
     void    test_nodes(void);
+    void    test_filefct(void);
+    void    test_spectral_model(void);
     //
     void    test_model(void);
     void    test_models(void);
-    void    test_spatial_model(void);
-    void    test_spectral_model(void);
 
 private:        
     // Private methods
@@ -79,6 +80,7 @@ private:
     std::string m_xml_model_point_eplaw;
     std::string m_xml_model_point_logparabola;
     std::string m_xml_model_point_nodes;
+    std::string m_xml_model_point_filefct;
     std::string m_xml_model_diffuse_const;
     std::string m_xml_model_diffuse_cube;
     std::string m_xml_model_diffuse_map;
