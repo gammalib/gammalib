@@ -47,6 +47,7 @@ public:
     virtual void set(void);
     void    test_model_par(void);
     void    test_sky_model(void);
+    void    test_point_source(void);
     void    test_diffuse_const(void);
     void    test_diffuse_cube(void);
     void    test_diffuse_map(void);
@@ -63,8 +64,6 @@ public:
     void    test_nodes(void);
     void    test_filefct(void);
     void    test_spectral_model(void);
-    //
-    void    test_model(void);
     void    test_models(void);
 
 private:        

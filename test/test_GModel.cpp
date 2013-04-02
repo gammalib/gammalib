@@ -67,6 +67,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
 
     // Add spatial model tests
+    add_test(static_cast<pfunction>(&TestGModel::test_point_source), "Test GModelSpatialPointSource");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
@@ -86,9 +87,10 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_filefct), "Test GModelSpectralFunc");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
 
-    // Add other tests
-    add_test(static_cast<pfunction>(&TestGModel::test_model), "Test model handling");
-    add_test(static_cast<pfunction>(&TestGModel::test_models), "Test models");
+    // Add temporal model tests
+
+    // Add model container tests
+    add_test(static_cast<pfunction>(&TestGModel::test_models), "Test GModels");
 
     // Return
     return;
@@ -343,6 +345,93 @@ void TestGModel::test_sky_model(void)
         test_value(vector[3], 0.0);
         test_value(vector[4], 0.0);
         test_value(vector[5], 0.0);
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialPointSource class
+ ***************************************************************************/
+void TestGModel::test_point_source(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialPointSource model;
+        test_assert(model.type() == "SkyDirFunction",
+                                    "Model type \"SkyDirFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test sky direction constructor
+    test_try("Test sky direction constructor");
+    try {
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        GModelSpatialPointSource model(dir);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), +22.0145);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpatialPointSource model(83.6331, +22.0145);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), +22.0145);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                     xml(m_xml_model_point_plaw);
+        GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialPointSource model(*element);
+        test_value(model.size(), 2);
+        test_assert(model.type() == "SkyDirFunction", "Expected \"SkyDirFunction\"");
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), +22.0145);
+
+        // Test ra method
+        model.ra(3.9);
+        test_value(model.ra(), 3.9);
+
+        // Test dec method
+        model.dec(3.9);
+        test_value(model.dec(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"RA", "DEC"};
+        for (int i = 0; i < 2; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
 
         // Success if we reached this point
         test_try_success();
@@ -1573,94 +1662,6 @@ void TestGModel::test_filefct(void)
 
 
 /***********************************************************************//**
- * @brief Test model handling.
- ***************************************************************************/
-void TestGModel::test_model(void)
-{
-    // Setup spatial model
-    GModelSpatialPointSource point_source;
-    test_try("Setup spatial model");
-    try {
-        GSkyDir dir;
-        dir.radec_deg(83.6331, +22.0145);
-        point_source = GModelSpatialPointSource(dir);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    test_assert((point_source.ra() == 83.6331 && point_source.dec() == +22.0145),
-                "Test if ra=83.6331 and dec=22.0145",
-                "Bad values in GModelSpatialPointSource");
-
-    // Setup spectral model
-    GModelSpectralPlaw power_law;
-    test_try("Setup spectral model");
-    try {
-        power_law = GModelSpectralPlaw(1.0e-7, -2.1, GEnergy(100.0, "MeV"));
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-    test_assert((power_law.prefactor() == 1.0e-7 && power_law.index() == -2.1),
-                "Test if norm=1.0e-7 and index=-2.1",
-                "Bad values in GModelSpectralPlaw");
-
-    // Setup Crab model
-    GModelSky crab;
-    test_try("Setup Crab model");
-    try {
-        crab = GModelSky(point_source, power_law);
-        crab.name("Crab");
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Put model in container
-    GModels models;
-    test_try("Put model in container");
-    try {
-        models.append(crab);
-        models.append(crab);
-        models.append(crab);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Set model scaling
-    GModelPar lat("LAT", 1.0);
-    GModelPar cta("CTA", 0.5);
-    crab.scale(lat);
-    crab.scale(lat); // In purpose to check if parameter is appended only once
-    crab.scale(cta);
-
-    // Test model scaling
-    test_value(crab.scale("LAT").value(), 1.0);
-    test_value(crab.scale("CTA").value(), 0.5);
-    test_value(crab.scale("COM").value(), 1.0);
-
-    // Test saving and loading
-    GModels models2;
-    models2.append(crab);
-    models2.save("test_instrument.xml");
-    models2.load("test_instrument.xml");
-    test_value(models2[0]->scale("LAT").value(), 1.0);
-    test_value(models2[0]->scale("CTA").value(), 0.5);
-    test_value(models2[0]->scale("COM").value(), 1.0);
-
-    // Exit test
-    return;
-
-}
-
-
-/***********************************************************************//**
  * @brief Test XML model.
  *
  * @param[in] name Model name.
@@ -1737,7 +1738,7 @@ void TestGModel::test_spectral_model(void)
 
 
 /***********************************************************************//**
- * @brief Test models.
+ * @brief Test model container handling
  ***************************************************************************/
 void TestGModel::test_models(void)
 {
@@ -1776,6 +1777,54 @@ void TestGModel::test_models(void)
         test_try_failure(e);
     }
 
+    // Setup Crab model
+    GModelSky crab;
+    test_try("Setup Crab model");
+    try {
+        GModelSpatialPointSource point_source(83.6331, +22.0145);
+        GModelSpectralPlaw power_law(2.0, -2.1, GEnergy(100.0, "MeV"));
+        crab = GModelSky(point_source, power_law);
+        crab.name("Crab");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Put model in container
+    GModels models;
+    test_try("Put model in container");
+    try {
+        models.append(crab);
+        models.append(crab);
+        models.append(crab);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Set model scaling
+    GModelPar lat("LAT", 1.0);
+    GModelPar cta("CTA", 0.5);
+    crab.scale(lat);
+    crab.scale(lat); // In purpose to check if parameter is appended only once
+    crab.scale(cta);
+
+    // Test model scaling
+    test_value(crab.scale("LAT").value(), 1.0);
+    test_value(crab.scale("CTA").value(), 0.5);
+    test_value(crab.scale("COM").value(), 1.0);
+
+    // Test saving and loading
+    GModels models2;
+    models2.append(crab);
+    models2.save("test_instrument.xml");
+    models2.load("test_instrument.xml");
+    test_value(models2[0]->scale("LAT").value(), 1.0);
+    test_value(models2[0]->scale("CTA").value(), 0.5);
+    test_value(models2[0]->scale("COM").value(), 1.0);
+
     // Exit test
     return;
 
@@ -1787,20 +1836,22 @@ void TestGModel::test_models(void)
  ***************************************************************************/
 int main(void)
 {
+    // Create test suites
     GTestSuites testsuite("GModel");
 
+    // Initialise success flag
     bool was_successful=true;
 
-    //Create a test suite
+    // Create a test suite
     TestGModel test;
 
-    //Append to the container
+    // Append to the container
     testsuite.append(test);
 
-    //Run
+    // Run
     was_successful=testsuite.run();
 
-    //save xml report
+    // Save xml report
     testsuite.save("reports/GModel.xml");
 
     // Return
