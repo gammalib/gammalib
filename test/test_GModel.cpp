@@ -88,6 +88,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
 
     // Add temporal model tests
+    add_test(static_cast<pfunction>(&TestGModel::test_temp_const), "Test GModelTemporalConst");
 
     // Add model container tests
     add_test(static_cast<pfunction>(&TestGModel::test_models), "Test GModels");
@@ -1638,6 +1639,69 @@ void TestGModel::test_filefct(void)
 
         // Test operator access
         const char* strarray[] = {"Normalization"};
+        for (int i = 0; i < 1; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelTemporalConst class
+ ***************************************************************************/
+void TestGModel::test_temp_const(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelTemporalConst model;
+        test_assert(model.type() == "Constant",
+                                    "Model type \"Constant\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelTemporalConst model(3.0);
+        test_value(model.norm(), 3.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GModelTemporalConst model;
+
+        // Test value method
+        model.norm(3.9);
+        test_value(model.norm(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"Constant"};
         for (int i = 0; i < 1; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value

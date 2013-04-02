@@ -64,6 +64,7 @@ public:
     void    test_nodes(void);
     void    test_filefct(void);
     void    test_spectral_model(void);
+    void    test_temp_const(void);
     void    test_models(void);
 
 private:        
