@@ -45,20 +45,21 @@ void TestGModel::set(void)
     name("GModel");
 
     // Set attributes
-    m_map_file                  = "data/cena_lobes_parkes.fits";
-    m_xml_file                  = "data/crab.xml";
-    m_xml_model_point_const     = "data/model_point_const.xml";
-    m_xml_model_point_plaw      = "data/model_point_plaw.xml";
-    m_xml_model_point_plaw2     = "data/model_point_plaw2.xml";
-    m_xml_model_point_eplaw     = "data/model_point_eplaw.xml";
-    m_xml_model_point_nodes     = "data/model_point_nodes.xml";
-    m_xml_model_diffuse_const   = "data/model_diffuse_const.xml";
-    m_xml_model_diffuse_cube    = "data/model_diffuse_cube.xml";
-    m_xml_model_diffuse_map     = "data/model_diffuse_map.xml";
-    m_xml_model_radial_disk     = "data/model_radial_disk.xml";
-    m_xml_model_radial_gauss    = "data/model_radial_gauss.xml";
-    m_xml_model_radial_shell    = "data/model_radial_shell.xml";
-    m_xml_model_elliptical_disk = "data/model_elliptical_disk.xml";
+    m_map_file                    = "data/cena_lobes_parkes.fits";
+    m_xml_file                    = "data/crab.xml";
+    m_xml_model_point_const       = "data/model_point_const.xml";
+    m_xml_model_point_plaw        = "data/model_point_plaw.xml";
+    m_xml_model_point_plaw2       = "data/model_point_plaw2.xml";
+    m_xml_model_point_eplaw       = "data/model_point_eplaw.xml";
+    m_xml_model_point_logparabola = "data/model_point_logparabola.xml";
+    m_xml_model_point_nodes       = "data/model_point_nodes.xml";
+    m_xml_model_diffuse_const     = "data/model_diffuse_const.xml";
+    m_xml_model_diffuse_cube      = "data/model_diffuse_cube.xml";
+    m_xml_model_diffuse_map       = "data/model_diffuse_map.xml";
+    m_xml_model_radial_disk       = "data/model_radial_disk.xml";
+    m_xml_model_radial_gauss      = "data/model_radial_gauss.xml";
+    m_xml_model_radial_shell      = "data/model_radial_shell.xml";
+    m_xml_model_elliptical_disk   = "data/model_elliptical_disk.xml";
 
     // Add tests
     add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
@@ -79,6 +80,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
     add_test(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
     add_test(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
+    add_test(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
 
     // Add other tests
@@ -1271,7 +1273,93 @@ void TestGModel::test_eplaw(void)
 
         // Test operator access
         const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Cutoff"};
-        for (int i = 0; i < 3; ++i) {
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralLogParabola class
+ ***************************************************************************/
+void TestGModel::test_logparabola(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralLogParabola model;
+        test_assert(model.type() == "LogParabola",
+                                    "Model type \"LogParabola\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralLogParabola model(1.0, -2.1, GEnergy(100.0, "MeV"), -0.2);
+        test_value(model.prefactor(), 1.0);
+        test_value(model.index(), -2.1);
+        test_value(model.pivot().MeV(), 100.0);
+        test_value(model.curvature(), -0.2);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                      xml(m_xml_model_point_logparabola);
+        GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralLogParabola model(*element);
+        test_value(model.size(), 4);
+        test_assert(model.type() == "LogParabola", "Expected \"LogParabola\"");
+        test_value(model.prefactor(), 5.878e-16);
+        test_value(model.index(), -2.32473);
+        test_value(model.pivot().TeV(), 1.0);
+        test_value(model.curvature(), -0.074);
+
+        // Test prefactor method
+        model.prefactor(2.3e-16);
+        test_value(model.prefactor(), 2.3e-16);
+
+        // Test index method
+        model.index(-2.6);
+        test_value(model.index(), -2.6);
+
+        // Test pivot method
+        model.pivot(GEnergy(0.5, "TeV"));
+        test_value(model.pivot().TeV(), 0.5);
+
+        // Test curvature method
+        model.curvature(-0.1);
+        test_value(model.curvature(), -0.1);
+
+        // Test operator access
+        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Curvature"};
+        for (int i = 0; i < 4; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value
             model[keyname].value(2.1);
