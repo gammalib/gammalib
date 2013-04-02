@@ -671,7 +671,7 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
     // Get parameter element
     GXmlElement* par = xml.element("parameter", 0);
 
-    // Set parameyter
+    // Set parameter
     if (par->attribute("name") == "Normalization") {
         m_norm.write(*par);
     }
@@ -679,6 +679,9 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
         throw GException::model_invalid_parnames(G_WRITE, xml,
                           "Require \"Normalization\" parameter.");
     }
+
+    // Set file attribute
+    xml.attribute("file", m_filename);
 
     // Return
     return;
