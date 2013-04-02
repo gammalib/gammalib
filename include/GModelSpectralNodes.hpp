@@ -43,22 +43,37 @@
  * @brief Spectral nodes model class
  *
  * This class implements a piecewise power law between spectral nodes
- * \f$(E_i, I_i)\f$,
+ *
+ * \f[
+ *    ({\tt m\_energies[i]}, {\tt m\_values[i]})
+ * \f]
+ *
  * where 
- * \f$E_i\f$ is the energy and \f$I_i\f$ is the intensity of node \f$i\f$.
- * For a given energy \f$E\f$, the piecewise powerlaw is computing by
- * finding the bracketing energies \f$E_1 <= E <= E_2\f$ and computing
- * \f[I(E)=10^{(\log v_1 + \log s_1) w_1 + (\log v_2 + \log s_2) w_2}\f]
+ * - \f${\tt m\_energies[i]}\f$ is the energy, and
+ * - \f${\tt m\_values[i]}\f$ is the intensity (in photons/cm2/s/MeV)
+ *   of node \f$i\f$.
+ *
+ * For a given energy \f$E\f$, the piecewise power law is computing by
+ * finding the bracketing energies 
+ * \f${\tt m\_energies[i]} <= E <= {\tt m\_energies[i+1]}\f$ and computing
+ *
+ * \f[
+ *    S_{\rm E}(E | t) =
+ *    10^{(\log {\tt m\_values[i]}) w_{i} + 
+ *        (\log {\tt m\_values[i+1]}) w_{i+1}}
+ * \f]
+ *
  * where
- * \f$I_1 = v_1 s_1\f$ is the intensity of node 1 (\f$E_1\f$),
- * \f$I_2 = v_2 s_2\f$ is the intensity of node 2 (\f$E_2\f$),
- * \f$w_1\f$ is the weighting of node 1, and
- * \f$w_2\f$ is the weighting of node 2.
- * The weightings \f$w_1\f$ and \f$w_2\f$ are computed by linear
+ * - \f${\tt m\_values[i]}\f$ is the intensity of node \f$i\f$,
+ * - \f${\tt m\_values[i+1]}\f$ is the intensity of node \f$i+1\f$,
+ * - \f$w_{i}\f$ is the weighting of node \f$i\f$, and
+ * - \f$w_{i+1}\f$ is the weighting of node \f$i+1\f$.
+ *
+ * The weightings \f$w_{i}\f$ and \f$w_{i+1}\f$ are computed by linear
  * interpolation (in the log-log plane) between the nodes
- * \f$(\log E_1, \log I_1)\f$
+ * \f$(\log {\tt m\_energies[i]}, \log{\tt m\_values[i]})\f$
  * and
- * \f$(\log E_2, \log I_2)\f$
+ * \f$(\log {\tt m\_energies[i+1]}, \log{\tt m\_values[i+1]})\f$
  * to the requested energy \f$\log E\f$.
  ***************************************************************************/
 class GModelSpectralNodes : public GModelSpectral {
@@ -73,7 +88,7 @@ public:
     // Operators
     virtual GModelSpectralNodes& operator=(const GModelSpectralNodes& model);
 
-    // Implemented pure virtual methods
+    // Implemented pure virtual base class methods
     virtual void                 clear(void);
     virtual GModelSpectralNodes* clone(void) const;
     virtual std::string          type(void) const;
@@ -92,6 +107,19 @@ public:
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
     virtual std::string          print(void) const;
+
+    // Other methods
+    int     nodes(void) const;
+    void    append(const GEnergy& energy, const double& intensity);
+    void    insert(const int& index, const GEnergy& energy,
+                   const double& intensity);
+    void    remove(const int& index);
+    void    reserve(const int& num);
+    void    extend(const GModelSpectralNodes& nodes);
+    GEnergy energy(const int& index) const;
+    void    energy(const int& index, const GEnergy& energy);
+    double  intensity(const int& index) const;
+    void    intensity(const int& index, const double& intensity);
 
 protected:
     // Protected methods
@@ -147,6 +175,20 @@ inline
 std::string GModelSpectralNodes::type(void) const
 {
     return "NodeFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of nodes
+ *
+ * @return Number of nodes.
+ *
+ * Returns the number of nodes in the node function model.
+ ***************************************************************************/
+inline
+int GModelSpectralNodes::nodes(void) const
+{
+    return (m_energies.size());
 }
 
 #endif /* GMODELSPECTRALNODES_HPP */
