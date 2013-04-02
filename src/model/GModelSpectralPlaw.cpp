@@ -331,7 +331,7 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
     double g_norm  = (m_norm.isfree())
                      ? m_norm.scale() * m_last_power : 0.0;
     double g_index = (m_index.isfree())
-                     ? value * m_index.scale() * std::log(m_last_e_norm) : 0.0;
+                     ? value * m_index.scale() * m_last_log_e_norm : 0.0;
     double g_pivot = (m_pivot.isfree())
                      ? -value * m_last_index / m_pivot.factor_value() : 0.0;
 
@@ -350,6 +350,9 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
         std::cout << " (value=" << value;
         std::cout << ", e_norm=" << m_last_e_norm;
         std::cout << ", power=" << m_last_power;
+        std::cout << ", g_norm=" << g_norm;
+        std::cout << ", g_index=" << g_index;
+        std::cout << ", g_pivot=" << g_pivot;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -727,10 +730,11 @@ void GModelSpectralPlaw::init_members(void)
 
     // Initialise eval cache
     m_last_energy.clear();
-    m_last_index  = 1.0e30;
-    m_last_pivot  = 1.0e30;
-    m_last_e_norm = 0.0;
-    m_last_power  = 0.0;
+    m_last_index      = 1.0e30;
+    m_last_pivot      = 1.0e30;
+    m_last_e_norm     = 0.0;
+    m_last_log_e_norm = 0.0;
+    m_last_power      = 0.0;
 
     // Initialise MC cache
     m_mc_emin       = 0.0;
@@ -763,11 +767,12 @@ void GModelSpectralPlaw::copy_members(const GModelSpectralPlaw& model)
     m_pars.push_back(&m_pivot);
 
     // Copy eval cache
-    m_last_energy = model.m_last_energy;
-    m_last_index  = model.m_last_index;
-    m_last_pivot  = model.m_last_pivot;
-    m_last_e_norm = model.m_last_e_norm;
-    m_last_power  = model.m_last_power;
+    m_last_energy     = model.m_last_energy;
+    m_last_index      = model.m_last_index;
+    m_last_pivot      = model.m_last_pivot;
+    m_last_e_norm     = model.m_last_e_norm;
+    m_last_log_e_norm = model.m_last_log_e_norm;
+    m_last_power      = model.m_last_power;
 
     // Copy MC cache
     m_mc_emin       = model.m_mc_emin;
@@ -817,9 +822,10 @@ void GModelSpectralPlaw::update_eval_cache(const GEnergy& energy) const
         m_last_pivot  = pivot;
 
         // Compute and store value
-        double eng    = energy.MeV();
-        m_last_e_norm = eng / m_last_pivot;
-        m_last_power  = std::pow(m_last_e_norm, m_last_index);
+        double eng        = energy.MeV();
+        m_last_e_norm     = eng / m_last_pivot;
+        m_last_log_e_norm = std::log(m_last_e_norm);
+        m_last_power      = std::pow(m_last_e_norm, m_last_index);
 
     } // endif: recomputation was required
 
