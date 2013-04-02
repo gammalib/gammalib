@@ -47,6 +47,9 @@ void TestGModel::set(void)
     // Set attributes
     m_map_file                  = "data/cena_lobes_parkes.fits";
     m_xml_file                  = "data/crab.xml";
+    m_xml_model_point_plaw      = "data/model_point_plaw.xml";
+    m_xml_model_point_plaw2     = "data/model_point_plaw2.xml";
+    m_xml_model_point_eplaw     = "data/model_point_eplaw.xml";
     m_xml_model_point_nodes     = "data/model_point_nodes.xml";
     m_xml_model_diffuse_const   = "data/model_diffuse_const.xml";
     m_xml_model_diffuse_cube    = "data/model_diffuse_cube.xml";
@@ -59,6 +62,8 @@ void TestGModel::set(void)
     // Add tests
     add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
     add_test(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
+
+    // Add spatial model tests
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
@@ -66,10 +71,13 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_radial_gauss), "Test GModelSpatialRadialGauss");
     add_test(static_cast<pfunction>(&TestGModel::test_radial_shell), "Test GModelSpatialRadialShell");
     add_test(static_cast<pfunction>(&TestGModel::test_elliptical_disk), "Test GModelSpatialEllipticalDisk");
-    //
     add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
+
+    // Add spatial model tests
+    add_test(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
-    //
+
+    // Add other tests
     add_test(static_cast<pfunction>(&TestGModel::test_model), "Test model handling");
     add_test(static_cast<pfunction>(&TestGModel::test_models), "Test models");
 
@@ -961,6 +969,88 @@ void TestGModel::test_elliptical_disk(void)
 
 
 /***********************************************************************//**
+ * @brief Test GModelSpectralPlaw class
+ ***************************************************************************/
+void TestGModel::test_plaw(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralPlaw model;
+        test_assert(model.type() == "PowerLaw",
+                                    "Model type \"PowerLaw\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralPlaw model(1.0, -2.1, GEnergy(100.0, "MeV"));
+        test_value(model.prefactor(), 1.0);
+        test_value(model.index(), -2.1);
+        test_value(model.pivot().MeV(), 100.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml               xml(m_xml_model_point_plaw);
+        GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralPlaw model(*element);
+        test_value(model.size(), 3);
+        test_assert(model.type() == "PowerLaw", "Expected \"PowerLaw\"");
+        test_value(model.prefactor(), 5.7e-16);
+        test_value(model.index(), -2.48);
+        test_value(model.pivot().TeV(), 0.3);
+
+        // Test prefactor method
+        model["Prefactor"].remove_range(); // To allow setting of any value
+        model.prefactor(3.9);
+        test_value(model.prefactor(), 3.9);
+
+        // Test index method
+        model["Index"].remove_range(); // To allow setting of any value
+        model.index(2.1);
+        test_value(model.index(), 2.1);
+
+        // Test pivot method
+        model["PivotEnergy"].remove_range(); // To allow setting of any value
+        model.pivot(GEnergy(10.0, "MeV"));
+        test_value(model.pivot().MeV(), 10.0);
+
+        // Test operator access
+        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy"};
+        for (int i = 0; i < 3; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Test model handling.
  ***************************************************************************/
 void TestGModel::test_model(void)
@@ -992,8 +1082,7 @@ void TestGModel::test_model(void)
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
-    test_assert((power_law.norm() == 1.0e-7 && power_law.index() == -2.1),
+    test_assert((power_law.prefactor() == 1.0e-7 && power_law.index() == -2.1),
                 "Test if norm=1.0e-7 and index=-2.1",
                 "Bad values in GModelSpectralPlaw");
 
@@ -1115,7 +1204,10 @@ void TestGModel::test_spatial_model(void)
 void TestGModel::test_spectral_model(void)
 {
     // Test spectral models XML interface
-    test_xml_model("GModelSpectralNodes", m_xml_model_point_nodes);
+    test_xml_model("GModelSpectralPlaw",   m_xml_model_point_plaw);
+    test_xml_model("GModelSpectralPlaw2",  m_xml_model_point_plaw2);
+    test_xml_model("GModelSpectralExpPaw", m_xml_model_point_eplaw);
+    test_xml_model("GModelSpectralNodes",  m_xml_model_point_nodes);
 
     // Return
     return;
