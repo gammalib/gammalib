@@ -38,11 +38,11 @@ def create_models():
     # Create model container
     models = GModels()
     
-    # Create a powerlaw model for the Crab
+    # Create a power law model for the Crab
     crabdir = GSkyDir()
     crabdir.radec_deg(83.6331, 22.0145)
     spatial  = GModelSpatialPointSource(crabdir)
-    spectral = GModelSpectralPlaw(5.7e-16, -2.48, 100.0)
+    spectral = GModelSpectralPlaw(5.7e-16, -2.48, GEnergy(100.0, "MeV"))
     model    = GModelSky(spatial, spectral)
     models.append(model)
     
@@ -66,5 +66,5 @@ if __name__ == '__main__':
 
     # Create XML document
     models = create_models()
-    print models
+    print(models)
     
