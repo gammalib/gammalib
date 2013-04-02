@@ -59,6 +59,7 @@ public:
     void    test_plaw2(void);
     void    test_eplaw(void);
     void    test_logparabola(void);
+    void    test_nodes(void);
     //
     void    test_model(void);
     void    test_models(void);

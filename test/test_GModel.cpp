@@ -81,6 +81,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
     add_test(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
     add_test(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
+    add_test(static_cast<pfunction>(&TestGModel::test_nodes), "Test GModelSpectralNodes");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
 
     // Add other tests
@@ -1359,6 +1360,119 @@ void TestGModel::test_logparabola(void)
 
         // Test operator access
         const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Curvature"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralNodes class
+ ***************************************************************************/
+void TestGModel::test_nodes(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralNodes model;
+        test_assert(model.type() == "NodeFunction",
+                                    "Model type \"NodeFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test node function manimulation
+    test_try("Test node function manimulation");
+    try {
+        GModelSpectralNodes model;
+        model.reserve(3);
+        test_value(model.size(), 0);
+        test_value(model.nodes(), 0);
+        model.append(GEnergy(1.0, "MeV"), 1.0);
+        test_value(model.size(), 2);
+        test_value(model.nodes(), 1);
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.intensity(0), 1.0);
+        model.append(GEnergy(10.0, "MeV"), 0.1);
+        test_value(model.size(), 4);
+        test_value(model.nodes(), 2);
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.energy(1).MeV(), 10.0);
+        test_value(model.intensity(0), 1.0);
+        test_value(model.intensity(1), 0.1);
+        model.remove(0);
+        test_value(model.size(), 2);
+        test_value(model.nodes(), 1);
+        test_value(model.energy(0).MeV(), 10.0);
+        test_value(model.intensity(0), 0.1);
+        model.insert(0, GEnergy(1.0, "MeV"), 1.0);
+        test_value(model.size(), 4);
+        test_value(model.nodes(), 2);
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.energy(1).MeV(), 10.0);
+        test_value(model.intensity(0), 1.0);
+        test_value(model.intensity(1), 0.1);
+        model.extend(model);
+        test_value(model.size(), 8);
+        test_value(model.nodes(), 4);
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.energy(1).MeV(), 10.0);
+        test_value(model.energy(2).MeV(), 1.0);
+        test_value(model.energy(3).MeV(), 10.0);
+        test_value(model.intensity(0), 1.0);
+        test_value(model.intensity(1), 0.1);
+        test_value(model.intensity(2), 1.0);
+        test_value(model.intensity(3), 0.1);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+   
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                      xml(m_xml_model_point_nodes);
+        GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralNodes model(*element);
+        test_value(model.size(), 4);
+        test_value(model.nodes(), 2);
+        test_assert(model.type() == "NodeFunction", "Expected \"NodeFunction\"");
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.energy(1).MeV(), 10.0);
+        test_value(model.intensity(0), 1.0e-7);
+        test_value(model.intensity(1), 0.1e-7);
+
+        // Test energy method
+        model.energy(0, GEnergy(0.1, "MeV"));
+        test_value(model.energy(0).MeV(), 0.1);
+
+        // Test intensity method
+        model.intensity(0, 2.0e-7);
+        test_value(model.intensity(0), 2.0e-7);
+
+        // Test operator access
+        const char* strarray[] = {"Energy0", "Energy1", "Intensity0", "Intensity1"};
         for (int i = 0; i < 4; ++i) {
             std::string keyname(strarray[i]);
             model[keyname].remove_range(); // To allow setting of any value
