@@ -95,6 +95,9 @@ GModelSpectralFunc::GModelSpectralFunc(const std::string& filename,
     // Load nodes
     load_nodes(filename);
 
+    // Set normalization
+    m_norm.value(norm);
+
     // Return
     return;
 }
