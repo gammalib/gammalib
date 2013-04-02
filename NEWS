@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-March, 29th, 2013
+April, 2nd, 2013
 
 
 1. Introduction
@@ -28,6 +28,43 @@ GModelPar
   true attributes, and the methods operating on unscaled attributes
   have been prefixed with "factor_". Some missing methods have been
   added. The name() and unit() methods now returns a const reference.
+
+GModelSky
+  The value() and gradient() methods now take an object of type GPhoton
+  as argument.
+
+GModelSpatial
+GModelSpatialPointSource
+GModelSpatialRadial
+GModelSpatialRadialDisk
+GModelSpatialRadialGauss
+GModelSpatialRadialShell
+GModelSpatialDiffuse
+GModelSpatialDiffuseConst
+GModelSpatialDiffuseCube
+GModelSpatialDiffuseMap
+GModelSpatialElliptical
+GModelSpatialEllipticalDisk
+  The eval() and eval_gradients() methods now take an object of type
+  GPhoton as argument. The eval_gradients() method is no longer declared
+  as const. The mc() method now also takes a GEnergy and a GTime
+  object as arguments.
+
+GModelSpectral
+GModelSpectralConst
+GModelSpectralExpPlaw
+GModelSpectralFunc
+GModelSpectralPlaw
+GModelSpectralPlaw2
+GModelSpectralNodes
+GModelSpectralLogParabola
+  The eval() and eval_gradients() methods now take a GEnergy and a GTime
+  object as arguments. The eval_gradients() method is no longer declared
+  as const. The mc() method now also takes also a GTime object as argument.
+
+GModelTemporal
+GModelTemporalConst
+  The eval_gradients() method is no longer declared as const.
 
 GModels
   The set() method has been added for model setting.
@@ -112,6 +149,8 @@ GModelSpatialRadial
  +- GModelSpatialRadialShell - axisymmetric shell
 
 GModelSpatialElliptical
+ |
+ +- GModelSpatialEllipticalDisk - elliptical disk
 
 GModelSpatialDiffuse
  |

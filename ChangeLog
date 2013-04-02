@@ -1,11 +1,11 @@
-2013-03-29  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2013-04-02  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released
         ========================
 
+        Major review of public interfaces of all classes
         Reorganize sky models
         Introduce GContainer interface class
-        Review of public interfaces of all classes
         Add Virtual Observatory support
         Introduce GUrl classes for transparent URL handling
         Make use of GUrl class in XML I/O
