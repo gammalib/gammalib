@@ -74,16 +74,16 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
 /***********************************************************************//**
  * @brief Parameter constructor
  *
- * @param[in] norm Power law normalization.
+ * @param[in] prefactor Power law pre factor (ph/cm2/s/MeV).
  * @param[in] index Power law index.
  * @param[in] pivot Pivot energy.
  *
  * Constructs a spectral power law using the model parameters
- * - power law normalization value @p norm (ph/cm2/s/MeV)
+ * - power law @p prefactor (ph/cm2/s/MeV)
  * - spectral @p index
  * - @p pivot energy.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const double&  norm,
+GModelSpectralPlaw::GModelSpectralPlaw(const double&  prefactor,
                                        const double&  index,
                                        const GEnergy& pivot) :
                     GModelSpectral()
@@ -92,7 +92,7 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double&  norm,
     init_members();
 
     // Set parameters
-    m_norm.value(norm);
+    m_norm.value(prefactor);
     m_index.value(index);
     m_pivot.value(pivot.MeV());  // Internally stored in MeV
 

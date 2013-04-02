@@ -39,7 +39,8 @@ class GModelSpectralPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralPlaw(void);
-    explicit GModelSpectralPlaw(const double& norm, const double& index,
+    explicit GModelSpectralPlaw(const double&  prefactor,
+                                const double&  index,
                                 const GEnergy& pivot);
     explicit GModelSpectralPlaw(const GXmlElement& xml);
     GModelSpectralPlaw(const GModelSpectralPlaw& model);
@@ -65,10 +66,10 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    double  norm(void) const;
+    double  prefactor(void) const;
     double  index(void) const;
     GEnergy pivot(void) const;
-    void    norm(const double& norm);
+    void    prefactor(const double& prefactor);
     void    index(const double& index);
     void    pivot(const GEnergy& pivot);
 };
