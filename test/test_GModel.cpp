@@ -68,13 +68,13 @@ void TestGModel::set(void)
 
     // Add spatial model tests
     add_test(static_cast<pfunction>(&TestGModel::test_point_source), "Test GModelSpatialPointSource");
-    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
-    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
-    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
     add_test(static_cast<pfunction>(&TestGModel::test_radial_disk), "Test GModelSpatialRadialDisk");
     add_test(static_cast<pfunction>(&TestGModel::test_radial_gauss), "Test GModelSpatialRadialGauss");
     add_test(static_cast<pfunction>(&TestGModel::test_radial_shell), "Test GModelSpatialRadialShell");
     add_test(static_cast<pfunction>(&TestGModel::test_elliptical_disk), "Test GModelSpatialEllipticalDisk");
+    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
+    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
+    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
     add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
 
     // Add spatial model tests
@@ -92,6 +92,9 @@ void TestGModel::set(void)
 
     // Add model container tests
     add_test(static_cast<pfunction>(&TestGModel::test_models), "Test GModels");
+
+    // Add model registry tests
+    add_test(static_cast<pfunction>(&TestGModel::test_model_registry), "Test model registries");
 
     // Return
     return;
@@ -1772,13 +1775,14 @@ void TestGModel::test_xml_model(const std::string& name,
 void TestGModel::test_spatial_model(void)
 {
     // Test spatial models XML interface
-    test_xml_model("GModelSpatialDiffuseConst",   m_xml_model_diffuse_const);
-    test_xml_model("GModelSpatialDiffuseCube",    m_xml_model_diffuse_cube);
-    test_xml_model("GModelSpatialDiffuseMap",     m_xml_model_diffuse_map);
+    test_xml_model("GModelSpatialPointSource",    m_xml_model_point_plaw);
     test_xml_model("GModelSpatialRadialDisk",     m_xml_model_radial_disk);
     test_xml_model("GModelSpatialRadialGauss",    m_xml_model_radial_gauss);
     test_xml_model("GModelSpatialRadialShell",    m_xml_model_radial_shell);
     test_xml_model("GModelSpatialEllipticalDisk", m_xml_model_elliptical_disk);
+    test_xml_model("GModelSpatialDiffuseConst",   m_xml_model_diffuse_const);
+    test_xml_model("GModelSpatialDiffuseCube",    m_xml_model_diffuse_cube);
+    test_xml_model("GModelSpatialDiffuseMap",     m_xml_model_diffuse_map);
 
     // Return
     return;
@@ -1791,10 +1795,13 @@ void TestGModel::test_spatial_model(void)
 void TestGModel::test_spectral_model(void)
 {
     // Test spectral models XML interface
-    test_xml_model("GModelSpectralPlaw",   m_xml_model_point_plaw);
-    test_xml_model("GModelSpectralPlaw2",  m_xml_model_point_plaw2);
-    test_xml_model("GModelSpectralExpPaw", m_xml_model_point_eplaw);
-    test_xml_model("GModelSpectralNodes",  m_xml_model_point_nodes);
+    test_xml_model("GModelSpectralConst",       m_xml_model_point_const);
+    test_xml_model("GModelSpectralPlaw",        m_xml_model_point_plaw);
+    test_xml_model("GModelSpectralPlaw2",       m_xml_model_point_plaw2);
+    test_xml_model("GModelSpectralExpPaw",      m_xml_model_point_eplaw);
+    test_xml_model("GModelSpectralLogParabola", m_xml_model_point_logparabola);
+    test_xml_model("GModelSpectralNodes",       m_xml_model_point_nodes);
+    test_xml_model("GModelSpectralFunc",        m_xml_model_point_filefct);
 
     // Return
     return;
@@ -1810,6 +1817,8 @@ void TestGModel::test_models(void)
     test_try("Test void constructor");
     try {
         GModels models;
+        test_assert(models.isempty(), "Model container not empty.");
+        test_value(models.size(), 0);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1834,12 +1843,48 @@ void TestGModel::test_models(void)
         models.load("test.xml");
         models.save("test.xml");
         models.load("test.xml");
-
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
+
+    // Test model manipulation
+    test_try("Test model access");
+    try {
+        GModels models(m_xml_file);
+        models.reserve(5);
+        test_assert(models.hasmodel("1FGL J0005.7+3815"), 
+                    "Model \"1FGL J0005.7+3815\" not found.");
+        test_assert(!models.hasmodel("2FGL J0005.7+3815"), 
+                    "Model \"2FGL J0005.7+3815\" found but not expected.");
+        test_assert(!models.isempty(), "Model container is empty.");
+        test_value(models.size(), 1);
+        models.append(*(models[0]));
+        models.insert(0, *(models.at(0)));
+        test_assert(!models.isempty(), "Model container is empty.");
+        test_value(models.size(), 3);
+        models.remove(0);
+        test_assert(!models.isempty(), "Model container is empty.");
+        test_value(models.size(), 2);
+        models.remove(0);
+        test_assert(!models.isempty(), "Model container is empty.");
+        test_value(models.size(), 1);
+        models.remove("1FGL J0005.7+3815");
+        test_assert(models.isempty(), "Model container is not empty.");
+        test_value(models.size(), 0);
+        models.load(m_xml_file);
+        test_assert(!models.isempty(), "Model container is empty.");
+        test_value(models.size(), 1);
+        models.extend(models);
+        test_assert(!models.isempty(), "Model container is empty.");
+        test_value(models.size(), 2);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
 
     // Setup Crab model
     GModelSky crab;
@@ -1862,6 +1907,7 @@ void TestGModel::test_models(void)
         models.append(crab);
         models.append(crab);
         models.append(crab);
+        test_value(models.size(), 3);
         test_try_success();
     }
     catch (std::exception &e) {
@@ -1888,6 +1934,165 @@ void TestGModel::test_models(void)
     test_value(models2[0]->scale("LAT").value(), 1.0);
     test_value(models2[0]->scale("CTA").value(), 0.5);
     test_value(models2[0]->scale("COM").value(), 1.0);
+
+    // Exit test
+    return;
+
+}
+
+
+/***********************************************************************//**
+ * @brief Test model registry
+ ***************************************************************************/
+void TestGModel::test_model_registry(void)
+{
+    // Test GModelRegistry void constructor
+    test_try("Test GModelRegistry void constructor");
+    try {
+        GModelRegistry registry;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GModelRegistry allocators
+    test_try("Test GModelRegistry model allocation");
+    try {
+        // Loop over all models in registry
+        GModelRegistry registry;
+        int num = registry.size();
+        for (int i = 0; i < num; ++i) {
+            GModel* ptr = registry.alloc(registry.name(i));
+            test_assert(ptr != NULL, "Model pointer for \""+ \
+                                     registry.name(i)+"\" is NULL");
+            if (ptr != NULL) {
+            
+                // Test model type
+                test_assert(ptr->type() == registry.name(i),
+                            "Expected \""+registry.name(i)+"\" instead"
+                            " of \""+ptr->type()+"\".");
+
+                // Free model
+                delete ptr;
+            }
+        } // endfor: looped over all models
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GModelSpatialRegistry void constructor
+    test_try("Test GModelSpatialRegistry void constructor");
+    try {
+        GModelSpatialRegistry registry;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GModelSpatialRegistry allocators
+    test_try("Test GModelSpatialRegistry model allocation");
+    try {
+        // Loop over all models in registry
+        GModelSpatialRegistry registry;
+        int num = registry.size();
+        for (int i = 0; i < num; ++i) {
+            GModelSpatial* ptr = registry.alloc(registry.name(i));
+            test_assert(ptr != NULL, "Model pointer for \""+ \
+                                     registry.name(i)+"\" is NULL");
+            if (ptr != NULL) {
+            
+                // Test model type
+                test_assert(ptr->type() == registry.name(i),
+                            "Expected \""+registry.name(i)+"\" instead"
+                            " of \""+ptr->type()+"\".");
+
+                // Free model
+                delete ptr;
+            }
+        } // endfor: looped over all models
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GModelSpectralRegistry void constructor
+    test_try("Test GModelSpectralRegistry void constructor");
+    try {
+        GModelSpectralRegistry registry;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GModelSpectralRegistry allocators
+    test_try("Test GModelSpectralRegistry model allocation");
+    try {
+        // Loop over all models in registry
+        GModelSpectralRegistry registry;
+        int num = registry.size();
+        for (int i = 0; i < num; ++i) {
+            GModelSpectral* ptr = registry.alloc(registry.name(i));
+            test_assert(ptr != NULL, "Model pointer for \""+ \
+                                     registry.name(i)+"\" is NULL");
+            if (ptr != NULL) {
+            
+                // Test model type
+                test_assert(ptr->type() == registry.name(i),
+                            "Expected \""+registry.name(i)+"\" instead"
+                            " of \""+ptr->type()+"\".");
+
+                // Free model
+                delete ptr;
+            }
+        } // endfor: looped over all models
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GModelTemporalRegistry void constructor
+    test_try("Test GModelTemporalRegistry void constructor");
+    try {
+        GModelTemporalRegistry registry;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test GModelTemporalRegistry allocators
+    test_try("Test GModelTemporalRegistry model allocation");
+    try {
+        // Loop over all models in registry
+        GModelTemporalRegistry registry;
+        int num = registry.size();
+        for (int i = 0; i < num; ++i) {
+            GModelTemporal* ptr = registry.alloc(registry.name(i));
+            test_assert(ptr != NULL, "Model pointer for \""+ \
+                                     registry.name(i)+"\" is NULL");
+            if (ptr != NULL) {
+            
+                // Test model type
+                test_assert(ptr->type() == registry.name(i),
+                            "Expected \""+registry.name(i)+"\" instead"
+                            " of \""+ptr->type()+"\".");
+
+                // Free model
+                delete ptr;
+            }
+        } // endfor: looped over all models
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
 
     // Exit test
     return;

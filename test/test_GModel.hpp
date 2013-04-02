@@ -66,6 +66,7 @@ public:
     void    test_spectral_model(void);
     void    test_temp_const(void);
     void    test_models(void);
+    void    test_model_registry(void);
 
 private:        
     // Private methods
