@@ -47,6 +47,7 @@ void TestGModel::set(void)
     // Set attributes
     m_map_file                  = "data/cena_lobes_parkes.fits";
     m_xml_file                  = "data/crab.xml";
+    m_xml_model_point_const     = "data/model_point_const.xml";
     m_xml_model_point_plaw      = "data/model_point_plaw.xml";
     m_xml_model_point_plaw2     = "data/model_point_plaw2.xml";
     m_xml_model_point_eplaw     = "data/model_point_eplaw.xml";
@@ -74,6 +75,7 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
 
     // Add spatial model tests
+    add_test(static_cast<pfunction>(&TestGModel::test_const), "Test GModelSpectralConst");
     add_test(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
     add_test(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
     add_test(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
@@ -950,6 +952,74 @@ void TestGModel::test_elliptical_disk(void)
         const char* strarray[] = {"RA", "DEC", "PA", "MinorRadius", "MajorRadius"};
         for (int i = 0; i < 5; ++i) {
             std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralConst class
+ ***************************************************************************/
+void TestGModel::test_const(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralConst model;
+        test_assert(model.type() == "ConstantValue",
+                                    "Model type \"ConstantValue\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralConst model(3.0);
+        test_value(model.value(), 3.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                xml(m_xml_model_point_const);
+        GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralConst model(*element);
+        test_value(model.size(), 1);
+        test_assert(model.type() == "ConstantValue", "Expected \"ConstantValue\"");
+        test_value(model.value(), 5.7e-16);
+
+        // Test value method
+        model.value(3.9e-16);
+        test_value(model.value(), 3.9e-16);
+
+        // Test operator access
+        const char* strarray[] = {"Value"};
+        for (int i = 0; i < 1; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
             model[keyname].value(2.1);
             model[keyname].error(1.9);
             model[keyname].gradient(0.8);

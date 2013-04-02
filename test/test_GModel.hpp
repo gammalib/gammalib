@@ -54,6 +54,7 @@ public:
     void    test_radial_gauss(void);
     void    test_radial_shell(void);
     void    test_elliptical_disk(void);
+    void    test_const(void);
     void    test_plaw(void);
     void    test_plaw2(void);
     void    test_eplaw(void);
@@ -70,6 +71,7 @@ private:
     // Private attributes
     std::string m_map_file;
     std::string m_xml_file;
+    std::string m_xml_model_point_const;
     std::string m_xml_model_point_plaw;
     std::string m_xml_model_point_plaw2;
     std::string m_xml_model_point_eplaw;
