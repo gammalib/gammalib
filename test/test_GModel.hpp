@@ -55,6 +55,7 @@ public:
     void    test_radial_shell(void);
     void    test_elliptical_disk(void);
     void    test_plaw(void);
+    void    test_plaw2(void);
     //
     void    test_model(void);
     void    test_models(void);

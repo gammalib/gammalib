@@ -75,6 +75,7 @@ void TestGModel::set(void)
 
     // Add spatial model tests
     add_test(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
+    add_test(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
 
     // Add other tests
@@ -1030,6 +1031,92 @@ void TestGModel::test_plaw(void)
         const char* strarray[] = {"Prefactor", "Index", "PivotEnergy"};
         for (int i = 0; i < 3; ++i) {
             std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralPlaw2 class
+ ***************************************************************************/
+void TestGModel::test_plaw2(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralPlaw2 model;
+        test_assert(model.type() == "PowerLaw2",
+                                    "Model type \"PowerLaw2\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralPlaw2 model(1.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+        test_value(model.integral(), 1.0);
+        test_value(model.index(), -2.1);
+        test_value(model.emin().MeV(), 10.0);
+        test_value(model.emax().MeV(), 100.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                xml(m_xml_model_point_plaw2);
+        GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralPlaw2 model(*element);
+        test_value(model.size(), 4);
+        test_assert(model.type() == "PowerLaw2", "Expected \"PowerLaw2\"");
+        test_value(model.integral(), 1.0e-7);
+        test_value(model.index(), -2.0);
+        test_value(model.emin().MeV(), 100.0);
+        test_value(model.emax().MeV(), 500000.0);
+
+        // Test integral method
+        model.integral(2.1e-7);
+        test_value(model.integral(), 2.1e-7);
+
+        // Test index method
+        model.index(-2.3);
+        test_value(model.index(), -2.3);
+
+        // Test emin method
+        model.emin(GEnergy(10.0, "MeV"));
+        test_value(model.emin().MeV(), 10.0);
+
+        // Test emax method
+        model.emax(GEnergy(10.0, "MeV"));
+        test_value(model.emax().MeV(), 10.0);
+
+        // Test operator access
+        const char* strarray[] = {"Integral", "Index", "LowerLimit", "UpperLimit"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
             model[keyname].value(2.1);
             model[keyname].error(1.9);
             model[keyname].gradient(0.8);
