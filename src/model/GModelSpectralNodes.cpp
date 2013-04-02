@@ -43,9 +43,15 @@ const GModelSpectralRegistry g_spectral_nodes_registry(&g_spectral_nodes_seed);
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                "GModelSpectralNodes::flux(GEnergy&, GEnergy&)"
 #define G_EFLUX              "GModelSpectralNodes::eflux(GEnergy&, GEnergy&)"
-#define G_MC             "GModelSpectralNodes::mc(GEnergy&, GEnergy&, GRan&)"
+#define G_MC     "GModelSpectralNodes::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                      "GModelSpectralNodes::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralNodes::write(GXmlElement&)"
+#define G_INSERT       "GModelSpectralNodes::insert(int&, GEnergy&, double&)"
+#define G_REMOVE                          "GModelSpectralNodes::remove(int&)"
+#define G_ENERGY_GET                      "GModelSpectralNodes::energy(int&)"
+#define G_ENERGY_SET            "GModelSpectralNodes::energy(int&, GEnergy&)"
+#define G_INTENSITY_GET                "GModelSpectralNodes::intensity(int&)"
+#define G_INTENSITY_SET       "GModelSpectralNodes::intensity(int&, double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -78,12 +84,12 @@ GModelSpectralNodes::GModelSpectralNodes(void) : GModelSpectral()
  *
  * @param[in] xml XML element.
  *
- * Creates instance of a spectral nodes model by extracting information from
- * an XML element. See GModelSpectralNodes::read() for more information about
- * the expected structure of the XML element.
+ * Construct spectral nodes model by extracting information from an XML
+ * element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
-GModelSpectralNodes::GModelSpectralNodes(const GXmlElement& xml)
-                                         : GModelSpectral()
+GModelSpectralNodes::GModelSpectralNodes(const GXmlElement& xml) :
+                     GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -101,8 +107,8 @@ GModelSpectralNodes::GModelSpectralNodes(const GXmlElement& xml)
  *
  * @param[in] model Spectral nodes model.
  ***************************************************************************/
-GModelSpectralNodes::GModelSpectralNodes(const GModelSpectralNodes& model)
-                                         : GModelSpectral(model)
+GModelSpectralNodes::GModelSpectralNodes(const GModelSpectralNodes& model) :
+                     GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -138,8 +144,9 @@ GModelSpectralNodes::~GModelSpectralNodes(void)
  * @brief Assignment operator
  *
  * @param[in] model Spectral nodes model.
+ * @return Spectral nodes model.
  ***************************************************************************/
-GModelSpectralNodes& GModelSpectralNodes::operator= (const GModelSpectralNodes& model)
+GModelSpectralNodes& GModelSpectralNodes::operator=(const GModelSpectralNodes& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -170,7 +177,7 @@ GModelSpectralNodes& GModelSpectralNodes::operator= (const GModelSpectralNodes& 
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear spectral nodes model
  ***************************************************************************/
 void GModelSpectralNodes::clear(void)
 {
@@ -188,10 +195,11 @@ void GModelSpectralNodes::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone spectral nodes model
 ***************************************************************************/
 GModelSpectralNodes* GModelSpectralNodes::clone(void) const
 {
+    // Clone spectral nodes model
     return new GModelSpectralNodes(*this);
 }
 
@@ -203,23 +211,26 @@ GModelSpectralNodes* GModelSpectralNodes::clone(void) const
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The spectral model is defined as a piecewise power law between spectral
- * nodes \f$(E_i, I_i)\f$,
- * where 
- * \f$E_i\f$ is the energy and \f$I_i\f$ is the intensity of node \f$i\f$.
- * For a given energy \f$E\f$, the piecewise powerlaw is computing by
- * finding the bracketing energies \f$E_1 <= E <= E_2\f$ and computing
- * \f[I(E)=10^{(\log v_1 + \log s_1) w_1 + (\log v_2 + \log s_2) w_2}\f]
+ * Computes
+ *
+ * \f[
+ *    S_{\rm E}(E | t) =
+ *    10^{(\log {\tt m\_values[i]}) w_{i} + 
+ *        (\log {\tt m\_values[i+1]}) w_{i+1}}
+ * \f]
+ *
  * where
- * \f$I_1 = v_1 s_1\f$ is the intensity of node 1 (\f$E_1\f$),
- * \f$I_2 = v_2 s_2\f$ is the intensity of node 2 (\f$E_2\f$),
- * \f$w_1\f$ is the weighting of node 1, and
- * \f$w_2\f$ is the weighting of node 2.
- * The weightings \f$w_1\f$ and \f$w_2\f$ are computed by linear
+ * - \f${\tt m\_values[i]}\f$ is the intensity of node \f$i\f$,
+ * - \f${\tt m\_values[i+1]}\f$ is the intensity of node \f$i+1\f$,
+ * - \f$w_{i}\f$ is the weighting of node \f$i\f$,
+ * - \f$w_{i+1}\f$ is the weighting of node \f$i+1\f$, and
+ * - \f${\tt m\_energies[i]} <= E <= {\tt m\_energies[i+1]}\f$.
+ *
+ * The weightings \f$w_{i}\f$ and \f$w_{i+1}\f$ are computed by linear
  * interpolation (in the log-log plane) between the nodes
- * \f$(\log E_1, \log I_1)\f$
+ * \f$(\log {\tt m\_energies[i]}, \log{\tt m\_values[i]})\f$
  * and
- * \f$(\log E_2, \log I_2)\f$
+ * \f$(\log {\tt m\_energies[i+1]}, \log{\tt m\_values[i+1]})\f$
  * to the requested energy \f$\log E\f$.
  ***************************************************************************/
 double GModelSpectralNodes::eval(const GEnergy& srcEng,
@@ -237,7 +248,8 @@ double GModelSpectralNodes::eval(const GEnergy& srcEng,
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralNodes::eval";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ", exponent=" << exponent;
@@ -257,28 +269,35 @@ double GModelSpectralNodes::eval(const GEnergy& srcEng,
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The spectral model is defined as a piecewise power law between spectral
- * nodes \f$(E_i, I_i)\f$,
- * where 
- * \f$E_i\f$ is the energy and \f$I_i\f$ is the intensity of node \f$i\f$.
- * For a given energy \f$E\f$, the piecewise powerlaw is computing by
- * finding the bracketing energies \f$E_1 <= E <= E_2\f$ and computing
- * \f[I(E)=10^{(\log v_1 + \log s_1) w_1 + (\log v_2 + \log s_2) w_2}\f]
+ * Computes
+ *
+ * \f[
+ *    S_{\rm E}(E | t) =
+ *    10^{(\log {\tt m\_values[i]}) w_{i} + 
+ *        (\log {\tt m\_values[i+1]}) w_{i+1}}
+ * \f]
+ *
  * where
- * \f$I_1 = v_1 s_1\f$ is the intensity of node 1 (\f$E_1\f$),
- * \f$I_2 = v_2 s_2\f$ is the intensity of node 2 (\f$E_2\f$),
- * \f$w_1\f$ is the weighting of node 1, and
- * \f$w_2\f$ is the weighting of node 2.
- * The weightings \f$w_1\f$ and \f$w_2\f$ are computed by linear
+ * - \f${\tt m\_values[i]}\f$ is the intensity of node \f$i\f$,
+ * - \f${\tt m\_values[i+1]}\f$ is the intensity of node \f$i+1\f$,
+ * - \f$w_{i}\f$ is the weighting of node \f$i\f$,
+ * - \f$w_{i+1}\f$ is the weighting of node \f$i+1\f$, and
+ * - \f${\tt m\_energies[i]} <= E <= {\tt m\_energies[i+1]}\f$.
+ *
+ * The weightings \f$w_{i}\f$ and \f$w_{i+1}\f$ are computed by linear
  * interpolation (in the log-log plane) between the nodes
- * \f$(\log E_1, \log I_1)\f$
+ * \f$(\log {\tt m\_energies[i]}, \log{\tt m\_values[i]})\f$
  * and
- * \f$(\log E_2, \log I_2)\f$
+ * \f$(\log {\tt m\_energies[i+1]}, \log{\tt m\_values[i+1]})\f$
  * to the requested energy \f$\log E\f$.
  *
- * The partial derivatives are given by
- * \f[dI/dv_i=I(E) w_i / v_i\f]
- * for \f$i=1,2\f$ and \f$0\f$ for all other nodes.
+ * The method also evaluates the partial derivatives of the model with
+ * respect to the parameters using
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_values[i]}} =
+ *      \frac{S_{\rm E}(E | t) \, w_i}{{\tt m\_values[i]}}
+ * \f]
  ***************************************************************************/
 double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng,
                                            const GTime&   srcTime)
@@ -304,26 +323,27 @@ double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng,
 
     // Initialise gradients
     for (int i = 0; i < m_values.size(); ++i) {
-        const_cast<GModelSpectralNodes*>(this)->m_values[i].factor_gradient(0.0);
+        m_values[i].factor_gradient(0.0);
     }
 
     // Gradient for left node
     if (m_values[inx_left].isfree()) {
         double grad = value * wgt_left / m_values[inx_left].factor_value();
-        const_cast<GModelSpectralNodes*>(this)->m_values[inx_left].factor_gradient(grad);
+        m_values[inx_left].factor_gradient(grad);
     }
 
     // Gradient for right node
     if (m_values[inx_right].isfree()) {
         double grad = value * wgt_right / m_values[inx_right].factor_value();
-        const_cast<GModelSpectralNodes*>(this)->m_values[inx_right].factor_gradient(grad);
+        m_values[inx_right].factor_gradient(grad);
     }
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralNodes::eval_gradients";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ", exponent=" << exponent;
@@ -343,37 +363,30 @@ double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng,
  * @param[in] emax Maximum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ *
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  ***************************************************************************/
 double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
-
-    // Update flux cache
-    update_flux_cache();
-
     // Initialise flux
     double flux = 0.0;
     
-    // Get energy range in MeV
-    double e_min = emin.MeV();
-    double e_max = emax.MeV();
-    
-    // Continue only if e_max > e_min
-    if (e_max > e_min) {
+    // Compute only if integration range is valid
+    if (emin < emax) {
+
+        // Update flux cache
+        update_flux_cache();
+
+        // Get energy range in MeV
+        double e_min = emin.MeV();
+        double e_max = emax.MeV();
     
         // Determine left node index for minimum energy
         m_lin_energies.set_value(e_min);
@@ -421,10 +434,9 @@ double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
                                      e_max,
                                      m_epivot[inx_emax],
                                      m_gamma[inx_emax]);
-        
-        } // endelse: emin and emax not between same nodes
-    
-    } // endif: e_max > e_min
+        }
+
+    } // endif: integration range was valid
 
     // Return
     return flux;
@@ -438,37 +450,30 @@ double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] emax Maximum photon energy.
  * @return Energy flux (erg/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ *
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) E \, dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  ***************************************************************************/
 double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
-
-    // Update flux cache
-    update_flux_cache();
-
     // Initialise flux
-    double flux = 0.0;
+    double eflux = 0.0;
     
-    // Get energy range in MeV
-    double e_min = emin.MeV();
-    double e_max = emax.MeV();
+    // Compute only if integration range is valid
+    if (emin < emax) {
+
+        // Update flux cache
+        update_flux_cache();
     
-    // Continue only if e_max > e_min
-    if (e_max > e_min) {
+        // Get energy range in MeV
+        double e_min = emin.MeV();
+        double e_max = emax.MeV();
     
         // Determine left node index for minimum energy
         m_lin_energies.set_value(e_min);
@@ -482,11 +487,11 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
         // integrate over the energy interval using the appropriate power
         // law parameters
         if (inx_emin == inx_emax) {
-            flux = m_prefactor[inx_emin] * 
-                   plaw_energy_flux(e_min,
-                                    e_max, 
-                                    m_epivot[inx_emin],
-                                    m_gamma[inx_emin]) * MeV2erg;
+            eflux = m_prefactor[inx_emin] * 
+                    plaw_energy_flux(e_min,
+                                     e_max, 
+                                     m_epivot[inx_emin],
+                                     m_gamma[inx_emin]) * MeV2erg;
         }
 
         // ... otherwise integrate over the nodes where emin and emax
@@ -499,30 +504,30 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
             int i_start = (e_min < m_lin_energies[0]) ? inx_emin : inx_emin+1;
 
             // Integrate from emin to the node boundary
-            flux = m_prefactor[inx_emin] *
-                   plaw_energy_flux(e_min,
-                                    m_lin_energies[i_start],
-                                    m_epivot[inx_emin],
-                                    m_gamma[inx_emin]) * MeV2erg;
+            eflux = m_prefactor[inx_emin] *
+                    plaw_energy_flux(e_min,
+                                     m_lin_energies[i_start],
+                                     m_epivot[inx_emin],
+                                     m_gamma[inx_emin]) * MeV2erg;
 
             // Integrate over all nodes between
             for (int i = i_start; i < inx_emax; ++i) {
-                flux += m_eflux[i];
+                eflux += m_eflux[i];
             }
 
             // Integrate from node boundary to emax
-            flux += m_prefactor[inx_emax] *
-                    plaw_energy_flux(m_lin_energies[inx_emax],
-                                     e_max,
-                                     m_epivot[inx_emax],
-                                     m_gamma[inx_emax]) * MeV2erg;
+            eflux += m_prefactor[inx_emax] *
+                     plaw_energy_flux(m_lin_energies[inx_emax],
+                                      e_max,
+                                      m_epivot[inx_emax],
+                                      m_gamma[inx_emax]) * MeV2erg;
         
         } // endelse: emin and emax not between same nodes
     
-    } // endif: e_max > e_min
+    } // endif: integration range was valid
 
-    // Return
-    return flux;
+    // Return flux
+    return eflux;
 }
 
 
@@ -537,6 +542,8 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
  *
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
+ *
+ * Returns Monte Carlo energy by randomly drawing from node function.
  ***************************************************************************/
 GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
                                 const GEnergy& emax,
@@ -552,41 +559,36 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
     // Allocate energy
     GEnergy energy;
     
-    // Continue only if emax > emin
-    if (emax > emin) {
-    
-        // Update cache
-        mc_update(emin, emax);
+    // Update cache
+    mc_update(emin, emax);
 
-        // Determine in which bin we reside
-        int inx = 0;
-        if (m_mc_cum.size() > 1) {
-            double u = ran.uniform();
-            for (inx = m_mc_cum.size()-1; inx > 0; --inx) {
-                if (m_mc_cum[inx-1] <= u)
-                    break;
-            }
+    // Determine in which bin we reside
+    int inx = 0;
+    if (m_mc_cum.size() > 1) {
+        double u = ran.uniform();
+        for (inx = m_mc_cum.size()-1; inx > 0; --inx) {
+            if (m_mc_cum[inx-1] <= u)
+                break;
         }
+    }
 
-        // Get random energy for specific bin
-        if (m_mc_exp[inx] != 0.0) {
-            double e_min = m_mc_min[inx];
-            double e_max = m_mc_max[inx];
-            double u     = ran.uniform();
-            double eng   = (u > 0.0) 
-                            ? std::exp(std::log(u * (e_max - e_min) + e_min) / m_mc_exp[inx])
-                            : 0.0;
-            energy.MeV(eng);
-        }
-        else {
-            double e_min = m_mc_min[inx];
-            double e_max = m_mc_max[inx];
-            double u     = ran.uniform();
-            double eng   = std::exp(u * (e_max - e_min) + e_min);
-            energy.MeV(eng);
-        }
-
-    } // endif: emax > emin
+    // Get random energy for specific bin
+    if (m_mc_exp[inx] != 0.0) {
+        double e_min = m_mc_min[inx];
+        double e_max = m_mc_max[inx];
+        double u     = ran.uniform();
+        double eng   = (u > 0.0) 
+                        ? std::exp(std::log(u * (e_max - e_min) + e_min) / m_mc_exp[inx])
+                        : 0.0;
+        energy.MeV(eng);
+    }
+    else {
+        double e_min = m_mc_min[inx];
+        double e_max = m_mc_max[inx];
+        double u     = ran.uniform();
+        double eng   = std::exp(u * (e_max - e_min) + e_min);
+        energy.MeV(eng);
+    }
     
     // Return energy
     return energy;
@@ -603,9 +605,20 @@ GEnergy GModelSpectralNodes::mc(const GEnergy& emin,
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter name found in XML element.
  *
- * Read the node function information from an XML element. The XML
- * element is required to have at least two nodes. Each node has two
- * parameters named "Energy" and "Intensity".
+ * Reads the spectral information from an XML element. The format of the XML
+ * elements is
+ *
+ *     <spectrum type="NodeFunction">
+ *       <node>
+ *         <parameter name="Energy"    scale=".." value=".." min=".." max=".." free=".."/>
+ *         <parameter name="Intensity" scale=".." value=".." min=".." max=".." free=".."/>
+ *       </node>
+ *       ...
+ *       <node>
+ *         <parameter name="Energy"    scale=".." value=".." min=".." max=".." free=".."/>
+ *         <parameter name="Intensity" scale=".." value=".." min=".." max=".." free=".."/>
+ *       </node>
+ *     </spectrum>
  *
  * @todo Check that all energies and intensities are positive
  * @todo Check that nodes are ordered
@@ -713,9 +726,20 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the node function information into an XML element. The XML element
- * will have node leaves, where each node leave has two parameters named
- * "Energy" and "Intensity".
+ * Writes the spectral information into an XML element. The format of the XML
+ * element is
+ *
+ *     <spectrum type="NodeFunction">
+ *       <node>
+ *         <parameter name="Energy"    scale=".." value=".." min=".." max=".." free=".."/>
+ *         <parameter name="Intensity" scale=".." value=".." min=".." max=".." free=".."/>
+ *       </node>
+ *       ...
+ *       <node>
+ *         <parameter name="Energy"    scale=".." value=".." min=".." max=".." free=".."/>
+ *         <parameter name="Intensity" scale=".." value=".." min=".." max=".." free=".."/>
+ *       </node>
+ *     </spectrum>
  ***************************************************************************/
 void GModelSpectralNodes::write(GXmlElement& xml) const
 {
@@ -801,7 +825,320 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Append node
+ *
+ * @param[in] energy Node energy.
+ * @param[in] intensity Node intensity.
+ *
+ * Appends one node to the node function.
+ ***************************************************************************/
+void GModelSpectralNodes::append(const GEnergy& energy,
+                                 const double&  intensity)
+{
+    // Allocate node parameters
+    GModelPar e_par;
+    GModelPar i_par;
+
+    // Set energy attributes
+    e_par.name("Energy");
+    e_par.value(energy.MeV());
+    e_par.unit("MeV");
+    e_par.hasgrad(false);
+
+    // Set intensity attributes
+    i_par.name("Intensity");
+    i_par.value(intensity);
+    i_par.unit("ph/cm2/s/MeV");
+    i_par.hasgrad(true);
+
+    // Append to nodes
+    m_energies.push_back(e_par);
+    m_values.push_back(i_par);
+
+    // Update parameter mapping
+    update_pars();
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert node
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] energy Node energy.
+ * @param[in] intensity Node intensity.
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ *
+ * Inserts a node into the node function before the node with the specified
+ * @p index.
+ ***************************************************************************/
+void GModelSpectralNodes::insert(const int&     index,
+                                 const GEnergy& energy,
+                                 const double&  intensity)
+{
+    // Raise exception if index is outside boundary
+    #if defined(G_RANGE_CHECK)
+    if (m_energies.empty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT, index, 0, nodes()-1);
+        }
+    }
+    else {
+        if (index < 0 || index >= nodes()) {
+            throw GException::out_of_range(G_INSERT, index, 0, nodes()-1);
+        }
+    }
+    #endif
+
+    // Allocate node parameters
+    GModelPar e_par;
+    GModelPar i_par;
+
+    // Set energy attributes
+    e_par.name("Energy");
+    e_par.value(energy.MeV());
+    e_par.unit("MeV");
+    e_par.hasgrad(false);
+
+    // Set intensity attributes
+    i_par.name("Intensity");
+    i_par.value(intensity);
+    i_par.unit("ph/cm2/s/MeV");
+    i_par.hasgrad(true);
+
+    // Insert node
+    m_energies.insert(m_energies.begin()+index, e_par);
+    m_values.insert(m_values.begin()+index, i_par);
+
+    // Update parameter mapping
+    update_pars();
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove node
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ *
+ * Removes node of specified @p index from the node function.
+ ***************************************************************************/
+void GModelSpectralNodes::remove(const int& index)
+{
+    // Raise exception if index is outside boundary
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_REMOVE, index, 0, nodes()-1);
+    }
+    #endif
+
+    // Erase energy and intensity
+    m_energies.erase(m_energies.begin() + index);
+    m_values.erase(m_values.begin() + index);
+
+    // Update parameter mapping
+    update_pars();
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Reserve space for nodes
+ *
+ * @param[in] num Number of reseved nodes.
+ *
+ * Reserves space for @p num nodes.
+ ***************************************************************************/
+void GModelSpectralNodes::reserve(const int& num)
+{
+    // Reserve space
+    m_energies.reserve(num);
+    m_values.reserve(num);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append nodes from node function
+ *
+ * @param[in] nodes Node function.
+ *
+ * Appends all nodes from a node function to current object.
+ ***************************************************************************/
+void GModelSpectralNodes::extend(const GModelSpectralNodes& nodes)
+{
+    // Get number of nodes in node function. Note that we extract the size
+    // first to avoid an endless loop that arises when a container is
+    // appended to itself.
+    int num = nodes.nodes();
+
+    // Continue only if node function is not empty
+    if (num > 0) {
+
+        // Reserve enough space
+        reserve(this->nodes() + num);
+
+        // Loop over all nodes and append them to the node function
+        for (int i = 0; i < num; ++i) {
+            m_energies.push_back(nodes.m_energies[i]);
+            m_values.push_back(nodes.m_values[i]);
+        }
+
+        // Update parameter mapping
+        update_pars();
+
+        // Set pre-computation cache
+        set_cache();
+
+    } // endif: node function was not empty
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return node energy
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @return Energy of node @p index.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of range.
+ *
+ * Returns the energy of node @p index.
+ ***************************************************************************/
+GEnergy GModelSpectralNodes::energy(const int& index) const
+{
+    // Raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_ENERGY_GET, index, nodes()-1);
+    }
+    #endif
+
+    // Retrieve energy
+    GEnergy energy;
+    energy.MeV(m_energies[index].value());
+
+    // Return energy
+    return energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Set node energy
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] energy Node energy.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of range.
+ *
+ * Sets the energy of node @p index.
+ ***************************************************************************/
+void GModelSpectralNodes::energy(const int& index, const GEnergy& energy)
+{
+    // Raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_ENERGY_SET, index, nodes()-1);
+    }
+    #endif
+
+    // Set energy
+    m_energies[index].value(energy.MeV());
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return node intensity
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @return Intensity of node @p index.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of range.
+ *
+ * Returns the intensity of node @p index.
+ ***************************************************************************/
+double GModelSpectralNodes::intensity(const int& index) const
+{
+    // Raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_INTENSITY_GET, index, nodes()-1);
+    }
+    #endif
+
+    // Return intensity
+    return (m_values[index].value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set node intensity
+ *
+ * @param[in] index Node index [0,...,nodes()-1].
+ * @param[in] intensity Node Intensity.
+ *
+ * @exception GException::out_of_range
+ *            Index is out of range.
+ *
+ * Set the intensity of node @p index.
+ ***************************************************************************/
+void GModelSpectralNodes::intensity(const int& index, const double& intensity)
+{
+    // Raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= nodes()) {
+        throw GException::out_of_range(G_INTENSITY_SET, index, nodes()-1);
+    }
+    #endif
+
+    // Set intensity
+    m_values[index].value(intensity);
+
+    // Set pre-computation cache
+    set_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print node function information
+ *
+ * @return String containing node function information.
  ***************************************************************************/
 std::string GModelSpectralNodes::print(void) const
 {
@@ -810,6 +1147,8 @@ std::string GModelSpectralNodes::print(void) const
 
     // Append header
     result.append("=== GModelSpectralNodes ===");
+
+    // Append information
     result.append("\n"+parformat("Number of nodes")+str(m_energies.size()));
     result.append("\n"+parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
@@ -948,10 +1287,18 @@ void GModelSpectralNodes::update_pars(void)
     // Set parameter pointers for all nodes
     for (int i = 0; i < nodes; ++i) {
 
-        // Signal that energies have no gradients
+        // Set parameter names
+        std::string energy_name    = "Energy"+str(i);
+        std::string intensity_name = "Intensity"+str(i);
+
+        // Set energy attributes
+        m_energies[i].name(energy_name);
+        m_energies[i].unit("MeV");
         m_energies[i].hasgrad(false);
 
-        // Signal that values have gradients
+        // Set intensity attributes
+        m_values[i].name(intensity_name);
+        m_values[i].unit("ph/cm2/s/MeV");
         m_values[i].hasgrad(true);
 
         // Set pointer
@@ -1310,10 +1657,3 @@ void GModelSpectralNodes::mc_update(const GEnergy& emin, const GEnergy& emax) co
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

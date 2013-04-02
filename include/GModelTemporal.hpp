@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GModelTemporal.hpp  -  Abstract temporal model base class        *
+ *         GModelTemporal.hpp - Abstract temporal model base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,7 +68,7 @@ public:
     virtual GModelTemporal* clone(void) const = 0;
     virtual std::string     type(void) const = 0;
     virtual double          eval(const GTime& srcTime) const = 0;
-    virtual double          eval_gradients(const GTime& srcTime) const = 0;
+    virtual double          eval_gradients(const GTime& srcTime) = 0;
     virtual GTimes          mc(const double& rate, const GTime& tmin,
                                const GTime& tmax, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;

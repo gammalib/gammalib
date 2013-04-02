@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralFunc.i  -  Spectral function model class          *
+ *          GModelSpectralFunc.i - Spectral function model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelSpectralFunc.i
  * @brief Spectral function model class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,7 +39,8 @@ class GModelSpectralFunc : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralFunc(void);
-    explicit GModelSpectralFunc(const std::string& filename);
+    explicit GModelSpectralFunc(const std::string& filename,
+                                const double&      norm);
     explicit GModelSpectralFunc(const GXmlElement& xml);
     GModelSpectralFunc(const GModelSpectralFunc& model);
     virtual ~GModelSpectralFunc(void);
@@ -56,13 +57,18 @@ public:
                                      const GEnergy& emax) const;
     virtual double              eflux(const GEnergy& emin,
                                       const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax,
-                                   const GTime& time, GRan& ran) const;
+    virtual GEnergy             mc(const GEnergy& emin,
+                                   const GEnergy& emax,
+                                   const GTime&   time,
+                                   GRan&          ran) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    double norm(void) const;
+    const std::string& filename(void) const;
+    void               filename(const std::string& filename);
+    double             norm(void) const;
+    void               norm(const double& norm);
 };
 
 

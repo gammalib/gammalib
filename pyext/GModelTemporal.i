@@ -48,7 +48,7 @@ public:
     virtual GModelTemporal* clone(void) const = 0;
     virtual std::string     type(void) const = 0;
     virtual double          eval(const GTime& srcTime) const = 0;
-    virtual double          eval_gradients(const GTime& srcTime) const = 0;
+    virtual double          eval_gradients(const GTime& srcTime) = 0;
     virtual GTimes          mc(const double& rate, const GTime& tmin,
                                const GTime& tmax, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;
@@ -68,10 +68,12 @@ public:
         return tochar(self->print());
     }
     GModelPar& __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     GModelPar& __getitem__(const std::string& name) {
         return (*self)[name];
@@ -81,8 +83,9 @@ public:
             (*self)[index] = val;
             return;
         }
-        else
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
     void __setitem__(const std::string& name, const GModelPar& val) {
         (*self)[name] = val;

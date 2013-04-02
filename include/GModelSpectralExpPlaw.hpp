@@ -61,8 +61,10 @@ class GModelSpectralExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralExpPlaw(void);
-    explicit GModelSpectralExpPlaw(const double&  norm, const double&  index,
-                                   const GEnergy& ecut, const GEnergy& pivot);
+    explicit GModelSpectralExpPlaw(const double&  prefactor,
+                                   const double&  index,
+                                   const GEnergy& pivot,
+                                   const GEnergy& cutoff);
     explicit GModelSpectralExpPlaw(const GXmlElement& xml);
     GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model);
     virtual ~GModelSpectralExpPlaw(void);
@@ -91,13 +93,13 @@ public:
     virtual std::string            print(void) const;
 
     // Other methods
-    double  norm(void) const;
+    double  prefactor(void) const;
+    void    prefactor(const double& prefactor);
     double  index(void) const;
-    GEnergy ecut(void) const;
-    GEnergy pivot(void) const;
-    void    norm(const double& norm);
     void    index(const double& index);
-    void    ecut(const GEnergy& ecut);
+    GEnergy cutoff(void) const;
+    void    cutoff(const GEnergy& cutoff);
+    GEnergy pivot(void) const;
     void    pivot(const GEnergy& pivot);
 
 protected:
@@ -183,30 +185,30 @@ std::string GModelSpectralExpPlaw::type(void) const
 
 
 /***********************************************************************//**
- * @brief Return normalization factor
+ * @brief Return pre factor
  *
- * @return Normalization factor (ph/cm2/s/MeV).
+ * @return Pre factor (ph/cm2/s/MeV).
  *
- * Returns the normalization factor.
+ * Returns the pre factor.
  ***************************************************************************/
 inline
-double GModelSpectralExpPlaw::norm(void) const
+double GModelSpectralExpPlaw::prefactor(void) const
 {
     return (m_norm.value());
 }
 
 
 /***********************************************************************//**
- * @brief Set normalization factor 
+ * @brief Set pre factor 
  *
- * @param[in] norm Normalization factor (ph/cm2/s/MeV).
+ * @param[in] norm Pre factor (ph/cm2/s/MeV).
  *
- * Sets the normalization factor.
+ * Sets the pre factor.
  ***************************************************************************/
 inline
-void GModelSpectralExpPlaw::norm(const double& norm)
+void GModelSpectralExpPlaw::prefactor(const double& prefactor)
 {
-    m_norm.value(norm);
+    m_norm.value(prefactor);
     return;
 }
 
@@ -241,37 +243,6 @@ void GModelSpectralExpPlaw::index(const double& index)
 
 
 /***********************************************************************//**
- * @brief Return exponential cut-off energy
- *
- * @return Exponential cut-off energy.
- *
- * Returns the exponential cut-off energy.
- ***************************************************************************/
-inline
-GEnergy GModelSpectralExpPlaw::ecut(void) const
-{
-    GEnergy energy;
-    energy.MeV(m_ecut.value());
-    return energy;
-}
-
-
-/***********************************************************************//**
- * @brief Set exponential cut-off energy
- *
- * @param[in] ecut Exponential cut-off energy.
- *
- * Sets the exponential cut-off energy.
- ***************************************************************************/
-inline
-void GModelSpectralExpPlaw::ecut(const GEnergy& ecut)
-{
-    m_ecut.value(ecut.MeV());
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Return pivot energy
  *
  * @return Pivot energy.
@@ -298,6 +269,37 @@ inline
 void GModelSpectralExpPlaw::pivot(const GEnergy& pivot)
 {
     m_pivot.value(pivot.MeV());
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return exponential cut-off energy
+ *
+ * @return Exponential cut-off energy.
+ *
+ * Returns the exponential cut-off energy.
+ ***************************************************************************/
+inline
+GEnergy GModelSpectralExpPlaw::cutoff(void) const
+{
+    GEnergy energy;
+    energy.MeV(m_ecut.value());
+    return energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Set exponential cut-off energy
+ *
+ * @param[in] cutoff Exponential cut-off energy.
+ *
+ * Sets the exponential cut-off energy.
+ ***************************************************************************/
+inline
+void GModelSpectralExpPlaw::cutoff(const GEnergy& cutoff)
+{
+    m_ecut.value(cutoff.MeV());
     return;
 }
 

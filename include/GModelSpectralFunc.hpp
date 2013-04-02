@@ -42,18 +42,23 @@
  *
  * @brief Spectral function model class
  *
- * This class implements an arbitrary function as the spectral component of
- * the model. The function is defined as
- * \f[I(E)=norm f(E)\f]
+ * This class implements an arbitrary function  as the spectral model
+ * component. The model is defined by
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ * \f]
+ *
  * where
- * \f$norm\f$ is the normalization of the function.
+ * - \f${\tt m\_norm}\f$ is the normalization of the function.
  ***************************************************************************/
 class GModelSpectralFunc : public GModelSpectral {
 
 public:
     // Constructors and destructors
     GModelSpectralFunc(void);
-    explicit GModelSpectralFunc(const std::string& filename);
+    explicit GModelSpectralFunc(const std::string& filename,
+                                const double&      norm);
     explicit GModelSpectralFunc(const GXmlElement& xml);
     GModelSpectralFunc(const GModelSpectralFunc& model);
     virtual ~GModelSpectralFunc(void);
@@ -73,14 +78,19 @@ public:
                                      const GEnergy& emax) const;
     virtual double              eflux(const GEnergy& emin,
                                       const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin, const GEnergy& emax,
-                                   const GTime& time, GRan& ran) const;
+    virtual GEnergy             mc(const GEnergy& emin,
+                                   const GEnergy& emax,
+                                   const GTime&   time,
+                                   GRan&          ran) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.value(); }
+    const std::string& filename(void) const;
+    void               filename(const std::string& filename);
+    double             norm(void) const;
+    void               norm(const double& norm);
 
 protected:
     // Protected methods
@@ -127,6 +137,64 @@ inline
 std::string GModelSpectralFunc::type(void) const
 {
     return "FileFunction";
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization factor
+ *
+ * @return Normalization factor.
+ *
+ * Returns the normalization factor.
+ ***************************************************************************/
+inline
+double GModelSpectralFunc::norm(void) const
+{
+    return (m_norm.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set normalization factor 
+ *
+ * @param[in] norm Normalization factor.
+ *
+ * Sets the normalization factor.
+ ***************************************************************************/
+inline
+void GModelSpectralFunc::norm(const double& norm)
+{
+    m_norm.value(norm);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return file name
+ *
+ * @return Name of node file.
+ *
+ * Returns the name of the file function node file.
+ ***************************************************************************/
+inline
+const std::string& GModelSpectralFunc::filename(void) const
+{
+    return (m_filename);
+}
+
+
+/***********************************************************************//**
+ * @brief Loads nodes from node file and set filename
+ *
+ * @param[in] filename Node file name.
+ *
+ * Loads the nodes from a file function node file and sets the filename.
+ ***************************************************************************/
+inline
+void GModelSpectralFunc::filename(const std::string& filename)
+{
+    load_nodes(filename);
+    return;
 }
 
 #endif /* GMODELSPECTRALFUNC_HPP */

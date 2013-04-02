@@ -74,16 +74,16 @@ GModelSpectralPlaw::GModelSpectralPlaw(void) : GModelSpectral()
 /***********************************************************************//**
  * @brief Parameter constructor
  *
- * @param[in] norm Power law normalization.
+ * @param[in] prefactor Power law pre factor (ph/cm2/s/MeV).
  * @param[in] index Power law index.
  * @param[in] pivot Pivot energy.
  *
  * Constructs a spectral power law using the model parameters
- * - power law normalization value @p norm (ph/cm2/s/MeV)
+ * - power law @p prefactor (ph/cm2/s/MeV)
  * - spectral @p index
  * - @p pivot energy.
  ***************************************************************************/
-GModelSpectralPlaw::GModelSpectralPlaw(const double&  norm,
+GModelSpectralPlaw::GModelSpectralPlaw(const double&  prefactor,
                                        const double&  index,
                                        const GEnergy& pivot) :
                     GModelSpectral()
@@ -92,7 +92,7 @@ GModelSpectralPlaw::GModelSpectralPlaw(const double&  norm,
     init_members();
 
     // Set parameters
-    m_norm.value(norm);
+    m_norm.value(prefactor);
     m_index.value(index);
     m_pivot.value(pivot.MeV());  // Internally stored in MeV
 
@@ -351,11 +351,11 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
         std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
-        std::cout << ", m_norm=" << m_norm.value();
-        std::cout << ", m_index=" << m_index.value();
-        std::cout << ", m_pivot=" << m_pivot.value();
-        std::cout << ", m_last_power=" << m_last_power;
-        std::cout << ", m_last_log_e_norm=" << m_last_log_e_norm;
+        std::cout << ", e_norm=" << m_last_e_norm;
+        std::cout << ", power=" << m_last_power;
+        std::cout << ", g_norm=" << g_norm;
+        std::cout << ", g_index=" << g_index;
+        std::cout << ", g_pivot=" << g_pivot;
         std::cout << ")" << std::endl;
     }
     #endif

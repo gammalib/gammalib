@@ -44,7 +44,7 @@ const GModelSpectralRegistry g_spectral_func_registry(&g_spectral_func_seed);
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                 "GModelSpectralFunc::flux(GEnergy&, GEnergy&)"
 #define G_EFLUX               "GModelSpectralFunc::eflux(GEnergy&, GEnergy&)"
-#define G_MC              "GModelSpectralFunc::mc(GEnergy&, GEnergy&, GRan&)"
+#define G_MC      "GModelSpectralFunc::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                       "GModelSpectralFunc::read(GXmlElement&)"
 #define G_WRITE                     "GModelSpectralFunc::write(GXmlElement&)"
 #define G_LOAD_NODES           "GModelSpectralFunc::load_nodes(std::string&)"
@@ -79,19 +79,24 @@ GModelSpectralFunc::GModelSpectralFunc(void) : GModelSpectral()
  * @brief File constructor
  *
  * @param[in] filename File name of nodes.
+ * @param[in] norm Normalization factor.
  *
- * Creates instance of a spectral function model from a list of nodes that is
- * found in the specified file. See GModelSpectralFunc::load_nodes() for more
+ * Constructs spectral file function model from a list of nodes that is found
+ * in the specified ASCII file. See the load_nodes() method for more
  * information about the expected structure of the file.
  ***************************************************************************/
-GModelSpectralFunc::GModelSpectralFunc(const std::string& filename)
-                                       : GModelSpectral()
+GModelSpectralFunc::GModelSpectralFunc(const std::string& filename,
+                                       const double&      norm) :
+                    GModelSpectral()
 {
     // Initialise members
     init_members();
 
     // Load nodes
     load_nodes(filename);
+
+    // Set normalization
+    m_norm.value(norm);
 
     // Return
     return;
@@ -103,9 +108,9 @@ GModelSpectralFunc::GModelSpectralFunc(const std::string& filename)
  *
  * @param[in] xml XML element.
  *
- * Creates instance of a spectral function model by extracting information
- * from an XML element. See GModelSpectralFunc::read() for more information
- * about the expected structure of the XML element.
+ * Constructs spectral file function model by extracting information from an
+ * XML element. See the read() method for more information about the expected
+ * structure of the XML element.
  ***************************************************************************/
 GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml) :
                     GModelSpectral()
@@ -124,7 +129,7 @@ GModelSpectralFunc::GModelSpectralFunc(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] model Spectral function model.
+ * @param[in] model File function model.
  ***************************************************************************/
 GModelSpectralFunc::GModelSpectralFunc(const GModelSpectralFunc& model) :
                     GModelSpectral(model)
@@ -162,7 +167,8 @@ GModelSpectralFunc::~GModelSpectralFunc(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] model Spectral function model.
+ * @param[in] model File function model.
+ * @return File function model.
  ***************************************************************************/
 GModelSpectralFunc& GModelSpectralFunc::operator= (const GModelSpectralFunc& model)
 {
@@ -195,7 +201,7 @@ GModelSpectralFunc& GModelSpectralFunc::operator= (const GModelSpectralFunc& mod
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear file function
 ***************************************************************************/
 void GModelSpectralFunc::clear(void)
 {
@@ -213,27 +219,30 @@ void GModelSpectralFunc::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone file function
 ***************************************************************************/
 GModelSpectralFunc* GModelSpectralFunc::clone(void) const
 {
+    // Clone file function
     return new GModelSpectralFunc(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Evaluate model
+ * @brief Evaluate function
  *
  * @param[in] srcEng True photon energy.
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The spectral model is defined as
- * \f[I(E)=norm f(E)\f]
+ * Evaluates
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ * \f]
+ *
  * where
- * \f$norm\f$ is the normalization of the function.
- * Note that the node energies are stored as log10 of energy in units of
- * MeV.
+ * - \f${\tt m\_norm}\f$ is the normalization factor.
  ***************************************************************************/
 double GModelSpectralFunc::eval(const GEnergy& srcEng,
                                 const GTime&   srcTime) const
@@ -244,13 +253,14 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng,
     double func = std::pow(10.0, arg);
 
     // Compute function value
-    double value  = norm() * func;
+    double value  = m_norm.value() * func;
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralFunc::eval";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ", norm=" << norm();
@@ -271,16 +281,22 @@ double GModelSpectralFunc::eval(const GEnergy& srcEng,
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The spectral model is defined as
- * \f[I(E)=norm f(E)\f]
- * where
- * \f$norm=n_s n_v\f$ is the normalization of the function.
- * Note that the normalization is factorised into a scaling factor and a
- * value and that the method is expected to return the gradient with respect
- * to the parameter value \f$n_v\f$.
+ * Evaluates
  *
- * The partial derivative of the normalization value is given by
- * \f[dI/dn_v=n_s f(E)\f]
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_norm}
+ * \f]
+ *
+ * where
+ * - \f${\tt m\_norm}\f$ is the normalization factor.
+ *
+ * The method also evaluates the partial derivatives of the model with
+ * respect to the normalization parameter using
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_norm}} =
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_norm}}
+ * \f]
  ***************************************************************************/
 double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng,
                                           const GTime&   srcTime)
@@ -291,19 +307,20 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng,
     double func = std::pow(10.0, arg);
 
     // Compute function value
-    double value  = norm() * func;
+    double value  = m_norm.value() * func;
 
     // Compute partial derivatives of the parameter values
     double g_norm  = (m_norm.isfree())  ? m_norm.scale() * func : 0.0;
 
-    // Set gradients (circumvent const correctness)
-    const_cast<GModelSpectralFunc*>(this)->m_norm.factor_gradient(g_norm);
+    // Set gradients
+    m_norm.factor_gradient(g_norm);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralFunc::eval_gradients";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ", norm=" << norm();
@@ -325,34 +342,27 @@ double GModelSpectralFunc::eval_gradients(const GEnergy& srcEng,
  * @param[in] emax Maximum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
+ *
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  ***************************************************************************/
 double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
-
     // Initialise flux
     double flux = 0.0;
-    
-    // Get energy range in MeV
-    double e_min = emin.MeV();
-    double e_max = emax.MeV();
-    
-    // Continue only if e_max > e_min
-    if (e_max > e_min) {
+
+    // Compute only if integration range is valid
+    if (emin < emax) {
+
+        // Get energy range in MeV
+        double e_min = emin.MeV();
+        double e_max = emax.MeV();
     
         // Determine left node index for minimum energy
         m_lin_nodes.set_value(e_min);
@@ -404,9 +414,9 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
         } // endelse: emin and emax not between same nodes
     
         // Multiply flux by normalisation factor
-        flux *= norm();
+        flux *= m_norm.value();
     
-    } // endif: e_max > e_min
+    } // endif: integration range was valid
 
     // Return
     return flux;
@@ -420,34 +430,27 @@ double GModelSpectralFunc::flux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] emax Maximum photon energy.
  * @return Energy flux (erg/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
+ *
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) E \, dE
+ * \f]
+ *
  * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  ***************************************************************************/
 double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
-
     // Initialise flux
-    double flux = 0.0;
+    double eflux = 0.0;
+
+    // Compute only if integration range is valid
+    if (emin < emax) {
     
-    // Get energy range in MeV
-    double e_min = emin.MeV();
-    double e_max = emax.MeV();
-    
-    // Continue only if e_max > e_min
-    if (e_max > e_min) {
+        // Get energy range in MeV
+        double e_min = emin.MeV();
+        double e_max = emax.MeV();
     
         // Determine left node index for minimum energy
         m_lin_nodes.set_value(e_min);
@@ -461,11 +464,11 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
         // integrate over the energy interval using the appropriate power
         // law parameters
         if (inx_emin == inx_emax) {
-            flux = m_prefactor[inx_emin] * 
-                   plaw_energy_flux(e_min,
-                                    e_max, 
-                                    m_epivot[inx_emin],
-                                    m_gamma[inx_emin]) * MeV2erg;
+            eflux = m_prefactor[inx_emin] * 
+                    plaw_energy_flux(e_min,
+                                     e_max, 
+                                     m_epivot[inx_emin],
+                                     m_gamma[inx_emin]) * MeV2erg;
         }
 
         // ... otherwise integrate over the nodes where emin and emax
@@ -478,33 +481,33 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
             int i_start = (e_min < m_lin_nodes[0]) ? inx_emin : inx_emin+1;
 
             // Integrate from emin to the node boundary
-            flux = m_prefactor[inx_emin] *
-                   plaw_energy_flux(e_min,
-                                    m_lin_nodes[i_start],
-                                    m_epivot[inx_emin],
-                                    m_gamma[inx_emin]) * MeV2erg;
+            eflux = m_prefactor[inx_emin] *
+                    plaw_energy_flux(e_min,
+                                     m_lin_nodes[i_start],
+                                     m_epivot[inx_emin],
+                                     m_gamma[inx_emin]) * MeV2erg;
 
             // Integrate over all nodes between
             for (int i = i_start; i < inx_emax; ++i) {
-                flux += m_eflux[i];
+                eflux += m_eflux[i];
             }
 
             // Integrate from node boundary to emax
-            flux += m_prefactor[inx_emax] *
-                    plaw_energy_flux(m_lin_nodes[inx_emax],
-                                     e_max,
-                                     m_epivot[inx_emax],
-                                     m_gamma[inx_emax]) * MeV2erg;
+            eflux += m_prefactor[inx_emax] *
+                     plaw_energy_flux(m_lin_nodes[inx_emax],
+                                      e_max,
+                                      m_epivot[inx_emax],
+                                      m_gamma[inx_emax]) * MeV2erg;
         
         } // endelse: emin and emax not between same nodes
     
         // Multiply flux by normalisation factor
-        flux *= norm();
+        eflux *= norm();
     
-    } // endif: e_max > e_min
+    } // endif: integration range was valid
 
-    // Return
-    return flux;
+    // Return flux
+    return eflux;
 }
 
 
@@ -520,8 +523,8 @@ double GModelSpectralFunc::eflux(const GEnergy& emin, const GEnergy& emax) const
  * @exception GException::erange_invalid
  *            Energy range is invalid (emin < emax required).
  *
- * Simulates a random energy in the interval [emin, emax] for a spectral
- * function.
+ * Returns Monte Carlo energy by randomly drawing from a broken power law
+ * defined by the file function.
  ***************************************************************************/
 GEnergy GModelSpectralFunc::mc(const GEnergy& emin,
                                const GEnergy& emax,
@@ -537,42 +540,37 @@ GEnergy GModelSpectralFunc::mc(const GEnergy& emin,
     // Allocate energy
     GEnergy energy;
     
-    // Continue only if emax > emin
-    if (emax > emin) {
-    
-        // Update cache
-        mc_update(emin, emax);
+    // Update cache
+    mc_update(emin, emax);
 
-        // Determine in which bin we reside
-        int inx = 0;
-        if (m_mc_cum.size() > 1) {
-            double u = ran.uniform();
-            for (inx = m_mc_cum.size()-1; inx > 0; --inx) {
-                if (m_mc_cum[inx-1] <= u) {
-                    break;
-                }
+    // Determine in which bin we reside
+    int inx = 0;
+    if (m_mc_cum.size() > 1) {
+        double u = ran.uniform();
+        for (inx = m_mc_cum.size()-1; inx > 0; --inx) {
+            if (m_mc_cum[inx-1] <= u) {
+                break;
             }
         }
+    }
 
-        // Get random energy for specific bin
-        if (m_mc_exp[inx] != 0.0) {
-            double e_min = m_mc_min[inx];
-            double e_max = m_mc_max[inx];
-            double u     = ran.uniform();
-            double eng   = (u > 0.0) 
-                            ? std::exp(std::log(u * (e_max - e_min) + e_min) / m_mc_exp[inx])
-                            : 0.0;
-            energy.MeV(eng);
-        }
-        else {
-            double e_min = m_mc_min[inx];
-            double e_max = m_mc_max[inx];
-            double u     = ran.uniform();
-            double eng   = std::exp(u * (e_max - e_min) + e_min);
-            energy.MeV(eng);
-        }
-
-    } // endif: emax > emin
+    // Get random energy for specific bin
+    if (m_mc_exp[inx] != 0.0) {
+        double e_min = m_mc_min[inx];
+        double e_max = m_mc_max[inx];
+        double u     = ran.uniform();
+        double eng   = (u > 0.0) 
+                        ? std::exp(std::log(u * (e_max - e_min) + e_min) / m_mc_exp[inx])
+                        : 0.0;
+        energy.MeV(eng);
+    }
+    else {
+        double e_min = m_mc_min[inx];
+        double e_max = m_mc_max[inx];
+        double u     = ran.uniform();
+        double eng   = std::exp(u * (e_max - e_min) + e_min);
+        energy.MeV(eng);
+    }
     
     // Return energy
     return energy;
@@ -589,10 +587,12 @@ GEnergy GModelSpectralFunc::mc(const GEnergy& emin,
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter name found in XML element.
  *
- * Read the function information from an XML element and load the nodes
- * from the associated file. The XML element is required to have an
- * attribute "file" that specifies the function nodes and a parameter
- * named "Normalization".
+ * Reads the spectral information from an XML element. The format of the XML
+ * elements is
+ *
+ *     <spectrum type="FileFunction" file="..">
+ *       <parameter name="Normalization" scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
  ***************************************************************************/
 void GModelSpectralFunc::read(const GXmlElement& xml)
 {
@@ -634,10 +634,15 @@ void GModelSpectralFunc::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the spectral function information into an XML element. The XML
- * element has to be of type "FileFunction" and will have 1 parameter leaf
- * named "Normalization". Note that the function nodes will not be written
- * since they will not be altered by any method.
+ * Writes the spectral information into an XML element. The format of the XML
+ * element is
+ *
+ *     <spectrum type="FileFunction" file="..">
+ *       <parameter name="Normalization" scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
+ * 
+ * Note that the function nodes will not be written since they will not be
+ * altered by any method.
  ***************************************************************************/
 void GModelSpectralFunc::write(GXmlElement& xml) const
 {
@@ -681,7 +686,9 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Print file function information
+ *
+ * @return String containing file function information.
  ***************************************************************************/
 std::string GModelSpectralFunc::print(void) const
 {
@@ -690,6 +697,8 @@ std::string GModelSpectralFunc::print(void) const
 
     // Append header
     result.append("=== GModelSpectralFunc ===");
+
+    // Append information
     result.append("\n"+parformat("Function file")+m_filename);
     result.append("\n"+parformat("Number of nodes")+str(m_lin_nodes.size()));
     result.append("\n"+parformat("Number of parameters")+str(size()));
@@ -962,9 +971,9 @@ void GModelSpectralFunc::set_cache(void) const
  *
  * This method sets up an array of indices and the cumulative distribution
  * function needed for MC simulations.
- * 
  ***************************************************************************/
-void GModelSpectralFunc::mc_update(const GEnergy& emin, const GEnergy& emax) const
+void GModelSpectralFunc::mc_update(const GEnergy& emin,
+                                   const GEnergy& emax) const
 {
     // Check if we need to update the cache
     if (emin != m_mc_emin || emax != m_mc_emax) {
@@ -1090,10 +1099,3 @@ void GModelSpectralFunc::mc_update(const GEnergy& emin, const GEnergy& emax) con
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

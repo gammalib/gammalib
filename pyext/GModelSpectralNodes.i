@@ -61,6 +61,19 @@ public:
                                     GRan&          ran) const;
     virtual void                 read(const GXmlElement& xml);
     virtual void                 write(GXmlElement& xml) const;
+
+    // Other methods
+    int     nodes(void) const;
+    void    append(const GEnergy& energy, const double& intensity);
+    void    insert(const int& index, const GEnergy& energy,
+                   const double& intensity);
+    void    remove(const int& index);
+    void    reserve(const int& num);
+    void    extend(const GModelSpectralNodes& nodes);
+    GEnergy energy(const int& index) const;
+    void    energy(const int& index, const GEnergy& energy);
+    double  intensity(const int& index) const;
+    void    intensity(const int& index, const double& intensity);
 };
 
 

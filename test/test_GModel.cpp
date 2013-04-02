@@ -45,20 +45,29 @@ void TestGModel::set(void)
     name("GModel");
 
     // Set attributes
-    m_map_file                  = "data/cena_lobes_parkes.fits";
-    m_xml_file                  = "data/crab.xml";
-    m_xml_model_point_nodes     = "data/model_point_nodes.xml";
-    m_xml_model_diffuse_const   = "data/model_diffuse_const.xml";
-    m_xml_model_diffuse_cube    = "data/model_diffuse_cube.xml";
-    m_xml_model_diffuse_map     = "data/model_diffuse_map.xml";
-    m_xml_model_radial_disk     = "data/model_radial_disk.xml";
-    m_xml_model_radial_gauss    = "data/model_radial_gauss.xml";
-    m_xml_model_radial_shell    = "data/model_radial_shell.xml";
-    m_xml_model_elliptical_disk = "data/model_elliptical_disk.xml";
+    m_map_file                    = "data/cena_lobes_parkes.fits";
+    m_xml_file                    = "data/crab.xml";
+    m_xml_model_point_const       = "data/model_point_const.xml";
+    m_xml_model_point_plaw        = "data/model_point_plaw.xml";
+    m_xml_model_point_plaw2       = "data/model_point_plaw2.xml";
+    m_xml_model_point_eplaw       = "data/model_point_eplaw.xml";
+    m_xml_model_point_logparabola = "data/model_point_logparabola.xml";
+    m_xml_model_point_nodes       = "data/model_point_nodes.xml";
+    m_xml_model_point_filefct     = "data/model_point_filefct.xml";
+    m_xml_model_diffuse_const     = "data/model_diffuse_const.xml";
+    m_xml_model_diffuse_cube      = "data/model_diffuse_cube.xml";
+    m_xml_model_diffuse_map       = "data/model_diffuse_map.xml";
+    m_xml_model_radial_disk       = "data/model_radial_disk.xml";
+    m_xml_model_radial_gauss      = "data/model_radial_gauss.xml";
+    m_xml_model_radial_shell      = "data/model_radial_shell.xml";
+    m_xml_model_elliptical_disk   = "data/model_elliptical_disk.xml";
 
     // Add tests
     add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
     add_test(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
+
+    // Add spatial model tests
+    add_test(static_cast<pfunction>(&TestGModel::test_point_source), "Test GModelSpatialPointSource");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
     add_test(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
@@ -66,12 +75,23 @@ void TestGModel::set(void)
     add_test(static_cast<pfunction>(&TestGModel::test_radial_gauss), "Test GModelSpatialRadialGauss");
     add_test(static_cast<pfunction>(&TestGModel::test_radial_shell), "Test GModelSpatialRadialShell");
     add_test(static_cast<pfunction>(&TestGModel::test_elliptical_disk), "Test GModelSpatialEllipticalDisk");
-    //
     add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
+
+    // Add spatial model tests
+    add_test(static_cast<pfunction>(&TestGModel::test_const), "Test GModelSpectralConst");
+    add_test(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
+    add_test(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
+    add_test(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
+    add_test(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
+    add_test(static_cast<pfunction>(&TestGModel::test_nodes), "Test GModelSpectralNodes");
+    add_test(static_cast<pfunction>(&TestGModel::test_filefct), "Test GModelSpectralFunc");
     add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
-    //
-    add_test(static_cast<pfunction>(&TestGModel::test_model), "Test model handling");
-    add_test(static_cast<pfunction>(&TestGModel::test_models), "Test models");
+
+    // Add temporal model tests
+    add_test(static_cast<pfunction>(&TestGModel::test_temp_const), "Test GModelTemporalConst");
+
+    // Add model container tests
+    add_test(static_cast<pfunction>(&TestGModel::test_models), "Test GModels");
 
     // Return
     return;
@@ -326,6 +346,93 @@ void TestGModel::test_sky_model(void)
         test_value(vector[3], 0.0);
         test_value(vector[4], 0.0);
         test_value(vector[5], 0.0);
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpatialPointSource class
+ ***************************************************************************/
+void TestGModel::test_point_source(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpatialPointSource model;
+        test_assert(model.type() == "SkyDirFunction",
+                                    "Model type \"SkyDirFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test sky direction constructor
+    test_try("Test sky direction constructor");
+    try {
+        GSkyDir dir;
+        dir.radec_deg(83.6331, +22.0145);
+        GModelSpatialPointSource model(dir);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), +22.0145);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpatialPointSource model(83.6331, +22.0145);
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), +22.0145);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                     xml(m_xml_model_point_plaw);
+        GXmlElement*             element = xml.element(0)->element(0)->element("spatialModel", 0);
+        GModelSpatialPointSource model(*element);
+        test_value(model.size(), 2);
+        test_assert(model.type() == "SkyDirFunction", "Expected \"SkyDirFunction\"");
+        test_value(model.ra(), 83.6331);
+        test_value(model.dec(), +22.0145);
+
+        // Test ra method
+        model.ra(3.9);
+        test_value(model.ra(), 3.9);
+
+        // Test dec method
+        model.dec(3.9);
+        test_value(model.dec(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"RA", "DEC"};
+        for (int i = 0; i < 2; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
 
         // Success if we reached this point
         test_try_success();
@@ -961,91 +1068,660 @@ void TestGModel::test_elliptical_disk(void)
 
 
 /***********************************************************************//**
- * @brief Test model handling.
+ * @brief Test GModelSpectralConst class
  ***************************************************************************/
-void TestGModel::test_model(void)
+void TestGModel::test_const(void)
 {
-    // Setup spatial model
-    GModelSpatialPointSource point_source;
-    test_try("Setup spatial model");
+    // Test void constructor
+    test_try("Test void constructor");
     try {
-        GSkyDir dir;
-        dir.radec_deg(83.6331, +22.0145);
-        point_source = GModelSpatialPointSource(dir);
+        GModelSpectralConst model;
+        test_assert(model.type() == "ConstantValue",
+                                    "Model type \"ConstantValue\" expected.");
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
 
-    test_assert((point_source.ra() == 83.6331 && point_source.dec() == +22.0145),
-                "Test if ra=83.6331 and dec=22.0145",
-                "Bad values in GModelSpatialPointSource");
-
-    // Setup spectral model
-    GModelSpectralPlaw power_law;
-    test_try("Setup spectral model");
+    // Test value constructor
+    test_try("Test value constructor");
     try {
-        power_law = GModelSpectralPlaw(1.0e-7, -2.1, GEnergy(100.0, "MeV"));
+        GModelSpectralConst model(3.0);
+        test_value(model.value(), 3.0);
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
-    test_assert((power_law.norm() == 1.0e-7 && power_law.index() == -2.1),
-                "Test if norm=1.0e-7 and index=-2.1",
-                "Bad values in GModelSpectralPlaw");
-
-    // Setup Crab model
-    GModelSky crab;
-    test_try("Setup Crab model");
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
     try {
-        crab = GModelSky(point_source, power_law);
-        crab.name("Crab");
+        // Test XML constructor
+        GXml                xml(m_xml_model_point_const);
+        GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralConst model(*element);
+        test_value(model.size(), 1);
+        test_assert(model.type() == "ConstantValue", "Expected \"ConstantValue\"");
+        test_value(model.value(), 5.7e-16);
+
+        // Test value method
+        model.value(3.9e-16);
+        test_value(model.value(), 3.9e-16);
+
+        // Test operator access
+        const char* strarray[] = {"Value"};
+        for (int i = 0; i < 1; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
         test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);
     }
-
-    // Put model in container
-    GModels models;
-    test_try("Put model in container");
-    try {
-        models.append(crab);
-        models.append(crab);
-        models.append(crab);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Set model scaling
-    GModelPar lat("LAT", 1.0);
-    GModelPar cta("CTA", 0.5);
-    crab.scale(lat);
-    crab.scale(lat); // In purpose to check if parameter is appended only once
-    crab.scale(cta);
-
-    // Test model scaling
-    test_value(crab.scale("LAT").value(), 1.0);
-    test_value(crab.scale("CTA").value(), 0.5);
-    test_value(crab.scale("COM").value(), 1.0);
-
-    // Test saving and loading
-    GModels models2;
-    models2.append(crab);
-    models2.save("test_instrument.xml");
-    models2.load("test_instrument.xml");
-    test_value(models2[0]->scale("LAT").value(), 1.0);
-    test_value(models2[0]->scale("CTA").value(), 0.5);
-    test_value(models2[0]->scale("COM").value(), 1.0);
 
     // Exit test
     return;
+}
 
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralPlaw class
+ ***************************************************************************/
+void TestGModel::test_plaw(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralPlaw model;
+        test_assert(model.type() == "PowerLaw",
+                                    "Model type \"PowerLaw\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"));
+        test_value(model.prefactor(), 2.0);
+        test_value(model.index(), -2.1);
+        test_value(model.pivot().MeV(), 100.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml               xml(m_xml_model_point_plaw);
+        GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralPlaw model(*element);
+        test_value(model.size(), 3);
+        test_assert(model.type() == "PowerLaw", "Expected \"PowerLaw\"");
+        test_value(model.prefactor(), 5.7e-16);
+        test_value(model.index(), -2.48);
+        test_value(model.pivot().TeV(), 0.3);
+
+        // Test prefactor method
+        model["Prefactor"].remove_range(); // To allow setting of any value
+        model.prefactor(3.9);
+        test_value(model.prefactor(), 3.9);
+
+        // Test index method
+        model["Index"].remove_range(); // To allow setting of any value
+        model.index(2.1);
+        test_value(model.index(), 2.1);
+
+        // Test pivot method
+        model["PivotEnergy"].remove_range(); // To allow setting of any value
+        model.pivot(GEnergy(10.0, "MeV"));
+        test_value(model.pivot().MeV(), 10.0);
+
+        // Test operator access
+        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy"};
+        for (int i = 0; i < 3; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralPlaw2 class
+ ***************************************************************************/
+void TestGModel::test_plaw2(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralPlaw2 model;
+        test_assert(model.type() == "PowerLaw2",
+                                    "Model type \"PowerLaw2\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralPlaw2 model(2.0, -2.1, GEnergy(10.0, "MeV"), GEnergy(100.0, "MeV"));
+        test_value(model.integral(), 2.0);
+        test_value(model.index(), -2.1);
+        test_value(model.emin().MeV(), 10.0);
+        test_value(model.emax().MeV(), 100.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                xml(m_xml_model_point_plaw2);
+        GXmlElement*        element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralPlaw2 model(*element);
+        test_value(model.size(), 4);
+        test_assert(model.type() == "PowerLaw2", "Expected \"PowerLaw2\"");
+        test_value(model.integral(), 1.0e-7);
+        test_value(model.index(), -2.0);
+        test_value(model.emin().MeV(), 100.0);
+        test_value(model.emax().MeV(), 500000.0);
+
+        // Test integral method
+        model.integral(2.1e-7);
+        test_value(model.integral(), 2.1e-7);
+
+        // Test index method
+        model.index(-2.3);
+        test_value(model.index(), -2.3);
+
+        // Test emin method
+        model.emin(GEnergy(10.0, "MeV"));
+        test_value(model.emin().MeV(), 10.0);
+
+        // Test emax method
+        model.emax(GEnergy(10.0, "MeV"));
+        test_value(model.emax().MeV(), 10.0);
+
+        // Test operator access
+        const char* strarray[] = {"Integral", "Index", "LowerLimit", "UpperLimit"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralExpPlaw class
+ ***************************************************************************/
+void TestGModel::test_eplaw(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralExpPlaw model;
+        test_assert(model.type() == "ExpCutoff",
+                                    "Model type \"ExpCutoff\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralExpPlaw model(2.0, -2.1, GEnergy(100.0, "MeV"), GEnergy(1.0, "GeV"));
+        test_value(model.prefactor(), 2.0);
+        test_value(model.index(), -2.1);
+        test_value(model.pivot().MeV(), 100.0);
+        test_value(model.cutoff().GeV(), 1.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                  xml(m_xml_model_point_eplaw);
+        GXmlElement*          element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralExpPlaw model(*element);
+        test_value(model.size(), 4);
+        test_assert(model.type() == "ExpCutoff", "Expected \"ExpCutoff\"");
+        test_value(model.prefactor(), 5.7e-16);
+        test_value(model.index(), -2.48);
+        test_value(model.pivot().TeV(), 0.3);
+        test_value(model.cutoff().TeV(), 1.0);
+
+        // Test prefactor method
+        model.prefactor(2.3e-16);
+        test_value(model.prefactor(), 2.3e-16);
+
+        // Test index method
+        model.index(-2.6);
+        test_value(model.index(), -2.6);
+
+        // Test pivot method
+        model.pivot(GEnergy(0.5, "TeV"));
+        test_value(model.pivot().TeV(), 0.5);
+
+        // Test cutoff method
+        model.cutoff(GEnergy(10.0, "TeV"));
+        test_value(model.cutoff().TeV(), 10.0);
+
+        // Test operator access
+        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Cutoff"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralLogParabola class
+ ***************************************************************************/
+void TestGModel::test_logparabola(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralLogParabola model;
+        test_assert(model.type() == "LogParabola",
+                                    "Model type \"LogParabola\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralLogParabola model(2.0, -2.1, GEnergy(100.0, "MeV"), -0.2);
+        test_value(model.prefactor(), 2.0);
+        test_value(model.index(), -2.1);
+        test_value(model.pivot().MeV(), 100.0);
+        test_value(model.curvature(), -0.2);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                      xml(m_xml_model_point_logparabola);
+        GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralLogParabola model(*element);
+        test_value(model.size(), 4);
+        test_assert(model.type() == "LogParabola", "Expected \"LogParabola\"");
+        test_value(model.prefactor(), 5.878e-16);
+        test_value(model.index(), -2.32473);
+        test_value(model.pivot().TeV(), 1.0);
+        test_value(model.curvature(), -0.074);
+
+        // Test prefactor method
+        model.prefactor(2.3e-16);
+        test_value(model.prefactor(), 2.3e-16);
+
+        // Test index method
+        model.index(-2.6);
+        test_value(model.index(), -2.6);
+
+        // Test pivot method
+        model.pivot(GEnergy(0.5, "TeV"));
+        test_value(model.pivot().TeV(), 0.5);
+
+        // Test curvature method
+        model.curvature(-0.1);
+        test_value(model.curvature(), -0.1);
+
+        // Test operator access
+        const char* strarray[] = {"Prefactor", "Index", "PivotEnergy", "Curvature"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralNodes class
+ ***************************************************************************/
+void TestGModel::test_nodes(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralNodes model;
+        test_assert(model.type() == "NodeFunction",
+                                    "Model type \"NodeFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test node function manimulation
+    test_try("Test node function manimulation");
+    try {
+        GModelSpectralNodes model;
+        model.reserve(3);
+        test_value(model.size(), 0);
+        test_value(model.nodes(), 0);
+        model.append(GEnergy(1.0, "MeV"), 1.0);
+        test_value(model.size(), 2);
+        test_value(model.nodes(), 1);
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.intensity(0), 1.0);
+        model.append(GEnergy(10.0, "MeV"), 0.1);
+        test_value(model.size(), 4);
+        test_value(model.nodes(), 2);
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.energy(1).MeV(), 10.0);
+        test_value(model.intensity(0), 1.0);
+        test_value(model.intensity(1), 0.1);
+        model.remove(0);
+        test_value(model.size(), 2);
+        test_value(model.nodes(), 1);
+        test_value(model.energy(0).MeV(), 10.0);
+        test_value(model.intensity(0), 0.1);
+        model.insert(0, GEnergy(1.0, "MeV"), 1.0);
+        test_value(model.size(), 4);
+        test_value(model.nodes(), 2);
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.energy(1).MeV(), 10.0);
+        test_value(model.intensity(0), 1.0);
+        test_value(model.intensity(1), 0.1);
+        model.extend(model);
+        test_value(model.size(), 8);
+        test_value(model.nodes(), 4);
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.energy(1).MeV(), 10.0);
+        test_value(model.energy(2).MeV(), 1.0);
+        test_value(model.energy(3).MeV(), 10.0);
+        test_value(model.intensity(0), 1.0);
+        test_value(model.intensity(1), 0.1);
+        test_value(model.intensity(2), 1.0);
+        test_value(model.intensity(3), 0.1);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+   
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml                      xml(m_xml_model_point_nodes);
+        GXmlElement*              element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralNodes model(*element);
+        test_value(model.size(), 4);
+        test_value(model.nodes(), 2);
+        test_assert(model.type() == "NodeFunction", "Expected \"NodeFunction\"");
+        test_value(model.energy(0).MeV(), 1.0);
+        test_value(model.energy(1).MeV(), 10.0);
+        test_value(model.intensity(0), 1.0e-7);
+        test_value(model.intensity(1), 0.1e-7);
+
+        // Test energy method
+        model.energy(0, GEnergy(0.1, "MeV"));
+        test_value(model.energy(0).MeV(), 0.1);
+
+        // Test intensity method
+        model.intensity(0, 2.0e-7);
+        test_value(model.intensity(0), 2.0e-7);
+
+        // Test operator access
+        const char* strarray[] = {"Energy0", "Energy1", "Intensity0", "Intensity1"};
+        for (int i = 0; i < 4; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelSpectralFunc class
+ ***************************************************************************/
+void TestGModel::test_filefct(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelSpectralFunc model;
+        test_assert(model.type() == "FileFunction",
+                                    "Model type \"FileFunction\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelSpectralFunc model("data/filefunction.txt", 2.0);
+        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+        test_value(model.norm(), 2.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+   
+    // Test XML constructor and value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GXml               xml(m_xml_model_point_filefct);
+        GXmlElement*       element = xml.element(0)->element(0)->element("spectrum", 0);
+        GModelSpectralFunc model(*element);
+        test_value(model.size(), 1);
+        test_assert(model.type() == "FileFunction", "Expected \"FileFunction\"");
+        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+        test_value(model.norm(), 1.0);
+
+        // Test filename method
+        model.filename("data/filefunction.txt");
+        test_assert(model.filename() == "data/filefunction.txt", "Expected \"data/filefunction.txt\"");
+
+        // Test norm method
+        model.norm(3.0);
+        test_value(model.norm(), 3.0);
+
+        // Test operator access
+        const char* strarray[] = {"Normalization"};
+        for (int i = 0; i < 1; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GModelTemporalConst class
+ ***************************************************************************/
+void TestGModel::test_temp_const(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GModelTemporalConst model;
+        test_assert(model.type() == "Constant",
+                                    "Model type \"Constant\" expected.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructor
+    test_try("Test value constructor");
+    try {
+        GModelTemporalConst model(3.0);
+        test_value(model.norm(), 3.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    
+    // Test value
+    test_try("Test XML constructor, value and gradients");
+    try {
+        // Test XML constructor
+        GModelTemporalConst model;
+
+        // Test value method
+        model.norm(3.9);
+        test_value(model.norm(), 3.9);
+
+        // Test operator access
+        const char* strarray[] = {"Constant"};
+        for (int i = 0; i < 1; ++i) {
+            std::string keyname(strarray[i]);
+            model[keyname].remove_range(); // To allow setting of any value
+            model[keyname].value(2.1);
+            model[keyname].error(1.9);
+            model[keyname].gradient(0.8);
+            test_value(model[keyname].value(), 2.1);
+            test_value(model[keyname].error(), 1.9);
+            test_value(model[keyname].gradient(), 0.8);
+        }
+
+        // Success if we reached this point
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Exit test
+    return;
 }
 
 
@@ -1115,7 +1791,10 @@ void TestGModel::test_spatial_model(void)
 void TestGModel::test_spectral_model(void)
 {
     // Test spectral models XML interface
-    test_xml_model("GModelSpectralNodes", m_xml_model_point_nodes);
+    test_xml_model("GModelSpectralPlaw",   m_xml_model_point_plaw);
+    test_xml_model("GModelSpectralPlaw2",  m_xml_model_point_plaw2);
+    test_xml_model("GModelSpectralExpPaw", m_xml_model_point_eplaw);
+    test_xml_model("GModelSpectralNodes",  m_xml_model_point_nodes);
 
     // Return
     return;
@@ -1123,7 +1802,7 @@ void TestGModel::test_spectral_model(void)
 
 
 /***********************************************************************//**
- * @brief Test models.
+ * @brief Test model container handling
  ***************************************************************************/
 void TestGModel::test_models(void)
 {
@@ -1162,6 +1841,54 @@ void TestGModel::test_models(void)
         test_try_failure(e);
     }
 
+    // Setup Crab model
+    GModelSky crab;
+    test_try("Setup Crab model");
+    try {
+        GModelSpatialPointSource point_source(83.6331, +22.0145);
+        GModelSpectralPlaw power_law(2.0, -2.1, GEnergy(100.0, "MeV"));
+        crab = GModelSky(point_source, power_law);
+        crab.name("Crab");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Put model in container
+    GModels models;
+    test_try("Put model in container");
+    try {
+        models.append(crab);
+        models.append(crab);
+        models.append(crab);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Set model scaling
+    GModelPar lat("LAT", 1.0);
+    GModelPar cta("CTA", 0.5);
+    crab.scale(lat);
+    crab.scale(lat); // In purpose to check if parameter is appended only once
+    crab.scale(cta);
+
+    // Test model scaling
+    test_value(crab.scale("LAT").value(), 1.0);
+    test_value(crab.scale("CTA").value(), 0.5);
+    test_value(crab.scale("COM").value(), 1.0);
+
+    // Test saving and loading
+    GModels models2;
+    models2.append(crab);
+    models2.save("test_instrument.xml");
+    models2.load("test_instrument.xml");
+    test_value(models2[0]->scale("LAT").value(), 1.0);
+    test_value(models2[0]->scale("CTA").value(), 0.5);
+    test_value(models2[0]->scale("COM").value(), 1.0);
+
     // Exit test
     return;
 
@@ -1173,20 +1900,22 @@ void TestGModel::test_models(void)
  ***************************************************************************/
 int main(void)
 {
+    // Create test suites
     GTestSuites testsuite("GModel");
 
+    // Initialise success flag
     bool was_successful=true;
 
-    //Create a test suite
+    // Create a test suite
     TestGModel test;
 
-    //Append to the container
+    // Append to the container
     testsuite.append(test);
 
-    //Run
+    // Run
     was_successful=testsuite.run();
 
-    //save xml report
+    // Save xml report
     testsuite.save("reports/GModel.xml");
 
     // Return

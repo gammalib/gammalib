@@ -1,0 +1,15 @@
+<?xml version="1.0" standalone="no"?>
+<source_library title="source library">
+	<source name="Crab" type="PointSource">
+        <spectrum type="LogParabola">
+           <parameter name="Prefactor" scale="1e-17" value="5.878"   min="1e-07" max="1000.0" free="1"/>
+           <parameter name="Index"     scale="-1"    value="2.32473" min="0.0"   max="+5.0"   free="1"/>
+           <parameter name="Curvature" scale="-1"    value="0.074"   min="-5.0"  max="+5.0"   free="1"/>
+           <parameter name="Scale"     scale="1e6"   value="1.0"     min="0.01"  max="1000.0" free="0"/>
+        </spectrum>
+		<spatialModel type="SkyDirFunction">
+			<parameter free="0" max="360" min="-360" name="RA" scale="1" value="83.6331" />
+			<parameter free="0" max="90" min="-90" name="DEC" scale="1" value="22.0145" />
+		</spatialModel>
+	</source>
+</source_library>

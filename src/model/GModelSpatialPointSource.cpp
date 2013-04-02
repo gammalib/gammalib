@@ -92,6 +92,31 @@ GModelSpatialPointSource::GModelSpatialPointSource(const GSkyDir& dir) :
 
 
 /***********************************************************************//**
+ * @brief Value constructor
+ *
+ * @param[in] ra Right Ascencion of model centre.
+ * @param[in] dec Declination of model centre.
+ *
+ * Construct a point source spatial model from the Right Ascension and
+ * Declination of the model centre.
+ ***************************************************************************/
+GModelSpatialPointSource::GModelSpatialPointSource(const double& ra,
+                                                   const double& dec) :
+                          GModelSpatial()
+{
+    // Initialise members
+    init_members();
+
+    // Set values
+    m_ra.value(ra);
+    m_dec.value(dec);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief XML constructor
  *
  * @param[in] xml XML element.

@@ -56,7 +56,7 @@ public:
     // Constructors and destructors
     GModelSpectralConst(void);
     explicit GModelSpectralConst(const GXmlElement& xml);
-    explicit GModelSpectralConst(const double& norm);
+    explicit GModelSpectralConst(const double& value);
     GModelSpectralConst(const GModelSpectralConst& model);
     virtual ~GModelSpectralConst(void);
 
@@ -84,8 +84,8 @@ public:
     virtual std::string          print(void) const;
 
     // Other methods
-    double norm(void) const;
-    void   norm(const double& norm);
+    double value(void) const;
+    void   value(const double& value);
 
 protected:
     // Protected methods
@@ -113,30 +113,30 @@ std::string GModelSpectralConst::type(void) const
 
 
 /***********************************************************************//**
- * @brief Return normalization factor
+ * @brief Return model value
  *
- * @return Normalization factor (ph/cm2/s/MeV).
+ * @return Model value (ph/cm2/s/MeV).
  *
- * Returns the normalization factor.
+ * Returns the model value.
  ***************************************************************************/
 inline
-double GModelSpectralConst::norm(void) const
+double GModelSpectralConst::value(void) const
 {
     return (m_norm.value());
 }
 
 
 /***********************************************************************//**
- * @brief Set normalization factor 
+ * @brief Set model value
  *
- * @param[in] norm Normalization factor (ph/cm2/s/MeV).
+ * @param[in] value Model value (ph/cm2/s/MeV).
  *
- * Sets the normalization factor.
+ * Sets the model value.
  ***************************************************************************/
 inline
-void GModelSpectralConst::norm(const double& norm)
+void GModelSpectralConst::value(const double& value)
 {
-    m_norm.value(norm);
+    m_norm.value(value);
     return;
 }
 
