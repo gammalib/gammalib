@@ -1002,8 +1002,8 @@ void GModelSpectralNodes::extend(const GModelSpectralNodes& nodes)
 
         // Loop over all nodes and append them to the node function
         for (int i = 0; i < num; ++i) {
-            m_energies.push_back(nodes[2*i]);
-            m_values.push_back(nodes[2*i+1]);
+            m_energies.push_back(nodes.m_energies[i]);
+            m_values.push_back(nodes.m_values[i]);
         }
 
         // Update parameter mapping
