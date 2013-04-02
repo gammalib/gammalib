@@ -61,8 +61,10 @@ class GModelSpectralExpPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralExpPlaw(void);
-    explicit GModelSpectralExpPlaw(const double&  norm, const double&  index,
-                                   const GEnergy& ecut, const GEnergy& pivot);
+    explicit GModelSpectralExpPlaw(const double&  prefactor,
+                                   const double&  index,
+                                   const GEnergy& ecut,
+                                   const GEnergy& pivot);
     explicit GModelSpectralExpPlaw(const GXmlElement& xml);
     GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model);
     virtual ~GModelSpectralExpPlaw(void);
@@ -91,11 +93,11 @@ public:
     virtual std::string            print(void) const;
 
     // Other methods
-    double  norm(void) const;
+    double  prefactor(void) const;
     double  index(void) const;
     GEnergy ecut(void) const;
     GEnergy pivot(void) const;
-    void    norm(const double& norm);
+    void    prefactor(const double& prefactor);
     void    index(const double& index);
     void    ecut(const GEnergy& ecut);
     void    pivot(const GEnergy& pivot);
@@ -183,30 +185,30 @@ std::string GModelSpectralExpPlaw::type(void) const
 
 
 /***********************************************************************//**
- * @brief Return normalization factor
+ * @brief Return pre factor
  *
- * @return Normalization factor (ph/cm2/s/MeV).
+ * @return Pre factor (ph/cm2/s/MeV).
  *
- * Returns the normalization factor.
+ * Returns the pre factor.
  ***************************************************************************/
 inline
-double GModelSpectralExpPlaw::norm(void) const
+double GModelSpectralExpPlaw::prefactor(void) const
 {
     return (m_norm.value());
 }
 
 
 /***********************************************************************//**
- * @brief Set normalization factor 
+ * @brief Set pre factor 
  *
- * @param[in] norm Normalization factor (ph/cm2/s/MeV).
+ * @param[in] norm Pre factor (ph/cm2/s/MeV).
  *
- * Sets the normalization factor.
+ * Sets the pre factor.
  ***************************************************************************/
 inline
-void GModelSpectralExpPlaw::norm(const double& norm)
+void GModelSpectralExpPlaw::prefactor(const double& prefactor)
 {
-    m_norm.value(norm);
+    m_norm.value(prefactor);
     return;
 }
 
