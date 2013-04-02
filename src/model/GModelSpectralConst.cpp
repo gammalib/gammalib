@@ -98,18 +98,18 @@ GModelSpectralConst::GModelSpectralConst(const GXmlElement& xml) :
 /***********************************************************************//**
  * @brief Value constructor
  *
- * @param[in] norm Normalization factor (ph/cm2/s/MeV).
+ * @param[in] value Model value (ph/cm2/s/MeV).
  *
- * Constructs constant spectral model by setting the normalization factor.
+ * Constructs constant spectral model by setting the model value.
  ***************************************************************************/
-GModelSpectralConst::GModelSpectralConst(const double& norm) :
+GModelSpectralConst::GModelSpectralConst(const double& value) :
                      GModelSpectral()
 {
     // Initialise members
     init_members();
 
-    // Set normalization factor
-    m_norm.value(norm);
+    // Set model value
+    m_norm.value(value);
 
     // Return
     return;

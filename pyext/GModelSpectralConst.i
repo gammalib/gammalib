@@ -40,7 +40,7 @@ public:
     // Constructors and destructors
     GModelSpectralConst(void);
     explicit GModelSpectralConst(const GXmlElement& xml);
-    explicit GModelSpectralConst(const double& norm);
+    explicit GModelSpectralConst(const double& value);
     GModelSpectralConst(const GModelSpectralConst& model);
     virtual ~GModelSpectralConst(void);
 
@@ -62,8 +62,8 @@ public:
     virtual void                 write(GXmlElement& xml) const;
 
     // Other methods
-    double norm(void) const;
-    void   norm(const double& norm);
+    double value(void) const;
+    void   value(const double& value);
 };
 
 
