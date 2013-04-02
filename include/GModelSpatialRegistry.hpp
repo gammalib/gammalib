@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GModelSpatialRegistry.hpp - Spatial model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -60,10 +60,10 @@ public:
     virtual ~GModelSpatialRegistry(void);
 
     // Operators
-    GModelSpatialRegistry& operator= (const GModelSpatialRegistry& registry);
+    GModelSpatialRegistry& operator=(const GModelSpatialRegistry& registry);
 
     // Methods
-    int            size(void) const { return m_number; }
+    int            size(void) const;
     GModelSpatial* alloc(const std::string& name) const;
     std::string    name(const int& index) const;
     std::string    print(void) const;
@@ -80,5 +80,19 @@ private:
     static std::string*          m_names;    //!< Model names
     static const GModelSpatial** m_models;   //!< Pointer to seed models
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of registered models
+ *
+ * @return Number of registered models.
+ *
+ * Returns the number of registered model.
+ ***************************************************************************/
+inline
+int GModelSpatialRegistry::size(void) const
+{
+    return m_number;
+}
 
 #endif /* GMODELSPATIALREGISTRY_HPP */
