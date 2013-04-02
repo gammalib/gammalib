@@ -78,31 +78,31 @@ GModelSpectralLogParabola::GModelSpectralLogParabola(void) : GModelSpectral()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] norm Power law normalization.
+ * @param[in] prefactor Power law pre factor.
  * @param[in] index Power law index.
- * @param[in] curvature Curvature.
  * @param[in] pivot Pivot energy.
+ * @param[in] curvature Curvature.
  *
  * Construct a LogParabola model from
- * - a normalization value (in ph/cm2/s/MeV),
+ * - a pre factor (in ph/cm2/s/MeV),
  * - a spectral index,
- * - a curvature, and
- * - a pivot energy.
+ * - a pivot energy, and
+ * - a curvature.
  ***************************************************************************/
-GModelSpectralLogParabola::GModelSpectralLogParabola(const double&  norm,
+GModelSpectralLogParabola::GModelSpectralLogParabola(const double&  prefactor,
                                                      const double&  index,
-                                                     const double&  curvature,
-                                                     const GEnergy& pivot) :
+                                                     const GEnergy& pivot,
+                                                     const double&  curvature) :
                            GModelSpectral()
 {
     // Initialise members
     init_members();
 
     // Set parameters
-    m_norm.value(norm);
+    m_norm.value(prefactor);
     m_index.value(index);
-    m_curvature.value(curvature);
     m_pivot.value(pivot.MeV());
+    m_curvature.value(curvature);
 
     // Autoscale parameters
     autoscale();
@@ -415,7 +415,7 @@ double GModelSpectralLogParabola::flux(const GEnergy& emin,
     if (emin < emax) {
 
         // Initialise function to integrate
-        flux_kern kernel(norm(), index(), curvature(), pivot());
+        flux_kern kernel(prefactor(), index(), curvature(), pivot());
 
         // Initialise integral class with function
         GIntegral integral(&kernel);
@@ -461,7 +461,7 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
     if (emin < emax) {
 	
         // Initialise function to integrate
-        eflux_kern kernel(norm(),index(),curvature(),pivot());
+        eflux_kern kernel(prefactor(), index(), curvature(), pivot());
 
         // Initialise integral class with function
         GIntegral integral(&kernel);
@@ -546,7 +546,8 @@ GEnergy GModelSpectralLogParabola::mc(const GEnergy& emin,
 	    double plaw   = m_mc_norm * std::pow(e_norm, m_mc_exponent-1.0);
 
 	    // Compute logparabola at given energy
-	    double logparabola = norm()*std::pow(e_norm,index()+curvature()*std::log(e_norm));
+	    double logparabola = prefactor() * 
+                             std::pow(e_norm,index()+curvature()*std::log(e_norm));
 
 	    // Compute acceptance fraction
 	    acceptance_fraction = logparabola / plaw;
@@ -985,7 +986,7 @@ void GModelSpectralLogParabola::update_mc_cache(const GEnergy& emin,
 
 			// Use the spectral index at the pivot energy of the LogParabola
 			index_pl  = index();
-			m_mc_norm = norm();
+			m_mc_norm = prefactor();
 		}
 		else {
 			// Use a power law which connects the ends of the convex,

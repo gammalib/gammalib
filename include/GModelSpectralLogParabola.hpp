@@ -63,10 +63,10 @@ class GModelSpectralLogParabola : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralLogParabola(void);
-    explicit GModelSpectralLogParabola(const double&  norm,
+    explicit GModelSpectralLogParabola(const double&  prefactor,
                                        const double&  index,
-                                       const double&  curvature,
-                                       const GEnergy& pivot);
+                                       const GEnergy& pivot,
+                                       const double&  curvature);
     explicit GModelSpectralLogParabola(const GXmlElement& xml);
     GModelSpectralLogParabola(const GModelSpectralLogParabola& model);
     virtual ~GModelSpectralLogParabola(void);
@@ -95,8 +95,8 @@ public:
     virtual std::string                print(void) const;
 
     // Other methods
-    double  norm(void) const;
-    void    norm(const double& norm);
+    double  prefactor(void) const;
+    void    prefactor(const double& prefactor);
     double  index(void) const;
     void    index(const double& index);
     double  curvature(void) const;
@@ -198,30 +198,30 @@ std::string GModelSpectralLogParabola::type(void) const
 
 
 /***********************************************************************//**
- * @brief Return normalization factor
+ * @brief Return pre factor
  *
- * @return Normalization factor (ph/cm2/s/MeV).
+ * @return Pre factor (ph/cm2/s/MeV).
  *
- * Returns the normalization factor.
+ * Returns the pre factor.
  ***************************************************************************/
 inline
-double GModelSpectralLogParabola::norm(void) const
+double GModelSpectralLogParabola::prefactor(void) const
 {
     return (m_norm.value());
 }
 
 
 /***********************************************************************//**
- * @brief Set normalization factor 
+ * @brief Set pre factor 
  *
- * @param[in] norm Normalization factor (ph/cm2/s/MeV).
+ * @param[in] prefactor Pre factor (ph/cm2/s/MeV).
  *
- * Sets the normalization factor.
+ * Sets the pre factor.
  ***************************************************************************/
 inline
-void GModelSpectralLogParabola::norm(const double& norm)
+void GModelSpectralLogParabola::prefactor(const double& prefactor)
 {
-    m_norm.value(norm);
+    m_norm.value(prefactor);
     return;
 }
 
