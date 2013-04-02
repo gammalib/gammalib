@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelTemporalConst.i  -  Temporal constant model class         *
+ *          GModelTemporalConst.i - Temporal constant model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelTemporalConst.i
  * @brief Constant temporal model class Python interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -39,15 +39,16 @@ class GModelTemporalConst  : public GModelTemporal {
 public:
     // Constructors and destructors
     GModelTemporalConst(void);
+    explicit GModelTemporalConst(const double& norm);
     GModelTemporalConst(const GModelTemporalConst& model);
     virtual ~GModelTemporalConst(void);
 
-    // Implemented virtual methods
+    // Implemented virtual base class methods
     virtual void                 clear(void);
     virtual GModelTemporalConst* clone(void) const;
     virtual std::string          type(void) const;
     virtual double               eval(const GTime& srcTime) const;
-    virtual double               eval_gradients(const GTime& srcTime) const;
+    virtual double               eval_gradients(const GTime& srcTime);
     virtual GTimes               mc(const double& rate, const GTime& tmin,
                                     const GTime& tmax, GRan& ran) const;
     virtual void                 read(const GXmlElement& xml);
@@ -55,6 +56,7 @@ public:
 
     // Other methods
     double norm(void) const;
+    void   norm(const double& norm);
 };
 
 

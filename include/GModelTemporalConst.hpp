@@ -41,28 +41,35 @@
  *
  * @brief Constant temporal model class
  *
- * This class implements the temporal component of the factorised model for
- * a model that is constant in time. It has a single parameter norm that is
- * used for scaling, and that normally is set to 1. The parameter is not
- * supposed to be fitted.
+ * This class implements a constant light curve. The model is defined by
+ *
+ * \f[
+ *    S_{\rm t}(t) = {\tt m\_norm}
+ * \f]
+ *
+ * where
+ * \f${\tt m\_norm}\f$ is the normalization constant which by default is
+ * set to unity. The parameter \f${\tt m\_norm}\f$ is not supposed to be
+ * fitted.
  ***************************************************************************/
 class GModelTemporalConst : public GModelTemporal {
 
 public:
     // Constructors and destructors
     GModelTemporalConst(void);
+    explicit GModelTemporalConst(const double& norm);
     GModelTemporalConst(const GModelTemporalConst& model);
     virtual ~GModelTemporalConst(void);
 
     // Operators
     virtual GModelTemporalConst& operator= (const GModelTemporalConst& model);
 
-    // Implemented virtual methods
+    // Implemented virtual base class methods
     virtual void                 clear(void);
     virtual GModelTemporalConst* clone(void) const;
-    virtual std::string          type(void) const { return "Constant"; }
+    virtual std::string          type(void) const;
     virtual double               eval(const GTime& srcTime) const;
-    virtual double               eval_gradients(const GTime& srcTime) const;
+    virtual double               eval_gradients(const GTime& srcTime);
     virtual GTimes               mc(const double& rate, const GTime& tmin,
                                     const GTime& tmax, GRan& ran) const;
     virtual void                 read(const GXmlElement& xml);
@@ -70,7 +77,8 @@ public:
     virtual std::string          print(void) const;
 
     // Other methods
-    double norm(void) const { return m_norm.value(); }
+    double norm(void) const;
+    void   norm(const double& norm);
 
 protected:
     // Protected methods
@@ -81,5 +89,48 @@ protected:
     // Protected members
     GModelPar m_norm;    //!< Constant
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return "ConstantValue".
+ *
+ * Returns the type of the constant temporal model.
+ ***************************************************************************/
+inline
+std::string GModelTemporalConst::type(void) const
+{
+    return "Constant";
+}
+
+
+/***********************************************************************//**
+ * @brief Return normalization factor
+ *
+ * @return Normalization factor.
+ *
+ * Returns the normalization factor.
+ ***************************************************************************/
+inline
+double GModelTemporalConst::norm(void) const
+{
+    return (m_norm.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set normalization factor 
+ *
+ * @param[in] norm Normalization factor.
+ *
+ * Sets the normalization factor.
+ ***************************************************************************/
+inline
+void GModelTemporalConst::norm(const double& norm)
+{
+    m_norm.value(norm);
+    return;
+}
 
 #endif /* GMODELTEMPORALCONST_HPP */
