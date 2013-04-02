@@ -1287,10 +1287,18 @@ void GModelSpectralNodes::update_pars(void)
     // Set parameter pointers for all nodes
     for (int i = 0; i < nodes; ++i) {
 
-        // Signal that energies have no gradients
+        // Set parameter names
+        std::string energy_name    = "Energy"+str(i);
+        std::string intensity_name = "Intensity"+str(i);
+
+        // Set energy attributes
+        m_energies[i].name(energy_name);
+        m_energies[i].unit("MeV");
         m_energies[i].hasgrad(false);
 
-        // Signal that values have gradients
+        // Set intensity attributes
+        m_values[i].name(intensity_name);
+        m_values[i].unit("ph/cm2/s/MeV");
         m_values[i].hasgrad(true);
 
         // Set pointer
