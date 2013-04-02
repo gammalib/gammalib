@@ -39,6 +39,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                                 "GModels::operator[](int&)"
 #define G_ACCESS2                         "GModels::operator[](std::string&)"
+#define G_AT                                              "GModels::at(int&)"
 #define G_INSERT1                            "GModels::insert(int&, GModel&)"
 #define G_INSERT2                    "GModels::insert(std::string&, GModel&)"
 #define G_REMOVE1                                     "GModels::remove(int&)"
@@ -166,20 +167,10 @@ GModels& GModels::operator= (const GModels& models)
  *
  * @param[in] index Model index [0,...,size()-1].
  *
- * @exception GException::out_of_range
- *            Model index is out of range.
- *
  * Returns a pointer to the model with the specified @p index.
  ***************************************************************************/
 GModel* GModels::operator[](const int& index)
 {
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    }
-    #endif
-
     // Return pointer
     return m_models[index];
 }
@@ -190,20 +181,10 @@ GModel* GModels::operator[](const int& index)
  *
  * @param[in] index Model index [0,...,size()-1].
  *
- * @exception GException::out_of_range
- *            Model index is out of range.
- *
  * Returns a const pointer to the model with the specified @p index.
  ***************************************************************************/
 const GModel* GModels::operator[](const int& index) const
 {
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    }
-    #endif
-
     // Return pointer
     return m_models[index];
 }
@@ -221,10 +202,10 @@ const GModel* GModels::operator[](const int& index) const
  ***************************************************************************/
 GModel* GModels::operator[](const std::string& name)
 {
-    // Get parameter index
+    // Get model index
     int index = get_index(name);
 
-    // Throw exception if parameter name was not found
+    // Throw exception if model name was not found
     if (index >= size()) {
         throw GException::model_not_found(G_ACCESS2, name);
     }
@@ -246,10 +227,10 @@ GModel* GModels::operator[](const std::string& name)
  ***************************************************************************/
 const GModel* GModels::operator[](const std::string& name) const
 {
-    // Get parameter index
+    // Get model index
     int index = get_index(name);
 
-    // Throw exception if parameter name was not found
+    // Throw exception if model name was not found
     if (index >= size()) {
         throw GException::model_not_found(G_ACCESS2, name);
     }
@@ -295,6 +276,50 @@ void GModels::clear(void)
 GModels* GModels::clone(void) const
 {
     return new GModels(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to model
+ *
+ * @param[in] index Model index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ *
+ * Returns a pointer to the model with the specified @p index.
+ ***************************************************************************/
+GModel* GModels::at(const int& index)
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, index, 0, size()-1);
+    }
+
+    // Return pointer
+    return m_models[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to model (const version)
+ *
+ * @param[in] index Model index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Model index is out of range.
+ *
+ * Returns a const pointer to the model with the specified @p index.
+ ***************************************************************************/
+const GModel* GModels::at(const int& index) const
+{
+    // Raise exception if index is out of range
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, index, 0, size()-1);
+    }
+
+    // Return pointer
+    return m_models[index];
 }
 
 
@@ -567,6 +592,25 @@ void GModels::extend(const GModels& models)
     
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if model name exists
+ *
+ * @param[in] name Model name.
+ * @return True if model with specified @p name exists.
+ *
+ * Searches all model names for a match with the specified @p name. If the
+ * specified name has been found, true is returned.
+ ***************************************************************************/
+bool GModels::hasmodel(const std::string& name) const
+{
+    // Get model index
+    int index = get_index(name);
+
+    // Return
+    return (index < size());
 }
 
 

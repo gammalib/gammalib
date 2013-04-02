@@ -80,6 +80,8 @@ public:
     // Methods
     void          clear(void);
     GModels*      clone(void) const;
+    GModel*       at(const int& index);
+    const GModel* at(const int& index) const;
     int           size(void) const;
     bool          isempty(void) const;
     GModel*       set(const int& index, const GModel& model);
@@ -91,6 +93,7 @@ public:
     void          remove(const std::string& name);
     void          reserve(const int& num);
     void          extend(const GModels& models);
+    bool          hasmodel(const std::string& name) const;
     void          load(const std::string& filename);
     void          save(const std::string& filename) const;
     void          read(const GXml& xml);
