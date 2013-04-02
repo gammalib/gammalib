@@ -77,16 +77,19 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(void) : GModelSpectral()
  *
  * @param[in] prefactor Pre factor normalization (ph/cm2/s/MeV).
  * @param[in] index Power law index.
- * @param[in] ecut Cut off energy.
  * @param[in] pivot Pivot energy.
+ * @param[in] cutoff Cut off energy.
  *
- * Construct an exponentially cut off power law from a prefactor value,
- * a spectral index, a cut off energy and a pivot energy.
+ * Construct an exponentially cut off power law from
+ * - a prefactor value (in units of ph/cm2/s/MeV)
+ * - a spectral index,
+ * - a pivot energy, and
+ * - a cut off energy.
  ***************************************************************************/
 GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double&  prefactor,
                                              const double&  index,
-                                             const GEnergy& ecut,
-                                             const GEnergy& pivot) :
+                                             const GEnergy& pivot,
+                                             const GEnergy& cutoff) :
                        GModelSpectral()
 {
     // Initialise members
@@ -95,8 +98,8 @@ GModelSpectralExpPlaw::GModelSpectralExpPlaw(const double&  prefactor,
     // Set parameters
     m_norm.value(prefactor);
     m_index.value(index);
-    m_ecut.value(ecut.MeV());   // Internally stored in MeV
     m_pivot.value(pivot.MeV()); // Internally stored in MeV
+    m_ecut.value(cutoff.MeV()); // Internally stored in MeV
 
     // Autoscale parameters
     autoscale();

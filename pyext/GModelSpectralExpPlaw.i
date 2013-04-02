@@ -41,8 +41,8 @@ public:
     GModelSpectralExpPlaw(void);
     explicit GModelSpectralExpPlaw(const double&  prefactor,
                                    const double&  index,
-                                   const GEnergy& ecut,
-                                   const GEnergy& pivot);
+                                   const GEnergy& pivot,
+                                   const GEnergy& cutoff);
     explicit GModelSpectralExpPlaw(const GXmlElement& xml);
     GModelSpectralExpPlaw(const GModelSpectralExpPlaw& model);
     virtual ~GModelSpectralExpPlaw(void);
@@ -71,10 +71,10 @@ public:
     void    prefactor(const double& prefactor);
     double  index(void) const;
     void    index(const double& index);
-    GEnergy ecut(void) const;
-    void    ecut(const GEnergy& ecut);
     GEnergy pivot(void) const;
     void    pivot(const GEnergy& pivot);
+    GEnergy cutoff(void) const;
+    void    cutoff(const GEnergy& cutoff);
 };
 
 
