@@ -43,7 +43,7 @@ const GModelSpectralRegistry g_spectral_plaw2_registry(&g_spectral_plaw2_seed);
 /* __ Method name definitions ____________________________________________ */
 #define G_FLUX                "GModelSpectralPlaw2::flux(GEnergy&, GEnergy&)"
 #define G_EFLUX              "GModelSpectralPlaw2::eflux(GEnergy&, GEnergy&)"
-#define G_MC             "GModelSpectralPlaw2::mc(GEnergy&, GEnergy&, GRan&)"
+#define G_MC     "GModelSpectralPlaw2::mc(GEnergy&, GEnergy&, GTime&, GRan&)"
 #define G_READ                      "GModelSpectralPlaw2::read(GXmlElement&)"
 #define G_WRITE                    "GModelSpectralPlaw2::write(GXmlElement&)"
 
@@ -76,14 +76,22 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(void) : GModelSpectral()
 /***********************************************************************//**
  * @brief Constructor
  *
- * @param[in] integral Integral flux.
+ * @param[in] integral Integral flux (ph/cm2/s).
  * @param[in] index Power law index.
+ * @param[in] emin Minimum energy.
+ * @param[in] emax Maximum energy.
  *
- * Construct a spectral power law from integral flux and spectral index.
+ * Construct a spectral power law from the
+ * - integral flux (in ph/cm2/s),
+ * - spectral index,
+ * - minimum energy and
+ * - maximum energy.
  ***************************************************************************/
-GModelSpectralPlaw2::GModelSpectralPlaw2(const double& integral,
-                                         const double& index)
-                                         : GModelSpectral()
+GModelSpectralPlaw2::GModelSpectralPlaw2(const double&  integral,
+                                         const double&  index,
+                                         const GEnergy& emin,
+                                         const GEnergy& emax) :
+                     GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -91,6 +99,8 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(const double& integral,
     // Set parameters
     m_integral.value(integral);
     m_index.value(index);
+    m_emin.value(emin.MeV());
+    m_emax.value(emax.MeV());
 
     // Return
     return;
@@ -102,12 +112,12 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(const double& integral,
  *
  * @param[in] xml XML element.
  *
- * Creates instance of a flux normalized power law spectral model by
- * extracting information from an XML element. See GModelSpectralPlaw2::read()
- * for more information about the expected structure of the XML element.
+ * Constructs flux normalized power law spectral model by extracting
+ * information from an XML element. See the read() method for more
+ * information about the expected structure of the XML element.
  ***************************************************************************/
-GModelSpectralPlaw2::GModelSpectralPlaw2(const GXmlElement& xml)
-                                         : GModelSpectral()
+GModelSpectralPlaw2::GModelSpectralPlaw2(const GXmlElement& xml) :
+                     GModelSpectral()
 {
     // Initialise members
     init_members();
@@ -125,8 +135,8 @@ GModelSpectralPlaw2::GModelSpectralPlaw2(const GXmlElement& xml)
  *
  * @param[in] model Spectral power law model.
  ***************************************************************************/
-GModelSpectralPlaw2::GModelSpectralPlaw2(const GModelSpectralPlaw2& model)
-                                         : GModelSpectral(model)
+GModelSpectralPlaw2::GModelSpectralPlaw2(const GModelSpectralPlaw2& model) :
+                     GModelSpectral(model)
 {
     // Initialise members
     init_members();
@@ -162,8 +172,9 @@ GModelSpectralPlaw2::~GModelSpectralPlaw2(void)
  * @brief Assignment operator
  *
  * @param[in] model Spectral power law model.
+ * @return Spectral power law model.
  ***************************************************************************/
-GModelSpectralPlaw2& GModelSpectralPlaw2::operator= (const GModelSpectralPlaw2& model)
+GModelSpectralPlaw2& GModelSpectralPlaw2::operator=(const GModelSpectralPlaw2& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -194,8 +205,8 @@ GModelSpectralPlaw2& GModelSpectralPlaw2::operator= (const GModelSpectralPlaw2& 
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
-***************************************************************************/
+ * @brief Clear power law model
+ ***************************************************************************/
 void GModelSpectralPlaw2::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
@@ -212,10 +223,13 @@ void GModelSpectralPlaw2::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone power law model
+ *
+ * @return Pointer to deep copy of power law model
+ ***************************************************************************/
 GModelSpectralPlaw2* GModelSpectralPlaw2::clone(void) const
 {
+    // Clone power law model
     return new GModelSpectralPlaw2(*this);
 }
 
@@ -227,15 +241,31 @@ GModelSpectralPlaw2* GModelSpectralPlaw2::clone(void) const
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The power law function is defined as
- * \f[I(E)=integral (index+1)/(emax^{index+1}-emin^{index+1}) E^{index}\f]
- * for \f$index \ne -1\f$ and
- * \f[I(E)=integral / (\log(emax)-\log(emin)) E^{index}\f]
- * for \f$index = -1\f$, where
- * \f$integral\f$ is the integral flux between \f$emin\f$ and \f$emax\f$,
- * \f$index\f$ is the spectral index,
- * \f$emin\f$ is the lower energy limit, and
- * \f$emax\f$ is the upper energy limit.
+ * Computes
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_integral}
+ *    \frac{{\tt m\_index}+1}
+ *         {{\tt e\_max}^{{\tt m\_index}+1} -
+ *          {\tt e\_min}^{{\tt m\_index}+1}}
+ *    E^{\tt m\_index}
+ * \f]
+ *
+ * for \f${\tt m\_index} \ne -1\f$ and
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = 
+ *    \frac{{\tt m\_integral}}
+ *         {\log {\tt e\_max} - \log {\tt e\_min}}
+ *    E^{\tt m\_index}
+ * \f]
+ *
+ * for \f${\tt m\_index} = -1\f$, where
+ * - \f${\tt e\_min}\f$ is the minimum energy of an interval,
+ * - \f${\tt e\_max}\f$ is the maximum energy of an interval,
+ * - \f${\tt m\_integral}\f$ is the integral flux between 
+ *   \f${\tt e\_min}\f$ and \f${\tt e\_max}\f$, and
+ * - \f${\tt m\_index}\f$ is the spectral index.
  ***************************************************************************/
 double GModelSpectralPlaw2::eval(const GEnergy& srcEng,
                                  const GTime&   srcTime) const
@@ -244,13 +274,14 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng,
     update(srcEng);
 
     // Compute function value
-    double value = integral() * m_norm * m_power;
+    double value = m_integral.value() * m_norm * m_power;
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw2::eval";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ", integral=" << integral();
@@ -272,30 +303,59 @@ double GModelSpectralPlaw2::eval(const GEnergy& srcEng,
  * @param[in] srcTime True photon arrival time.
  * @return Model value (ph/cm2/s/MeV).
  *
- * The power law function is defined as
- * \f[I(E)=integral (index+1)/(emax^{index+1}-emin^{index+1}) E^{index}\f]
- * for \f$index \ne -1\f$ and
- * \f[I(E)=integral / (\log(emax)-\log(emin)) E^{index}\f]
- * for \f$index = -1\f$, where
- * \f$integral=f_s f_v\f$ is the integral flux between \f$emin\f$ and \f$emax\f$,
- * \f$index=i_s i_v\f$ is the spectral index,
- * \f$emin=l_s l_v\f$ is the lower energy limit, and
- * \f$emax=u_s u_v\f$ is the upper energy limit.
- * Note that each parameter is factorised into a scaling factor and a value
- * and that the method is expected to return the gradient with respect to
- * the parameter value (i.e. \f$f_v\f$, \f$i_v\f$, \f$l_v\f$, and \f$u_v\f$
- * in this case).
+ * Computes
  *
- * The partial derivatives of the parameter values are given by
- * \f[dI/df_v=I(E) / f_v\f]
- * \f[dI/di_v=I(E) \left( \frac{1}{index+1} -
- *                   \frac{\log(emax) emax^{index+1} - \log(emin) emin^{index+1}}
- *                        {emax^{index+1} - emin^{index+1}}
- *                 + \log(E) \right) i_s\f]
- * for \f$index \ne -1\f$ and
- * \f[dI/df_v=I(E) / f_v\f]
- * \f[dI/di_v=I(E) \log(E) i_s\f]
- * for \f$index = -1\f$.
+ * \f[
+ *    S_{\rm E}(E | t) = {\tt m\_integral}
+ *    \frac{{\tt m\_index}+1}
+ *         {{\tt e\_max}^{{\tt m\_index}+1} -
+ *          {\tt e\_min}^{{\tt m\_index}+1}}
+ *    E^{\tt m\_index}
+ * \f]
+ *
+ * for \f${\tt m\_index} \ne -1\f$ and
+ *
+ * \f[
+ *    S_{\rm E}(E | t) = 
+ *    \frac{{\tt m\_integral}}
+ *         {\log {\tt e\_max} - \log {\tt e\_min}}
+ *    E^{\tt m\_index}
+ * \f]
+ *
+ * for \f${\tt m\_index} = -1\f$, where
+ * - \f${\tt e\_min}\f$ is the minimum energy of an interval,
+ * - \f${\tt e\_max}\f$ is the maximum energy of an interval,
+ * - \f${\tt m\_integral}\f$ is the integral flux between 
+ *   \f${\tt e\_min}\f$ and \f${\tt e\_max}\f$, and
+ * - \f${\tt m\_index}\f$ is the spectral index.
+ *
+ * The method also evaluates the partial derivatives of the model with
+ * respect to the parameters using
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_integral}} =
+ *      \frac{S_{\rm E}(E | t)}{{\tt m\_integral}}
+ * \f]
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_index}} =
+ *      S_{\rm E}(E | t) \,
+ *      \left( \frac{1}{{\tt m\_index}+1} -
+ *             \frac{\log({\tt e\_max}) {\tt e\_max}^{{\tt m\_index}+1} -
+ *                   \log({\tt e\_min}) {\tt e\_min}^{{\tt m\_index}+1}}
+ *                        {{\tt e\_max}^{{\tt m\_index}+1} -
+ *                         {\tt e\_min}^{{\tt m\_index}+1}}
+ *                 + \ln(E) \right)
+ * \f]
+ *
+ * for \f${\tt m\_index} \ne -1\f$ and
+ *
+ * \f[
+ *    \frac{\delta S_{\rm E}(E | t)}{\delta {\tt m\_index}} =
+ *      S_{\rm E}(E | t) \, \ln(E)
+ * \f]
+ *
+ * for \f${\tt m\_index} = -1\f$.
  *
  * No partial derivatives are supported for the energy boundaries.
  ***************************************************************************/
@@ -310,7 +370,7 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng,
     update(srcEng);
 
     // Compute function value
-    double value = integral() * m_norm * m_power;
+    double value = m_integral.value() * m_norm * m_power;
 
     // Integral flux gradient
     if (m_integral.isfree()) {
@@ -323,14 +383,15 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng,
     }
 
     // Set gradients
-    const_cast<GModelSpectralPlaw2*>(this)->m_integral.factor_gradient(g_integral);
-    const_cast<GModelSpectralPlaw2*>(this)->m_index.factor_gradient(g_index);
+    m_integral.factor_gradient(g_integral);
+    m_index.factor_gradient(g_index);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
     if (isnotanumber(value) || isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw2::eval_gradients";
-        std::cout << "(srcEng=" << srcEng << "):";
+        std::cout << "(srcEng=" << srcEng;
+        std::cout << ", srcTime=" << srcTime << "):";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << ", integral=" << integral();
@@ -354,50 +415,49 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng,
  * @param[in] emax Minimum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) dE\f]
- * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
  *
- * @todo Implement method
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) dE
+ * \f]
+ *
+ * where
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  ***************************************************************************/
-double GModelSpectralPlaw2::flux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralPlaw2::flux(const GEnergy& emin,
+                                 const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_FLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
-
     // Initialise flux
     double flux = 0.0;
 
-    // Case A: Index is not -1
-    if (index() != -1.0) {
-        double gamma        = index() + 1.0;
-        double pow_emin     = std::pow(emin.MeV(), gamma);
-        double pow_emax     = std::pow(emax.MeV(), gamma);
-        double pow_ref_emin = std::pow(this->emin(), gamma);
-        double pow_ref_emax = std::pow(this->emax(), gamma);
-        double factor       = (pow_emax - pow_emin) / (pow_ref_emax - pow_ref_emin);
-        flux                = integral() * factor;
-    }
+    // Compute only if integration range is valid
+    if (emin < emax) {
 
-    // Case B: Index is -1
-    else {
-        double log_emin     = std::log(emin.MeV());
-        double log_emax     = std::log(emax.MeV());
-        double log_ref_emin = std::log(this->emin());
-        double log_ref_emax = std::log(this->emax());
-        double factor       = (log_emax - log_emin) / (log_ref_emax - log_ref_emin);
-        flux                = integral() * factor;
-    }
+        // Case A: Index is not -1
+        if (index() != -1.0) {
+            double gamma        = m_index.value() + 1.0;
+            double pow_emin     = std::pow(emin.MeV(), gamma);
+            double pow_emax     = std::pow(emax.MeV(), gamma);
+            double pow_ref_emin = std::pow(this->emin().MeV(), gamma);
+            double pow_ref_emax = std::pow(this->emax().MeV(), gamma);
+            double factor       = (pow_emax - pow_emin) /
+                                  (pow_ref_emax - pow_ref_emin);
+            flux                = m_integral.value() * factor;
+        }
+
+        // Case B: Index is -1
+        else {
+            double log_emin     = std::log(emin.MeV());
+            double log_emax     = std::log(emax.MeV());
+            double log_ref_emin = std::log(this->emin().MeV());
+            double log_ref_emax = std::log(this->emax().MeV());
+            double factor       = (log_emax - log_emin) /
+                                  (log_ref_emax - log_ref_emin);
+            flux                = m_integral.value() * factor;
+        }
+
+    } // endif: integration range was valid
 
     // Return flux
     return flux;
@@ -411,61 +471,58 @@ double GModelSpectralPlaw2::flux(const GEnergy& emin, const GEnergy& emax) const
  * @param[in] emax Minimum photon energy.
  * @return Photon flux (ph/cm2/s).
  *
- * @exception GException::erange_invalid
- *            Energy range is invalid (emin < emax required).
- *
  * Computes
- * \f[\int_{E_{\rm min}}^{E_{\rm max}} I(E) E dE\f]
- * where
- * \f$E_{\rm min}\f$ and \f$E_{\rm max}\f$ are the minimum and maximum
- * energy, respectively, and
- * \f$I(E)\f$ is the spectral model (units: ph/cm2/s/MeV).
  *
- * @todo Implement method
+ * \f[
+ *    \int_{\tt emin}^{\tt emax} S_{\rm E}(E | t) E \, dE
+ * \f]
+ *
+ * where
+ * - [@p emin, @p emax] is an energy interval, and
+ * - \f$S_{\rm E}(E | t)\f$ is the spectral model (ph/cm2/s/MeV).
  ***************************************************************************/
-double GModelSpectralPlaw2::eflux(const GEnergy& emin, const GEnergy& emax) const
+double GModelSpectralPlaw2::eflux(const GEnergy& emin,
+                                  const GEnergy& emax) const
 {
-    // Throw an exception if energy range is invalid
-    if (emin >= emax) {
-        throw GException::erange_invalid(G_EFLUX, emin.MeV(), emax.MeV(),
-              "Minimum energy < maximum energy required.");
-        
-    }
-
     // Initialise flux
     double eflux = 0.0;
 
-    // Compute power law normalization
-    double norm;
-    if (index() != -1.0) {
-        double gamma        = index() + 1.0;
-        double pow_ref_emin = std::pow(this->emin(), gamma);
-        double pow_ref_emax = std::pow(this->emax(), gamma);
-        norm = integral() * gamma / (pow_ref_emax - pow_ref_emin);
-    }
-    else {
-        double log_ref_emin = std::log(this->emin());
-        double log_ref_emax = std::log(this->emax());
-        norm = integral() / (log_ref_emax - log_ref_emin);
-    }
+    // Compute only if integration range is valid
+    if (emin < emax) {
 
-    // Compute energy flux
-    if (index() != -2.0) {
-        double gamma    = index() + 2.0;
-        double pow_emin = std::pow(emin.MeV(), gamma);
-        double pow_emax = std::pow(emax.MeV(), gamma);
-        eflux = norm / gamma * (pow_emax - pow_emin);
-    }
+        // Compute power law normalization
+        double norm;
+        if (index() != -1.0) {
+            double gamma        = m_index.value() + 1.0;
+            double pow_ref_emin = std::pow(this->emin().MeV(), gamma);
+            double pow_ref_emax = std::pow(this->emax().MeV(), gamma);
+            norm = m_integral.value() * gamma / (pow_ref_emax - pow_ref_emin);
+        }
+        else {
+            double log_ref_emin = std::log(this->emin().MeV());
+            double log_ref_emax = std::log(this->emax().MeV());
+            norm = m_integral.value() / (log_ref_emax - log_ref_emin);
+        }
 
-    // Case B: Index is -2
-    else {
-        double log_emin = std::log(emin.MeV());
-        double log_emax = std::log(emax.MeV());
-        eflux = norm * (log_emax - log_emin);
-    }
+        // Compute energy flux
+        if (index() != -2.0) {
+            double gamma    = m_index.value() + 2.0;
+            double pow_emin = std::pow(emin.MeV(), gamma);
+            double pow_emax = std::pow(emax.MeV(), gamma);
+            eflux = norm / gamma * (pow_emax - pow_emin);
+        }
 
-    // Convert from MeV/cm2/s to erg/cm2/s
-    eflux *= MeV2erg;
+        // Case B: Index is -2
+        else {
+            double log_emin = std::log(emin.MeV());
+            double log_emax = std::log(emax.MeV());
+            eflux = norm * (log_emax - log_emin);
+        }
+
+        // Convert from MeV/cm2/s to erg/cm2/s
+        eflux *= MeV2erg;
+
+    } // endif: integration range was valid
 
     // Return flux
     return eflux;
@@ -536,9 +593,17 @@ GEnergy GModelSpectralPlaw2::mc(const GEnergy& emin,
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Read the spectral power law information from an XML element. The XML
- * element is required to have 4 parameters with names "Integral", "Index",
- * "LowerLimit", and "UpperLimit".
+ * Reads the spectral information from an XML element. The format of the XML
+ * elements is
+ *
+ *     <spectrum type="PowerLaw2">
+ *       <parameter name="Integral"   scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index"      scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="LowerLimit" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="UpperLimit" scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
+ *
+ * @todo Add parameter validity check
  ***************************************************************************/
 void GModelSpectralPlaw2::read(const GXmlElement& xml)
 {
@@ -605,9 +670,15 @@ void GModelSpectralPlaw2::read(const GXmlElement& xml)
  * @exception GException::model_invalid_parnames
  *            Invalid model parameter names found in XML element.
  *
- * Write the spectral power law information into an XML element. The XML
- * element has to be of type "PowerLaw2" and will have 4 parameter leafs
- * named "Integral", "Index", "LowerLimit", and "UpperLimit".
+ * Writes the spectral information into an XML element. The format of the XML
+ * element is
+ *
+ *     <spectrum type="PowerLaw2">
+ *       <parameter name="Integral"   scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="Index"      scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="LowerLimit" scale=".." value=".." min=".." max=".." free=".."/>
+ *       <parameter name="UpperLimit" scale=".." value=".." min=".." max=".." free=".."/>
+ *     </spectrum>
  ***************************************************************************/
 void GModelSpectralPlaw2::write(GXmlElement& xml) const
 {
@@ -682,7 +753,9 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Print powerlaw information
+ * @brief Print power law information
+ *
+ * @return String containing power law information.
  ***************************************************************************/
 std::string GModelSpectralPlaw2::print(void) const
 {
@@ -691,6 +764,8 @@ std::string GModelSpectralPlaw2::print(void) const
 
     // Append header
     result.append("=== GModelSpectralPlaw2 ===\n");
+
+    // Append information
     result.append(parformat("Number of parameters")+str(size()));
     for (int i = 0; i < size(); ++i) {
         result.append("\n"+m_pars[i]->print());
@@ -771,8 +846,8 @@ void GModelSpectralPlaw2::init_members(void)
     m_power           = 0.0;
     m_last_integral   = 0.0;
     m_last_index      = 1000.0;
-    m_last_emin       = 0.0;
-    m_last_emax       = 0.0;
+    m_last_emin.MeV(0.0);
+    m_last_emax.MeV(0.0);
     m_last_energy.MeV(0.0);
     m_last_value      = 0.0;
     m_last_g_integral = 0.0;
@@ -852,16 +927,16 @@ void GModelSpectralPlaw2::update(const GEnergy& srcEng) const
 
         // Change in energy boundaries?
         if (emin() != m_last_emin || emax() != m_last_emax) {
-            m_log_emin  = std::log(emin());
+            m_log_emin  = std::log(emin().MeV());
             m_last_emin = emin();
-            m_log_emax  = std::log(emax());
+            m_log_emax  = std::log(emax().MeV());
             m_last_emax = emax();
         }
 
         // Compute normalization factors
         if (gamma != 0.0) {
-            m_pow_emin  = std::pow(emin(), gamma);
-            m_pow_emax  = std::pow(emax(), gamma);
+            m_pow_emin  = std::pow(emin().MeV(), gamma);
+            m_pow_emax  = std::pow(emax().MeV(), gamma);
             double d    = m_pow_emax - m_pow_emin;
             m_norm      = gamma / d;
             m_g_norm    = 1.0/gamma - 
@@ -885,15 +960,15 @@ void GModelSpectralPlaw2::update(const GEnergy& srcEng) const
         if (emin() != m_last_emin || emax() != m_last_emax) {
 
             // Update energy boundaries
-            m_log_emin  = std::log(emin());
+            m_log_emin  = std::log(emin().MeV());
             m_last_emin = emin();
-            m_log_emax  = std::log(emax());
+            m_log_emax  = std::log(emax().MeV());
             m_last_emax = emax();
         
             // Compute power law normalization
             if (gamma != 0.0) {
-                m_pow_emin  = std::pow(emin(), gamma);
-                m_pow_emax  = std::pow(emax(), gamma);
+                m_pow_emin  = std::pow(emin().MeV(), gamma);
+                m_pow_emax  = std::pow(emax().MeV(), gamma);
                 double d    = m_pow_emax - m_pow_emin;
                 m_norm      = gamma / d;
                 m_g_norm    = 1.0/gamma - 
@@ -917,10 +992,3 @@ void GModelSpectralPlaw2::update(const GEnergy& srcEng) const
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
