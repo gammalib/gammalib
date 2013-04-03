@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include "GOptimizerPars.hpp"
 #include "GVector.hpp"
-#include "GSparseMatrix.hpp"
+#include "GMatrixSparse.hpp"
 
 
 /***********************************************************************//**
@@ -62,7 +62,7 @@ public:
     virtual void           eval(const GOptimizerPars& pars) = 0;
     virtual double         value(void) = 0;
     virtual GVector*       gradient(void) = 0;
-    virtual GSparseMatrix* covar(void) = 0;
+    virtual GMatrixSparse* covar(void) = 0;
  
 protected:
     // Protected methods

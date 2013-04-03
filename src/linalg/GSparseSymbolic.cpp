@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GSparseSymbolic.cpp  -  sparse matrix symbolic analysis class       *
+ *       GSparseSymbolic.cpp - Sparse matrix symbolic analysis class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -28,7 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GSparseMatrix.hpp"
+#include "GMatrixSparse.hpp"
 #include "GSparseSymbolic.hpp"
 
 /* __ Macros _____________________________________________________________ */
@@ -43,16 +43,16 @@
 
 /*==========================================================================
  =                                                                         =
- =                  GSparseSymbolic constructors/destructors               =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
-/***************************************************************************
- *                       GSparseSymbolic constructor                       *
+/***********************************************************************//**
+ * @brief Void constructor
  ***************************************************************************/
-GSparseSymbolic::GSparseSymbolic()
+GSparseSymbolic::GSparseSymbolic(void)
 {
-  // Initialise private members for clean destruction
+  // Initialise private members
   m_n_pinv     = 0;
   m_n_q        = 0;
   m_n_parent   = 0;
@@ -72,10 +72,10 @@ GSparseSymbolic::GSparseSymbolic()
 }
 
 
-/***************************************************************************
- *                        GSparseSymbolic destructor                       *
+/***********************************************************************//**
+ * @brief Destructor
  ***************************************************************************/
-GSparseSymbolic::~GSparseSymbolic()
+GSparseSymbolic::~GSparseSymbolic(void)
 {
   // De-allocate only if memory has indeed been allocated
   if (m_pinv     != NULL) delete [] m_pinv;
@@ -91,7 +91,7 @@ GSparseSymbolic::~GSparseSymbolic()
 
 /*==========================================================================
  =                                                                         =
- =                        GSparseSymbolic operators                        =
+ =                                  Operators                              =
  =                                                                         =
  ==========================================================================*/
 
@@ -194,7 +194,7 @@ GSparseSymbolic& GSparseSymbolic::operator= (const GSparseSymbolic& s)
  *          m                    Sparse matrix                             *
  ***************************************************************************/
 void GSparseSymbolic::cholesky_symbolic_analysis(int order, 
-												 const GSparseMatrix& m)
+												 const GMatrixSparse& m)
 {
   // Debug
   #if defined(G_DEBUG_SPARSE_CHOLESKY)
@@ -230,7 +230,7 @@ void GSparseSymbolic::cholesky_symbolic_analysis(int order,
   // Check if order type is valid
   if (order < 0 || order > 1)
     throw GException::invalid_order(
-		  "GSparseSymbolic::cholesky_symbolic_analysis(int, GSparseMatrix*)",
+		  "GSparseSymbolic::cholesky_symbolic_analysis(int, GMatrixSparse*)",
 	      order, 0, 1);
 
   // Assign input matrix attributes
@@ -264,7 +264,7 @@ void GSparseSymbolic::cholesky_symbolic_analysis(int order,
   if (P != NULL) delete [] P;
   
   // C = spones(triu(A(P,P)))
-  GSparseMatrix C = cs_symperm(m, m_pinv);
+  GMatrixSparse C = cs_symperm(m, m_pinv);
   #if defined(G_DEBUG_SPARSE_CHOLESKY)
   cout << " C = spones(triu(A(P,P))) " << C << endl;
   #endif
@@ -383,11 +383,11 @@ void GSparseSymbolic::cholesky_symbolic_analysis(int order,
  *          A                    Sparse matrix                             *
  * Output:  p[0..n]              integer array of n+1 elements             *
  ***************************************************************************/
-int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
+int* GSparseSymbolic::cs_amd(int order, const GMatrixSparse* A)
 {
   // Throw exception if order is not a decomposition
   if (order < 0 || order > 3)
-    throw GException::invalid_order("GSparseSymbolic::cs_amd(int, const GSparseMatrix*)",
+    throw GException::invalid_order("GSparseSymbolic::cs_amd(int, const GMatrixSparse*)",
 	                    order, 0, 3);
   
   // Debug
@@ -424,13 +424,13 @@ int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
   // dimension since we attribute the matrix later anyways. It's just
   // that there is no empty constructor of a matrix, so we have to put
   // something by default ...
-  GSparseMatrix C(m,n);
+  GMatrixSparse C(m,n);
 
   // Get (logical) transpose of A: AT = A'
 // NOTE: WE ONLY NEED THE LOGICAL TRANSPOSE HERE. HOWEVER, WE HAVE NO
 // LOGICAL ADDITION SO FAR ...
-//  GSparseMatrix AT = cs_transpose(*A, 0);
-  GSparseMatrix AT = cs_transpose(*A, 1);
+//  GMatrixSparse AT = cs_transpose(*A, 0);
+  GMatrixSparse AT = cs_transpose(*A, 1);
 
   // Find dense threshold
   dense = (int)CS_MAX(16, 10 * sqrt((double)n));
@@ -464,8 +464,8 @@ int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
 	// Get (logical) transpose of AT: A2 = AT'
 // NOTE: WE ONLY NEED THE LOGICAL TRANSPOSE HERE. HOWEVER, WE HAVE NO
 // LOGICAL MULTIPLICATION SO FAR ...
-//    GSparseMatrix A2 = cs_transpose(AT, 0);
-    GSparseMatrix A2 = cs_transpose(AT, 1);
+//    GMatrixSparse A2 = cs_transpose(AT, 0);
+    GMatrixSparse A2 = cs_transpose(AT, 1);
 	
 	// C = A' * A with no dense rows
 //  NOTE: cs_multiply NOT YET IMPLEMENTED
@@ -951,7 +951,7 @@ int* GSparseSymbolic::cs_amd(int order, const GSparseMatrix* A)
  ***************************************************************************/
 #define HEAD(k,j) (ata ? head [k] : j)
 #define NEXT(J)   (ata ? next [J] : -1)
-int* GSparseSymbolic::cs_counts(const GSparseMatrix* A, const int* parent, 
+int* GSparseSymbolic::cs_counts(const GMatrixSparse* A, const int* parent, 
                                 const int* post, int ata)
 {
     // Declare loop variables
@@ -974,7 +974,7 @@ int* GSparseSymbolic::cs_counts(const GSparseMatrix* A, const int* parent,
     int* wrk_int  = new int[wrk_size];
 
   // Get (logical) transpose of A: AT = A'
-  GSparseMatrix AT = cs_transpose(*A, 0);
+  GMatrixSparse AT = cs_transpose(*A, 0);
 
   // Set-up pointers to workspace
   int* ancestor = wrk_int;
@@ -1046,7 +1046,7 @@ int* GSparseSymbolic::cs_counts(const GSparseMatrix* A, const int* parent,
  *          ata            flag                                            *
  * Output:  etree(A)       Evaluation tree of matrix A                     *
  ***************************************************************************/
-int* GSparseSymbolic::cs_etree(const GSparseMatrix* A, int ata)
+int* GSparseSymbolic::cs_etree(const GMatrixSparse* A, int ata)
 {
     // Declare loop variables
     int i, k, p;
@@ -1115,7 +1115,7 @@ int* GSparseSymbolic::cs_etree(const GSparseMatrix* A, int ata)
  * Drop entries for which fkeep(A(i,j)) is false. Return the number of
  * non-zero elements if ok, otherwise return -1.
  ***************************************************************************/
-int GSparseSymbolic::cs_fkeep(GSparseMatrix* A, 
+int GSparseSymbolic::cs_fkeep(GMatrixSparse* A, 
                               int(*fkeep)(int, int, double, void*), 
                               void* other)
 {
@@ -1368,7 +1368,7 @@ int GSparseSymbolic::cs_tdfs(int j, int k, int* head, const int* next,
  *          next              pointer to next[0..n-1] linked list info     *
  * Output:  -                 -                                            *
  ***************************************************************************/
-void GSparseSymbolic::init_ata(const GSparseMatrix* AT, const int* post, 
+void GSparseSymbolic::init_ata(const GMatrixSparse* AT, const int* post, 
                                int* wrk_int, int** head, int** next)
 {
   // Declare loop variables

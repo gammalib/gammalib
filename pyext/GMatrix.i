@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GMatrix.i  -  General Matrix class                     *
+ *                   GMatrix.i - General Matrix class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,8 +47,8 @@ public:
     GMatrix(void);
     GMatrix(const int& rows, const int& cols);
     GMatrix(const GMatrix& matrix);
-    GMatrix(const GSymMatrix& matrix);
-    GMatrix(const GSparseMatrix& matrix);
+    GMatrix(const GMatrixSymmetric& matrix);
+    GMatrix(const GMatrixSparse& matrix);
     virtual ~GMatrix(void);
 
     // Implemented pure virtual base class operators

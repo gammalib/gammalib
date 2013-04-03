@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GSparseMatrix.hpp  -  sparse matrix class               *
+ *                  GMatrixSparse.hpp - Sparse matrix class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSparseMatrix.hpp
+ * @file GMatrixSparse.hpp
  * @brief Sparse matrix class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GSPARSEMATRIX_HPP
-#define GSPARSEMATRIX_HPP
+#ifndef GMATRIXSPARSE_HPP
+#define GMATRIXSPARSE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -38,58 +38,112 @@
 
 /* __ Forward declarations _______________________________________________ */
 class GMatrix;
-class GSymMatrix;
-class GSparseMatrix;
+class GMatrixSymmetric;
+class GMatrixSparse;
 class GSparseSymbolic;
 class GSparseNumeric;
 
-/* __ Prototypes _________________________________________________________ */
-
 
 /***********************************************************************//**
- * @class GSparseMatrix
+ * @class GMatrixSparse
  *
  * @brief Sparse matrix class interface defintion
  *
  * This class implements a sparse matrix class. The class only stores
  * non-zero elements, which can considerably reduce the memory requirements
  * for large systems that are sparsly filled.
+ *
+ * The class has been inspired from the code CSparse that can be downloaded
+ * from http://www.cise.ufl.edu/research/sparse/CSparse/ 
+ * CSparse has been written by Timothy A. Davis to accompany his book
+ * "Direct Methods for Sparse Linear Systems". In the CSparse code, a sparse
+ * matrix is implemented by the structure cs_sparse. The members of this
+ * structure map as follows to the member of the GMatrixSparse class:
+ *
+ * <table border> 
+ *  <tr> 
+ *     <td><b>CSparse</b></td> 
+ *     <td><b>GMatrixSparse</b></td> 
+ *     <td><b>Dimension</b></td> 
+ *     <td><b>Description</b></td> 
+ *  </tr>
+ *  <tr>
+ *     <td>nzmax</td>
+ *     <td>m_elements</td>
+ *     <td>n.a.</td>
+ *     <td>Maximum number of entries</td>
+ *  </tr>
+ *  <tr>
+ *     <td>m</td>
+ *     <td>m_rows</td>
+ *     <td>n.a.</td>
+ *     <td>Number of rows</td>
+ *  </tr>
+ *  <tr>
+ *     <td>n</td>
+ *     <td>m_cols</td>
+ *     <td>n.a.</td>
+ *     <td>Number of columns</td>
+ *  </tr>
+ *  <tr>
+ *     <td>*p</td>
+ *     <td>*m_colstart</td>
+ *     <td>m_cols+1</td>
+ *     <td>Column pointers (index of first element of each column in 
+ *         m_data array)</td>
+ *  </tr>
+ *  <tr>
+ *     <td>*i</td>
+ *     <td>*m_rowinx</td>
+ *     <td>m_elements</td>
+ *     <td>Row indices for all non-zero elements</td>
+ *  </tr>
+ *  <tr>
+ *     <td>*x</td>
+ *     <td>*m_data</td>
+ *     <td>m_elements</td>
+ *     <td>Numerical values of all non-zero elements</td>
+ *  </tr>
+ * </table>
+ *
+ * Except for *m_rowinx which is implemented on the level of GMatrixSparse,
+ * all other members are implemented by the base class GMatrixBase.
  ***************************************************************************/
-class GSparseMatrix : public GMatrixBase {
+class GMatrixSparse : public GMatrixBase {
 
     // Friend classes
     friend class GSparseSymbolic;
     friend class GSparseNumeric;
 
     // Binary operator friends
-    friend GSparseMatrix operator*(const double& a,  const GSparseMatrix& b);
-    friend GSparseMatrix operator*(const GSparseMatrix& a, const double& b);
-    friend GSparseMatrix operator/(const GSparseMatrix& a, const double& b);
+    friend GMatrixSparse operator*(const double& a,  const GMatrixSparse& b);
+    friend GMatrixSparse operator*(const GMatrixSparse& a, const double& b);
+    friend GMatrixSparse operator/(const GMatrixSparse& a, const double& b);
 
     // Friend functions
-    friend GSparseMatrix transpose(const GSparseMatrix& matrix);
-    friend GSparseMatrix abs(const GSparseMatrix& matrix);
-    friend GSparseMatrix cholesky_decompose(const GSparseMatrix& matrix,
+    friend GMatrixSparse transpose(const GMatrixSparse& matrix);
+    friend GMatrixSparse abs(const GMatrixSparse& matrix);
+    friend GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix,
                                             bool compress = true);
-    friend GSparseMatrix cholesky_invert(const GSparseMatrix& matrix,
+    friend GMatrixSparse cholesky_invert(const GMatrixSparse& matrix,
                                          bool compress = true);
 
     // Some friend functions that we should not expose ... but I don't
     // know what to do with them as they are also needed by GSparseSymbolic,
     // yet they have to access low-level stuff from the matrix class, hence
     // they need to be friends ...
-    friend GSparseMatrix cs_symperm(const GSparseMatrix& matrix, const int* pinv);
-    friend GSparseMatrix cs_transpose(const GSparseMatrix& matrix, int values);
+    friend GMatrixSparse cs_symperm(const GMatrixSparse& matrix, const int* pinv);
+    friend GMatrixSparse cs_transpose(const GMatrixSparse& matrix, int values);
     friend double        cs_cumsum(int* p, int* c, int n);
 
 public:
     // Constructors and destructors
-    GSparseMatrix(void);
-    GSparseMatrix(const int& rows, const int& cols, const int& elements = 0);
-    GSparseMatrix(const GMatrix& matrix);
-    GSparseMatrix(const GSymMatrix& matrix);
-    GSparseMatrix(const GSparseMatrix& matrix);
-    virtual ~GSparseMatrix(void);
+    GMatrixSparse(void);
+    GMatrixSparse(const int& rows, const int& cols, const int& elements = 0);
+    GMatrixSparse(const GMatrix& matrix);
+    GMatrixSparse(const GMatrixSparse& matrix);
+    GMatrixSparse(const GMatrixSymmetric& matrix);
+    virtual ~GMatrixSparse(void);
 
     // Implemented pure virtual base class operators
     double&        operator()(const int& row, const int& col);
@@ -97,24 +151,24 @@ public:
     GVector        operator*(const GVector& vector) const;
 
     // Overloaded virtual base class operators
-    bool           operator==(const GSparseMatrix& matrix) const;
-    bool           operator!=(const GSparseMatrix& matrix) const;
+    bool           operator==(const GMatrixSparse& matrix) const;
+    bool           operator!=(const GMatrixSparse& matrix) const;
 
     // Other operators
-    GSparseMatrix& operator=(const GSparseMatrix& matrix);
-    GSparseMatrix  operator+(const GSparseMatrix& matrix) const;
-    GSparseMatrix  operator-(const GSparseMatrix& matrix) const;
-    GSparseMatrix  operator*(const GSparseMatrix& matrix) const;
-    GSparseMatrix  operator-(void) const;
-    GSparseMatrix& operator+=(const GSparseMatrix& matrix);
-    GSparseMatrix& operator-=(const GSparseMatrix& matrix);
-    GSparseMatrix& operator*=(const GSparseMatrix& matrix);
-    GSparseMatrix& operator*=(const double& scalar);
-    GSparseMatrix& operator/=(const double& scalar);
+    GMatrixSparse& operator=(const GMatrixSparse& matrix);
+    GMatrixSparse  operator+(const GMatrixSparse& matrix) const;
+    GMatrixSparse  operator-(const GMatrixSparse& matrix) const;
+    GMatrixSparse  operator*(const GMatrixSparse& matrix) const;
+    GMatrixSparse  operator-(void) const;
+    GMatrixSparse& operator+=(const GMatrixSparse& matrix);
+    GMatrixSparse& operator-=(const GMatrixSparse& matrix);
+    GMatrixSparse& operator*=(const GMatrixSparse& matrix);
+    GMatrixSparse& operator*=(const double& scalar);
+    GMatrixSparse& operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
     void           clear(void);
-    GSparseMatrix* clone(void) const;
+    GMatrixSparse* clone(void) const;
     void           transpose(void);
     void           invert(void);
     void           add_col(const GVector& vector, const int& col);
@@ -146,7 +200,7 @@ public:
 private:
     // Private methods
     void init_members(void);
-    void copy_members(const GSparseMatrix& m);
+    void copy_members(const GMatrixSparse& m);
     void free_members(void);
     void alloc_members(const int& rows, const int& cols, const int& elements = 0);
     void init_stack_members(void);
@@ -193,34 +247,34 @@ private:
  ***************************************************************************/
 // Binary matrix addition
 inline
-GSparseMatrix GSparseMatrix::operator+(const GSparseMatrix& matrix) const
+GMatrixSparse GMatrixSparse::operator+(const GMatrixSparse& matrix) const
 {
-    GSparseMatrix result = *this;
+    GMatrixSparse result = *this;
     result += matrix;
     return result;
 }
 
 // Binary matrix subtraction
 inline
-GSparseMatrix GSparseMatrix::operator-(const GSparseMatrix& matrix) const
+GMatrixSparse GMatrixSparse::operator-(const GMatrixSparse& matrix) const
 {
-    GSparseMatrix result = *this;
+    GMatrixSparse result = *this;
     result -= matrix;
     return result;
 }
 
 // Binary matrix multiplication
 inline
-GSparseMatrix GSparseMatrix::operator*(const GSparseMatrix& matrix) const
+GMatrixSparse GMatrixSparse::operator*(const GMatrixSparse& matrix) const
 {
-    GSparseMatrix result = *this;
+    GMatrixSparse result = *this;
     result *= matrix;
     return result;
 }
 
 // Matrix scaling
 inline
-GSparseMatrix& GSparseMatrix::operator*=(const double& scalar)
+GMatrixSparse& GMatrixSparse::operator*=(const double& scalar)
 {
     fill_pending();
     multiplication(scalar);
@@ -229,7 +283,7 @@ GSparseMatrix& GSparseMatrix::operator*=(const double& scalar)
 
 // Matrix scalar division
 inline
-GSparseMatrix& GSparseMatrix::operator/=(const double& scalar)
+GMatrixSparse& GMatrixSparse::operator/=(const double& scalar)
 {
     double inverse = 1.0/scalar;
     fill_pending();
@@ -239,9 +293,9 @@ GSparseMatrix& GSparseMatrix::operator/=(const double& scalar)
 
 // Negation
 inline
-GSparseMatrix GSparseMatrix::operator-(void) const
+GMatrixSparse GMatrixSparse::operator-(void) const
 {
-    GSparseMatrix result = *this;
+    GMatrixSparse result = *this;
     result.fill_pending();
     result.negation();
     return result;
@@ -253,9 +307,9 @@ GSparseMatrix GSparseMatrix::operator-(void) const
  ***************************************************************************/
 // Binary matrix scaling (matrix is left operand)
 inline
-GSparseMatrix operator*(const GSparseMatrix& a, const double& b)
+GMatrixSparse operator*(const GMatrixSparse& a, const double& b)
 {
-    GSparseMatrix result = a;
+    GMatrixSparse result = a;
     result.fill_pending();
     result *= b;
     return result;
@@ -263,9 +317,9 @@ GSparseMatrix operator*(const GSparseMatrix& a, const double& b)
 
 // Binary matrix scaling (matrix is right operand)
 inline
-GSparseMatrix operator*(const double& a, const GSparseMatrix& b)
+GMatrixSparse operator*(const double& a, const GMatrixSparse& b)
 {
-    GSparseMatrix result = b;
+    GMatrixSparse result = b;
     result.fill_pending();
     result *= a;
     return result;
@@ -273,9 +327,9 @@ GSparseMatrix operator*(const double& a, const GSparseMatrix& b)
 
 // Binary matrix division (matrix is left operand)
 inline
-GSparseMatrix operator/(const GSparseMatrix& a, const double& b)
+GMatrixSparse operator/(const GMatrixSparse& a, const double& b)
 {
-    GSparseMatrix result = a;
+    GMatrixSparse result = a;
     result.fill_pending();
     result /= b;
     return result;
@@ -283,16 +337,16 @@ GSparseMatrix operator/(const GSparseMatrix& a, const double& b)
 
 // Matrix transpose function
 inline
-GSparseMatrix transpose(const GSparseMatrix& matrix)
+GMatrixSparse transpose(const GMatrixSparse& matrix)
 {
-    GSparseMatrix result = matrix;
+    GMatrixSparse result = matrix;
     result.transpose();
     return result;
 }
 
 // Set memory block size
 inline
-void GSparseMatrix::set_mem_block(const int& block)
+void GMatrixSparse::set_mem_block(const int& block)
 {
     m_mem_block = (block > 0) ? block : 1;
     return;
@@ -300,20 +354,20 @@ void GSparseMatrix::set_mem_block(const int& block)
 
 // Cholesky decomposition
 inline
-GSparseMatrix cholesky_decompose(const GSparseMatrix& matrix, bool compress)
+GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix, bool compress)
 {
-    GSparseMatrix result = matrix;
+    GMatrixSparse result = matrix;
     result.cholesky_decompose(compress);
     return result;
 }
 
 // Matrix inversion using Cholesky decomposition
 inline
-GSparseMatrix cholesky_invert(const GSparseMatrix& matrix, bool compress)
+GMatrixSparse cholesky_invert(const GMatrixSparse& matrix, bool compress)
 {
-    GSparseMatrix result = matrix;
+    GMatrixSparse result = matrix;
     result.cholesky_invert(compress);
     return result;
 }
 
-#endif /* GSPARSEMATRIX_HPP */
+#endif /* GMATRIXSPARSE_HPP */

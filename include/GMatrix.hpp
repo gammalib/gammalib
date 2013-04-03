@@ -1,7 +1,7 @@
 /***************************************************************************
- *                         GMatrix.hpp  -  matrix class                    *
+ *                      GMatrix.hpp - General matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GMatrix.hpp
- * @brief Generic matrix class definition.
+ * @brief Generic matrix class definition
  * @author Juergen Knoedlseder
  */
 
@@ -32,8 +32,8 @@
 #include "GMatrixBase.hpp"
 
 /* __ Forward declarations _______________________________________________ */
-class GSymMatrix;
-class GSparseMatrix;
+class GMatrixSymmetric;
+class GMatrixSparse;
 
 
 /***********************************************************************//**
@@ -62,8 +62,8 @@ public:
     GMatrix(void);
     GMatrix(const int& rows, const int& cols);
     GMatrix(const GMatrix& matrix);
-    GMatrix(const GSymMatrix& matrix);
-    GMatrix(const GSparseMatrix& matrix);
+    GMatrix(const GMatrixSymmetric& matrix);
+    GMatrix(const GMatrixSparse& matrix);
     virtual ~GMatrix(void);
 
     // Implemented pure virtual base class operators

@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GSparseNumeric.hpp  -  sparse matrix numeric analysis class        *
+ *       GSparseNumeric.hpp - Sparse matrix numeric analysis class         *
  * ----------------------------------------------------------------------- *
- *  copyright            : (C) 2006 by Jurgen Knodlseder                   *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GSparseNumeric.hpp
+ * @brief Sparse matrix numeric analysis class definition
+ * @author Juergen Knoedlseder
+ */
 
 #ifndef GSPARSENUMERIC_HPP
 #define GSPARSENUMERIC_HPP
@@ -26,7 +31,7 @@
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
-#include "GSparseMatrix.hpp"
+#include "GMatrixSparse.hpp"
 #include "GSparseSymbolic.hpp"
 
 /* __ Definitions ________________________________________________________ */
@@ -38,48 +43,41 @@
 /* __ Prototypes _________________________________________________________ */
 
 
-/***************************************************************************
- *                      GSparseNumeric class definition                    *
+/***********************************************************************//**
+ * @class GSparseNumeric
+ *
+ * @brief Sparse matrix numeric analysis class
  ***************************************************************************/
 class GSparseNumeric {
+
   // Friend classes
-  friend class GSparseMatrix;
+  friend class GMatrixSparse;
 
   // I/O friends
   friend std::ostream& operator<< (std::ostream& os, const GSparseNumeric& n);
 
 public:
   // Constructors and destructors
-  GSparseNumeric();
-  ~GSparseNumeric();
+  GSparseNumeric(void);
+  virtual ~GSparseNumeric(void);
 
   // Assignment operator
-  GSparseNumeric& operator= (const GSparseNumeric& n);
+  GSparseNumeric& operator=(const GSparseNumeric& n);
 
   // Functions
-  void cholesky_numeric_analysis(const GSparseMatrix& m, const GSparseSymbolic& s);
+  void cholesky_numeric_analysis(const GMatrixSparse& m, const GSparseSymbolic& s);
 
 private:
   // Functions
-  int cs_ereach(const GSparseMatrix* A, int k, const int* parent, int* s, int* w);
+  int cs_ereach(const GMatrixSparse* A, int k, const int* parent, int* s, int* w);
 
   // Data
-  GSparseMatrix* m_L;        // L for LU and Cholesky, V for QR
-  GSparseMatrix* m_U;        // U for LU, R for QR, not used for Cholesky
+  GMatrixSparse* m_L;        // L for LU and Cholesky, V for QR
+  GMatrixSparse* m_U;        // U for LU, R for QR, not used for Cholesky
   int*           m_pinv;     // partial pivoting for LU
   double*        m_B;        // beta [0..n-1] for QR
   int            m_n_pinv;   // Number of elements in m_pinv
   int            m_n_B;      // Number of elements in m_B
 };
-
-
-/***************************************************************************
- *                              Inline members                             *
- ***************************************************************************/
-
-
-/***************************************************************************
- *                               Inline friends                            *
- ***************************************************************************/
 
 #endif /* GSPARSENUMERIC_HPP */

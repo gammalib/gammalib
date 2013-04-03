@@ -136,7 +136,7 @@ public:
         double         value(void) { return m_value; }       //!< @brief Return optimizer function value
         double         npred(void) const { return m_npred; } //!< @brief Return predicted number of events
         GVector*       gradient(void) { return m_gradient; } //!< @brief Return pointer to gradient vector
-        GSparseMatrix* covar(void) { return m_covar; }       //!< @brief Return pointer to covariance matrix
+        GMatrixSparse* covar(void) { return m_covar; }       //!< @brief Return pointer to covariance matrix
 
         // Other methods
         void set(GObservations* obs) { m_this=obs; } //!< @brief Set GObservations pointer
@@ -145,7 +145,7 @@ public:
                               const GOptimizerPars& pars);
         void poisson_unbinned(const GObservation&   obs,
                               const GOptimizerPars& pars,
-                              GSparseMatrix&        covar,
+                              GMatrixSparse&        covar,
                               GVector&              mgrad,
                               double&               value,
                               GVector&              gradient);
@@ -153,7 +153,7 @@ public:
                             const GOptimizerPars& pars);
         void poisson_binned(const GObservation&   obs,
                             const GOptimizerPars& pars,
-                            GSparseMatrix&        covar,
+                            GMatrixSparse&        covar,
                             GVector&              mgrad,
                             double&               value,
                             double&               npred,
@@ -162,7 +162,7 @@ public:
                              const GOptimizerPars& pars);
         void gaussian_binned(const GObservation&   obs,
                              const GOptimizerPars& pars,
-                             GSparseMatrix&        covar,
+                             GMatrixSparse&        covar,
                              GVector&              mgrad,
                              double&               value,
                              double&               npred,
@@ -180,7 +180,7 @@ public:
         double         m_minmod;      //!< Minimum model value
         double         m_minerr;      //!< Minimum error value
         GVector*       m_gradient;    //!< Pointer to gradient vector
-        GSparseMatrix* m_covar;       //!< Pointer to covariance matrix
+        GMatrixSparse* m_covar;       //!< Pointer to covariance matrix
         GVector*       m_wrk_grad;    //!< Pointer to working gradient vector
         GObservations* m_this;        //!< Pointer to GObservations object
     };

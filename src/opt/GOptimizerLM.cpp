@@ -577,12 +577,12 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // Initialise iteration parameters
         GVector*       grad  = fct.gradient();
-        GSparseMatrix* covar = fct.covar();
+        GMatrixSparse* covar = fct.covar();
 
         // Save function value, gradient and covariance matrix
         double         save_value = m_value;
         GVector        save_grad  = GVector(*grad);
-        GSparseMatrix  save_covar = GSparseMatrix(*covar);
+        GMatrixSparse  save_covar = GMatrixSparse(*covar);
 
         // Save parameter values in vector
         GVector save_pars(m_npars);
@@ -830,13 +830,13 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
     // Fetch sparse matrix pointer. We have to do this after the eval()
     // method since eval() will allocate new memory for the covariance
     // matrix!
-    GSparseMatrix* covar = fct.covar();
+    GMatrixSparse* covar = fct.covar();
 
     // Save best fitting value
     m_value = fct.value();
 
     // Save covariance matrix
-    GSparseMatrix save_covar = GSparseMatrix(*covar);
+    GMatrixSparse save_covar = GMatrixSparse(*covar);
 
     // Signal no diagonal element loading
     bool diag_loaded = false;

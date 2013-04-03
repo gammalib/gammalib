@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GMatrix.cpp  -  General matrix class                  *
+ *                    GMatrix.cpp - General matrix class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -33,24 +33,24 @@
 #include "GTools.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
-#include "GSymMatrix.hpp"
-#include "GSparseMatrix.hpp"
+#include "GMatrixSparse.hpp"
+#include "GMatrixSymmetric.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                              "GMatrix::operator(int&,int&)"
-#define G_ACCESS2                        "GMatrix::operator(int&,int&) const"
+#define G_ACCESS1                             "GMatrix::operator(int&, int&)"
+#define G_ACCESS2                             "GMatrix::operator(int&, int&)"
 #define G_OP_MUL_VEC                           "GMatrix::operator*(GVector&)"
 #define G_OP_ADD                              "GMatrix::operator+=(GMatrix&)"
 #define G_OP_SUB                              "GMatrix::operator-=(GMatrix&)"
 #define G_OP_MAT_MUL                          "GMatrix::operator*=(GMatrix&)"
 #define G_INVERT                                          "GMatrix::invert()"
-#define G_ADD_COL                           "GMatrix::add_col(GVector&,int&)"
+#define G_ADD_COL                          "GMatrix::add_col(GVector&, int&)"
 #define G_EXTRACT_ROW                            "GMatrix::extract_row(int&)"
 #define G_EXTRACT_COL                            "GMatrix::extract_col(int&)"
-#define G_EXTRACT_LOWER               "GMatrix::extract_lower_triangle(void)"
-#define G_EXTRACT_UPPER               "GMatrix::extract_upper_triangle(void)"
-#define G_INSERT_COL                     "GMatrix::insert_col(GVector&,int&)"
-#define G_ALLOC_MEMBERS                   "GMatrix::alloc_members(int&,int&)"
+#define G_EXTRACT_LOWER                   "GMatrix::extract_lower_triangle()"
+#define G_EXTRACT_UPPER                   "GMatrix::extract_upper_triangle()"
+#define G_INSERT_COL                    "GMatrix::insert_col(GVector&, int&)"
+#define G_ALLOC_MEMBERS                  "GMatrix::alloc_members(int&, int&)"
 
 
 /*==========================================================================
@@ -120,15 +120,15 @@ GMatrix::GMatrix(const GMatrix& matrix) : GMatrixBase(matrix)
 
 
 /***********************************************************************//**
- * @brief GSymMatrix to GMatrix storage class convertor
+ * @brief GMatrixSymmetric to GMatrix storage class convertor
  *
- * @param[in] matrix Symmetric matrix (GSymMatrix).
+ * @param[in] matrix Symmetric matrix (GMatrixSymmetric).
  *
- * This constructor converts a symmetric matrix (of type GSymMatrix) into a
- * generic matrix. As the result is generic, the conversion will succeed in
- * all cases. 
+ * This constructor converts a symmetric matrix (of type GMatrixSymmetric)
+ * into a generic matrix. As the result is generic, the conversion will
+ * succeed in all cases. 
  ***************************************************************************/
-GMatrix::GMatrix(const GSymMatrix& matrix) : GMatrixBase(matrix)
+GMatrix::GMatrix(const GMatrixSymmetric& matrix) : GMatrixBase(matrix)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -153,15 +153,15 @@ GMatrix::GMatrix(const GSymMatrix& matrix) : GMatrixBase(matrix)
 
 
 /***********************************************************************//**
- * @brief GSparseMatrix to GMatrix storage class convertor
+ * @brief GMatrixSparse to GMatrix storage class convertor
  *
- * @param[in] matrix Sparse matrix (GSparseMatrix).
+ * @param[in] matrix Sparse matrix (GMatrixSparse).
  *
- * This constructor converts a sparse matrix (of type GSparseMatrix) into a
+ * This constructor converts a sparse matrix (of type GMatrixSparse) into a
  * generic matrix. As the result is generic, the conversion will succeed in
  * all cases. 
  ***************************************************************************/
-GMatrix::GMatrix(const GSparseMatrix& matrix) : GMatrixBase(matrix)
+GMatrix::GMatrix(const GMatrixSparse& matrix) : GMatrixBase(matrix)
 {
     // Initialise class members for clean destruction
     init_members();

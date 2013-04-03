@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GSymMatrix.cpp  -  Symmetric matrix class              *
+ *                GMatrixSymmetric.cpp - Symmetric matrix class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSymMatrix.cpp
+ * @file GMatrixSymmetric.cpp
  * @brief Symmetric matrix class implementation
  * @author Juergen Knoedlseder
  */
@@ -33,28 +33,28 @@
 #include "GException.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
-#include "GSymMatrix.hpp"
-#include "GSparseMatrix.hpp"
+#include "GMatrixSparse.hpp"
+#include "GMatrixSymmetric.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CAST_MATRIX                      "GSymMatrix::GSymMatrix(GMatrix&)"
-#define G_CAST_SPARSEMATRIX          "GSymMatrix::GSymMatrix(GSparseMatrix&)"
-#define G_ACCESS1                           "GSymMatrix::operator(int&,int&)"
-#define G_ACCESS2                     "GSymMatrix::operator(int&,int&) const"
-#define G_OP_ADD                       "GSymMatrix::operator+= (GSymMatrix&)"
-#define G_OP_SUB                       "GSymMatrix::operator-= (GSymMatrix&)"
-#define G_OP_MUL_VEC                 "GSymMatrix::operator* (GVector&) const"
-#define G_OP_MAT_MUL                   "GSymMatrix::operator*= (GSymMatrix&)"
-#define G_INVERT                                   "GSymMatrix::invert(void)"
-#define G_ADD_COL                        "GSymMatrix::add_col(GVector&, int)"
-#define G_INSERT_COL                  "GSymMatrix::insert_col(GVector&,int&)"
-#define G_CHOL_DECOMP                  "GSymMatrix::cholesky_decompose(int&)"
-#define G_CHOL_SOLVE            "GSymMatrix::cholesky_solver(GVector&, int&)"
-#define G_CHOL_INVERT                     "GSymMatrix::cholesky_invert(int&)"
-#define G_EXTRACT_ROW                         "GSymMatrix::extract_row(int&)"
-#define G_EXTRACT_COL                         "GSymMatrix::extract_col(int&)"
-#define G_COPY_MEMBERS                "GSymMatrix::copy_members(GSymMatrix&)"
-#define G_ALLOC_MEMBERS                "GSymMatrix::alloc_members(int&,int&)"
+#define G_CAST_MATRIX          "GMatrixSymmetric::GMatrixSymmetric(GMatrix&)"
+#define G_CAST_SPARSEMATRIX "GMatrixSymmetric::GMatrixSymmetric(GSparseMatrix&)"
+#define G_ACCESS1                    "GMatrixSymmetric::operator(int&, int&)"
+#define G_ACCESS2                     "GMatrixSymmetric::operator(int&,int&)"
+#define G_OP_ADD            "GMatrixSymmetric::operator+=(GMatrixSymmetric&)"
+#define G_OP_SUB            "GMatrixSymmetric::operator-=(GMatrixSymmetric&)"
+#define G_OP_MUL_VEC                  "GMatrixSymmetric::operator*(GVector&)"
+#define G_OP_MAT_MUL        "GMatrixSymmetric::operator*=(GMatrixSymmetric&)"
+#define G_INVERT                             "GMatrixSymmetric::invert(void)"
+#define G_ADD_COL                 "GMatrixSymmetric::add_col(GVector&, int&)"
+#define G_INSERT_COL           "GMatrixSymmetric::insert_col(GVector&, int&)"
+#define G_CHOL_DECOMP            "GMatrixSymmetric::cholesky_decompose(int&)"
+#define G_CHOL_SOLVE      "GMatrixSymmetric::cholesky_solver(GVector&, int&)"
+#define G_CHOL_INVERT               "GMatrixSymmetric::cholesky_invert(int&)"
+#define G_EXTRACT_ROW                   "GMatrixSymmetric::extract_row(int&)"
+#define G_EXTRACT_COL                   "GMatrixSymmetric::extract_col(int&)"
+#define G_COPY_MEMBERS    "GMatrixSymmetric::copy_members(GMatrixSymmetric&)"
+#define G_ALLOC_MEMBERS         "GMatrixSymmetric::alloc_members(int&, int&)"
 
 
 /*==========================================================================
@@ -71,7 +71,7 @@
  * @todo Check the entire matrix class to see whether handling with an
  *       empty matrix may lead to some conflicts.
  ***************************************************************************/
-GSymMatrix::GSymMatrix(void) : GMatrixBase()
+GMatrixSymmetric::GMatrixSymmetric(void) : GMatrixBase()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -86,7 +86,8 @@ GSymMatrix::GSymMatrix(void) : GMatrixBase()
  * @param[in] rows Number of rows in matrix.
  * @param[in] cols Number of columns in matrix.
  ***************************************************************************/
-GSymMatrix::GSymMatrix(const int& rows, const int& cols) : GMatrixBase()
+GMatrixSymmetric::GMatrixSymmetric(const int& rows, const int& cols) :
+                  GMatrixBase()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -100,7 +101,7 @@ GSymMatrix::GSymMatrix(const int& rows, const int& cols) : GMatrixBase()
 
 
 /***********************************************************************//**
- * @brief GMatrix to GSymMatrix storage class convertor
+ * @brief GMatrix to GMatrixSymmetric storage class convertor
  *
  * @param[in] matrix General matrix (GMatrix).
  *
@@ -110,7 +111,7 @@ GSymMatrix::GSymMatrix(const int& rows, const int& cols) : GMatrixBase()
  * Converts a general matrix into the symmetric storage class. If the input
  * matrix is not symmetric, an exception is thrown.
  ***************************************************************************/
-GSymMatrix::GSymMatrix(const GMatrix& matrix)
+GMatrixSymmetric::GMatrixSymmetric(const GMatrix& matrix)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -138,27 +139,9 @@ GSymMatrix::GSymMatrix(const GMatrix& matrix)
 
 
 /***********************************************************************//**
- * @brief Copy constructor
+ * @brief GMatrixSparse to GMatrixSymmetric storage class convertor
  *
- * @param[in] matrix Matrix.
- ***************************************************************************/
-GSymMatrix::GSymMatrix(const GSymMatrix& matrix) : GMatrixBase(matrix)
-{
-    // Initialise private members for clean destruction
-    init_members();
-
-    // Copy members
-    copy_members(matrix);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief GSparseMatrix to GSymMatrix storage class convertor
- *
- * @param[in] matrix Sparse matrix (GSparseMatrix).
+ * @param[in] matrix Sparse matrix (GMatrixSparse).
  *
  * @exception GException::matrix_not_symmetric
  *            Sparse matrix is not symmetric.
@@ -166,7 +149,7 @@ GSymMatrix::GSymMatrix(const GSymMatrix& matrix) : GMatrixBase(matrix)
  * Converts a sparse matrix into the symmetric storage class. If the input
  * matrix is not symmetric, an exception is thrown.
  ***************************************************************************/
-GSymMatrix::GSymMatrix(const GSparseMatrix& matrix)
+GMatrixSymmetric::GMatrixSymmetric(const GMatrixSparse& matrix)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -194,9 +177,28 @@ GSymMatrix::GSymMatrix(const GSparseMatrix& matrix)
 
 
 /***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] matrix Matrix.
+ ***************************************************************************/
+GMatrixSymmetric::GMatrixSymmetric(const GMatrixSymmetric& matrix) :
+                  GMatrixBase(matrix)
+{
+    // Initialise private members for clean destruction
+    init_members();
+
+    // Copy members
+    copy_members(matrix);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GSymMatrix::~GSymMatrix(void)
+GMatrixSymmetric::~GMatrixSymmetric(void)
 {
     // Free members
     free_members();
@@ -217,7 +219,7 @@ GSymMatrix::~GSymMatrix(void)
  *
  * @param[in] matrix Matrix.
  ***************************************************************************/
-GSymMatrix& GSymMatrix::operator=(const GSymMatrix& matrix)
+GMatrixSymmetric& GMatrixSymmetric::operator=(const GMatrixSymmetric& matrix)
 {
     // Execute only if object is not identical
     if (this != &matrix) {
@@ -252,7 +254,7 @@ GSymMatrix& GSymMatrix::operator=(const GSymMatrix& matrix)
  * @exception GException::out_of_range
  *            Row or column index out of range.
  ***************************************************************************/
-double& GSymMatrix::operator()(const int& row, const int& col)
+double& GMatrixSymmetric::operator()(const int& row, const int& col)
 {
     // Compile option: perform range check
     #if defined(G_RANGE_CHECK)
@@ -278,7 +280,7 @@ double& GSymMatrix::operator()(const int& row, const int& col)
  * @exception GException::out_of_range
  *            Row or column index out of range.
  ***************************************************************************/
-const double& GSymMatrix::operator()(const int& row, const int& col) const
+const double& GMatrixSymmetric::operator()(const int& row, const int& col) const
 {
     // Compile option: perform range check
     #if defined(G_RANGE_CHECK)
@@ -307,7 +309,7 @@ const double& GSymMatrix::operator()(const int& row, const int& col) const
  * be performed when the number of matrix columns is equal to the length of
  * the vector.
  ***************************************************************************/
-GVector GSymMatrix::operator*(const GVector& vector) const
+GVector GMatrixSymmetric::operator*(const GVector& vector) const
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
     if (m_cols != vector.size()) {
@@ -341,7 +343,7 @@ GVector GSymMatrix::operator*(const GVector& vector) const
  * This method performs a matrix addition. The operation can only succeed
  * when the dimensions of both matrices are identical.
  ***************************************************************************/
-GSymMatrix& GSymMatrix::operator+=(const GSymMatrix& matrix)
+GMatrixSymmetric& GMatrixSymmetric::operator+=(const GMatrixSymmetric& matrix)
 {
     // Raise an exception if the matrix dimensions are not compatible
     if (m_rows != matrix.m_rows || m_cols != matrix.m_cols) {
@@ -369,7 +371,7 @@ GSymMatrix& GSymMatrix::operator+=(const GSymMatrix& matrix)
  * This method performs a matrix addition. The operation can only succeed
  * when the dimensions of both matrices are identical.
  ***************************************************************************/
-GSymMatrix& GSymMatrix::operator-= (const GSymMatrix& matrix)
+GMatrixSymmetric& GMatrixSymmetric::operator-= (const GMatrixSymmetric& matrix)
 {
     // Raise an exception if the matrix dimensions are not compatible
     if (m_rows != matrix.m_rows || m_cols != matrix.m_cols) {
@@ -395,7 +397,7 @@ GSymMatrix& GSymMatrix::operator-= (const GSymMatrix& matrix)
 /***********************************************************************//**
  * @brief Clear instance
  ***************************************************************************/
-void GSymMatrix::clear(void)
+void GMatrixSymmetric::clear(void)
 {
     // Free members
     free_members();
@@ -411,10 +413,10 @@ void GSymMatrix::clear(void)
 /***********************************************************************//**
  * @brief Clone object
  ***************************************************************************/
-GSymMatrix* GSymMatrix::clone(void) const
+GMatrixSymmetric* GMatrixSymmetric::clone(void) const
 {
     // Clone this image
-    return new GSymMatrix(*this);
+    return new GMatrixSymmetric(*this);
 }
 
 
@@ -426,7 +428,7 @@ GSymMatrix* GSymMatrix::clone(void) const
  *
  * @todo Needs to be implemented.
  ***************************************************************************/
-void GSymMatrix::invert(void)
+void GMatrixSymmetric::invert(void)
 {
     // Throw exception
     throw GException::feature_not_implemented(G_INVERT);
@@ -449,7 +451,7 @@ void GSymMatrix::invert(void)
  *
  * Adds the content of a vector to a matrix column.
  ***************************************************************************/
-void GSymMatrix::add_col(const GVector& vector, const int& col)
+void GMatrixSymmetric::add_col(const GVector& vector, const int& col)
 {
     // Raise an exception if the column index is invalid
     #if defined(G_RANGE_CHECK)
@@ -489,7 +491,7 @@ void GSymMatrix::add_col(const GVector& vector, const int& col)
  * Inserts the content of a vector into a matrix column. Any previous
  * content in the matrix column will be overwritted.
  ***************************************************************************/
-void GSymMatrix::insert_col(const GVector& vector, const int& col)
+void GMatrixSymmetric::insert_col(const GVector& vector, const int& col)
 {
     // Raise an exception if the column index is invalid
     #if defined(G_RANGE_CHECK)
@@ -525,7 +527,7 @@ void GSymMatrix::insert_col(const GVector& vector, const int& col)
  *
  * This method extracts a matrix row into a vector.
  ***************************************************************************/
-GVector GSymMatrix::extract_row(const int& row) const
+GVector GMatrixSymmetric::extract_row(const int& row) const
 {
     // Raise an exception if the row index is invalid
     #if defined(G_RANGE_CHECK)
@@ -557,7 +559,7 @@ GVector GSymMatrix::extract_row(const int& row) const
  *
  * This method extracts a matrix column into a vector.
  ***************************************************************************/
-GVector GSymMatrix::extract_col(const int& col) const
+GVector GMatrixSymmetric::extract_col(const int& col) const
 {
     // Raise an exception if the column index is invalid
     #if defined(G_RANGE_CHECK)
@@ -586,7 +588,7 @@ GVector GSymMatrix::extract_col(const int& col) const
  * (including the diagonal elements).
  * All remaining matrix elements will be zero.
  ***************************************************************************/
-GMatrix GSymMatrix::extract_lower_triangle(void) const
+GMatrix GMatrixSymmetric::extract_lower_triangle(void) const
 {
     // Define result matrix
     GMatrix result(m_rows, m_cols);
@@ -610,7 +612,7 @@ GMatrix GSymMatrix::extract_lower_triangle(void) const
  * (including the diagonal elements).
  * All remaining matrix elements will be zero.
  ***************************************************************************/
-GMatrix GSymMatrix::extract_upper_triangle(void) const
+GMatrix GMatrixSymmetric::extract_upper_triangle(void) const
 {
     // Define result matrix
     GMatrix result(m_rows, m_cols);
@@ -644,7 +646,7 @@ GMatrix GSymMatrix::extract_upper_triangle(void) const
  * Case A operates on a full matrix, Case B operates on a (logically)
  * compressed matrix where zero rows/columns have been removed.
  ***************************************************************************/
-void GSymMatrix::cholesky_decompose(bool compress)
+void GMatrixSymmetric::cholesky_decompose(bool compress)
 {
     // Set-up incides of non zero rows if matrix compression is requested
     if (compress) {
@@ -738,11 +740,11 @@ void GSymMatrix::cholesky_decompose(bool compress)
  *            All matrix elements are zero.
  *
  * Solves the linear equation A*x=b using a Cholesky decomposition of A.
- * This function is to be applied on a decomposition GSymMatrix matrix
+ * This function is to be applied on a decomposition GMatrixSymmetric matrix
  * that is produced by 'cholesky_decompose'. Case A operates on a full
  * matrix, Case B on a zero rows/columns (logically) compressed matrix.
  ***************************************************************************/
-GVector GSymMatrix::cholesky_solver(const GVector& vector, bool compress)
+GVector GMatrixSymmetric::cholesky_solver(const GVector& vector, bool compress)
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
     if (m_rows != vector.size()) {
@@ -832,7 +834,7 @@ GVector GSymMatrix::cholesky_solver(const GVector& vector, bool compress)
  * operates on a full matrix while Case B operates on a (logically)
  * compressed matrix where all zero rows/columns are skipped.
  ***************************************************************************/
-void GSymMatrix::cholesky_invert(bool compress)
+void GMatrixSymmetric::cholesky_invert(bool compress)
 {
     // Generate Cholesky decomposition of matrix
     this->cholesky_decompose(compress);
@@ -932,7 +934,7 @@ void GSymMatrix::cholesky_invert(bool compress)
  * The fill of a matrix is defined as the number of non-zero elements
  * devided by the total number of matrix elements.
  ***************************************************************************/
-double GSymMatrix::fill(void) const
+double GMatrixSymmetric::fill(void) const
 {
     // Determine the number of zero elements
     int zero = 0;
@@ -955,7 +957,7 @@ double GSymMatrix::fill(void) const
 /***********************************************************************//**
  * @brief Sum matrix elements
  ***************************************************************************/
-double GSymMatrix::sum(void) const
+double GMatrixSymmetric::sum(void) const
 {
     // Initialise matrix sums (diagonal and off-diagonal)
     double diag     = 0.0;
@@ -984,13 +986,13 @@ double GSymMatrix::sum(void) const
 /***********************************************************************//**
  * @brief Print matrix
  ***************************************************************************/
-std::string GSymMatrix::print(void) const
+std::string GMatrixSymmetric::print(void) const
 {
     // Initialise result string
     std::string result;
 
     // Append header
-    result.append("=== GSymMatrix ===");
+    result.append("=== GMatrixSymmetric ===");
     result.append("\n"+parformat("Number of rows")+str(m_rows));
     if (m_rowsel != NULL) {
         result.append(" (compressed "+str(m_num_rowsel)+")");
@@ -1021,7 +1023,7 @@ std::string GSymMatrix::print(void) const
 /***********************************************************************//**
  * @brief Initialise class mambers
  ***************************************************************************/
-void GSymMatrix::init_members(void)
+void GMatrixSymmetric::init_members(void)
 {
     // Initialise members
     m_num_inx = 0;
@@ -1037,7 +1039,7 @@ void GSymMatrix::init_members(void)
  *
  * @param[in] matrix Matrix.
  ***************************************************************************/
-void GSymMatrix::copy_members(const GSymMatrix& matrix)
+void GMatrixSymmetric::copy_members(const GMatrixSymmetric& matrix)
 {
     // Copy attributes
     m_num_inx = matrix.m_num_inx;
@@ -1058,7 +1060,7 @@ void GSymMatrix::copy_members(const GSymMatrix& matrix)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GSymMatrix::free_members(void)
+void GMatrixSymmetric::free_members(void)
 {
     // De-allocate only if memory has indeed been allocated by derived class
     if (m_inx != NULL) delete [] m_inx;
@@ -1089,7 +1091,7 @@ void GSymMatrix::free_members(void)
  *
  * @todo Verify if the index array m_inx should be initialized.
  ***************************************************************************/
-void GSymMatrix::alloc_members(const int& rows, const int& cols)
+void GMatrixSymmetric::alloc_members(const int& rows, const int& cols)
 {
     // Determine number of physical elements in matrix
     int elements = rows*(rows+1)/2;
@@ -1139,7 +1141,7 @@ void GSymMatrix::alloc_members(const int& rows, const int& cols)
  * that points to these rows/columns. This array is used for compressed
  * matrix calculations (Case B in the above routines).
  ***************************************************************************/
-void GSymMatrix::set_inx(void)
+void GMatrixSymmetric::set_inx(void)
 {
     // Allocate loop variables and pointers
     int row;
@@ -1194,10 +1196,10 @@ void GSymMatrix::set_inx(void)
  *
  * @param[in] matrix Matrix.
  ***************************************************************************/
-GSymMatrix abs(const GSymMatrix& matrix)
+GMatrixSymmetric abs(const GMatrixSymmetric& matrix)
 {
     // Define result matrix
-    GSymMatrix result = matrix;
+    GMatrixSymmetric result = matrix;
 
     // Convert all elements to absolute values
     for (int i = 0; i < result.m_elements; ++i) {
@@ -1224,7 +1226,7 @@ GSymMatrix abs(const GSymMatrix& matrix)
  * The operation can only succeed when the dimensions of both matrices are
  * compatible.
  ***************************************************************************/
-GMatrix GSymMatrix::operator*(const GSymMatrix& matrix) const
+GMatrix GMatrixSymmetric::operator*(const GMatrixSymmetric& matrix) const
 {
     // Raise an exception if the matrix dimensions are not compatible
     if (m_cols != matrix.m_rows) {

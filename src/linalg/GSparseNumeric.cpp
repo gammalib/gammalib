@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GSparseNumeric.cpp  -  sparse matrix numeric analysis class        *
+ *        GSparseNumeric.cpp - Sparse matrix numeric analysis class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GSparseNumeric.cpp
+ * @brief Sparse matrix numeric analysis class implementation
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -33,7 +38,7 @@
 
 /*==========================================================================
  =                                                                         =
- =                   GSparseNumeric constructors/destructors               =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
@@ -101,11 +106,11 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
 
 	    // Copy m_L if it exists
 	    if (n.m_L != NULL)
-	        m_L = new GSparseMatrix(*n.m_L);
+	        m_L = new GMatrixSparse(*n.m_L);
 
 	    // Copy m_U if it exists
 	    if (n.m_U != NULL)
-	        m_U = new GSparseMatrix(*n.m_U);
+	        m_U = new GMatrixSparse(*n.m_U);
 	
 	    // Copy m_pinv array if it exists
 	    if (n.m_pinv != NULL && n.m_n_pinv > 0) {
@@ -145,7 +150,7 @@ GSparseNumeric& GSparseNumeric::operator= (const GSparseNumeric& n)
  * Input:   A                    Sparse matrix                             *
  *          S                    Symbolic analysis of sparse matrix        *
  ***************************************************************************/
-void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A, 
+void GSparseNumeric::cholesky_numeric_analysis(const GMatrixSparse& A, 
                                                const GSparseSymbolic& S)
 {
   // De-allocate memory that has indeed been previously allocated
@@ -186,7 +191,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
   int* parent = S.m_parent;
 
   // Assign C = A(p,p) where A and C are symmetric and the upper part stored
-  GSparseMatrix C = (pinv) ? cs_symperm(A, pinv) : (A);
+  GMatrixSparse C = (pinv) ? cs_symperm(A, pinv) : (A);
 
   // Assign workspace pointer
   int*    c = wrk_int;
@@ -199,7 +204,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
   double* Cx = C.m_data;
   
     // Allocate L matrix
-    m_L = new GSparseMatrix(n, n, cp[n]);
+    m_L = new GMatrixSparse(n, n, cp[n]);
 
   // Assign L matrix pointers 
   int*    Lp = m_L->m_colstart;
@@ -246,7 +251,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
 	// Compute L(k,k)
 	if (d <= 0)
 	  throw GException::matrix_not_pos_definite(
-	        "GSparseNumeric::cholesky_numeric_analysis(GSparseMatrix&, const GSparseSymbolic&)",
+	        "GSparseNumeric::cholesky_numeric_analysis(GMatrixSparse&, const GSparseSymbolic&)",
 			k, d);
 
     // Store L(k,k) = sqrt (d) in column k
@@ -288,7 +293,7 @@ void GSparseNumeric::cholesky_numeric_analysis(const GSparseMatrix& A,
  *                               of L(k,:); -1 if arrays have not been     *
  *                               allocated                                 *
  ***************************************************************************/
-int GSparseNumeric::cs_ereach(const GSparseMatrix* A, int k, 
+int GSparseNumeric::cs_ereach(const GMatrixSparse* A, int k, 
                                           const int* parent, int* s, int* w)
 {
   // Return -1 if arrays have not been allocated

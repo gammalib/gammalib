@@ -216,7 +216,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         m_value    = 0.0;
         m_npred    = 0.0;
         m_gradient = new GVector(npars);
-        m_covar    = new GSparseMatrix(npars,npars);
+        m_covar    = new GMatrixSparse(npars,npars);
         m_wrk_grad = new GVector(npars);
 
         // Set stack size and number of entries
@@ -226,7 +226,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
         // Allocate vectors to save working variables of each thread
         std::vector<GVector*>       vect_cpy_grad;
-        std::vector<GSparseMatrix*> vect_cpy_covar;
+        std::vector<GMatrixSparse*> vect_cpy_covar;
         std::vector<double*>        vect_cpy_value;
         std::vector<double*>        vect_cpy_npred;
 
@@ -243,7 +243,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
             GModels        cpy_model((GModels&)pars);
             GVector        cpy_wrk_grad(npars);
             GVector*       cpy_gradient = new GVector(npars);
-            GSparseMatrix* cpy_covar    = new GSparseMatrix(npars,npars);
+            GMatrixSparse* cpy_covar    = new GMatrixSparse(npars,npars);
             double*        cpy_npred    = new double(0.0);
             double*        cpy_value    = new double(0.0);
 
@@ -482,7 +482,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
  ***************************************************************************/
 void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
                                                 const GOptimizerPars& pars,
-                                                GSparseMatrix&        covar,
+                                                GMatrixSparse&        covar,
                                                 GVector&              gradient,
                                                 double&               value,
                                                 GVector&              wrk_grad)
@@ -634,7 +634,7 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
  ***************************************************************************/
 void GObservations::optimizer::poisson_binned(const GObservation&   obs,
                                               const GOptimizerPars& pars,
-                                              GSparseMatrix&        covar,
+                                              GMatrixSparse&        covar,
                                               GVector&              gradient,
                                               double&               value,
                                               double&               npred,
@@ -875,7 +875,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
  ***************************************************************************/
 void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
                                                const GOptimizerPars& pars,
-                                               GSparseMatrix&        covar,
+                                               GMatrixSparse&        covar,
                                                GVector&              gradient,
                                                double&               value,
                                                double&               npred,
@@ -1048,7 +1048,7 @@ void GObservations::optimizer::copy_members(const optimizer& fct)
     if (fct.m_gradient != NULL) m_gradient = new GVector(*fct.m_gradient);
 
     // Clone covariance matrix if it exists
-    if (fct.m_covar != NULL) m_covar = new GSparseMatrix(*fct.m_covar);
+    if (fct.m_covar != NULL) m_covar = new GMatrixSparse(*fct.m_covar);
 
     // Clone working gradient if it exists
     if (fct.m_wrk_grad != NULL) m_wrk_grad = new GVector(*fct.m_wrk_grad);

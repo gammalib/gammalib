@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GSparseMatrix.i  -  Sparse Matrix class SWIG file            *
+ *                   GMatrixSparse.i - Sparse matrix class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GSparseMatrix.i
+ * @file GMatrixSparse.i
  * @brief Sparse matrix class definition.
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GSparseMatrix.hpp"
+#include "GMatrixSparse.hpp"
 #include "GTools.hpp"
 %}
 
@@ -34,44 +34,44 @@
 
 
 /***********************************************************************//**
- * @class GSparseMatrix
+ * @class GMatrixSparse
  *
  * @brief Sparse matrix class definition
  *
- * GSparseMatrix implements a sparse matrix storage class. It derives from
+ * GMatrixSparse implements a sparse matrix storage class. It derives from
  * the abstract base class GMatrixBase.
  ***************************************************************************/
-class GSparseMatrix : public GMatrixBase {
+class GMatrixSparse : public GMatrixBase {
 public:
     // Constructors and destructors
-    GSparseMatrix(void);
-    GSparseMatrix(const int& rows, const int& cols, const int& elements = 0);
-    GSparseMatrix(const GMatrix& matrix);
-    GSparseMatrix(const GSymMatrix& matrix);
-    GSparseMatrix(const GSparseMatrix& matrix);
-    virtual ~GSparseMatrix(void);
+    GMatrixSparse(void);
+    GMatrixSparse(const int& rows, const int& cols, const int& elements = 0);
+    GMatrixSparse(const GMatrix& matrix);
+    GMatrixSparse(const GMatrixSparse& matrix);
+    GMatrixSparse(const GMatrixSymmetric& matrix);
+    virtual ~GMatrixSparse(void);
 
     // Implemented pure virtual base class operators
     GVector        operator*(const GVector& vector) const;
 
     // Overloaded virtual base class operators
-    bool           operator==(const GSparseMatrix& matrix) const;
-    bool           operator!=(const GSparseMatrix& matrix) const;
+    bool           operator==(const GMatrixSparse& matrix) const;
+    bool           operator!=(const GMatrixSparse& matrix) const;
 
     // Other operators
-    GSparseMatrix  operator+(const GSparseMatrix& matrix) const;
-    GSparseMatrix  operator-(const GSparseMatrix& matrix) const;
-    GSparseMatrix  operator*(const GSparseMatrix& matrix) const;
-    GSparseMatrix  operator-(void) const;
-    GSparseMatrix& operator+=(const GSparseMatrix& matrix);
-    GSparseMatrix& operator-=(const GSparseMatrix& matrix);
-    GSparseMatrix& operator*=(const GSparseMatrix& matrix);
-    GSparseMatrix& operator*=(const double& scalar);
-    GSparseMatrix& operator/=(const double& scalar);
+    GMatrixSparse  operator+(const GMatrixSparse& matrix) const;
+    GMatrixSparse  operator-(const GMatrixSparse& matrix) const;
+    GMatrixSparse  operator*(const GMatrixSparse& matrix) const;
+    GMatrixSparse  operator-(void) const;
+    GMatrixSparse& operator+=(const GMatrixSparse& matrix);
+    GMatrixSparse& operator-=(const GMatrixSparse& matrix);
+    GMatrixSparse& operator*=(const GMatrixSparse& matrix);
+    GMatrixSparse& operator*=(const double& scalar);
+    GMatrixSparse& operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
     void           clear(void);
-    GSparseMatrix* clone(void) const;
+    GMatrixSparse* clone(void) const;
     void           transpose(void);
     void           invert(void);
     void           add_col(const GVector& vector, const int& col);
@@ -102,9 +102,9 @@ public:
 
 
 /***********************************************************************//**
- * @brief GSparseMatrix class extension
+ * @brief GMatrixSparse class extension
  ***************************************************************************/
-%extend GSparseMatrix {
+%extend GMatrixSparse {
     char *__str__() {
         return tochar(self->print());
     }
@@ -114,13 +114,13 @@ public:
     void __setitem__(int GTuple[2], double value) {
         (*self)(GTuple[0], GTuple[1]) = value;
     }
-    GSparseMatrix __mul__(const double &a) {
+    GMatrixSparse __mul__(const double &a) {
         return (*self) * a;
     }
-    GSparseMatrix __div__(const double &a) {
+    GMatrixSparse __div__(const double &a) {
         return (*self) / a;
     }
-    GSparseMatrix copy() {
+    GMatrixSparse copy() {
         return (*self);
     }
 };

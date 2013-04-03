@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GSparseSymbolic.hpp  -  sparse matrix symbolic analysis class       *
+ *      GSparseSymbolic.hpp - Sparse matrix symbolic analysis class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GSparseSymbolic.hpp
- * @brief Sparse matrix symbolic analysis class implementation
+ * @brief Sparse matrix symbolic analysis class definition
  * @author Juergen Knoedlseder
  */
 
@@ -35,9 +35,9 @@
 
 /* __ Structures _________________________________________________________ */
 
-/* __ Prototypes (implementions in GSparseMatrix) ________________________ */
-GSparseMatrix cs_symperm(const GSparseMatrix& matrix, const int* pinv);
-GSparseMatrix cs_transpose(const GSparseMatrix& matrix, int values);
+/* __ Prototypes (implementions in GMatrixSparse) ________________________ */
+GMatrixSparse cs_symperm(const GMatrixSparse& matrix, const int* pinv);
+GMatrixSparse cs_transpose(const GMatrixSparse& matrix, int values);
 double        cs_cumsum(int* p, int* c, int n);
 
 
@@ -54,32 +54,31 @@ class GSparseSymbolic {
     friend std::ostream& operator<< (std::ostream& os, const GSparseSymbolic& s);
 
     // Friend classes
-    friend class GSparseMatrix;
+    friend class GMatrixSparse;
     friend class GSparseNumeric;
 
 public:
     // Constructors and destructors
     GSparseSymbolic(void);
-//  GSparseSymbolic(const GSparseSymbolic& s) { cout << "would sym to" << endl;}
-    ~GSparseSymbolic(void);
+    virtual ~GSparseSymbolic(void);
 
     // Assignment operator
     GSparseSymbolic& operator= (const GSparseSymbolic& s);
 
     // Methods
-    void cholesky_symbolic_analysis(int order, const GSparseMatrix& m);
+    void cholesky_symbolic_analysis(int order, const GMatrixSparse& m);
 
 private:
     // Private methods
-    int*        cs_amd (int order, const GSparseMatrix* A);
-    int*        cs_counts(const GSparseMatrix* A, const int* parent, const int* post, int ata);
-    int*        cs_etree(const GSparseMatrix* A, int ata);
-    int         cs_fkeep(GSparseMatrix* A, int(*fkeep)(int, int, double, void*), void* other);
+    int*        cs_amd (int order, const GMatrixSparse* A);
+    int*        cs_counts(const GMatrixSparse* A, const int* parent, const int* post, int ata);
+    int*        cs_etree(const GMatrixSparse* A, int ata);
+    int         cs_fkeep(GMatrixSparse* A, int(*fkeep)(int, int, double, void*), void* other);
     int         cs_leaf(int i, int j, const int* first, int* maxfirst, int* prevleaf, int* ancestor, int* jleaf);
     int*        cs_pinv(int const* p, int n);
     int*        cs_post(const int* parent, int n);
     int         cs_tdfs(int j, int k, int* head, const int* next, int* post, int* stack);
-    static void init_ata(const GSparseMatrix* AT, const int* post, int* wrk_int, int** head, int** next);
+    static void init_ata(const GMatrixSparse* AT, const int* post, int* wrk_int, int** head, int** next);
     static int  cs_diag(int i, int j, double aij, void* other);
     static int  cs_wclear(int mark, int lemax, int* w, int n);
 
