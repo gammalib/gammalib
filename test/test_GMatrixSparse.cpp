@@ -1,7 +1,7 @@
 /***************************************************************************
- *           test_GSparseMatrix.cpp  -  Test sparse matrix class           *
+ *            test_GMatrixSparse.cpp - Test sparse matrix class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GSparseMatrix.cpp
+ * @file test_GMatrixSparse.cpp
  * @brief Implementation of unit tests for sparse matrices
  * @author Juergen Knoedlseder
  */
@@ -29,7 +29,7 @@
 #include <config.h>
 #endif
 #include <cmath>
-#include "test_GSparseMatrix.hpp"
+#include "test_GMatrixSparse.hpp"
 
 /* __ Globals ____________________________________________________________ */
 double g_matrix[] = {1.0, 7.0, 3.0, 2.0, 4.0, 8.0, 5.0, 6.0, 9.0};
@@ -44,10 +44,10 @@ int    g_cols     = 5;
 /***************************************************************************
  * @brief Set test matrix
  ***************************************************************************/
-GSparseMatrix TestGSparseMatrix::set_matrix(void) const
+GMatrixSparse TestGMatrixSparse::set_matrix(void) const
 {
     // Allocate matrix
-    GSparseMatrix matrix(g_rows, g_cols);
+    GMatrixSparse matrix(g_rows, g_cols);
 
     // Set matrix values
     for (int i = 0; i < g_elements; ++i) {
@@ -63,10 +63,10 @@ GSparseMatrix TestGSparseMatrix::set_matrix(void) const
  * @brief Set test matrix with zero lines
  ***************************************************************************/
 /*
-GSparseMatrix TestGSparseMatrix::set_matrix_zero(void) const
+GMatrixSparse TestGMatrixSparse::set_matrix_zero(void) const
 {
     // Allocate matrix
-    GSparseMatrix matrix(g_rows+1,g_cols+1);
+    GMatrixSparse matrix(g_rows+1,g_cols+1);
 
     // Set matrix values
 	int i = 0;
@@ -89,7 +89,7 @@ GSparseMatrix TestGSparseMatrix::set_matrix_zero(void) const
 /***************************************************************************
  * @brief Set test vector
  ***************************************************************************/
-GVector TestGSparseMatrix::set_vector(void) const
+GVector TestGMatrixSparse::set_vector(void) const
 {
     // Allocate vector
     GVector vector(g_cols);
@@ -114,7 +114,7 @@ GVector TestGSparseMatrix::set_vector(void) const
  * Checks if a matrix corresponds to the test matrix. Optionally, the test
  * matrix can be scaled and an offset can be added.
  ***************************************************************************/
-bool TestGSparseMatrix::check_matrix(const GSparseMatrix& matrix,
+bool TestGMatrixSparse::check_matrix(const GMatrixSparse& matrix,
                                      const double&        scale,
                                      const double&        offset) const
 {
@@ -158,7 +158,7 @@ bool TestGSparseMatrix::check_matrix(const GSparseMatrix& matrix,
  * Checks if a matrix corresponds to the test matrix. Optionally, the test
  * matrix can be scaled and an offset can be added.
  ***************************************************************************/
-bool TestGSparseMatrix::check_matrix_trans(const GSparseMatrix& matrix,
+bool TestGMatrixSparse::check_matrix_trans(const GMatrixSparse& matrix,
                                            const double&        scale,
                                            const double&        offset) const
 {
@@ -198,8 +198,8 @@ bool TestGSparseMatrix::check_matrix_trans(const GSparseMatrix& matrix,
  * @param[in] matrix Matrix.
  * @param[in] ref Reference matrix.
  ***************************************************************************/
-bool TestGSparseMatrix::check_matrix_lt(const GSparseMatrix& matrix,
-                                        const GSparseMatrix& ref) const
+bool TestGMatrixSparse::check_matrix_lt(const GMatrixSparse& matrix,
+                                        const GMatrixSparse& ref) const
 {
     // Initialise check with true
     bool result = true;
@@ -239,8 +239,8 @@ bool TestGSparseMatrix::check_matrix_lt(const GSparseMatrix& matrix,
  * @param[in] matrix Matrix.
  * @param[in] ref Reference matrix.
  ***************************************************************************/
-bool TestGSparseMatrix::check_matrix_ut(const GSparseMatrix& matrix,
-                                        const GSparseMatrix& ref) const
+bool TestGMatrixSparse::check_matrix_ut(const GMatrixSparse& matrix,
+                                        const GMatrixSparse& ref) const
 {
     // Initialise check with true
     bool result = true;
@@ -277,26 +277,26 @@ bool TestGSparseMatrix::check_matrix_ut(const GSparseMatrix& matrix,
 /***********************************************************************//**
  * @brief Set parameters and tests
  **************************************************************************/
-void TestGSparseMatrix::set(void)
+void TestGMatrixSparse::set(void)
 {
     // Set test name
-    name("GSparseMatrix");
+    name("GMatrixSparse");
 
     // Add tests
-    append(static_cast<pfunction>(&TestGSparseMatrix::alloc_matrix), "Test matrix allocation");
-    append(static_cast<pfunction>(&TestGSparseMatrix::assign_values), "Test value assignment");
-    append(static_cast<pfunction>(&TestGSparseMatrix::copy_matrix), "Test matrix copying");
-    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_operations), "Test matrix operations");
-    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_arithmetics), "Test matrix arithmetics");
-    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_functions), "Test matrix functions");
-    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_compare), "Test matrix comparisons");
-    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_cholesky), "Test matrix Cholesky decomposition");
-    append(static_cast<pfunction>(&TestGSparseMatrix::matrix_print), "Test matrix printing");
+    append(static_cast<pfunction>(&TestGMatrixSparse::alloc_matrix), "Test matrix allocation");
+    append(static_cast<pfunction>(&TestGMatrixSparse::assign_values), "Test value assignment");
+    append(static_cast<pfunction>(&TestGMatrixSparse::copy_matrix), "Test matrix copying");
+    append(static_cast<pfunction>(&TestGMatrixSparse::matrix_operations), "Test matrix operations");
+    append(static_cast<pfunction>(&TestGMatrixSparse::matrix_arithmetics), "Test matrix arithmetics");
+    append(static_cast<pfunction>(&TestGMatrixSparse::matrix_functions), "Test matrix functions");
+    append(static_cast<pfunction>(&TestGMatrixSparse::matrix_compare), "Test matrix comparisons");
+    append(static_cast<pfunction>(&TestGMatrixSparse::matrix_cholesky), "Test matrix Cholesky decomposition");
+    append(static_cast<pfunction>(&TestGMatrixSparse::matrix_print), "Test matrix printing");
 
     // Set members
     m_test   = set_matrix();
     v_test   = set_vector();
-    m_bigger = GSparseMatrix(g_rows+1, g_cols+1);
+    m_bigger = GMatrixSparse(g_rows+1, g_cols+1);
 
     // Return
     return;
@@ -306,12 +306,12 @@ void TestGSparseMatrix::set(void)
 /***********************************************************************//**
  * @brief Test matrix allocation
  ***************************************************************************/
-void TestGSparseMatrix::alloc_matrix(void)
+void TestGMatrixSparse::alloc_matrix(void)
 {
     // Allocate zero matrix. The allocation should fail.
     test_try("Allocate zero matrix");
     try {
-        GSparseMatrix test(0,0);
+        GMatrixSparse test(0,0);
         test_try_failure("Expected GException::empty exception.");
     }
     catch (GException::empty &e) {
@@ -323,7 +323,7 @@ void TestGSparseMatrix::alloc_matrix(void)
 
     // Setup a symmetric sparse matrix
     int size = 30;
-    GSparseMatrix symmetric(size,size);
+    GMatrixSparse symmetric(size,size);
     for (int i = 0; i < size; i+=2) {
         for (int j = 0; j < size; j+=2) {
             symmetric(i,j) = 1.0+i+j;
@@ -334,9 +334,9 @@ void TestGSparseMatrix::alloc_matrix(void)
     test_try("Test symmetric GMatrix conversion");
     try {
         GMatrix cnv_matrix        = GMatrix(symmetric);
-        GSparseMatrix back_matrix = GSparseMatrix(cnv_matrix);
+        GMatrixSparse back_matrix = GMatrixSparse(cnv_matrix);
         test_assert((symmetric == back_matrix),
-                    "Test symmetric GSparseMatrix - GMatrix conversion",
+                    "Test symmetric GMatrixSparse - GMatrix conversion",
                     "Found:\n"+back_matrix.print()+"\nExpected:\n"+symmetric.print());
         test_try_success();
     }
@@ -351,9 +351,9 @@ void TestGSparseMatrix::alloc_matrix(void)
     test_try("Test GMatrix conversion");
     try {
         GMatrix       cnv_matrix  = GMatrix(m_test);
-        GSparseMatrix back_matrix = GSparseMatrix(cnv_matrix);
+        GMatrixSparse back_matrix = GMatrixSparse(cnv_matrix);
         test_assert((m_test == back_matrix),
-                    "Test GSparseMatrix - GMatrix conversion",
+                    "Test GMatrixSparse - GMatrix conversion",
                     "Found:\n"+back_matrix.print()+"\nExpected:\n"+m_test.print());
         test_try_success();
     }
@@ -361,13 +361,13 @@ void TestGSparseMatrix::alloc_matrix(void)
         test_try_failure(e);
     }
 
-    // Test GSparseMatrix <-> GSymMatrix conversion
-    test_try("Test GSymMatrix conversion");
+    // Test GMatrixSparse <-> GMatrixSymmetric conversion
+    test_try("Test GMatrixSymmetric conversion");
     try {
-        GSymMatrix    cnv_sym  = GSymMatrix(symmetric);
-        GSparseMatrix back_sym = GSparseMatrix(cnv_sym);
+        GMatrixSymmetric cnv_sym  = GMatrixSymmetric(symmetric);
+        GMatrixSparse    back_sym = GMatrixSparse(cnv_sym);
         test_assert((symmetric == back_sym),
-                    "Test GSparseMatrix - GSymMatrix conversion",
+                    "Test GMatrixSparse - GMatrixSymmetric conversion",
                     "Found:\n"+back_sym.print()+"\nExpected:\n"+symmetric.print());
         test_try_success();
     }
@@ -375,10 +375,10 @@ void TestGSparseMatrix::alloc_matrix(void)
         test_try_failure(e);
     }
 
-    // Test invalid GSparseMatrix <-> GSymMatrix conversion
-    test_try("Test invalid GSymMatrix conversion");
+    // Test invalid GMatrixSparse <-> GMatrixSymmetric conversion
+    test_try("Test invalid GMatrixSymmetric conversion");
     try {
-        GSymMatrix bad_sym = GSymMatrix(m_test);
+        GMatrixSymmetric bad_sym = GMatrixSymmetric(m_test);
         test_try_failure("Expected GException::matrix_not_symmetric exception.");
     }
     catch (GException::matrix_not_symmetric &e) {
@@ -396,10 +396,10 @@ void TestGSparseMatrix::alloc_matrix(void)
 /***********************************************************************//**
  * @brief Test value assignment
  ***************************************************************************/
-void TestGSparseMatrix::assign_values(void)
+void TestGMatrixSparse::assign_values(void)
 {
     // Setup 3x3 matrix
-    GSparseMatrix test(3,3);
+    GMatrixSparse test(3,3);
     
     // Assignment individual values
     for (int i = 0; i < 3; ++i) {
@@ -433,12 +433,12 @@ void TestGSparseMatrix::assign_values(void)
     #endif
 
     // Setup 10x10 matrix and keep for reference
-	GSparseMatrix sparse(10,10);
+	GMatrixSparse sparse(10,10);
 	for (int i = 3; i < 5; ++i) {
         sparse(i,i) = 5.0;
     }
-	GSparseMatrix initial   = sparse;
-	GSparseMatrix reference = sparse;
+	GMatrixSparse initial   = sparse;
+	GMatrixSparse reference = sparse;
 
     // Insert column into 10 x 10 matrix using large matrix stack and the
     // add_col(GVector) method
@@ -636,10 +636,10 @@ void TestGSparseMatrix::assign_values(void)
 /***********************************************************************//**
  * @brief Test matrix copy
  ***************************************************************************/
-void TestGSparseMatrix::copy_matrix(void)
+void TestGMatrixSparse::copy_matrix(void)
 {
     // Copy matrix
-	GSparseMatrix test = m_test;
+	GMatrixSparse test = m_test;
     
     // Test if original and compied matrices are correct
     test_assert(check_matrix(m_test), "Test source matrix");
@@ -656,7 +656,7 @@ void TestGSparseMatrix::copy_matrix(void)
  *
  * Tests matrix*vector and matrix*matrix multiplication operations.
  ***************************************************************************/
-void TestGSparseMatrix::matrix_operations(void)
+void TestGMatrixSparse::matrix_operations(void)
 {
     // Perform vector multiplication
 	GVector test1 = m_test * v_test;
@@ -693,10 +693,10 @@ void TestGSparseMatrix::matrix_operations(void)
     }
     
     // Test matrix multiplication
-	GSparseMatrix test3 = m_test * transpose(m_test);
+	GMatrixSparse test3 = m_test * transpose(m_test);
 
     // Check if the result matrix is as expected
-    GSparseMatrix ref3(g_rows, g_rows);
+    GMatrixSparse ref3(g_rows, g_rows);
     for (int row = 0; row < g_rows; ++row) {
         for (int col = 0; col < g_rows; ++col) {
             double value = 0.0;
@@ -735,7 +735,7 @@ void TestGSparseMatrix::matrix_operations(void)
     // Test incompatible matrix multiplication
     test_try("Test incompatible matrix multiplication");
     try {
-        GSparseMatrix test4 = m_bigger * m_test;
+        GMatrixSparse test4 = m_bigger * m_test;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
@@ -748,7 +748,7 @@ void TestGSparseMatrix::matrix_operations(void)
     // Test another incompatible matrix multiplication
     test_try("Test incompatible matrix multiplication");
     try {
-        GSparseMatrix test5 = m_bigger * m_test;
+        GMatrixSparse test5 = m_bigger * m_test;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
@@ -768,70 +768,70 @@ void TestGSparseMatrix::matrix_operations(void)
  *
  * Tests matrix arithmetics.
  ***************************************************************************/
-void TestGSparseMatrix::matrix_arithmetics(void)
+void TestGMatrixSparse::matrix_arithmetics(void)
 {
-	// -GSparseMatrix
-	GSparseMatrix test = -m_test;
+	// -GMatrixSparse
+	GMatrixSparse test = -m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, -1.0, 0.0), "Test -GSparseMatrix",
+    test_assert(check_matrix(test, -1.0, 0.0), "Test -GMatrixSparse",
                 "Unexpected result matrix:\n"+test.print());
 
-	// GSparseMatrix += GSparseMatrix
+	// GMatrixSparse += GMatrixSparse
 	test  = m_test;
 	test += m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 2.0, 0.0), "Test GSparseMatrix += GSparseMatrix",
+    test_assert(check_matrix(test, 2.0, 0.0), "Test GMatrixSparse += GMatrixSparse",
                 "Unexpected result matrix:\n"+test.print());
 
-	// GSparseMatrix -= GSparseMatrix
+	// GMatrixSparse -= GMatrixSparse
 	test  = m_test;
 	test -= m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 0.0, 0.0), "Test GSparseMatrix -= GSparseMatrix",
+    test_assert(check_matrix(test, 0.0, 0.0), "Test GMatrixSparse -= GMatrixSparse",
                 "Unexpected result matrix:\n"+test.print());
 
-	// GSparseMatrix *= 3.0
+	// GMatrixSparse *= 3.0
 	test  = m_test;
 	test *= 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 3.0, 0.0), "Test GSparseMatrix *= 3.0",
+    test_assert(check_matrix(test, 3.0, 0.0), "Test GMatrixSparse *= 3.0",
                 "Unexpected result matrix:\n"+test.print());
 
-	// GSparseMatrix /= 3.0
+	// GMatrixSparse /= 3.0
 	test  = m_test;
 	test /= 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GSparseMatrix /= 3.0",
+    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GMatrixSparse /= 3.0",
                 "Unexpected result matrix:\n"+test.print());
 
-	// GSparseMatrix + GSparseMatrix
+	// GMatrixSparse + GMatrixSparse
 	test = m_test + m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 2.0, 0.0), "Test GSparseMatrix + GSparseMatrix",
+    test_assert(check_matrix(test, 2.0, 0.0), "Test GMatrixSparse + GMatrixSparse",
                 "Unexpected result matrix:\n"+test.print());
 
-	// GSparseMatrix - GSparseMatrix
+	// GMatrixSparse - GMatrixSparse
 	test = m_test - m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 0.0, 0.0), "Test GSparseMatrix - GSparseMatrix",
+    test_assert(check_matrix(test, 0.0, 0.0), "Test GMatrixSparse - GMatrixSparse",
                 "Unexpected result matrix:\n"+test.print());
 
-	// GSparseMatrix * 3.0
+	// GMatrixSparse * 3.0
 	test = m_test * 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 3.0, 0.0), "Test GSparseMatrix * 3.0",
+    test_assert(check_matrix(test, 3.0, 0.0), "Test GMatrixSparse * 3.0",
                 "Unexpected result matrix:\n"+test.print());
 
-	// 3.0 * GSparseMatrix
+	// 3.0 * GMatrixSparse
 	test = 3.0 * m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 3.0, 0.0), "Test 3.0 * GSparseMatrix",
+    test_assert(check_matrix(test, 3.0, 0.0), "Test 3.0 * GMatrixSparse",
                 "Unexpected result matrix:\n"+test.print());
 
-	// GSparseMatrix / 3.0
+	// GMatrixSparse / 3.0
 	test = m_test / 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GSparseMatrix / 3.0",
+    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GMatrixSparse / 3.0",
                 "Unexpected result matrix:\n"+test.print());
 
     // Test invalid matrix addition
@@ -858,7 +858,7 @@ void TestGSparseMatrix::matrix_arithmetics(void)
  *
  * Tests matrix functions.
  ***************************************************************************/
-void TestGSparseMatrix::matrix_functions(void)
+void TestGMatrixSparse::matrix_functions(void)
 {
     // Minimum
 	double min = m_test.min();
@@ -890,10 +890,10 @@ void TestGSparseMatrix::matrix_functions(void)
     test_value(sum, value, 1.0e-20, "Test sum function");
 
     // Transpose function
-	GSparseMatrix test1 = transpose(m_test);
+	GMatrixSparse test1 = transpose(m_test);
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix_trans(test1, 1.0, 0.0),
-                "Test transpose(GSparseMatrix) function",
+                "Test transpose(GMatrixSparse) function",
                 "Unexpected transposed matrix:\n"+test1.print());
 
     // Transpose method
@@ -901,15 +901,15 @@ void TestGSparseMatrix::matrix_functions(void)
 	test1.transpose();
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix_trans(test1, 1.0, 0.0), 
-                "Test GSparseMatrix.transpose() method",
+                "Test GMatrixSparse.transpose() method",
                 "Unexpected transposed matrix:\n"+test1.print());
 
     // Convert to general matrix
-    GSparseMatrix test2 = GSparseMatrix(m_test);
+    GMatrixSparse test2 = GMatrixSparse(m_test);
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix(test2, 1.0, 0.0), 
-                "Test GSparseMatrix(GSparseMatrix) constructor",
-                "Unexpected GSparseMatrix:\n"+test2.print());
+                "Test GMatrixSparse(GMatrixSparse) constructor",
+                "Unexpected GMatrixSparse:\n"+test2.print());
     
     // Return
     return;
@@ -919,13 +919,13 @@ void TestGSparseMatrix::matrix_functions(void)
 /***********************************************************************//**
  * @brief Test matrix comparisons
  ***************************************************************************/
-void TestGSparseMatrix::matrix_compare(void)
+void TestGMatrixSparse::matrix_compare(void)
 {
     // Allocate an empty matrix
-    GSparseMatrix empty(g_rows, g_cols);
+    GMatrixSparse empty(g_rows, g_cols);
 
     // Allocate a full matrix
-    GSparseMatrix full(g_rows, g_cols);
+    GMatrixSparse full(g_rows, g_cols);
     for (int i = 0; i < g_rows; ++i) {
         for (int j = 0; j < g_rows; ++j) {
             full(i,j) = 1.0 + i*1000.0 + j*10.0;
@@ -960,10 +960,10 @@ void TestGSparseMatrix::matrix_compare(void)
 /***********************************************************************//**
  * @brief Test Cholesky decomposition
  ***************************************************************************/
-void TestGSparseMatrix::matrix_cholesky(void)
+void TestGMatrixSparse::matrix_cholesky(void)
 {
     // Setup matrix for Cholesky decomposition
-    GSparseMatrix chol_test(5,5);
+    GMatrixSparse chol_test(5,5);
     chol_test(0,0) = 1.0;
     chol_test(0,1) = 0.2;
     chol_test(0,2) = 0.2;
@@ -993,7 +993,7 @@ void TestGSparseMatrix::matrix_cholesky(void)
     }
 
     // Perform Cholesky decomposition
-    GSparseMatrix cd = cholesky_decompose(chol_test);
+    GMatrixSparse cd = cholesky_decompose(chol_test);
 
     // Perform inplace Cholesky decomposition
     cd = chol_test;
@@ -1052,7 +1052,7 @@ void TestGSparseMatrix::matrix_cholesky(void)
     test_value(res, 0.0, 1.0e-15, "Test cholesky_solver() method - 5");
 
 	// Setup matrix for Cholesky decomposition with zero row/col
-	GSparseMatrix chol_test_zero(6,6);
+	GMatrixSparse chol_test_zero(6,6);
 	chol_test_zero(0,0) = 1.0;
 	chol_test_zero(0,1) = 0.2;
 	chol_test_zero(0,2) = 0.2;
@@ -1068,7 +1068,7 @@ void TestGSparseMatrix::matrix_cholesky(void)
 	chol_test_zero(5,5) = 1.0;
 
     // Test compressed Cholesky decomposition
-	GSparseMatrix cd_zero = chol_test_zero;
+	GMatrixSparse cd_zero = chol_test_zero;
 	cd_zero.cholesky_decompose();
 
     // Test compressed Cholesky solver (first test)
@@ -1124,7 +1124,7 @@ void TestGSparseMatrix::matrix_cholesky(void)
     test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method - 5");
 
 	// Setup matrix for Cholesky decomposition with zero row/col (unsymmetric case)
-	GSparseMatrix chol_test_zero2(6,5);
+	GMatrixSparse chol_test_zero2(6,5);
 	chol_test_zero2(0,0) = 1.0;
 	chol_test_zero2(0,1) = 0.2;
 	chol_test_zero2(0,2) = 0.2;
@@ -1140,7 +1140,7 @@ void TestGSparseMatrix::matrix_cholesky(void)
 	chol_test_zero2(5,4) = 1.0;
 
     // Test compressed Cholesky decomposition (unsymmetric case)
-	GSparseMatrix cd_zero2 = chol_test_zero2;
+	GMatrixSparse cd_zero2 = chol_test_zero2;
 	cd_zero2.cholesky_decompose();
 
     // Test compressed Cholesky solver (unsymmetric case)
@@ -1201,16 +1201,16 @@ void TestGSparseMatrix::matrix_cholesky(void)
                "Test unsymmetric compressed cholesky_solver() method - 5");
 
 	// Test Cholesky inverter (inplace)
-	GSparseMatrix unit(5,5);
+	GMatrixSparse unit(5,5);
 	unit(0,0) = 1.0;
 	unit(1,1) = 1.0;
 	unit(2,2) = 1.0;
 	unit(3,3) = 1.0;
 	unit(4,4) = 1.0;
-	GSparseMatrix chol_test_inv = chol_test;
+	GMatrixSparse chol_test_inv = chol_test;
 	chol_test_inv.cholesky_invert();
-    GSparseMatrix ci_product   = chol_test * chol_test_inv;
-    GSparseMatrix ci_residuals = ci_product - unit;
+    GMatrixSparse ci_product   = chol_test * chol_test_inv;
+    GMatrixSparse ci_residuals = ci_product - unit;
 	res = (abs(ci_residuals)).max();
     test_value(res, 0.0, 1.0e-15, "Test inplace Cholesky inverter");
             
@@ -1222,16 +1222,16 @@ void TestGSparseMatrix::matrix_cholesky(void)
     test_value(res, 0.0, 1.0e-15, "Test Cholesky inverter");
 
     // Test Cholesky inverter for compressed matrix
-    unit = GSparseMatrix(6,6);
+    unit = GMatrixSparse(6,6);
     unit(0,0) = 1.0;
     unit(1,1) = 1.0;
     unit(2,2) = 1.0;
     unit(4,4) = 1.0;
     unit(5,5) = 1.0;
-    GSparseMatrix chol_test_zero_inv = chol_test_zero;
+    GMatrixSparse chol_test_zero_inv = chol_test_zero;
     chol_test_zero_inv.cholesky_invert();
-    GSparseMatrix ciz_product   = chol_test_zero * chol_test_zero_inv;
-    GSparseMatrix ciz_residuals = ciz_product - unit;
+    GMatrixSparse ciz_product   = chol_test_zero * chol_test_zero_inv;
+    GMatrixSparse ciz_residuals = ciz_product - unit;
     res = (abs(ciz_residuals)).max();
     test_value(res, 0.0, 1.0e-15, "Test compressed matrix Cholesky inverter");
 
@@ -1243,11 +1243,11 @@ void TestGSparseMatrix::matrix_cholesky(void)
 /***************************************************************************
  * @brief Test matrix printing
  ***************************************************************************/
-void TestGSparseMatrix::matrix_print(void)
+void TestGMatrixSparse::matrix_print(void)
 {
     // Set reference
     std::string reference;
-    reference.append("=== GSparseMatrix ===\n");
+    reference.append("=== GMatrixSparse ===\n");
     reference.append(" Number of rows ............: 4\n");
     reference.append(" Number of columns .........: 5\n");
     reference.append(" Number of nonzero elements : 9\n");
@@ -1268,7 +1268,7 @@ void TestGSparseMatrix::matrix_print(void)
                 "Unexpected print() output:\n"+output+"\nExpected:\n"+reference);
 
     // Allocate big matrix
-    GSparseMatrix big(30, 40);
+    GMatrixSparse big(30, 40);
     for (int i = 0; i < 30; ++i) {
         for (int j = 0; j < 40; ++j) {
             big(i,j) = i+j;
@@ -1277,7 +1277,7 @@ void TestGSparseMatrix::matrix_print(void)
 
     // Set reference for big matrix
     std::string ref_big;
-    ref_big.append("=== GSparseMatrix ===\n");
+    ref_big.append("=== GMatrixSparse ===\n");
     ref_big.append(" Number of rows ............: 30\n");
     ref_big.append(" Number of columns .........: 40\n");
     ref_big.append(" Number of nonzero elements : 1199\n");
@@ -1315,13 +1315,13 @@ void TestGSparseMatrix::matrix_print(void)
 int main(void)
 {
     // Allocate test suit container
-    GTestSuites testsuites("GSparseMatrix class testing");
+    GTestSuites testsuites("GMatrixSparse class testing");
 
     // Initially assume that we pass all tests
     bool success = true;
 
     // Create a test suite
-    TestGSparseMatrix test;
+    TestGMatrixSparse test;
 
     // Append test suite to the container
     testsuites.append(test);
@@ -1330,7 +1330,7 @@ int main(void)
     success = testsuites.run();
 
     // Save test report
-    testsuites.save("reports/GSparseMatrix.xml");
+    testsuites.save("reports/GMatrixSparse.xml");
 
     // Return success status
     return (success ? 0 : 1);

@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib linalg module.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2013 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -49,9 +49,9 @@ class Test(GPythonTestSuite):
         self.name("linalg")
 
         # Append tests
-        self.append(self.test_matrix, "Test GMatrix")
-        self.append(self.test_sym_matrix, "Test GSymMatrix")
-        self.append(self.test_sparse_matrix, "Test GSparseMatrix")
+        self.append(self.test_matrix,           "Test GMatrix")
+        self.append(self.test_matrix_sparse,    "Test GMatrixSparse")
+        self.append(self.test_matrix_symmetric, "Test GMatrixSymmetric")
 
         # Return
         return
@@ -82,43 +82,17 @@ class Test(GPythonTestSuite):
         # Return
         return
 
-    # Test GSymMatrix class
-    def test_sym_matrix(self):
+    # Test GMatrixSparse class
+    def test_matrix_sparse(self):
         """
-        Test GSymMatrix class.
-        """
-        # Set matrix size
-        nrows = 3
-        ncols = 3
-
-        # Allocate matrix
-        m = GSymMatrix(nrows, ncols)
-
-        # Fill elements
-        for i in range(nrows):
-            for j in range(ncols):
-                m[i, j] = i + j
-
-        # Check elements
-        for i in range(nrows):
-            for j in range(ncols):
-                ref = i + j
-                self.test_value(m[i, j], ref, 0.0, "Test matrix element access")
-
-        # Return
-        return
-
-    # Test GSparseMatrix class
-    def test_sparse_matrix(self):
-        """
-        Test GSparseMatrix class.
+        Test GMatrixSparse class.
         """
         # Set matrix size
         nrows = 5
         ncols = 3
 
         # Allocate matrix
-        m = GSparseMatrix(nrows, ncols)
+        m = GMatrixSparse(nrows, ncols)
 
         # Fill elements
         for i in range(nrows):
@@ -133,3 +107,30 @@ class Test(GPythonTestSuite):
 
         # Return
         return
+
+    # Test GMatrixSymmetric class
+    def test_matrix_symmetric(self):
+        """
+        Test GMatrixSymmetric class.
+        """
+        # Set matrix size
+        nrows = 3
+        ncols = 3
+
+        # Allocate matrix
+        m = GMatrixSymmetric(nrows, ncols)
+
+        # Fill elements
+        for i in range(nrows):
+            for j in range(ncols):
+                m[i, j] = i + j
+
+        # Check elements
+        for i in range(nrows):
+            for j in range(ncols):
+                ref = i + j
+                self.test_value(m[i, j], ref, 0.0, "Test matrix element access")
+
+        # Return
+        return
+

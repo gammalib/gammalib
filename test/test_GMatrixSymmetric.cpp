@@ -1,7 +1,7 @@
 /***************************************************************************
- *          test_GSymMatrix.cpp  -  Test symmetric matrix class            *
+ *          test_GMatrixSymmetric.cpp - Test symmetric matrix class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GSymMatrix.cpp
+ * @file test_GMatrixSymmetric.cpp
  * @brief Implementation of unit tests for symmetric matrices
  * @author Juergen Knoedlseder
  */
@@ -29,7 +29,7 @@
 #include <config.h>
 #endif
 #include <cmath>
-#include "test_GSymMatrix.hpp"
+#include "test_GMatrixSymmetric.hpp"
 
 /* __ Globals ____________________________________________________________ */
 double g_matrix[] = {4.0, 1.0, 2.0, 1.0, 5.0, 3.0, 2.0, 3.0, 6.0};
@@ -41,10 +41,10 @@ int    g_cols    = 3;
 /***************************************************************************
  * @brief Set test matrix
  ***************************************************************************/
-GSymMatrix TestGSymMatrix::set_matrix(void) const
+GMatrixSymmetric TestGMatrixSymmetric::set_matrix(void) const
 {
     // Allocate matrix
-    GSymMatrix matrix(g_rows,g_cols);
+    GMatrixSymmetric matrix(g_rows,g_cols);
 
     // Set matrix values
     for (int row = 0; row < g_rows; ++row) {
@@ -61,10 +61,10 @@ GSymMatrix TestGSymMatrix::set_matrix(void) const
 /***************************************************************************
  * @brief Set test matrix with zero lines
  ***************************************************************************/
-GSymMatrix TestGSymMatrix::set_matrix_zero(void) const
+GMatrixSymmetric TestGMatrixSymmetric::set_matrix_zero(void) const
 {
     // Allocate matrix
-    GSymMatrix matrix(g_rows+1,g_cols+1);
+    GMatrixSymmetric matrix(g_rows+1,g_cols+1);
 
     // Set matrix values
 	int i = 0;
@@ -87,7 +87,7 @@ GSymMatrix TestGSymMatrix::set_matrix_zero(void) const
 /***************************************************************************
  * @brief Set test vector
  ***************************************************************************/
-GVector TestGSymMatrix::set_vector(void) const
+GVector TestGMatrixSymmetric::set_vector(void) const
 {
     // Allocate vector
     GVector vector(g_cols);
@@ -112,9 +112,9 @@ GVector TestGSymMatrix::set_vector(void) const
  * Checks if a matrix corresponds to the test matrix. Optionally, the test
  * matrix can be scaled and an offset can be added.
  ***************************************************************************/
-bool TestGSymMatrix::check_matrix(const GSymMatrix& matrix,
-                                  const double&     scale,
-                                  const double&     offset) const
+bool TestGMatrixSymmetric::check_matrix(const GMatrixSymmetric& matrix,
+                                        const double&     scale,
+                                        const double&     offset) const
 {
     // Initialise check with true
     bool result = true;
@@ -145,9 +145,9 @@ bool TestGSymMatrix::check_matrix(const GSymMatrix& matrix,
  * Checks if a matrix corresponds to the test matrix. Optionally, the test
  * matrix can be scaled and an offset can be added.
  ***************************************************************************/
-bool TestGSymMatrix::check_matrix(const GMatrix& matrix,
-                                  const double&  scale,
-                                  const double&  offset) const
+bool TestGMatrixSymmetric::check_matrix(const GMatrix& matrix,
+                                        const double&  scale,
+                                        const double&  offset) const
 {
     // Initialise check with true
     bool result = true;
@@ -175,9 +175,9 @@ bool TestGSymMatrix::check_matrix(const GMatrix& matrix,
  * @param[in] scale scale factor (default: 1.0)
  * @param[in] offset offset value (default: 0.0)
  ***************************************************************************/
-bool TestGSymMatrix::check_matrix_lt(const GMatrix& matrix,
-                                     const double&  scale,
-                                     const double&  offset) const
+bool TestGMatrixSymmetric::check_matrix_lt(const GMatrix& matrix,
+                                           const double&  scale,
+                                           const double&  offset) const
 {
     // Initialise check with true
     bool result = true;
@@ -206,9 +206,9 @@ bool TestGSymMatrix::check_matrix_lt(const GMatrix& matrix,
  * @param[in] scale scale factor (default: 1.0)
  * @param[in] offset offset value (default: 0.0)
  ***************************************************************************/
-bool TestGSymMatrix::check_matrix_ut(const GMatrix& matrix,
-                                     const double&  scale,
-                                     const double&  offset) const
+bool TestGMatrixSymmetric::check_matrix_ut(const GMatrix& matrix,
+                                           const double&  scale,
+                                           const double&  offset) const
 {
     // Initialise check with true
     bool result = true;
@@ -233,26 +233,26 @@ bool TestGSymMatrix::check_matrix_ut(const GMatrix& matrix,
 /***********************************************************************//**
  * @brief Set parameters and tests
  **************************************************************************/
-void TestGSymMatrix::set(void)
+void TestGMatrixSymmetric::set(void)
 {
     // Set test name
-    name("GSymMatrix");
+    name("GMatrixSymmetric");
 
     // Add tests
-    append(static_cast<pfunction>(&TestGSymMatrix::alloc_matrix), "Test matrix allocation");
-    append(static_cast<pfunction>(&TestGSymMatrix::assign_values), "Test value assignment");
-    append(static_cast<pfunction>(&TestGSymMatrix::copy_matrix), "Test matrix copying");
-    append(static_cast<pfunction>(&TestGSymMatrix::matrix_operations), "Test matrix operations");
-    append(static_cast<pfunction>(&TestGSymMatrix::matrix_arithmetics), "Test matrix arithmetics");
-    append(static_cast<pfunction>(&TestGSymMatrix::matrix_functions), "Test matrix functions");
-    append(static_cast<pfunction>(&TestGSymMatrix::matrix_compare), "Test matrix comparisons");
-    append(static_cast<pfunction>(&TestGSymMatrix::matrix_cholesky), "Test matrix Cholesky decomposition");
-    append(static_cast<pfunction>(&TestGSymMatrix::matrix_print), "Test matrix printing");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::alloc_matrix), "Test matrix allocation");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::assign_values), "Test value assignment");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::copy_matrix), "Test matrix copying");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::matrix_operations), "Test matrix operations");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::matrix_arithmetics), "Test matrix arithmetics");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::matrix_functions), "Test matrix functions");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::matrix_compare), "Test matrix comparisons");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::matrix_cholesky), "Test matrix Cholesky decomposition");
+    append(static_cast<pfunction>(&TestGMatrixSymmetric::matrix_print), "Test matrix printing");
 
     // Set members
     m_test   = set_matrix();
     v_test   = set_vector();
-    m_bigger = GSymMatrix(g_rows+1, g_cols+1);
+    m_bigger = GMatrixSymmetric(g_rows+1, g_cols+1);
 
     // Return
     return;
@@ -262,12 +262,12 @@ void TestGSymMatrix::set(void)
 /***********************************************************************//**
  * @brief Test matrix allocation
  ***************************************************************************/
-void TestGSymMatrix::alloc_matrix(void)
+void TestGMatrixSymmetric::alloc_matrix(void)
 {
     // Allocate zero matrix. The allocation should fail.
     test_try("Allocate zero matrix");
     try {
-        GSymMatrix test(0,0);
+        GMatrixSymmetric test(0,0);
         test_try_failure("Expected GException::empty exception.");
     }
     catch (GException::empty &e) {
@@ -285,10 +285,10 @@ void TestGSymMatrix::alloc_matrix(void)
 /***********************************************************************//**
  * @brief Test value assignment
  ***************************************************************************/
-void TestGSymMatrix::assign_values(void)
+void TestGMatrixSymmetric::assign_values(void)
 {
     // Setup 3x3 matrix
-    GSymMatrix test(3,3);
+    GMatrixSymmetric test(3,3);
     
     // Assignment individual values
     for (int i = 0; i < 3; ++i) {
@@ -329,10 +329,10 @@ void TestGSymMatrix::assign_values(void)
 /***********************************************************************//**
  * @brief Test matrix copy
  ***************************************************************************/
-void TestGSymMatrix::copy_matrix(void)
+void TestGMatrixSymmetric::copy_matrix(void)
 {
     // Copy matrix
-	GSymMatrix test = m_test;
+	GMatrixSymmetric test = m_test;
     
     // Test if original and compied matrices are correct
     test_assert(check_matrix(m_test), "Test source matrix");
@@ -349,7 +349,7 @@ void TestGSymMatrix::copy_matrix(void)
  *
  * Tests matrix*vector and matrix*matrix multiplication operations.
  ***************************************************************************/
-void TestGSymMatrix::matrix_operations(void)
+void TestGMatrixSymmetric::matrix_operations(void)
 {
     // Perform vector multiplication
 	GVector test1 = m_test * v_test;
@@ -388,10 +388,10 @@ void TestGSymMatrix::matrix_operations(void)
     }
     
     // Test matrix multiplication
-	GSymMatrix test3 = m_test * m_test;
+	GMatrixSymmetric test3 = m_test * m_test;
     
     // Check if the result matrix is as expected
-    GSymMatrix ref3 = test3;
+    GMatrixSymmetric ref3 = test3;
     result = true;
     for (int row = 0; row < test3.rows(); ++row) {
         for (int col = 0; col < test3.cols(); ++col) {
@@ -417,7 +417,7 @@ void TestGSymMatrix::matrix_operations(void)
     // Test incompatible matrix multiplication
     test_try("Test incompatible matrix multiplication");
     try {
-        GSymMatrix test4 = m_test * m_bigger;
+        GMatrixSymmetric test4 = m_test * m_bigger;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
@@ -430,7 +430,7 @@ void TestGSymMatrix::matrix_operations(void)
     // Test another incompatible matrix multiplication
     test_try("Test incompatible matrix multiplication");
     try {
-        GSymMatrix test5 = m_bigger * m_test;
+        GMatrixSymmetric test5 = m_bigger * m_test;
         test_try_failure("Expected GException::matrix_mismatch exception.");
     }
     catch (GException::matrix_mismatch &e) {
@@ -450,70 +450,70 @@ void TestGSymMatrix::matrix_operations(void)
  *
  * Tests matrix arithmetics.
  ***************************************************************************/
-void TestGSymMatrix::matrix_arithmetics(void)
+void TestGMatrixSymmetric::matrix_arithmetics(void)
 {
-	// -GSymMatrix
-	GSymMatrix test = -m_test;
+	// -GMatrixSymmetric
+	GMatrixSymmetric test = -m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, -1.0, 0.0), "Test -GSymMatrix",
+    test_assert(check_matrix(test, -1.0, 0.0), "Test -GMatrixSymmetric",
                 test.print());
 
-	// GSymMatrix += GSymMatrix
+	// GMatrixSymmetric += GMatrixSymmetric
 	test  = m_test;
 	test += m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 2.0, 0.0), "Test GSymMatrix += GSymMatrix",
+    test_assert(check_matrix(test, 2.0, 0.0), "Test GMatrixSymmetric += GMatrixSymmetric",
                 test.print());
 
-	// GSymMatrix -= GSymMatrix
+	// GMatrixSymmetric -= GMatrixSymmetric
 	test  = m_test;
 	test -= m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 0.0, 0.0), "Test GSymMatrix -= GSymMatrix",
+    test_assert(check_matrix(test, 0.0, 0.0), "Test GMatrixSymmetric -= GMatrixSymmetric",
                 test.print());
 
-	// GSymMatrix *= 3.0
+	// GMatrixSymmetric *= 3.0
 	test  = m_test;
 	test *= 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 3.0, 0.0), "Test GSymMatrix *= 3.0",
+    test_assert(check_matrix(test, 3.0, 0.0), "Test GMatrixSymmetric *= 3.0",
                 test.print());
 
-	// GSymMatrix /= 3.0
+	// GMatrixSymmetric /= 3.0
 	test  = m_test;
 	test /= 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GSymMatrix /= 3.0",
+    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GMatrixSymmetric /= 3.0",
                 test.print());
 
-	// GSymMatrix + GSymMatrix
+	// GMatrixSymmetric + GMatrixSymmetric
 	test = m_test + m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 2.0, 0.0), "Test GSymMatrix + GSymMatrix",
+    test_assert(check_matrix(test, 2.0, 0.0), "Test GMatrixSymmetric + GMatrixSymmetric",
                 test.print());
 
-	// GSymMatrix - GSymMatrix
+	// GMatrixSymmetric - GMatrixSymmetric
 	test = m_test - m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 0.0, 0.0), "Test GSymMatrix - GSymMatrix",
+    test_assert(check_matrix(test, 0.0, 0.0), "Test GMatrixSymmetric - GMatrixSymmetric",
                 test.print());
 
-	// GSymMatrix * 3.0
+	// GMatrixSymmetric * 3.0
 	test = m_test * 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 3.0, 0.0), "Test GSymMatrix * 3.0",
+    test_assert(check_matrix(test, 3.0, 0.0), "Test GMatrixSymmetric * 3.0",
                 test.print());
 
-	// 3.0 * GSymMatrix
+	// 3.0 * GMatrixSymmetric
 	test = 3.0 * m_test;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 3.0, 0.0), "Test 3.0 * GSymMatrix",
+    test_assert(check_matrix(test, 3.0, 0.0), "Test 3.0 * GMatrixSymmetric",
                 test.print());
 
-	// GSymMatrix / 3.0
+	// GMatrixSymmetric / 3.0
 	test = m_test / 3.0;
     test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GSymMatrix / 3.0",
+    test_assert(check_matrix(test, 1.0/3.0, 0.0), "Test GMatrixSymmetric / 3.0",
                 test.print());
 
     // Test invalid matrix addition
@@ -540,7 +540,7 @@ void TestGSymMatrix::matrix_arithmetics(void)
  *
  * Tests matrix functions.
  ***************************************************************************/
-void TestGSymMatrix::matrix_functions(void)
+void TestGMatrixSymmetric::matrix_functions(void)
 {
     // Minimum
 	double min = m_test.min();
@@ -583,10 +583,10 @@ void TestGSymMatrix::matrix_functions(void)
     test_value(sum, value, 1.0e-20, "Test sum function");
 
     // Transpose function
-	GSymMatrix test1 = transpose(m_test);
+	GMatrixSymmetric test1 = transpose(m_test);
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix(test1, 1.0, 0.0),
-                "Test transpose(GSymMatrix) function",
+                "Test transpose(GMatrixSymmetric) function",
                 "Unexpected transposed matrix:\n"+test1.print());
 
     // Transpose method
@@ -594,28 +594,28 @@ void TestGSymMatrix::matrix_functions(void)
 	test1.transpose();
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix(test1, 1.0, 0.0), 
-                "Test GSymMatrix.transpose() method",
+                "Test GMatrixSymmetric.transpose() method",
                 "Unexpected transposed matrix:\n"+test1.print());
 
     // Convert to general matrix
     GMatrix test2 = GMatrix(m_test);
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix(test2, 1.0, 0.0), 
-                "Test GMatrix(GSymMatrix) constructor",
+                "Test GMatrix(GMatrixSymmetric) constructor",
                 "Unexpected GMatrix:\n"+test2.print());
 
     // Extract lower triangle
     test2 = m_test.extract_lower_triangle();
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix_lt(test2, 1.0, 0.0), 
-                "Test GSymMatrix.extract_lower_triangle() method",
+                "Test GMatrixSymmetric.extract_lower_triangle() method",
                 "Unexpected GMatrix:\n"+test2.print());
 
     // Extract upper triangle
     test2 = m_test.extract_upper_triangle();
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix_ut(test2, 1.0, 0.0), 
-                "Test GSymMatrix.extract_upper_triangle() method",
+                "Test GMatrixSymmetric.extract_upper_triangle() method",
                 "Unexpected GMatrix:\n"+test2.print());
 
     // Return
@@ -626,10 +626,10 @@ void TestGSymMatrix::matrix_functions(void)
 /***********************************************************************//**
  * @brief Test matrix comparisons
  ***************************************************************************/
-void TestGSymMatrix::matrix_compare(void)
+void TestGMatrixSymmetric::matrix_compare(void)
 {
     // Allocate an empty matrix
-    GSymMatrix empty(g_rows,g_cols);
+    GMatrixSymmetric empty(g_rows,g_cols);
 
     // Test operators
     test_assert((m_test == m_test), "Test == operator");
@@ -647,10 +647,10 @@ void TestGSymMatrix::matrix_compare(void)
 /***********************************************************************//**
  * @brief Test Cholesky decomposition
  ***************************************************************************/
-void TestGSymMatrix::matrix_cholesky(void)
+void TestGMatrixSymmetric::matrix_cholesky(void)
 {
     // Test Cholesky decomposition
-	GSymMatrix cd           = cholesky_decompose(m_test);
+	GMatrixSymmetric cd           = cholesky_decompose(m_test);
 	GMatrix    cd_lower     = cd.extract_lower_triangle();
 	GMatrix    cd_upper     = transpose(cd_lower);
 	GMatrix    cd_product   = cd_lower * cd_upper;
@@ -659,8 +659,8 @@ void TestGSymMatrix::matrix_cholesky(void)
     test_value(res, 0.0, 1.0e-15, "Test cholesky_decompose() method");
 
     // Test compressed Cholesky decomposition
-    GSymMatrix test_zero         = set_matrix_zero();
-	GSymMatrix cd_zero           = cholesky_decompose(test_zero);
+    GMatrixSymmetric test_zero         = set_matrix_zero();
+	GMatrixSymmetric cd_zero           = cholesky_decompose(test_zero);
 	GMatrix    cd_zero_lower     = cd_zero.extract_lower_triangle();
 	GMatrix    cd_zero_upper     = transpose(cd_zero_lower);
 	GMatrix    cd_zero_product   = cd_zero_lower * cd_zero_upper;
@@ -669,7 +669,7 @@ void TestGSymMatrix::matrix_cholesky(void)
     test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_decompose() method");
 
 	// Test Cholesky inplace decomposition
-	GSymMatrix test = m_test;
+	GMatrixSymmetric test = m_test;
     test.cholesky_decompose();
 	GMatrix cd_lower2 = test.extract_lower_triangle();
     test_assert((cd_lower2 == cd_lower), "Test inplace cholesky_decompose() method");
@@ -751,9 +751,9 @@ void TestGSymMatrix::matrix_cholesky(void)
     test_value(res, 0.0, 1.0e-15, "Test compressed cholesky_solver() method");
 
 	// Test Cholesky inverter
-	GSymMatrix unit(g_rows,g_cols);
+	GMatrixSymmetric unit(g_rows,g_cols);
 	unit(0,0) = unit(1,1) = unit(2,2) = 1.0;
-	GSymMatrix test_inv = m_test;
+	GMatrixSymmetric test_inv = m_test;
 	test_inv.cholesky_invert();
     GMatrix ci_product   = m_test * test_inv;
     GMatrix ci_residuals = ci_product - unit;
@@ -761,9 +761,9 @@ void TestGSymMatrix::matrix_cholesky(void)
     test_value(res, 0.0, 1.0e-15, "Test cholesky_invert method");
 
 	// Test Cholesky inverter for compressed matrix
-	unit = GSymMatrix(4,4);
+	unit = GMatrixSymmetric(4,4);
 	unit(0,0) = unit(1,1) = unit(3,3) = 1.0;
-	GSymMatrix test_zero_inv = test_zero;
+	GMatrixSymmetric test_zero_inv = test_zero;
 	test_zero_inv.cholesky_invert();
     GMatrix ciz_product   = test_zero * test_zero_inv;
     GMatrix ciz_residuals = ciz_product - unit;
@@ -778,11 +778,11 @@ void TestGSymMatrix::matrix_cholesky(void)
 /***************************************************************************
  * @brief Test matrix printing
  ***************************************************************************/
-void TestGSymMatrix::matrix_print(void)
+void TestGMatrixSymmetric::matrix_print(void)
 {
     // Set reference
     std::string reference;
-    reference.append("=== GSymMatrix ===\n");
+    reference.append("=== GMatrixSymmetric ===\n");
     reference.append(" Number of rows ............: 3\n");
     reference.append(" Number of columns .........: 3\n");
     reference.append(" Number of elements ........: 6\n");
@@ -807,13 +807,13 @@ void TestGSymMatrix::matrix_print(void)
 int main(void)
 {
     // Allocate test suit container
-    GTestSuites testsuites("GSymMatrix class testing");
+    GTestSuites testsuites("GMatrixSymmetric class testing");
 
     // Initially assume that we pass all tests
     bool success = true;
 
     // Create a test suite
-    TestGSymMatrix test;
+    TestGMatrixSymmetric test;
 
     // Append test suite to the container
     testsuites.append(test);
@@ -822,7 +822,7 @@ int main(void)
     success = testsuites.run();
 
     // Save test report
-    testsuites.save("reports/GSymMatrix.xml");
+    testsuites.save("reports/GMatrixSymmetric.xml");
 
     // Return success status
     return (success ? 0 : 1);

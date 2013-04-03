@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_GSparseMatrix.hpp  -  Test sparse matrix class          *
+ *             test_GMatrixSparse.hpp - Test sparse matrix class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,20 +19,20 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GSparseMatrix.hpp
+ * @file test_GMatrixSparse.hpp
  * @brief Definition of unit tests for sparse matrices
  * @author Juergen Knoedlseder
  */
 
-#ifndef TEST_GSPARSEMATRIX_HPP
-#define TEST_GSPARSEMATRIX_HPP
+#ifndef TEST_GMATRIXSPARSE_HPP
+#define TEST_GMATRIXSPARSE_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 
 
 /***********************************************************************//**
- * @class TestGSparseMatrix
+ * @class TestGMatrixSparse
  *
  * @brief Test suite for sparse matrix class testing
  *
@@ -40,12 +40,12 @@
  * that match logically are gathered in a number of class methods, and the
  * class methods are executed when running the test.
  ***************************************************************************/
-class TestGSparseMatrix : public GTestSuite {
+class TestGMatrixSparse : public GTestSuite {
 
 public:
     // Constructors and destructors
-    TestGSparseMatrix(void) : GTestSuite() {}
-    virtual ~TestGSparseMatrix(void) {}
+    TestGMatrixSparse(void) : GTestSuite() {}
+    virtual ~TestGMatrixSparse(void) {}
 
     // Methods
     virtual void set(void);
@@ -61,24 +61,24 @@ public:
 
 private:
     // Private methods
-    GSparseMatrix set_matrix(void) const;
-    //GSparseMatrix set_matrix_zero(void) const;
+    GMatrixSparse set_matrix(void) const;
+    //GMatrixSparse set_matrix_zero(void) const;
     GVector       set_vector(void) const;
-    bool          check_matrix(const GSparseMatrix& matrix,
-                               const double&     scale = 1.0,
-                               const double&     offset = 0.0) const;
-    bool          check_matrix_trans(const GSparseMatrix& matrix,
-                                     const double&  scale,
-                                     const double&  offset) const;
-    bool          check_matrix_lt(const GSparseMatrix& matrix,
-                                  const GSparseMatrix& ref) const;
-    bool          check_matrix_ut(const GSparseMatrix& matrix,
-                                  const GSparseMatrix& ref) const;
+    bool          check_matrix(const GMatrixSparse& matrix,
+                               const double&        scale = 1.0,
+                               const double&        offset = 0.0) const;
+    bool          check_matrix_trans(const GMatrixSparse& matrix,
+                                     const double&        scale,
+                                     const double&        offset) const;
+    bool          check_matrix_lt(const GMatrixSparse& matrix,
+                                  const GMatrixSparse& ref) const;
+    bool          check_matrix_ut(const GMatrixSparse& matrix,
+                                  const GMatrixSparse& ref) const;
     
     // Private members;
-    GSparseMatrix m_test;    //!< Test matrix
-    GSparseMatrix m_bigger;  //!< Bigger test matrix (for collisions)
+    GMatrixSparse m_test;    //!< Test matrix
+    GMatrixSparse m_bigger;  //!< Bigger test matrix (for collisions)
     GVector       v_test;    //!< Test vector
 };
 
-#endif /* TEST_GSPARSEMATRIX_HPP */
+#endif /* TEST_GMATRIXSPARSE_HPP */

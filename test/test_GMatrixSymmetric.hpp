@@ -1,7 +1,7 @@
 /***************************************************************************
- *          test_GSymMatrix.hpp  -  Test symmetric matrix class            *
+ *          test_GMatrixSymmetric.hpp - Test symmetric matrix class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,20 +19,20 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file test_GSymMatrix.hpp
+ * @file test_GMatrixSymmetric.hpp
  * @brief Definition of unit tests for symmetric matrices
  * @author Juergen Knoedlseder
  */
 
-#ifndef TEST_GSYMMATRIX_HPP
-#define TEST_GSYMMATRIX_HPP
+#ifndef TEST_GMATRIXSYMMETRIC_HPP
+#define TEST_GMATRIXSYMMETRIC_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
 
 
 /***********************************************************************//**
- * @class TestGSymMatrix
+ * @class TestGMatrixSymmetric
  *
  * @brief Test suite for symmetric matrix class testing
  *
@@ -40,12 +40,12 @@
  * that match logically are gathered in a number of class methods, and the
  * class methods are executed when running the test.
  ***************************************************************************/
-class TestGSymMatrix : public GTestSuite {
+class TestGMatrixSymmetric : public GTestSuite {
 
 public:
     // Constructors and destructors
-    TestGSymMatrix(void) : GTestSuite() {}
-    virtual ~TestGSymMatrix(void) {}
+    TestGMatrixSymmetric(void) : GTestSuite() {}
+    virtual ~TestGMatrixSymmetric(void) {}
 
     // Methods
     virtual void set(void);
@@ -61,26 +61,26 @@ public:
 
 private:
     // Private methods
-    GSymMatrix set_matrix(void) const;
-    GSymMatrix set_matrix_zero(void) const;
-    GVector    set_vector(void) const;
-    bool       check_matrix(const GSymMatrix& matrix,
-                            const double&     scale = 1.0,
-                            const double&     offset = 0.0) const;
-    bool       check_matrix(const GMatrix& matrix,
-                            const double&  scale = 1.0,
-                            const double&  offset = 0.0) const;
-    bool       check_matrix_lt(const GMatrix& matrix,
-                               const double&  scale,
-                               const double&  offset) const;
-    bool       check_matrix_ut(const GMatrix& matrix,
-                               const double&  scale,
-                               const double&  offset) const;
+    GMatrixSymmetric set_matrix(void) const;
+    GMatrixSymmetric set_matrix_zero(void) const;
+    GVector          set_vector(void) const;
+    bool             check_matrix(const GMatrixSymmetric& matrix,
+                                  const double&     scale = 1.0,
+                                  const double&     offset = 0.0) const;
+    bool             check_matrix(const GMatrix& matrix,
+                                  const double&  scale = 1.0,
+                                  const double&  offset = 0.0) const;
+    bool             check_matrix_lt(const GMatrix& matrix,
+                                     const double&  scale,
+                                     const double&  offset) const;
+    bool             check_matrix_ut(const GMatrix& matrix,
+                                     const double&  scale,
+                                     const double&  offset) const;
     
     // Private members;
-    GSymMatrix m_test;    //!< Test matrix
-    GSymMatrix m_bigger;  //!< Bigger test matrix (for collisions)
-    GVector    v_test;    //!< Test vector
+    GMatrixSymmetric m_test;    //!< Test matrix
+    GMatrixSymmetric m_bigger;  //!< Bigger test matrix (for collisions)
+    GVector          v_test;    //!< Test vector
 };
 
-#endif /* TEST_GSYMMATRIX_HPP */
+#endif /* TEST_GMATRIXSYMMETRIC_HPP */
