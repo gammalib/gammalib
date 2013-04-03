@@ -65,8 +65,8 @@ INCLUDES = -I$(top_srcdir)/include \
 check_PROGRAMS = test_GSupport \
                  test_GVector \
                  test_GMatrix \
-                 test_GSymMatrix \
-                 test_GSparseMatrix \
+                 test_GMatrixSparse \
+                 test_GMatrixSymmetric \
                  test_GNumerics \
                  test_GFits \
                  test_GXml \
@@ -86,8 +86,8 @@ TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNS
 TESTS = test_GSupport \
         test_GVector \
         test_GMatrix \
-        test_GSymMatrix \
-        test_GSparseMatrix \
+        test_GMatrixSparse \
+        test_GMatrixSymmetric \
         test_GNumerics \
         test_GFits \
         test_GXml \
@@ -116,15 +116,15 @@ test_GMatrix_LDFLAGS = @LDFLAGS@
 test_GMatrix_CPPFLAGS = @CPPFLAGS@
 test_GMatrix_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GSymMatrix_SOURCES = test_GSymMatrix.cpp
-test_GSymMatrix_LDFLAGS = @LDFLAGS@
-test_GSymMatrix_CPPFLAGS = @CPPFLAGS@
-test_GSymMatrix_LDADD = $(top_srcdir)/src/libgamma.la
+test_GMatrixSparse_SOURCES = test_GMatrixSparse.cpp
+test_GMatrixSparse_LDFLAGS = @LDFLAGS@
+test_GMatrixSparse_CPPFLAGS = @CPPFLAGS@
+test_GMatrixSparse_LDADD = $(top_srcdir)/src/libgamma.la
 #
-test_GSparseMatrix_SOURCES = test_GSparseMatrix.cpp
-test_GSparseMatrix_LDFLAGS = @LDFLAGS@
-test_GSparseMatrix_CPPFLAGS = @CPPFLAGS@
-test_GSparseMatrix_LDADD = $(top_srcdir)/src/libgamma.la
+test_GMatrixSymmetric_SOURCES = test_GMatrixSymmetric.cpp
+test_GMatrixSymmetric_LDFLAGS = @LDFLAGS@
+test_GMatrixSymmetric_CPPFLAGS = @CPPFLAGS@
+test_GMatrixSymmetric_LDADD = $(top_srcdir)/src/libgamma.la
 #
 test_GNumerics_SOURCES = test_GNumerics.cpp
 test_GNumerics_LDFLAGS = @LDFLAGS@
