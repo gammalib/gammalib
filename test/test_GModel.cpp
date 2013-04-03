@@ -1964,7 +1964,7 @@ void TestGModel::test_model_registry(void)
         int num = registry.size();
         for (int i = 0; i < num; ++i) {
             GModel* ptr = registry.alloc(registry.name(i));
-            test_assert(ptr != NULL, "Model pointer for \""+ \
+            test_assert(ptr != NULL, "Model pointer for \"" +
                                      registry.name(i)+"\" is NULL");
             if (ptr != NULL) {
             
