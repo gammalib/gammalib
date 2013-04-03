@@ -201,7 +201,7 @@ double GModelSpectralExpPlaw::prefactor(void) const
 /***********************************************************************//**
  * @brief Set pre factor 
  *
- * @param[in] norm Pre factor (ph/cm2/s/MeV).
+ * @param[in] prefactor Pre factor (ph/cm2/s/MeV).
  *
  * Sets the pre factor.
  ***************************************************************************/
