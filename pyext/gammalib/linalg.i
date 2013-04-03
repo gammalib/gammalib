@@ -48,5 +48,5 @@
 %include "GVector.i"
 %include "GMatrixBase.i"
 %include "GMatrix.i"
-%include "GSymMatrix.i"
-%include "GSparseMatrix.i"
+%include "GMatrixSparse.i"
+%include "GMatrixSymmetric.i"

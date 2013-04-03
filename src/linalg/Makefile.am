@@ -9,8 +9,8 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = GVector.cpp \
           GMatrixBase.cpp \
           GMatrix.cpp \
-          GSymMatrix.cpp \
-          GSparseMatrix.cpp \
+          GMatrixSparse.cpp \
+          GMatrixSymmetric.cpp \
           GSparseSymbolic.cpp \
           GSparseNumeric.cpp \
           GException_linalg.cpp

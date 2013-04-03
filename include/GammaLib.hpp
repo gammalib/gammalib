@@ -46,12 +46,14 @@
 #include "GUrlFile.hpp"
 #include "GUrlString.hpp"
 
-/* __ Numerics module ____________________________________________________ */
+/* __ Linear algebra module ______________________________________________ */
 #include "GVector.hpp"
 #include "GMatrixBase.hpp"
 #include "GMatrix.hpp"
-#include "GSymMatrix.hpp"
-#include "GSparseMatrix.hpp"
+#include "GMatrixSparse.hpp"
+#include "GMatrixSymmetric.hpp"
+
+/* __ Numerics module ____________________________________________________ */
 #include "GIntegral.hpp"
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
