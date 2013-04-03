@@ -261,8 +261,10 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                   << m_lambda << std::endl;
         #endif
         #if defined(G_DEBUG_SHOW_GRAD_COVAR)
-        *m_logger << *fct.gradient() << std::endl;
-        *m_logger << *fct.covar() << std::endl;
+        if (m_logger != NULL) {
+            *m_logger << *fct.gradient() << std::endl;
+            *m_logger << *fct.covar() << std::endl;
+        }
         #endif
 
         // Initialise iteration flags
@@ -314,8 +316,10 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                       << ", delta=" << delta << std::endl;
             #endif
             #if defined(G_DEBUG_SHOW_GRAD_COVAR)
-            *m_logger << *fct.gradient() << std::endl;
-            *m_logger << *fct.covar() << std::endl;
+            if (m_logger != NULL) {
+                *m_logger << *fct.gradient() << std::endl;
+                *m_logger << *fct.covar() << std::endl;
+            }
             #endif
 
             // Reset lambda increment if we had success
