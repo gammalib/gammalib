@@ -67,14 +67,14 @@ examples/python/*.html
 test/test_GApplication
 test/test_GFits
 test/test_GMatrix
+test/test_GMatrixSparse
+test/test_GMatrixSymmetric
 test/test_GModel
 test/test_GNumerics
 test/test_GObservation
 test/test_GOptimizer
 test/test_GSky
-test/test_GSparseMatrix
 test/test_GSupport
-test/test_GSymMatrix
 test/test_GVector
 test/test_GXml
 test/test_GVO
