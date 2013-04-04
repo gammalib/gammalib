@@ -457,7 +457,8 @@ GMatrixSparse abs(const GMatrixSparse& matrix)
  * @return Cholesky decomposition of matrix.
  ***************************************************************************/
 inline
-GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix, bool compress)
+GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix,
+                                 bool compress = true)
 {
     GMatrixSparse result = matrix;
     result.cholesky_decompose(compress);
@@ -473,7 +474,8 @@ GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix, bool compress)
  * @return Inverse of matrix.
  ***************************************************************************/
 inline
-GMatrixSparse cholesky_invert(const GMatrixSparse& matrix, bool compress)
+GMatrixSparse cholesky_invert(const GMatrixSparse& matrix,
+                              bool compress = true)
 {
     GMatrixSparse result = matrix;
     result.cholesky_invert(compress);

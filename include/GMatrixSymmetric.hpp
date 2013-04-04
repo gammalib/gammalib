@@ -334,7 +334,8 @@ GMatrixSymmetric abs(const GMatrixSymmetric& matrix)
  * @return Cholesky decomposition of matrix.
  ***************************************************************************/
 inline
-GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix, bool compress)
+GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix,
+                                    bool compress = true)
 {
     GMatrixSymmetric result = matrix;
     result.cholesky_decompose(compress);
@@ -350,7 +351,8 @@ GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix, bool compres
  * @return Inverse of matrix.
  ***************************************************************************/
 inline
-GMatrixSymmetric cholesky_invert(const GMatrixSymmetric& matrix, bool compress)
+GMatrixSymmetric cholesky_invert(const GMatrixSymmetric& matrix,
+                                 bool compress = true)
 {
     GMatrixSymmetric result = matrix;
     result.cholesky_invert(compress);
