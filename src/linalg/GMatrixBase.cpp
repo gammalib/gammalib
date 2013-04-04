@@ -355,7 +355,7 @@ void GMatrixBase::select_non_zero(void)
 
 
 /***********************************************************************//**
- * @brief Multiply matrix elements with scalar
+ * @brief Scale all matrix elements with a scalar
  *
  * @param[in] scalar Scalar.
  *
@@ -364,7 +364,7 @@ void GMatrixBase::select_non_zero(void)
  * - the multiplier is +/-1, then do nothing or negate,
  * - in any other case, multiply by multiplier.
  ***************************************************************************/
-void GMatrixBase::multiplication(const double& scalar)
+void GMatrixBase::scale_elements(const double& scalar)
 {
     // Case 1: If multiplicator is 0 then set entire matrix to 0
     if (scalar == 0.0) {

@@ -90,7 +90,7 @@ protected:
     void        copy_members(const GMatrixBase& matrix);
     void        free_members(void);
     void        select_non_zero(void);
-    void        multiplication(const double& scalar);
+    void        scale_elements(const double& scalar);
     void        set_all_elements(const double& value);
     double      get_min_element(void) const;
     double      get_max_element(void) const;
