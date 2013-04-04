@@ -1299,26 +1299,6 @@ void GMatrixSymmetric::set_inx(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return matrix of absolute values
- *
- * @param[in] matrix Matrix.
- ***************************************************************************/
-GMatrixSymmetric abs(const GMatrixSymmetric& matrix)
-{
-    // Define result matrix
-    GMatrixSymmetric result = matrix;
-
-    // Convert all elements to absolute values
-    for (int i = 0; i < result.m_elements; ++i) {
-        result.m_data[i] = std::abs(result.m_data[i]);
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Binary matrix multiplication operator
  *
  * @param[in] matrix Matrix to be multiplied.

@@ -115,19 +115,6 @@ class GMatrixSparse : public GMatrixBase {
     friend class GSparseSymbolic;
     friend class GSparseNumeric;
 
-    // Binary operator friends
-    friend GMatrixSparse operator*(const double& a,  const GMatrixSparse& b);
-    friend GMatrixSparse operator*(const GMatrixSparse& a, const double& b);
-    friend GMatrixSparse operator/(const GMatrixSparse& a, const double& b);
-
-    // Friend functions
-    friend GMatrixSparse transpose(const GMatrixSparse& matrix);
-    friend GMatrixSparse abs(const GMatrixSparse& matrix);
-    friend GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix,
-                                            bool compress = true);
-    friend GMatrixSparse cholesky_invert(const GMatrixSparse& matrix,
-                                         bool compress = true);
-
     // Some friend functions that we should not expose ... but I don't
     // know what to do with them as they are also needed by GSparseSymbolic,
     // yet they have to access low-level stuff from the matrix class, hence
@@ -247,10 +234,30 @@ private:
 };
 
 
-/***************************************************************************
- *              Inline members that override base class members            *
+/***********************************************************************//**
+ * @brief Set memory block size
+ *
+ * @param[in] block Memory block size.
+ *
+ * Sets the size of the memory block that will be allocated at once.
  ***************************************************************************/
-// Binary matrix addition
+inline
+void GMatrixSparse::set_mem_block(const int& block)
+{
+    m_mem_block = (block > 0) ? block : 1;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Binary matrix addition
+ *
+ * @param[in] matrix Matrix.
+ * @return Result of matrix addition.
+ *
+ * Returns the sum of two matrices. The method makes use of the unary
+ * addition operator.
+ ***************************************************************************/
 inline
 GMatrixSparse GMatrixSparse::operator+(const GMatrixSparse& matrix) const
 {
@@ -259,7 +266,16 @@ GMatrixSparse GMatrixSparse::operator+(const GMatrixSparse& matrix) const
     return result;
 }
 
-// Binary matrix subtraction
+
+/***********************************************************************//**
+ * @brief Binary matrix subtraction
+ *
+ * @param[in] matrix Matrix.
+ * @return Result of matrix subtraction.
+ *
+ * Returns the difference between two matrices. The method makes use of the
+ * unary subtraction operator.
+ ***************************************************************************/
 inline
 GMatrixSparse GMatrixSparse::operator-(const GMatrixSparse& matrix) const
 {
@@ -268,7 +284,16 @@ GMatrixSparse GMatrixSparse::operator-(const GMatrixSparse& matrix) const
     return result;
 }
 
-// Binary matrix multiplication
+
+/***********************************************************************//**
+ * @brief Binary matrix multiplication
+ *
+ * @param[in] matrix Matrix.
+ * @return Result of matrix multiplication.
+ *
+ * Returns the product of two matrices. The method makes use of the unary
+ * multiplication operator.
+ ***************************************************************************/
 inline
 GMatrixSparse GMatrixSparse::operator*(const GMatrixSparse& matrix) const
 {
@@ -277,26 +302,47 @@ GMatrixSparse GMatrixSparse::operator*(const GMatrixSparse& matrix) const
     return result;
 }
 
-// Matrix scaling
+
+/***********************************************************************//**
+ * @brief Scale matrix elements
+ *
+ * @param[in] scalar Scale factor.
+ * @return Matrix with elements multiplied by @p scalar.
+ *
+ * Returns a matrix where all elements have been multiplied by the specified
+ * @p scalar value.
+ ***************************************************************************/
 inline
 GMatrixSparse& GMatrixSparse::operator*=(const double& scalar)
 {
     fill_pending();
-    multiplication(scalar);
+    scale_elements(scalar);
     return *this;
 }
 
-// Matrix scalar division
+
+/***********************************************************************//**
+ * @brief Divide matrix elements
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with elements divided by @p scalar.
+ *
+ * Returns a matrix where all elements have been divided by the specified
+ * @p scalar value.
+ ***************************************************************************/
 inline
 GMatrixSparse& GMatrixSparse::operator/=(const double& scalar)
 {
-    double inverse = 1.0/scalar;
-    fill_pending();
-    multiplication(inverse);
+    *this *= 1.0/scalar;
     return *this;
 }
 
-// Negation
+
+/***********************************************************************//**
+ * @brief Negate matrix elements
+ *
+ * @return Matrix with negated elements.
+ ***************************************************************************/
 inline
 GMatrixSparse GMatrixSparse::operator-(void) const
 {
@@ -306,40 +352,63 @@ GMatrixSparse GMatrixSparse::operator-(void) const
 }
 
 
-/***************************************************************************
- *                               Inline friends                            *
+/***********************************************************************//**
+ * @brief Multiply matrix by scalar
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] scalar Scalar.
+ * @return Matrix divided by @p scalar.
  ***************************************************************************/
-// Binary matrix scaling (matrix is left operand)
 inline
-GMatrixSparse operator*(const GMatrixSparse& a, const double& b)
+GMatrixSparse operator*(const GMatrixSparse& matrix, const double& scalar)
 {
-    GMatrixSparse result = a;
-    result.fill_pending();
-    result *= b;
+    GMatrixSparse result = matrix;
+    //result.fill_pending();
+    result *= scalar;
     return result;
 }
 
-// Binary matrix scaling (matrix is right operand)
+
+/***********************************************************************//**
+ * @brief Multiply matrix by scalar
+ *
+ * @param[in] scalar Scalar.
+ * @param[in] matrix Matrix.
+ * @return Matrix divided by @p scalar.
+ ***************************************************************************/
 inline
-GMatrixSparse operator*(const double& a, const GMatrixSparse& b)
+GMatrixSparse operator*(const double& scalar, const GMatrixSparse& matrix)
 {
-    GMatrixSparse result = b;
-    result.fill_pending();
-    result *= a;
+    GMatrixSparse result = matrix;
+    //result.fill_pending();
+    result *= scalar;
     return result;
 }
 
-// Binary matrix division (matrix is left operand)
+
+/***********************************************************************//**
+ * @brief Divide matrix by scalar
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] scalar Scalar.
+ * @return Matrix divided by @p scalar.
+ ***************************************************************************/
 inline
-GMatrixSparse operator/(const GMatrixSparse& a, const double& b)
+GMatrixSparse operator/(const GMatrixSparse& matrix, const double& scalar)
 {
-    GMatrixSparse result = a;
-    result.fill_pending();
-    result /= b;
+    GMatrixSparse result = matrix;
+    //result.fill_pending();
+    result /= scalar;
     return result;
 }
 
-// Matrix transpose function
+
+/***********************************************************************//**
+ * @brief Return transpose of matrix
+ *
+ * @param[in] matrix Matrix.
+ * @return Transpose of matrix.
+ ***************************************************************************/
 inline
 GMatrixSparse transpose(const GMatrixSparse& matrix)
 {
@@ -348,15 +417,29 @@ GMatrixSparse transpose(const GMatrixSparse& matrix)
     return result;
 }
 
-// Set memory block size
-inline
-void GMatrixSparse::set_mem_block(const int& block)
+
+/***********************************************************************//**
+ * @brief Return matrix with absolute values of all elements
+ *
+ * @param[in] matrix Matrix.
+ * @return Matrix with elements being the absolute elements of the input
+ *         matrix.
+ ***************************************************************************/
+GMatrixSparse abs(const GMatrixSparse& matrix)
 {
-    m_mem_block = (block > 0) ? block : 1;
-    return;
+    GMatrixSparse result = matrix;
+    result.abs();
+    return result;
 }
 
-// Cholesky decomposition
+
+/***********************************************************************//**
+ * @brief Return Cholesky decomposition of matrix
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] compress Use matrix compression (defaults to true).
+ * @return Cholesky decomposition of matrix.
+ ***************************************************************************/
 inline
 GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix, bool compress)
 {
@@ -365,7 +448,14 @@ GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix, bool compress)
     return result;
 }
 
-// Matrix inversion using Cholesky decomposition
+
+/***********************************************************************//**
+ * @brief Return inverse matrix using Cholesky decomposition
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] compress Use matrix compression (defaults to true).
+ * @return Inverse of matrix.
+ ***************************************************************************/
 inline
 GMatrixSparse cholesky_invert(const GMatrixSparse& matrix, bool compress)
 {

@@ -176,7 +176,7 @@ GMatrix GMatrix::operator*(const GMatrix& matrix) const
 inline
 GMatrix& GMatrix::operator*=(const double& scalar)
 {
-    multiplication(scalar);
+    scale_elements(scalar);
     return *this;
 }
 
@@ -194,8 +194,6 @@ inline
 GMatrix& GMatrix::operator/=(const double& scalar)
 {
     *this *= 1.0/scalar;
-    //double inverse = 1.0/scalar;
-    //multiplication(inverse);
     return *this;
 }
 

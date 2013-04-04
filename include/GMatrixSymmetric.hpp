@@ -47,17 +47,6 @@ class GMatrixSparse;
  ***************************************************************************/
 class GMatrixSymmetric : public GMatrixBase {
 
-    // Binary operator friends
-    friend GMatrixSymmetric operator*(const double& a,  const GMatrixSymmetric& b);
-    friend GMatrixSymmetric operator*(const GMatrixSymmetric& a, const double& b);
-    friend GMatrixSymmetric operator/(const GMatrixSymmetric& a, const double& b);
-
-    // Friend functions
-    friend GMatrixSymmetric transpose(const GMatrixSymmetric& matrix);
-    friend GMatrixSymmetric abs(const GMatrixSymmetric& matrix);
-    friend GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix, bool compress = true);
-    friend GMatrixSymmetric cholesky_invert(const GMatrixSymmetric& matrix, bool compress = true);
-
 public:
     // Constructors and destructors
     GMatrixSymmetric(void);
@@ -161,10 +150,15 @@ double GMatrixSymmetric::max(void) const
 }
 
 
-/***************************************************************************
- *                            Inline operators                             *
+/***********************************************************************//**
+ * @brief Binary matrix addition
+ *
+ * @param[in] matrix Matrix.
+ * @return Result of matrix addition.
+ *
+ * Returns the sum of two matrices. The method makes use of the unary
+ * addition operator.
  ***************************************************************************/
-// Binary matrix addition
 inline
 GMatrixSymmetric GMatrixSymmetric::operator+(const GMatrixSymmetric& matrix) const
 {
@@ -173,7 +167,16 @@ GMatrixSymmetric GMatrixSymmetric::operator+(const GMatrixSymmetric& matrix) con
     return result;
 }
 
-// Binary matrix subtraction
+
+/***********************************************************************//**
+ * @brief Binary matrix subtraction
+ *
+ * @param[in] matrix Matrix.
+ * @return Result of matrix subtraction.
+ *
+ * Returns the difference between two matrices. The method makes use of the
+ * unary subtraction operator.
+ ***************************************************************************/
 inline
 GMatrixSymmetric GMatrixSymmetric::operator-(const GMatrixSymmetric& matrix) const
 {
@@ -182,24 +185,46 @@ GMatrixSymmetric GMatrixSymmetric::operator-(const GMatrixSymmetric& matrix) con
     return result;
 }
 
-// Matrix scaling
+
+/***********************************************************************//**
+ * @brief Scale matrix elements
+ *
+ * @param[in] scalar Scale factor.
+ * @return Matrix with elements multiplied by @p scalar.
+ *
+ * Returns a matrix where all elements have been multiplied by the specified
+ * @p scalar value.
+ ***************************************************************************/
 inline
 GMatrixSymmetric& GMatrixSymmetric::operator*=(const double& scalar)
 {
-    multiplication(scalar);
+    scale_elements(scalar);
     return *this;
 }
 
-// Matrix scalar division
+
+/***********************************************************************//**
+ * @brief Divide matrix elements
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with elements divided by @p scalar.
+ *
+ * Returns a matrix where all elements have been divided by the specified
+ * @p scalar value.
+ ***************************************************************************/
 inline
 GMatrixSymmetric& GMatrixSymmetric::operator/=(const double& scalar)
 {
-    double inverse = 1.0/scalar;
-    multiplication(inverse);
+    *this *= 1.0/scalar;
     return *this;
 }
 
-// Negation
+
+/***********************************************************************//**
+ * @brief Negate matrix elements
+ *
+ * @return Matrix with negated elements.
+ ***************************************************************************/
 inline
 GMatrixSymmetric GMatrixSymmetric::operator-(void) const
 {
@@ -209,44 +234,89 @@ GMatrixSymmetric GMatrixSymmetric::operator-(void) const
 }
 
 
-/***************************************************************************
- *                               Inline friends                            *
+/***********************************************************************//**
+ * @brief Multiply matrix by scalar
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] scalar Scalar.
+ * @return Matrix divided by @p scalar.
  ***************************************************************************/
-// Binary matrix scaling (matrix is left operand)
 inline 
-GMatrixSymmetric operator*(const GMatrixSymmetric& a, const double& b)
+GMatrixSymmetric operator*(const GMatrixSymmetric& matrix, const double& scalar)
 {
-    GMatrixSymmetric result = a;
-    result *= b;
+    GMatrixSymmetric result = matrix;
+    result *= scalar;
     return result;
 }
 
-// Binary matrix scaling (matrix is right operand)
+
+/***********************************************************************//**
+ * @brief Multiply matrix by scalar
+ *
+ * @param[in] scalar Scalar.
+ * @param[in] matrix Matrix.
+ * @return Matrix divided by @p scalar.
+ ***************************************************************************/
 inline
-GMatrixSymmetric operator*(const double& a, const GMatrixSymmetric& b)
+GMatrixSymmetric operator*(const double& scalar, const GMatrixSymmetric& matrix)
 {
-    GMatrixSymmetric result = b;
-    result *= a;
+    GMatrixSymmetric result = matrix;
+    result *= scalar;
     return result;
 }
 
-// Binary matrix division (matrix is left operand)
+
+/***********************************************************************//**
+ * @brief Divide matrix by scalar
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] scalar Scalar.
+ * @return Matrix divided by @p scalar.
+ ***************************************************************************/
 inline 
-GMatrixSymmetric operator/(const GMatrixSymmetric& a, const double& b)
+GMatrixSymmetric operator/(const GMatrixSymmetric& matrix, const double& scalar)
 {
-    GMatrixSymmetric result = a;
-    result /= b;
+    GMatrixSymmetric result = matrix;
+    result /= scalar;
     return result;
 }
 
-// Matrix transpose function
+
+/***********************************************************************//**
+ * @brief Return transpose of matrix
+ *
+ * @param[in] matrix Matrix.
+ * @return Transpose of matrix.
+ ***************************************************************************/
 inline
 GMatrixSymmetric transpose(const GMatrixSymmetric& matrix)
 {
     return matrix;
 }
 
-// Cholesky decomposition
+
+/***********************************************************************//**
+ * @brief Return matrix with absolute values of all elements
+ *
+ * @param[in] matrix Matrix.
+ * @return Matrix with elements being the absolute elements of the input
+ *         matrix.
+ ***************************************************************************/
+GMatrixSymmetric abs(const GMatrixSymmetric& matrix)
+{
+    GMatrixSymmetric result = matrix;
+    result.abs();
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Cholesky decomposition of matrix
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] compress Use matrix compression (defaults to true).
+ * @return Cholesky decomposition of matrix.
+ ***************************************************************************/
 inline
 GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix, bool compress)
 {
@@ -255,7 +325,14 @@ GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix, bool compres
     return result;
 }
 
-// Matrix inversion using Cholesky decomposition
+
+/***********************************************************************//**
+ * @brief Return inverse matrix using Cholesky decomposition
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] compress Use matrix compression (defaults to true).
+ * @return Inverse of matrix.
+ ***************************************************************************/
 inline
 GMatrixSymmetric cholesky_invert(const GMatrixSymmetric& matrix, bool compress)
 {

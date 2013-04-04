@@ -3277,29 +3277,6 @@ void GMatrixSparse::mix_column(const double* src1_data, const int* src1_row,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return matrix with absolute values of all elements
- *
- * @param[in] matrix Matrix for which absolute values are to be returned.
- ***************************************************************************/
-GMatrixSparse abs(const GMatrixSparse& matrix)
-{
-    // Define result matrix
-    GMatrixSparse result = matrix;
-
-    // Fill pending element
-    result.fill_pending();
-
-    // Convert all elements to absolute values
-    for (int i = 0; i < result.m_elements; ++i) {
-        result.m_data[i] = std::abs(result.m_data[i]);
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief cs_symperm
  *
  * @param[in] matrix Matrix.
