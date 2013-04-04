@@ -44,18 +44,10 @@ class GMatrixSparse;
  * This class implements a generic matrix class. This class is a
  * non-spezialized representation of a matrix, and all other matrix storage
  * classes can be converted into that class.
+ *
+ * The matrix stores the elements column-wise.
  ***************************************************************************/
 class GMatrix : public GMatrixBase {
-
-    // Binary operator friends
-    friend GMatrix operator*(const double& a,  const GMatrix& b);
-    friend GMatrix operator*(const GMatrix& a, const double& b);
-    friend GMatrix operator/(const GMatrix& a, const double& b);
-
-    // Friend functions
-    friend GMatrix transpose(const GMatrix& matrix);
-    friend GMatrix invert(const GMatrix& matrix);
-    friend GMatrix abs(const GMatrix& matrix);
 
 public:
     // Constructors and destructors
@@ -173,7 +165,7 @@ GMatrix GMatrix::operator*(const GMatrix& matrix) const
 
 
 /***********************************************************************//**
- * @brief Scales matrix elements
+ * @brief Scale matrix elements
  *
  * @param[in] scalar Scale factor.
  * @return Matrix with elements multiplied by @p scalar.
@@ -188,16 +180,31 @@ GMatrix& GMatrix::operator*=(const double& scalar)
     return *this;
 }
 
-// Matrix scalar division
+
+/***********************************************************************//**
+ * @brief Divide matrix elements
+ *
+ * @param[in] scalar Scalar.
+ * @return Matrix with elements divided by @p scalar.
+ *
+ * Returns a matrix where all elements have been divided by the specified
+ * @p scalar value.
+ ***************************************************************************/
 inline
 GMatrix& GMatrix::operator/=(const double& scalar)
 {
-    double inverse = 1.0/scalar;
-    multiplication(inverse);
+    *this *= 1.0/scalar;
+    //double inverse = 1.0/scalar;
+    //multiplication(inverse);
     return *this;
 }
 
-// Negation
+
+/***********************************************************************//**
+ * @brief Negate matrix elements
+ *
+ * @return Matrix with negated elements.
+ ***************************************************************************/
 inline
 GMatrix GMatrix::operator-(void) const
 {
@@ -207,45 +214,96 @@ GMatrix GMatrix::operator-(void) const
 }
 
 
-/***************************************************************************
- *                              Inline methods                             *
+/***********************************************************************//**
+ * @brief Return minimum matrix element
+ *
+ * @return Minimum element in matrix.
  ***************************************************************************/
-inline double GMatrix::min(void) const { return get_min_element(); }
-inline double GMatrix::max(void) const { return get_max_element(); }
-inline double GMatrix::sum(void) const { return get_element_sum(); }
-
-
-/***************************************************************************
- *                              Inline friends                             *
- ***************************************************************************/
-// Binary matrix scaling (matrix is left operand)
 inline
-GMatrix operator* (const GMatrix& a, const double& b)
+double GMatrix::min(void) const
 {
-    GMatrix result = a;
-    result *= b;
+    return get_min_element();
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum matrix element
+ *
+ * @return Maximum element in matrix.
+ ***************************************************************************/
+inline
+double GMatrix::max(void) const
+{
+    return get_max_element();
+}
+
+
+/***********************************************************************//**
+ * @brief Return matrix element sum
+ *
+ * @return Sum of all matrix elements.
+ ***************************************************************************/
+inline
+double GMatrix::sum(void) const
+{
+    return get_element_sum();
+}
+
+
+/***********************************************************************//**
+ * @brief Multiply matrix by scalar
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] scalar Scalar.
+ * @return Matrix divided by @p scalar.
+ ***************************************************************************/
+inline
+GMatrix operator*(const GMatrix& matrix, const double& scalar)
+{
+    GMatrix result = matrix;
+    result *= scalar;
     return result;
 }
 
-// Binary matrix scaling (matrix is right operand)
+
+/***********************************************************************//**
+ * @brief Multiply matrix by scalar
+ *
+ * @param[in] scalar Scalar.
+ * @param[in] matrix Matrix.
+ * @return Matrix divided by @p scalar.
+ ***************************************************************************/
 inline
-GMatrix operator* (const double& a, const GMatrix& b)
+GMatrix operator*(const double& scalar, const GMatrix& matrix)
 {
-    GMatrix result = b;
-    result *= a;
+    GMatrix result = matrix;
+    result *= scalar;
     return result;
 }
 
-// Binary matrix division (matrix is left operand)
+
+/***********************************************************************//**
+ * @brief Divide matrix by scalar
+ *
+ * @param[in] matrix Matrix.
+ * @param[in] scalar Scalar.
+ * @return Matrix divided by @p scalar.
+ ***************************************************************************/
 inline 
-GMatrix operator/ (const GMatrix& a, const double& b)
+GMatrix operator/(const GMatrix& matrix, const double& scalar)
 {
-    GMatrix result = a;
-    result /= b;
+    GMatrix result = matrix;
+    result /= scalar;
     return result;
 }
 
-// Matrix transpose function
+
+/***********************************************************************//**
+ * @brief Return transpose of matrix
+ *
+ * @param[in] matrix Matrix.
+ * @return Transpose of matrix.
+ ***************************************************************************/
 inline
 GMatrix transpose(const GMatrix& matrix)
 {
@@ -254,12 +312,33 @@ GMatrix transpose(const GMatrix& matrix)
     return result;
 }
 
-// Matrix inversion
+
+/***********************************************************************//**
+ * @brief Return inverse of matrix
+ *
+ * @param[in] matrix Matrix.
+ * @return Inverse of matrix.
+ ***************************************************************************/
 inline
 GMatrix invert(const GMatrix& matrix)
 {
     GMatrix result = matrix;
     result.invert();
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Return matrix with absolute values of all elements
+ *
+ * @param[in] matrix Matrix.
+ * @return Matrix with elements being the absolute elements of the input
+ *         matrix.
+ ***************************************************************************/
+GMatrix abs(const GMatrix& matrix)
+{
+    GMatrix result = matrix;
+    result.abs();
     return result;
 }
 
