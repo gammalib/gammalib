@@ -202,7 +202,7 @@ inline
 GMatrix GMatrix::operator-(void) const
 {
     GMatrix result = *this;
-    result.negation();
+    result.negate();
     return result;
 }
 

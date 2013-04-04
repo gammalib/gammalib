@@ -1337,17 +1337,20 @@ void GMatrixSparse::invert(void)
 
 
 /***********************************************************************//**
- * @brief Negate matrix
+ * @brief Negate all matrix elements
  *
- * @exception GException::feature_not_implemented
- *            Feature not yet implemented.
- *
- * @todo Needs to be implemented.
+ * Negates all matrix elements.
  ***************************************************************************/
 void GMatrixSparse::negate(void)
 {
-    // Throw exception
-    throw GException::feature_not_implemented(G_INVERT);
+    // Fill pending element
+    fill_pending();
+
+    // Negate all matrix elements
+    double* ptr = m_data;
+    for (int i = 0; i < m_elements; ++i, ++ptr) {
+        *ptr = -(*ptr);
+    }
     
     // Return
     return;
@@ -1364,9 +1367,10 @@ void GMatrixSparse::abs(void)
     // Fill pending element
     fill_pending();
 
-    // Convert all elements to absolute values
-    for (int i = 0; i < m_elements; ++i) {
-        m_data[i] = std::abs(m_data[i]);
+    // Take the absolute value of all matrix elements
+    double* ptr = m_data;
+    for (int i = 0; i < m_elements; ++i, ++ptr) {
+        *ptr = std::abs(*ptr);
     }
     
     // Return

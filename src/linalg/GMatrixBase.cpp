@@ -353,60 +353,6 @@ void GMatrixBase::select_non_zero(void)
 }
 
 
-/***********************************************************************//**
- * @brief Negate matrix elements
- *
- * This method inverts the sign of all matrix elements.
- ***************************************************************************/
-void GMatrixBase::negation(void)
-{
-    // Inverts the sign for all matrix elements
-    for (int i = 0; i < m_elements; ++i) {
-        m_data[i] = -m_data[i];
-    }
-	
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Add matrix elements
- *
- * @param[in] matrix Matrix.
- *
- * Add all matrix elements.
- ***************************************************************************/
-void GMatrixBase::addition(const GMatrixBase& matrix)
-{
-    // Add all elements of matrix
-    for (int i = 0; i < m_elements; ++i) {
-        m_data[i] += matrix.m_data[i];
-    }
-	
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Subtract matrix elements
- *
- * @param[in] matrix Matrix.
- *
- * Subtract all matrix elements.
- ***************************************************************************/
-void GMatrixBase::subtraction(const GMatrixBase& matrix)
-{
-    // Add all elements of matrix
-    for (int i = 0; i < m_elements; ++i) {
-        m_data[i] -= matrix.m_data[i];
-    }
-	
-    // Return
-    return;
-}
-
 
 /***********************************************************************//**
  * @brief Multiply matrix elements with scalar

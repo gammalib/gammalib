@@ -204,7 +204,7 @@ inline
 GMatrixSymmetric GMatrixSymmetric::operator-(void) const
 {
     GMatrixSymmetric result = *this;
-    result.negation();
+    result.negate();
     return result;
 }
 

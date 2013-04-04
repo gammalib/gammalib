@@ -369,8 +369,12 @@ GMatrixSymmetric& GMatrixSymmetric::operator+=(const GMatrixSymmetric& matrix)
                                           matrix.m_rows, matrix.m_cols);
     }
 
-    // Add matrices
-    addition(matrix);
+    // Add all matrix elements
+    const double* src = matrix.m_data;
+    double*       dst = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ += *src++;
+    }
 
     // Return result
     return *this;
@@ -397,8 +401,12 @@ GMatrixSymmetric& GMatrixSymmetric::operator-=(const GMatrixSymmetric& matrix)
                                           matrix.m_rows, matrix.m_cols);
     }
 
-    // Subtract matrices
-    subtraction(matrix);
+    // Subtract all matrix elements
+    const double* src = matrix.m_data;
+    double*       dst = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ -= *src++;
+    }
 
     // Return result
     return *this;
@@ -639,17 +647,17 @@ void GMatrixSymmetric::invert(void)
 
 
 /***********************************************************************//**
- * @brief Negate matrix
+ * @brief Negate all matrix elements
  *
- * @exception GException::feature_not_implemented
- *            Feature not yet implemented.
- *
- * @todo Needs to be implemented.
+ * Negates all matrix elements.
  ***************************************************************************/
 void GMatrixSymmetric::negate(void)
 {
-    // Throw exception
-    throw GException::feature_not_implemented(G_INVERT);
+    // Negate all matrix elements
+    double* ptr = m_data;
+    for (int i = 0; i < m_elements; ++i, ++ptr) {
+        *ptr = -(*ptr);
+    }
     
     // Return
     return;
@@ -663,9 +671,10 @@ void GMatrixSymmetric::negate(void)
  ***************************************************************************/
 void GMatrixSymmetric::abs(void)
 {
-    // Convert all elements to absolute values
-    for (int i = 0; i < m_elements; ++i) {
-        m_data[i] = std::abs(m_data[i]);
+    // Take the absolute value of all matrix elements
+    double* ptr = m_data;
+    for (int i = 0; i < m_elements; ++i, ++ptr) {
+        *ptr = std::abs(*ptr);
     }
     
     // Return

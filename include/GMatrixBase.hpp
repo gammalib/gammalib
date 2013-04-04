@@ -90,9 +90,6 @@ protected:
     void        copy_members(const GMatrixBase& matrix);
     void        free_members(void);
     void        select_non_zero(void);
-    void        negation(void);
-    void        addition(const GMatrixBase& matrix);
-    void        subtraction(const GMatrixBase& matrix);
     void        multiplication(const double& scalar);
     void        set_all_elements(const double& value);
     double      get_min_element(void) const;

@@ -301,8 +301,7 @@ inline
 GMatrixSparse GMatrixSparse::operator-(void) const
 {
     GMatrixSparse result = *this;
-    result.fill_pending();
-    result.negation();
+    result.negate();
     return result;
 }
 

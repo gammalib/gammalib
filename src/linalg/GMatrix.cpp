@@ -350,8 +350,12 @@ GMatrix& GMatrix::operator+=(const GMatrix& matrix)
                                           matrix.m_rows, matrix.m_cols);
     }
 
-    // Add matrices using base class method
-    addition(matrix);
+    // Add all matrix elements
+    const double* src = matrix.m_data;
+    double*       dst = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ += *src++;
+    }
 
     // Return result
     return *this;
@@ -378,8 +382,12 @@ GMatrix& GMatrix::operator-=(const GMatrix& matrix)
                                           matrix.m_rows, matrix.m_cols);
     }
 
-    // Subtract matrices using base class method
-    subtraction(matrix);
+    // Subtract all matrix elements
+    const double* src = matrix.m_data;
+    double*       dst = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ -= *src++;
+    }
 
     // Return result
     return *this;
@@ -752,17 +760,17 @@ void GMatrix::invert(void)
 
 
 /***********************************************************************//**
- * @brief Negate matrix
+ * @brief Negate all matrix elements
  *
- * @exception GException::feature_not_implemented
- *            Feature not yet implemented.
- *
- * @todo Needs to be implemented.
+ * Negates all matrix elements.
  ***************************************************************************/
 void GMatrix::negate(void)
 {
-    // Throw exception
-    throw GException::feature_not_implemented(G_INVERT);
+    // Negate all matrix elements
+    double* ptr = m_data;
+    for (int i = 0; i < m_elements; ++i, ++ptr) {
+        *ptr = -(*ptr);
+    }
     
     // Return
     return;
@@ -770,17 +778,17 @@ void GMatrix::negate(void)
 
 
 /***********************************************************************//**
- * @brief Negate matrix
+ * @brief Take absolute value of matrix elements
  *
- * @exception GException::feature_not_implemented
- *            Feature not yet implemented.
- *
- * @todo Needs to be implemented.
+ * Replaces all elements of the matrix by their absolute values.
  ***************************************************************************/
 void GMatrix::abs(void)
 {
-    // Throw exception
-    throw GException::feature_not_implemented(G_INVERT);
+    // Take the absolute value of all matrix elements
+    double* ptr = m_data;
+    for (int i = 0; i < m_elements; ++i, ++ptr) {
+        *ptr = std::abs(*ptr);
+    }
     
     // Return
     return;
