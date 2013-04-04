@@ -317,6 +317,7 @@ GMatrixSymmetric invert(const GMatrixSymmetric& matrix)
  * @return Matrix with elements being the absolute elements of the input
  *         matrix.
  ***************************************************************************/
+inline
 GMatrixSymmetric abs(const GMatrixSymmetric& matrix)
 {
     GMatrixSymmetric result = matrix;

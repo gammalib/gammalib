@@ -440,6 +440,7 @@ GMatrixSparse invert(const GMatrixSparse& matrix)
  * @return Matrix with elements being the absolute elements of the input
  *         matrix.
  ***************************************************************************/
+inline
 GMatrixSparse abs(const GMatrixSparse& matrix)
 {
     GMatrixSparse result = matrix;

@@ -333,6 +333,7 @@ GMatrix invert(const GMatrix& matrix)
  * @return Matrix with elements being the absolute elements of the input
  *         matrix.
  ***************************************************************************/
+inline
 GMatrix abs(const GMatrix& matrix)
 {
     GMatrix result = matrix;
