@@ -296,6 +296,21 @@ GMatrixSymmetric transpose(const GMatrixSymmetric& matrix)
 
 
 /***********************************************************************//**
+ * @brief Return inverse of matrix
+ *
+ * @param[in] matrix Matrix.
+ * @return Inverse of matrix.
+ ***************************************************************************/
+inline
+GMatrixSymmetric invert(const GMatrixSymmetric& matrix)
+{
+    GMatrixSymmetric result = matrix;
+    result.invert();
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Return matrix with absolute values of all elements
  *
  * @param[in] matrix Matrix.

@@ -419,6 +419,21 @@ GMatrixSparse transpose(const GMatrixSparse& matrix)
 
 
 /***********************************************************************//**
+ * @brief Return inverse of matrix
+ *
+ * @param[in] matrix Matrix.
+ * @return Inverse of matrix.
+ ***************************************************************************/
+inline
+GMatrixSparse invert(const GMatrixSparse& matrix)
+{
+    GMatrixSparse result = matrix;
+    result.invert();
+    return result;
+}
+
+
+/***********************************************************************//**
  * @brief Return matrix with absolute values of all elements
  *
  * @param[in] matrix Matrix.
