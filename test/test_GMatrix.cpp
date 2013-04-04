@@ -1,7 +1,7 @@
 /***************************************************************************
- *            test_GMatrix.cpp  -  Test generic matrix class               *
+ *             test_GMatrix.cpp - Test generic matrix class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -184,7 +184,7 @@ bool TestGMatrix::check_matrix_lt(const GMatrix& matrix,
     
     // Compare all matrix elements
     for (int row = 0; row < ref.rows(); ++row) {
-        for (int col = 0; col < ref.cols(); ++col) {
+        for (int col = 0; col < ref.columns(); ++col) {
             double value = (col <= row) ? ref(row,col) : 0.0;
             if (matrix(row,col) != value) {
                 result = false;
@@ -212,7 +212,7 @@ bool TestGMatrix::check_matrix_ut(const GMatrix& matrix,
     
     // Compare all matrix elements
     for (int row = 0; row < ref.rows(); ++row) {
-        for (int col = 0; col < ref.cols(); ++col) {
+        for (int col = 0; col < ref.columns(); ++col) {
             double value = (col >= row) ? ref(row,col) : 0.0;
             if (matrix(row,col) != value) {
                 result = false;
@@ -390,7 +390,7 @@ void TestGMatrix::matrix_operations(void)
     GMatrix ref3 = test3;
     result = true;
     for (int row = 0; row < test3.rows(); ++row) {
-        for (int col = 0; col < test3.cols(); ++col) {
+        for (int col = 0; col < test3.columns(); ++col) {
             double value = 0.0;
             for (int i = 0; i < g_cols; ++i) {
                 value += g_matrix[i+row*g_cols] * g_matrix[i+col*g_cols];
@@ -408,7 +408,7 @@ void TestGMatrix::matrix_operations(void)
     test_assert(result, "Test matrix multiplication",
                 "Found:\n"+test3.print()+"\nExpected:\n"+ref3.print());
     test_value(test3.rows(), g_rows, "Test number of rows of result matrix");
-    test_value(test3.cols(), g_rows, "Test number of columns of result matrix");
+    test_value(test3.columns(), g_rows, "Test number of columns of result matrix");
 
     // Test incompatible matrix multiplication
     test_try("Test incompatible matrix multiplication");

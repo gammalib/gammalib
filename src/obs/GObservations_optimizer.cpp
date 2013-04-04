@@ -558,7 +558,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
             }
 
             // Add column to matrix
-            covar.add_col(values, inx, ndev, jpar);
+            covar.add_to_column(values, inx, ndev, jpar);
 
         } // endfor: looped over columns
 
@@ -759,7 +759,7 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
                 }
 
                 // Add column to matrix
-                covar.add_col(values, inx, ndev, jpar);
+                covar.add_to_column(values, inx, ndev, jpar);
 
             } // endfor: looped over columns
 
@@ -972,7 +972,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
             }
 
             // Add column to matrix
-            covar.add_col(values, inx, ndev, jpar);
+            covar.add_to_column(values, inx, ndev, jpar);
 
         } // endfor: looped over columns
 

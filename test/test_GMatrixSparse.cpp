@@ -454,7 +454,7 @@ void TestGMatrixSparse::assign_values(void)
             column[i]         = (i+1)*1;
             reference(i,col) += column[i];
         }
-        sparse.add_col(column, col);
+        sparse.add_to_column(col, column);
 	}
 	sparse.stack_destroy();
     test_assert((sparse == reference),
@@ -474,7 +474,7 @@ void TestGMatrixSparse::assign_values(void)
         for (int i = i_min; i < i_max; ++i) {
             column[i]         = (i+1)*1;
         }
-        sparse.add_col(column, col);
+        sparse.add_to_column(col, column);
 	}
 	sparse.stack_destroy();
     test_assert((sparse == reference),
@@ -494,7 +494,7 @@ void TestGMatrixSparse::assign_values(void)
         for (int i = i_min; i < i_max; ++i) {
             column[i]         = (i+1)*1;
         }
-        sparse.add_col(column, col);
+        sparse.add_to_column(col, column);
 	}
 	sparse.stack_destroy();
     test_assert((sparse == reference),
@@ -513,7 +513,7 @@ void TestGMatrixSparse::assign_values(void)
         for (int i = i_min; i < i_max; ++i) {
             column[i]         = (i+1)*1;
         }
-        sparse.add_col(column, col);
+        sparse.add_to_column(col, column);
 	}
 	sparse.stack_destroy();
     test_assert((sparse == reference),
@@ -545,7 +545,7 @@ void TestGMatrixSparse::assign_values(void)
                 reference(i,col) += wrk_data[inx];
                 inx++;
             }
-            sparse.add_col(wrk_data, wrk_row, inx, col);
+            sparse.add_to_column(wrk_data, wrk_row, inx, col);
         }
         sparse.stack_destroy();
         test_assert((sparse == reference),
@@ -567,7 +567,7 @@ void TestGMatrixSparse::assign_values(void)
                 wrk_row[inx]  = i;
                 inx++;
             }
-            sparse.add_col(wrk_data, wrk_row, inx, col);
+            sparse.add_to_column(wrk_data, wrk_row, inx, col);
         }
         sparse.stack_destroy();
         test_assert((sparse == reference),
@@ -589,7 +589,7 @@ void TestGMatrixSparse::assign_values(void)
                 wrk_row[inx]  = i;
                 inx++;
             }
-            sparse.add_col(wrk_data, wrk_row, inx, col);
+            sparse.add_to_column(wrk_data, wrk_row, inx, col);
         }
         sparse.stack_destroy();
         test_assert((sparse == reference),
@@ -610,7 +610,7 @@ void TestGMatrixSparse::assign_values(void)
                 wrk_row[inx]  = i;
                 inx++;
             }
-            sparse.add_col(wrk_data, wrk_row, inx, col);
+            sparse.add_to_column(wrk_data, wrk_row, inx, col);
         }
         sparse.stack_destroy();
         test_assert((sparse == reference),
@@ -730,7 +730,7 @@ void TestGMatrixSparse::matrix_operations(void)
     test_assert(result, "Test matrix multiplication",
                 "Found:\n"+test3.print()+"\nExpected:\n"+ref3.print());
     test_value(test3.rows(), g_rows, "Test number of rows of result matrix");
-    test_value(test3.cols(), g_rows, "Test number of columns of result matrix");
+    test_value(test3.columns(), g_rows, "Test number of columns of result matrix");
 
     // Test incompatible matrix multiplication
     test_try("Test incompatible matrix multiplication");

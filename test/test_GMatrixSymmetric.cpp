@@ -394,7 +394,7 @@ void TestGMatrixSymmetric::matrix_operations(void)
     GMatrixSymmetric ref3 = test3;
     result = true;
     for (int row = 0; row < test3.rows(); ++row) {
-        for (int col = 0; col < test3.cols(); ++col) {
+        for (int col = 0; col < test3.columns(); ++col) {
             double value = 0.0;
             for (int i = 0; i < g_cols; ++i) {
                 value += g_matrix[i+row*g_cols] * g_matrix[i+col*g_cols];
@@ -412,7 +412,7 @@ void TestGMatrixSymmetric::matrix_operations(void)
     test_assert(result, "Test matrix multiplication",
                 "Found:\n"+test3.print()+"\nExpected:\n"+ref3.print());
     test_assert(test3.rows() == g_rows, "Test number of rows of result matrix");
-    test_assert(test3.cols() == g_cols, "Test number of columns of result matrix");
+    test_assert(test3.columns() == g_cols, "Test number of columns of result matrix");
 
     // Test incompatible matrix multiplication
     test_try("Test incompatible matrix multiplication");
