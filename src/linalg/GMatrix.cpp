@@ -497,12 +497,14 @@ GMatrix* GMatrix::clone(void) const
 /***********************************************************************//**
  * @brief Extract row as vector from matrix
  *
- * @param[in] row Row to be extracted (starting from 0).
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @return Vector of matrix row elements (columns() elements).
  *
  * @exception GException::out_of_range
  *            Invalid row index specified.
  *
- * This method extracts a matrix row into a vector.
+ * Extracts one @p row of the matrix into a vector. The vector will contain
+ * columns() elements.
  ***************************************************************************/
 GVector GMatrix::row(const int& row) const
 {
@@ -516,8 +518,10 @@ GVector GMatrix::row(const int& row) const
     // Create result vector
     GVector result(m_cols);
 
-    // Extract row into vector
-    for (int col = 0, i = row; col < m_cols; ++col, i+=m_rows) {
+    // Extract row into vector. Recall that the matrix elements are stored
+    // column wise, hence we have to increment the element counter i by
+    // the number of rows to go into the next matrix column.
+    for (int col = 0, i = row; col < m_cols; ++col, i += m_rows) {
         result[col] = m_data[i];
     }
 
@@ -529,7 +533,17 @@ GVector GMatrix::row(const int& row) const
 /***********************************************************************//**
  * @brief Set row in matrix
  *
- * @todo To be implemented.
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] vector Vector of matrix row elements (columns() elements).
+ *
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Vector does not match the matrix dimensions.
+ *
+ * Sets the elements from a vector as the elements of a matrix row. The
+ * length of the vector must be identical to the number of columns in the
+ * matrix.
  ***************************************************************************/
 void GMatrix::row(const int& row, const GVector& vector)
 {
@@ -539,6 +553,20 @@ void GMatrix::row(const int& row, const GVector& vector)
         throw GException::out_of_range(G_SET_ROW, row, 0, m_rows-1);
     }
     #endif
+
+    // Raise an exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_cols != vector.size()) {
+        throw GException::matrix_vector_mismatch(G_SET_ROW, vector.size(),
+                                                 m_rows, m_cols);
+    }
+
+    // Set row from vector. Recall that the matrix elements are stored
+    // column wise, hence we have to increment the element counter i by
+    // the number of rows to go into the next matrix column.
+    for (int col = 0, i = row; col < m_cols; ++col, i += m_rows) {
+         m_data[i] = vector[col];
+    }
 
     // Return
     return;
@@ -636,7 +664,13 @@ void GMatrix::column(const int& column, const GVector& vector)
 /***********************************************************************//**
  * @brief Add row to matrix elements
  *
- * @todo To be implemented.
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] vector Vector of matrix row elements (columns() elements).
+ *
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Vector does not match the matrix dimensions.
  ***************************************************************************/
 void GMatrix::add_to_row(const int& row, const GVector& vector)
 {
@@ -646,6 +680,20 @@ void GMatrix::add_to_row(const int& row, const GVector& vector)
         throw GException::out_of_range(G_ADD_TO_ROW, row, 0, m_rows-1);
     }
     #endif
+
+    // Raise an exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_cols != vector.size()) {
+        throw GException::matrix_vector_mismatch(G_ADD_TO_ROW, vector.size(),
+                                                 m_rows, m_cols);
+    }
+
+    // Add row from vector. Recall that the matrix elements are stored
+    // column wise, hence we have to increment the element counter i by
+    // the number of rows to go into the next matrix column.
+    for (int col = 0, i = row; col < m_cols; ++col, i += m_rows) {
+         m_data[i] += vector[col];
+    }
 
     // Return
     return;
@@ -919,8 +967,8 @@ void GMatrix::eulerx(const double& angle)
     alloc_members(3,3);
 
     // Compute angles
-    double cosangle = cos(angle * deg2rad);
-    double sinangle = sin(angle * deg2rad);
+    double cosangle = std::cos(angle * deg2rad);
+    double sinangle = std::sin(angle * deg2rad);
 
     // Set matrix elements
     (*this)(0,0) =       1.0;
@@ -955,8 +1003,8 @@ void GMatrix::eulery(const double& angle)
     alloc_members(3,3);
 
     // Compute angles
-    double cosangle = cos(angle * deg2rad);
-    double sinangle = sin(angle * deg2rad);
+    double cosangle = std::cos(angle * deg2rad);
+    double sinangle = std::sin(angle * deg2rad);
 
     // Set matrix elements
     (*this)(0,0) =  cosangle;
@@ -991,8 +1039,8 @@ void GMatrix::eulerz(const double& angle)
     alloc_members(3,3);
 
     // Compute angles
-    double cosangle = cos(angle * deg2rad);
-    double sinangle = sin(angle * deg2rad);
+    double cosangle = std::cos(angle * deg2rad);
+    double sinangle = std::sin(angle * deg2rad);
 
     // Set matrix elements
     (*this)(0,0) =  cosangle;
@@ -1012,6 +1060,8 @@ void GMatrix::eulerz(const double& angle)
 
 /***********************************************************************//**
  * @brief Print matrix
+ *
+ * @return String containing matrix information.
  ***************************************************************************/
 std::string GMatrix::print(void) const
 {
@@ -1129,30 +1179,4 @@ void GMatrix::alloc_members(const int& rows, const int& columns)
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                           Friend functions                              =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Return matrix with absolute values of all elements
- *
- * @param[in] matrix Matrix.
- ***************************************************************************/
-GMatrix abs(const GMatrix& matrix)
-{
-    // Define result matrix
-    GMatrix result = matrix;
-
-    // Convert all elements to absolute values  
-    for (int i = 0; i < result.m_elements; ++i) {
-        result.m_data[i] = std::abs(result.m_data[i]);
-    }
-
-    // Return result
-    return result;
 }
