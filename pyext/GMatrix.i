@@ -45,46 +45,50 @@ class GMatrix : public GMatrixBase {
 public:
     // Constructors and destructors
     GMatrix(void);
-    GMatrix(const int& rows, const int& cols);
+    explicit GMatrix(const int& rows, const int& columns);
     GMatrix(const GMatrix& matrix);
     GMatrix(const GMatrixSymmetric& matrix);
     GMatrix(const GMatrixSparse& matrix);
     virtual ~GMatrix(void);
 
     // Implemented pure virtual base class operators
-    GVector       operator*(const GVector& vector) const;
+    virtual GVector       operator*(const GVector& vector) const;
 
     // Other operators
-    GMatrix       operator+(const GMatrix& matrix) const;
-    GMatrix       operator-(const GMatrix& matrix) const;
-    GMatrix       operator*(const GMatrix& matrix) const;
-    GMatrix       operator-(void) const;
-    GMatrix&      operator+=(const GMatrix& matrix);
-    GMatrix&      operator-=(const GMatrix& matrix);
-    GMatrix&      operator*=(const GMatrix& matrix);
-    GMatrix&      operator*=(const double& scalar);
-    GMatrix&      operator/=(const double& scalar);
+    virtual GMatrix       operator+(const GMatrix& matrix) const;
+    virtual GMatrix       operator-(const GMatrix& matrix) const;
+    virtual GMatrix       operator*(const GMatrix& matrix) const;
+    virtual GMatrix       operator-(void) const;
+    virtual GMatrix&      operator+=(const GMatrix& matrix);
+    virtual GMatrix&      operator-=(const GMatrix& matrix);
+    virtual GMatrix&      operator*=(const GMatrix& matrix);
+    virtual GMatrix&      operator*=(const double& scalar);
+    virtual GMatrix&      operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
-    void        clear(void);
-    GMatrix*    clone(void) const;
-    void        transpose(void);
-    void        invert(void);
-    void        add_col(const GVector& vector, const int& col);
-    void        insert_col(const GVector& vector, const int& col);
-    GVector     extract_row(const int& row) const;
-    GVector     extract_col(const int& col) const;
-    double      fill(void) const;
-    double      min(void) const;
-    double      max(void) const;
-    double      sum(void) const;
+    virtual void        clear(void);
+    virtual GMatrix*    clone(void) const;
+    virtual GVector     row(const int& row) const;
+    virtual void        row(const int& row, const GVector& vector);
+    virtual GVector     column(const int& column) const;
+    virtual void        column(const int& column, const GVector& vector);
+    virtual void        add_to_row(const int& row, const GVector& vector);
+    virtual void        add_to_column(const int& column, const GVector& vector);
+    virtual void        transpose(void);
+    virtual void        invert(void);
+    virtual void        negate(void);
+    virtual void        abs(void);
+    virtual double      fill(void) const;
+    virtual double      min(void) const;
+    virtual double      max(void) const;
+    virtual double      sum(void) const;
 
     // Other methods
-    GMatrix     extract_lower_triangle(void) const;
-    GMatrix     extract_upper_triangle(void) const;
-    void        eulerx(const double& angle);
-    void        eulery(const double& angle);
-    void        eulerz(const double& angle);
+    virtual GMatrix extract_lower_triangle(void) const;
+    virtual GMatrix extract_upper_triangle(void) const;
+    virtual void    eulerx(const double& angle);
+    virtual void    eulery(const double& angle);
+    virtual void    eulerz(const double& angle);
 };
 
 

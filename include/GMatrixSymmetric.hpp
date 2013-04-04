@@ -61,37 +61,41 @@ class GMatrixSymmetric : public GMatrixBase {
 public:
     // Constructors and destructors
     GMatrixSymmetric(void);
-    GMatrixSymmetric(const int& rows, const int& cols);
+    explicit GMatrixSymmetric(const int& rows, const int& columns);
     GMatrixSymmetric(const GMatrix& matrix);
     GMatrixSymmetric(const GMatrixSparse& matrix);
     GMatrixSymmetric(const GMatrixSymmetric& matrix);
     virtual ~GMatrixSymmetric(void);
 
     // Implemented pure virtual base class operators
-    virtual double&       operator()(const int& row, const int& col);
-    virtual const double& operator()(const int& row, const int& col) const;
-    virtual GVector       operator*(const GVector& v) const;
+    virtual double&           operator()(const int& row, const int& column);
+    virtual const double&     operator()(const int& row, const int& column) const;
+    virtual GVector           operator*(const GVector& v) const;
 
     // Other operators
-    virtual GMatrixSymmetric&   operator=(const GMatrixSymmetric& matrix);
-    virtual GMatrixSymmetric    operator+(const GMatrixSymmetric& matrix) const;
-    virtual GMatrixSymmetric    operator-(const GMatrixSymmetric& matrix) const;
-    virtual GMatrix             operator*(const GMatrixSymmetric& matrix) const;
-    virtual GMatrixSymmetric    operator-(void) const;
-    virtual GMatrixSymmetric&   operator+=(const GMatrixSymmetric& matrix);
-    virtual GMatrixSymmetric&   operator-=(const GMatrixSymmetric& matrix);
-    virtual GMatrixSymmetric&   operator*=(const double& scaler);
-    virtual GMatrixSymmetric&   operator/=(const double& scalar);
+    virtual GMatrixSymmetric& operator=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric  operator+(const GMatrixSymmetric& matrix) const;
+    virtual GMatrixSymmetric  operator-(const GMatrixSymmetric& matrix) const;
+    virtual GMatrix           operator*(const GMatrixSymmetric& matrix) const;
+    virtual GMatrixSymmetric  operator-(void) const;
+    virtual GMatrixSymmetric& operator+=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator-=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator*=(const double& scaler);
+    virtual GMatrixSymmetric& operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
     virtual void              clear(void);
     virtual GMatrixSymmetric* clone(void) const;
-    virtual void              transpose(void) { return; }
+    virtual GVector           row(const int& row) const;
+    virtual void              row(const int& row, const GVector& vector);
+    virtual GVector           column(const int& column) const;
+    virtual void              column(const int& column, const GVector& vector);
+    virtual void              add_to_row(const int& row, const GVector& vector);
+    virtual void              add_to_column(const int& column, const GVector& vector);
+    virtual void              transpose(void);
     virtual void              invert(void);
-    virtual void              add_col(const GVector& vector, const int& col);
-    virtual void              insert_col(const GVector& vector, const int& col);
-    virtual GVector           extract_row(const int& row) const;
-    virtual GVector           extract_col(const int& col) const;
+    virtual void              negate(void);
+    virtual void              abs(void);
     virtual double            fill(void) const;
     virtual double            min(void) const;
     virtual double            max(void) const;
@@ -99,24 +103,62 @@ public:
     virtual std::string       print(void) const;
 
     // Other methods
-    virtual GMatrix     extract_lower_triangle(void) const;
-    virtual GMatrix     extract_upper_triangle(void) const;
-    virtual void        cholesky_decompose(bool compress = true);
-    virtual GVector     cholesky_solver(const GVector& vector, bool compress = true);
-    virtual void        cholesky_invert(bool compress = true);
+    virtual GMatrix extract_lower_triangle(void) const;
+    virtual GMatrix extract_upper_triangle(void) const;
+    virtual void    cholesky_decompose(bool compress = true);
+    virtual GVector cholesky_solver(const GVector& vector, bool compress = true);
+    virtual void    cholesky_invert(bool compress = true);
 
 private:
     // Private methods
     void init_members(void);
     void copy_members(const GMatrixSymmetric& matrix);
     void free_members(void);
-    void alloc_members(const int& rows, const int& cols);
+    void alloc_members(const int& rows, const int& columns);
     void set_inx(void);
 
     // Private data area
     int  m_num_inx;          //!< Number of indices in array
     int* m_inx;              //!< Index array of non-zero rows/columns
 };
+
+
+/***********************************************************************//**
+ * @brief Transpose matrix
+ *
+ * Transpose matrix. As the transposed matrix of a symmetric matrix is
+ * identical to the original matrix, this method simply returns without
+ * taking any action.
+ ***************************************************************************/
+inline
+void GMatrixSymmetric::transpose(void)
+{
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum matrix element
+ *
+ * @return Minimum matrix element
+ ***************************************************************************/
+inline
+double GMatrixSymmetric::min(void) const
+{
+    return (get_min_element());
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum matrix element
+ *
+ * @return Maximum matrix element
+ ***************************************************************************/
+inline
+double GMatrixSymmetric::max(void) const
+{
+    return (get_max_element());
+}
 
 
 /***************************************************************************
@@ -165,13 +207,6 @@ GMatrixSymmetric GMatrixSymmetric::operator-(void) const
     result.negation();
     return result;
 }
-
-
-/***************************************************************************
- *                              Inline methods                             *
- ***************************************************************************/
-inline double GMatrixSymmetric::min(void) const { return get_min_element(); }
-inline double GMatrixSymmetric::max(void) const { return get_max_element(); }
 
 
 /***************************************************************************

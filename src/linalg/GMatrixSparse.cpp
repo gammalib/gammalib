@@ -52,21 +52,24 @@
 #include "GSparseNumeric.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                       "GMatrixSparse::operator(int&, int&)"
-#define G_ACCESS2                       "GMatrixSparse::operator(int&, int&)"
+#define G_CONSTRUCTOR        "GMatrixSparse::GMatrixSparse(int&, int&, int&)"
+#define G_ACCESS                        "GMatrixSparse::operator(int&, int&)"
 #define G_OP_MUL_VEC                     "GMatrixSparse::operator*(GVector&)"
 #define G_OP_ADD                  "GMatrixSparse::operator+=(GMatrixSparse&)"
 #define G_OP_SUB                  "GMatrixSparse::operator-=(GMatrixSparse&)"
 #define G_OP_MAT_MUL              "GMatrixSparse::operator*=(GMatrixSparse&)"
+#define G_EXTRACT_ROW                           "GMatrixSymmetric::row(int&)"
+#define G_SET_ROW                     "GMatrixSymmetric::row(int&, GVector&)"
+#define G_EXTRACT_COLUMN                     "GMatrixSymmetric::column(int&)"
+#define G_SET_COLUMN               "GMatrixSymmetric::column(int&, GVector&)"
+#define G_SET_COLUMN2    "GMatrixSymmetric::column(double*, int*, int, int&)"
+#define G_ADD_TO_ROW           "GMatrixSymmetric::add_to_row(int&, GVector&)"
+#define G_ADD_TO_COLUMN     "GMatrixSymmetric::add_to_column(int&, GVector&)"
+#define G_ADD_TO_COLUMN2     "GMatrixSymmetric::add_to_column(double*, int*,"\
+                                                                " int, int&)"
 #define G_INVERT                                "GMatrixSparse::invert(void)"
-#define G_ADD_COL                    "GMatrixSparse::add_col(GVector&, int&)"
-#define G_ADD_COL2         "GMatrixSparse::add_col(double*, int*, int, int&)"
 #define G_CHOL_DECOMP               "GMatrixSparse::cholesky_decompose(bool)"
 #define G_CHOL_SOLVE         "GMatrixSparse::cholesky_solver(GVector&, bool)"
-#define G_EXTRACT_ROW                      "GMatrixSparse::extract_row(int&)"
-#define G_EXTRACT_COL                      "GMatrixSparse::extract_col(int&)"
-#define G_INSERT_COL              "GMatrixSparse::insert_col(GVector&, int&)"
-#define G_INSERT_COL2   "GMatrixSparse::insert_col(double*, int*, int, int&)"
 #define G_STACK_INIT                  "GMatrixSparse::stack_init(int&, int&)"
 #define G_STACK_PUSH  "GMatrixSparse::stack_push_column(double*, int*, int&,"\
                                                                      " int&)"
@@ -123,23 +126,36 @@ GMatrixSparse::GMatrixSparse(void) : GMatrixBase()
 /***********************************************************************//**
  * @brief Matrix constructor
  *
- * @param[in] rows Number of rows.
- * @param[in] cols Number of columns.
+ * @param[in] rows Number of rows [>0].
+ * @param[in] columns Number of columns [>0].
  * @param[in] elements Number of allocated elements (default: 0).
+ *
+ * @exception GException::empty
+ *            Specified number of rows or columns is not valid.
  *
  * This method allocates a sparse matrix object with the specified number
  * of rows and columns. The elements parameter allows to specify how much
  * physical memory should be allocated initially. By default, no memory
  * will be allocated.
  ***************************************************************************/
-GMatrixSparse::GMatrixSparse(const int& rows, const int& cols,
-                             const int& elements) : GMatrixBase()
+GMatrixSparse::GMatrixSparse(const int& rows,
+                             const int& columns,
+                             const int& elements) :
+               GMatrixBase()
 {
-    // Initialise private members for clean destruction
-    init_members();
+    // Continue only if matrix is valid
+    if (rows > 0 && columns > 0) {
 
-    // Allocate matrix memory
-    alloc_members(rows, cols, elements);
+        // Initialise private members for clean destruction
+        init_members();
+
+        // Allocate matrix memory
+        alloc_members(rows, columns, elements);
+
+    }
+    else {
+        throw GException::empty(G_CONSTRUCTOR);
+    }
 
     // Return
     return;
@@ -160,12 +176,12 @@ GMatrixSparse::GMatrixSparse(const GMatrix& matrix) : GMatrixBase()
     init_members();
 
     // Construct matrix
-    alloc_members(matrix.rows(), matrix.cols());
+    alloc_members(matrix.rows(), matrix.columns());
 
     // Fill matrix column by column
-    for (int col = 0; col < matrix.cols(); ++col) {
-        GVector vector = matrix.extract_col(col);
-        this->insert_col(vector, col);
+    for (int col = 0; col < m_cols; ++col) {
+        GVector vector = matrix.column(col);
+        this->column(col, vector);
     }
 
     // Return
@@ -187,12 +203,12 @@ GMatrixSparse::GMatrixSparse(const GMatrixSymmetric& matrix) : GMatrixBase()
     init_members();
 
     // Allocate matrix memory
-    alloc_members(matrix.rows(), matrix.cols());
+    alloc_members(matrix.rows(), matrix.columns());
 
     // Fill matrix column by column
-    for (int col = 0; col < matrix.cols(); ++col) {
-        GVector vector = matrix.extract_col(col);
-        this->insert_col(vector, col);
+    for (int col = 0; col < m_cols; ++col) {
+        GVector vector = matrix.column(col);
+        this->column(col, vector);
     }
 
     // Return
@@ -274,29 +290,29 @@ GMatrixSparse& GMatrixSparse::operator=(const GMatrixSparse& matrix)
 /***********************************************************************//**
  * @brief Access operator
  *
- * @param[in] row Matrix row.
- * @param[in] col Matrix column.
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
  *
  * @exception GException::out_of_range
  *            Row or column index out of range.
  ***************************************************************************/
-double& GMatrixSparse::operator()(const int& row, const int& col)
+double& GMatrixSparse::operator()(const int& row, const int& column)
 {
     // Compile option: perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_ACCESS1, row, col, m_rows, m_cols);
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
     }
     #endif
 
     // Get element
     fill_pending();
-    int inx = get_index(row,col);
+    int inx = get_index(row, column);
     double* value;
     if (inx < 0) {
         value      = &m_fill_val;
         m_fill_row = row;
-        m_fill_col = col;
+        m_fill_col = column;
     }
     else {
         value = &(m_data[inx]);
@@ -310,8 +326,8 @@ double& GMatrixSparse::operator()(const int& row, const int& col)
 /***********************************************************************//**
  * @brief Access operator (const version)
  *
- * @param[in] row Matrix row.
- * @param[in] col Matrix column.
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
  *
  * @exception GException::out_of_range
  *            Row or column index out of range.
@@ -320,17 +336,18 @@ double& GMatrixSparse::operator()(const int& row, const int& col)
  * is not stored. Since we have the const version we don't have to care about
  * modification of this zero value.
  ***************************************************************************/
-const double& GMatrixSparse::operator()(const int& row, const int& col) const
+const double& GMatrixSparse::operator()(const int& row,
+                                        const int& column) const
 {
     // Compile option: perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
-      throw GException::out_of_range(G_ACCESS2, row, col, m_rows, m_cols);
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+      throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
     }
     #endif
 
     // Get element
-    int inx = get_index(row,col);
+    int inx = get_index(row, column);
     double* value;
     if (inx < 0) {
         value = (double*)&m_zero;
@@ -488,10 +505,10 @@ GMatrixSparse& GMatrixSparse::operator+=(const GMatrixSparse& matrix)
 
     // Perform inplace matrix addition using vectors
     for (int col = 0; col < m_cols; ++col) {
-        GVector v_result  = extract_col(col);
-        GVector v_operand = matrix.extract_col(col);
+        GVector v_result  = column(col);
+        GVector v_operand = matrix.column(col);
         v_result += v_operand;
-        insert_col(v_result, col);
+        column(col, v_result);
     }
 
     // Return result
@@ -523,10 +540,10 @@ GMatrixSparse& GMatrixSparse::operator-=(const GMatrixSparse& matrix)
 
     // Perform inplace matrix subtraction
     for (int col = 0; col < m_cols; ++col) {
-        GVector v_result  = extract_col(col);
-        GVector v_operand = matrix.extract_col(col);
+        GVector v_result  = column(col);
+        GVector v_operand = matrix.column(col);
         v_result -= v_operand;
-        insert_col(v_result, col);
+        column(col, v_result);
     }
 
     // Return result
@@ -590,7 +607,7 @@ GMatrixSparse& GMatrixSparse::operator*=(const GMatrixSparse& matrix)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear matrix
  ***************************************************************************/
 void GMatrixSparse::clear(void)
 {
@@ -606,56 +623,435 @@ void GMatrixSparse::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone matrix
+ *
+ * @return Pointer to deep copy of matrix.
  ***************************************************************************/
 GMatrixSparse* GMatrixSparse::clone(void) const
 {
-    // Clone this image
+    // Clone matrix
     return new GMatrixSparse(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Transpose matrix
+ * @brief Extract row as vector from matrix
  *
- * The transpose operation exchanges the number of rows against the number
- * of columns.
+ * @param[in] row Row to be extracted (starting from 0).
+ *
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ *
+ * This method extracts a matrix row into a vector.
  ***************************************************************************/
-void GMatrixSparse::transpose(void)
+GVector GMatrixSparse::row(const int& row) const
 {
-    // Fill pending element
-    fill_pending();
-    
-    // Compute the transpose
-    *this = cs_transpose(*this, 1);
-    
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_EXTRACT_ROW, row, 0, m_rows-1);
+    }
+    #endif
+
+    // Create result vector
+    GVector result(m_cols);
+
+    // Loop over all columns to extract data
+    for (int col = 0; col < m_cols; ++col) {
+
+        // Get the start and stop of the elements
+        int i_start = m_colstart[col];
+        int i_stop  = m_colstart[col+1];
+
+        // Search requested row in elements
+        int i;
+        for (i = i_start; i < i_stop; ++i) {
+            if (m_rowinx[i] == row) {
+                break;
+            }
+        }
+
+        // Copy element if we found one
+        if (i < i_stop) {
+            result[col] = m_data[i];
+        }
+
+    } // endfor: looped over all columns
+
+    // If there is a pending element then put it in the vector
+    if (m_fill_val != 0.0 && m_fill_row == row) {
+        result[m_fill_col] = m_fill_val;
+    }
+
+    // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Set row in matrix
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GMatrixSparse::row(const int& row, const GVector& vector)
+{
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_SET_ROW, row, 0, m_rows-1);
+    }
+    #endif
+
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Invert matrix
+ * @brief Extract column as vector from matrix
  *
- * @exception GException::feature_not_implemented
- *            Feature not yet implemented.
+ * @param[in] column Column index [0,...,columns()-1].
  *
- * @todo Needs to be implemented.
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ *
+ * This method extracts a matrix column into a vector.
  ***************************************************************************/
-void GMatrixSparse::invert(void)
+GVector GMatrixSparse::column(const int& column) const
 {
-    // Throw exception
-    throw GException::feature_not_implemented(G_INVERT);
-    
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_EXTRACT_COLUMN, column, 0, m_cols-1);
+    }
+    #endif
+
+    // Create result vector
+    GVector result(m_rows);
+
+    // Get the start and stop of the elements
+    int i_start = m_colstart[column];
+    int i_stop  = m_colstart[column+1];
+
+    // Extract elements into vector
+    for (int i = i_start; i < i_stop; ++i) {
+        result[m_rowinx[i]] = m_data[i];
+    }
+
+    // If there is a pending element then put it in the vector
+    if (m_fill_val != 0.0 && m_fill_col == column) {
+        result[m_fill_row] = m_fill_val;
+    }
+
+    // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert vector column into matrix
+ *
+ * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] vector Vector.
+ *
+ * @exception GException::out_of_range
+ *            Invalid column index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Matrix dimension mismatches the vector size.
+ *
+ * Inserts the content of a vector into a matrix column. Any previous
+ * content in the matrix column will be overwritted.
+ *
+ * This is the main driver routine to insert data into a matrix. Note that
+ * there is another instance of this function that takes a compressed array.
+ ***************************************************************************/
+void GMatrixSparse::column(const int& column, const GVector& vector)
+{
+    // Debug header
+    #if defined(G_DEBUG_SPARSE_INSERTION)
+    std::cout << "GMatrixSparse::column(";
+    std::cout << column << ", [" << v << "]):" << std::endl;
+    std::cout << " In Data : ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_data[i] << " ";
+    }
+    std::cout << std::endl << " In Row .: ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_rowinx[i] << " ";
+    }
+    std::cout << std::endl << " In Col .: ";
+    for (int i = 0; i < m_cols+1; ++i) {
+        std::cout << m_colstart[i] << " ";
+    }
+    std::cout << std::endl;
+    #endif
+
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_SET_COLUMN, column, 0, m_cols-1);
+    }
+    #endif
+
+    // Raise an exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_rows != vector.size()) {
+        throw GException::matrix_vector_mismatch(G_SET_COLUMN, vector.size(),
+                                                 m_rows, m_cols);
+    }
+
+    // If there is a pending element for this column then delete it since
+    // the vector overwrites this element
+    if (m_fill_val != 0.0 && m_fill_col == column) {
+        #if defined(G_DEBUG_SPARSE_PENDING)
+        std::cout << G_SET_COLUMN << ": pending value " << m_fill_val << 
+                     " for location (" << m_fill_row << "," << m_fill_col << 
+                     ") became obsolete" << std::endl;
+        #endif
+        m_fill_val = 0.0;
+        m_fill_row = 0;
+        m_fill_col = 0;
+    }
+
+    // Determine the number of non-zero elements in the vector
+    int n_vector = 0;
+    for (int row = 0; row < m_rows; ++row) {
+        if (vector[row] != 0.0) {
+            n_vector++;
+        }
+    }
+
+    // Get the start and stop indices of the actual column and compute
+    // the number of exisiting elements in the column
+    int i_start = m_colstart[column];
+    int i_stop  = m_colstart[column+1];
+    int n_exist = i_stop - i_start;
+
+    // Compute the size difference for the new matrix. It is positive if
+    // the number of non-zero entries in the vector is larger than the
+    // number of non-zero entries in the matrix (in this case we have to
+    // increase the matrix size).
+    int n_diff = n_vector - n_exist;
+
+    // If we need space then allocate it, if we have to much space then free it
+    if (n_diff > 0) {
+        alloc_elements(i_start, n_diff);
+        #if defined(G_DEBUG_SPARSE_INSERTION)
+        std::cout << " Insert .: " << n_diff << " elements at index " << i_start << std::endl;
+        #endif
+    }
+    else if (n_diff < 0) {
+        free_elements(i_start, -n_diff);
+        #if defined(G_DEBUG_SPARSE_INSERTION)
+        std::cout << " Remove .: " << -n_diff << " elements at index " << i_start << std::endl;
+        #endif
+    }
+
+    // Insert the vector elements in the matrix
+    if (n_vector > 0) {
+        for (int row = 0, i = i_start; row < m_rows; ++row) {
+            if (vector[row] != 0.0) {
+                m_data[i]   = vector[row];
+                m_rowinx[i] = row;
+                i++;
+            }
+        }
+    }
+
+    // Update column start indices
+    for (int i = column+1; i <= m_cols; ++i) {
+        m_colstart[i] += n_diff;
+    }
+
+    // Debugging: show sparse matrix after insertion
+    #if defined(G_DEBUG_SPARSE_INSERTION)
+    std::cout << " Out Data: ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_data[i] << " ";
+    }
+    std::cout << std::endl << " Out Row : ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_rowinx[i] << " ";
+    }
+    std::cout << endl << " Out Col : ";
+    for (int i = 0; i < m_cols+1; ++i) {
+        std::cout << m_colstart[i] << " ";
+    }
+    std::cout << std::endl;
+    #endif
+
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Insert compressed array into matrix column
+ *
+ * @param[in] values Compressed array.
+ * @param[in] rows Row indices of array.
+ * @param[in] number Number of elements in array.
+ * @param[in] column Column index [0,...,columns()-1].
+ *
+ * @exception GException::out_of_range
+ *            Invalid column index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Matrix dimension mismatches the vector size.
+ *
+ * Inserts the content of a copressed array into a matrix column. Any 
+ * previous content in the matrix column will be overwritted.
+ *
+ * This is the main driver routine to insert data into a matrix. Note that
+ * there is another instance of this function that takes a vector.
+ ***************************************************************************/
+void GMatrixSparse::column(const double* values, const int* rows, 
+                           int number, const int& column)
+{
+    // Debug header
+    #if defined(G_DEBUG_SPARSE_INSERTION)
+    std::cout << "GMatrixSparse::insert_col(v, i, n, " << column << "):" << std::endl;
+    std::cout << " Matrix Data : ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_data[i] << " ";
+    }
+    std::cout << std::endl << " Matrix Row .: ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_rowinx[i] << " ";
+    }
+    std::cout << std::endl << " Matrix Col .: ";
+    for (int i = 0; i < m_cols+1; ++i) {
+        std::cout << m_colstart[i] << " ";
+    }
+    std::cout << std::endl;
+    std::cout << " Array Data .: ";
+    for (int i = 0; i < number; ++i) {
+        std::cout << values[i] << " ";
+    }
+    std::cout << std::endl << " Array Row ..: ";
+    for (int i = 0; i < number; ++i) {
+        std::cout << rows[i] << " ";
+    }
+    std::cout << std::endl;
+    #endif
+
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_SET_COLUMN2, column, 0, m_cols-1);
+    }
+    #endif
+
+    // Raise an exception if the index array seems incompatible with matrix 
+    // dimensions
+    if (rows[number-1] >= m_rows) {
+        throw GException::matrix_vector_mismatch(G_SET_COLUMN2, rows[number-1],
+                                                 m_rows, m_cols);
+    }
+
+    // If there is a pending element for this column then delete it since
+    // the vector overwrites this element
+    if (m_fill_val != 0.0 && m_fill_col == column) {
+        #if defined(G_DEBUG_SPARSE_PENDING)
+        std::cout << G_INSERT_COL2 << ": pending value " << m_fill_val << 
+                " for location (" << m_fill_row << "," << m_fill_col << 
+                ") became obsolete" << std::endl;
+        #endif
+        m_fill_val = 0.0;
+        m_fill_row = 0;
+        m_fill_col = 0;
+    }
+
+    // Get the start and stop indices of the actual column and compute
+    // the number of exisiting elements in the column
+    int i_start = m_colstart[column];
+    int i_stop  = m_colstart[column+1];
+    int n_exist = i_stop - i_start;
+
+    // If the array is empty then make sure that the number of elements is 0 
+    // (we then just delete the existing column)
+    if (!values || !rows) {
+        number = 0;
+    }
+
+    // Compute the size difference for the new matrix. It is positive if
+    // the number of non-zero entries in the array is larger than the
+    // number of non-zero entries in the matrix (in this case we have to
+    // increase the matrix size).
+    int n_diff = number - n_exist;
+
+    // If we need space then allocate it, if we have to much space then free it
+    if (n_diff > 0) {
+        alloc_elements(i_start, n_diff);
+        #if defined(G_DEBUG_SPARSE_INSERTION)
+        std::cout << " Insert .: " << n_diff << " elements at index " << i_start << std::endl;
+        #endif
+    }
+    else if (n_diff < 0) {
+        free_elements(i_start, -n_diff);
+        #if defined(G_DEBUG_SPARSE_INSERTION)
+        std::cout << " Remove .: " << -n_diff << " elements at index " << i_start << std::endl;
+        #endif
+    }
+
+    // Insert the array elements into the matrix
+    if (number > 0) {
+        for (int row = 0, i = i_start; row < number; ++row, ++i) {
+            m_data[i]   = values[row];
+            m_rowinx[i] = rows[row];
+        }
+    }
+
+    // Update column start indices
+    for (int i = column+1; i <= m_cols; ++i) {
+        m_colstart[i] += n_diff;
+    }
+
+    // Debugging: show sparse matrix after insertion
+    #if defined(G_DEBUG_SPARSE_INSERTION)
+    std::cout << " Out Data: ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_data[i] << " ";
+    }
+    std::cout << std::endl << " Out Row : ";
+    for (int i = 0; i < m_elements; ++i) {
+        std::cout << m_rowinx[i] << " ";
+    }
+    std::cout << std::endl << " Out Col : ";
+    for (int i = 0; i < m_cols+1; ++i) {
+        std::cout << m_colstart[i] << " ";
+    }
+    std::cout << std::endl;
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Add row to matrix elements
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GMatrixSparse::add_to_row(const int& row, const GVector& vector)
+{
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_ADD_TO_ROW, row, 0, m_rows-1);
+    }
+    #endif
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Add vector column into matrix
  *
+ * @param[in] column Column index [0,...,columns()-1].
  * @param[in] vector Vector.
- * @param[in] col Column index (starting from 0).
  *
  * @exception GException::out_of_range
  *            Invalid column index specified.
@@ -668,11 +1064,12 @@ void GMatrixSparse::invert(void)
  * normal and stack-based filled. Note that there is another instance of this
  * method that takes a compressed array.
  ***************************************************************************/
-void GMatrixSparse::add_col(const GVector& vector, const int& col)
+void GMatrixSparse::add_to_column(const int& column, const GVector& vector)
 {
     // Debug header
     #if defined(G_DEBUG_SPARSE_ADDITION)
-    std::cout << "GMatrixSparse::add_col([" << v << "], " << col << "):" << std::endl;
+    std::cout << "GMatrixSparse::add_col(";
+    std::cout << column << ", [" << v << "]):" << std::endl;
     std::cout << " In Data : ";
     for (int i = 0; i < m_elements; ++i) {
         std::cout << m_data[i] << " ";
@@ -695,7 +1092,7 @@ void GMatrixSparse::add_col(const GVector& vector, const int& col)
     // stack_push_column does its own argument verifications, so to avoid
     // double checking we don't do anything before this call ...
     if (m_stack_data != NULL) {
-        non_zero = stack_push_column(vector, col);
+        non_zero = stack_push_column(vector, column);
         if (non_zero == 0) {
             return;
         }
@@ -707,14 +1104,14 @@ void GMatrixSparse::add_col(const GVector& vector, const int& col)
 
         // Raise an exception if the column index is invalid
         #if defined(G_RANGE_CHECK)
-        if (col < 0 || col >= m_cols) {
-            throw GException::out_of_range(G_ADD_COL, col, 0, m_cols-1);
+        if (column < 0 || column >= m_cols) {
+            throw GException::out_of_range(G_ADD_TO_COLUMN, column, 0, m_cols-1);
         }
         #endif
 
         // Raise an exception if the matrix and vector dimensions are incompatible
         if (m_rows != vector.size()) {
-            throw GException::matrix_vector_mismatch(G_ADD_COL, vector.size(),
+            throw GException::matrix_vector_mismatch(G_ADD_TO_COLUMN, vector.size(),
                                                      m_rows, m_cols);
         }
 
@@ -727,20 +1124,20 @@ void GMatrixSparse::add_col(const GVector& vector, const int& col)
     if (non_zero > 0) {
 
         // Copy input vector
-        GVector column = vector;
+        GVector v_column = vector;
 
         // Add elements to vector
-        for (int i = m_colstart[col]; i < m_colstart[col+1]; ++i) {
-            column[m_rowinx[i]] += m_data[i];
+        for (int i = m_colstart[column]; i < m_colstart[column+1]; ++i) {
+            v_column[m_rowinx[i]] += m_data[i];
         }
 
         // If there is a pending element then put it in the vector
-        if (m_fill_val != 0.0 && m_fill_col == col) {
-            column[m_fill_row] += m_fill_val;
+        if (m_fill_val != 0.0 && m_fill_col == column) {
+            v_column[m_fill_row] += m_fill_val;
         }
 
-        // Insert vector into matrix
-        insert_col(column, col);
+        // Set vector into matrix
+        this->column(column, v_column);
 
     }
 
@@ -785,8 +1182,8 @@ void GMatrixSparse::add_col(const GVector& vector, const int& col)
  * normal and stack-based filled. Note that there is another instance of this
  * method that takes a vector.
  ***************************************************************************/
-void GMatrixSparse::add_col(const double* values, const int* rows, 
-                            int number, const int& col)
+void GMatrixSparse::add_to_column(const double* values, const int* rows, 
+                                  int number, const int& col)
 {
     // Debug header
     #if defined(G_DEBUG_SPARSE_ADDITION)
@@ -835,13 +1232,13 @@ void GMatrixSparse::add_col(const double* values, const int* rows,
         // Raise an exception if the column index is invalid
         #if defined(G_RANGE_CHECK)
         if (col < 0 || col >= m_cols) {
-            throw GException::out_of_range(G_ADD_COL2, col, 0, m_cols-1);
+            throw GException::out_of_range(G_ADD_TO_COLUMN2, col, 0, m_cols-1);
         }
         #endif
 
         // Raise an exception if the matrix and vector dimensions are incompatible
         if (rows[number-1] >= m_rows) {
-            throw GException::matrix_vector_mismatch(G_ADD_COL2, rows[number-1],
+            throw GException::matrix_vector_mismatch(G_ADD_TO_COLUMN2, rows[number-1],
                                                      m_rows, m_cols);
         }
 
@@ -870,7 +1267,7 @@ void GMatrixSparse::add_col(const double* values, const int* rows,
                    wrk_double, wrk_int, &num_mix);
 
         // Insert mixed column
-        insert_col(wrk_double, wrk_int, num_mix, col);
+        this->column(wrk_double, wrk_int, num_mix, col);
 
         // Free workspace
         delete [] wrk_int;
@@ -880,7 +1277,7 @@ void GMatrixSparse::add_col(const double* values, const int* rows,
 
     // Case B: the column does not yet exist in the matrix, so just insert it
     else {
-        insert_col(values, rows, number, col);
+        this->column(values, rows, number, col);
     }
 
     // Debugging: show sparse matrix after insertion
@@ -903,366 +1300,178 @@ void GMatrixSparse::add_col(const double* values, const int* rows,
 
 
 /***********************************************************************//**
- * @brief Insert vector column into matrix
+ * @brief Transpose matrix
  *
- * @param[in] vector Vector.
- * @param[in] col Column index (starting from 0).
- *
- * @exception GException::out_of_range
- *            Invalid column index specified.
- * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
- *
- * Inserts the content of a vector into a matrix column. Any previous
- * content in the matrix column will be overwritted.
- *
- * This is the main driver routine to insert data into a matrix. Note that
- * there is another instance of this function that takes a compressed array.
+ * The transpose operation exchanges the number of rows against the number
+ * of columns.
  ***************************************************************************/
-void GMatrixSparse::insert_col(const GVector& vector, const int& col)
+void GMatrixSparse::transpose(void)
 {
-    // Debug header
-    #if defined(G_DEBUG_SPARSE_INSERTION)
-    std::cout << "GMatrixSparse::insert_col([" << v << "], " << col << "):" << std::endl;
-    std::cout << " In Data : ";
-    for (int i = 0; i < m_elements; ++i)
-        std::cout << m_data[i] << " ";
-    std::cout << std::endl << " In Row .: ";
-    for (int i = 0; i < m_elements; ++i)
-        std::cout << m_rowinx[i] << " ";
-    std::cout << std::endl << " In Col .: ";
-    for (int i = 0; i < m_cols+1; ++i)
-        std::cout << m_colstart[i] << " ";
-    std::cout << std::endl;
-    #endif
-
-    // Raise an exception if the column index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_INSERT_COL, col, 0, m_cols-1);
-    }
-    #endif
-
-    // Raise an exception if the matrix and vector dimensions are not
-    // compatible
-    if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_INSERT_COL, vector.size(),
-                                                 m_rows, m_cols);
-    }
-
-    // If there is a pending element for this column then delete it since
-    // the vector overwrites this element
-    if (m_fill_val != 0.0 && m_fill_col == col) {
-        #if defined(G_DEBUG_SPARSE_PENDING)
-        std::cout << G_INSERT_COL << ": pending value " << m_fill_val << 
-                     " for location (" << m_fill_row << "," << m_fill_col << 
-                     ") became obsolete" << std::endl;
-        #endif
-        m_fill_val = 0.0;
-        m_fill_row = 0;
-        m_fill_col = 0;
-    }
-
-    // Determine the number of non-zero elements in the vector
-    int n_vector = 0;
-    for (int row = 0; row < m_rows; ++row) {
-        if (vector[row] != 0.0) {
-            n_vector++;
-        }
-    }
-
-    // Get the start and stop indices of the actual column and compute
-    // the number of exisiting elements in the column
-    int i_start = m_colstart[col];
-    int i_stop  = m_colstart[col+1];
-    int n_exist = i_stop - i_start;
-
-    // Compute the size difference for the new matrix. It is positive if
-    // the number of non-zero entries in the vector is larger than the
-    // number of non-zero entries in the matrix (in this case we have to
-    // increase the matrix size).
-    int n_diff = n_vector - n_exist;
-
-    // If we need space then allocate it, if we have to much space then free it
-    if (n_diff > 0) {
-        alloc_elements(i_start, n_diff);
-        #if defined(G_DEBUG_SPARSE_INSERTION)
-        std::cout << " Insert .: " << n_diff << " elements at index " << i_start << std::endl;
-        #endif
-    }
-    else if (n_diff < 0) {
-        free_elements(i_start, -n_diff);
-        #if defined(G_DEBUG_SPARSE_INSERTION)
-        std::cout << " Remove .: " << -n_diff << " elements at index " << i_start << std::endl;
-        #endif
-    }
-
-    // Insert the vector elements in the matrix
-    if (n_vector > 0) {
-        for (int row = 0, i = i_start; row < m_rows; ++row) {
-            if (vector[row] != 0.0) {
-                m_data[i]   = vector[row];
-                m_rowinx[i] = row;
-                i++;
-            }
-        }
-    }
-
-    // Update column start indices
-    for (int i = col+1; i <= m_cols; ++i) {
-        m_colstart[i] += n_diff;
-    }
-
-    // Debugging: show sparse matrix after insertion
-    #if defined(G_DEBUG_SPARSE_INSERTION)
-    std::cout << " Out Data: ";
-    for (int i = 0; i < m_elements; ++i)
-        std::cout << m_data[i] << " ";
-    std::cout << std::endl << " Out Row : ";
-    for (int i = 0; i < m_elements; ++i)
-        std::cout << m_rowinx[i] << " ";
-    std::cout << endl << " Out Col : ";
-    for (int i = 0; i < m_cols+1; ++i)
-        std::cout << m_colstart[i] << " ";
-    std::cout << std::endl;
-    #endif
-
+    // Fill pending element
+    fill_pending();
+    
+    // Compute the transpose
+    *this = cs_transpose(*this, 1);
+    
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Insert compressed array into matrix column
+ * @brief Invert matrix
  *
- * @param[in] values Compressed array.
- * @param[in] rows Row indices of array.
- * @param[in] number Number of elements in array.
- * @param[in] col Column index (starting from 0).
+ * @exception GException::feature_not_implemented
+ *            Feature not yet implemented.
  *
- * @exception GException::out_of_range
- *            Invalid column index specified.
- * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
- *
- * Inserts the content of a copressed array into a matrix column. Any 
- * previous content in the matrix column will be overwritted.
- *
- * This is the main driver routine to insert data into a matrix. Note that
- * there is another instance of this function that takes a vector.
+ * @todo Needs to be implemented.
  ***************************************************************************/
-void GMatrixSparse::insert_col(const double* values, const int* rows, 
-                               int number, const int& col)
+void GMatrixSparse::invert(void)
 {
-    // Debug header
-    #if defined(G_DEBUG_SPARSE_INSERTION)
-    std::cout << "GMatrixSparse::insert_col(v, i, n, " << col << "):" << std::endl;
-    std::cout << " Matrix Data : ";
-    for (int i = 0; i < m_elements; ++i) {
-        std::cout << m_data[i] << " ";
-    }
-    std::cout << std::endl << " Matrix Row .: ";
-    for (int i = 0; i < m_elements; ++i) {
-        std::cout << m_rowinx[i] << " ";
-    }
-    std::cout << std::endl << " Matrix Col .: ";
-    for (int i = 0; i < m_cols+1; ++i) {
-        std::cout << m_colstart[i] << " ";
-    }
-    std::cout << std::endl;
-    std::cout << " Array Data .: ";
-    for (int i = 0; i < number; ++i) {
-        std::cout << values[i] << " ";
-    }
-    std::cout << std::endl << " Array Row ..: ";
-    for (int i = 0; i < number; ++i) {
-        std::cout << rows[i] << " ";
-    }
-    std::cout << std::endl;
-    #endif
-
-    // Raise an exception if the column index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_INSERT_COL2, col, 0, m_cols-1);
-    }
-    #endif
-
-    // Raise an exception if the index array seems incompatible with matrix 
-    // dimensions
-    if (rows[number-1] >= m_rows) {
-        throw GException::matrix_vector_mismatch(G_INSERT_COL2, rows[number-1],
-                                                 m_rows, m_cols);
-    }
-
-    // If there is a pending element for this column then delete it since
-    // the vector overwrites this element
-    if (m_fill_val != 0.0 && m_fill_col == col) {
-        #if defined(G_DEBUG_SPARSE_PENDING)
-        std::cout << G_INSERT_COL2 << ": pending value " << m_fill_val << 
-                " for location (" << m_fill_row << "," << m_fill_col << 
-                ") became obsolete" << std::endl;
-        #endif
-        m_fill_val = 0.0;
-        m_fill_row = 0;
-        m_fill_col = 0;
-    }
-
-    // Get the start and stop indices of the actual column and compute
-    // the number of exisiting elements in the column
-    int i_start = m_colstart[col];
-    int i_stop  = m_colstart[col+1];
-    int n_exist = i_stop - i_start;
-
-    // If the array is empty then make sure that the number of elements is 0 
-    // (we then just delete the existing column)
-    if (!values || !rows) {
-        number = 0;
-    }
-
-    // Compute the size difference for the new matrix. It is positive if
-    // the number of non-zero entries in the array is larger than the
-    // number of non-zero entries in the matrix (in this case we have to
-    // increase the matrix size).
-    int n_diff = number - n_exist;
-
-    // If we need space then allocate it, if we have to much space then free it
-    if (n_diff > 0) {
-        alloc_elements(i_start, n_diff);
-        #if defined(G_DEBUG_SPARSE_INSERTION)
-        std::cout << " Insert .: " << n_diff << " elements at index " << i_start << std::endl;
-        #endif
-    }
-    else if (n_diff < 0) {
-        free_elements(i_start, -n_diff);
-        #if defined(G_DEBUG_SPARSE_INSERTION)
-        std::cout << " Remove .: " << -n_diff << " elements at index " << i_start << std::endl;
-        #endif
-    }
-
-    // Insert the array elements into the matrix
-    if (number > 0) {
-        for (int row = 0, i = i_start; row < number; ++row, ++i) {
-            m_data[i]   = values[row];
-            m_rowinx[i] = rows[row];
-        }
-    }
-
-    // Update column start indices
-    for (int i = col+1; i <= m_cols; ++i) {
-        m_colstart[i] += n_diff;
-    }
-
-    // Debugging: show sparse matrix after insertion
-    #if defined(G_DEBUG_SPARSE_INSERTION)
-    std::cout << " Out Data: ";
-    for (int i = 0; i < m_elements; ++i)
-        std::cout << m_data[i] << " ";
-    std::cout << std::endl << " Out Row : ";
-    for (int i = 0; i < m_elements; ++i)
-        std::cout << m_rowinx[i] << " ";
-    std::cout << std::endl << " Out Col : ";
-    for (int i = 0; i < m_cols+1; ++i)
-        std::cout << m_colstart[i] << " ";
-    std::cout << std::endl;
-    #endif
-
+    // Throw exception
+    throw GException::feature_not_implemented(G_INVERT);
+    
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Extract row as vector from matrix
+ * @brief Negate matrix
  *
- * @param[in] row Row to be extracted (starting from 0).
+ * @exception GException::feature_not_implemented
+ *            Feature not yet implemented.
  *
- * @exception GException::out_of_range
- *            Invalid row index specified.
- *
- * This method extracts a matrix row into a vector.
+ * @todo Needs to be implemented.
  ***************************************************************************/
-GVector GMatrixSparse::extract_row(const int& row) const
+void GMatrixSparse::negate(void)
 {
-    // Raise an exception if the row index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_EXTRACT_ROW, row, 0, m_rows-1);
+    // Throw exception
+    throw GException::feature_not_implemented(G_INVERT);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Take absolute value of matrix elements
+ *
+ * Replaces all elements of the matrix by their absolute values.
+ ***************************************************************************/
+void GMatrixSparse::abs(void)
+{
+    // Fill pending element
+    fill_pending();
+
+    // Convert all elements to absolute values
+    for (int i = 0; i < m_elements; ++i) {
+        m_data[i] = std::abs(m_data[i]);
     }
-    #endif
+    
+    // Return
+    return;
+}
 
-    // Create result vector
-    GVector result(m_cols);
 
-    // Loop over all columns to extract data
-    for (int col = 0; col < m_cols; ++col) {
+/***********************************************************************//**
+ * @brief Returns fill of matrix
+ *
+ * The fill of a matrix is defined as the number non-zero elements devided
+ * by the number of total elements. By definiton, the fill is comprised
+ * in the interval [0,..,1]. The fill of an undefined matrix is defined to
+ * be 0.
+ ***************************************************************************/
+double GMatrixSparse::fill(void) const
+{
+    // Initialise result
+    double result = 0.0;
 
-        // Get the start and stop of the elements
-        int i_start = m_colstart[col];
-        int i_stop  = m_colstart[col+1];
+    // Compute matrix size
+    int size = m_rows*m_cols;
 
-        // Search requested row in elements
-        int i;
-        for (i = i_start; i < i_stop; ++i) {
-            if (m_rowinx[i] == row) {
-                break;
-            }
-        }
+    // Continue only if matrix has elements
+    if (size > 0) {
 
-        // Copy element if we found one
-        if (i < i_stop) {
-            result[col] = m_data[i];
-        }
+        // Determine number of elements in matrix
+        int num = (m_fill_val == 0.0) ? m_elements : m_elements + 1;
 
-    } // endfor: looped over all columns
+        // Compute fill
+        result = double(num) / double(size);
 
-    // If there is a pending element then put it in the vector
-    if (m_fill_val != 0.0 && m_fill_row == row) {
-        result[m_fill_col] = m_fill_val;
-    }
+    } // endif: there were elements in matrix
 
-    // Return vector
+    // Return fill
     return result;
 }
 
 
 /***********************************************************************//**
- * @brief Extract column as vector from matrix
- *
- * @param[in] col Column to be extracted (starting from 0).
- *
- * @exception GException::out_of_range
- *            Invalid row index specified.
- *
- * This method extracts a matrix column into a vector.
+ * @brief Return minimum matrix element
  ***************************************************************************/
-GVector GMatrixSparse::extract_col(const int& col) const
+double GMatrixSparse::min(void) const
 {
-    // Raise an exception if the column index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_EXTRACT_COL, col, 0, m_cols-1);
-    }
-    #endif
+    // Initialise minimum with fill value
+    double result = m_fill_val;
 
-    // Create result vector
-    GVector result(m_rows);
-
-    // Get the start and stop of the elements
-    int i_start = m_colstart[col];
-    int i_stop  = m_colstart[col+1];
-
-    // Extract elements into vector
-    for (int i = i_start; i < i_stop; ++i) {
-        result[m_rowinx[i]] = m_data[i];
+    // Search all elements for the smallest one
+    for (int i = 0; i < m_elements; ++i) {
+        if (m_data[i] < result) {
+            result = m_data[i];
+        }
     }
 
-    // If there is a pending element then put it in the vector
-    if (m_fill_val != 0.0 && m_fill_col == col) {
-        result[m_fill_row] = m_fill_val;
+    // If minimum is > 0.0 and there are zero elements then set the minimum
+    // to 0.0
+    if ((result > 0.0) && (m_elements < (m_rows*m_cols))) {
+        result = 0.0;
     }
 
-    // Return vector
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum matrix element
+ ***************************************************************************/
+double GMatrixSparse::max(void) const
+{
+    // Initialise maximum with fill value
+    double result = m_fill_val;
+
+    // Search all elements for the largest one
+    for (int i = 0; i < m_elements; ++i) {
+        if (m_data[i] > result) {
+            result = m_data[i];
+        }
+    }
+
+    // If maximum is < 0.0 and there are zero elements then set the maximum
+    // to 0.0
+    if ((result < 0.0) && (m_elements < (m_rows*m_cols))) {
+        result = 0.0;
+    }
+
+    // Return result
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Sum matrix elements
+ ***************************************************************************/
+double GMatrixSparse::sum(void) const
+{
+    // Initialise matrix sum with fill value
+    double result = m_fill_val;
+
+    // Add all elements
+    for (int i = 0; i < m_elements; ++i) {
+        result += m_data[i];
+    }
+
+    // Return result
     return result;
 }
 
@@ -1597,7 +1806,7 @@ void GMatrixSparse::cholesky_invert(bool compress)
         GVector x = cholesky_solver(unit, compress);
 
         // Insert column in matrix
-        result.insert_col(x, col);
+        result.column(col, x);
 
         // Clear unit vector for next round
         unit[col] = 0.0;
@@ -1613,109 +1822,9 @@ void GMatrixSparse::cholesky_invert(bool compress)
 
 
 /***********************************************************************//**
- * @brief Returns fill of matrix
- *
- * The fill of a matrix is defined as the number non-zero elements devided
- * by the number of total elements. By definiton, the fill is comprised
- * in the interval [0,..,1]. The fill of an undefined matrix is defined to
- * be 0.
- ***************************************************************************/
-double GMatrixSparse::fill(void) const
-{
-    // Initialise result
-    double result = 0.0;
-
-    // Compute matrix size
-    int size = m_rows*m_cols;
-
-    // Continue only if matrix has elements
-    if (size > 0) {
-
-        // Determine number of elements in matrix
-        int num = (m_fill_val == 0.0) ? m_elements : m_elements + 1;
-
-        // Compute fill
-        result = double(num) / double(size);
-
-    } // endif: there were elements in matrix
-
-    // Return fill
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return minimum matrix element
- ***************************************************************************/
-double GMatrixSparse::min(void) const
-{
-    // Initialise minimum with fill value
-    double result = m_fill_val;
-
-    // Search all elements for the smallest one
-    for (int i = 0; i < m_elements; ++i) {
-        if (m_data[i] < result) {
-            result = m_data[i];
-        }
-    }
-
-    // If minimum is > 0.0 and there are zero elements then set the minimum
-    // to 0.0
-    if ((result > 0.0) && (m_elements < (m_rows*m_cols))) {
-        result = 0.0;
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return maximum matrix element
- ***************************************************************************/
-double GMatrixSparse::max(void) const
-{
-    // Initialise maximum with fill value
-    double result = m_fill_val;
-
-    // Search all elements for the largest one
-    for (int i = 0; i < m_elements; ++i) {
-        if (m_data[i] > result) {
-            result = m_data[i];
-        }
-    }
-
-    // If maximum is < 0.0 and there are zero elements then set the maximum
-    // to 0.0
-    if ((result < 0.0) && (m_elements < (m_rows*m_cols))) {
-        result = 0.0;
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Sum matrix elements
- ***************************************************************************/
-double GMatrixSparse::sum(void) const
-{
-    // Initialise matrix sum with fill value
-    double result = m_fill_val;
-
-    // Add all elements
-    for (int i = 0; i < m_elements; ++i) {
-        result += m_data[i];
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Print matrix
+ *
+ * @return String containing matrix information
  ***************************************************************************/
 std::string GMatrixSparse::print(void) const
 {
@@ -1735,6 +1844,8 @@ std::string GMatrixSparse::print(void) const
 
     // Append header
     result.append("=== GMatrixSparse ===");
+
+    // Append information
     result.append("\n"+parformat("Number of rows")+str(m_rows));
     if (m_rowsel != NULL) {
         result.append(" (compressed "+str(m_num_rowsel)+")");
@@ -2382,42 +2493,39 @@ void GMatrixSparse::free_members(void)
 /***********************************************************************//**
  * @brief Allocate matrix
  *
- * @param[in] rows Number of rows (>1).
- * @param[in] cols Number of columns (>1).
+ * @param[in] rows Number of rows.
+ * @param[in] columns Number of columns.
  * @param[in] elements Number of matrix elements to be physically allocated.
- *
- * @exception GException::empty
- *            Attempt to allocate zero size matrix.
  *
  * This is the main constructor code that allocates and initialises memory
  * for matrix elements.
  ***************************************************************************/
-void GMatrixSparse::alloc_members(const int& rows, const int& cols,
+void GMatrixSparse::alloc_members(const int& rows, const int& columns,
                                   const int& elements)
 {
-    // Throw exception if requested matrix size is zero
-    if (rows == 0 || cols == 0) {
-        throw GException::empty(G_ALLOC_MEMBERS);
-    }
+    // Continue only if rows and columns are valid
+    if (rows > 0 && columns > 0) {
 
-    // Allocate column start array. This is the only array that we can
-    // allocate at this time. The other arrays can only be allocated during
-    // filling of the matrix
-    m_colstart = new int[cols+1];
+        // Allocate column start array. This is the only array that we can
+        // allocate at this time. The other arrays can only be allocated
+        // during filling of the matrix
+        m_colstart = new int[columns+1];
 
-    // Store (logical) matrix size
-    m_rows = rows;
-    m_cols = cols;
+        // Store (logical) matrix size
+        m_rows = rows;
+        m_cols = columns;
 
-    // Initialise column start indices to 0
-    for (int col = 0; col <= m_cols; ++col) {
-        m_colstart[col] = 0;
-    }
+        // Initialise column start indices to 0
+        for (int col = 0; col <= m_cols; ++col) {
+            m_colstart[col] = 0;
+        }
 
-    // Optionally allocate memory for matrix elements
-    if (elements > 0) {
-        alloc_elements(0, elements);
-    }
+        // Optionally allocate memory for matrix elements
+        if (elements > 0) {
+            alloc_elements(0, elements);
+        }
+
+    } // endif: number of elements was positive
 
     // Return
     return;
@@ -2483,24 +2591,24 @@ void GMatrixSparse::free_stack_members(void)
 
 
 /***********************************************************************//**
- * @brief Determines element index for (row,col)
+ * @brief Determines element index for (row,column)
  *
  * @param[in] row Row index.
- * @param[in] col Column index.
+ * @param[in] column Column index.
  *
  * Returns the index in the compressed array for (row,col). The following
  * special results exist:
  * -1: Requested index does not exist in the matrix.
  * m_elements: Requested index is the pending element.
  ***************************************************************************/
-int GMatrixSparse::get_index(const int& row, const int& col) const
+int GMatrixSparse::get_index(const int& row, const int& column) const
 {
     // Initialise element to 'not found'
     int index = -1;
 
     // If we have a pending element then check if this element is requested
     if (m_fill_val != 0.0) {
-        if (row == m_fill_row && col == m_fill_col) {
+        if (row == m_fill_row && column == m_fill_col) {
             return m_elements;
         }
     }
@@ -2509,7 +2617,7 @@ int GMatrixSparse::get_index(const int& row, const int& col) const
     // in the matrix. Only if it is found its index is returned. Otherwise
     // the default index is -1, signalling that the element is absent.
     if (m_elements > 0) {
-        int* ptr_colstart = m_colstart + col;
+        int* ptr_colstart = m_colstart + column;
         int  i_start      = *ptr_colstart++;
         int  i_stop       = *ptr_colstart;
         int* ptr_rowinx   = m_rowinx + i_start;
@@ -2590,14 +2698,17 @@ void GMatrixSparse::fill_pending(void)
         // Debugging: show sparse matrix after filling
         #if defined(G_DEBUG_SPARSE_PENDING) || defined(G_DEBUG_SPARSE_INSERTION)
         std::cout << " Data: ";
-        for (int i = 0; i < m_elements; ++i)
+        for (int i = 0; i < m_elements; ++i) {
             std::cout << m_data[i] << " ";
+        }
         std::cout << std::endl << " Row.: ";
-        for (int i = 0; i < m_elements; ++i)
+        for (int i = 0; i < m_elements; ++i) {
             std::cout << m_rowinx[i] << " ";
+        }
         std::cout << std::endl << " Col.: ";
-        for (int i = 0; i < m_cols+1; ++i)
+        for (int i = 0; i < m_cols+1; ++i) {
             std::cout << m_colstart[i] << " ";
+        }
         std::cout << std::endl;
         #endif
 

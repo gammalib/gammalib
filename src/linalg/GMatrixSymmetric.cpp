@@ -37,22 +37,24 @@
 #include "GMatrixSymmetric.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CAST_MATRIX          "GMatrixSymmetric::GMatrixSymmetric(GMatrix&)"
-#define G_CAST_SPARSEMATRIX "GMatrixSymmetric::GMatrixSymmetric(GSparseMatrix&)"
-#define G_ACCESS1                    "GMatrixSymmetric::operator(int&, int&)"
-#define G_ACCESS2                     "GMatrixSymmetric::operator(int&,int&)"
+#define G_CONSTRUCTOR        "GMatrixSymmetric::GMatrixSymmetric(int&, int&)"
+#define G_MATRIX               "GMatrixSymmetric::GMatrixSymmetric(GMatrix&)"
+#define G_SPARSEMATRIX   "GMatrixSymmetric::GMatrixSymmetric(GSparseMatrix&)"
+#define G_ACCESS                     "GMatrixSymmetric::operator(int&, int&)"
 #define G_OP_ADD            "GMatrixSymmetric::operator+=(GMatrixSymmetric&)"
 #define G_OP_SUB            "GMatrixSymmetric::operator-=(GMatrixSymmetric&)"
 #define G_OP_MUL_VEC                  "GMatrixSymmetric::operator*(GVector&)"
 #define G_OP_MAT_MUL        "GMatrixSymmetric::operator*=(GMatrixSymmetric&)"
-#define G_INVERT                             "GMatrixSymmetric::invert(void)"
-#define G_ADD_COL                 "GMatrixSymmetric::add_col(GVector&, int&)"
-#define G_INSERT_COL           "GMatrixSymmetric::insert_col(GVector&, int&)"
+#define G_EXTRACT_ROW                           "GMatrixSymmetric::row(int&)"
+#define G_SET_ROW                     "GMatrixSymmetric::row(int&, GVector&)"
+#define G_EXTRACT_COLUMN                     "GMatrixSymmetric::column(int&)"
+#define G_SET_COLUMN               "GMatrixSymmetric::column(int&, GVector&)"
+#define G_ADD_TO_ROW           "GMatrixSymmetric::add_to_row(int&, GVector&)"
+#define G_ADD_TO_COLUMN     "GMatrixSymmetric::add_to_column(int&, GVector&)"
+#define G_INVERT                                 "GMatrixSymmetric::invert()"
 #define G_CHOL_DECOMP            "GMatrixSymmetric::cholesky_decompose(int&)"
 #define G_CHOL_SOLVE      "GMatrixSymmetric::cholesky_solver(GVector&, int&)"
 #define G_CHOL_INVERT               "GMatrixSymmetric::cholesky_invert(int&)"
-#define G_EXTRACT_ROW                   "GMatrixSymmetric::extract_row(int&)"
-#define G_EXTRACT_COL                   "GMatrixSymmetric::extract_col(int&)"
 #define G_COPY_MEMBERS    "GMatrixSymmetric::copy_members(GMatrixSymmetric&)"
 #define G_ALLOC_MEMBERS         "GMatrixSymmetric::alloc_members(int&, int&)"
 
@@ -66,7 +68,8 @@
 /***********************************************************************//**
  * @brief Void constructor
  *
- * Initialises an empty matrix with no rows and columns
+ * Constructs an empty matrix (i.e. a matrix without any elements; the number
+ * of rows and columns of the matrix will be zero).
  *
  * @todo Check the entire matrix class to see whether handling with an
  *       empty matrix may lead to some conflicts.
@@ -83,17 +86,28 @@ GMatrixSymmetric::GMatrixSymmetric(void) : GMatrixBase()
 /***********************************************************************//**
  * @brief Matrix constructor
  *
- * @param[in] rows Number of rows in matrix.
- * @param[in] cols Number of columns in matrix.
+ * @param[in] rows Number of rows [>0].
+ * @param[in] columns Number of columns [>0].
+ *
+ * @exception GException::empty
+ *            Specified number of rows or columns is not valid.
  ***************************************************************************/
-GMatrixSymmetric::GMatrixSymmetric(const int& rows, const int& cols) :
+GMatrixSymmetric::GMatrixSymmetric(const int& rows, const int& columns) :
                   GMatrixBase()
 {
-    // Initialise class members for clean destruction
-    init_members();
+    // Continue only if matrix is valid
+    if (rows > 0 && columns > 0) {
 
-    // Allocate matrix memory
-    alloc_members(rows, cols);
+        // Initialise class members for clean destruction
+        init_members();
+
+        // Allocate matrix memory
+        alloc_members(rows, columns);
+
+    }
+    else {
+        throw GException::empty(G_CONSTRUCTOR);
+    }
 
     // Return
     return;
@@ -117,17 +131,17 @@ GMatrixSymmetric::GMatrixSymmetric(const GMatrix& matrix)
     init_members();
 
     // Allocate matrix memory
-    alloc_members(matrix.rows(), matrix.cols());
+    alloc_members(matrix.rows(), matrix.columns());
 
     // Fill matrix
-    for (int col = 0; col < matrix.cols(); ++col) {
-        for (int row = col; row < matrix.rows(); ++row) {
+    for (int col = 0; col < m_cols; ++col) {
+        for (int row = col; row < m_rows; ++row) {
             double value_ll = matrix(row,col);
             double value_ur = matrix(col,row);
             if (value_ll != value_ur) {
-                throw GException::matrix_not_symmetric(G_CAST_MATRIX,
+                throw GException::matrix_not_symmetric(G_MATRIX,
                                                        matrix.rows(),
-                                                       matrix.cols());
+                                                       matrix.columns());
             }
             (*this)(row, col) = matrix(row, col);
         }
@@ -155,17 +169,17 @@ GMatrixSymmetric::GMatrixSymmetric(const GMatrixSparse& matrix)
     init_members();
 
     // Allocate matrix memory
-    alloc_members(matrix.rows(), matrix.cols());
+    alloc_members(matrix.rows(), matrix.columns());
 
     // Fill matrix
-    for (int col = 0; col < matrix.cols(); ++col) {
-        for (int row = col; row < matrix.rows(); ++row) {
+    for (int col = 0; col < m_cols; ++col) {
+        for (int row = col; row < m_rows; ++row) {
             double value_ll = matrix(row,col);
             double value_ur = matrix(col,row);
             if (value_ll != value_ur) {
-                throw GException::matrix_not_symmetric(G_CAST_SPARSEMATRIX,
+                throw GException::matrix_not_symmetric(G_SPARSEMATRIX,
                                                        matrix.rows(),
-                                                       matrix.cols());
+                                                       matrix.columns());
             }
             (*this)(row, col) = matrix(row, col);
         }
@@ -248,23 +262,24 @@ GMatrixSymmetric& GMatrixSymmetric::operator=(const GMatrixSymmetric& matrix)
 /***********************************************************************//**
  * @brief Access operator
  *
- * @param[in] row Matrix row.
- * @param[in] col Matrix column.
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
  *
  * @exception GException::out_of_range
  *            Row or column index out of range.
  ***************************************************************************/
-double& GMatrixSymmetric::operator()(const int& row, const int& col)
+double& GMatrixSymmetric::operator()(const int& row, const int& column)
 {
     // Compile option: perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_ACCESS1, row, col, m_rows, m_cols);
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
     }
     #endif
 
     // Get element index
-    int inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
+    int inx = (row >= column) ? m_colstart[column]+(row-column)
+                              : m_colstart[row]+(column-row);
 
     // Return element
     return m_data[inx];
@@ -274,22 +289,24 @@ double& GMatrixSymmetric::operator()(const int& row, const int& col)
 /***********************************************************************//**
  * @brief Access operator (const version)
  *
- * @param[in] row Matrix row.
- * @param[in] col Matrix column.
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
  *
  * @exception GException::out_of_range
  *            Row or column index out of range.
  ***************************************************************************/
-const double& GMatrixSymmetric::operator()(const int& row, const int& col) const
+const double& GMatrixSymmetric::operator()(const int& row,
+                                           const int& column) const
 {
     // Compile option: perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols)
-        throw GException::out_of_range(G_ACCESS2, row, col, m_rows, m_cols);
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols)
+        throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
     #endif
 
     // Get element index
-    int inx = (row >= col) ? m_colstart[col]+(row-col) : m_colstart[row]+(col-row);
+    int inx = (row >= column) ? m_colstart[column]+(row-column)
+                              : m_colstart[row]+(column-row);
 
     // Return element
     return m_data[inx];
@@ -371,7 +388,7 @@ GMatrixSymmetric& GMatrixSymmetric::operator+=(const GMatrixSymmetric& matrix)
  * This method performs a matrix addition. The operation can only succeed
  * when the dimensions of both matrices are identical.
  ***************************************************************************/
-GMatrixSymmetric& GMatrixSymmetric::operator-= (const GMatrixSymmetric& matrix)
+GMatrixSymmetric& GMatrixSymmetric::operator-=(const GMatrixSymmetric& matrix)
 {
     // Raise an exception if the matrix dimensions are not compatible
     if (m_rows != matrix.m_rows || m_cols != matrix.m_cols) {
@@ -395,7 +412,7 @@ GMatrixSymmetric& GMatrixSymmetric::operator-= (const GMatrixSymmetric& matrix)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear matrix
  ***************************************************************************/
 void GMatrixSymmetric::clear(void)
 {
@@ -411,109 +428,14 @@ void GMatrixSymmetric::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone matrix
+ *
+ * @return Pointer to deep copy of matrix.
  ***************************************************************************/
 GMatrixSymmetric* GMatrixSymmetric::clone(void) const
 {
-    // Clone this image
+    // Clone matrix
     return new GMatrixSymmetric(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Invert matrix
- *
- * @exception GException::feature_not_implemented
- *            Feature not yet implemented.
- *
- * @todo Needs to be implemented.
- ***************************************************************************/
-void GMatrixSymmetric::invert(void)
-{
-    // Throw exception
-    throw GException::feature_not_implemented(G_INVERT);
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Add vector column into matrix
- *
- * @param[in] vector Vector.
- * @param[in] col Column index (starting from 0).
- *
- * @exception GException::out_of_range
- *            Invalid column index specified.
- * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
- *
- * Adds the content of a vector to a matrix column.
- ***************************************************************************/
-void GMatrixSymmetric::add_col(const GVector& vector, const int& col)
-{
-    // Raise an exception if the column index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_ADD_COL, col, 0, m_cols-1);
-    }
-    #endif
-
-    // Raise an exception if the matrix and vector dimensions are not
-    // compatible
-    if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_ADD_COL, vector.size(),
-                                                 m_rows, m_cols);
-    }
-
-    // Insert column into vector
-    for (int row = 0; row < m_rows; ++row) {
-        (*this)(row,col) += vector[row];
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Insert vector column into matrix
- *
- * @param[in] vector Vector.
- * @param[in] col Column index (starting from 0).
- *
- * @exception GException::out_of_range
- *            Invalid column index specified.
- * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
- *
- * Inserts the content of a vector into a matrix column. Any previous
- * content in the matrix column will be overwritted.
- ***************************************************************************/
-void GMatrixSymmetric::insert_col(const GVector& vector, const int& col)
-{
-    // Raise an exception if the column index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_INSERT_COL, col, 0, m_cols-1);
-    }
-    #endif
-
-    // Raise an exception if the matrix and vector dimensions are not
-    // compatible
-    if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_INSERT_COL, vector.size(),
-                                                 m_rows, m_cols);
-    }
-
-    // Insert column into vector
-    for (int row = 0; row < m_rows; ++row) {
-        (*this)(row,col) = vector[row];
-    }
-
-    // Return
-    return;
 }
 
 
@@ -527,7 +449,7 @@ void GMatrixSymmetric::insert_col(const GVector& vector, const int& col)
  *
  * This method extracts a matrix row into a vector.
  ***************************************************************************/
-GVector GMatrixSymmetric::extract_row(const int& row) const
+GVector GMatrixSymmetric::row(const int& row) const
 {
     // Raise an exception if the row index is invalid
     #if defined(G_RANGE_CHECK)
@@ -550,21 +472,40 @@ GVector GMatrixSymmetric::extract_row(const int& row) const
 
 
 /***********************************************************************//**
+ * @brief Set row in matrix
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GMatrixSymmetric::row(const int& row, const GVector& vector)
+{
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_SET_ROW, row, 0, m_rows-1);
+    }
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Extract column as vector from matrix
  *
- * @param[in] col Column to be extracted (starting from 0).
+ * @param[in] column Column index [0,...,columns()-1].
  *
  * @exception GException::out_of_range
  *            Invalid row index specified.
  *
  * This method extracts a matrix column into a vector.
  ***************************************************************************/
-GVector GMatrixSymmetric::extract_col(const int& col) const
+GVector GMatrixSymmetric::column(const int& column) const
 {
     // Raise an exception if the column index is invalid
     #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_EXTRACT_COL, col, 0, m_cols-1);
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_EXTRACT_COLUMN, column, 0, m_cols-1);
     }
     #endif
 
@@ -573,10 +514,220 @@ GVector GMatrixSymmetric::extract_col(const int& col) const
 
     // Extract column into vector
     for (int row = 0; row < m_rows; ++row) {
-        result[row] = (*this)(row,col);
+        result[row] = (*this)(row, column);
     }
 
     // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Set matrix column from vector
+ *
+ * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] vector Vector.
+ *
+ * @exception GException::out_of_range
+ *            Invalid column index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Matrix dimension mismatches the vector size.
+ *
+ * Inserts the content of a vector into a matrix column. Any previous
+ * content in the matrix column will be overwritted.
+ ***************************************************************************/
+void GMatrixSymmetric::column(const int& column, const GVector& vector)
+{
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_SET_COLUMN, column, 0, m_cols-1);
+    }
+    #endif
+
+    // Raise an exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_rows != vector.size()) {
+        throw GException::matrix_vector_mismatch(G_SET_COLUMN, vector.size(),
+                                                 m_rows, m_cols);
+    }
+
+    // Insert column into vector
+    for (int row = 0; row < m_rows; ++row) {
+        (*this)(row, column) = vector[row];
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Add row to matrix elements
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GMatrixSymmetric::add_to_row(const int& row, const GVector& vector)
+{
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_ADD_TO_ROW, row, 0, m_rows-1);
+    }
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Add vector column into matrix
+ *
+ * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] vector Vector.
+ *
+ * @exception GException::out_of_range
+ *            Invalid column index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Matrix dimension mismatches the vector size.
+ *
+ * Adds the content of a vector to a matrix column.
+ ***************************************************************************/
+void GMatrixSymmetric::add_to_column(const int& column, const GVector& vector)
+{
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_ADD_TO_COLUMN, column, 0, m_cols-1);
+    }
+    #endif
+
+    // Raise an exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_rows != vector.size()) {
+        throw GException::matrix_vector_mismatch(G_ADD_TO_COLUMN, vector.size(),
+                                                 m_rows, m_cols);
+    }
+
+    // Insert column into vector
+    for (int row = 0; row < m_rows; ++row) {
+        (*this)(row, column) += vector[row];
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Invert matrix
+ *
+ * @exception GException::feature_not_implemented
+ *            Feature not yet implemented.
+ *
+ * @todo Needs to be implemented.
+ ***************************************************************************/
+void GMatrixSymmetric::invert(void)
+{
+    // Throw exception
+    throw GException::feature_not_implemented(G_INVERT);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Negate matrix
+ *
+ * @exception GException::feature_not_implemented
+ *            Feature not yet implemented.
+ *
+ * @todo Needs to be implemented.
+ ***************************************************************************/
+void GMatrixSymmetric::negate(void)
+{
+    // Throw exception
+    throw GException::feature_not_implemented(G_INVERT);
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Take absolute value of matrix elements
+ *
+ * Replaces all elements of the matrix by their absolute values.
+ ***************************************************************************/
+void GMatrixSymmetric::abs(void)
+{
+    // Convert all elements to absolute values
+    for (int i = 0; i < m_elements; ++i) {
+        m_data[i] = std::abs(m_data[i]);
+    }
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Determine fill of matrix
+ *
+ * @return Matrix fill (between 0 and 1).
+ *
+ * The fill of a matrix is defined as the number of non-zero elements
+ * devided by the total number of matrix elements.
+ ***************************************************************************/
+double GMatrixSymmetric::fill(void) const
+{
+    // Determine the number of zero elements
+    int zero = 0;
+    for (int col = 0, i = 0; col < m_cols; ++col) {
+        if (m_data[i++] == 0.0) {                    // Count diag. once
+            zero++;
+        }
+        for (int row = col+1; row < m_rows; ++row) {
+            if (m_data[i++] == 0.0) {                // Count off-diag. twice
+                zero +=2;
+            }
+        }
+    }
+
+    // Return the fill
+    return (1.0-double(zero)/double(m_elements));
+}
+
+
+/***********************************************************************//**
+ * @brief Sum matrix elements
+ *
+ * @return Sum of all matrix elements.
+ ***************************************************************************/
+double GMatrixSymmetric::sum(void) const
+{
+    // Initialise matrix sums (diagonal and off-diagonal)
+    double diag     = 0.0;
+    double off_diag = 0.0;
+
+    // Calulate sum over diagonal elements
+    for (int row = 0; row < m_rows; ++row) {
+        diag += m_data[m_colstart[row]];
+    }
+
+    // Calulate sum over off-diagonal elements
+    for (int row = 0; row < m_rows; ++row) {
+        for (int col = row+1; col < m_cols; ++col) {
+            off_diag += m_data[m_colstart[row]+(col-row)];
+        }
+    }
+
+    // Calculate total
+    double result = diag + 2.0 * off_diag;
+
+    // Return result
     return result;
 }
 
@@ -929,62 +1080,9 @@ void GMatrixSymmetric::cholesky_invert(bool compress)
 
 
 /***********************************************************************//**
- * @brief Determine fill of matrix
- *
- * The fill of a matrix is defined as the number of non-zero elements
- * devided by the total number of matrix elements.
- ***************************************************************************/
-double GMatrixSymmetric::fill(void) const
-{
-    // Determine the number of zero elements
-    int zero = 0;
-    for (int col = 0, i = 0; col < m_cols; ++col) {
-        if (m_data[i++] == 0.0) {                    // Count diag. once
-            zero++;
-        }
-        for (int row = col+1; row < m_rows; ++row) {
-            if (m_data[i++] == 0.0) {                // Count off-diag. twice
-                zero +=2;
-            }
-        }
-    }
-
-    // Return the fill
-    return (1.0-double(zero)/double(m_elements));
-}
-
-
-/***********************************************************************//**
- * @brief Sum matrix elements
- ***************************************************************************/
-double GMatrixSymmetric::sum(void) const
-{
-    // Initialise matrix sums (diagonal and off-diagonal)
-    double diag     = 0.0;
-    double off_diag = 0.0;
-
-    // Calulate sum over diagonal elements
-    for (int row = 0; row < m_rows; ++row) {
-        diag += m_data[m_colstart[row]];
-    }
-
-    // Calulate sum over off-diagonal elements
-    for (int row = 0; row < m_rows; ++row) {
-        for (int col = row+1; col < m_cols; ++col) {
-            off_diag += m_data[m_colstart[row]+(col-row)];
-        }
-    }
-
-    // Calculate total
-    double result = diag + 2.0 * off_diag;
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Print matrix
+ *
+ * @return String containing matrix information
  ***************************************************************************/
 std::string GMatrixSymmetric::print(void) const
 {
@@ -993,6 +1091,8 @@ std::string GMatrixSymmetric::print(void) const
 
     // Append header
     result.append("=== GMatrixSymmetric ===");
+
+    // Append information
     result.append("\n"+parformat("Number of rows")+str(m_rows));
     if (m_rowsel != NULL) {
         result.append(" (compressed "+str(m_num_rowsel)+")");
@@ -1073,11 +1173,9 @@ void GMatrixSymmetric::free_members(void)
 /***********************************************************************//**
  * @brief Allocates matrix memory
  *
- * @param[in] rows Number of rows (>1).
- * @param[in] cols Number of columns (>1).
+ * @param[in] rows Number of rows.
+ * @param[in] columns Number of columns.
  *
- * @exception GException::empty
- *            Attempt to allocate zero size matrix.
  * @exception GException::matrix_not_symmetric
  *            Matrix is not symmetric.
  *
@@ -1091,43 +1189,43 @@ void GMatrixSymmetric::free_members(void)
  *
  * @todo Verify if the index array m_inx should be initialized.
  ***************************************************************************/
-void GMatrixSymmetric::alloc_members(const int& rows, const int& cols)
+void GMatrixSymmetric::alloc_members(const int& rows, const int& columns)
 {
     // Determine number of physical elements in matrix
     int elements = rows*(rows+1)/2;
 
-    // Throw exception if requested matrix size is zero
-    if (elements == 0) {
-        throw GException::empty(G_ALLOC_MEMBERS);
-    }
-
     // Throw exception if number of rows and columns is not identical
-    if (rows != cols) {
-      throw GException::matrix_not_symmetric(G_ALLOC_MEMBERS, rows, cols);
+    if (rows != columns) {
+      throw GException::matrix_not_symmetric(G_ALLOC_MEMBERS, rows, columns);
     }
 
-    // Allocate matrix array and column start index array.
-    m_data     = new double[elements];
-    m_colstart = new int[cols+1];
-    m_inx      = new int[cols];
+    // Continue only if number of elements is positive
+    if (elements > 0) {
 
-    // Store matrix size (logical and physical)
-    m_rows     = rows;
-    m_cols     = cols;
-    m_elements = elements;
-    m_alloc    = elements;
+        // Allocate matrix array and column start index array.
+        m_data     = new double[elements];
+        m_colstart = new int[columns+1];
+        m_inx      = new int[columns];
 
-    // Set-up column start indices
-    m_colstart[0]   = 0;
-    int offset = rows;
-    for (int col = 1; col <= m_cols; ++col) {
-        m_colstart[col] = m_colstart[col-1] + offset--;
-    }
+        // Store matrix size (logical and physical)
+        m_rows     = rows;
+        m_cols     = columns;
+        m_elements = elements;
+        m_alloc    = elements;
 
-    // Initialise matrix elements to 0.0
-    for (int i = 0; i < m_elements; ++i) {
-        m_data[i] = 0.0;
-    }
+        // Set-up column start indices
+        m_colstart[0]   = 0;
+        int offset = rows;
+        for (int col = 1; col <= m_cols; ++col) {
+            m_colstart[col] = m_colstart[col-1] + offset--;
+        }
+
+        // Initialise matrix elements to 0.0
+        for (int i = 0; i < m_elements; ++i) {
+            m_data[i] = 0.0;
+        }
+
+    } // endif: number of elements was positive
     
     // Return
     return;

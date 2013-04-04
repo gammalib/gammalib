@@ -45,45 +45,49 @@ class GMatrixSymmetric : public GMatrixBase {
 public:
     // Constructors and destructors
     GMatrixSymmetric(void);
-    GMatrixSymmetric(const int& rows, const int& cols);
+    explicit GMatrixSymmetric(const int& rows, const int& columns);
     GMatrixSymmetric(const GMatrix& matrix);
     GMatrixSymmetric(const GMatrixSparse& matrix);
     GMatrixSymmetric(const GMatrixSymmetric& matrix);
     virtual ~GMatrixSymmetric(void);
 
     // Implemented pure virtual base class operators
-    virtual GVector       operator*(const GVector& v) const;
+    virtual GVector           operator*(const GVector& v) const;
 
     // Other operators
-    virtual GMatrixSymmetric    operator+(const GMatrixSymmetric& matrix) const;
-    virtual GMatrixSymmetric    operator-(const GMatrixSymmetric& matrix) const;
-    virtual GMatrix             operator*(const GMatrixSymmetric& matrix) const;
-    virtual GMatrixSymmetric    operator-(void) const;
-    virtual GMatrixSymmetric&   operator+=(const GMatrixSymmetric& matrix);
-    virtual GMatrixSymmetric&   operator-=(const GMatrixSymmetric& matrix);
-    virtual GMatrixSymmetric&   operator*=(const double& scaler);
-    virtual GMatrixSymmetric&   operator/=(const double& scalar);
+    virtual GMatrixSymmetric  operator+(const GMatrixSymmetric& matrix) const;
+    virtual GMatrixSymmetric  operator-(const GMatrixSymmetric& matrix) const;
+    virtual GMatrix           operator*(const GMatrixSymmetric& matrix) const;
+    virtual GMatrixSymmetric  operator-(void) const;
+    virtual GMatrixSymmetric& operator+=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator-=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator*=(const double& scaler);
+    virtual GMatrixSymmetric& operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
     virtual void              clear(void);
     virtual GMatrixSymmetric* clone(void) const;
+    virtual GVector           row(const int& row) const;
+    virtual void              row(const int& row, const GVector& vector);
+    virtual GVector           column(const int& column) const;
+    virtual void              column(const int& column, const GVector& vector);
+    virtual void              add_to_row(const int& row, const GVector& vector);
+    virtual void              add_to_column(const int& column, const GVector& vector);
     virtual void              transpose(void);
     virtual void              invert(void);
-    virtual void              add_col(const GVector& vector, const int& col);
-    virtual void              insert_col(const GVector& vector, const int& col);
-    virtual GVector           extract_row(const int& row) const;
-    virtual GVector           extract_col(const int& col) const;
+    virtual void              negate(void);
+    virtual void              abs(void);
     virtual double            fill(void) const;
     virtual double            min(void) const;
     virtual double            max(void) const;
     virtual double            sum(void) const;
 
     // Other methods
-    virtual GMatrix     extract_lower_triangle(void) const;
-    virtual GMatrix     extract_upper_triangle(void) const;
-    virtual void        cholesky_decompose(bool compress = true);
-    virtual GVector     cholesky_solver(const GVector& vector, bool compress = true);
-    virtual void        cholesky_invert(bool compress = true);
+    virtual GMatrix extract_lower_triangle(void) const;
+    virtual GMatrix extract_upper_triangle(void) const;
+    virtual void    cholesky_decompose(bool compress = true);
+    virtual GVector cholesky_solver(const GVector& vector, bool compress = true);
+    virtual void    cholesky_invert(bool compress = true);
 };
 
 

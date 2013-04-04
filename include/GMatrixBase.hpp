@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GMatrixBase.hpp  -  Abstract matrix base class            *
+ *                GMatrixBase.hpp - Abstract matrix base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,9 +38,9 @@
  *
  * @brief Abstract matrix base class interface defintion
  *
- * This is an abstract base class for all matrix classes. It defines the
- * common interface of the matrix objects and provides some common services
- * to the derived classes.
+ * This class is an abstract base class from which all matrix classes will
+ * be derived. It defines the common interface for all matrix classes and
+ * implements common methods and data members.
  ***************************************************************************/
 class GMatrixBase : public GBase {
 
@@ -51,11 +51,11 @@ public:
     virtual ~GMatrixBase(void);
 
     // Pure virtual operators
-    virtual double&       operator()(const int& row, const int& col) = 0;
-    virtual const double& operator()(const int& row, const int& col) const = 0;
+    virtual double&       operator()(const int& row, const int& column) = 0;
+    virtual const double& operator()(const int& row, const int& column) const = 0;
     virtual GVector       operator*(const GVector& vector) const = 0;
 
-    // Implemented base class operators
+    // Base class operators
     virtual GMatrixBase&  operator=(const GMatrixBase& matrix);
     virtual bool          operator==(const GMatrixBase& matrix) const;
     virtual bool          operator!=(const GMatrixBase& matrix) const;
@@ -63,21 +63,26 @@ public:
     // Pure virtual methods
     virtual void         clear(void) = 0;
     virtual GMatrixBase* clone(void) const = 0;
+    virtual GVector      row(const int& row) const = 0;
+    virtual void         row(const int& row, const GVector& vector) = 0;
+    virtual GVector      column(const int& column) const = 0;
+    virtual void         column(const int& column, const GVector& vector) = 0;
+    virtual void         add_to_row(const int& row, const GVector& vector) = 0;
+    virtual void         add_to_column(const int& column, const GVector& vector) = 0;
     virtual void         transpose(void) = 0;
     virtual void         invert(void) = 0;
-    virtual void         add_col(const GVector& vector, const int& col) = 0;
-    virtual void         insert_col(const GVector& vector, const int& col) = 0;
-    virtual GVector      extract_row(const int& row) const = 0;
-    virtual GVector      extract_col(const int& col) const = 0;
+    virtual void         negate(void) = 0;
+    virtual void         abs(void) = 0;
     virtual double       fill(void) const = 0;
     virtual double       min(void) const = 0;
     virtual double       max(void) const = 0;
     virtual double       sum(void) const = 0;
     virtual std::string  print(void) const = 0;
 
-    // Implemented base class methods
-    virtual int          cols(void) const { return m_cols; }
-    virtual int          rows(void) const { return m_rows; }
+    // Base class methods
+    const int& size(void) const;
+    const int& columns(void) const;
+    const int& rows(void) const;
 
 protected:
     // Protected methods
@@ -109,5 +114,47 @@ protected:
     int*    m_colsel;     //!< Column selection (for compressed decomposition)
     double* m_data;       //!< Matrix data
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of matrix elements
+ *
+ * @return Number of matrix elements.
+ *
+ * Returns the number of matrix elements that are stored in the matrix.
+ ***************************************************************************/
+inline
+const int& GMatrixBase::size(void) const
+{
+    return (m_elements);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of matrix columns
+ *
+ * @return Number of matrix columns.
+ *
+ * Returns the number of matrix columns.
+ ***************************************************************************/
+inline
+const int& GMatrixBase::columns(void) const
+{
+    return (m_cols);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of matrix rows
+ *
+ * @return Number of matrix rows.
+ *
+ * Returns the number of matrix rows.
+ ***************************************************************************/
+inline
+const int& GMatrixBase::rows(void) const
+{
+    return (m_rows);
+}
 
 #endif /* GMATRIXBASE_HPP */

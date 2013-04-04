@@ -37,20 +37,21 @@
 #include "GMatrixSymmetric.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                             "GMatrix::operator(int&, int&)"
-#define G_ACCESS2                             "GMatrix::operator(int&, int&)"
+#define G_CONSTRUCTOR                          "GMatrix::GMatrix(int&, int&)"
+#define G_ACCESS                              "GMatrix::operator(int&, int&)"
 #define G_OP_MUL_VEC                           "GMatrix::operator*(GVector&)"
 #define G_OP_ADD                              "GMatrix::operator+=(GMatrix&)"
 #define G_OP_SUB                              "GMatrix::operator-=(GMatrix&)"
 #define G_OP_MAT_MUL                          "GMatrix::operator*=(GMatrix&)"
+#define G_EXTRACT_ROW                                    "GMatrix::row(int&)"
+#define G_SET_ROW                              "GMatrix::row(int&, GVector&)"
+#define G_EXTRACT_COLUMN                              "GMatrix::column(int&)"
+#define G_SET_COLUMN                        "GMatrix::column(int&, GVector&)"
+#define G_ADD_TO_ROW                    "GMatrix::add_to_row(int&, GVector&)"
+#define G_ADD_TO_COLUMN              "GMatrix::add_to_column(int&, GVector&)"
 #define G_INVERT                                          "GMatrix::invert()"
-#define G_ADD_COL                          "GMatrix::add_col(GVector&, int&)"
-#define G_EXTRACT_ROW                            "GMatrix::extract_row(int&)"
-#define G_EXTRACT_COL                            "GMatrix::extract_col(int&)"
 #define G_EXTRACT_LOWER                   "GMatrix::extract_lower_triangle()"
 #define G_EXTRACT_UPPER                   "GMatrix::extract_upper_triangle()"
-#define G_INSERT_COL                    "GMatrix::insert_col(GVector&, int&)"
-#define G_ALLOC_MEMBERS                  "GMatrix::alloc_members(int&, int&)"
 
 
 /*==========================================================================
@@ -62,8 +63,8 @@
 /***********************************************************************//**
  * @brief Void matrix constructor
  *
- * This method will allocate a generic matrix object without any elements.
- * The number of rows and columns of the matrix will be zero.
+ * Constructs an empty matrix (i.e. a matrix without any elements; the number
+ * of rows and columns of the matrix will be zero).
  *
  * @todo Verify that the class is save against empty matrix objects.
  ***************************************************************************/
@@ -80,19 +81,31 @@ GMatrix::GMatrix(void) : GMatrixBase()
 /***********************************************************************//**
  * @brief Matrix constructor
  *
- * @param[in] rows Number of rows.
- * @param[in] cols Number of columns.
+ * @param[in] rows Number of rows [>0].
+ * @param[in] columns Number of columns [>0].
  *
- * This method allocates a generic matrix object with the specified number
- * of rows and columns.
+ * @exception GException::empty
+ *            Specified number of rows or columns is not valid.
+ *
+ * Constructs a matrix with the specified number of @p rows and @p columns.
+ * The memory for all matrix elements will be allocated and all matrix
+ * elements will be initialized to 0.
  ***************************************************************************/
-GMatrix::GMatrix(const int& rows, const int& cols) : GMatrixBase()
+GMatrix::GMatrix(const int& rows, const int& columns) : GMatrixBase()
 {
-    // Initialise class members for clean destruction
-    init_members();
+    // Continue only if matrix is valid
+    if (rows > 0 && columns > 0) {
 
-    // Allocate matrix memory
-    alloc_members(rows, cols);
+        // Initialise class members for clean destruction
+        init_members();
+
+        // Allocate matrix memory
+        alloc_members(rows, columns);
+
+    }
+    else {
+        throw GException::empty(G_CONSTRUCTOR);
+    }
 
     // Return
     return;
@@ -103,8 +116,6 @@ GMatrix::GMatrix(const int& rows, const int& cols) : GMatrixBase()
  * @brief Copy constructor
  *
  * @param[in] matrix Matrix.
- *
- * This method copies a matrix object.
  ***************************************************************************/
 GMatrix::GMatrix(const GMatrix& matrix) : GMatrixBase(matrix)
 {
@@ -124,9 +135,9 @@ GMatrix::GMatrix(const GMatrix& matrix) : GMatrixBase(matrix)
  *
  * @param[in] matrix Symmetric matrix (GMatrixSymmetric).
  *
- * This constructor converts a symmetric matrix (of type GMatrixSymmetric)
- * into a generic matrix. As the result is generic, the conversion will
- * succeed in all cases. 
+ * Constructs a GMatrix object from a symmetric matrix object of type
+ * GMatrixSymmetric. Since the result is a generic matrix, the constructor
+ * will succeed in all cases.
  ***************************************************************************/
 GMatrix::GMatrix(const GMatrixSymmetric& matrix) : GMatrixBase(matrix)
 {
@@ -134,13 +145,13 @@ GMatrix::GMatrix(const GMatrixSymmetric& matrix) : GMatrixBase(matrix)
     init_members();
 
     // Allocate matrix memory
-    alloc_members(matrix.rows(), matrix.cols());
+    alloc_members(matrix.rows(), matrix.columns());
 
     // Fill matrix. We benefit here from the symmetry of the matrix and
     // loop only over the lower triangle of the symmetric matrix to perform
     // the fill.
-    for (int col = 0; col < matrix.cols(); ++col) {
-        for (int row = col; row < matrix.rows(); ++row) {
+    for (int col = 0; col < m_cols; ++col) {
+        for (int row = col; row < m_rows; ++row) {
             double value      = matrix(row, col);
             (*this)(row, col) = value;
             (*this)(col, row) = value;
@@ -157,9 +168,9 @@ GMatrix::GMatrix(const GMatrixSymmetric& matrix) : GMatrixBase(matrix)
  *
  * @param[in] matrix Sparse matrix (GMatrixSparse).
  *
- * This constructor converts a sparse matrix (of type GMatrixSparse) into a
- * generic matrix. As the result is generic, the conversion will succeed in
- * all cases. 
+ * Constructs a GMatrix object from a sparse matrix object of type
+ * GMatrixSparse. Since the result is a generic matrix, the constructor
+ * will succeed in all cases.
  ***************************************************************************/
 GMatrix::GMatrix(const GMatrixSparse& matrix) : GMatrixBase(matrix)
 {
@@ -167,11 +178,11 @@ GMatrix::GMatrix(const GMatrixSparse& matrix) : GMatrixBase(matrix)
     init_members();
 
     // Construct matrix
-    alloc_members(matrix.rows(), matrix.cols());
+    alloc_members(matrix.rows(), matrix.columns());
 
     // Fill matrix
-    for (int col = 0; col < matrix.cols(); ++col) {
-        for (int row = 0; row < matrix.rows(); ++row) {
+    for (int col = 0; col < m_cols; ++col) {
+        for (int row = 0; row < m_rows; ++row) {
             (*this)(row, col) = matrix(row, col);
         }
     }
@@ -204,6 +215,7 @@ GMatrix::~GMatrix(void)
  * @brief Assignment operator
  *
  * @param[in] matrix Matrix.
+ * @return Matrix.
  ***************************************************************************/
 GMatrix& GMatrix::operator=(const GMatrix& matrix)
 {
@@ -232,48 +244,52 @@ GMatrix& GMatrix::operator=(const GMatrix& matrix)
 
 
 /***********************************************************************//**
- * @brief Access operator
+ * @brief Return reference to matrix element
  *
- * @param[in] row Matrix row.
- * @param[in] col Matrix column.
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
  *
  * @exception GException::out_of_range
  *            Row or column index out of range.
+ *
+ * Returns a reference to the matrix element at @p row and @p column.
  ***************************************************************************/
-double& GMatrix::operator()(const int& row, const int& col)
+double& GMatrix::operator()(const int& row, const int& column)
 {
     // Compile option: perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_ACCESS1, row, col, m_rows, m_cols);
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
     }
     #endif
 
     // Return element
-    return m_data[m_colstart[col]+row];
+    return (m_data[m_colstart[column]+row]);
 }
 
 
 /***********************************************************************//**
- * @brief Access operator (const version)
+ * @brief Return reference to matrix element (const version)
  *
- * @param[in] row Matrix row.
- * @param[in] col Matrix column.
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
  *
  * @exception GException::out_of_range
  *            Row or column index out of range.
+ *
+ * Returns a const reference to the matrix element at @p row and @p column.
  ***************************************************************************/
-const double& GMatrix::operator()(const int& row, const int& col) const
+const double& GMatrix::operator()(const int& row, const int& column) const
 {
     // Compile option: perform range check
     #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || col < 0 || col >= m_cols) {
-      throw GException::out_of_range(G_ACCESS2, row, col, m_rows, m_cols);
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+      throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
     }
     #endif
 
     // Return element
-    return m_data[m_colstart[col]+row];
+    return (m_data[m_colstart[column]+row]);
 }
 
 
@@ -288,8 +304,8 @@ const double& GMatrix::operator()(const int& row, const int& col) const
  *
  * This method performs a vector multiplication of a matrix. The vector
  * multiplication will produce a vector. The matrix multiplication can only
- * be performed when the number of matrix columns is equal to the length of
- * the vector.
+ * be performed when the number of matrix columns is identical to the length
+ * of the vector.
  ***************************************************************************/
 GVector GMatrix::operator*(const GVector& vector) const
 {
@@ -398,7 +414,7 @@ GMatrix& GMatrix::operator*=(const GMatrix& matrix)
     // Case A: Matrices are rectangular, so perform 'inplace' multiplication
     if (m_rows == m_cols) {
         for (int row = 0; row < m_rows; ++row) {
-            GVector v_row = extract_row(row);
+            GVector v_row = this->row(row);
             for (int col = 0; col < m_cols; ++col) {
                 double sum = 0.0;
                 for (int i = 0; i < m_cols; ++i) {
@@ -443,7 +459,7 @@ GMatrix& GMatrix::operator*=(const GMatrix& matrix)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear matrix
  ***************************************************************************/
 void GMatrix::clear(void)
 {
@@ -459,12 +475,219 @@ void GMatrix::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone matrix
+ *
+ * @return Pointer to deep copy of matrix.
  ***************************************************************************/
 GMatrix* GMatrix::clone(void) const
 {
-    // Clone this image
+    // Clone matrix
     return new GMatrix(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Extract row as vector from matrix
+ *
+ * @param[in] row Row to be extracted (starting from 0).
+ *
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ *
+ * This method extracts a matrix row into a vector.
+ ***************************************************************************/
+GVector GMatrix::row(const int& row) const
+{
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_EXTRACT_ROW, row, 0, m_rows-1);
+    }
+    #endif
+
+    // Create result vector
+    GVector result(m_cols);
+
+    // Extract row into vector
+    for (int col = 0, i = row; col < m_cols; ++col, i+=m_rows) {
+        result[col] = m_data[i];
+    }
+
+    // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Set row in matrix
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GMatrix::row(const int& row, const GVector& vector)
+{
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_SET_ROW, row, 0, m_rows-1);
+    }
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Extract column as vector from matrix
+ *
+ * @param[in] column Column index [0,...,columns()-1].
+ *
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ *
+ * This method extracts a matrix column into a vector.
+ ***************************************************************************/
+GVector GMatrix::column(const int& column) const
+{
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_EXTRACT_COLUMN, column, 0, m_cols-1);
+    }
+    #endif
+
+    // Create result vector
+    GVector result(m_rows);
+
+    // Continue only if we have elements
+    if (m_elements > 0) {
+
+        // Get start of data in matrix
+        int i = m_colstart[column];
+
+        // Extract column into vector
+        for (int row = 0; row < m_rows; ++row) {
+            result[row] = m_data[i++];
+        }
+
+    } // endif: matrix had elements
+
+    // Return vector
+    return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Set matrix column from vector
+ *
+ * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] vector Vector.
+ *
+ * @exception GException::out_of_range
+ *            Invalid column index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Matrix dimension mismatches the vector size.
+ *
+ * Inserts the content of a vector into a matrix column. Any previous
+ * content in the matrix column will be overwritted.
+ ***************************************************************************/
+void GMatrix::column(const int& column, const GVector& vector)
+{
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_SET_COLUMN, column, 0, m_cols-1);
+    }
+    #endif
+
+    // Raise an exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_rows != vector.size()) {
+        throw GException::matrix_vector_mismatch(G_SET_COLUMN, vector.size(),
+                                                 m_rows, m_cols);
+    }
+
+    // Continue only if we have elements
+    if (m_elements > 0) {
+
+        // Get start index of data in matrix
+        int i = m_colstart[column];
+
+        // Insert column into vector
+        for (int row = 0; row < m_rows; ++row) {
+            m_data[i++] = vector[row];
+        }
+
+    } // endif: matrix had elements
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Add row to matrix elements
+ *
+ * @todo To be implemented.
+ ***************************************************************************/
+void GMatrix::add_to_row(const int& row, const GVector& vector)
+{
+    // Raise an exception if the row index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_rows) {
+        throw GException::out_of_range(G_ADD_TO_ROW, row, 0, m_rows-1);
+    }
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Add vector column into matrix
+ *
+ * @param[in] column Column index [0,...,columns()-1].
+ * @param[in] vector Vector.
+ *
+ * @exception GException::out_of_range
+ *            Invalid column index specified.
+ * @exception GException::matrix_vector_mismatch
+ *            Matrix dimension mismatches the vector size.
+ *
+ * Adds the content of a vector to a matrix column.
+ ***************************************************************************/
+void GMatrix::add_to_column(const int& column, const GVector& vector)
+{
+    // Raise an exception if the column index is invalid
+    #if defined(G_RANGE_CHECK)
+    if (column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_ADD_TO_COLUMN, column, 0, m_cols-1);
+    }
+    #endif
+
+    // Raise an exception if the matrix and vector dimensions are not
+    // compatible
+    if (m_rows != vector.size()) {
+        throw GException::matrix_vector_mismatch(G_ADD_TO_COLUMN, vector.size(),
+                                                 m_rows, m_cols);
+    }
+
+    // Continue only if we have elements
+    if (m_elements > 0) {
+
+        // Get start index of data in matrix
+        int i = m_colstart[column];
+
+        // Add column into vector
+        for (int row = 0; row < m_rows; ++row) {
+            m_data[i++] += vector[row];
+        }
+
+    } // endif: matrix had elements
+
+    // Return
+    return;
 }
 
 
@@ -529,168 +752,74 @@ void GMatrix::invert(void)
 
 
 /***********************************************************************//**
- * @brief Add vector column into matrix
+ * @brief Negate matrix
  *
- * @param[in] vector Vector.
- * @param[in] col Column index (starting from 0).
+ * @exception GException::feature_not_implemented
+ *            Feature not yet implemented.
  *
- * @exception GException::out_of_range
- *            Invalid column index specified.
- * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
- *
- * Adds the content of a vector to a matrix column.
+ * @todo Needs to be implemented.
  ***************************************************************************/
-void GMatrix::add_col(const GVector& vector, const int& col)
+void GMatrix::negate(void)
 {
-    // Raise an exception if the column index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_ADD_COL, col, 0, m_cols-1);
-    }
-    #endif
-
-    // Raise an exception if the matrix and vector dimensions are not
-    // compatible
-    if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_ADD_COL, vector.size(),
-                                                 m_rows, m_cols);
-    }
-
-    // Continue only if we have elements
-    if (m_elements > 0) {
-
-        // Get start index of data in matrix
-        int i = m_colstart[col];
-
-        // Add column into vector
-        for (int row = 0; row < m_rows; ++row) {
-            m_data[i++] += vector[row];
-        }
-
-    } // endif: matrix had elements
-
+    // Throw exception
+    throw GException::feature_not_implemented(G_INVERT);
+    
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Insert vector column into matrix
+ * @brief Negate matrix
  *
- * @param[in] vector Vector.
- * @param[in] col Column index (starting from 0).
+ * @exception GException::feature_not_implemented
+ *            Feature not yet implemented.
  *
- * @exception GException::out_of_range
- *            Invalid column index specified.
- * @exception GException::matrix_vector_mismatch
- *            Matrix dimension mismatches the vector size.
- *
- * Inserts the content of a vector into a matrix column. Any previous
- * content in the matrix column will be overwritted.
+ * @todo Needs to be implemented.
  ***************************************************************************/
-void GMatrix::insert_col(const GVector& vector, const int& col)
+void GMatrix::abs(void)
 {
-    // Raise an exception if the column index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_INSERT_COL, col, 0, m_cols-1);
-    }
-    #endif
-
-    // Raise an exception if the matrix and vector dimensions are not
-    // compatible
-    if (m_rows != vector.size()) {
-        throw GException::matrix_vector_mismatch(G_INSERT_COL, vector.size(),
-                                                 m_rows, m_cols);
-    }
-
-    // Continue only if we have elements
-    if (m_elements > 0) {
-
-        // Get start index of data in matrix
-        int i = m_colstart[col];
-
-        // Insert column into vector
-        for (int row = 0; row < m_rows; ++row) {
-            m_data[i++] = vector[row];
-        }
-
-    } // endif: matrix had elements
-
+    // Throw exception
+    throw GException::feature_not_implemented(G_INVERT);
+    
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Extract row as vector from matrix
+ * @brief Return fill of matrix
  *
- * @param[in] row Row to be extracted (starting from 0).
+ * @return Matrix fill (between 0 and 1).
  *
- * @exception GException::out_of_range
- *            Invalid row index specified.
+ * Returns the fill of the matrix. The fill of a matrix is defined as the
+ * number non-zero elements devided by the number of total elements. By
+ * definiton, the fill is comprised in the interval [0,..,1].
  *
- * This method extracts a matrix row into a vector.
+ * The fill of a matrix with zero elements will be set to 0.
  ***************************************************************************/
-GVector GMatrix::extract_row(const int& row) const
+double GMatrix::fill(void) const
 {
-    // Raise an exception if the row index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows) {
-        throw GException::out_of_range(G_EXTRACT_ROW, row, 0, m_rows-1);
-    }
-    #endif
+    // Initialise result
+    double result = 0.0;
 
-    // Create result vector
-    GVector result(m_cols);
-
-    // Extract row into vector
-    for (int col = 0, i = row; col < m_cols; ++col, i+=m_rows) {
-        result[col] = m_data[i];
-    }
-
-    // Return vector
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Extract column as vector from matrix
- *
- * @param[in] col Column to be extracted (starting from 0).
- *
- * @exception GException::out_of_range
- *            Invalid row index specified.
- *
- * This method extracts a matrix column into a vector.
- ***************************************************************************/
-GVector GMatrix::extract_col(const int& col) const
-{
-    // Raise an exception if the column index is invalid
-    #if defined(G_RANGE_CHECK)
-    if (col < 0 || col >= m_cols) {
-        throw GException::out_of_range(G_EXTRACT_COL, col, 0, m_cols-1);
-    }
-    #endif
-
-    // Create result vector
-    GVector result(m_rows);
-
-    // Continue only if we have elements
+    // Continue only if matrix has elements
     if (m_elements > 0) {
 
-        // Get start of data in matrix
-        int i = m_colstart[col];
-
-        // Extract column into vector
-        for (int row = 0; row < m_rows; ++row) {
-            result[row] = m_data[i++];
+        // Determine the number of zero elements
+        int zero = 0;
+        for (int i = 0; i < m_elements; ++i) {
+            if (m_data[i] == 0.0) {
+                zero++;
+            }
         }
 
-    } // endif: matrix had elements
+        // Compute fill
+        result = 1.0-double(zero)/double(m_elements);
 
-    // Return vector
+    } // endif: there were elements in the matrix
+
+    // Return result
     return result;
 }
 
@@ -758,42 +887,6 @@ GMatrix GMatrix::extract_upper_triangle(void) const
         for (int row = 0; row <= col; ++row, ++i) {
             result.m_data[i] = m_data[i];
         }
-    }
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return fill of matrix
- *
- * This method returns the fill of a matrix.
- * The fill of a matrix is defined as the number non-zero elements devided
- * by the number of total elements. By definiton, the fill is comprised
- * in the interval [0,..,1].
- *
- * The fill of a matrix with zero elements will be set to 0.
- ***************************************************************************/
-double GMatrix::fill(void) const
-{
-    // Initialise result
-    double result = 0.0;
-
-    // Continue only if matrix has elements
-    if (m_elements > 0) {
-
-        // Determine the number of zero elements
-        int zero = 0;
-        for (int i = 0; i < m_elements; ++i) {
-            if (m_data[i] == 0.0) {
-                zero++;
-            }
-        }
-
-        // Compute fill
-        result = 1.0-double(zero)/double(m_elements);
-
     }
 
     // Return result
@@ -919,6 +1012,8 @@ std::string GMatrix::print(void) const
 
     // Append header
     result.append("=== GMatrix ===");
+
+    // Append information
     result.append("\n"+parformat("Number of rows")+str(m_rows));
     if (m_rowsel != NULL) {
         result.append(" (compressed "+str(m_num_rowsel)+")");
@@ -979,51 +1074,50 @@ void GMatrix::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Allocates matrix memory
+ * @brief Allocate matrix memory
  *
- * @param[in] rows Number of rows (>1).
- * @param[in] cols Number of columns (>1).
+ * @param[in] rows Number of matrix rows.
+ * @param[in] columns Number of matrix columns.
  *
- * @exception GException::empty
- *            Attempt to allocate zero size matrix
+ * Allocates memory for the matrix elements. The method assumes that no
+ * memory has been allocated for the matrix elements and the column start
+ * index array. The method allocates the memory for matrix elements and the
+ * column start indices, sets all matrix elements to 0, and sets the column
+ * start indices.
  *
- * This method is the main constructor code that allocates and initialises
- * memory for matrix elements. The method assumes that no memory has been
- * allocated for the matrix elements and the column start index array.
- * The method allocates the memory for matrix elements and the column start
- * indices, sets all matrix elements to 0.0, and sets the column start
- * indices.
+ * If either the number of rows or the number of columns is non-positive, the
+ * method does nothing.
  ***************************************************************************/
-void GMatrix::alloc_members(const int& rows, const int& cols)
+void GMatrix::alloc_members(const int& rows, const int& columns)
 {
     // Determine number of elements to store in matrix
-    int elements = rows*cols;
+    int elements = rows * columns;
 
-    // Throw exception if requested matrix size is zero
-    if (elements == 0) {
-        throw GException::empty(G_ALLOC_MEMBERS);
-    }
+    // Continue only if number of elements is positive
+    if (elements > 0) {
 
-    // Allocate matrix array and column start index array.
-    m_data     = new double[elements];
-    m_colstart = new int[cols+1];
+        // Allocate matrix array and column start index array.
+        m_data     = new double[elements];
+        m_colstart = new int[columns+1];
 
-    // Store matrix size (logical, storage, allocated)
-    m_rows     = rows;
-    m_cols     = cols;
-    m_elements = elements;
-    m_alloc    = elements;
+        // Store matrix size (logical, storage, allocated)
+        m_rows     = rows;
+        m_cols     = columns;
+        m_elements = elements;
+        m_alloc    = elements;
 
-    // Set-up column start indices
-    m_colstart[0] = 0;
-    for (int col = 1; col <= m_cols; ++col) {
-        m_colstart[col] = m_colstart[col-1] + m_rows;
-    }
+        // Set-up column start indices
+        m_colstart[0] = 0;
+        for (int col = 1; col <= m_cols; ++col) {
+            m_colstart[col] = m_colstart[col-1] + m_rows;
+        }
         
-    // Initialise matrix elements to 0.0
-    for (int i = 0; i < m_elements; ++i) {
-        m_data[i] = 0.0;
-    }
+        // Initialise matrix elements to 0
+        for (int i = 0; i < m_elements; ++i) {
+            m_data[i] = 0.0;
+        }
+
+    } // endif: number of elements was positive
 
     // Return
     return;

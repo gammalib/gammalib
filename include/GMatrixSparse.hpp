@@ -139,53 +139,58 @@ class GMatrixSparse : public GMatrixBase {
 public:
     // Constructors and destructors
     GMatrixSparse(void);
-    GMatrixSparse(const int& rows, const int& cols, const int& elements = 0);
+    explicit GMatrixSparse(const int& rows, const int& columns,
+                           const int& elements = 0);
     GMatrixSparse(const GMatrix& matrix);
     GMatrixSparse(const GMatrixSparse& matrix);
     GMatrixSparse(const GMatrixSymmetric& matrix);
     virtual ~GMatrixSparse(void);
 
     // Implemented pure virtual base class operators
-    double&        operator()(const int& row, const int& col);
-    const double&  operator()(const int& row, const int& col) const;
-    GVector        operator*(const GVector& vector) const;
+    virtual double&        operator()(const int& row, const int& column);
+    virtual const double&  operator()(const int& row, const int& column) const;
+    virtual GVector        operator*(const GVector& vector) const;
 
     // Overloaded virtual base class operators
-    bool           operator==(const GMatrixSparse& matrix) const;
-    bool           operator!=(const GMatrixSparse& matrix) const;
+    virtual bool           operator==(const GMatrixSparse& matrix) const;
+    virtual bool           operator!=(const GMatrixSparse& matrix) const;
 
     // Other operators
-    GMatrixSparse& operator=(const GMatrixSparse& matrix);
-    GMatrixSparse  operator+(const GMatrixSparse& matrix) const;
-    GMatrixSparse  operator-(const GMatrixSparse& matrix) const;
-    GMatrixSparse  operator*(const GMatrixSparse& matrix) const;
-    GMatrixSparse  operator-(void) const;
-    GMatrixSparse& operator+=(const GMatrixSparse& matrix);
-    GMatrixSparse& operator-=(const GMatrixSparse& matrix);
-    GMatrixSparse& operator*=(const GMatrixSparse& matrix);
-    GMatrixSparse& operator*=(const double& scalar);
-    GMatrixSparse& operator/=(const double& scalar);
+    virtual GMatrixSparse& operator=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse  operator+(const GMatrixSparse& matrix) const;
+    virtual GMatrixSparse  operator-(const GMatrixSparse& matrix) const;
+    virtual GMatrixSparse  operator*(const GMatrixSparse& matrix) const;
+    virtual GMatrixSparse  operator-(void) const;
+    virtual GMatrixSparse& operator+=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse& operator-=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse& operator*=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse& operator*=(const double& scalar);
+    virtual GMatrixSparse& operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
-    void           clear(void);
-    GMatrixSparse* clone(void) const;
-    void           transpose(void);
-    void           invert(void);
-    void           add_col(const GVector& vector, const int& col);
-    void           insert_col(const GVector& vector, const int& col);
-    GVector        extract_row(const int& row) const;
-    GVector        extract_col(const int& col) const;
-    double         fill(void) const;
-    double         min(void) const;
-    double         max(void) const;
-    double         sum(void) const;
-    std::string    print(void) const;
+    virtual void           clear(void);
+    virtual GMatrixSparse* clone(void) const;
+    virtual GVector        row(const int& row) const;
+    virtual void           row(const int& row, const GVector& vector);
+    virtual GVector        column(const int& column) const;
+    virtual void           column(const int& column, const GVector& vector);
+    virtual void           add_to_row(const int& row, const GVector& vector);
+    virtual void           add_to_column(const int& column, const GVector& vector);
+    virtual void           transpose(void);
+    virtual void           invert(void);
+    virtual void           negate(void);
+    virtual void           abs(void);
+    virtual double         fill(void) const;
+    virtual double         min(void) const;
+    virtual double         max(void) const;
+    virtual double         sum(void) const;
+    virtual std::string    print(void) const;
 
     // Other methods
-    void    add_col(const double* values, const int* rows,
-                    int number, const int& col);
-    void    insert_col(const double* values, const int* rows,
-                       int number, const int& col);
+    void    column(const double* values, const int* rows,
+                   int number, const int& col);
+    void    add_to_column(const double* values, const int* rows,
+                          int number, const int& col);
     void    cholesky_decompose(bool compress = true);
     GVector cholesky_solver(const GVector& vector, bool compress = true);
     void    cholesky_invert(bool compress = true);
@@ -205,7 +210,7 @@ private:
     void alloc_members(const int& rows, const int& cols, const int& elements = 0);
     void init_stack_members(void);
     void free_stack_members(void);
-    int  get_index(const int& row, const int& col) const;
+    int  get_index(const int& row, const int& column) const;
     void fill_pending(void);
     void alloc_elements(int start, const int& num);
     void free_elements(const int& start, const int& num);
