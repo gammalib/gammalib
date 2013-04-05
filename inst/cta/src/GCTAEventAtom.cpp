@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GCTAEventAtom.cpp  -  CTA event atom class                *
+ *                GCTAEventAtom.cpp - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventAtom.cpp
  * @brief GCTAEventAtom class implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -198,6 +198,7 @@ void GCTAEventAtom::init_members(void)
     m_dir.clear();
     m_time.clear();
     m_energy.clear();
+    m_index       = 0;
     m_event_id    = 0;
     m_obs_id      = 0;
     m_multip      = 0;
@@ -236,6 +237,7 @@ void GCTAEventAtom::copy_members(const GCTAEventAtom& atom)
     m_dir         = atom.m_dir;
     m_time        = atom.m_time;
     m_energy      = atom.m_energy;
+    m_index       = atom.m_index;
     m_event_id    = atom.m_event_id;
     m_obs_id      = atom.m_obs_id;
     m_multip      = atom.m_multip;
@@ -271,10 +273,3 @@ void GCTAEventAtom::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

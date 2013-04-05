@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GCTAEventAtom.hpp  -  CTA event atom class               *
+ *                 GCTAEventAtom.hpp - CTA event atom class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventAtom.hpp
  * @brief GCTAEventAtom class interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAEVENTATOM_HPP
@@ -69,6 +69,7 @@ public:
     std::string        print(void) const;
 
     // Other methods
+    const int&           index(void) const { return m_index; }
     const unsigned long& event_id(void) const { return m_event_id; }
     const unsigned long& obs_id(void)   const { return m_obs_id; }
     void                 event_id(const unsigned long& id) { m_event_id=id; }
@@ -81,6 +82,7 @@ protected:
     void free_members(void);
 
     // Protected members
+    int           m_index;          //!< Index in list
     GCTAInstDir   m_dir;            //!< Event direction
     GEnergy       m_energy;         //!< Event energy
     GTime         m_time;           //!< Event time
