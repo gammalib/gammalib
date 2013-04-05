@@ -49,7 +49,7 @@ public:
     // Methods
     void                 clear(void);
     GSource*             clone(void) const;
-    std::string          name(void) const;
+    const std::string&   name(void) const;
     const GModelSpatial* model(void) const;
     const GEnergy&       energy(void) const;
     const GTime&         time(void) const;

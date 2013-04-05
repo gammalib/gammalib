@@ -61,14 +61,14 @@ public:
                      const GTime&       time);
     GSource(const GSource& src);
     virtual ~GSource(void);
- 
+
     // Operators
     GSource& operator= (const GSource& src);
 
     // Methods
     void                 clear(void);
     GSource*             clone(void) const;
-    std::string          name(void) const { return m_name; }
+    const std::string&   name(void) const { return m_name; }
     const GModelSpatial* model(void) const { return m_model; }
     const GEnergy&       energy(void) const { return m_energy; }
     const GTime&         time(void) const { return m_time; }
@@ -77,7 +77,7 @@ public:
     void                 energy(const GEnergy& energy) { m_energy=energy; }
     void                 time(const GTime& time) { m_time=time; }
     std::string          print(void) const;
-  
+
 protected:
     // Protected methods
     void init_members(void);
