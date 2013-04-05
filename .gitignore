@@ -36,6 +36,7 @@ m4/lt~obsolete.m4
 *.fits
 *.cpp~
 *.hpp~
+*.i~
 Makefile
 stamp-h1
 Makefile.in
