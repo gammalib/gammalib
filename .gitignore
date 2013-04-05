@@ -37,6 +37,7 @@ m4/lt~obsolete.m4
 *.cpp~
 *.hpp~
 *.i~
+.gitignore~
 Makefile
 stamp-h1
 Makefile.in
