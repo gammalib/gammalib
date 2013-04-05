@@ -178,8 +178,10 @@ private:
     GCTAEdisp*          m_edisp;    //!< Energy dispersion
 
     // Npred cache
-    mutable std::vector<std::string> m_npred_names;  //!< Model names
-    mutable std::vector<double>      m_npred_values; //!< Model values
+    mutable std::vector<std::string> m_npred_names;    //!< Model names
+    mutable std::vector<GEnergy>     m_npred_energies; //!< Model energy
+    mutable std::vector<GTime>       m_npred_times;    //!< Model time
+    mutable std::vector<double>      m_npred_values;   //!< Model values
 };
 
 #endif /* GCTARESPONSE_HPP */
