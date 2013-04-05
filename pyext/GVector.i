@@ -48,20 +48,21 @@ public:
     virtual ~GVector(void);
 
     // Vector operators
-    GVector& operator+=(const GVector& v);
-    GVector& operator-=(const GVector& v);
-    GVector& operator+=(const double& v);
-    GVector& operator-=(const double& v);
-    GVector& operator*=(const double& v);
-    GVector& operator/=(const double& v);
-    GVector  operator-() const;
+    bool     operator==(const GVector& vector) const;
+    bool     operator!=(const GVector& vector) const;
+    GVector& operator+=(const GVector& vector);
+    GVector& operator-=(const GVector& vector);
+    GVector& operator+=(const double& value);
+    GVector& operator-=(const double& value);
+    GVector& operator*=(const double& value);
+    GVector& operator/=(const double& value);
+    GVector  operator-(void) const;
 
     // Vector functions
     void          clear(void);
     GVector*      clone(void) const;
-    int           size(void) const;
-    double&       at(const int& inx);
-    const double& at(const int& inx) const;
+    const int&    size(void) const;
+    double&       at(const int& index);
     int           non_zeros(void) const;
 };
 

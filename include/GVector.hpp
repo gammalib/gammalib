@@ -1,5 +1,5 @@
 /***************************************************************************
- *                          GVector.hpp - Vector class                     *
+ *                         GVector.hpp - Vector class                      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -45,46 +45,33 @@
  ***************************************************************************/
 class GVector : public GBase {
 
-    // Operator friends
-    friend GVector  operator+(const GVector &a, const GVector &b);
-    friend GVector  operator+(const GVector &a, const double &b);
-    friend GVector  operator+(const double &a, const GVector &b);
-    friend GVector  operator-(const GVector &a, const GVector &b);
-    friend GVector  operator-(const GVector &a, const double &b);
-    friend GVector  operator-(const double &a, const GVector &b);
-    friend double   operator*(const GVector &a, const GVector &b);
-    friend GVector  operator*(const GVector &a, const double &b);
-    friend GVector  operator*(const double &a, const GVector &b);
-    friend GVector  operator/(const GVector &a, const double &b);
-    friend int      operator==(const GVector &a, const GVector &b);
-    friend int      operator!=(const GVector &a, const GVector &b);
-
     // Friend functions
-    friend GVector  cross(const GVector &a, const GVector &b);
-    friend double   norm(const GVector &v);
-    friend double   min(const GVector &v);
-    friend double   max(const GVector &v);
-    friend double   sum(const GVector &v);
-    friend GVector  perm(const GVector &v, const int *p);
-    friend GVector  iperm(const GVector &v, const int *p);
-    friend GVector  acos(const GVector &v);
-    friend GVector  acosh(const GVector &v);
-    friend GVector  asin(const GVector &v);
-    friend GVector  asinh(const GVector &v);
-    friend GVector  atan(const GVector &v);
-    friend GVector  atanh(const GVector &v);
-    friend GVector  cos(const GVector &v);
-    friend GVector  cosh(const GVector &v);
-    friend GVector  exp(const GVector &v);
-    friend GVector  abs(const GVector &v);
-    friend GVector  log(const GVector &v);
-    friend GVector  log10(const GVector &v);
-    friend GVector  sin(const GVector &v);
-    friend GVector  sinh(const GVector &v);
-    friend GVector  sqrt(const GVector &v);
-    friend GVector  tan(const GVector &v);
-    friend GVector  tanh(const GVector &v);
-    friend GVector  pow(const GVector &v, const double &q);
+    friend GVector cross(const GVector& a, const GVector& b);
+    friend double  operator*(const GVector& a, const GVector& b);
+    friend double  norm(const GVector& vector);
+    friend double  min(const GVector& vector);
+    friend double  max(const GVector& vector);
+    friend double  sum(const GVector& vector);
+    friend GVector perm(const GVector& vector, const int *p);
+    friend GVector iperm(const GVector& vector, const int *p);
+    friend GVector acos(const GVector& vector);
+    friend GVector acosh(const GVector& vector);
+    friend GVector asin(const GVector& vector);
+    friend GVector asinh(const GVector& vector);
+    friend GVector atan(const GVector& vector);
+    friend GVector atanh(const GVector& vector);
+    friend GVector cos(const GVector& vector);
+    friend GVector cosh(const GVector& vector);
+    friend GVector exp(const GVector& vector);
+    friend GVector abs(const GVector& vector);
+    friend GVector log(const GVector& vector);
+    friend GVector log10(const GVector& vector);
+    friend GVector sin(const GVector& vector);
+    friend GVector sinh(const GVector& vector);
+    friend GVector sqrt(const GVector& vector);
+    friend GVector tan(const GVector& vector);
+    friend GVector tanh(const GVector& vector);
+    friend GVector pow(const GVector& vector, const double& power);
 
 public:
     // Constructors and destructors
@@ -93,30 +80,32 @@ public:
     explicit GVector(const double& a);
     explicit GVector(const double& a, const double& b);
     explicit GVector(const double& a, const double& b, const double& c);
-    GVector(const GVector& v);
+    GVector(const GVector& vector);
     virtual ~GVector(void);
 
     // Vector element access operators
-    double&       operator[](const int& inx);
-    const double& operator[](const int& inx) const;
+    double&       operator[](const int& index);
+    const double& operator[](const int& index) const;
 
     // Vector operators
-    GVector& operator=(const GVector& v);
-    GVector& operator+=(const GVector& v);
-    GVector& operator-=(const GVector& v);
-    GVector& operator=(const double& v);
-    GVector& operator+=(const double& v);
-    GVector& operator-=(const double& v);
-    GVector& operator*=(const double& v);
-    GVector& operator/=(const double& v);
-    GVector  operator-() const;
+    bool     operator==(const GVector& vector) const;
+    bool     operator!=(const GVector& vector) const;
+    GVector& operator=(const GVector& vector);
+    GVector& operator+=(const GVector& vector);
+    GVector& operator-=(const GVector& vector);
+    GVector& operator=(const double& scalar);
+    GVector& operator+=(const double& scalar);
+    GVector& operator-=(const double& scalar);
+    GVector& operator*=(const double& scalar);
+    GVector& operator/=(const double& scalar);
+    GVector  operator-(void) const;
 
     // Vector methods
     void          clear(void);
     GVector*      clone(void) const;
-    int           size(void) const;
-    double&       at(const int& inx);
-    const double& at(const int& inx) const;
+    const int&    size(void) const;
+    double&       at(const int& index);
+    const double& at(const int& index) const;
     int           non_zeros(void) const;
     std::string   print(void) const;
 
@@ -124,7 +113,7 @@ private:
     // Private methods
     void init_members(void);
     void alloc_members(void);
-    void copy_members(const GVector& v);
+    void copy_members(const GVector& vector);
     void free_members(void);
 
     // Private data area
@@ -136,140 +125,28 @@ private:
 /***********************************************************************//**
  * @brief Vector element access operator
  *
- * @param[in] inx Vector element index to be accessed [0,...,size()-1]
+ * @param[in] index Element index [0,...,size()-1]
  * @return Reference to vector element.
  ***************************************************************************/
 inline
-double& GVector::operator[](const int& inx)
+double& GVector::operator[](const int& index)
 {
     // Return vector element
-    return m_data[inx];
+    return m_data[index];
 }
 
 
 /***********************************************************************//**
  * @brief Vector element access operator (const variant)
  *
- * @param[in] inx Vector element index to be accessed [0,...,size()-1]
+ * @param[in] index Element index [0,...,size()-1]
  * @return Reference to vector element.
  ***************************************************************************/
 inline
-const double& GVector::operator[](const int& inx) const
+const double& GVector::operator[](const int& index) const
 {
     // Return vector element
-    return m_data[inx];
-}
-
-
-/***********************************************************************//**
- * @brief Vector unary addition operator
- ***************************************************************************/
-inline
-GVector& GVector::operator+=(const GVector& v)
-{
-    if (m_num != v.m_num) {
-        throw GException::vector_mismatch("GVector::operator+=(GVector)",
-                                          m_num, v.m_num);
-    }
-    for (int i = 0; i < m_num; ++i) {
-        m_data[i] += v.m_data[i];
-    }
-    return *this;
-}
-
-
-/***********************************************************************//**
- * @brief Vector unary subtraction operator
- ***************************************************************************/
-inline
-GVector& GVector::operator-=(const GVector& v)
-{
-    if (m_num != v.m_num) {
-        throw GException::vector_mismatch("GVector::operator-=(GVector)",
-                                          m_num, v.m_num);
-    }
-    for (int i = 0; i < m_num; ++i) {
-        m_data[i] -= v.m_data[i];
-    }
-    return *this;
-}
-
-
-/***********************************************************************//**
- * @brief Scalar assignment operator
- ***************************************************************************/
-inline
-GVector& GVector::operator=(const double& v)
-{
-    for (int i = 0; i < m_num; ++i) {
-        m_data[i] = v;
-    }
-    return *this;
-}
-
-
-/***********************************************************************//**
- * @brief Scalar unary addition operator
- ***************************************************************************/
-inline
-GVector& GVector::operator+=(const double& v)
-{
-    for (int i = 0; i < m_num; ++i) {
-        m_data[i] += v;
-    }
-    return *this;
-}
-
-
-/***********************************************************************//**
- * @brief Scalar unary subtraction operator
- ***************************************************************************/
-inline
-GVector& GVector::operator-=(const double& v)
-{
-    for (int i = 0; i < m_num; ++i) {
-        m_data[i] -= v;
-    }
-    return *this;
-}
-
-/***********************************************************************//**
- * @brief Scalar unary multiplication operator
- ***************************************************************************/
-inline
-GVector& GVector::operator*=(const double& v)
-{
-    for (int i = 0; i < m_num; ++i) {
-        m_data[i] *= v;
-    }
-    return *this;
-}
-
-
-/***********************************************************************//**
- * @brief Scalar unary division operator
- ***************************************************************************/
-inline
-GVector& GVector::operator/=(const double& v)
-{
-    for (int i = 0; i < m_num; ++i) {
-        m_data[i] /= v;
-    }
-    return *this;
-}
-
-
-/***********************************************************************//**
- * @brief Unary minus operator
- ***************************************************************************/
-inline
-GVector GVector::operator-( ) const
-{
-    GVector result = *this;
-    for (int i = 0; i < m_num; ++i) {
-        result.m_data[i] = -result.m_data[i];
-    }
-    return result;
+    return m_data[index];
 }
 
 
@@ -277,45 +154,79 @@ GVector GVector::operator-( ) const
  * @brief Return size of vector
  *
  * @return Size of vector
+ *
+ * Returns the number of elements in the vector.
  ***************************************************************************/
 inline
-int GVector::size() const
+const int& GVector::size() const
 {
     return m_num;
 }
 
 
-/***************************************************************************
- *                               Inline friends                            *
+/***********************************************************************//**
+ * @brief Add two vectors
+ *
+ * @param[in] a Vector.
+ * @param[in] b Vector.
+ * @return Sum of vectors @p a and @p b.
+ *
+ * Returns the sum of vectors @p a and @p b.
  ***************************************************************************/
-// Vector + Vector
 inline
-GVector operator+ (const GVector& a, const GVector& b)
+GVector operator+(const GVector& a, const GVector& b)
 {
     GVector result = a;
     result += b;
     return result;
 }
 
-// Vector + Scalar
+
+/***********************************************************************//**
+ * @brief Add scalar to vector
+ *
+ * @param[in] vector Vector.
+ * @param[in] scalar Scalar.
+ * @return Vector with @p scalar added to all elements.
+ *
+ * Returns a vector for which the @p scalar has been added to all elements.
+ ***************************************************************************/
 inline
-GVector operator+ (const GVector& a, const double& b)
+GVector operator+(const GVector& vector, const double& scalar)
 {
-    GVector result = a;
-    result += b;
+    GVector result = vector;
+    result += scalar;
     return result;
 }
 
-// Scalar + Vector
+
+/***********************************************************************//**
+ * @brief Add scalar to vector
+ *
+ * @param[in] scalar Scalar.
+ * @param[in] vector Vector.
+ * @return Vector with @p scalar added to all elements.
+ *
+ * Returns a vector for which the @p scalar has been added to all elements.
+ ***************************************************************************/
 inline
-GVector operator+ (const double& a, const GVector& b)
+GVector operator+(const double& scalar, const GVector& vector)
 {
-    GVector result = b;
-    result += a;
+    GVector result = vector;
+    result += scalar;
     return result;
 }
 
-// Vector - Vector
+
+/***********************************************************************//**
+ * @brief Subtract vector from vector
+ *
+ * @param[in] a Vector.
+ * @param[in] b Vector.
+ * @return Difference between vector @p a and @p b.
+ *
+ * Returns the difference between vector @p a and @p b.
+ ***************************************************************************/
 inline
 GVector operator- (const GVector& a, const GVector& b)
 {
@@ -324,350 +235,95 @@ GVector operator- (const GVector& a, const GVector& b)
     return result;
 }
 
-// Vector - Scalar
+
+/***********************************************************************//**
+ * @brief Subtract scalar from vector
+ *
+ * @param[in] vector Vector.
+ * @param[in] scalar Scalar.
+ * @return Vector with @p scalar subtracted from all elements.
+ *
+ * Returns a vector for which the @p scalar has been subtracted from all
+ * elements.
+ ***************************************************************************/
 inline
-GVector operator- (const GVector& a, const double& b)
+GVector operator-(const GVector& vector, const double& scalar)
 {
-    GVector result = a;
-    result -= b;
+    GVector result = vector;
+    result -= scalar;
     return result;
 }
 
-// Scalar - Vector
+
+/***********************************************************************//**
+ * @brief Subtract vector from scalar
+ *
+ * @param[in] scalar Scalar.
+ * @param[in] vector Vector.
+ * @return Vector with all elements subtracted from @p scalar.
+ *
+ * Returns a vector for which all elements have been subtracted from the 
+ * @p scalar.
+ ***************************************************************************/
 inline
-GVector operator- (const double& a, const GVector& b)
+GVector operator-(const double& scalar, const GVector& vector)
 {
-    GVector result = -b;
-    result += a;
+    GVector result = -vector;
+    result += scalar;
     return result;
 }
 
-// Scalar product
+
+/***********************************************************************//**
+ * @brief Multiply vector by scalar
+ *
+ * @param[in] vector Vector.
+ * @param[in] scalar Scalar.
+ * @return Vector for which all elements have be multiplied by @p scalar.
+ *
+ * Returns a vector for which all elements have be multiplied by @p scalar.
+ ***************************************************************************/
 inline
-double operator* (const GVector& a, const GVector& b)
+GVector operator*(const GVector& vector, const double& scalar)
 {
-    if (a.m_num != b.m_num)
-        throw GException::vector_mismatch("operator*(GVector, GVector)",
-                                          a.m_num, b.m_num);
-    double result = 0.0;
-    for (int i = 0; i < a.m_num; ++i)
-        result += (a.m_data[i] * b.m_data[i]);
+    GVector result = vector;
+    result *= scalar;
     return result;
 }
 
-// Vector * double
+
+/***********************************************************************//**
+ * @brief Multiply vector by scalar
+ *
+ * @param[in] scalar Scalar.
+ * @param[in] vector Vector.
+ * @return Vector for which all elements have be multiplied by @p scalar.
+ *
+ * Returns a vector for which all elements have be multiplied by @p scalar.
+ ***************************************************************************/
 inline
-GVector operator* (const GVector& a, const double& b)
+GVector operator*(const double& scalar, const GVector& vector)
 {
-    GVector result = a;
-    result *= b;
+    GVector result = vector;
+    result *= scalar;
     return result;
 }
 
-// double * Vector
-inline
-GVector operator* (const double& a, const GVector& b)
-{
-    GVector result = b;
-    result *= a;
-    return result;
-}
 
-// Vector / double
+/***********************************************************************//**
+ * @brief Divide vector by scalar
+ *
+ * @param[in] vector Vector.
+ * @param[in] scalar Scalar.
+ * @return Vector for which all elements have be divided by @p scalar.
+ *
+ * Returns a vector for which all elements have be divided by @p scalar.
+ ***************************************************************************/
 inline
-GVector operator/ (const GVector& a, const double& b)
+GVector operator/(const GVector& vector, const double& scalar)
 {
-    GVector result = a;
-    result /= b;
-    return result;
-}
-
-// Vector norm
-inline
-double norm(const GVector &v)
-{
-    double result = 0.0;
-    for (int i = 0; i < v.m_num; ++i)
-        result += (v.m_data[i] * v.m_data[i]);
-    result = (result > 0.0) ? std::sqrt(result) : 0.0;
-    return result;
-}
-
-// Vector minimum
-inline
-double min(const GVector &v)
-{
-    double result = v.m_data[0];
-    for (int i = 1; i < v.m_num; ++i) {
-        if (v.m_data[i] < result)
-            result = v.m_data[i];
-  }
-  return result;
-}
-
-// Vector maximum
-inline
-double max(const GVector &v)
-{
-    double result = v.m_data[0];
-    for (int i = 1; i < v.m_num; ++i) {
-        if (v.m_data[i] > result)
-            result = v.m_data[i];
-    }
-    return result;
-}
-
-// Vector sum
-inline
-double sum(const GVector &v)
-{
-    double result = 0.0;
-    for (int i = 0; i < v.m_num; ++i)
-        result += v.m_data[i];
-    return result;
-}
-
-// Vector permutation
-inline
-GVector perm(const GVector &v, const int *p)
-{
-    GVector result(v.m_num);
-    if (p == NULL)
-        result = v;
-    else {
-        for (int i = 0; i < v.m_num; ++i)
-            result.m_data[i] = v.m_data[p[i]];
-    }
-    return result;
-}
-
-// Inverse vector permutation
-inline
-GVector iperm(const GVector &v, const int *p)
-{
-    GVector result(v.m_num);
-    if (p == NULL)
-        result = v;
-    else {
-        for (int i = 0; i < v.m_num; ++i)
-            result.m_data[p[i]] = v.m_data[i];
-    }
-    return result;
-}
-
-// Vector acos
-inline
-GVector acos(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::acos(v.m_data[i]);
-    return result;
-}
-
-// Vector acosh
-inline
-GVector acosh(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = acosh(v.m_data[i]);
-    return result;
-}
-
-// Vector asin
-inline
-GVector asin(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::asin(v.m_data[i]);
-    return result;
-}
-
-// Vector asinh
-inline
-GVector asinh(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = asinh(v.m_data[i]);
-    return result;
-}
-
-// Vector atan
-inline
-GVector atan(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::atan(v.m_data[i]);
-    return result;
-}
-
-// Vector atanh
-inline
-GVector atanh(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = atanh(v.m_data[i]);
-    return result;
-}
-
-// Vector cos
-inline
-GVector cos(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::cos(v.m_data[i]);
-    return result;
-}
-
-// Vector cosh
-inline
-GVector cosh(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::cosh(v.m_data[i]);
-    return result;
-}
-
-// Vector exp
-inline
-GVector exp(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::exp(v.m_data[i]);
-    return result;
-}
-
-// Vector abs
-inline
-GVector abs(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::abs(v.m_data[i]);
-    return result;
-}
-
-// Vector log
-inline
-GVector log(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::log(v.m_data[i]);
-    return result;
-}
-
-// Vector log10
-inline
-GVector log10(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::log10(v.m_data[i]);
-    return result;
-}
-
-// Vector sin
-inline
-GVector sin(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::sin(v.m_data[i]);
-    return result;
-}
-
-// Vector sinh
-inline
-GVector sinh(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::sinh(v.m_data[i]);
-    return result;
-}
-
-// Vector sqrt
-inline
-GVector sqrt(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::sqrt(v.m_data[i]);
-    return result;
-}
-
-// Vector tan
-inline
-GVector tan(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::tan(v.m_data[i]);
-    return result;
-}
-
-// Vector tanh
-inline
-GVector tanh(const GVector &v)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::tanh(v.m_data[i]);
-    return result;
-}
-
-// Vector pow
-inline
-GVector pow(const GVector &v, const double &a)
-{
-    GVector result(v.m_num);
-    for (int i = 0; i < v.m_num; ++i)
-        result.m_data[i] = std::pow(v.m_data[i],a);
-    return result;
-}
-
-// Equality operator
-inline
-int operator== (const GVector &a, const GVector &b)
-{
-    int result = 1;
-    if (a.m_num == b.m_num) {
-        for (int i = 0; i < a.m_num; ++i) {
-            if (a.m_data[i] != b.m_data[i]) {
-                result = 0;
-                break;
-            }
-        }
-    }
-    else
-      result = 0;
-    return result;
-}
-
-// Not equality operator
-inline
-int operator!= (const GVector &a, const GVector &b)
-{
-    int result = 0;
-    if (a.m_num == b.m_num) {
-        for (int i = 0; i < a.m_num; ++i) {
-            if (a.m_data[i] != b.m_data[i]) {
-                result = 1;
-                break;
-            }
-        }
-    }
-    else
-        result = 1;
+    GVector result = vector;
+    result /= scalar;
     return result;
 }
 
