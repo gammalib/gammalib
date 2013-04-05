@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GSource.hpp - Source class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -42,7 +42,7 @@
  *
  * The GSource class stores the physical attributes of a gamma-ray source,
  * which is the distribution of photon arrival directions in form of a
- * spatial source model), the photon energy, and the photon arrival time.
+ * spatial source model, the photon energy, and the photon arrival time.
  * The class is very similar to the GPhoton class, yet instead of a given
  * photon arrival direction it contains a spatial model pointer. Note that
  * the class does not allocate or deallocate the spatial model pointer,
@@ -68,14 +68,14 @@ public:
     // Methods
     void                 clear(void);
     GSource*             clone(void) const;
-    const std::string&   name(void) const { return m_name; }
-    const GModelSpatial* model(void) const { return m_model; }
-    const GEnergy&       energy(void) const { return m_energy; }
-    const GTime&         time(void) const { return m_time; }
-    void                 name(const std::string& name) { m_name=name; }
-    void                 model(GModelSpatial* model) { m_model=model; }
-    void                 energy(const GEnergy& energy) { m_energy=energy; }
-    void                 time(const GTime& time) { m_time=time; }
+    const std::string&   name(void) const;
+    const GModelSpatial* model(void) const;
+    const GEnergy&       energy(void) const;
+    const GTime&         time(void) const;
+    void                 name(const std::string& name);
+    void                 model(GModelSpatial* model);
+    void                 energy(const GEnergy& energy);
+    void                 time(const GTime& time);
     std::string          print(void) const;
 
 protected:
@@ -90,5 +90,121 @@ protected:
     GEnergy        m_energy;   //!< Photon energy
     GTime          m_time;     //!< Photon arrival time
 };
+
+
+/***********************************************************************//**
+ * @brief Return model name
+ *
+ * @return Model name.
+ *
+ * Returns the model name.
+ ***************************************************************************/
+inline
+const std::string& GSource::name(void) const
+{
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Return spatial model component
+ *
+ * @return Pointer to spatial model component.
+ *
+ * Returns spatial model component.
+ ***************************************************************************/
+inline
+const GModelSpatial* GSource::model(void) const
+{
+    return m_model;
+}
+
+
+/***********************************************************************//**
+ * @brief Return photon energy
+ *
+ * @return Photon energy.
+ *
+ * Returns photon energy.
+ ***************************************************************************/
+inline
+const GEnergy& GSource::energy(void) const
+{
+    return m_energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Return photon arrival time
+ *
+ * @return Photon arrival time.
+ *
+ * Returns the photon arrival time.
+ ***************************************************************************/
+inline
+const GTime& GSource::time(void) const
+{
+    return m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Set model name
+ *
+ * @param[in] name Model name.
+ *
+ * Sets the model name.
+ ***************************************************************************/
+inline
+void GSource::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set spatial model component
+ *
+ * @param[in] model Spatial model component.
+ *
+ * Sets the spatial model component.
+ ***************************************************************************/
+inline
+void GSource::model(GModelSpatial* model)
+{
+    m_model = model;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set photon energy
+ *
+ * @param[in] energy Photon energy.
+ *
+ * Sets the photon energy.
+ ***************************************************************************/
+inline
+void GSource::energy(const GEnergy& energy)
+{
+    m_energy = energy;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set photon arrival time
+ *
+ * @param[in] time Photon arrival time.
+ *
+ * Sets the photon arrival time.
+ ***************************************************************************/
+inline
+void GSource::time(const GTime& time)
+{
+    m_time = time;
+    return;
+}
 
 #endif /* GSOURCE_HPP */
