@@ -810,12 +810,16 @@ double GObservation::npred_temp(const GModel& model) const
     const GModelSky* sky = dynamic_cast<const GModelSky*>(&model);
     if (sky != NULL && sky->temporal()->type() == "Constant") {
 
-        // Setup integration function
-        GObservation::npred_temp_kern integrand(this, &model);
-
         // Evaluate model at first start time and multiply by ontime
-        double time = events()->gti().tstart().secs();
-        result      = integrand.eval(time) * events()->gti().ontime();
+        double ontime = events()->gti().ontime();
+
+        // Integrate only if ontime is positive
+        if (ontime > 0.0) {
+
+            // Integration is a simple multiplication by the time
+            result = npred_spec(model, events()->gti().tstart()) * ontime;
+
+        }
 
     } // endif: model was constant
 
@@ -914,6 +918,9 @@ double GObservation::npred_spec(const GModel& model,
     // Setup integration function
     GObservation::npred_spec_kern integrand(this, &model, &obsTime);
     GIntegral                     integral(&integrand);
+
+    // Set integration precision
+    integral.eps(1.0e-5);
 
     // Do Romberg integration
     #if defined(G_LN_ENERGY_INT)
