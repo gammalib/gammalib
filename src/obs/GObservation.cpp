@@ -722,7 +722,7 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
             }
         }
         #endif
-        
+
         // Remove any boundaries to avoid limitations
         (*ptr)[ipar].remove_range();
 
@@ -805,27 +805,47 @@ double GObservation::npred_temp(const GModel& model) const
     // Initialise result
     double result = 0.0;
 
-    // Loop over GTIs
-    for (int i = 0; i < events()->gti().size(); ++i) {
 
-        // Set integration interval in seconds
-        double tstart = events()->gti().tstart(i).secs();
-        double tstop  = events()->gti().tstop(i).secs();
-
-        // Throw exception if time interval is not valid
-        if (tstop <= tstart) {
-            throw GException::gti_invalid(G_NPRED_TEMP, events()->gti().tstart(i),
-                                          events()->gti().tstop(i));
-        }
+    // Case A: If the model is constant then integrate analytically
+    const GModelSky* sky = dynamic_cast<const GModelSky*>(&model);
+    if (sky != NULL && sky->temporal()->type() == "Constant") {
 
         // Setup integration function
         GObservation::npred_temp_kern integrand(this, &model);
-        GIntegral                     integral(&integrand);
 
-        // Do Romberg integration
-        result += integral.romb(tstart, tstop);
+        // Evaluate model at first start time and multiply by ontime
+        double time = events()->gti().tstart().secs();
+        result      = integrand.eval(time) * events()->gti().ontime();
 
-    } // endfor: looped over GTIs
+    } // endif: model was constant
+
+    // ... otherwise integrate temporally
+    else {
+
+        // Loop over GTIs
+        for (int i = 0; i < events()->gti().size(); ++i) {
+
+            // Set integration interval in seconds
+            double tstart = events()->gti().tstart(i).secs();
+            double tstop  = events()->gti().tstop(i).secs();
+
+            // Throw exception if time interval is not valid
+            if (tstop <= tstart) {
+                throw GException::gti_invalid(G_NPRED_TEMP,
+                                              events()->gti().tstart(i),
+                                              events()->gti().tstop(i));
+            }
+
+            // Setup integration function
+            GObservation::npred_temp_kern integrand(this, &model);
+            GIntegral                     integral(&integrand);
+
+            // Do Romberg integration
+            result += integral.romb(tstart, tstop);
+
+        } // endfor: looped over GTIs
+
+    } // endelse: integrated temporally
 
     // Return result
     return result;
