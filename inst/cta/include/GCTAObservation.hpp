@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GCTAObservation.hpp  -  CTA Observation class             *
+ *                GCTAObservation.hpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAObservation.hpp
  * @brief CTA observation class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAOBSERVATION_HPP
@@ -94,9 +94,6 @@ protected:
     void free_members(void);
     void read_attributes(const GFitsHDU* hdu);
     void write_attributes(GFitsHDU* hdu) const;
-
-    // Npred integration methods
-    double npred_temp(const GModel& model) const;
 
     // Protected members
     std::string   m_instrument;   //!< Instrument name

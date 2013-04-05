@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GCTAObservation.cpp  -  CTA Observation class             *
+ *                GCTAObservation.cpp - CTA Observation class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -378,10 +378,10 @@ void GCTAObservation::read(const GXmlElement& xml)
 
             // Read eventlist file name
             std::string filename = par->attribute("file");
-            
+
             // Load unbinned observation (sets also m_evenfile member)
             load_unbinned(filename);
-            
+
             // Increment parameter counter
             npar[0]++;
         }
@@ -391,10 +391,10 @@ void GCTAObservation::read(const GXmlElement& xml)
 
             // Read countsmap file name
             std::string filename = par->attribute("file");
-            
+
             // Load binned observation (sets also m_evenfile member)
             load_binned(filename);
-            
+
             // Increment parameter counter
             npar[0]++;
         }
@@ -630,7 +630,7 @@ void GCTAObservation::write(GXmlElement& xml) const
                     if (perf != NULL) {
                         sigma = perf->sigma();
                     }
-                    
+
                 } // endif: effective area was valid
             } // endif: response was valid
 
@@ -1079,49 +1079,3 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                        Npred integration methods                        =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Temporally integrate spatially & spectrally integrated Npred kernel
- *
- * @param[in] model Gamma-ray source model.
- *
- * Implement the temporal integration as a simple multiplication by the
- * ontime. This assumes that the source is non-variable during the
- * observation and that the CTA pointing is stable.
- *
- * Note that we use here the ontime as the GResponse::irf method returns
- * already deadtime corrected response values.
- ***************************************************************************/
-double GCTAObservation::npred_temp(const GModel& model) const
-{
-    // Initialise result
-    double result = 0.0;
-
-    // Determine ontime
-    double ontime = events()->gti().ontime();
-
-    // Integrate only if ontime is positive
-    if (ontime > 0.0) {
-
-        // Integration is a simple multiplication by the time
-        result = npred_spec(model, events()->gti().tstart()) * ontime;
-
-    }
-
-    // Return result
-    return result;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
