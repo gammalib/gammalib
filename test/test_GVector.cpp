@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  test_GVector.cpp  -  test vector class                 *
+ *                   test_GVector.cpp - Test vector class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,66 +18,162 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GVector.cpp
+ * @brief Testing of vector class implementation
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #include <cmath>
-#include <iostream>
-#include <stdexcept>                          // std::exception
 #include "test_GVector.hpp"
 
+/* __ Namespaces _________________________________________________________ */
+
+/* __ Globals ____________________________________________________________ */
+
+/* __ Debug definitions __________________________________________________ */
+
+
+/***********************************************************************//**
+ * @brief Set parameters and tests
+ ***************************************************************************/
 void TestGVector::set(void){
+
     // Test name
     name("GVector");
 
     // Set parameters
-    m_num=5;
+    m_num = 5;
+
+    // Define vectors
+    define_vectors();
 
     //add tests
-    add_test(static_cast<pfunction>(&TestGVector::define_vectors),"Define vectors");
-    add_test(static_cast<pfunction>(&TestGVector::test1),"Test 1: Allocate zero vector");
-    add_test(static_cast<pfunction>(&TestGVector::test2),"Test 2: Allocate too large vector");
-    add_test(static_cast<pfunction>(&TestGVector::test3),"Test 3: Assign values");
-    add_test(static_cast<pfunction>(&TestGVector::test4),"Test 4: Define vector using copy constructor");
-    add_test(static_cast<pfunction>(&TestGVector::test5),"Test 5: Vector assignment");
-    add_test(static_cast<pfunction>(&TestGVector::test6),"Test 6: Assignment and arithmetics");
-    add_test(static_cast<pfunction>(&TestGVector::test7),"Test 7: Comparison");
+    add_test(static_cast<pfunction>(&TestGVector::allocation),"Vector allocation");
+    add_test(static_cast<pfunction>(&TestGVector::assign),"Assign values");
+    add_test(static_cast<pfunction>(&TestGVector::arithmetics),"Assignment and arithmetics");
+    add_test(static_cast<pfunction>(&TestGVector::comparison),"Comparison");
 
     return;
 }
 
-// Define vectors
+
+/***********************************************************************//**
+ * @brief Define vectors
+ ***************************************************************************/
 void TestGVector::define_vectors(void){
-    m_test= GVector(m_num);
-    m_result=GVector(m_num);
-    m_smaller=GVector(m_num+1);
-    m_bigger=GVector(m_num+1);
-    for (int i = 0; i < m_num; ++i)
+
+    // Allocate and initialise vectors
+    m_test    = GVector(m_num);
+    m_result  = GVector(m_num);
+    m_smaller = GVector(m_num+1);
+    m_bigger  = GVector(m_num+1);
+    for (int i = 0; i < m_num; ++i) {
         m_test[i] = (i+1) * 1.1;
-    for (int i = 0; i < m_num-1; ++i)
+    }
+    for (int i = 0; i < m_num-1; ++i) {
         m_smaller[i] = (i+1) * 1.1;
-    for (int i = 0; i < m_num+1; ++i)
+    }
+    for (int i = 0; i < m_num+1; ++i) {
         m_bigger[i] = (i+1) * 1.1;
+    }
+    
+    // Return
+    return;
 }
 
-//Test 1: Allocate zero vector
-void TestGVector::test1(void){
-    GVector test1(0);
+
+/***********************************************************************//**
+ * @brief Vector allocation
+ ***************************************************************************/
+void TestGVector::allocation(void){
+
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GVector vector;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test zero vector allocation
+    test_try("Number constructor");
+    try {
+        GVector vector(0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test non-zero allocation
+    test_try("Number constructor");
+    try {
+        GVector vector(10);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test value constructors
+    test_try("Value constructors");
+    try {
+        // One element
+        GVector vector1(3.0);
+        test_value(vector1[0], 3.0);
+        test_assert(vector1.size() == 1, "Expected vector size 1.");
+
+        // Two elements
+        GVector vector2(2.0, 5.0);
+        test_value(vector2[0], 2.0);
+        test_value(vector2[1], 5.0);
+        test_assert(vector2.size() == 2, "Expected vector size 2.");
+
+        // Three elements
+        GVector vector3(7.0, 8.0, 9.0);
+        test_value(vector3[0], 7.0);
+        test_value(vector3[1], 8.0);
+        test_value(vector3[2], 9.0);
+        test_assert(vector3.size() == 3, "Expected vector size 3.");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test copy constructor
+    test_try("Copy constructor");
+    try {
+        GVector vector = m_test;
+        test_assert(vector == m_test, vector.print() + " instead of " + m_test.print());
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
 }
 
-//Test 2: Allocate too large vector
-void TestGVector::test2(void){
-    /*
-    GVector test2(1000000000);
-    */
-}
 
-//Test 3: Assign values
-void TestGVector::test3(void){
+/***********************************************************************//**
+ * @brief Vector assignment
+ ***************************************************************************/
+void TestGVector::assign(void){
+
+    // Test value assignment
     GVector test3(3);
-    test3[1] = acos(-1.0);
-
-    test_value(test3[1],acos(-1.0),1e-6,"test3 == (0, pi, 0)");
-    test_assert(test3.size()==3,"test3.size()==3");
+    double  ref = std::acos(-1.0);
+    test3[1]    = ref;
+    test_value(test3[0], 0.0);
+    test_value(test3[1], ref);
+    test_value(test3[2], 0.0);
+    test_assert(test3.size() == 3, "Expected vector size 3.");
 
     #if defined(G_RANGE_CHECK)
     test_try("Test out of range access");
@@ -93,28 +189,24 @@ void TestGVector::test3(void){
         test_try_failure(e);
     }
     #endif
-}
 
-//Test 4: Vector copy constructor
-void TestGVector::test4(void){
-
-    GVector test4 = m_test;
-    test_assert(test4==m_test,"test4 == m_test");
-}
-
-//Test 5: Vector assignment
-void TestGVector::test5(void){
+    // Test vector assignment
     m_result = m_test;
-
-    test_assert(m_result==m_test,"m_result == m_test");
-
+    test_assert(m_result == m_test, "m_result == m_test");
     m_result = m_bigger;    
     test_assert(m_result==m_bigger,"m_result == m_bigger");
     test_assert(m_result.size()==m_bigger.size(),"m_result.size() == m_bigger.size()");
+
+    // Return
+    return;
 }
 
-//Test 6: Assignment and arithmetics
-void TestGVector::test6(void){
+
+/***********************************************************************//**
+ * @brief Assignment and arithmetics
+ ***************************************************************************/
+void TestGVector::arithmetics(void){
+
     m_result  = m_test;
     m_result += m_test;
 
@@ -337,8 +429,6 @@ void TestGVector::test6(void){
     // tanh(GVector)
     test_assert(tanh(m_test).print()=="(0.800499, 0.975743, 0.997283, 0.999699, 0.999967)","tanh(GVector)");
 
-    //
-
     // Incompatible size GVector + GVector
     test_try("Incompatible size GVector + GVector:");
     try {
@@ -399,8 +489,11 @@ void TestGVector::test6(void){
     }
 }
 
-//Test 7: Comparison
-void TestGVector::test7(void){
+
+/***********************************************************************//**
+ * @brief Comparison
+ ***************************************************************************/
+void TestGVector::comparison(void){
 
     // GVector == GVector
     test_assert((m_test == m_test),"GVector == GVector");
@@ -421,22 +514,29 @@ void TestGVector::test7(void){
     // GVector != GVector (m_bigger)
     test_assert((m_test != m_bigger),"GVector != GVector (m_bigger)");
 }
+
+
+/***********************************************************************//**
+ * @brief Main test entry point
+ ***************************************************************************/
 int main(void)
 {
+    // Allocate test suite container
     GTestSuites testsuites("GVector");
 
+    // Initially assume that we pass all tests
     bool was_successful=true;
 
-    //Create a test suite
+    // Create a test suite
     TestGVector test;
 
-    //Append to the container
+    // Append to the container
     testsuites.append(test);
 
-    //Run
+    // Run
     was_successful=testsuites.run();
 
-    //save xml report
+    // Save xml report
     testsuites.save("reports/GVector.xml");
 
     // Return

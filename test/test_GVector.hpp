@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GVector.hpp  -   test vector class                    *
+ *                 test_GVector.hpp - Test vector class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,32 +18,38 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GVector.hpp
+ * @brief Testing of vector class definition
+ * @author Juergen Knoedlseder
+ */
 
 #ifndef TEST_GVECTOR_HPP
 #define TEST_GVECTOR_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
 
+
+/***********************************************************************//**
+ * @class TestGVector
+ *
+ * @brief Test suite for GVector class
+ ***************************************************************************/
 class TestGVector : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGVector(void) : GTestSuite(), m_num(5) { return; }
-        virtual ~TestGVector(void) { return; }
+        TestGVector(void) : GTestSuite() { }
+        virtual ~TestGVector(void) { }
 
         // Methods
         virtual void set(void);
         void         define_vectors(void);
-        void         test1(void);
-        void         test2(void);
-        void         test3(void);
-        void         test4(void);
-        void         test5(void);
-        void         test6(void);
-        void         test7(void);
-
+        void         allocation(void);
+        void         assign(void);
+        void         arithmetics(void);
+        void         comparison(void);
 
     // Private members
     private:
