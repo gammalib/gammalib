@@ -826,7 +826,10 @@ std::string GCTAResponse::print(void) const
     if (!m_npred_names.empty()) {
          for (int i = 0; i < m_npred_names.size(); ++i) {
              result.append("\n"+parformat("Npred cache "+str(i)));
-             result.append(m_npred_names[i]+"="+str(m_npred_values[i]));
+             result.append(m_npred_names[i]+", ");
+             result.append(m_npred_energies[i].print()+", ");
+             result.append(m_npred_times[i].print()+" = ");
+             result.append(str(m_npred_values[i]));
          }
     }
 
@@ -1253,119 +1256,148 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
                                  const GSource&      source,
                                  const GObservation& obs) const
 {
+    // Initialise IRF value
+    bool   has_irf = false;
+    double irf     = 0.0;
+
     // Get pointer on CTA observation
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
     if (ctaobs == NULL) {
         throw GCTAException::bad_observation_type(G_IRF_DIFFUSE);
     }
 
-    // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_IRF_DIFFUSE);
-    }
-
-    // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        throw GCTAException::bad_instdir_type(G_IRF_DIFFUSE);
-    }
-
-    // Get pointer on spatial model
-    const GModelSpatial* model = dynamic_cast<const GModelSpatial*>(source.model());
-    if (model == NULL) {
-        throw GCTAException::bad_model_type(G_IRF_DIFFUSE);
-    }
-
-    // Get event attributes
-    //const GSkyDir& obsDir = dir->dir();
-    const GEnergy& obsEng = event.energy();
-
-    // Get source attributes
-    const GEnergy& srcEng  = source.energy();
-    const GTime&   srcTime = source.time();
-
-    // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
-
-    // Determine angular distance between measured photon direction and
-    // pointing direction [radians]
-    double eta = pnt->dir().dist(dir->dir());
-
-    // Get log10(E/TeV) of true and measured photon energies
-    double srcLogEng = srcEng.log10TeV();
-    double obsLogEng = obsEng.log10TeV();
-
-    // Assign the observed theta angle (eta) as the true theta angle
-    // between the source and the pointing directions. This is a (not
-    // too bad) approximation which helps to speed up computations.
-    // If we want to do this correctly, however, we would need to move
-    // the psf_dummy_sigma down to the integration kernel, and we would
-    // need to make sure that psf_delta_max really gives the absolute
-    // maximum (this is certainly less critical)
-    double theta = eta;
-    double phi   = 0.0; //TODO: Implement Phi dependence
-
-    // Get maximum PSF radius in radians
-    double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
-
-    // Initialise IRF value
-    double irf = 0.0;
-
-    // Perform zenith angle integration if interval is valid
-    if (delta_max > 0.0) {
-
-        // Compute rotation matrix to convert from coordinates (theta,phi)
-        // in the reference frame of the observed arrival direction into
-        // celestial coordinates
-        GMatrix ry;
-        GMatrix rz;
-        GMatrix rot;
-        ry.eulery(dir->dec_deg() - 90.0);
-        rz.eulerz(-dir->ra_deg());
-        rot = transpose(ry * rz);
-
-        // Setup integration kernel
-        cta_irf_diffuse_kern_theta integrand(*this,
-                                             *model,
-                                             theta,
-                                             phi,
-                                             zenith,
-                                             azimuth,
-                                             srcEng,
-                                             srcTime,
-                                             srcLogEng,
-                                             obsLogEng,
-                                             rot,
-                                             eta);
-
-        // Integrate over zenith angle
-        GIntegral integral(&integrand);
-        integral.eps(1.0e-2);
-        irf = integral.romb(0.0, delta_max);
-
-        // Compile option: Check for NaN/Inf
-        #if defined(G_NAN_CHECK)
-        if (isnotanumber(irf) || isinfinite(irf)) {
-            std::cout << "*** ERROR: GCTAResponse::irf_diffuse:";
-            std::cout << " NaN/Inf encountered";
-            std::cout << " (irf=" << irf;
-            std::cout << ", delta_max=" << delta_max << ")";
-            std::cout << std::endl;
+    // Try getting the IRF value from cache
+    const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
+    const GCTAEventAtom* atom = dynamic_cast<const GCTAEventAtom*>(&event);
+    if (list != NULL && atom != NULL) {
+        irf = list->irf_cache(source.name(), atom->index());
+        if (irf >= 0.0) {
+            has_irf = true;
+            #if defined(G_DEBUG_IRF_DIFFUSE)
+            std::cout << "GCTAResponse::irf_diffuse:";
+            std::cout << " cached irf=" << irf << std::endl;
+            #endif
         }
-        #endif
+        else {
+            irf = 0.0;
+        }
     }
 
-    // Compile option: Show integration results
-    #if defined(G_DEBUG_IRF_DIFFUSE)
-    std::cout << "GCTAResponse::irf_diffuse:";
-    std::cout << " srcLogEng=" << srcLogEng;
-    std::cout << " obsLogEng=" << obsLogEng;
-    std::cout << " eta=" << eta;
-    std::cout << " delta_max=" << delta_max;
-    std::cout << " irf=" << irf << std::endl;
-    #endif
+    // Continue only if we have no IRF value
+    if (!has_irf) {
+
+        // Get pointer on CTA pointing
+        const GCTAPointing *pnt = ctaobs->pointing();
+        if (pnt == NULL) {
+            throw GCTAException::no_pointing(G_IRF_DIFFUSE);
+        }
+
+        // Get pointer on CTA instrument direction
+        const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
+        if (dir == NULL) {
+            throw GCTAException::bad_instdir_type(G_IRF_DIFFUSE);
+        }
+
+        // Get pointer on spatial model
+        const GModelSpatial* model =
+            dynamic_cast<const GModelSpatial*>(source.model());
+        if (model == NULL) {
+            throw GCTAException::bad_model_type(G_IRF_DIFFUSE);
+        }
+
+        // Get event attributes
+        //const GSkyDir& obsDir = dir->dir();
+        const GEnergy& obsEng = event.energy();
+
+        // Get source attributes
+        const GEnergy& srcEng  = source.energy();
+        const GTime&   srcTime = source.time();
+
+        // Get pointing direction zenith angle and azimuth [radians]
+        double zenith  = pnt->zenith();
+        double azimuth = pnt->azimuth();
+
+        // Determine angular distance between measured photon direction and
+        // pointing direction [radians]
+        double eta = pnt->dir().dist(dir->dir());
+
+        // Get log10(E/TeV) of true and measured photon energies
+        double srcLogEng = srcEng.log10TeV();
+        double obsLogEng = obsEng.log10TeV();
+
+        // Assign the observed theta angle (eta) as the true theta angle
+        // between the source and the pointing directions. This is a (not
+        // too bad) approximation which helps to speed up computations.
+        // If we want to do this correctly, however, we would need to move
+        // the psf_dummy_sigma down to the integration kernel, and we would
+        // need to make sure that psf_delta_max really gives the absolute
+        // maximum (this is certainly less critical)
+        double theta = eta;
+        double phi   = 0.0; //TODO: Implement Phi dependence
+
+        // Get maximum PSF radius in radians
+        double delta_max = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
+
+        // Perform zenith angle integration if interval is valid
+        if (delta_max > 0.0) {
+
+            // Compute rotation matrix to convert from coordinates (theta,phi)
+            // in the reference frame of the observed arrival direction into
+            // celestial coordinates
+            GMatrix ry;
+            GMatrix rz;
+            GMatrix rot;
+            ry.eulery(dir->dec_deg() - 90.0);
+            rz.eulerz(-dir->ra_deg());
+            rot = transpose(ry * rz);
+
+            // Setup integration kernel
+            cta_irf_diffuse_kern_theta integrand(*this,
+                                                 *model,
+                                                 theta,
+                                                 phi,
+                                                 zenith,
+                                                 azimuth,
+                                                 srcEng,
+                                                 srcTime,
+                                                 srcLogEng,
+                                                 obsLogEng,
+                                                 rot,
+                                                 eta);
+
+            // Integrate over zenith angle
+            GIntegral integral(&integrand);
+            integral.eps(1.0e-2);
+            irf = integral.romb(0.0, delta_max);
+
+            // Compile option: Check for NaN/Inf
+            #if defined(G_NAN_CHECK)
+            if (isnotanumber(irf) || isinfinite(irf)) {
+                std::cout << "*** ERROR: GCTAResponse::irf_diffuse:";
+                std::cout << " NaN/Inf encountered";
+                std::cout << " (irf=" << irf;
+                std::cout << ", delta_max=" << delta_max << ")";
+                std::cout << std::endl;
+            }
+            #endif
+        }
+
+        // Put IRF value in cache
+        if (list != NULL && atom != NULL) {
+            list->irf_cache(source.name(), atom->index(), irf);
+        }
+
+        // Compile option: Show integration results
+        #if defined(G_DEBUG_IRF_DIFFUSE)
+        std::cout << "GCTAResponse::irf_diffuse:";
+        std::cout << " srcLogEng=" << srcLogEng;
+        std::cout << " obsLogEng=" << obsLogEng;
+        std::cout << " eta=" << eta;
+        std::cout << " delta_max=" << delta_max;
+        std::cout << " irf=" << irf << std::endl;
+        #endif
+
+    } // endif: has no IRF
 
     // Return IRF value
     return irf;
@@ -1782,19 +1814,26 @@ double GCTAResponse::npred_diffuse(const GSource& source,
     // Initialise Npred value
     double npred = 0.0;
 
+    // Build unique identifier
+    std::string id = source.name() + "::" + obs.name() + "::" + obs.id();
+
     // Check if Npred value is already in cache
     bool has_npred = false;
     if (!m_npred_names.empty()) {
 
-         // Build unique identifier
-         std::string id = source.name() + "::" + obs.name() + "::" + obs.id();
-
          // Search for unique identifier, and if found, recover Npred value
          // and break
          for (int i = 0; i < m_npred_names.size(); ++i) {
-             if (m_npred_names[i] == id) {
+             if (m_npred_names[i]    == id &&
+                 m_npred_energies[i] == source.energy() &&
+                 m_npred_times[i]    == source.time()) {
                  npred = m_npred_values[i];
                  has_npred = true;
+                 #if defined(G_DEBUG_NPRED_DIFFUSE)
+                 std::cout << "GCTAResponse::npred_diffuse:";
+                 std::cout << " cache=" << i;
+                 std::cout << " npred=" << npred << std::endl;
+                 #endif
                  break;
              }
          }
@@ -1805,7 +1844,8 @@ double GCTAResponse::npred_diffuse(const GSource& source,
     if (!has_npred) {
 
         // Get pointer on CTA observation
-        const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+        const GCTAObservation* ctaobs =
+            dynamic_cast<const GCTAObservation*>(&obs);
         if (ctaobs == NULL) {
             throw GCTAException::bad_observation_type(G_NPRED_DIFFUSE);
         }
@@ -1884,16 +1924,16 @@ double GCTAResponse::npred_diffuse(const GSource& source,
             #if defined(G_DEBUG_NPRED_DIFFUSE)
             std::cout << "GCTAResponse::npred_diffuse:";
             std::cout << " roi_psf_radius=" << roi_psf_radius;
-            std::cout << " npred=" << npred << std::endl;
+            std::cout << " npred=" << npred;
+            std::cout << " id=" << id << std::endl;
             #endif
 
         } // endif: offset angle range was valid
 
-        // Build unique identifier for Npred cache
-        std::string id = source.name() + "::" + obs.name() + "::" + obs.id();
-
         // Store result in Npred cache
         m_npred_names.push_back(id);
+        m_npred_energies.push_back(source.energy());
+        m_npred_times.push_back(source.time());
         m_npred_values.push_back(npred);
 
         // Debug: Check for NaN
@@ -2220,6 +2260,8 @@ void GCTAResponse::init_members(void)
 
     // Initialise Npred cache
     m_npred_names.clear();
+    m_npred_energies.clear();
+    m_npred_times.clear();
     m_npred_values.clear();
 
     // Return
@@ -2241,8 +2283,10 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     m_eps     = rsp.m_eps;
 
     // Copy cache
-    m_npred_names  = rsp.m_npred_names;
-    m_npred_values = rsp.m_npred_values;
+    m_npred_names    = rsp.m_npred_names;
+    m_npred_energies = rsp.m_npred_energies;
+    m_npred_times    = rsp.m_npred_times;
+    m_npred_values   = rsp.m_npred_values;
 
     // Clone members
     m_aeff  = (rsp.m_aeff  != NULL) ? rsp.m_aeff->clone()  : NULL;
