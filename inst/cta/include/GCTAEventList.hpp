@@ -63,7 +63,8 @@ public:
     virtual GCTAEventList* clone(void) const;
     virtual int            size(void) const { return m_events.size(); }
     virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           save(const std::string& filename,
+                                bool clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const { return m_events.size(); }
@@ -72,8 +73,11 @@ public:
     std::string            print(void) const;
 
     // Implement other methods
-    void                   append(const GCTAEventAtom& event);
-    void                   reserve(const int& number);
+    void   append(const GCTAEventAtom& event);
+    void   reserve(const int& number);
+    double irf_cache(const std::string& name, const int& index) const;
+    void   irf_cache(const std::string& name, const int& index,
+                     const double& irf) const;
 
 protected:
     // Protected methods
@@ -90,10 +94,16 @@ protected:
     void         read_ds_roi(const GFitsHDU* hdu);
     void         write_events(GFitsBinTable* hdu) const;
     void         write_ds_keys(GFitsHDU* hdu) const;
+    int          irf_cache_init(const std::string& name) const;
+    int          irf_cache_index(const std::string& name) const;
 
     // Protected members
     GCTARoi                    m_roi;     //!< Region of interest
     std::vector<GCTAEventAtom> m_events;  //!< Events
+
+    // IRF cache for diffuse models
+    mutable std::vector<std::string>          m_irf_names;  //!< Model names
+    mutable std::vector<std::vector<double> > m_irf_values; //!< IRF values
 };
 
 #endif /* GCTAEVENTLIST_HPP */

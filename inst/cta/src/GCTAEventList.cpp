@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GCTAEventList.cpp  -  CTA event atom container class          *
+ *            GCTAEventList.cpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -153,8 +153,9 @@ GCTAEventAtom* GCTAEventList::operator[](const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    }
     #endif
 
     // Return pointer
@@ -176,8 +177,9 @@ const GCTAEventAtom* GCTAEventList::operator[](const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    }
     #endif
 
     // Return pointer
@@ -192,7 +194,7 @@ const GCTAEventAtom* GCTAEventList::operator[](const int& index) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
+ * @brief Clear event list
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -214,10 +216,13 @@ void GCTAEventList::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
-***************************************************************************/
+ * @brief Clone event list
+ *
+ * @return Pointer to deep copy of event list.
+ ***************************************************************************/
 GCTAEventList* GCTAEventList::clone(void) const
 {
+    // Clone event list
     return new GCTAEventList(*this);
 }
 
@@ -268,7 +273,7 @@ void GCTAEventList::save(const std::string& filename, bool clobber) const
 
     // Write event list
     write(fits);
-    
+
     // Save FITS file
     fits.saveto(filename, clobber);
 
@@ -321,7 +326,7 @@ void GCTAEventList::read(const GFits& file)
 
         // Create time reference from header information
         GTimeReference timeref(events);
-        
+
         // Set start and stop time
         GTime start(tstart);
         GTime stop(tstop);
@@ -397,8 +402,9 @@ void GCTAEventList::roi(const GRoi& roi)
     const GCTARoi* ptr = dynamic_cast<const GCTARoi*>(&roi);
 
     // Throw exception if ROI is not of correct type
-    if (ptr == NULL)
+    if (ptr == NULL) {
         throw GCTAException::bad_roi_type(G_ROI);
+    }
 
     // Set ROI
     m_roi = *ptr;
@@ -419,7 +425,7 @@ std::string GCTAEventList::print(void) const
     // Append header
     result.append("=== GCTAEventList ===");
     result.append("\n"+parformat("Number of events")+str(size()));
-    
+
     // Append GTI intervals
     result.append("\n"+parformat("Time interval"));
     if (gti().size() > 0) {
@@ -428,7 +434,7 @@ std::string GCTAEventList::print(void) const
     else {
         result.append("not defined");
     }
-        
+
     // Append energy intervals
     if (ebounds().size() > 0) {
         result.append("\n"+ebounds().print());
@@ -436,13 +442,26 @@ std::string GCTAEventList::print(void) const
     else {
         result.append("\n"+parformat("Energy intervals")+"not defined");
     }
-    
+
     // Append ROI
     if (roi().radius() > 0) {
         result.append("\n"+roi().print());
     }
     else {
         result.append("\n"+parformat("Region of interest")+"not defined");
+    }
+
+    // Append IRF cache
+    for (int i = 0; i < m_irf_names.size(); ++i) {
+         result.append("\n"+parformat("IRF cache "+str(i)));
+         result.append(m_irf_names[i]+" = ");
+         int num   = 0;
+         for (int k = 0; k < size(); ++k) {
+             if ((m_irf_values[i])[k] != -1.0) {
+                 num++;
+             }
+         }
+         result.append(str(num)+" values");
     }
 
     // Return result
@@ -499,6 +518,10 @@ void GCTAEventList::init_members(void)
     m_roi.clear();
     m_events.clear();
 
+    // Initialise cache
+    m_irf_names.clear();
+    m_irf_values.clear();
+
     // Return
     return;
 }
@@ -514,6 +537,10 @@ void GCTAEventList::copy_members(const GCTAEventList& list)
     // Copy members
     m_roi    = list.m_roi;
     m_events = list.m_events;
+
+    // Copy cache
+    m_irf_names  = list.m_irf_names;
+    m_irf_values = list.m_irf_values;
 
     // Return
     return;
@@ -552,7 +579,7 @@ void GCTAEventList::read_events(const GFitsTable* table)
 
         // Continue only if there are events
         if (num > 0) {
-        
+
             // Read events for v1
             if (table->hascolumn("SHWIDTH") && table->hascolumn("SHLENGTH")) {
                 read_events_v1(table);
@@ -624,6 +651,7 @@ void GCTAEventList::read_events_v0(const GFitsTable* table)
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom event;
             for (int i = 0; i < num; ++i) {
+                event.m_index     = i;
                 event.m_time.set((*ptr_time)(i), m_gti.reference());
                 event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
                 event.m_energy.TeV((*ptr_energy)(i));
@@ -707,26 +735,27 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom event;
             for (int i = 0; i < num; ++i) {
+                event.m_index     = i;
                 event.m_time.set((*ptr_time)(i), m_gti.reference());
                 event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
                 event.m_energy.TeV((*ptr_energy)(i));
-                event.m_event_id    = (*ptr_eid)(i);
-                event.m_obs_id      = (*ptr_oid)(i);
-                event.m_multip      = (*ptr_multip)(i);
-                event.m_telmask     = 0;
-                event.m_dir_err     = (*ptr_dir_err)(i);
-                event.m_detx        = (*ptr_detx)(i);
-                event.m_dety        = (*ptr_dety)(i);
-                event.m_alt         = (*ptr_alt)(i);
-                event.m_az          = (*ptr_az)(i);
-                event.m_corex       = (*ptr_corex)(i);
-                event.m_corey       = (*ptr_corey)(i);
-                event.m_core_err    = (*ptr_core_err)(i);
-                event.m_xmax        = (*ptr_xmax)(i);
-                event.m_xmax_err    = (*ptr_xmax_err)(i);
-                event.m_shwidth     = (*ptr_shw)(i);
-                event.m_shlength    = (*ptr_shl)(i);
-                event.m_energy_err  = (*ptr_energy_err)(i);
+                event.m_event_id   = (*ptr_eid)(i);
+                event.m_obs_id     = (*ptr_oid)(i);
+                event.m_multip     = (*ptr_multip)(i);
+                event.m_telmask    = 0;
+                event.m_dir_err    = (*ptr_dir_err)(i);
+                event.m_detx       = (*ptr_detx)(i);
+                event.m_dety       = (*ptr_dety)(i);
+                event.m_alt        = (*ptr_alt)(i);
+                event.m_az         = (*ptr_az)(i);
+                event.m_corex      = (*ptr_corex)(i);
+                event.m_corey      = (*ptr_corey)(i);
+                event.m_core_err   = (*ptr_core_err)(i);
+                event.m_xmax       = (*ptr_xmax)(i);
+                event.m_xmax_err   = (*ptr_xmax_err)(i);
+                event.m_shwidth    = (*ptr_shw)(i);
+                event.m_shlength   = (*ptr_shl)(i);
+                event.m_energy_err = (*ptr_energy_err)(i);
                 m_events.push_back(event);
             }
 
@@ -1086,7 +1115,7 @@ void GCTAEventList::write_events(GFitsBinTable* hdu) const
             hdu->append_column(col_hil_msw_err);
             hdu->append_column(col_hil_msl);
             hdu->append_column(col_hil_msl_err);
-        
+
         } // endif: there were events to write
 
     } // endif: HDU was valid
@@ -1138,7 +1167,7 @@ void GCTAEventList::write_ds_keys(GFitsHDU* hdu) const
         hdu->card("DSTYP2", "POS(RA,DEC)", "Data selection type");
         hdu->card("DSUNI2", "deg",         "Data selection unit");
         hdu->card("DSVAL2", dsval2,        "Data selection value");
-        
+
         // Add energy range selection
         hdu->card("DSTYP3", "ENERGY", "Data selection type");
         hdu->card("DSUNI3", "TeV",    "Data selection unit");
@@ -1154,8 +1183,103 @@ void GCTAEventList::write_ds_keys(GFitsHDU* hdu) const
 }
 
 
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
+/***********************************************************************//**
+ * @brief Initialize IRF cache for a given model
+ *
+ * @param[in] name Model name.
+ * @return Cache index (-1 if invalid).
+ ***************************************************************************/
+int GCTAEventList::irf_cache_init(const std::string& name) const
+{
+    // Initialise cache index
+    int index = irf_cache_index(name);
+
+    // Continue only if model does not yet exist
+    if (index == -1) {
+
+        // Add model name and vector to cache. The vector is initialized
+        // to -1, which signals that no cache values exist
+        m_irf_names.push_back(name);
+        m_irf_values.push_back(std::vector<double>(size(), -1.0));
+
+        // Set index
+        index = m_irf_names.size()-1;
+
+    } // endif: model cache did not yet exist
+
+    // Return index
+    return index;
+}
+
+
+/***********************************************************************//**
+ * @brief Determines the cache index for a given model name
+ *
+ * @param[in] name Model name.
+ * @return Cache index (-1 if model has not been found).
+ ***************************************************************************/
+int GCTAEventList::irf_cache_index(const std::string& name) const
+{
+    // Initialise index
+    int index = -1;
+
+    // Continue only if there are models in cache
+    if (!m_irf_names.empty()) {
+
+         // Search for model name
+         for (int i = 0; i < m_irf_names.size(); ++i) {
+             if (m_irf_names[i] == name) {
+                 index = i;
+                 break;
+             }
+         }
+
+    } // endif: there were models in cache
+
+    // Return index
+    return index;
+}
+
+
+/***********************************************************************//**
+ * @brief Get cache IRF value
+ *
+ * @param[in] name Model name.
+ * @param[in] index Event index [0,...,size()-1].
+ * @return IRF value (-1 if no cache value found).
+ ***************************************************************************/
+double GCTAEventList::irf_cache(const std::string& name, const int& index) const
+{
+    // Initialise IRF value to invalid value
+    double irf = -1.0;
+
+    // Get cache index. Continue only if index is valid
+    int icache = irf_cache_index(name);
+    if (icache != -1) {
+        irf = (m_irf_values[icache])[index];
+    }
+
+    // Return IRF value
+    return irf;
+}
+
+
+/***********************************************************************//**
+ * @brief Set cache IRF value
+ *
+ * @param[in] name Model name.
+ * @param[in] index Event index [0,...,size()-1].
+ * @param[in] irf IRF value.
+ ***************************************************************************/
+void GCTAEventList::irf_cache(const std::string& name, const int& index,
+                              const double& irf) const
+{
+    // Initialize cache index. Continue only if index is valid
+    int icache = irf_cache_init(name);
+    if (icache != -1) {
+        (m_irf_values[icache])[index] = irf;
+    }
+
+    // Return
+    return;
+}
