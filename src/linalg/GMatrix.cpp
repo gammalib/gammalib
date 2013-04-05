@@ -318,9 +318,10 @@ GVector GMatrix::operator*(const GVector& vector) const
     // Perform vector multiplication
     GVector result(m_rows);
     for (int row = 0; row < m_rows; ++row) {
-        double sum = 0.0;
-        for (int col = 0; col < m_cols; ++col) {
-            sum += (*this)(row,col) * vector[col];
+        double        sum = 0.0;
+        const double* src = m_data + row;
+        for (int col = 0; col < m_cols; ++col, src += m_rows) {
+            sum += *src * vector[col];
         }
         result[row] = sum;
     }
@@ -476,7 +477,7 @@ void GMatrix::clear(void)
 
     // Initialise private members
     init_members();
-    
+
     // Return
     return; 
 }
@@ -801,7 +802,7 @@ void GMatrix::invert(void)
 {
     // Throw exception
     throw GException::feature_not_implemented(G_INVERT);
-    
+
     // Return
     return;
 }
@@ -819,7 +820,7 @@ void GMatrix::negate(void)
     for (int i = 0; i < m_elements; ++i, ++ptr) {
         *ptr = -(*ptr);
     }
-    
+
     // Return
     return;
 }
@@ -837,7 +838,7 @@ void GMatrix::abs(void)
     for (int i = 0; i < m_elements; ++i, ++ptr) {
         *ptr = std::abs(*ptr);
     }
-    
+
     // Return
     return;
 }
@@ -1169,7 +1170,7 @@ void GMatrix::alloc_members(const int& rows, const int& columns)
         for (int col = 1; col <= m_cols; ++col) {
             m_colstart[col] = m_colstart[col-1] + m_rows;
         }
-        
+
         // Initialise matrix elements to 0
         for (int i = 0; i < m_elements; ++i) {
             m_data[i] = 0.0;
