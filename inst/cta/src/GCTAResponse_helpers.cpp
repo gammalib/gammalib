@@ -880,7 +880,7 @@ double cta_irf_diffuse_kern_phi::eval(double phi)
 
         // Compute true photon offset angle in camera system [radians]
         double offset = std::acos(m_cos_ph + m_sin_ph * cos_phi);
-    
+
         //TODO: Compute true photon azimuth angle in camera system [radians]
         double azimuth = 0.0;
 
@@ -890,9 +890,10 @@ double cta_irf_diffuse_kern_phi::eval(double phi)
 
         // Optionally take energy dispersion into account
         if (m_rsp.hasedisp() && irf > 0.0) {
-            irf *= m_rsp.edisp(m_obsLogEng, offset, azimuth, m_zenith, m_azimuth, m_srcLogEng);
+            irf *= m_rsp.edisp(m_obsLogEng, offset, azimuth,
+                               m_zenith, m_azimuth, m_srcLogEng);
         }
-    
+
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
         if (isnotanumber(irf) || isinfinite(irf)) {
@@ -978,7 +979,7 @@ double cta_npred_diffuse_kern_theta::eval(double theta)
             std::cout << ")" << std::endl;
         }
         #endif
-    
+
     } // endif: offset angle was positive
 
     // Return Npred
@@ -1045,7 +1046,7 @@ double cta_npred_diffuse_kern_phi::eval(double phi)
         #endif
 
     } // endif: sky intensity was positive
-    
+
     // Return Npred
     return npred;
 }

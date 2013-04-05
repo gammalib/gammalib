@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GCTAResponse.hpp  -  CTA Response class                *
+ *                  GCTAResponse.hpp - CTA Response class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -30,6 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <cmath>
 #include <vector>
+#include <string>
 #include "GMatrix.hpp"
 #include "GEvent.hpp"
 #include "GModelSky.hpp"
@@ -72,7 +73,8 @@ public:
     // Constructors and destructors
     GCTAResponse(void);
     GCTAResponse(const GCTAResponse& rsp);
-    explicit GCTAResponse(const std::string& rspname, const std::string& caldb = "");
+    explicit GCTAResponse(const std::string& rspname,
+                          const std::string& caldb = "");
     virtual ~GCTAResponse(void);
 
     // Operators
@@ -167,13 +169,17 @@ private:
     void free_members(void);
 
     // Private data members
-    std::string         m_caldb;        //!< Name of or path to the calibration database
-    std::string         m_rspname;      //!< Name of the instrument response
-    std::string         m_rmffile;      //!< Name of RMF file
-    double              m_eps;          //!< Integration precision
-    GCTAAeff*           m_aeff;         //!< Effective area
-    GCTAPsf*            m_psf;          //!< Point spread function
-    GCTAEdisp*          m_edisp;        //!< Energy dispersion
+    std::string         m_caldb;    //!< Name of or path to the calibration database
+    std::string         m_rspname;  //!< Name of the instrument response
+    std::string         m_rmffile;  //!< Name of RMF file
+    double              m_eps;      //!< Integration precision
+    GCTAAeff*           m_aeff;     //!< Effective area
+    GCTAPsf*            m_psf;      //!< Point spread function
+    GCTAEdisp*          m_edisp;    //!< Energy dispersion
+
+    // Npred cache
+    mutable std::vector<std::string> m_npred_names;  //!< Model names
+    mutable std::vector<double>      m_npred_values; //!< Model values
 };
 
 #endif /* GCTARESPONSE_HPP */

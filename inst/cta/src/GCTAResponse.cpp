@@ -333,13 +333,13 @@ double GCTAResponse::irf(const GEvent&       event,
 
         // Get effective area component
         irf = aeff(theta, phi, zenith, azimuth, srcLogEng);
-        
+
         // Multiply-in PSF
         if (irf > 0) {
-        
+
             // Get PSF component
             irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
-            
+
             // Multiply-in energy dispersion
             if (hasedisp() && irf > 0) {
 
@@ -350,7 +350,7 @@ double GCTAResponse::irf(const GEvent&       event,
                 irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
 
             } // endif: energy dispersion was available and PSF was non-zero
-            
+
         } // endif: Aeff was non-zero
 
     } // endif: we were sufficiently close to PSF
@@ -427,10 +427,10 @@ double GCTAResponse::npred(const GPhoton&      photon,
 
     // Get effectve area components
     double npred = aeff(theta, phi, zenith, azimuth, srcLogEng);
-    
+
     // Multiply-in PSF
     if (npred > 0.0) {
-    
+
         // Get PSF
         npred *= npsf(srcDir, srcLogEng, srcTime, *pnt, events->roi());
 
@@ -441,7 +441,7 @@ double GCTAResponse::npred(const GPhoton&      photon,
             npred *= nedisp(srcDir, srcEng, srcTime, *pnt, events->ebounds());
 
         } // endif: had energy dispersion
-    
+
     } // endif: had non-zero effective area
 
     // Compile option: Check for NaN/Inf
@@ -511,13 +511,14 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
     // Continue only if event is detected
     if (ran.uniform() <= ulimite) {
-        
+
         // Apply deadtime correction
         double deadc = obs.deadc(photon.time());
         if (deadc >= 1.0 || ran.uniform() <= deadc) {
 
             // Simulate offset from photon arrival direction
-            double delta = psf()->mc(ran, srcLogEng, theta, phi, zenith, azimuth) * rad2deg;
+            double delta = psf()->mc(ran, srcLogEng, theta, phi, zenith, azimuth) *
+                           rad2deg;
             double alpha = 360.0 * ran.uniform();
 
             // Rotate sky direction by offset
@@ -635,10 +636,10 @@ void GCTAResponse::load_aeff(const std::string& filename)
     // Free any existing effective area instance
     if (m_aeff != NULL) delete m_aeff;
     m_aeff = NULL;
-    
+
     // Try opening the file as a FITS file
     try {
-    
+
         // Open FITS file
         GFits file(filename);
 
@@ -699,10 +700,10 @@ void GCTAResponse::load_psf(const std::string& filename)
     // Free any existing point spread function instance
     if (m_psf != NULL) delete m_psf;
     m_psf = NULL;
-    
+
     // Try opening the file as a FITS file
     try {
-    
+
         // Open FITS file
         GFits file(filename);
 
@@ -795,6 +796,8 @@ double GCTAResponse::offset_sigma(void) const
 
 /***********************************************************************//**
  * @brief Print CTA response information
+ *
+ * @return String containing CTA response information
  ***************************************************************************/
 std::string GCTAResponse::print(void) const
 {
@@ -818,7 +821,15 @@ std::string GCTAResponse::print(void) const
     if (m_psf != NULL) {
         result.append("\n"+m_psf->print());
     }
-    
+
+    // Append Npred cache information
+    if (!m_npred_names.empty()) {
+         for (int i = 0; i < m_npred_names.size(); ++i) {
+             result.append("\n"+parformat("Npred cache "+str(i)));
+             result.append(m_npred_names[i]+"="+str(m_npred_values[i]));
+         }
+    }
+
     // Return result
     return result;
 }
@@ -1492,7 +1503,7 @@ double GCTAResponse::npred_radial(const GSource& source,
         ry.eulery(model->dec() - 90.0);
         rz.eulerz(-model->ra());
         rot = transpose(ry * rz);
-        
+
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
         double omega0 = centre.posang(events->roi().centre().dir());
@@ -1533,7 +1544,7 @@ double GCTAResponse::npred_radial(const GSource& source,
         std::cout << ")" << std::endl;
     }
     #endif
-    
+
     // Return Npred
     return npred;
 }
@@ -1591,7 +1602,7 @@ double GCTAResponse::npred_radial(const GSource& source,
  * considerably larger than the onaxis PSF. We should verify this, however.
  *
  * @todo Verify that offaxis PSF is not considerably larger than onaxis
- *       PSF. 
+ *       PSF.
  ***************************************************************************/
 double GCTAResponse::npred_elliptical(const GSource& source,
                                       const GObservation& obs) const
@@ -1671,7 +1682,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
         ry.eulery(model->dec() - 90.0);
         rz.eulerz(-model->ra());
         rot = transpose(ry * rz);
-        
+
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
         double omega0 = centre.posang(events->roi().centre().dir());
@@ -1712,7 +1723,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
         std::cout << ")" << std::endl;
     }
     #endif
-    
+
     // Return Npred
     return npred;
 }
@@ -1771,100 +1782,133 @@ double GCTAResponse::npred_diffuse(const GSource& source,
     // Initialise Npred value
     double npred = 0.0;
 
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_NPRED_DIFFUSE);
-    }
+    // Check if Npred value is already in cache
+    bool has_npred = false;
+    if (!m_npred_names.empty()) {
 
-    // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_IRF_DIFFUSE);
-    }
+         // Build unique identifier
+         std::string id = source.name() + "::" + obs.name() + "::" + obs.id();
 
-    // Get pointer on CTA events list
-    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
-    if (events == NULL) {
-        throw GException::no_list(G_NPRED_DIFFUSE);
-    }
+         // Search for unique identifier, and if found, recover Npred value
+         // and break
+         for (int i = 0; i < m_npred_names.size(); ++i) {
+             if (m_npred_names[i] == id) {
+                 npred = m_npred_values[i];
+                 has_npred = true;
+                 break;
+             }
+         }
 
-    // Get pointer on spatial model
-    const GModelSpatial* model = dynamic_cast<const GModelSpatial*>(source.model());
-    if (model == NULL) {
-        throw GCTAException::bad_model_type(G_NPRED_DIFFUSE);
-    }
+    } // endif: there were values in the Npred cache
 
-    // Get source attributes
-    const GEnergy& srcEng = source.energy();
+    // Continue only if no Npred cache value was found
+    if (!has_npred) {
 
-    // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
+        // Get pointer on CTA observation
+        const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+        if (ctaobs == NULL) {
+            throw GCTAException::bad_observation_type(G_NPRED_DIFFUSE);
+        }
 
-    // Get log10(E/TeV) of true photon energy
-    double srcLogEng = srcEng.log10TeV();
+        // Get pointer on CTA pointing
+        const GCTAPointing *pnt = ctaobs->pointing();
+        if (pnt == NULL) {
+            throw GCTAException::no_pointing(G_IRF_DIFFUSE);
+        }
 
-    // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
-    // as this allows us doing this computation in the outer loop. This
-    // should be sufficient here, unless the offaxis PSF becomes much worse
-    // than the onaxis PSF. In this case, we may add a safety factor here
-    // to make sure we encompass the entire PSF.
-    double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
+        // Get pointer on CTA events list
+        const GCTAEventList* events =
+            dynamic_cast<const GCTAEventList*>(ctaobs->events());
+        if (events == NULL) {
+            throw GException::no_list(G_NPRED_DIFFUSE);
+        }
 
-    // Extract ROI radius (radians)
-    double roi_radius = events->roi().radius() * deg2rad;
+        // Get pointer on spatial model
+        const GModelSpatial* model =
+            dynamic_cast<const GModelSpatial*>(source.model());
+        if (model == NULL) {
+            throw GCTAException::bad_model_type(G_NPRED_DIFFUSE);
+        }
 
-    // Compute the ROI radius plus maximum PSF radius (radians). Any photon
-    // coming from beyond this radius will not make it in the dataspace and
-    // thus can be neglected.
-    double roi_psf_radius = roi_radius + psf_max_radius;
+        // Get source attributes
+        const GEnergy& srcEng = source.energy();
 
-    // Perform offset angle integration only if interval is valid
-    if (roi_psf_radius > 0.0) {
+        // Get pointing direction zenith angle and azimuth [radians]
+        double zenith  = pnt->zenith();
+        double azimuth = pnt->azimuth();
 
-        // Compute rotation matrix to convert from native ROI coordinates,
-        // given by (theta,phi), into celestial coordinates.
-        GMatrix ry;
-        GMatrix rz;
-        GMatrix rot;
-        ry.eulery(events->roi().centre().dec_deg() - 90.0);
-        rz.eulerz(-events->roi().centre().ra_deg());
-        rot = transpose(ry * rz);
-        
-        // Setup integration kernel
-        cta_npred_diffuse_kern_theta integrand(*this,
-                                               *model,
-                                               source.energy(),
-                                               source.time(),
-                                               *ctaobs,
-                                               rot);
+        // Get log10(E/TeV) of true photon energy
+        double srcLogEng = srcEng.log10TeV();
 
-        // Integrate over theta
-        GIntegral integral(&integrand);
-        integral.eps(1.0e-4);
-        npred = integral.romb(0.0, roi_psf_radius);
+        // Get maximum PSF radius (radians). We do this for the onaxis PSF only,
+        // as this allows us doing this computation in the outer loop. This
+        // should be sufficient here, unless the offaxis PSF becomes much worse
+        // than the onaxis PSF. In this case, we may add a safety factor here
+        // to make sure we encompass the entire PSF.
+        double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
-        // Compile option: Show integration results
-        #if defined(G_DEBUG_NPRED_DIFFUSE)
-        std::cout << "GCTAResponse::npred_diffuse:";
-        std::cout << " roi_psf_radius=" << roi_psf_radius;
-        std::cout << " npred=" << npred << std::endl;
+        // Extract ROI radius (radians)
+        double roi_radius = events->roi().radius() * deg2rad;
+
+        // Compute the ROI radius plus maximum PSF radius (radians). Any photon
+        // coming from beyond this radius will not make it in the dataspace and
+        // thus can be neglected.
+        double roi_psf_radius = roi_radius + psf_max_radius;
+
+        // Perform offset angle integration only if interval is valid
+        if (roi_psf_radius > 0.0) {
+
+            // Compute rotation matrix to convert from native ROI coordinates,
+            // given by (theta,phi), into celestial coordinates.
+            GMatrix ry;
+            GMatrix rz;
+            GMatrix rot;
+            ry.eulery(events->roi().centre().dec_deg() - 90.0);
+            rz.eulerz(-events->roi().centre().ra_deg());
+            rot = transpose(ry * rz);
+
+            // Setup integration kernel
+            cta_npred_diffuse_kern_theta integrand(*this,
+                                                   *model,
+                                                   source.energy(),
+                                                   source.time(),
+                                                   *ctaobs,
+                                                   rot);
+
+            // Integrate over theta
+            GIntegral integral(&integrand);
+            integral.eps(1.0e-4);
+            npred = integral.romb(0.0, roi_psf_radius);
+
+            // Compile option: Show integration results
+            #if defined(G_DEBUG_NPRED_DIFFUSE)
+            std::cout << "GCTAResponse::npred_diffuse:";
+            std::cout << " roi_psf_radius=" << roi_psf_radius;
+            std::cout << " npred=" << npred << std::endl;
+            #endif
+
+        } // endif: offset angle range was valid
+
+        // Build unique identifier for Npred cache
+        std::string id = source.name() + "::" + obs.name() + "::" + obs.id();
+
+        // Store result in Npred cache
+        m_npred_names.push_back(id);
+        m_npred_values.push_back(npred);
+
+        // Debug: Check for NaN
+        #if defined(G_NAN_CHECK)
+        if (isnotanumber(npred) || isinfinite(npred)) {
+            std::cout << "*** ERROR: GCTAResponse::npred_diffuse:";
+            std::cout << " NaN/Inf encountered";
+            std::cout << " (npred=" << npred;
+            std::cout << ", roi_psf_radius=" << roi_psf_radius;
+            std::cout << ")" << std::endl;
+        }
         #endif
 
-    } // endif: offset angle range was valid
+    } // endif: Npred computation required
 
-    // Debug: Check for NaN
-    #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
-        std::cout << "*** ERROR: GCTAResponse::npred_diffuse:";
-        std::cout << " NaN/Inf encountered";
-        std::cout << " (npred=" << npred;
-        std::cout << ", roi_psf_radius=" << roi_psf_radius;
-        std::cout << ")" << std::endl;
-    }
-    #endif
-    
     // Return Npred
     return npred;
 }
@@ -2038,7 +2082,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt.zenith();
     double azimuth = pnt.azimuth();
-    
+
     // Compute offset angle of source direction in camera system
     double theta = pnt.dir().dist(srcDir);
 
@@ -2062,7 +2106,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
         // Compute minimum PSF integration radius
         double rmin = (roi_psf_distance > roi_radius) 
                       ? roi_psf_distance - roi_radius : 0.0;
-        
+
         // Continue only if integration range is valid
         if (rmax > rmin) {
 
@@ -2106,7 +2150,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
                 std::cout << std::endl;
             }
             #endif
-        
+
         } // endif: integration range was valid
 
     } // endelse: numerical integration required
@@ -2173,7 +2217,11 @@ void GCTAResponse::init_members(void)
     m_aeff  = NULL;
     m_psf   = NULL;
     m_edisp = NULL;
-    
+
+    // Initialise Npred cache
+    m_npred_names.clear();
+    m_npred_values.clear();
+
     // Return
     return;
 }
@@ -2191,6 +2239,10 @@ void GCTAResponse::copy_members(const GCTAResponse& rsp)
     m_rspname = rsp.m_rspname;
     m_rmffile = rsp.m_rmffile;
     m_eps     = rsp.m_eps;
+
+    // Copy cache
+    m_npred_names  = rsp.m_npred_names;
+    m_npred_values = rsp.m_npred_values;
 
     // Clone members
     m_aeff  = (rsp.m_aeff  != NULL) ? rsp.m_aeff->clone()  : NULL;
