@@ -44,7 +44,10 @@
  * @brief Observation container class
  *
  * This is the main user interface class that provides high-level access to
- * gamma-ray observations and manages their scientific analysis.
+ * gamma-ray observations and manages their scientific analysis. For a given
+ * instruments, the identifiers of all observations in the container have to
+ * be unique, i.e. every identifier can occur only once. This allows for
+ * accessing the observations by instrument and by identifier.
  *
  * GObservations holds a list of pointers to GObservation objects which
  * implement gamma-ray observations. The class derives from the abstract
@@ -60,7 +63,8 @@
  * The size() method provides the number of observations in the list.
  *
  * The operator[] provides access to an observation in the list by index,
- * returning a reference to the observation.
+ * returning a reference to the observation. The operator does not perform
+ * index range checking. If range checking is required, use the at() method.
  *
  * The observation information may be stored into a XML file. The save()
  * method saves all information into a XML file while the load() method
@@ -93,32 +97,35 @@ public:
     virtual ~GObservations(void);
 
     // Operators
-    GObservations&      operator= (const GObservations& obs);
+    GObservations&      operator=(const GObservations& obs);
     GObservation*       operator[](const int& index);
     const GObservation* operator[](const int& index) const;
 
     // Methods
-    void           clear(void);
-    GObservations* clone(void) const;
-    int            size(void) const { return m_obs.size(); }
-    bool           isempty(void) const { return m_obs.empty(); }
-    GObservation*  set(const int& index, const GObservation& obs);
-    GObservation*  append(const GObservation& obs);
-    GObservation*  insert(const int& index, const GObservation& obs);
-    void           remove(const int& index);
-    void           reserve(const int& num) { return m_obs.reserve(num); }
-    void           extend(const GObservations& obs);
-    void           load(const std::string& filename);
-    void           save(const std::string& filename) const;
-    void           read(const GXml& xml);
-    void           write(GXml& xml) const;
-    void           models(const GModels& models) { m_models=models;} //!< @brief Set model container
-    void           models(const std::string& filename);
-    const GModels& models(void) { return m_models; } //!< @brief Return model container
-    void           optimize(GOptimizer& opt);
-    double         npred(void) const { return m_fct.npred(); } //!< @brief Return total number of predicted events
-    std::string    print(void) const;
-
+    void                clear(void);
+    GObservations*      clone(void) const;
+    GObservation*       at(const int& index);
+    const GObservation* at(const int& index) const;
+    int                 size(void) const;
+    bool                isempty(void) const;
+    GObservation*       set(const int& index, const GObservation& obs);
+    GObservation*       append(const GObservation& obs);
+    GObservation*       insert(const int& index, const GObservation& obs);
+    void                remove(const int& index);
+    void                reserve(const int& num);
+    void                extend(const GObservations& obs);
+    bool                contains(const std::string& instrument,
+                                 const std::string& id) const;
+    void                load(const std::string& filename);
+    void                save(const std::string& filename) const;
+    void                read(const GXml& xml);
+    void                write(GXml& xml) const;
+    void                models(const GModels& models);
+    void                models(const std::string& filename);
+    const GModels&      models(void) const;
+    void                optimize(GOptimizer& opt);
+    double              npred(void) const;
+    std::string         print(void) const;
 
     // Optimizer
     class optimizer : public GOptimizerFunction {
@@ -133,13 +140,13 @@ public:
         optimizer& operator=(const optimizer& fct);
 
         // Implemented pure virtual base class methods
-        double         value(void) { return m_value; }       //!< @brief Return optimizer function value
-        double         npred(void) const { return m_npred; } //!< @brief Return predicted number of events
-        GVector*       gradient(void) { return m_gradient; } //!< @brief Return pointer to gradient vector
-        GMatrixSparse* covar(void) { return m_covar; }       //!< @brief Return pointer to covariance matrix
+        double         value(void);
+        double         npred(void) const;
+        GVector*       gradient(void);
+        GMatrixSparse* covar(void);
 
         // Other methods
-        void set(GObservations* obs) { m_this=obs; } //!< @brief Set GObservations pointer
+        void set(GObservations* obs);
         void eval(const GOptimizerPars& pars);
         void poisson_unbinned(const GObservation&   obs,
                               const GOptimizerPars& pars);
@@ -186,18 +193,225 @@ public:
     };
 
     // Optimizer access method
-    const GObservations::optimizer& function(void) const { return m_fct; } //!< @brief Return optimizer function
+    const GObservations::optimizer& function(void) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GObservations& obs);
     void free_members(void);
+    int  get_index(const std::string& instrument,
+                   const std::string& id) const;
 
     // Protected members
     std::vector<GObservation*> m_obs;    //!< List of observations
     GModels                    m_models; //!< List of models
     GObservations::optimizer   m_fct;    //!< Optimizer function
 };
+
+
+/***********************************************************************//**
+ * @brief Return pointer to observation
+ *
+ * @param[in] index Observation index [0,...,size()-1].
+ * @return Observation.
+ *
+ * Returns a pointer to the observation with specified @p index.
+ ***************************************************************************/
+inline
+GObservation* GObservations::operator[](const int& index)
+{
+    return m_obs[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to observation (const version)
+ *
+ * @param[in] index Observation index [0,...,size()-1].
+ *
+ * Returns a const pointer to the observation with specified @p index.
+ ***************************************************************************/
+inline
+const GObservation* GObservations::operator[](const int& index) const
+{
+    return m_obs[index];
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of observations in container
+ *
+ * @return Number of observations in container.
+ *
+ * Returns the number of observations in the observation container.
+ ***************************************************************************/
+inline
+int GObservations::size(void) const
+{
+    return (m_obs.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if there are no observations in container
+ *
+ * @return True if container is empty, false otherwise.
+ *
+ * Signals if the observation container does not contain any observation.
+ ***************************************************************************/
+inline
+bool GObservations::isempty(void) const
+{
+    return (m_obs.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for observations in container
+ *
+ * @param[in] num Number of observations.
+ *
+ * Reserves space for @p num observations in the container.
+ ***************************************************************************/
+inline
+void GObservations::reserve(const int& num)
+{
+    m_obs.reserve(num);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set model container
+ *
+ * @param[in] models Model container.
+ *
+ * Sets the model container for the observations.
+ ***************************************************************************/
+inline
+void GObservations::models(const GModels& models)
+{
+    m_models = models;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return model container
+ *
+ * @return Model container.
+ *
+ * Returns the model container of the observations.
+ ***************************************************************************/
+inline
+const GModels& GObservations::models(void) const
+{
+    return m_models;
+}
+
+
+/***********************************************************************//**
+ * @brief Return total number of predicted events after model fitting
+ *
+ * @return Total number of predicted events after model fitting.
+ *
+ * Returns the total number of events that is predicted by the models after
+ * they have been fitted to the data. This number if computed following a
+ * call of the optimize() method. If this method has never been called, the
+ * npred() method returns 0.
+ ***************************************************************************/
+inline
+double GObservations::npred(void) const
+{
+    return (m_fct.npred());
+}
+
+
+/***********************************************************************//**
+ * @brief Return optimizer function
+ *
+ * @return Reference to optimizer function.
+ *
+ * Returns a reference to the optimizer function.
+ ***************************************************************************/
+inline
+const GObservations::optimizer& GObservations::function(void) const
+{
+    return m_fct;
+}
+
+
+/***********************************************************************//**
+ * @brief Return optimizer function value
+ *
+ * @return Optimizer function value.
+ *
+ * Returns the actual function value of the optimizer.
+ ***************************************************************************/
+inline
+double GObservations::optimizer::value(void)
+{
+    return m_value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return total number of predicted events
+ *
+ * @return Total number of predicted events.
+ *
+ * Returns the total number of events that is predicted by the models after
+ * they have been fitted to the data.
+ ***************************************************************************/
+inline
+double GObservations::optimizer::npred(void) const
+{
+    return m_npred;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to gradient vector
+ *
+ * @return Pointer to gradient vector.
+ *
+ * Returns a pointer to the parameter gradient vector.
+ ***************************************************************************/
+inline
+GVector* GObservations::optimizer::gradient(void)
+{
+    return m_gradient;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to covariance matrix
+ *
+ * @return Pointer to covariance matrix.
+ *
+ * Returns a pointer to the parameter covariance matrix.
+ ***************************************************************************/
+inline
+GMatrixSparse* GObservations::optimizer::covar(void)
+{
+    return m_covar;
+}
+
+
+/***********************************************************************//**
+ * @brief Set observation container
+ *
+ * @param[in] obs Pointer to observation container.
+ *
+ * Sets the pointer to the observation container for which the optimizer
+ * class should be used.
+ ***************************************************************************/
+inline
+void GObservations::optimizer::set(GObservations* obs)
+{
+    m_this = obs;
+    return;
+}
 
 #endif /* GOBSERVATIONS_HPP */

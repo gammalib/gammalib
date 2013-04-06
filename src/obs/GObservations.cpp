@@ -34,10 +34,12 @@
 #include "GObservationRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OP_ACCESS                         "GObservations::operator[](int&)"
+#define G_AT                                        "GObservations::at(int&)"
 #define G_SET                       "GObservations::set(int&, GObservation&)"
+#define G_APPEND                       "GObservations::append(GObservation&)"
 #define G_INSERT                 "GObservations::insert(int&, GObservation&)"
 #define G_REMOVE                                "GObservations::remove(int&)"
+#define G_EXTEND                      "GObservations::extend(GObservations&)"
 #define G_READ                                   "GObservations::read(GXml&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -152,6 +154,40 @@ GObservations& GObservations::operator=(const GObservations& obs)
 }
 
 
+/*==========================================================================
+ =                                                                         =
+ =                              Public methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear observations
+ ***************************************************************************/
+void GObservations::clear(void)
+{
+    // Free members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone observations
+ *
+ * @return Pointer to deep copy of observation container.
+ ***************************************************************************/
+GObservations* GObservations::clone(void) const
+{
+    // Clone observations
+    return new GObservations(*this);
+}
+
+
 /***********************************************************************//**
  * @brief Return pointer to observation
  *
@@ -163,14 +199,12 @@ GObservations& GObservations::operator=(const GObservations& obs)
  *
  * Returns a pointer to the observation with specified @p index.
  ***************************************************************************/
-GObservation* GObservations::operator[](const int& index)
+GObservation* GObservations::at(const int& index)
 {
-    // Compile option: If index is outside boundary then raise exception
-    #if defined(G_RANGE_CHECK)
+    // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, index, 0, size()-1);
     }
-    #endif
 
     // Return pointer
     return m_obs[index];
@@ -187,50 +221,15 @@ GObservation* GObservations::operator[](const int& index)
  *
  * Returns a const pointer to the observation with specified @p index.
  ***************************************************************************/
-const GObservation* GObservations::operator[](const int& index) const
+const GObservation* GObservations::at(const int& index) const
 {
-    // Compile option: If index is outside boundary then raise exception
-    #if defined(G_RANGE_CHECK)
+    // Raise exception if index is out of range
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, index, 0, size()-1);
     }
-    #endif
 
     // Return pointer
     return m_obs[index];
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                              Public methods                             =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Clear container
- ***************************************************************************/
-void GObservations::clear(void)
-{
-    // Free members
-    free_members();
-
-    // Initialise members
-    init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone object
- *
- * @return Pointer to deep copy of observation container.
- ***************************************************************************/
-GObservations* GObservations::clone(void) const
-{
-    return new GObservations(*this);
 }
 
 
@@ -243,6 +242,9 @@ GObservations* GObservations::clone(void) const
  *
  * @exception GException::out_of_range
  *            Observation index is out of range.
+ * @exception GException::invalid_value
+ *            Observation with same instrument and identifier already
+ *            exists in container.
  *
  * Set a deep copy and observation @p obs at the specified @p index in the
  * container.
@@ -255,6 +257,21 @@ GObservation* GObservations::set(const int& index, const GObservation& obs)
         throw GException::out_of_range(G_SET, index, 0, size()-1);
     }
     #endif
+
+    // Raise an exception if an observation with specified instrument and
+    // identifier already exists
+    int inx = get_index(obs.instrument(), obs.id());
+    if (inx != -1 && inx != index) {
+        std::string msg =
+            "Attempt to set \""+obs.instrument()+"\" observation with"
+            " identifier \""+obs.id()+"\" in observation container at"
+            " index "+str(index)+", but an observation with the same"
+            " attributes exists already at index "+str(inx)+" in the"
+            " container.\n"
+            "Every observation for a given instrument in the observation"
+            " container needs a unique identifier.";
+        throw GException::invalid_value(G_SET, msg);
+    }
 
     // Delete existing observation
     if (m_obs[index] != NULL) delete m_obs[index];
@@ -273,10 +290,28 @@ GObservation* GObservations::set(const int& index, const GObservation& obs)
  * @param[in] obs Observation.
  * @return Pointer to deep copy of observation.
  *
+ * @exception GException::invalid_value
+ *            Observation with same instrument and identifier already
+ *            exists in container.
+ *
  * Appends a deep copy of an observation to the container.
  ***************************************************************************/
 GObservation* GObservations::append(const GObservation& obs)
 {
+    // Raise an exception if an observation with specified instrument and
+    // identifier already exists
+    int inx = get_index(obs.instrument(), obs.id());
+    if (inx != -1) {
+        std::string msg =
+            "Attempt to append \""+obs.instrument()+"\" observation with"
+            " identifier \""+obs.id()+"\" to observation container, but an"
+            " observation with the same attributes exists already at"
+            " index "+str(inx)+" in the container.\n"
+            "Every observation for a given instrument in the observation"
+            " container needs a unique identifier.";
+        throw GException::invalid_value(G_APPEND, msg);
+    }
+
     // Clone observation
     GObservation* ptr = obs.clone();
     
@@ -297,6 +332,9 @@ GObservation* GObservations::append(const GObservation& obs)
  *
  * @exception GException::out_of_range
  *            Observation index is out of range.
+ * @exception GException::invalid_value
+ *            Observation with same instrument and identifier already
+ *            exists in container.
  *
  * Inserts a deep copy of an observation into the container before the
  * observation with the specified @p index.
@@ -316,6 +354,21 @@ GObservation* GObservations::insert(const int& index, const GObservation& obs)
         }
     }
     #endif
+
+    // Raise an exception if an observation with specified instrument and
+    // identifier already exists
+    int inx = get_index(obs.instrument(), obs.id());
+    if (inx != -1 && inx != index) {
+        std::string msg =
+            "Attempt to insert \""+obs.instrument()+"\" observation with"
+            " identifier \""+obs.id()+"\" in observation container before"
+            " index "+str(index)+", but an observation with the same"
+            " attributes exists already at index "+str(inx)+" in the"
+            " container.\n"
+            "Every observation for a given instrument in the observation"
+            " container needs a unique identifier.";
+        throw GException::invalid_value(G_INSERT, msg);
+    }
 
     // Clone observation
     GObservation* ptr = obs.clone();
@@ -356,9 +409,13 @@ void GObservations::remove(const int& index)
 
 
 /***********************************************************************//**
- * @brief Append observations
+ * @brief Append observations from observation container
  *
  * @param[in] obs Observations.
+ *
+ * @exception GException::invalid_value
+ *            Observation with same instrument and identifier already
+ *            exists in container.
  *
  * Appends deep copies of observations to the container.
  ***************************************************************************/
@@ -378,6 +435,23 @@ void GObservations::extend(const GObservations& obs)
         // Loop over all observations, clone them and append them to the
         // list
         for (int i = 0; i < num; ++i) {
+
+            // Raise an exception if an observation with specified
+            // instrument and identifier already exists
+            int inx = get_index(obs[i]->instrument(), obs[i]->id());
+            if (inx != -1) {
+                std::string msg =
+                    "Attempt to append \""+obs[i]->instrument()+"\""
+                    " observation with identifier \""+obs[i]->id()+"\""
+                    " to observation container, but an observation with the"
+                    " same attributes exists already at index "+str(inx)+
+                    " in the container.\n"
+                    "Every observation for a given instrument in the"
+                    " observation container needs a unique identifier.";
+                throw GException::invalid_value(G_EXTEND, msg);
+            }
+
+            // Append observation to container
             m_obs.push_back(obs[i]->clone());
         }
 
@@ -385,6 +459,29 @@ void GObservations::extend(const GObservations& obs)
     
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if observation exists
+ *
+ * @param[in] instrument Instrument.
+ * @param[in] id Observation identifier.
+ * @return True if observation with specified @p instrument and identifier
+ *         @p id exists.
+ *
+ * Searches all observations for a match with the specified @p instrument
+ * and @p identifier. If the specified attributes have been found, true is
+ * returned.
+ ***************************************************************************/
+bool GObservations::contains(const std::string& instrument,
+                             const std::string& id) const
+{
+    // Get observation index
+    int index = get_index(instrument, id);
+
+    // Return
+    return (index != -1);
 }
 
 
@@ -714,4 +811,36 @@ void GObservations::free_members(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation index by instrument and identifier
+ *
+ * @param[in] instrument Instrument.
+ * @param[in] id Observation identifier.
+ * @return Observation index (-1 of instrument and observation identifier
+ *         has not been found)
+ *
+ * Returns observation index based on the specified @p instrument and
+ * observation identifier @p id. If no observation with the specified
+ * attributes has been found, the method returns -1.
+ ***************************************************************************/
+int GObservations::get_index(const std::string& instrument,
+                             const std::string& id) const
+{
+    // Initialise index
+    int index = -1;
+
+    // Search observation with specified instrument and id
+    for (int i = 0; i < size(); ++i) {
+        if ((m_obs[i]->instrument() == instrument) &&
+            (m_obs[i]->id()         == id)) {
+            index = i;
+            break;
+        }
+    }
+
+    // Return index
+    return index;
 }

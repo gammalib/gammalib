@@ -54,6 +54,8 @@ public:
     void           remove(const int& index);
     void           reserve(const int& num);
     void           extend(const GObservations& obs);
+    bool           contains(const std::string& instrument,
+                            const std::string& id) const;
     void           load(const std::string& filename);
     void           save(const std::string& filename) const;
     void           read(const GXml& xml);
