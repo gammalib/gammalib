@@ -1853,6 +1853,7 @@ void TestGModel::test_models(void)
     test_try("Test model access");
     try {
         GModels models(m_xml_file);
+        GModel* model = models[0]->clone();
         models.reserve(5);
         test_assert(models.hasmodel("1FGL J0005.7+3815"), 
                     "Model \"1FGL J0005.7+3815\" not found.");
@@ -1860,23 +1861,99 @@ void TestGModel::test_models(void)
                     "Model \"2FGL J0005.7+3815\" found but not expected.");
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 1);
-        models.append(*(models[0]));
-        models.insert(0, *(models.at(0)));
+        
+        // Append model with same name
+        test_try("Append model with same name");
+        try {
+            models.append(*(models[0]));
+            test_try_failure("Appending of model with same name is not refused.");
+        }
+        catch (GException::invalid_value &e) {
+            test_try_success();
+        }
+        catch (std::exception &e) {
+            test_try_failure(e);
+        }
+        
+        // Append model with different name
+        model->name("Appended model");
+        models.append(*model);
+
+        // Insert model with same name
+        test_try("Insert model with same name");
+        try {
+            models.insert(0, *(models.at(0)));
+            test_try_failure("Inserting of model with same name is not refused.");
+        }
+        catch (GException::invalid_value &e) {
+            test_try_success();
+        }
+        catch (std::exception &e) {
+            test_try_failure(e);
+        }
+
+        // Insert model with different name
+        model->name("Inserted model");
+        models.insert(0, *model);
+
+        // Set model with same name
+        test_try("Set model with same name");
+        try {
+            models.set(0, *(models.at(1)));
+            test_try_failure("Setting of model with same name is not refused.");
+        }
+        catch (GException::invalid_value &e) {
+            test_try_success();
+        }
+        catch (std::exception &e) {
+            test_try_failure(e);
+        }
+
+        // Set model with different name
+        model->name("Set model");
+        models.set(0, *model);
+
+        // Make sure that we have now 3 models in container
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 3);
+
+        // Remove "Set model"
         models.remove(0);
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 2);
+
+        // Remove "1FGL J0005.7+3815"
         models.remove(0);
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 1);
-        models.remove("1FGL J0005.7+3815");
+
+        // Remove "Appended model"
+        models.remove("Appended model");
         test_assert(models.isempty(), "Model container is not empty.");
         test_value(models.size(), 0);
+
+        // Reload model
         models.load(m_xml_file);
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 1);
-        models.extend(models);
+        
+        // Append identical container
+        test_try("Append identical container");
+        try {
+            models.extend(models);
+            test_try_failure("Appending of identical container is not refused.");
+        }
+        catch (GException::invalid_value &e) {
+            test_try_success();
+        }
+        catch (std::exception &e) {
+            test_try_failure(e);
+        }
+
+        // Append different container
+        GModels other_models = models;
+        other_models[0]->name("New name");
+        models.extend(other_models);
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 2);
         test_try_success();
@@ -1900,20 +1977,6 @@ void TestGModel::test_models(void)
         test_try_failure(e);
     }
 
-    // Put model in container
-    GModels models;
-    test_try("Put model in container");
-    try {
-        models.append(crab);
-        models.append(crab);
-        models.append(crab);
-        test_value(models.size(), 3);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
     // Set model scaling
     GModelPar lat("LAT", 1.0);
     GModelPar cta("CTA", 0.5);
@@ -1927,13 +1990,13 @@ void TestGModel::test_models(void)
     test_value(crab.scale("COM").value(), 1.0);
 
     // Test saving and loading
-    GModels models2;
-    models2.append(crab);
-    models2.save("test_instrument.xml");
-    models2.load("test_instrument.xml");
-    test_value(models2[0]->scale("LAT").value(), 1.0);
-    test_value(models2[0]->scale("CTA").value(), 0.5);
-    test_value(models2[0]->scale("COM").value(), 1.0);
+    GModels models;
+    models.append(crab);
+    models.save("test_instrument.xml");
+    models.load("test_instrument.xml");
+    test_value(models[0]->scale("LAT").value(), 1.0);
+    test_value(models[0]->scale("CTA").value(), 0.5);
+    test_value(models[0]->scale("COM").value(), 1.0);
 
     // Exit test
     return;
