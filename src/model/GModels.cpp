@@ -167,34 +167,6 @@ GModels& GModels::operator= (const GModels& models)
 /***********************************************************************//**
  * @brief Return pointer to model
  *
- * @param[in] index Model index [0,...,size()-1].
- *
- * Returns a pointer to the model with the specified @p index.
- ***************************************************************************/
-GModel* GModels::operator[](const int& index)
-{
-    // Return pointer
-    return m_models[index];
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to model (const version)
- *
- * @param[in] index Model index [0,...,size()-1].
- *
- * Returns a const pointer to the model with the specified @p index.
- ***************************************************************************/
-const GModel* GModels::operator[](const int& index) const
-{
-    // Return pointer
-    return m_models[index];
-}
-
-
-/***********************************************************************//**
- * @brief Return pointer to model
- *
  * @param[in] name Model name.
  *
  * @exception GException::model_not_found
@@ -678,7 +650,6 @@ void GModels::extend(const GModels& models)
     // Return
     return;
 }
-    // Check if a model with specified name does not yet exist
 
 
 /***********************************************************************//**
@@ -690,7 +661,7 @@ void GModels::extend(const GModels& models)
  * Searches all model names for a match with the specified @p name. If the
  * specified name has been found, true is returned.
  ***************************************************************************/
-bool GModels::hasmodel(const std::string& name) const
+bool GModels::contains(const std::string& name) const
 {
     // Get model index
     int index = get_index(name);

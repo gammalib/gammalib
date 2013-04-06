@@ -74,7 +74,7 @@ public:
     void          remove(const std::string& name);
     void          reserve(const int& num);
     void          extend(const GModels& models);
-    bool          hasmodel(const std::string& name) const;
+    bool          contains(const std::string& name) const;
     void          load(const std::string& filename);
     void          save(const std::string& filename) const;
     void          read(const GXml& xml);

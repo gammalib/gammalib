@@ -44,12 +44,101 @@ class GObservation;
  * @brief Model container class
  *
  * This container class collects models of type GModel that are used to
- * describe the gamma-ray data. Each model has a number of parameters
- * that are implemented using the GModelPar class. This container class
- * provides methods to manage the container class, to access and to evaluate
- * the models.
+ * describe the data. The names of all models in the container have to be
+ * unique, i.e. every name can occur only once. This allows for accessing the
+ * models by name and by index.
  *
- * The only member of this class is a list of model pointers. GModels handles
+ * The GModels class provides methods to manage and to access the models
+ * in the container. The number of models in the container is retrieved
+ * using the size() method. The isempty() method can be used to check
+ * whether the container is empty or whether it contains models:
+ *
+ *     GModels models;                 // Allocate container
+ *     int n = models.size();          // Number of models in container
+ *     if (models.isempty())           // Check for emptiness
+ *         std::cout << "Empty container";
+ *
+ * Access operators exist for accessing of models by index or by name:
+ *
+ *     GModel* mptr = models[i];       // Get i'th model
+ *     GModel* mptr = models["Crab"];  // Get a model named "Crab"
+ *
+ * The index access operator does not check the validity of the provided
+ * index. For index validation, use the at() method:
+ *
+ *     GModel* mptr = models.at(i);    // Get i'th model with index check
+ *
+ * The append() method add a model to the container:
+ *
+ *     models.append(model);           // Append model
+ *
+ * The append() method clones the model that is passed as argument. The
+ * method returns a pointer to the cloned model so that the attributes of
+ * the cloned model can be manipulated:
+ *
+ *     GModel* mptr = models.append(model);
+ *
+ * The insert() methods insert a model before a given index or before
+ * a model with a given name (the methods also return a pointer to the
+ * cloned model):
+ *
+ *     models.insert(i, model);        // Insert before i'th model
+ *     models.insert("Crab", model);   // Insert before "Crab" model
+ *
+ * The set() methods replace an existing model by index or by name (also
+ * these methods return a pointer to the cloned model):
+ *
+ *     models.set(i, model);           // Replace i'th model
+ *     models.set("Crab", model);      // Replace "Crab" model
+ *
+ * The remove() methods remove an existing model by index or by name:
+ *
+ *     models.remove(i);               // Remove i'th model
+ *     models.remove("Crab");          // Remove "Crab" model
+ *
+ * The existence of a model with a given name can be checked using
+ *
+ *     if (models.contains("Crab"))
+ *         std::cout << "We have the Crab!";
+ *
+ * The extend() method extends a container by all models found in another
+ * container:
+ *
+ *     models.extend(other_models);    // Extend container
+ *
+ * For repeated container manipulations, a given @p number of model slots can
+ * be reserved using
+ *
+ *     models.reserve(number);         // Reserves model slots
+ *
+ * which will speed up the memory allocations for new models.
+ *
+ * Models can be saved into or loaded from an XML file using
+ *
+ *     models.save("mymodels.xml");    // Save models in XML file
+ *     models.load("mymodels.xml");    // Load models from XML file
+ *
+ * The models can also be loaded upon construction from an XML file:
+ *
+ *     GModels models("mymodels.xml"); // Construct by loading models from XML file
+ *
+ * The class can also directly operate on a GXml object using the read() and
+ * write() methods:
+ *
+ *     GXml xml;                       // Allocate GXml object
+ *     models.write(xml);              // Write into GXml object
+ *     models.read(xml);               // Read models from GXml object
+ *
+ * The sum of all models in the container are evaluated for a given @p event
+ * and @p observation using the eval() or eval_gradients() methods:
+ *
+ *     double value = models.eval(event, observation);
+ *     double value = models.eval_gradients(event, observation);
+ *
+ * The eval_gradients() method sets the parameter gradients for all free
+ * model parameters that have an analytical parameter gradient.
+ *
+ * The only member of GModels is a list of model pointers. The class handles
  * the proper allocation and deallocation of the model memory.
  *
  * GModels derives from GOptimizerPars which contains a flat array of
@@ -93,7 +182,7 @@ public:
     void          remove(const std::string& name);
     void          reserve(const int& num);
     void          extend(const GModels& models);
-    bool          hasmodel(const std::string& name) const;
+    bool          contains(const std::string& name) const;
     void          load(const std::string& filename);
     void          save(const std::string& filename) const;
     void          read(const GXml& xml);
@@ -113,6 +202,34 @@ protected:
     // Proteced members
     std::vector<GModel*> m_models;  //!< List of models
 };
+
+
+/***********************************************************************//**
+ * @brief Return pointer to model
+ *
+ * @param[in] index Model index [0,...,size()-1].
+ *
+ * Returns a pointer to the model with the specified @p index.
+ ***************************************************************************/
+inline
+GModel* GModels::operator[](const int& index)
+{
+    return (m_models[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to model (const version)
+ *
+ * @param[in] index Model index [0,...,size()-1].
+ *
+ * Returns a const pointer to the model with the specified @p index.
+ ***************************************************************************/
+inline
+const GModel* GModels::operator[](const int& index) const
+{
+    return (m_models[index]);
+}
 
 
 /***********************************************************************//**
