@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GMWLObservation.cpp  -  Multi-wavelength observation class       *
+ *         GMWLObservation.cpp - Multi-wavelength observation class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -474,6 +474,7 @@ void GMWLObservation::load(const std::string& filename)
 
     // Set attributes
     name("Multi-wavelength observation");
+    id(filename);
     m_filename   = filename;
     m_instrument = spec->instrument();
 
@@ -489,7 +490,7 @@ void GMWLObservation::load(const std::string& filename)
  * @param[in] extno FITS extension number.
  ***************************************************************************/
 void GMWLObservation::load(const std::string& filename,
-                           const int& extno)
+                           const int&         extno)
 {
     // Clear observation
     clear();
@@ -503,6 +504,7 @@ void GMWLObservation::load(const std::string& filename,
 
     // Set attributes
     name("Multi-wavelength observation");
+    id(filename+"["+str(extno)+"]");
     m_filename   = filename;
     m_extno      = str(extno);
     m_instrument = spec->instrument();
@@ -533,6 +535,7 @@ void GMWLObservation::load(const std::string& filename,
 
     // Set attributes
     name("Multi-wavelength observation");
+    id(filename+"["+extname+"]");
     m_filename   = filename;
     m_extname    = extname;
     m_instrument = spec->instrument();
@@ -552,6 +555,8 @@ std::string GMWLObservation::print(void) const
 
     // Append header
     result.append("=== GMWLObservation ===");
+
+    // Append information
     result.append("\n"+parformat("Name")+name());
     result.append("\n"+parformat("Identifier")+id());
     result.append("\n"+parformat("Instrument")+instrument());
