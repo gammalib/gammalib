@@ -1855,9 +1855,9 @@ void TestGModel::test_models(void)
         GModels models(m_xml_file);
         GModel* model = models[0]->clone();
         models.reserve(5);
-        test_assert(models.hasmodel("1FGL J0005.7+3815"), 
+        test_assert(models.contains("1FGL J0005.7+3815"), 
                     "Model \"1FGL J0005.7+3815\" not found.");
-        test_assert(!models.hasmodel("2FGL J0005.7+3815"), 
+        test_assert(!models.contains("2FGL J0005.7+3815"), 
                     "Model \"2FGL J0005.7+3815\" found but not expected.");
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 1);
