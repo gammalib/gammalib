@@ -40,12 +40,14 @@
 #define G_ACCESS1                                 "GModels::operator[](int&)"
 #define G_ACCESS2                         "GModels::operator[](std::string&)"
 #define G_AT                                              "GModels::at(int&)"
+#define G_SET1                                  "GModels::set(int&, GModel&)"
+#define G_SET2                          "GModels::set(std::string&, GModel&)"
+#define G_APPEND                                   "GModels::append(GModel&)"
 #define G_INSERT1                            "GModels::insert(int&, GModel&)"
 #define G_INSERT2                    "GModels::insert(std::string&, GModel&)"
 #define G_REMOVE1                                     "GModels::remove(int&)"
 #define G_REMOVE2                             "GModels::remove(std::string&)"
-#define G_SET1                                  "GModels::set(int&, GModel&)"
-#define G_SET2                          "GModels::set(std::string&, GModel&)"
+#define G_EXTEND                                  "GModels::extend(GModels&)"
 #define G_READ                                         "GModels::read(GXml&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -206,7 +208,7 @@ GModel* GModels::operator[](const std::string& name)
     int index = get_index(name);
 
     // Throw exception if model name was not found
-    if (index >= size()) {
+    if (index == -1) {
         throw GException::model_not_found(G_ACCESS2, name);
     }
 
@@ -231,7 +233,7 @@ const GModel* GModels::operator[](const std::string& name) const
     int index = get_index(name);
 
     // Throw exception if model name was not found
-    if (index >= size()) {
+    if (index == -1) {
         throw GException::model_not_found(G_ACCESS2, name);
     }
 
@@ -332,6 +334,8 @@ const GModel* GModels::at(const int& index) const
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
+ * @exception GException::invalid_value
+ *            Name of model exists already in container.
  *
  * Set model in the container. A deep copy of the model will be made.
  ***************************************************************************/
@@ -343,6 +347,17 @@ GModel* GModels::set(const int& index, const GModel& model)
         throw GException::out_of_range(G_SET1, index, 0, size()-1);
     }
     #endif
+
+    // Check if a model with specified name does not yet exist
+    int inx = get_index(model.name());
+    if (inx != -1 && inx != index) {
+        std::string msg =
+            "Attempt to set model with name \""+model.name()+"\" in model"
+            " container at index "+str(index)+", but a model with the same"
+            " name exists already at index "+str(inx)+" in the container.\n"
+            "Every model in the model container needs a unique name.";
+        throw GException::invalid_value(G_SET1, msg);
+    }
 
     // Delete any existing model
     if (m_models[index] != NULL) delete m_models[index];
@@ -367,6 +382,8 @@ GModel* GModels::set(const int& index, const GModel& model)
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
+ * @exception GException::invalid_value
+ *            Name of model exists already in container.
  *
  * Set model in the container. A deep copy of the model will be made.
  ***************************************************************************/
@@ -376,8 +393,19 @@ GModel* GModels::set(const std::string& name, const GModel& model)
     int index = get_index(name);
 
     // Throw exception if parameter name was not found
-    if (index >= size()) {
+    if (index == -1) {
         throw GException::model_not_found(G_SET2, name);
+    }
+
+    // Check if a model with specified name does not yet exist
+    int inx = get_index(model.name());
+    if (inx != -1 && inx != index) {
+        std::string msg =
+            "Attempt to set model with name \""+model.name()+"\" in model"
+            " container at index "+str(index)+", but a model with the same"
+            " name exists already at index "+str(inx)+" in the container.\n"
+            "Every model in the model container needs a unique name.";
+        throw GException::invalid_value(G_SET2, msg);
     }
 
     // Delete any existing model
@@ -400,11 +428,25 @@ GModel* GModels::set(const std::string& name, const GModel& model)
  * @param[in] model Model.
  * @return Pointer to deep copy of model.
  *
+ * @exception GException::invalid_value
+ *            Name of model exists already in container.
+ *
  * Appends model to the container by making a deep copy of the model and
  * storing its pointer.
  ***************************************************************************/
 GModel* GModels::append(const GModel& model)
 {
+    // Check if a model with specified name does not yet exist
+    int inx = get_index(model.name());
+    if (inx != -1) {
+        std::string msg = 
+            "Attempt to append model with name \""+model.name()+"\" to model"
+            " container, but a model with the same name exists already at"
+            " index "+str(inx)+" in the container.\n"
+            "Every model in the model container needs a unique name.";
+        throw GException::invalid_value(G_APPEND, msg);
+    }
+
     // Create deep copy of model
     GModel* ptr = model.clone();
 
@@ -428,6 +470,8 @@ GModel* GModels::append(const GModel& model)
  *
  * @exception GException::out_of_range
  *            Model index is out of range.
+ * @exception GException::invalid_value
+ *            Name of model exists already in container.
  *
  * Inserts a @p model into the container before the model with the specified
  * @p index.
@@ -447,6 +491,18 @@ GModel* GModels::insert(const int& index, const GModel& model)
         }
     }
     #endif
+
+    // Check if a model with specified name does not yet exist
+    int inx = get_index(model.name());
+    if (inx != -1) {
+        std::string msg =
+            "Attempt to insert model with name \""+model.name()+"\" in model"
+            " container before index "+str(index)+", but a model with the"
+            " same name exists already at index "+str(inx)+" in the"
+            " container.\n"
+            "Every model in the model container needs a unique name.";
+        throw GException::invalid_value(G_INSERT1, msg);
+    }
 
     // Create deep copy of model
     GModel* ptr = model.clone();
@@ -471,6 +527,8 @@ GModel* GModels::insert(const int& index, const GModel& model)
  *
  * @exception GException::model_not_found
  *            Model with specified name not found in container.
+ * @exception GException::invalid_value
+ *            Name of model exists already in container.
  *
  * Inserts a @p model into the container before the model with the specified
  * @p name.
@@ -481,8 +539,20 @@ GModel* GModels::insert(const std::string& name, const GModel& model)
     int index = get_index(name);
 
     // Throw exception if parameter name was not found
-    if (index >= size()) {
+    if (index == -1) {
         throw GException::model_not_found(G_INSERT2, name);
+    }
+
+    // Check if a model with specified name does not yet exist
+    int inx = get_index(model.name());
+    if (inx != -1) {
+        std::string msg =
+            "Attempt to insert model with name \""+model.name()+"\" in model"
+            " container before index "+str(index)+", but a model with the"
+            " same name exists already at index "+str(inx)+" in the"
+            " container.\n"
+            "Every model in the model container needs a unique name.";
+        throw GException::invalid_value(G_INSERT2, msg);
     }
 
     // Create deep copy of model
@@ -545,7 +615,7 @@ void GModels::remove(const std::string& name)
     int index = get_index(name);
 
     // Throw exception if parameter name was not found
-    if (index >= size()) {
+    if (index == -1) {
         throw GException::model_not_found(G_REMOVE2, name);
     }
 
@@ -582,8 +652,23 @@ void GModels::extend(const GModels& models)
 
         // Loop over all model components and append pointers to deep copies 
         for (int i = 0; i < num; ++i) {
+
+            // Check if model name does not yet exist
+            int inx = get_index(models[i]->name());
+            if (inx != -1) {
+                std::string msg =
+                    "Attempt to append model with name \""+models[i]->name()+
+                    "\" to model container, but a model with the same name"
+                    " exists already at index "+str(inx)+" in the"
+                    " container.\n"
+                    "Every model in the model container needs a unique name.";
+                throw GException::invalid_value(G_EXTEND, msg);
+            }
+
+            // Append model to container
             m_models.push_back(models[i]->clone());
-        }
+
+        } // endfor: looped over all models
 
         // Set parameter pointers
         set_pointers();
@@ -593,6 +678,7 @@ void GModels::extend(const GModels& models)
     // Return
     return;
 }
+    // Check if a model with specified name does not yet exist
 
 
 /***********************************************************************//**
@@ -610,7 +696,7 @@ bool GModels::hasmodel(const std::string& name) const
     int index = get_index(name);
 
     // Return
-    return (index < size());
+    return (index != -1);
 }
 
 
@@ -919,19 +1005,23 @@ void GModels::set_pointers(void)
 
 
 /***********************************************************************//**
- * @brief Returns index to model
+ * @brief Return model index by name
  *
  * @param[in] name Model name.
+ * @return Model index (-1 of no model has been found)
  *
- * Returns index to model specified by the model name. If no model is found
- * the method returns the size of the model container.
+ * Returns model index based on the specified @p name. If no model with the
+ * specified @p name is found the method returns -1.
  ***************************************************************************/
 int GModels::get_index(const std::string& name) const
 {
-    // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_models[index]->name() == name) {
+    // Initialise index
+    int index = -1;
+
+    // Search model with specified name
+    for (int i = 0; i < size(); ++i) {
+        if (m_models[i]->name() == name) {
+            index = i;
             break;
         }
     }
