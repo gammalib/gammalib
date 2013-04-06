@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GCTAResponse.cpp  -  CTA Response class                *
+ *                   GCTAResponse.cpp - CTA Response class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -1815,7 +1815,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
     double npred = 0.0;
 
     // Build unique identifier
-    std::string id = source.name() + "::" + obs.name() + "::" + obs.id();
+    std::string id = source.name() + "::" + obs.id();
 
     // Check if Npred value is already in cache
     bool has_npred = false;
