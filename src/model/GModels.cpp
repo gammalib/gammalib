@@ -979,7 +979,7 @@ void GModels::set_pointers(void)
  * @brief Return model index by name
  *
  * @param[in] name Model name.
- * @return Model index (-1 of no model has been found)
+ * @return Model index (-1 if model name has not been found)
  *
  * Returns model index based on the specified @p name. If no model with the
  * specified @p name is found the method returns -1.
