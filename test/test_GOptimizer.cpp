@@ -81,7 +81,7 @@ void TestGOptimizer::test_optimizer(const int& mode)
     GObservations obs;
 
     // Add some observation
-    for (int i=0; i<6; ++i) {
+    for (int i = 0; i < 6; ++i) {
 
         // Random Generator
         GRan ran;
@@ -100,6 +100,7 @@ void TestGOptimizer::test_optimizer(const int& mode)
 
         // Create an observation
         GTestObservation ob;
+        ob.id(str(i));
 
         // Add events to the observation
         ob.events(events);

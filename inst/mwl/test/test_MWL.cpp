@@ -100,8 +100,11 @@ void TestGMWL::test_obs(void)
         GMWLObservation run;
         run.load(lat_crab_fits);
         GObservations obs;
+        run.id("001");
         obs.append(run);
+        run.id("002");
         obs.append(run);
+        run.id("003");
         obs.append(run);
         test_try_success();
     }

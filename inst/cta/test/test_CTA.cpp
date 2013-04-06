@@ -408,9 +408,11 @@ void TestGCTAObservation::test_unbinned_obs(void)
     }
 
     // Add observation (twice) to data
-    test_try("Load unbinned CTA observation");
+    test_try("Append observation twice");
     try {
+        run.id("0001");
         obs.append(run);
+        run.id("0002");
         obs.append(run);
         test_try_success();
     }
