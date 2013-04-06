@@ -229,7 +229,9 @@ None
 
 19. CTA interface
 -----------------
-None
+The computations for diffuse map templates have been optimized by
+introducing a pre computation cache for IRF and Npred values. This
+considerably reduces the computing time for diffuse spatial maps.
 
 
 20. COMPTEL interface
