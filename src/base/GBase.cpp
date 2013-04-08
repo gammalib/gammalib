@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GBase.cpp - GammaLib base class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,6 +51,8 @@
  *
  * @param[in] os Output stream.
  * @param[in] base Object.
+ *
+ * Put @p base object into output stream.
  ***************************************************************************/
 std::ostream& operator<<(std::ostream& os, const GBase& base)
 {
@@ -67,11 +69,14 @@ std::ostream& operator<<(std::ostream& os, const GBase& base)
  *
  * @param[in] log Logger.
  * @param[in] base Object.
+ *
+ * Put @p base object into logger. The chattiness of the @p base object is
+ * controlled by the chatter() attribute of the @p log logger.
  ***************************************************************************/
 GLog& operator<<(GLog& log, const GBase& base)
 {
     // Write class into logger
-    log << base.print();
+    log << base.print(log.chatter());
 
     // Return logger
     return log;
