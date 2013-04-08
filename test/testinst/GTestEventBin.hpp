@@ -109,7 +109,7 @@ public:
         return error;
     }
     virtual void               counts(const double& counts) { m_counts=counts; }
-    virtual std::string        print(void) const{
+    virtual std::string        print(const GChatter& chatter = NORMAL) const{
          // Initialise result string
         std::string result;
 

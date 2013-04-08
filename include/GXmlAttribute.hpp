@@ -71,7 +71,7 @@ public:
     std::string        value(void) const;
     void               name(const std::string& name) { m_name=name; }
     void               value(std::string value);
-    std::string        print(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

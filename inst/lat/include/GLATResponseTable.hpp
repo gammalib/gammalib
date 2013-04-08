@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GLATResponseTable.hpp  -  Fermi/LAT Response table class        *
+ *          GLATResponseTable.hpp - Fermi-LAT Response table class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponseTable.hpp
- * @brief Fermi/LAT response table class definition
+ * @brief Fermi-LAT response table class definition
  * @author Juergen Knoedlseder
  */
 
@@ -79,7 +79,7 @@ public:
     std::vector<int>    indices(void) const;
     std::vector<double> energies(void) const;
     std::vector<double> weights(void) const;
-    std::string         print(void) const;
+    std::string         print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

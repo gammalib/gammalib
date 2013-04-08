@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCTAPointing.hpp  -  CTA pointing class                 *
+ *                  GCTAPointing.hpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAPointing.hpp
  * @brief CTA pointing class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAPOINTING_HPP
@@ -59,7 +59,7 @@ public:
     virtual void           clear(void);
     virtual GCTAPointing*  clone(void) const;
     virtual const GSkyDir& dir(void) const { return m_dir; }
-    virtual std::string    print(void) const;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void   dir(const GSkyDir& dir);

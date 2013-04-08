@@ -859,34 +859,41 @@ bool GEbounds::contains(const GEnergy& eng) const
 /***********************************************************************//**
  * @brief Print energy boundaries
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing energy boundary information.
  ***************************************************************************/
-std::string GEbounds::print(void) const
+std::string GEbounds::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append Header
-    result.append("=== GEbounds ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append(parformat("Number of intervals")+str(size()));
-    result.append("\n");
-    result.append(parformat("Energy range"));
-    result.append(emin().print());
-    result.append(" - ");
-    result.append(emax().print());
+        // Append Header
+        result.append("=== GEbounds ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of intervals")+str(size()));
+        result.append("\n"+parformat("Energy range"));
+        result.append(emin().print());
+        result.append(" - ");
+        result.append(emax().print());
     
-    // If there are multiple energy bins then append them
-    if (size() > 1) {
-        for (int i = 0; i < size(); ++i) {
-            result.append("\n");
-            result.append(parformat("Energy interval "+str(i)));
-            result.append(emin(i).print());
-            result.append(" - ");
-            result.append(emax(i).print());
-        }
-    }
+        // If there are multiple energy bins then append them
+        if (chatter >= EXPLICIT) {
+            if (size() > 1) {
+                for (int i = 0; i < size(); ++i) {
+                    result.append("\n");
+                    result.append(parformat("Energy interval "+str(i)));
+                    result.append(emin(i).print());
+                    result.append(" - ");
+                    result.append(emax(i).print());
+                }
+            }
+        } // endif: chatter was less than explicit
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

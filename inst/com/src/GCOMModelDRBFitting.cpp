@@ -746,25 +746,31 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print model information
  *
- * @todo Document method.
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing model information.
  ***************************************************************************/
-std::string GCOMModelDRBFitting::print(void) const
+std::string GCOMModelDRBFitting::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCOMModelDRBFitting ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append attributes
-    result.append("\n"+print_attributes());
+        // Append header
+        result.append("=== GCOMModelDRBFitting ===");
 
-    // Append node summary
-    result.append("\n"+parformat("Number of nodes")+str(m_phibars.size()));
-    result.append("\n"+parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append attributes
+        result.append("\n"+print_attributes());
+
+        // Append node summary
+        result.append("\n"+parformat("Number of nodes")+str(m_phibars.size()));
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -730,21 +730,27 @@ void GModelSpectralExpPlaw::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print model information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing model information.
  ***************************************************************************/
-std::string GModelSpectralExpPlaw::print(void) const
+std::string GModelSpectralExpPlaw::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpectralExpPlaw ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpectralExpPlaw ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

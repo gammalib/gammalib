@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GLATMeanPsf.hpp  -  Fermi LAT mean PSF                 *
+ *                   GLATMeanPsf.hpp - Fermi LAT mean PSF                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,7 +77,7 @@ public:
     void         thetamax(const double& value) { m_theta_max=value; }
     double       psf(const double& offset, const double& logE);
     double       exposure(const double& logE);
-    std::string  print(void) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

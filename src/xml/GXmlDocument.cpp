@@ -193,24 +193,34 @@ void GXmlDocument::write(GUrl& url, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML document
  *
- * @param[in] indent Text indentation (default = 0).
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] indent Text indentation (default to 0).
  * @return String containing XML document.
  ***************************************************************************/
-std::string GXmlDocument::print(const int& indent) const
+std::string GXmlDocument::print(const GChatter& chatter,
+                                const int&      indent) const
 {
     // Initialise result string
-    std::string result = fill(" ", indent);
+    std::string result;
 
-    // Append document to string
-    result.append("GXmlDocument::");
-    result.append("version=" + version());
-    result.append(" encoding=" + encoding());
-    result.append(" standalone=" + standalone());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append children
-    for (int i = 0; i < m_nodes.size(); ++i) {
-        result.append("\n" + m_nodes[i]->print(indent));
-    }
+        // Initialise result string
+        result = fill(" ", indent);
+
+        // Append document to string
+        result.append("GXmlDocument::");
+        result.append("version=" + version());
+        result.append(" encoding=" + encoding());
+        result.append(" standalone=" + standalone());
+
+        // Append children
+        for (int i = 0; i < m_nodes.size(); ++i) {
+            result.append("\n" + m_nodes[i]->print(chatter, indent));
+        }
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

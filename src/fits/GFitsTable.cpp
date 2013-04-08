@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GFitsTable.cpp  - FITS table base class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -555,51 +555,62 @@ bool GFitsTable::hascolumn(const std::string& colname) const
 
 /***********************************************************************//**
  * @brief Print table information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing table information.
  ***************************************************************************/
-std::string GFitsTable::print(void) const
+std::string GFitsTable::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GFitsTable ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append HDU information
-    result.append(print_hdu());
+        // Append header
+        result.append("=== GFitsTable ===\n");
 
-    // Append table type
-    result.append(parformat("Table type"));
-    switch (m_type) {
-    case GFitsHDU::HT_ASCII_TABLE:
-        result.append("ASCII table\n");
-        break;
-    case GFitsHDU::HT_BIN_TABLE:
-        result.append("Binary table\n");
-        break;
-    default:
-        result.append("Unknown\n");
-        break;
-    }
+        // Append HDU information
+        result.append(print_hdu(chatter));
 
-    // Append table dimensions
-    result.append(parformat("Number of rows")+str(m_rows)+"\n");
-    result.append(parformat("Number of columns")+str(m_cols)+"\n");
-
-    // Append header information
-    result.append(m_header.print());
-
-    // Append table columns
-    if (m_columns != NULL) {
-        for (int i = 0; i < m_cols; ++i) {
-            result.append("\n");
-            if (m_columns[i] != NULL)
-                result.append(m_columns[i]->print());
-            else
-                result.append(" Column "+str(i)+" undefined");
+        // Append table type
+        result.append(parformat("Table type"));
+        switch (m_type) {
+        case GFitsHDU::HT_ASCII_TABLE:
+            result.append("ASCII table\n");
+            break;
+        case GFitsHDU::HT_BIN_TABLE:
+            result.append("Binary table\n");
+            break;
+        default:
+            result.append("Unknown\n");
+            break;
         }
-    }
-    else
-        result.append(" Table columns undefined");
+
+        // Append table dimensions
+        result.append(parformat("Number of rows")+str(m_rows)+"\n");
+        result.append(parformat("Number of columns")+str(m_cols)+"\n");
+
+        // Append header information
+        result.append(m_header.print(chatter));
+
+        // Append table columns
+        if (m_columns != NULL) {
+            for (int i = 0; i < m_cols; ++i) {
+                result.append("\n");
+                if (m_columns[i] != NULL) {
+                    result.append(m_columns[i]->print(chatter));
+                }
+                else {
+                    result.append(" Column "+str(i)+" undefined");
+                }
+            }
+        }
+        else {
+            result.append(" Table columns undefined");
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

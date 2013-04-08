@@ -76,7 +76,7 @@ public:
     void                 model(GModelSpatial* model);
     void                 energy(const GEnergy& energy);
     void                 time(const GTime& time);
-    std::string          print(void) const;
+    std::string          print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

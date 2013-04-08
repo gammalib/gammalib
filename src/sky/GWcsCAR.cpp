@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GWcsCAR.cpp  -  Plate carree (CAR) projection class          *
+ *             GWcsCAR.cpp - Plate carree (CAR) projection class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsCAR.cpp
  * @brief Plate carree (CAR) projection class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -201,15 +201,25 @@ GWcsCAR* GWcsCAR::clone(void) const
 
 /***********************************************************************//**
  * @brief Print WCS information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing WCS information.
  ***************************************************************************/
-std::string GWcsCAR::print(void) const
+std::string GWcsCAR::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GWcsCAR ===\n");
-    result.append(wcs_print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GWcsCAR ===");
+
+        // Append information
+        result.append(wcs_print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

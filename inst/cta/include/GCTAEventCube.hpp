@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GCTAEventCube.hpp  -  CTA event bin container class          *
+ *             GCTAEventCube.hpp - CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventCube.hpp
  * @brief CTA event bin container class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAEVENTCUBE_HPP
@@ -74,7 +74,7 @@ public:
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const;
-    virtual std::string    print(void) const;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void                   map(const GSkymap& map);

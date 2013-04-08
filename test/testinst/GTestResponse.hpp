@@ -106,7 +106,7 @@ public:
                               const GObservation& obs) const { return 1.0; }
     virtual double        npred(const GPhoton&      photon,
                                 const GObservation& obs) const { return 1.0; }
-    virtual std::string   print(void) const{ return "=== GTestReponse ==="; }
+    virtual std::string   print(const GChatter& chatter = NORMAL) const{ return "=== GTestReponse ==="; }
 
 protected:
     // Protected methods

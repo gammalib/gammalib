@@ -827,31 +827,39 @@ bool GGti::contains(const GTime& time) const
 /***********************************************************************//**
  * @brief Print Good Time Intervals
  *
- * @return String containing Good Time Interval information
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing Good Time Interval information.
  ***************************************************************************/
-std::string GGti::print(void) const
+std::string GGti::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GGti ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append GTI information
-    result.append("\n"+parformat("Number of intervals")+str(size()));
-    result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
-    result.append("\n"+parformat("Elapsed time")+str(telapse())+" sec");
-    result.append("\n"+parformat("Time range"));
-    result.append(str(tstart().convert(m_reference)));
-    result.append(" - ");
-    result.append(str(tstop().convert(m_reference)));
-    result.append(" "+reference().timeunit());
-    result.append(" ("+reference().timesys()+")");
-    result.append("\n"+parformat("Reference MDJ"));
-    result.append(str(reference().mjdref()));
+        // Append header
+        result.append("=== GGti ===");
 
-    // Append time reference information
-    //result.append("\n"+reference().print());
+        // Append GTI information
+        result.append("\n"+parformat("Number of intervals")+str(size()));
+        result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
+        result.append("\n"+parformat("Elapsed time")+str(telapse())+" sec");
+        result.append("\n"+parformat("Time range"));
+        result.append(str(tstart().convert(m_reference)));
+        result.append(" - ");
+        result.append(str(tstop().convert(m_reference)));
+        result.append(" "+reference().timeunit());
+        result.append(" ("+reference().timesys()+")");
+        result.append("\n"+parformat("Reference MDJ"));
+        result.append(str(reference().mjdref()));
+
+        // EXPLICIT: Append time reference information
+        if (chatter >= EXPLICIT) {
+            result.append("\n"+reference().print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

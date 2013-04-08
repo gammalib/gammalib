@@ -209,7 +209,7 @@ public:
     
     virtual void        read(const GXmlElement& xml){ return; }
     virtual void        write(GXmlElement& xml) const { return; }
-    virtual std::string print(void) const { 
+    virtual std::string print(const GChatter& chatter = NORMAL) const { 
         std::string result;
         
         result.append(parformat("Number of temporal par's")+str(m_modelTps->size()));

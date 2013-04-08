@@ -155,7 +155,7 @@ public:
                               const GObservation& obs) const;
     virtual void        read(const GXmlElement& xml);
     virtual void        write(GXmlElement& xml) const;
-    virtual std::string print(void) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     GModelSpatial*      spatial(void) const;
@@ -192,7 +192,6 @@ protected:
                                   const GObservation& obs,
                                   bool grad) const;
     bool            valid_model(void) const;
-    std::string     print_model(void) const;
 
     // Proteced data members
     std::string     m_type;       //!< Model type

@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GSkyPixel.cpp  -  Class that implements a 2D sky pixel index      *
+ *        GSkyPixel.cpp - Class that implements a 2D sky pixel index       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -219,17 +219,25 @@ double GSkyPixel::y(void) const
 
 /***********************************************************************//**
  * @brief Print pixel
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing pixel information.
  ***************************************************************************/
-std::string GSkyPixel::print(void) const
+std::string GSkyPixel::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result = "(";
 
-    // Append pixel
-    result.append(str(x()));
-    result.append(",");
-    result.append(str(y()));
-    result.append(")");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append pixel
+        result.append(str(x()));
+        result.append(",");
+        result.append(str(y()));
+        result.append(")");
+
+    } // endif: chatter was not silent
     
     // Return result
     return result;

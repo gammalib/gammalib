@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GFitsImage.hpp  - FITS image abstract base class           *
+ *              GFitsImage.hpp - FITS image abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsImage.hpp
  * @brief GFitsImage class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSIMAGE_HPP
@@ -75,7 +75,7 @@ public:
     int         anynul(void) const;
     void        nulval(const void* value);
     void*       nulval(void);
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

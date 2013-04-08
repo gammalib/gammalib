@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATEventCube.hpp  -  LAT event cube class               *
+ *                 GLATEventCube.hpp - LAT event cube class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventCube.hpp
  * @brief LAT event cube class interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATEVENTCUBE_HPP
@@ -71,7 +71,7 @@ public:
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const;
-    virtual std::string    print(void) const;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void              time(const GTime& time) { m_time=time; }

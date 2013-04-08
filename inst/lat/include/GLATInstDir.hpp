@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GLATInstDir.hpp  -  LAT instrument direction class           *
+ *             GLATInstDir.hpp - LAT instrument direction class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATInstDir.hpp
  * @brief GLATInstDir class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATINSTDIR_HPP
@@ -56,7 +56,7 @@ public:
     // Implemented pure virtual base class methods
     void         clear(void);
     GLATInstDir* clone(void) const;
-    std::string  print(void) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Methods
     void         skydir(const GSkyDir& dir) { m_dir=dir; }

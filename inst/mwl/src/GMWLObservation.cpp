@@ -547,25 +547,35 @@ void GMWLObservation::load(const std::string& filename,
 
 /***********************************************************************//**
  * @brief Print multi-wavelength information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing multi-wavelength information.
  ***************************************************************************/
-std::string GMWLObservation::print(void) const
+std::string GMWLObservation::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GMWLObservation ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append("\n"+parformat("Name")+name());
-    result.append("\n"+parformat("Identifier")+id());
-    result.append("\n"+parformat("Instrument")+instrument());
-    result.append("\n"+parformat("Statistics")+statistics());
+        // Append header
+        result.append("=== GMWLObservation ===");
 
-    // Append events
-    if (m_events != NULL) {
-        result.append("\n"+(static_cast<GMWLSpectrum*>(m_events))->print());
-    }
+        // Append information
+        result.append("\n"+parformat("Name")+name());
+        result.append("\n"+parformat("Identifier")+id());
+        result.append("\n"+parformat("Instrument")+instrument());
+        result.append("\n"+parformat("Statistics")+statistics());
+
+        // EXPLICIT: Append events
+        if (chatter >=  EXPLICIT) {
+            if (m_events != NULL) {
+                result.append("\n"+m_events->print(chatter));
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

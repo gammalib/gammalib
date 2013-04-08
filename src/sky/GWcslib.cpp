@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GWcslib.cpp  -  Virtual base class for wcslib based WCS       *
+ *            GWcslib.cpp - Virtual base class for wcslib based WCS        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1307,162 +1307,166 @@ void GWcslib::wcs_s2p(int ncoord, int nelem, const double* world,
 /***********************************************************************//**
  * @brief Print WCS information
  ***************************************************************************/
-std::string GWcslib::wcs_print(void) const
+std::string GWcslib::wcs_print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append World Coordinate parameters
-    result.append(parformat("Number of axes")+str(m_naxis)+"\n");
-    result.append(parformat("Longitude axis")+str(m_lng)+"\n");
-    result.append(parformat("Latitude axis")+str(m_lat)+"\n");
-    result.append(parformat("Spectral axis")+str(m_spec)+"\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append World Coordinate parameters
+        result.append("\n"+parformat("Number of axes")+str(m_naxis));
+        result.append("\n"+parformat("Longitude axis")+str(m_lng));
+        result.append("\n"+parformat("Latitude axis")+str(m_lat));
+        result.append("\n"+parformat("Spectral axis")+str(m_spec));
     
-    // Append coordinates
-    result.append(parformat("Reference coordinate")+"(");
-    for (int i = 0; i < m_crval.size(); ++i) {
-        if (i > 0) {
-            result.append(", ");
+        // Append coordinates
+        result.append("\n"+parformat("Reference coordinate")+"(");
+        for (int i = 0; i < m_crval.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(str(m_crval[i]));
+            if (m_cunit[i].length() > 0) {
+                result.append(" "+m_cunit[i]);
+            }
         }
-        result.append(str(m_crval[i]));
-        if (m_cunit[i].length() > 0) {
-            result.append(" "+m_cunit[i]);
+        result.append(")");
+        result.append("\n"+parformat("Reference pixel")+"(");
+        for (int i = 0; i < m_crpix.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(str(m_crpix[i]));
         }
-            
-    }
-    result.append(")\n");
-    result.append(parformat("Reference pixel")+"(");
-    for (int i = 0; i < m_crpix.size(); ++i) {
-        if (i > 0) {
-            result.append(", ");
+        result.append(")");
+        result.append("\n"+parformat("Increment at reference")+"(");
+        for (int i = 0; i < m_cdelt.size(); ++i) {
+            if (i > 0) {
+                result.append(", ");
+            }
+            result.append(str(m_cdelt[i]));
+            if (m_cunit[i].length() > 0) {
+                result.append(" "+m_cunit[i]);
+            }
         }
-        result.append(str(m_crpix[i]));
-    }
-    result.append(")\n");
-    result.append(parformat("Increment at reference")+"(");
-    for (int i = 0; i < m_cdelt.size(); ++i) {
-        if (i > 0) {
-            result.append(", ");
-        }
-        result.append(str(m_cdelt[i]));
-        if (m_cunit[i].length() > 0) {
-            result.append(" "+m_cunit[i]);
-        }
-    }
-    result.append(")\n");
+        result.append(")");
         
-    // Append origin
-    result.append(parformat("(Phi_0, Theta_0)")+"(");
-    result.append(wcs_print_value(m_phi0)+", ");
-    result.append(wcs_print_value(m_theta0)+") deg\n");
+        // Append origin
+        result.append("\n"+parformat("(Phi_0, Theta_0)")+"(");
+        result.append(wcs_print_value(m_phi0)+", ");
+        result.append(wcs_print_value(m_theta0)+") deg");
     
-    // Append native pole
-    result.append(parformat("(Phi_p, Theta_p)")+"(");
-    result.append(wcs_print_value(m_lonpole)+", ");
-    result.append(wcs_print_value(m_latpole)+") deg\n");
+        // Append native pole
+        result.append("\n"+parformat("(Phi_p, Theta_p)")+"(");
+        result.append(wcs_print_value(m_lonpole)+", ");
+        result.append(wcs_print_value(m_latpole)+") deg");
 
-    // Append LATPOLEa keyword usage
-    result.append(parformat("LATPOLE keyword usage"));
-    switch (m_latpreq) {
-    case 0:
-        result.append("Not used. Theta_p determined uniquely by"
-                      " CRVALia and LONPOLEa keywords.\n");
-        break;
-    case 1:
-        result.append("Required to select between two valid solutions"
-                      " of Theta_p.\n");
-        break;
-    case 2:
-        result.append("Theta_p was specified solely by LATPOLE.\n");
-        break;
-    default:
-        result.append("UNDEFINED\n");
-        break;
-    }
+        // Append LATPOLEa keyword usage
+        result.append("\n"+parformat("LATPOLE keyword usage"));
+        switch (m_latpreq) {
+        case 0:
+            result.append("Not used. Theta_p determined uniquely by"
+                          " CRVALia and LONPOLEa keywords.");
+            break;
+        case 1:
+            result.append("Required to select between two valid solutions"
+                          " of Theta_p.");
+            break;
+        case 2:
+            result.append("Theta_p was specified solely by LATPOLE.");
+            break;
+        default:
+            result.append("UNDEFINED");
+            break;
+        }
 
-    // Append celestial transformation parameters
-    result.append(parformat("Reference vector (m_ref)")+"(");
-    for (int k = 0; k < 4; ++k) {
-        if (k > 0) {
-            result.append(", ");
+        // Append celestial transformation parameters
+        result.append("\n"+parformat("Reference vector (m_ref)")+"(");
+        for (int k = 0; k < 4; ++k) {
+            if (k > 0) {
+                result.append(", ");
+            }
+            result.append(wcs_print_value(m_ref[k]));
         }
-        result.append(wcs_print_value(m_ref[k]));
-    }
-    result.append(") deg\n");
+        result.append(") deg");
 
-    // Append Euler angles
-    result.append(parformat("Euler angles")+"(");
-    for (int k = 0; k < 5; ++k) {
-        if (k > 0) {
-            result.append(", ");
+        // Append Euler angles
+        result.append("\n"+parformat("Euler angles")+"(");
+        for (int k = 0; k < 5; ++k) {
+            if (k > 0) {
+                result.append(", ");
+            }
+            result.append(str(m_euler[k]));
+            if (k < 3) {
+                result.append(" deg");
+            }
         }
-        result.append(str(m_euler[k]));
-        if (k < 3) {
-            result.append(" deg");
-        }
-    }
-    result.append(")\n");
+        result.append(")");
     
-    // Append latitude preservement flag
-    if (m_isolat) {
-        result.append(parformat("Latitude preserved")+"True\n");
-    }
-    else {
-        result.append(parformat("Latitude preserved")+"False\n");
-    }
-
-    // Append linear transformation parameters
-    if (m_unity) {
-        result.append(parformat("Unity PC matrix")+"True\n");
-    }
-    else {
-        result.append(parformat("Unity PC matrix")+"False\n");
-    }
-    result.append(parformat("Pixel-to-image trafo")+"(");
-    for (int k = 0; k < m_piximg.size(); ++k) {
-        if (k > 0) {
-            result.append(", ");
+        // Append latitude preservement flag
+        if (m_isolat) {
+            result.append("\n"+parformat("Latitude preserved")+"True");
         }
-        result.append(str(m_piximg[k]));
-    }
-    result.append(")\n");
-    result.append(parformat("Image-to-pixel trafo")+"(");
-    for (int k = 0; k < m_imgpix.size(); ++k) {
-        if (k > 0) {
-            result.append(", ");
+        else {
+            result.append("\n"+parformat("Latitude preserved")+"False");
         }
-        result.append(str(m_imgpix[k]));
-    }
-    result.append(")\n");
-    
-    // Append coordinate system
-    result.append(parformat("Coodinate system")+coordsys()+"\n");
-    
-    // Append projection parameters
-    result.append(parformat("Projection code")+code()+"\n");
-    result.append(parformat("Projection name")+name()+"\n");
-    result.append(parformat("Radius of the gen. sphere")+str(m_r0)+" deg\n");
 
-    // Append boundary checking information
-    if (m_bounds) {
-        result.append(parformat("Strict bounds checking")+"True\n");
-    }
-    else {
-        result.append(parformat("Strict bounds checking")+"False\n");
-    }
-
-    // Append fiducial offset information
-    if (m_offset) {
-        result.append(parformat("Use fiducial offset")+"True\n");
-    }
-    else {
-        result.append(parformat("Use fiducial offset")+"False\n");
-    }
-    result.append(parformat("Fiducial offset")+"("+str(m_x0)+", "+str(m_y0)+")\n");
+        // Append linear transformation parameters
+        if (m_unity) {
+            result.append("\n"+parformat("Unity PC matrix")+"True");
+        }
+        else {
+            result.append("\n"+parformat("Unity PC matrix")+"False");
+        }
+        result.append("\n"+parformat("Pixel-to-image trafo")+"(");
+        for (int k = 0; k < m_piximg.size(); ++k) {
+            if (k > 0) {
+                result.append(", ");
+            }
+            result.append(str(m_piximg[k]));
+        }
+        result.append(")");
+        result.append("\n"+parformat("Image-to-pixel trafo")+"(");
+        for (int k = 0; k < m_imgpix.size(); ++k) {
+            if (k > 0) {
+                result.append(", ");
+            }
+            result.append(str(m_imgpix[k]));
+        }
+        result.append(")");
     
-    // Append spectral transformation parameters
-    result.append(parformat("Rest frequency")+wcs_print_value(m_restfrq)+"\n");
-    result.append(parformat("Rest wavelength")+wcs_print_value(m_restwav));
+        // Append coordinate system
+        result.append("\n"+parformat("Coodinate system")+coordsys());
+    
+        // Append projection parameters
+        result.append("\n"+parformat("Projection code")+code());
+        result.append("\n"+parformat("Projection name")+name());
+        result.append("\n"+parformat("Radius of the gen. sphere")+str(m_r0)+" deg");
+
+        // Append boundary checking information
+        if (m_bounds) {
+            result.append("\n"+parformat("Strict bounds checking")+"True");
+        }
+        else {
+            result.append("\n"+parformat("Strict bounds checking")+"False");
+        }
+
+        // Append fiducial offset information
+        if (m_offset) {
+            result.append("\n"+parformat("Use fiducial offset")+"True");
+        }
+        else {
+            result.append("\n"+parformat("Use fiducial offset")+"False");
+        }
+        result.append("\n"+parformat("Fiducial offset")+"("+str(m_x0)+", "+str(m_y0)+")");
+    
+        // Append spectral transformation parameters
+        result.append("\n"+parformat("Rest frequency")+wcs_print_value(m_restfrq));
+        result.append("\n"+parformat("Rest wavelength")+wcs_print_value(m_restwav));
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

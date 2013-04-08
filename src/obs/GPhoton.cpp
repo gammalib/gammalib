@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GPhoton.hpp - Photon class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -180,21 +180,30 @@ GPhoton* GPhoton::clone(void) const
 
 /***********************************************************************//**
  * @brief Print photon
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing photon information.
  ***************************************************************************/
-std::string GPhoton::print(void) const
+std::string GPhoton::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Build photon string
-    result.append("GPhoton(");
-    result.append("RA="+str(m_dir.ra_deg()));
-    result.append(", Dec="+str(m_dir.dec_deg()));
-    result.append(", E="+m_energy.print());
-    result.append(", MET="+m_time.print());
-    if (m_mc_id >= 0)
-        result.append(", MCid="+str(m_mc_id));
-    result.append(")");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Build photon string
+        result.append("GPhoton(");
+        result.append("RA="+str(m_dir.ra_deg()));
+        result.append(", Dec="+str(m_dir.dec_deg()));
+        result.append(", E="+m_energy.print());
+        result.append(", MET="+m_time.print());
+        if (m_mc_id >= 0) {
+            result.append(", MCid="+str(m_mc_id));
+        }
+        result.append(")");
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

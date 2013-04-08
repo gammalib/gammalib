@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GMWLObservation.hpp  -  Multi-wavelength observation class        *
+ *        GMWLObservation.hpp - Multi-wavelength observation class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,7 +70,7 @@ public:
     virtual double           deadc(const GTime& time) const { return 1.0; }
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
-    virtual std::string      print(void) const;
+    virtual std::string      print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void        load(const std::string& filename);

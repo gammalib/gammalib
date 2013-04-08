@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GWcsAZP.hpp  -  Zenithal/azimuthal perspective (AZP) projection class  *
+ *   GWcsAZP.hpp - Zenithal/azimuthal perspective (AZP) projection class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsAZP.hpp
  * @brief Zenithal/azimuthal perspective (AZP) projection class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GWCSAZP_HPP
@@ -59,7 +59,7 @@ public:
     virtual GWcsAZP*    clone(void) const;
     virtual std::string code(void) const { return "AZP"; }
     virtual std::string name(void) const { return "zenithal/azimuthal perspective"; }
-    virtual std::string print(void) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GLATLtCubeMap.cpp  -  Fermi LAT livetime cube map            *
+ *             GLATLtCubeMap.cpp - Fermi-LAT livetime cube map             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,6 +18,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file GLATLtCubeMap.cpp
+ * @brief Fermi-LAT livetime cube map class implementation
+ * @author Juergen Knoedlseder
+ */
 
 /* __ Includes ___________________________________________________________ */
 #ifdef HAVE_CONFIG_H
@@ -482,23 +487,35 @@ std::string GLATLtCubeMap::costhetabin(void) const
 
 /***********************************************************************//**
  * @brief Print lifetime cube map information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing lifetime cube map information.
  ***************************************************************************/
-std::string GLATLtCubeMap::print(void) const
+std::string GLATLtCubeMap::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATLtCubeMap ===");
-    result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
-    result.append("\n"+parformat("Number of phi bins")+str(nphi()));
-    result.append("\n"+parformat("Cos theta binning"));
-    if (m_sqrt_bin)
-        result.append("sqrt");
-    else
-        result.append("linear");
-    result.append("\n"+parformat("Minimum cos theta")+str(costhetamin()));
-    result.append("\n"+m_map.print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATLtCubeMap ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
+        result.append("\n"+parformat("Number of phi bins")+str(nphi()));
+        result.append("\n"+parformat("Cos theta binning"));
+        if (m_sqrt_bin) {
+            result.append("sqrt");
+        }
+        else {
+            result.append("linear");
+        }
+        result.append("\n"+parformat("Minimum cos theta")+str(costhetamin()));
+        result.append("\n"+m_map.print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

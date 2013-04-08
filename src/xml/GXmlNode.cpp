@@ -624,12 +624,13 @@ const GXmlElement* GXmlNode::element(const std::string& name, const int& index) 
 /***********************************************************************//**
  * @brief Print XML node in string
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing XML information.
  ***************************************************************************/
-std::string GXmlNode::print(void) const
+std::string GXmlNode::print(const GChatter& chatter) const
 {
     // Set result string
-    std::string result = print(0);
+    std::string result = print(chatter, 0);
 
     // Return
     return result;

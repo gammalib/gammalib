@@ -553,23 +553,29 @@ int GVector::non_zeros(void) const
 /***********************************************************************//**
  * @brief Print vector information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing vector information.
  ***************************************************************************/
-std::string GVector::print(void) const
+std::string GVector::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result = "(";
 
-    // Put all elements in stream
-    for (int i = 0; i < m_num; ++i) {
-        result += str((*this)[i]);
-        if (i != m_num-1) {
-            result += ", ";
-        }
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append )
-    result += ")";
+        // Put all elements in stream
+        for (int i = 0; i < m_num; ++i) {
+            result += str((*this)[i]);
+            if (i != m_num-1) {
+                result += ", ";
+            }
+        }
+
+        // Append )
+        result += ")";
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

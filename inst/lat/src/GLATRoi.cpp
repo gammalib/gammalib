@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATRoi.cpp  -  LAT region of interest class             *
+ *              GLATRoi.cpp - Fermi-LAT region of interest class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATRoi.cpp
- * @brief GLATRoi class interface implementation.
- * @author J. Knodlseder
+ * @brief Region of interest class interface implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -160,17 +160,27 @@ GLATRoi* GLATRoi::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Print ROI information
+ * @brief Print region of interest information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing region of interest information.
  ***************************************************************************/
-std::string GLATRoi::print(void) const
+std::string GLATRoi::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATRoi ===\n");
-    result.append(parformat("ROI centre")+m_centre.print()+"\n");
-    result.append(parformat("ROI radius")+str(m_radius)+" deg");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATRoi ===");
+
+        // Append information
+        result.append("\n"+parformat("ROI centre")+m_centre.print());
+        result.append("\n"+parformat("ROI radius")+str(m_radius)+" deg");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

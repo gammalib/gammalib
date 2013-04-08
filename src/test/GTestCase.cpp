@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GTestCase.cpp  - Test case class                     *
+ *                    GTestCase.cpp - Test case class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -336,23 +336,31 @@ void GTestCase::duration(const double& duration)
 /***********************************************************************//**
  * @brief Print test case result
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing test case information.
+ *
  * Returns either ".", "F" or "E", dependent on the test result.
  ***************************************************************************/
-std::string GTestCase::print(void) const
+std::string GTestCase::print(const GChatter& chatter) const
 {
     // Initialize string
     std::string result;
 
-    // Set string dependent on test result
-    if (m_passed) {
-        result.append(".");
-    }
-    else if (m_kind == ERROR_TEST) {
-        result.append("E");
-    }
-    else {
-        result.append("F");
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Set string dependent on test result
+        if (m_passed) {
+            result.append(".");
+        }
+        else if (m_kind == ERROR_TEST) {
+            result.append("E");
+        }
+        else {
+            result.append("F");
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

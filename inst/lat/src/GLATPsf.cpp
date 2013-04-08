@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GLATPsf.cpp  -  Fermi/LAT point spread function             *
+ *              GLATPsf.cpp - Fermi-LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATPsf.cpp
- * @brief Fermi/LAT point spread function class implementation
- * @author J. Knoedlseder
+ * @brief Fermi-LAT point spread function class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -546,36 +546,44 @@ int GLATPsf::version(void) const
 
 /***********************************************************************//**
  * @brief Print point spread function information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing point spread function information.
  ***************************************************************************/
-std::string GLATPsf::print(void) const
+std::string GLATPsf::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATPsf ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATPsf ===");
     
-    // No PSF has been loaded ...
-    if (m_psf == NULL) {
-        result.append("\n"+parformat("Version")+"No PSF loaded");
-    }
-    
-    // ... PSF has been loaded
-    else {
-        result.append("\n"+parformat("Version")+str(version()));
-        result.append("\n"+parformat("Detector section"));
-        if (isfront()) {
-            result.append("front");
+        // No PSF has been loaded ...
+        if (m_psf == NULL) {
+            result.append("\n"+parformat("Version")+"No PSF loaded");
         }
+    
+        // ... PSF has been loaded
         else {
-            result.append("back");
+            result.append("\n"+parformat("Version")+str(version()));
+            result.append("\n"+parformat("Detector section"));
+            if (isfront()) {
+                result.append("front");
+            }
+            else {
+                result.append("back");
+            }
+            result.append("\n"+parformat("Energy scaling"));
+            result.append("sqrt(");
+            result.append("("+str(m_psf->scale_par1())+"*(E/100)^");
+            result.append(str(m_psf->scale_index())+")^2");
+            result.append(" + ("+str(m_psf->scale_par2())+")^2)");
         }
-        result.append("\n"+parformat("Energy scaling"));
-        result.append("sqrt(");
-        result.append("("+str(m_psf->scale_par1())+"*(E/100)^");
-        result.append(str(m_psf->scale_index())+")^2");
-        result.append(" + ("+str(m_psf->scale_par2())+")^2)");
-    }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

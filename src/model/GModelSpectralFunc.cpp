@@ -691,33 +691,39 @@ void GModelSpectralFunc::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print file function information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing file function information.
  ***************************************************************************/
-std::string GModelSpectralFunc::print(void) const
+std::string GModelSpectralFunc::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpectralFunc ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append("\n"+parformat("Function file")+m_filename);
-    result.append("\n"+parformat("Number of nodes")+str(m_lin_nodes.size()));
-    result.append("\n"+parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpectralFunc ===");
 
-    // Append node information
-    for (int i = 0; i < m_prefactor.size(); ++i) {
-        result.append("\n"+parformat("Node "+str(i+1)));
-        result.append("Epivot="+str(m_epivot[i]));
-        result.append(" Prefactor="+str(m_prefactor[i]));
-        result.append(" Gamma="+str(m_gamma[i]));
-        result.append(" Flux="+str(m_flux[i]));
-        result.append(" EFlux="+str(m_eflux[i]));
-    }
+        // Append information
+        result.append("\n"+parformat("Function file")+m_filename);
+        result.append("\n"+parformat("Number of nodes")+str(m_lin_nodes.size()));
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+        // Append node information
+        for (int i = 0; i < m_prefactor.size(); ++i) {
+            result.append("\n"+parformat("Node "+str(i+1)));
+            result.append("Epivot="+str(m_epivot[i]));
+            result.append(" Prefactor="+str(m_prefactor[i]));
+            result.append(" Gamma="+str(m_gamma[i]));
+            result.append(" Flux="+str(m_flux[i]));
+            result.append(" EFlux="+str(m_eflux[i]));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

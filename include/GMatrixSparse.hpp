@@ -171,7 +171,7 @@ public:
     virtual double         min(void) const;
     virtual double         max(void) const;
     virtual double         sum(void) const;
-    virtual std::string    print(void) const;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void    column(const double* values, const int* rows,

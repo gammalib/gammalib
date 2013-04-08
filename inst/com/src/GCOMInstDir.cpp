@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCOMInstDir.cpp  -  COMPTEL instrument direction class          *
+ *          GCOMInstDir.cpp - COMPTEL instrument direction class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCOMInstDir.cpp
  * @brief COMPTEL instrument direction class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -165,17 +165,25 @@ GCOMInstDir* GCOMInstDir::clone(void) const
 /***********************************************************************//**
  * @brief Print instrument direction information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing instrument direction information.
  ***************************************************************************/
-std::string GCOMInstDir::print(void) const
+std::string GCOMInstDir::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCOMInstDir ===");
-    result.append("\n"+parformat("Sky direction (Chi,Psi)")+m_dir.print());
-    result.append("\n"+parformat("Scatter angle (Phibar)")+str(m_phibar));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCOMInstDir ===");
+
+        // Append information
+        result.append("\n"+parformat("Sky direction (Chi,Psi)")+m_dir.print(chatter));
+        result.append("\n"+parformat("Scatter angle (Phibar)")+str(m_phibar));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

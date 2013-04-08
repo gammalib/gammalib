@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPars.hpp - Application parameters                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,7 +71,7 @@ public:
     void        load(const std::string& filename, const std::vector<std::string>& args);
     void        save(const std::string& filename);
     bool        haspar(const std::string& name) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods

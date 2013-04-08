@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GCTAModelRadialAcceptance.hpp  -  Radial acceptance model class     *
+ *      GCTAModelRadialAcceptance.hpp - Radial acceptance model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,7 +76,7 @@ public:
     virtual GCTAEventList*             mc(const GObservation& obs, GRan& ran) const;
     virtual void                       read(const GXmlElement& xml);
     virtual void                       write(GXmlElement& xml) const;
-    virtual std::string                print(void) const;
+    virtual std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     GCTAModelRadial* radial(void)   const { return m_radial; }

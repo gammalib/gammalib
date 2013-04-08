@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GLATEdisp.cpp  -  Fermi LAT energy dispersion              *
+ *               GLATEdisp.cpp - Fermi-LAT energy dispersion               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATEdisp.cpp
- * @brief Fermi LAT energy dispersion class implementation.
- * @author J. Knoedlseder
+ * @brief Fermi-LAT energy dispersion class implementation.
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -271,16 +271,26 @@ void GLATEdisp::write(GFits& fits) const
 
 /***********************************************************************//**
  * @brief Print energy dispersion information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing energy dispersion information.
  ***************************************************************************/
-std::string GLATEdisp::print(void) const
+std::string GLATEdisp::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
     // Append header
     result.append("=== GLATEdisp ===");
+
+        // Append information
     result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
     result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GRoi.hpp  -  Region of interest interface class             *
+ *              GRoi.hpp - Region of interest interface class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,7 +59,7 @@ public:
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GRoi*       clone(void) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
     // Protected methods

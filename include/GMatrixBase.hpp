@@ -77,7 +77,7 @@ public:
     virtual double       min(void) const = 0;
     virtual double       max(void) const = 0;
     virtual double       sum(void) const = 0;
-    virtual std::string  print(void) const = 0;
+    virtual std::string  print(const GChatter& chatter = NORMAL) const = 0;
 
     // Base class methods
     const int& size(void) const;
@@ -95,9 +95,10 @@ protected:
     double      get_min_element(void) const;
     double      get_max_element(void) const;
     double      get_element_sum(void) const;
-    std::string print_elements(const int& num = 10) const;
-    std::string print_row_compression(void) const;
-    std::string print_col_compression(void) const;
+    std::string print_elements(const GChatter& chatter = NORMAL,
+                               const int&      num = 10) const;
+    std::string print_row_compression(const GChatter& chatter = NORMAL) const;
+    std::string print_col_compression(const GChatter& chatter = NORMAL) const;
 
     // Protected data area
     int     m_rows;       //!< Number of rows

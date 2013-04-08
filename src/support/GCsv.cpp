@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCsv.cpp - Column separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -358,17 +358,27 @@ void GCsv::load(const std::string& filename, std::string sep)
 
 
 /***********************************************************************//**
- * @brief Print class information
+ * @brief Print column separated values information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing column separated values information.
  ***************************************************************************/
-std::string GCsv::print(void) const
+std::string GCsv::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCsv ===");
-    result.append("\n"+parformat("Number of columns")+str(m_cols));
-    result.append("\n"+parformat("Number of rows")+str(m_rows));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCsv ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of columns")+str(m_cols));
+        result.append("\n"+parformat("Number of rows")+str(m_rows));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GNodeArray.cpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -526,38 +526,47 @@ void GNodeArray::set_value(const double& value) const
 
 /***********************************************************************//**
  * @brief Print nodes
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing nodes information.
  ***************************************************************************/
-std::string GNodeArray::print(void) const
+std::string GNodeArray::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GNodeArray ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append array type
-    result.append("\n"+parformat("Number of nodes in array")+str(size()));
-    if (m_is_linear) {
-        result.append("\n"+parformat("Array type")+"linear");
-        result.append("\n"+parformat("Linear slope")+str(m_linear_slope));
-        result.append("\n"+parformat("Linear offset")+str(m_linear_offset));
-    }
-    else
-        result.append("\n"+parformat("Array type")+"nonlinear");
+        // Append header
+        result.append("=== GNodeArray ===");
 
-    // Append indices and weights
-    result.append("\n"+parformat("Indices and weights"));
-    result.append("("+str(m_inx_left)+","+str(m_inx_right)+")=");
-    result.append("("+str(m_wgt_left)+","+str(m_wgt_right)+")");
-
-    // Append nodes
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Node "+str(i)));
-        result.append(str(m_node[i]));
-        if (i < m_step.size()) {
-            result.append(" (delta="+str(m_step[i])+")");
+        // Append array type
+        result.append("\n"+parformat("Number of nodes in array")+str(size()));
+        if (m_is_linear) {
+            result.append("\n"+parformat("Array type")+"linear");
+            result.append("\n"+parformat("Linear slope")+str(m_linear_slope));
+            result.append("\n"+parformat("Linear offset")+str(m_linear_offset));
         }
-    }
+        else {
+            result.append("\n"+parformat("Array type")+"nonlinear");
+        }
+
+        // Append indices and weights
+        result.append("\n"+parformat("Indices and weights"));
+        result.append("("+str(m_inx_left)+","+str(m_inx_right)+")=");
+        result.append("("+str(m_wgt_left)+","+str(m_wgt_right)+")");
+
+        // Append nodes
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+parformat("Node "+str(i)));
+            result.append(str(m_node[i]));
+            if (i < m_step.size()) {
+                result.append(" (delta="+str(m_step[i])+")");
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

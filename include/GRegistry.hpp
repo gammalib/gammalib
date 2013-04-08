@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GRegistry.hpp - Interface class for registries             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 #include <string>
 #include <iostream>
 #include "GLog.hpp"
+#include "GTypemaps.hpp"
 
 
 /***********************************************************************//**
@@ -82,7 +83,7 @@ public:
     ///
     /// Formats the content in a standard way and puts this content in a
     /// C++ string that is returned.
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 };
 
 /* __ Prototypes _________________________________________________________ */

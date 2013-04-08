@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GCTADir.cpp  -  CTA direction class                   *
+ *                    GCTADir.cpp - CTA direction class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -277,16 +277,24 @@ const double& GCTADir::sintheta(void) const
 
 /***********************************************************************//**
  * @brief Print camera direction information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing camera direction information.
  ***************************************************************************/
-std::string GCTADir::print(void) const
+std::string GCTADir::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append camera direction
-    result.append("(theta,phi)=(");
-    result.append(str(theta_deg())+","+str(phi_deg()));
-    result.append(")");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append camera direction
+        result.append("(theta,phi)=(");
+        result.append(str(theta_deg())+","+str(phi_deg()));
+        result.append(")");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

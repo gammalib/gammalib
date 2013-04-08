@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GFitsHeaderCard.hpp  - FITS header card class             *
+ *               GFitsHeaderCard.hpp - FITS header card class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -88,7 +88,7 @@ public:
     std::string      string(void);
     double           real(void);
     int              integer(void);
-    std::string      print(void) const;
+    std::string      print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

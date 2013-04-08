@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATEventCube.cpp - LAT event cube class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -421,54 +421,63 @@ void GLATEventCube::map(const GSkymap& map)
 /***********************************************************************//**
  * @brief Print event cube information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing event cube information.
  ***************************************************************************/
-std::string GLATEventCube::print(void) const
+std::string GLATEventCube::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATEventCube ===");
-    result.append("\n"+parformat("Number of elements")+str(size()));
-    result.append("\n"+parformat("Number of pixels"));
-    result.append(str(m_map.nx())+" x "+str(m_map.ny()));
-    result.append("\n"+parformat("Number of energy bins")+str(ebins()));
-    result.append("\n"+parformat("Number of events")+str(number()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append time interval
-    result.append("\n"+parformat("Time interval"));
-    if (gti().size() > 0) {
-        result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
-    }
-    else {
-        result.append("not defined");
-    }
+        // Append header
+        result.append("=== GLATEventCube ===");
 
-    // Append energy range
-    result.append("\n"+parformat("Energy range"));
-    if (ebounds().size() > 0) {
-        result.append(emin().print()+" - "+emax().print());
-    }
-    else {
-        result.append("not defined");
-    }
+        // Append information
+        result.append("\n"+parformat("Number of elements")+str(size()));
+        result.append("\n"+parformat("Number of pixels"));
+        result.append(str(m_map.nx())+" x "+str(m_map.ny()));
+        result.append("\n"+parformat("Number of energy bins")+str(ebins()));
+        result.append("\n"+parformat("Number of events")+str(number()));
 
-    // Append WCS
-    if (m_map.wcs() != NULL) {
-        result.append("\n"+m_map.wcs()->print());
-    }
+        // Append time interval
+        result.append("\n"+parformat("Time interval"));
+        if (gti().size() > 0) {
+            result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
+        }
+        else {
+            result.append("not defined");
+        }
 
-    // Append source maps
-    result.append("\n"+parformat("Number of source maps")+str(m_srcmap.size()));
-    for (int i = 0; i < m_srcmap.size(); ++i) {
-        result.append("\n"+parformat(" "+m_srcmap_names[i]));
-        result.append(str(m_srcmap[i]->nx()));
-        result.append(" x ");
-        result.append(str(m_srcmap[i]->ny()));
-        result.append(" x ");
-        result.append(str(m_srcmap[i]->nmaps()));
-    }
+        // Append energy range
+        result.append("\n"+parformat("Energy range"));
+        if (ebounds().size() > 0) {
+            result.append(emin().print()+" - "+emax().print(chatter));
+        }
+        else {
+            result.append("not defined");
+        }
+
+        // Append WCS
+        if (m_map.wcs() != NULL) {
+            result.append("\n"+m_map.wcs()->print(chatter));
+        }
+
+        // Append source maps
+        result.append("\n"+parformat("Number of source maps"));
+        result.append(str(m_srcmap.size()));
+        for (int i = 0; i < m_srcmap.size(); ++i) {
+            result.append("\n"+parformat(" "+m_srcmap_names[i]));
+            result.append(str(m_srcmap[i]->nx()));
+            result.append(" x ");
+            result.append(str(m_srcmap[i]->ny()));
+            result.append(" x ");
+            result.append(str(m_srcmap[i]->nmaps()));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

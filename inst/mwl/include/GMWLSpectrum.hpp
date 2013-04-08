@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLSpectrum.hpp  -  Multi-wavelength spectrum class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLSpectrum.hpp
  * @brief Multi-wavelength spectrum class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMWLSPECTRUM_HPP
@@ -69,7 +69,7 @@ public:
     virtual void          read(const GFits& file);
     virtual void          write(GFits& file) const;
     virtual int           number(void) const;
-    virtual std::string   print(void) const;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void                  load(const std::string& filename, const std::string& extname);

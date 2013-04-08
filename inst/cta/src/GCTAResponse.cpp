@@ -797,41 +797,49 @@ double GCTAResponse::offset_sigma(void) const
 /***********************************************************************//**
  * @brief Print CTA response information
  *
- * @return String containing CTA response information
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing CTA response information.
  ***************************************************************************/
-std::string GCTAResponse::print(void) const
+std::string GCTAResponse::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTAResponse ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append response information
-    result.append("\n"+parformat("Calibration database")+m_caldb);
-    result.append("\n"+parformat("Response name")+m_rspname);
-    result.append("\n"+parformat("RMF file name")+m_rmffile);
+        // Append header
+        result.append("=== GCTAResponse ===");
 
-    // Append effective area information
-    if (m_aeff != NULL) {
-        result.append("\n"+m_aeff->print());
-    }
+        // Append response information
+        result.append("\n"+parformat("Calibration database")+m_caldb);
+        result.append("\n"+parformat("Response name")+m_rspname);
+        result.append("\n"+parformat("RMF file name")+m_rmffile);
 
-    // Append point spread function information
-    if (m_psf != NULL) {
-        result.append("\n"+m_psf->print());
-    }
+        // Append effective area information
+        if (m_aeff != NULL) {
+            result.append("\n"+m_aeff->print(chatter));
+        }
 
-    // Append Npred cache information
-    if (!m_npred_names.empty()) {
-         for (int i = 0; i < m_npred_names.size(); ++i) {
-             result.append("\n"+parformat("Npred cache "+str(i)));
-             result.append(m_npred_names[i]+", ");
-             result.append(m_npred_energies[i].print()+", ");
-             result.append(m_npred_times[i].print()+" = ");
-             result.append(str(m_npred_values[i]));
-         }
-    }
+        // Append point spread function information
+        if (m_psf != NULL) {
+            result.append("\n"+m_psf->print(chatter));
+        }
+
+        // EXPLICIT: Append Npred cache information
+        if (chatter >= EXPLICIT) {
+            if (!m_npred_names.empty()) {
+                for (int i = 0; i < m_npred_names.size(); ++i) {
+                    result.append("\n"+parformat("Npred cache "+str(i)));
+                    result.append(m_npred_names[i]+", ");
+                    result.append(m_npred_energies[i].print()+", ");
+                    result.append(m_npred_times[i].print()+" = ");
+                    result.append(str(m_npred_values[i]));
+                }
+            }
+        } // endif: chatter was explicit
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

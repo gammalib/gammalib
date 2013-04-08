@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAAeff2D.hpp - CTA 2D effective area class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,7 +65,7 @@ public:
     GCTAAeff2D* clone(void) const;
     void        load(const std::string& filename);
     std::string filename(void) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
     // Methods
     void read(const GFits* file);

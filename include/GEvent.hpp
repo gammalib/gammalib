@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GEvent.hpp  -  Event abstract base class               *
+ *                   GEvent.hpp - Event abstract base class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -90,7 +90,7 @@ public:
     virtual double          error(void) const = 0;
     virtual bool            isatom(void) const = 0;
     virtual bool            isbin(void) const = 0;
-    virtual std::string     print(void) const = 0;
+    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
     // Protected methods

@@ -102,7 +102,7 @@ class GTestEventAtom : public GEventAtom {
         void                dir(const GTestInstDir& dir) { m_dir=dir; }
         void                energy(const GEnergy& energy) { m_energy=energy; }
         void                time(const GTime& time) { m_time=time; }
-        std::string         print(void) const{
+        std::string         print(const GChatter& chatter = NORMAL) const{
             std::string result("== GTestEventAtom == \n");
             result.append("Direction : "+m_dir.print()+"\n");
             result.append("Time : "+str(m_time.secs())+"\n");

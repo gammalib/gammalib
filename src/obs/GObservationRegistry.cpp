@@ -254,22 +254,32 @@ std::string GObservationRegistry::name(const int& index) const
 /***********************************************************************//**
  * @brief Print registry information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return Registry content.
  ***************************************************************************/
-std::string GObservationRegistry::print(void) const
+std::string GObservationRegistry::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GObservationRegistry ===");
-    result.append("\n"+parformat("Number of observations")+str(m_number));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append observations
-    for (int i = 0; i < m_number; ++i) {
-        result.append("\n"+parformat(m_names[i]));
-        result.append(m_obs[i]->instrument());
-    }
+        // Append header
+        result.append("=== GObservationRegistry ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of observations")+str(m_number));
+
+        // NORMAL: Append observations
+        if (chatter >= NORMAL) {
+            for (int i = 0; i < m_number; ++i) {
+                result.append("\n"+parformat(m_names[i]));
+                result.append(m_obs[i]->instrument());
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

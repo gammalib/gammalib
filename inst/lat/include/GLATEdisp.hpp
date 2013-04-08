@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GLATEdisp.hpp  -  Fermi LAT energy dispersion              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,9 +35,6 @@
 #include "GLATResponseTable.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
-//#include "GSkyDir.hpp"
-//#include "GEnergy.hpp"
-//#include "GTime.hpp"
 
 
 /***********************************************************************//**
@@ -75,7 +72,7 @@ public:
     //double       costhetamin(void) const { return m_min_ctheta; }
     //void         costhetamin(const double& ctheta);
     bool         hasphi(void) const { return false; }
-    std::string  print(void) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

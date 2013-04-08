@@ -93,7 +93,7 @@ public:
     void        log10MeV(const double& eng);
     void        log10GeV(const double& eng);
     void        log10TeV(const double& eng);
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods

@@ -405,21 +405,27 @@ void GModelSpatialDiffuseConst::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print isotropic source model information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing model information.
  ***************************************************************************/
-std::string GModelSpatialDiffuseConst::print(void) const
+std::string GModelSpatialDiffuseConst::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpatialDiffuseConst ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append parameters
-    result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpatialDiffuseConst ===");
+
+        // Append parameters
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

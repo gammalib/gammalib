@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GModelData.hpp  -  Abstract virtual data model class          *
+ *            GModelData.hpp - Abstract virtual data model class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GModelData.hpp
  * @brief Abstract data model base class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMODELDATA_HPP
@@ -75,7 +75,7 @@ public:
                               const GObservation& obs) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
     
 protected:
     // Protected methods

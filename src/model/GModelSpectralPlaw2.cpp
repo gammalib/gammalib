@@ -755,21 +755,27 @@ void GModelSpectralPlaw2::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print power law information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing power law information.
  ***************************************************************************/
-std::string GModelSpectralPlaw2::print(void) const
+std::string GModelSpectralPlaw2::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpectralPlaw2 ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpectralPlaw2 ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

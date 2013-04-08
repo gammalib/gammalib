@@ -416,53 +416,65 @@ void GCTAEventList::roi(const GRoi& roi)
 
 /***********************************************************************//**
  * @brief Print event list information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing event list information.
  ***************************************************************************/
-std::string GCTAEventList::print(void) const
+std::string GCTAEventList::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTAEventList ===");
-    result.append("\n"+parformat("Number of events")+str(size()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append GTI intervals
-    result.append("\n"+parformat("Time interval"));
-    if (gti().size() > 0) {
-        result.append(str(tstart().mjd())+" - "+str(tstop().mjd())+" days");
-    }
-    else {
-        result.append("not defined");
-    }
+        // Append header
+        result.append("=== GCTAEventList ===");
 
-    // Append energy intervals
-    if (ebounds().size() > 0) {
-        result.append("\n"+ebounds().print());
-    }
-    else {
-        result.append("\n"+parformat("Energy intervals")+"not defined");
-    }
+        // Append information
+        result.append("\n"+parformat("Number of events")+str(size()));
 
-    // Append ROI
-    if (roi().radius() > 0) {
-        result.append("\n"+roi().print());
-    }
-    else {
-        result.append("\n"+parformat("Region of interest")+"not defined");
-    }
+        // Append GTI interval
+        result.append("\n"+parformat("Time interval"));
+        if (gti().size() > 0) {
+            result.append(str(tstart().mjd())+" - "+str(tstop().mjd())+" days");
+        }
+        else {
+            result.append("not defined");
+        }
 
-    // Append IRF cache
-    for (int i = 0; i < m_irf_names.size(); ++i) {
-         result.append("\n"+parformat("IRF cache "+str(i)));
-         result.append(m_irf_names[i]+" = ");
-         int num   = 0;
-         for (int k = 0; k < size(); ++k) {
-             if ((m_irf_values[i])[k] != -1.0) {
-                 num++;
-             }
-         }
-         result.append(str(num)+" values");
-    }
+        // Append energy intervals
+        if (ebounds().size() > 0) {
+            result.append("\n"+ebounds().print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("Energy intervals")+"not defined");
+        }
+
+        // Append ROI
+        if (roi().radius() > 0) {
+            result.append("\n"+roi().print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("Region of interest")+"not defined");
+        }
+
+        // EXPLICIT: Append IRF cache
+        if (chatter >= EXPLICIT) {
+            for (int i = 0; i < m_irf_names.size(); ++i) {
+                result.append("\n"+parformat("IRF cache "+str(i)));
+                result.append(m_irf_names[i]+" = ");
+                int num   = 0;
+                for (int k = 0; k < size(); ++k) {
+                    if ((m_irf_values[i])[k] != -1.0) {
+                        num++;
+                    }
+                }
+                result.append(str(num)+" values");
+            }
+        } // endif: chatter was explicit
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

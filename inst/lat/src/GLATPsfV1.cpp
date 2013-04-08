@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GLATPsfV1.cpp  -  Fermi LAT point spread function version 1       *
+ *        GLATPsfV1.cpp - Fermi-LAT point spread function version 1        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfV1.cpp
- * @brief Fermi LAT point spread function version 1 class implementation
+ * @brief Fermi-LAT point spread function version 1 class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -385,15 +385,23 @@ double GLATPsfV1::psf(const double& offset, const double& logE,
 
 
 /***********************************************************************//**
- * @brief Print PSF
+ * @brief Print point spread function
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing point spread function information.
  ***************************************************************************/
-std::string GLATPsfV1::print(void) const
+std::string GLATPsfV1::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATPsfV1 ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATPsfV1 ===");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -58,7 +58,8 @@ public:
     virtual GXmlComment* clone(void) const;
     virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const { return NT_COMMENT; }
-    virtual std::string  print(const int& indent = 0) const;
+    virtual std::string  print(const GChatter& chatter = NORMAL,
+                               const int&      indent = 0) const;
 
     // Other methods
     const std::string&   comment(void) const { return m_comment; }

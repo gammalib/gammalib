@@ -426,45 +426,55 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
 /***********************************************************************//**
  * @brief Print optimizer information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing optimizer information.
  ***************************************************************************/
-std::string GOptimizerLM::print(void) const
+std::string GOptimizerLM::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GOptimizerLM ===");
-    result.append("\n"+parformat("Optimized function value")+str(m_value));
-    result.append("\n"+parformat("Absolute precision")+str(m_eps));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append status
-    result.append("\n"+parformat("Optimization status"));
-    switch (m_status) {
-    case G_LM_CONVERGED:
-        result.append("converged");
-        break;
-    case G_LM_STALLED:
-        result.append("stalled");
-        break;
-    case G_LM_SINGULAR:
-        result.append("singular curvature matrix encountered");
-        break;
-    case G_LM_NOT_POSTIVE_DEFINITE:
-        result.append("curvature matrix not positive definite");
-        break;
-    case G_LM_BAD_ERRORS:
-        result.append("errors are inaccurate");
-        break;
-    default:
-        result.append("unknown");
-        break;
-    }
+        // Append header
+        result.append("=== GOptimizerLM ===");
 
-    // Append further information
-    result.append("\n"+parformat("Number of parameters")+str(m_npars));
-    result.append("\n"+parformat("Number of free parameters")+str(m_nfree));
-    result.append("\n"+parformat("Number of iterations")+str(m_iter));
-    result.append("\n"+parformat("Lambda")+str(m_lambda));
+        // Append information
+        result.append("\n"+parformat("Optimized function value")+str(m_value));
+        result.append("\n"+parformat("Absolute precision")+str(m_eps));
+
+        // Append status
+        result.append("\n"+parformat("Optimization status"));
+        switch (m_status) {
+        case G_LM_CONVERGED:
+            result.append("converged");
+            break;
+        case G_LM_STALLED:
+            result.append("stalled");
+            break;
+        case G_LM_SINGULAR:
+            result.append("singular curvature matrix encountered");
+            break;
+        case G_LM_NOT_POSTIVE_DEFINITE:
+            result.append("curvature matrix not positive definite");
+            break;
+        case G_LM_BAD_ERRORS:
+            result.append("errors are inaccurate");
+            break;
+        default:
+            result.append("unknown");
+            break;
+        }
+
+        // Append further information
+        result.append("\n"+parformat("Number of parameters")+str(m_npars));
+        result.append("\n"+parformat("Number of free parameters")+str(m_nfree));
+        result.append("\n"+parformat("Number of iterations")+str(m_iter));
+        result.append("\n"+parformat("Lambda")+str(m_lambda));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

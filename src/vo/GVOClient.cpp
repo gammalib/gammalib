@@ -268,43 +268,49 @@ GXml GVOClient::response(void) const
 /***********************************************************************//**
  * @brief Print VO client information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing VO client information
  ***************************************************************************/
-std::string GVOClient::print(void) const
+std::string GVOClient::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GVOClient ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append client information
-    result.append("\n"+parformat("Name")+m_name);
+        // Append header
+        result.append("=== GVOClient ===");
 
-    // Append Hub information
-    if (hashub()) {
-        result.append("\n"+parformat("Hub key")+m_secret);
-        result.append("\n"+parformat("Hub URL")+m_hub_url);
-        result.append("\n"+parformat("Hub host (port)")+m_hub_host+" ("+m_hub_port+")");
-        result.append("\n"+parformat("SAMP protocol version")+m_version);
-        result.append("\n"+parformat("Hub connection"));
-        if (m_socket == -1) {
-            result.append("no");
-        }
-        else {
-            if (!m_client_key.empty()) {
-                result.append("registered as \""+m_client_id);
-                result.append("\" on Hub \""+m_hub_id);
-                result.append("\" via socket "+str(m_socket));
+        // Append client information
+        result.append("\n"+parformat("Name")+m_name);
+
+        // Append Hub information
+        if (hashub()) {
+            result.append("\n"+parformat("Hub key")+m_secret);
+            result.append("\n"+parformat("Hub URL")+m_hub_url);
+            result.append("\n"+parformat("Hub host (port)")+m_hub_host+" ("+m_hub_port+")");
+            result.append("\n"+parformat("SAMP protocol version")+m_version);
+            result.append("\n"+parformat("Hub connection"));
+            if (m_socket == -1) {
+                result.append("no");
             }
             else {
-                result.append("established on socket "+str(m_socket));
+                if (!m_client_key.empty()) {
+                    result.append("registered as \""+m_client_id);
+                    result.append("\" on Hub \""+m_hub_id);
+                    result.append("\" via socket "+str(m_socket));
+                }
+                else {
+                    result.append("established on socket "+str(m_socket));
+                }
             }
         }
-    }
-    else {
-        result.append("\n"+parformat("Hub key")+"No Hub has been found");
-    }
+        else {
+            result.append("\n"+parformat("Hub key")+"No Hub has been found");
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -500,25 +500,44 @@ void GEnergy::log10TeV(const double& eng)
 
 /***********************************************************************//**
  * @brief Print energy
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing energy information.
  ***************************************************************************/
-std::string GEnergy::print(void) const
+std::string GEnergy::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append energy
-    if (GeV() > 1000.0) {
-        result.append(str(TeV())+" TeV");
-    }
-    else if (MeV() > 1000.0) {
-        result.append(str(GeV())+" GeV");
-    }
-    else if (keV() > 1000.0) {
-        result.append(str(MeV())+" MeV");
-    }
-    else {
-        result.append(str(keV())+" keV");
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append energy
+        if (GeV() > 1000.0) {
+            result.append(str(TeV())+" TeV");
+        }
+        else if (MeV() > 1000.0) {
+            result.append(str(GeV())+" GeV");
+        }
+        else if (keV() > 1000.0) {
+            result.append(str(MeV())+" MeV");
+        }
+        else {
+            result.append(str(keV())+" keV");
+        }
+
+        // VERBOSE: append energy and log10 energy
+        if (chatter == VERBOSE) {
+            result.append(" (E="+str(m_energy));
+            if (m_has_log10) {
+                result.append(", log10(E)="+str(m_elog10)+")");
+            }
+            else {
+                result.append(", no log10(E) value)");
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

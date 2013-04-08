@@ -373,24 +373,34 @@ void GXmlElement::write(GUrl& url, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML element
  *
- * @param[in] indent Text indentation (default = 0).
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] indent Text indentation (defaults to 0).
  * @return String containing XML element
  ***************************************************************************/
-std::string GXmlElement::print(const int& indent) const
+std::string GXmlElement::print(const GChatter& chatter,
+                               const int&      indent) const
 {
-    // Initialise result string
-    std::string result = fill(" ", indent);
+    // Allocate result string
+    std::string result;
 
-    // Append element to string
-    result.append("GXmlElement::"+m_name);
-    for (int k = 0; k < m_attr.size(); ++k) {
-        result.append(m_attr[k]->print());
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append children
-    for (int i = 0; i < m_nodes.size(); ++i) {
-        result.append("\n" + m_nodes[i]->print(indent+g_indent));
-    }
+        // Initialise result string
+        result = fill(" ", indent);
+
+        // Append element to string
+        result.append("GXmlElement::"+m_name);
+        for (int k = 0; k < m_attr.size(); ++k) {
+            result.append(m_attr[k]->print(chatter));
+        }
+
+        // Append children
+        for (int i = 0; i < m_nodes.size(); ++i) {
+            result.append("\n" + m_nodes[i]->print(chatter, indent+g_indent));
+        }
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

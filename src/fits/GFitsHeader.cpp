@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsHeader.cpp  - FITS header handling class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -531,21 +531,31 @@ int GFitsHeader::integer(const int& cardno)
 
 
 /***********************************************************************//**
- * @brief Print FITS file information
+ * @brief Print FITS header information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing FITS header information.
  ***************************************************************************/
-std::string GFitsHeader::print(void) const
+std::string GFitsHeader::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GFitsHeader ("+str(m_num_cards)+" cards) ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append cards
-    for (int i = 0; i < m_num_cards; ++i) {
-        result.append("\n");
-        result.append(m_card[i].print());
-    }
+        // Append header
+        result.append("=== GFitsHeader ("+str(m_num_cards)+" cards) ===");
+
+        // NORMAL: Append cards
+        if (chatter >= NORMAL) {
+            for (int i = 0; i < m_num_cards; ++i) {
+                result.append("\n");
+                result.append(m_card[i].print());
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

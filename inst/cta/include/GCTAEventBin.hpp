@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAEventBin.hpp - CTA event bin class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,7 +73,7 @@ public:
     virtual double             counts(void) const;
     virtual double             error(void) const;
     virtual void               counts(const double& counts);
-    virtual std::string        print(void) const;
+    virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const double&  omega(void) const;

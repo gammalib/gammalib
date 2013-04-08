@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GWcsTAN.hpp  -  Gnomonic (TAN) projection class            *
+ *               GWcsTAN.hpp - Gnomonic (TAN) projection class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsTAN.hpp
  * @brief Gnomonic (TAN) projection class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GWCSTAN_HPP
@@ -59,7 +59,7 @@ public:
     virtual GWcsTAN*    clone(void) const;
     virtual std::string code(void) const { return "TAN"; }
     virtual std::string name(void) const { return "gnomonic"; }
-    virtual std::string print(void) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

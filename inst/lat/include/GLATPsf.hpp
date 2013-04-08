@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GLATPsf.hpp  -  Fermi LAT point spread function             *
+ *              GLATPsf.hpp - Fermi LAT point spread function              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,11 +65,11 @@ public:
 
     // Operators
     GLATPsf& operator= (const GLATPsf& psf);
-    double   operator() (const double& offset, const double& logE,
-                         const double& ctheta);
-    double   operator() (const GLATInstDir& obsDir, const GSkyDir& srcDir,
-                         const GEnergy& srcEng, const GTime& srcTime,
-                         const GLATPointing& pnt);
+    double   operator()(const double& offset, const double& logE,
+                        const double& ctheta);
+    double   operator()(const GLATInstDir& obsDir, const GSkyDir& srcDir,
+                        const GEnergy& srcEng, const GTime& srcTime,
+                        const GLATPointing& pnt);
 
     // Methods
     void         clear(void);
@@ -87,7 +87,7 @@ public:
     bool         isfront(void) const;
     bool         isback(void) const;
     int          version(void) const;
-    std::string  print(void) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

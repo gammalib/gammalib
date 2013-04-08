@@ -91,7 +91,7 @@ public:
     void                  reference(const GTimeReference& ref);
     const GTimeReference& reference(void) const;
     bool                  contains(const GTime& time) const;
-    std::string           print(void) const;
+    std::string           print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

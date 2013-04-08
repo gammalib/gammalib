@@ -189,20 +189,26 @@ GSource* GSource::clone(void) const
 /***********************************************************************//**
  * @brief Print source
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing source information
  ***************************************************************************/
-std::string GSource::print(void) const
+std::string GSource::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Build photon string
-    result.append("GSource(");
-    result.append(m_name);
-    result.append(", "+m_model->type());
-    result.append(", E="+m_energy.print());
-    result.append(", MET="+m_time.print());
-    result.append(")");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Build photon string
+        result.append("GSource(");
+        result.append(m_name);
+        result.append(", "+m_model->type());
+        result.append(", E="+m_energy.print(chatter));
+        result.append(", MET="+m_time.print(chatter));
+        result.append(")");
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

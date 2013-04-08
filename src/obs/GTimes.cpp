@@ -336,24 +336,31 @@ void GTimes::reserve(const int& num)
 /***********************************************************************//**
  * @brief Print time container information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing time container information.
  ***************************************************************************/
-std::string GTimes::print(void) const
+std::string GTimes::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GTimes ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append time container information
-    result.append(parformat("Number of times")+str(size())+"\n");
+        // Append header
+        result.append("=== GTimes ===");
 
-    // Append times
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n");
-        result.append(m_times[i].print());
-    }
+        // Append time container information
+        result.append("\n"+parformat("Number of times")+str(size()));
+
+        // EXPLICIT: Append times
+        if (chatter >= EXPLICIT) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+m_times[i].print(chatter));
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

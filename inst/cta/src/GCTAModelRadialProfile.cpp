@@ -551,18 +551,28 @@ void GCTAModelRadialProfile::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print point source information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing point source information.
  ***************************************************************************/
-std::string GCTAModelRadialProfile::print(void) const
+std::string GCTAModelRadialProfile::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTAModelRadialProfile ===");
-    result.append("\n"+parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCTAModelRadialProfile ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

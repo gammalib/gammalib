@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GCOMResponse.hpp  -  COMPTEL Response class              *
+ *                 GCOMResponse.hpp - COMPTEL Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,7 +66,7 @@ public:
                               const GObservation& obs) const;
     virtual double        npred(const GPhoton&      photon,
                                 const GObservation& obs) const;
-    virtual std::string   print(void) const;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other Methods
     void        caldb(const std::string& caldb);

@@ -98,8 +98,9 @@ public:
     virtual const GXmlElement* element(const std::string& name, const int& index) const;
     virtual void               write(GUrl& url, const int& indent) const = 0;
     virtual NodeType           type(void) const = 0;
-    virtual std::string        print(const int& indent) const = 0;
-    virtual std::string        print(void) const;
+    virtual std::string        print(const GChatter& chatter = NORMAL,
+                                     const int&      indent = 0) const = 0;
+    virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

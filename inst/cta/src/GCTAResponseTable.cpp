@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseTable.cpp - CTA response table class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -777,34 +777,42 @@ void GCTAResponseTable::write(GFitsTable* hdu) const
 /***********************************************************************//**
  * @brief Print response table information
  *
- * @return Content of response table instance.
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing response table information.
  *
  * Puts CTA response table information into a std::string object for
  * printing.
  ***************************************************************************/
-std::string GCTAResponseTable::print(void) const
+std::string GCTAResponseTable::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTAResponseTable ===");
-    result.append("\n"+parformat("Dimension")+str(axes()));
-    
-    // Append axes information
-    for (int i = 0; i < axes(); ++i) {
-        result.append("\n"+parformat("Axis "+str(i)));
-        result.append(str(axis(i)));
-        result.append(" ["+m_colname_lo[i]);
-        result.append(", ");
-        result.append(m_colname_hi[i]+"]");
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append parameter information
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+parformat("Parameter "+str(i)));
-        result.append(m_colname_par[i]);
-    }
+        // Append header
+        result.append("=== GCTAResponseTable ===");
+
+        // Append information
+        result.append("\n"+parformat("Dimension")+str(axes()));
+    
+        // Append axes information
+        for (int i = 0; i < axes(); ++i) {
+            result.append("\n"+parformat("Axis "+str(i)));
+            result.append(str(axis(i)));
+            result.append(" ["+m_colname_lo[i]);
+            result.append(", ");
+            result.append(m_colname_hi[i]+"]");
+        }
+
+        // Append parameter information
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+parformat("Parameter "+str(i)));
+            result.append(m_colname_par[i]);
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

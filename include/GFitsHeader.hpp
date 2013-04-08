@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GFitsHeader.hpp  - FITS header handling class             *
+ *               GFitsHeader.hpp - FITS header handling class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,7 +72,7 @@ public:
     double           real(const int& cardno);
     int              integer(const std::string& keyname);
     int              integer(const int& cardno);
-    std::string      print(void) const;
+    std::string      print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GFitsTable.hpp  - FITS table abstract base class            *
+ *             GFitsTable.hpp - FITS table abstract base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,7 +73,7 @@ public:
     int         nrows(void) const;
     int         ncols(void) const;
     bool        hascolumn(const std::string& colname) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

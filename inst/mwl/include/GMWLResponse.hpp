@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.hpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,7 +64,7 @@ public:
                               const GObservation& obs) const { return 1.0; }
     virtual double        npred(const GPhoton&      photon,
                                 const GObservation& obs) const { return 1.0; }
-    virtual std::string   print(void) const;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

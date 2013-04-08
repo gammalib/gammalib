@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAAeff2D.hpp - CTA 2D effective area class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -306,30 +306,38 @@ void GCTAAeff2D::read(const GFits* fits)
 /***********************************************************************//**
  * @brief Print effective area information
  *
- * @return Content of effective area instance.
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing effective area information.
  ***************************************************************************/
-std::string GCTAAeff2D::print(void) const
+std::string GCTAAeff2D::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Compute energy boundaries in TeV
-    double emin = m_aeff.axis_lo(0,0);
-    double emax = m_aeff.axis_hi(0,m_aeff.axis(0)-1);
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Compute offset angle boundaries in deg
-    double omin = m_aeff.axis_lo(1,0);
-    double omax = m_aeff.axis_hi(1,m_aeff.axis(1)-1);
+        // Compute energy boundaries in TeV
+        double emin = m_aeff.axis_lo(0,0);
+        double emax = m_aeff.axis_hi(0,m_aeff.axis(0)-1);
 
-    // Append header
-    result.append("=== GCTAAeff2D ===");
-    result.append("\n"+parformat("Filename")+m_filename);
-    result.append("\n"+parformat("Number of energy bins")+str(m_aeff.axis(0)));
-    result.append("\n"+parformat("Number of offset bins")+str(m_aeff.axis(1)));
-    result.append("\n"+parformat("Log10(Energy) range"));
-    result.append(str(emin)+" - "+str(emax)+" TeV");
-    result.append("\n"+parformat("Offset angle range"));
-    result.append(str(omin)+" - "+str(omax)+" deg");
+        // Compute offset angle boundaries in deg
+        double omin = m_aeff.axis_lo(1,0);
+        double omax = m_aeff.axis_hi(1,m_aeff.axis(1)-1);
+
+        // Append header
+        result.append("=== GCTAAeff2D ===");
+
+        // Append information
+        result.append("\n"+parformat("Filename")+m_filename);
+        result.append("\n"+parformat("Number of energy bins")+str(m_aeff.axis(0)));
+        result.append("\n"+parformat("Number of offset bins")+str(m_aeff.axis(1)));
+        result.append("\n"+parformat("Log10(Energy) range"));
+        result.append(str(emin)+" - "+str(emax)+" TeV");
+        result.append("\n"+parformat("Offset angle range"));
+        result.append(str(omin)+" - "+str(omax)+" deg");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

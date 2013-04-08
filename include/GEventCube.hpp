@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GEventCube.hpp  -  Abstract event bin container class          *
+ *           GEventCube.hpp - Abstract event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventCube.hpp
  * @brief Abstract event bin container class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GEVENTCUBE_HPP
@@ -64,7 +64,7 @@ public:
     virtual void        read(const GFits& file) = 0;
     virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
     // Protected methods

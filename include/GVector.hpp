@@ -107,7 +107,7 @@ public:
     double&       at(const int& index);
     const double& at(const int& index) const;
     int           non_zeros(void) const;
-    std::string   print(void) const;
+    std::string   print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

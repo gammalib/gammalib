@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GWcsHPX.cpp  -  Healpix projection class                *
+ *                  GWcsHPX.cpp - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsHPX.cpp
  * @brief HealPix projection class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -587,22 +587,32 @@ void GWcsHPX::ordering(const std::string& ordering)
 
 /***********************************************************************//**
  * @brief Print WCS information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing WCS information.
  ***************************************************************************/
-std::string GWcsHPX::print(void) const
+std::string GWcsHPX::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GWcsHPX ===\n");
-    result.append(parformat("Coordinate system")+coordsys()+"\n");
-    result.append(parformat("Nside (# of divisions)")+str(m_nside)+"\n");
-    result.append(parformat("Npface (pixels per face)")+str(m_npface)+"\n");
-    result.append(parformat("Ncap (# of cap pixels)")+str(m_ncap)+"\n");
-    result.append(parformat("Npix (# of pixels)")+str(m_num_pixels)+"\n");
-    result.append(parformat("Order")+str(m_order)+"\n");
-    result.append(parformat("Solid angle per pixel")+str(m_omega)+" sr\n");
-    result.append(parformat("Ordering")+ordering());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GWcsHPX ===");
+
+        // Append information
+        result.append("\n"+parformat("Coordinate system")+coordsys());
+        result.append("\n"+parformat("Nside (# of divisions)")+str(m_nside));
+        result.append("\n"+parformat("Npface (pixels per face)")+str(m_npface));
+        result.append("\n"+parformat("Ncap (# of cap pixels)")+str(m_ncap));
+        result.append("\n"+parformat("Npix (# of pixels)")+str(m_num_pixels));
+        result.append("\n"+parformat("Order")+str(m_order));
+        result.append("\n"+parformat("Solid angle per pixel")+str(m_omega)+" sr");
+        result.append("\n"+parformat("Ordering")+ordering());
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

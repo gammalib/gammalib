@@ -410,25 +410,35 @@ time_t GTestSuites::timestamp(void) const
 
 /***********************************************************************//**
  * @brief Print test suites information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing test suites information.
  ***************************************************************************/
-std::string GTestSuites::print(void) const
+std::string GTestSuites::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GTestSuites ===");
-    result.append("\n"+parformat("Name")+m_name);
-    result.append("\n"+parformat("Number of test suites")+str(size()));
-    result.append("\n"+parformat("Number of tests")+str(tests()));
-    result.append("\n"+parformat("Number of errors")+str(errors()));
-    result.append("\n"+parformat("Number of failures")+str(failures()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append test suites
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n");
-        result.append((*this)[i].print());
-    }
+        // Append header
+        result.append("=== GTestSuites ===");
+
+        // Append information
+        result.append("\n"+parformat("Name")+m_name);
+        result.append("\n"+parformat("Number of test suites")+str(size()));
+        result.append("\n"+parformat("Number of tests")+str(tests()));
+        result.append("\n"+parformat("Number of errors")+str(errors()));
+        result.append("\n"+parformat("Number of failures")+str(failures()));
+
+        // Append test suites
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n");
+            result.append((*this)[i].print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

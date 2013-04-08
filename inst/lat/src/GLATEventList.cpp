@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventList.cpp  -  LAT event list class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -367,33 +367,47 @@ void GLATEventList::roi(const GRoi& roi)
 
 /***********************************************************************//**
  * @brief Print event list information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing event list information.
  ***************************************************************************/
-std::string GLATEventList::print(void) const
+std::string GLATEventList::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATEventList ===\n");
-    result.append(parformat("Number of events")+str(number())+"\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append DS keywords
-    result.append(parformat("Number of DS keywords")+str(m_ds_type.size()));
-    for (int i = 0; i < m_ds_type.size(); ++i) {
-        result.append("\n"+parformat(" Data selection"));
-        result.append("Type="+m_ds_type[i]);
-        if (m_ds_unit[i].length() > 0)
-            result.append(" Unit="+m_ds_unit[i]);
-        if (m_ds_reference[i].length() > 0)
-            result.append(" Reference="+m_ds_reference[i]);
-    }
+        // Append header
+        result.append("=== GLATEventList ===");
 
-    // Append diffuse keywords
-    result.append("\n"+parformat("Number of diffuse models")+str(m_difrsp_label.size()));
-    for (int i = 0; i < m_difrsp_label.size(); ++i) {
-        result.append("\n"+parformat(" Diffuse component"));
-        result.append(m_difrsp_label[i]);
-    }
+        // Append information
+        result.append("\n"+parformat("Number of events")+str(number()));
+
+        // Append DS keywords
+        result.append("\n"+parformat("Number of DS keywords"));
+        result.append(str(m_ds_type.size()));
+        for (int i = 0; i < m_ds_type.size(); ++i) {
+            result.append("\n"+parformat(" Data selection"));
+            result.append("Type="+m_ds_type[i]);
+            if (m_ds_unit[i].length() > 0) {
+                result.append(" Unit="+m_ds_unit[i]);
+            }
+            if (m_ds_reference[i].length() > 0) {
+                result.append(" Reference="+m_ds_reference[i]);
+            }
+        }
+
+        // Append diffuse keywords
+        result.append("\n"+parformat("Number of diffuse models"));
+        result.append(str(m_difrsp_label.size()));
+        for (int i = 0; i < m_difrsp_label.size(); ++i) {
+            result.append("\n"+parformat(" Diffuse component"));
+            result.append(m_difrsp_label[i]);
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

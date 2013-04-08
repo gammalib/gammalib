@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GCOMEventBin.cpp  -  COMPTEL event bin class              *
+ *                GCOMEventBin.cpp - COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -215,15 +215,21 @@ double GCOMEventBin::error(void) const
 /***********************************************************************//**
  * @brief Print event information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing event information.
  ***************************************************************************/
-std::string GCOMEventBin::print(void) const
+std::string GCOMEventBin::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append number of counts
-    result.append(str(counts()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append number of counts
+        result.append(str(counts()));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

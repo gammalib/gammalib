@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GFits.cpp - FITS file access class                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -817,37 +817,45 @@ GFitsTable* GFits::table(int extno) const
 
 
 /***********************************************************************//**
- * @brief Print FITS file information
+ * @brief Print FITS information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing FITS information.
  ***************************************************************************/
-std::string GFits::print(void) const
+std::string GFits::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GFits ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append file information
-    result.append(parformat("Filename")+m_filename+"\n");
-    result.append(parformat("History"));
-    if (m_created) {
-        result.append("new file\n");
-    }
-    else {
-        result.append("existing file\n");
-    }
-    result.append(parformat("Mode"));
-    if (m_readwrite) {
-        result.append("read/write\n");
-    }
-    else {
-        result.append("read only\n");
-    }
-    result.append(parformat("Number of HDUs")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n");
-        result.append(m_hdu[i]->print());
-    }
+        // Append header
+        result.append("=== GFits ===\n");
+
+        // Append file information
+        result.append(parformat("Filename")+m_filename+"\n");
+        result.append(parformat("History"));
+        if (m_created) {
+            result.append("new file\n");
+        }
+        else {
+            result.append("existing file\n");
+        }
+        result.append(parformat("Mode"));
+        if (m_readwrite) {
+            result.append("read/write\n");
+        }
+        else {
+            result.append("read only\n");
+        }
+        result.append(parformat("Number of HDUs")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n");
+            result.append(m_hdu[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

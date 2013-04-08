@@ -66,7 +66,7 @@ public:
     int         size(void) const;
     GModel*     alloc(const std::string& name) const;
     std::string name(const int& index) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

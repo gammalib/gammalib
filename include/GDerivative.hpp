@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GDerivative.hpp  -  Derivative class                   *
+ *                   GDerivative.hpp - Derivative class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,7 +73,7 @@ public:
     double           ridder(const double& x, const double& h, double& err);
     double           minuit2(const double& x, double& err);
     double           difference(const double& x, const double& h);
-    std::string      print(void) const;
+    std::string      print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

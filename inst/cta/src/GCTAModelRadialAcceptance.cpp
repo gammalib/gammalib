@@ -730,56 +730,62 @@ void GCTAModelRadialAcceptance::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print model information
  *
- * @todo Document method.
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing model information.
  ***************************************************************************/
-std::string GCTAModelRadialAcceptance::print(void) const
+std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTAModelRadialAcceptance ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Determine number of parameters per type
-    int n_radial   = (radial()   != NULL) ? radial()->size()   : 0;
-    int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
-    int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
+        // Append header
+        result.append("=== GCTAModelRadialAcceptance ===");
 
-    // Append attributes
-    result.append("\n"+print_attributes());
+        // Determine number of parameters per type
+        int n_radial   = (radial()   != NULL) ? radial()->size()   : 0;
+        int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
+        int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
 
-    // Append model type
-    result.append("\n"+parformat("Model type"));
-    if (n_radial > 0) {
-        result.append("\""+radial()->type()+"\"");
-        if (n_spectral > 0 || n_temporal > 0) {
-            result.append(" * ");
+        // Append attributes
+        result.append("\n"+print_attributes());
+
+        // Append model type
+        result.append("\n"+parformat("Model type"));
+        if (n_radial > 0) {
+            result.append("\""+radial()->type()+"\"");
+            if (n_spectral > 0 || n_temporal > 0) {
+                result.append(" * ");
+            }
         }
-    }
-    if (n_spectral > 0) {
-        result.append("\""+spectral()->type()+"\"");
+        if (n_spectral > 0) {
+            result.append("\""+spectral()->type()+"\"");
+            if (n_temporal > 0) {
+                result.append(" * ");
+            }
+        }
         if (n_temporal > 0) {
-            result.append(" * ");
+            result.append("\""+temporal()->type()+"\"");
         }
-    }
-    if (n_temporal > 0) {
-        result.append("\""+temporal()->type()+"\"");
-    }
 
-    // Append parameters
-    result.append("\n"+parformat("Number of parameters")+str(size()));
-    result.append("\n"+parformat("Number of radial par's")+str(n_radial));
-    for (int i = 0; i < n_radial; ++i) {
-        result.append("\n"+(*radial())[i].print());
-    }
-    result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
-    for (int i = 0; i < n_spectral; ++i) {
-        result.append("\n"+(*spectral())[i].print());
-    }
-    result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
-    for (int i = 0; i < n_temporal; ++i) {
-        result.append("\n"+(*temporal())[i].print());
-    }
+        // Append parameters
+            result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+parformat("Number of radial par's")+str(n_radial));
+        for (int i = 0; i < n_radial; ++i) {
+            result.append("\n"+(*radial())[i].print());
+        }
+        result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
+        for (int i = 0; i < n_spectral; ++i) {
+            result.append("\n"+(*spectral())[i].print());
+        }
+        result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
+        for (int i = 0; i < n_temporal; ++i) {
+            result.append("\n"+(*temporal())[i].print());
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

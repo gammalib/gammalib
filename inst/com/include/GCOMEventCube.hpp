@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCOMEventCube.hpp  -  COMPTEL event bin container class         *
+ *          GCOMEventCube.hpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCOMEventCube.hpp
  * @brief COMPTEL event bin container class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCOMEVENTCUBE_HPP
@@ -76,7 +76,7 @@ public:
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const;
-    virtual std::string    print(void) const;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void                   map(const GSkymap& map, const double& phimin,

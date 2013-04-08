@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GCTARoi.hpp  -  CTA region of interest class              *
+ *                GCTARoi.hpp - CTA region of interest class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTARoi.hpp
  * @brief GCTARoi class definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAROI_HPP
@@ -56,7 +56,7 @@ public:
     // Implemented pure virtual base class methods
     void         clear(void);
     GCTARoi*     clone(void) const;
-    std::string  print(void) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     GCTAInstDir centre(void) const { return m_centre; }

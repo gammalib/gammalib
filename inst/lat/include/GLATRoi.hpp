@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATRoi.hpp  -  LAT region of interest class              *
+ *             GLATRoi.hpp - Fermi-LAT region of interest class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATRoi.hpp
- * @brief GLATRoi class definition.
- * @author J. Knodlseder
+ * @brief Region of interest class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATROI_HPP
@@ -38,9 +38,9 @@
  *
  * @brief Interface for the LAT region of interest class.
  *
- * The LAT region of interest class defines the region of photon arrival
- * directions that is used for unbinned data analysis. A circular LAT has
- * been implemented.
+ * The Fermi-LAT region of interest class defines the region of photon
+ * arrival directions that is used for unbinned data analysis. A circular
+ * Fermi-LAT has been implemented.
  ***************************************************************************/
 class GLATRoi : public GRoi {
 
@@ -56,7 +56,7 @@ public:
     // Implemented pure virtual base class methods
     void        clear(void);
     GLATRoi*    clone(void) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     GLATInstDir centre(void) const { return m_centre; }

@@ -476,22 +476,28 @@ void GModelSpatialDiffuseMap::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print map information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String with diffuse map model information.
  ***************************************************************************/
-std::string GModelSpatialDiffuseMap::print(void) const
+std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpatialDiffuseMap ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append parameters
-    result.append("\n"+parformat("Sky map file")+m_filename);
-    result.append("\n"+parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpatialDiffuseMap ===");
+
+        // Append parameters
+        result.append("\n"+parformat("Sky map file")+m_filename);
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -202,15 +202,21 @@ void GXmlAttribute::write(GUrl& url) const
 /***********************************************************************//**
  * @brief Print element attribute
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing element attribute.
  ***************************************************************************/
-std::string GXmlAttribute::print(void) const
+std::string GXmlAttribute::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
     
-    // Append attribute to string
-    result.append(" "+m_name+"="+m_value);
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append attribute to string
+        result.append(" "+m_name+"="+m_value);
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

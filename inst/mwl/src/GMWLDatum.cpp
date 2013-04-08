@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GMWLDatum.cpp  -  Multi-wavelength spectral point class        *
+ *           GMWLDatum.cpp - Multi-wavelength spectral point class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLDatum.cpp
  * @brief GMWLDatum class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -192,19 +192,29 @@ double GMWLDatum::error(void) const
 
 /***********************************************************************//**
  * @brief Print spectral point information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing spectral point information.
  ***************************************************************************/
-std::string GMWLDatum::print(void) const
+std::string GMWLDatum::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append spectral point
-    result.append(m_eng.print());
-    if (m_eng_err.MeV() > 0.0)
-        result.append(" +/- "+m_eng_err.print());
-    result.append(": "+str(m_flux));
-    if (m_flux_err > 0.0)
-        result.append(" +/- "+str(m_flux_err));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append spectral point
+        result.append(m_eng.print());
+        if (m_eng_err.MeV() > 0.0) {
+            result.append(" +/- "+m_eng_err.print());
+        }
+        result.append(": "+str(m_flux));
+        if (m_flux_err > 0.0) {
+            result.append(" +/- "+str(m_flux_err));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

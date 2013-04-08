@@ -692,23 +692,29 @@ double GSkyDir::posang_deg(const GSkyDir& dir) const
 /***********************************************************************//**
  * @brief Print sky direction information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing sky direction information.
  ***************************************************************************/
-std::string GSkyDir::print(void) const
+std::string GSkyDir::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Put coordinates in string
-    if (m_has_lb) {
-        result = "(l,b)=("+str(m_l*rad2deg)+","+str(m_b*rad2deg)+")";
-    }
-    else if (m_has_radec) {
-        result = "(RA,Dec)=("+str(m_ra*rad2deg)+","+str(m_dec*rad2deg)+")";
-    }
-    else {
-        result = "(RA,Dec)=(not initialised)";
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Put coordinates in string
+        if (m_has_lb) {
+            result = "(l,b)=("+str(m_l*rad2deg)+","+str(m_b*rad2deg)+")";
+        }
+        else if (m_has_radec) {
+            result = "(RA,Dec)=("+str(m_ra*rad2deg)+","+str(m_dec*rad2deg)+")";
+        }
+        else {
+            result = "(RA,Dec)=(not initialised)";
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

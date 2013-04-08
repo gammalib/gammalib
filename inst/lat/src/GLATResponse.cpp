@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATResponse.cpp - Fermi/LAT response class              *
+ *                GLATResponse.cpp - Fermi-LAT response class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.cpp
- * @brief Fermi/LAT response class implementation
+ * @brief Fermi-LAT response class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -685,38 +685,48 @@ GLATEdisp* GLATResponse::edisp(const int& index) const
 
 
 /***********************************************************************//**
- * @brief Print LAT response information
+ * @brief Print Fermi-LAT response information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing response information.
  ***************************************************************************/
-std::string GLATResponse::print(void) const
+std::string GLATResponse::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATResponse ===");
-    result.append("\n"+parformat("Calibration database")+m_caldb);
-    result.append("\n"+parformat("Response name")+m_rspname);
-    result.append("\n"+parformat("Section(s)"));
-    if (m_hasfront && m_hasback) {
-        result.append("front & back");
-    }
-    else if (m_hasfront) {
-        result.append("front");
-    }
-    else if (m_hasback) {
-        result.append("back");
-    }
-    else {
-        result.append("unknown");
-    }
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_aeff[i]->print());
-        result.append("\n"+m_psf[i]->print());
-        result.append("\n"+m_edisp[i]->print());
-    }
-    for (int i = 0; i < m_ptsrc.size(); ++i) {
-        result.append("\n"+m_ptsrc[i]->print());
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATResponse ===");
+
+        // Append information
+        result.append("\n"+parformat("Calibration database")+m_caldb);
+        result.append("\n"+parformat("Response name")+m_rspname);
+        result.append("\n"+parformat("Section(s)"));
+        if (m_hasfront && m_hasback) {
+            result.append("front & back");
+        }
+        else if (m_hasfront) {
+            result.append("front");
+        }
+        else if (m_hasback) {
+            result.append("back");
+        }
+        else {
+            result.append("unknown");
+        }
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_aeff[i]->print(chatter));
+            result.append("\n"+m_psf[i]->print(chatter));
+            result.append("\n"+m_edisp[i]->print(chatter));
+        }
+        for (int i = 0; i < m_ptsrc.size(); ++i) {
+            result.append("\n"+m_ptsrc[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

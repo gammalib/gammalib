@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLPointing.cpp  -  Multi-wavelength pointing class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLPointing.cpp
  * @brief GMWLPointing class interface implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -160,15 +160,25 @@ GMWLPointing* GMWLPointing::clone(void) const
 
 /***********************************************************************//**
  * @brief Print pointing information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing pointing information
  ***************************************************************************/
-std::string GMWLPointing::print(void) const
+std::string GMWLPointing::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GMWLPointing ===");
-    result.append("\n"+parformat("Pointing direction")+"not applicable");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GMWLPointing ===");
+
+        // Append information
+        result.append("\n"+parformat("Pointing direction")+"not applicable");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

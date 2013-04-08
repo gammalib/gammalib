@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATMeanPsf.cpp  -  Fermi LAT mean PSF                  *
+ *                  GLATMeanPsf.cpp - Fermi-LAT mean PSF                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATMeanPsf.cpp
- * @brief Fermi LAT mean PSF class implementation
- * @author J. Knoedlseder
+ * @brief Fermi-LAT mean PSF class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -527,45 +527,60 @@ double GLATMeanPsf::exposure(const double& logE)
 
 /***********************************************************************//**
  * @brief Print lifetime cube information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing ROI information.
  ***************************************************************************/
-std::string GLATMeanPsf::print(void) const
+std::string GLATMeanPsf::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Compute exposure range
-    double min_exposure = 0.0;
-    double max_exposure = 0.0;
-    for (int i = 0; i < nenergies(); ++i) {
-        if (i == 0) {
-            min_exposure = m_exposure[i];
-            max_exposure = m_exposure[i];
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Compute exposure range
+        double min_exposure = 0.0;
+        double max_exposure = 0.0;
+        for (int i = 0; i < nenergies(); ++i) {
+            if (i == 0) {
+                min_exposure = m_exposure[i];
+                max_exposure = m_exposure[i];
+            }
+            else {
+                if (m_exposure[i] < min_exposure) {
+                    min_exposure = m_exposure[i];
+                }
+                if (m_exposure[i] > max_exposure) {
+                    max_exposure = m_exposure[i];
+                }
+            }
         }
-        else {
-            if (m_exposure[i] < min_exposure) min_exposure = m_exposure[i];
-            if (m_exposure[i] > max_exposure) max_exposure = m_exposure[i];
-        }
-    }
     
-    // Append header
-    result.append("=== GLATMeanPsf ===");
-    result.append("\n"+parformat("Source name")+name());
-    result.append("\n"+parformat("Source direction"));
-    result.append(str(m_dir.ra_deg()));
-    result.append(", ");
-    result.append(str(m_dir.dec_deg()));
-    result.append("\n"+parformat("Offset angles")+str(noffsets()));
-    result.append("\n"+parformat("Energy values")+str(nenergies()));
-    result.append("\n"+parformat("Exposure range"));
-    result.append(str(min_exposure)+" - "+str(max_exposure)+" s cm2");
-    for (int i = 0; i < nenergies(); ++i) {
-        GEnergy energy;
-        energy.log10MeV(m_energy[i]);
-        result.append("\n"+parformat(energy.print()));
-        result.append(str(m_exposure[i])+" s cm2");
-        if (m_mapcorr.size() == nenergies())
-            result.append("   (map correction="+str(m_mapcorr[i])+")");
-    }
+        // Append header
+        result.append("=== GLATMeanPsf ===");
+
+        // Append information
+        result.append("\n"+parformat("Source name")+name());
+        result.append("\n"+parformat("Source direction"));
+        result.append(str(m_dir.ra_deg()));
+        result.append(", ");
+        result.append(str(m_dir.dec_deg()));
+        result.append("\n"+parformat("Offset angles")+str(noffsets()));
+        result.append("\n"+parformat("Energy values")+str(nenergies()));
+        result.append("\n"+parformat("Exposure range"));
+        result.append(str(min_exposure)+" - "+str(max_exposure)+" s cm2");
+        for (int i = 0; i < nenergies(); ++i) {
+            GEnergy energy;
+            energy.log10MeV(m_energy[i]);
+            result.append("\n"+parformat(energy.print()));
+            result.append(str(m_exposure[i])+" s cm2");
+            if (m_mapcorr.size() == nenergies()) {
+                result.append("   (map correction="+str(m_mapcorr[i])+")");
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

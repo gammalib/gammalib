@@ -72,7 +72,7 @@ public:
     virtual bool             isempty(void) const = 0;
     virtual void             remove(const int& index) = 0;
     virtual void             reserve(const int& num) = 0;
-    virtual std::string      print(void) const = 0;
+    virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
     virtual int              npars(void) const { return m_pars.size(); } //! @brief Return number of parameters

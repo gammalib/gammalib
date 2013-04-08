@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GCTAEventList.hpp  -  CTA event atom container class          *
+ *            GCTAEventList.hpp - CTA event atom container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAEventList.hpp
  * @brief CTA event atom container class interface definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTAEVENTLIST_HPP
@@ -70,7 +70,7 @@ public:
     virtual int            number(void) const { return m_events.size(); }
     virtual void           roi(const GRoi& roi);
     virtual const GCTARoi& roi(void) const { return m_roi; }
-    std::string            print(void) const;
+    std::string            print(const GChatter& chatter = NORMAL) const;
 
     // Implement other methods
     void   append(const GCTAEventAtom& event);

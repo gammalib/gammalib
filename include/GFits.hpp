@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GFits.hpp  - FITS file access class                  *
+ *                     GFits.hpp - FITS file access class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,7 +76,7 @@ public:
     GFitsTable* table(const std::string& extname) const;
     GFitsTable* table(int extno) const;
     std::string name(void) const { return m_filename; }
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
     // Complex single precision type
     typedef struct {

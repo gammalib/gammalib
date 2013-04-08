@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GCOMPointing.hpp  -  COMPTEL pointing class               *
+ *                GCOMPointing.hpp - COMPTEL pointing class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -57,7 +57,7 @@ public:
     virtual void           clear(void);
     virtual GCOMPointing*  clone(void) const;
     virtual const GSkyDir& dir(void) const;
-    virtual std::string    print(void) const;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void dir(const GSkyDir& dir);

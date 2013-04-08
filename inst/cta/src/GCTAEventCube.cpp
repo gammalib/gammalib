@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAEventCube.cpp  -  CTA event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -449,38 +449,46 @@ void GCTAEventCube::map(const GSkymap& map)
 
 /***********************************************************************//**
  * @brief Print event cube information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing event cube information.
  ***************************************************************************/
-std::string GCTAEventCube::print(void) const
+std::string GCTAEventCube::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTAEventCube ===");
-    result.append("\n"+parformat("Number of events")+str(number()));
-    result.append("\n"+parformat("Number of elements")+str(size()));
-    result.append("\n"+parformat("Number of pixels")+str(npix()));
-    result.append("\n"+parformat("Number of energy bins")+str(ebins()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append skymap definition
-    result.append("\n"+m_map.print());
+        // Append header
+        result.append("=== GCTAEventCube ===");
+        result.append("\n"+parformat("Number of events")+str(number()));
+        result.append("\n"+parformat("Number of elements")+str(size()));
+        result.append("\n"+parformat("Number of pixels")+str(npix()));
+        result.append("\n"+parformat("Number of energy bins")+str(ebins()));
+
+        // Append GTI intervals
+        result.append("\n"+parformat("Time interval"));
+        if (gti().size() > 0) {
+            result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
+        }
+        else {
+            result.append("not defined");
+        }
     
-    // Append GTI intervals
-    result.append("\n"+parformat("Time interval"));
-    if (gti().size() > 0) {
-        result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
-    }
-    else {
-        result.append("not defined");
-    }
-    
-    // Append energy intervals
-    if (ebounds().size() > 0) {
-        result.append("\n"+ebounds().print());
-    }
-    else {
-        result.append("\n"+parformat("Energy intervals")+"not defined");
-    }
+        // Append energy intervals
+        if (ebounds().size() > 0) {
+            result.append("\n"+ebounds().print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("Energy intervals")+"not defined");
+        }
+
+        // Append skymap definition
+        result.append("\n"+m_map.print(chatter));    
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

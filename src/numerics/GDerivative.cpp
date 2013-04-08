@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GDerivative.cpp  -  Derivative class                   *
+ *                   GDerivative.cpp - Derivative class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -521,25 +521,33 @@ double GDerivative::difference(const double& x, const double& h)
 
 /***********************************************************************//**
  * @brief Print derivative information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing derivative information.
  ***************************************************************************/
-std::string GDerivative::print(void) const
+std::string GDerivative::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GDerivative ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append("\n"+parformat("Relative precision")+str(eps()));
-    result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
-    result.append("\n"+parformat("Initial step fraction")+str(step_frac()));
-    if (silent()) {
-        result.append("\n"+parformat("Warnings")+"suppressed");
-    }
-    else {
-        result.append("\n"+parformat("Warnings")+"in standard output");
-    }
+        // Append header
+        result.append("=== GDerivative ===");
+
+        // Append information
+        result.append("\n"+parformat("Relative precision")+str(eps()));
+        result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
+        result.append("\n"+parformat("Initial step fraction")+str(step_frac()));
+        if (silent()) {
+            result.append("\n"+parformat("Warnings")+"suppressed");
+        }
+        else {
+            result.append("\n"+parformat("Warnings")+"in standard output");
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -77,7 +77,7 @@ public:
                                         const GTime& time,
                                         GRan& ran) const = 0;
     virtual double                   theta_max(void) const = 0;
-    virtual std::string              print(void) const = 0;
+    virtual std::string              print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented virtual base class methods
     virtual double eval(const GPhoton& photon) const;

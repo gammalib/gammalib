@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATAeff.cpp  -  Fermi/LAT effective area               *
+ *                  GLATAeff.cpp - Fermi-LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATAeff.cpp
- * @brief Fermi/LAT effective area class implementation
- * @author J. Knoedlseder
+ * @brief Fermi-LAT effective area class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -466,33 +466,43 @@ double GLATAeff::efficiency_factor2(const GEnergy& srcEng) const
 
 /***********************************************************************//**
  * @brief Print effective area information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing effective area information.
  ***************************************************************************/
-std::string GLATAeff::print(void) const
+std::string GLATAeff::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATAeff ===");
-    result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
-    result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
-    result.append("\n"+parformat("Detector section"));
-    if (m_front) {
-        result.append("front");
-    }
-    else if (m_back) {
-        result.append("back");
-    }
-    else {
-        result.append("unknown");
-    }
-    result.append("\n"+parformat("Efficiency factors"));
-    if (hasefficiency()) {
-        result.append("present");
-    }
-    else {
-        result.append("absent");
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATAeff ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
+        result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
+        result.append("\n"+parformat("Detector section"));
+        if (m_front) {
+            result.append("front");
+        }
+        else if (m_back) {
+            result.append("back");
+        }
+        else {
+            result.append("unknown");
+        }
+        result.append("\n"+parformat("Efficiency factors"));
+        if (hasefficiency()) {
+            result.append("present");
+        }
+        else {
+            result.append("absent");
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

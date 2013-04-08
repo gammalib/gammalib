@@ -151,7 +151,7 @@ public:
     void               autoscale(void);
     void               read(const GXmlElement& xml);
     void               write(GXmlElement& xml) const;
-    std::string        print(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

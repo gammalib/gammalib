@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATLtCube.cpp  -  Fermi/LAT livetime cube               *
+ *                 GLATLtCube.cpp - Fermi/LAT livetime cube                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATLtCube.cpp
- * @brief Fermi/LAT livetime cube class implementation
- * @author J. Knodlseder
+ * @brief Fermi-LAT livetime cube class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -434,17 +434,27 @@ void GLATLtCube::save(const std::string& filename, bool clobber) const
 
 /***********************************************************************//**
  * @brief Print livetime cube information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing livetime cube information.
  ***************************************************************************/
-std::string GLATLtCube::print(void) const
+std::string GLATLtCube::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATLtCube ===");
-    result.append("\n"+m_exposure.print());
-    result.append("\n"+m_weighted_exposure.print());
-    result.append("\n"+m_gti.print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATLtCube ===");
+
+        // Append information
+        result.append("\n"+m_exposure.print(chatter));
+        result.append("\n"+m_weighted_exposure.print(chatter));
+        result.append("\n"+m_gti.print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

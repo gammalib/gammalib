@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GWcs.hpp  -  World Coordinate System virtual base class        *
+ *           GWcs.hpp - World Coordinate System virtual base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,7 +68,7 @@ public:
     virtual int         dir2pix(const GSkyDir& dir) const = 0;
     virtual GSkyDir     xy2dir(const GSkyPixel& pix) const = 0;
     virtual GSkyPixel   dir2xy(const GSkyDir& dir) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
     virtual std::string coordsys(void) const;

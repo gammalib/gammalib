@@ -1,7 +1,7 @@
 /***************************************************************************
  *    GCTAAeffPerfTable.hpp - CTA performance table effective area class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -316,32 +316,40 @@ std::string GCTAAeffPerfTable::filename(void) const
 /***********************************************************************//**
  * @brief Print effective area information
  *
- * @return Content of effective area instance.
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing effective area information.
  ***************************************************************************/
-std::string GCTAAeffPerfTable::print(void) const
+std::string GCTAAeffPerfTable::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Compute energy boundaries in TeV
-    double emin = std::pow(10.0, m_logE[0]);
-    double emax = std::pow(10.0, m_logE[size()-1]);
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append("=== GCTAAeffPerfTable ===");
-    result.append("\n"+parformat("Filename")+m_filename);
-    result.append("\n"+parformat("Number of energy bins")+str(size()));
-    result.append("\n"+parformat("Log10(Energy) range"));
-    result.append(str(emin)+" - "+str(emax)+" TeV");
+        // Compute energy boundaries in TeV
+        double emin = std::pow(10.0, m_logE[0]);
+        double emax = std::pow(10.0, m_logE[size()-1]);
 
-    // Append offset angle dependence
-    if (m_sigma == 0) {
-        result.append("\n"+parformat("Offset angle dependence")+"none");
-    }
-    else {
-        std::string txt = "Fixed sigma="+str(m_sigma);
-        result.append("\n"+parformat("Offset angle dependence")+txt);
-    }
+        // Append header
+        result.append("=== GCTAAeffPerfTable ===");
+
+        // Append information
+        result.append("\n"+parformat("Filename")+m_filename);
+        result.append("\n"+parformat("Number of energy bins")+str(size()));
+        result.append("\n"+parformat("Log10(Energy) range"));
+        result.append(str(emin)+" - "+str(emax)+" TeV");
+
+        // Append offset angle dependence
+        if (m_sigma == 0) {
+            result.append("\n"+parformat("Offset angle dependence")+"none");
+        }
+        else {
+            std::string txt = "Fixed sigma="+str(m_sigma);
+            result.append("\n"+parformat("Offset angle dependence")+txt);
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

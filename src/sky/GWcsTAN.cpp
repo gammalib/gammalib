@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GWcsTAN.cpp  -  Gnomonic (TAN) projection class            *
+ *               GWcsTAN.cpp - Gnomonic (TAN) projection class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsTAN.cpp
  * @brief Gnomonic (TAN) projection class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -200,18 +200,27 @@ GWcsTAN* GWcsTAN::clone(void) const
 }
 
 
-
 /***********************************************************************//**
  * @brief Print WCS information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing WCS information.
  ***************************************************************************/
-std::string GWcsTAN::print(void) const
+std::string GWcsTAN::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GWcsTAN ===\n");
-    result.append(wcs_print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GWcsTAN ===");
+
+        // Append information
+        result.append(wcs_print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

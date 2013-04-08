@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPars.cpp - Application parameters                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -598,19 +598,27 @@ bool GPars::haspar(const std::string& name) const
 
 /***********************************************************************//**
  * @brief Print parameters
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing parameter information.
  ***************************************************************************/
-std::string GPars::print(void) const
+std::string GPars::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GPars ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append parameters
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i].print());
-    }
+        // Append header
+        result.append("=== GPars ===");
+
+        // Append parameters
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i].print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

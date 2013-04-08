@@ -525,21 +525,27 @@ void GModelSpectralConst::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print spectral model information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing spectral model information.
  ***************************************************************************/
-std::string GModelSpectralConst::print(void) const
+std::string GModelSpectralConst::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpectralConst ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append model content
-    result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpectralConst ===");
+
+        // Append model content
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

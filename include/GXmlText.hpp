@@ -57,7 +57,8 @@ public:
     virtual GXmlText*   clone(void) const;
     virtual void        write(GUrl& url, const int& indent = 0) const;
     virtual NodeType    type(void) const { return NT_TEXT; }
-    virtual std::string print(const int& indent = 0) const;
+    virtual std::string print(const GChatter& chatter = NORMAL,
+                              const int&      indent = 0) const;
 
     // Other methods
     const std::string&  text(void) const { return m_text; }

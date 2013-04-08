@@ -130,7 +130,7 @@ public:
     virtual void           read(const GFits& file){ return; }
     virtual void           write(GFits& file) const{ return; }
     virtual int            number(void) const{ return m_counts; }
-    virtual std::string    print(void) const{
+    virtual std::string    print(const GChatter& chatter = NORMAL) const{
         // Initialise result string
         std::string result;
 

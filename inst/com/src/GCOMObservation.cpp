@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCOMObservation.cpp  -  COMPTEL Observation class            *
+ *             GCOMObservation.cpp - COMPTEL Observation class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -536,52 +536,60 @@ void GCOMObservation::load(const std::string& drename,
 /***********************************************************************//**
  * @brief Print observation information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing observation information.
  ***************************************************************************/
-std::string GCOMObservation::print(void) const
+std::string GCOMObservation::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCOMObservation ===");
-    result.append("\n"+parformat("Name")+name());
-    result.append("\n"+parformat("Identifier")+id());
-    result.append("\n"+parformat("Instrument")+instrument());
-    result.append("\n"+parformat("Statistics")+statistics());
-    result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
-    result.append("\n"+parformat("Livetime")+str(livetime())+" sec");
-    result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
-    result.append("\n"+parformat("Energy band")+str(ewidth())+" MeV");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append pointing
-    if (m_pointing != NULL) {
-        result.append("\n"+m_pointing->print());
-    }
-    else {
-        result.append("\n"+parformat("Pointing")+"undefined");
-    }
+        // Append header
+        result.append("=== GCOMObservation ===");
 
-    // Append response
-    if (m_response != NULL) {
-        result.append("\n"+response()->print());
-    }
-    else {
-        result.append("\n"+parformat("Response")+"undefined");
-    }
+        // Append information
+        result.append("\n"+parformat("Name")+name());
+        result.append("\n"+parformat("Identifier")+id());
+        result.append("\n"+parformat("Instrument")+instrument());
+        result.append("\n"+parformat("Statistics")+statistics());
+        result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
+        result.append("\n"+parformat("Livetime")+str(livetime())+" sec");
+        result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
+        result.append("\n"+parformat("Energy band")+str(ewidth())+" MeV");
 
-    // Append events
-    if (m_events != NULL) {
-        result.append("\n"+m_events->print());
-    }
-    else {
-        result.append("\n"+parformat("Events")+"undefined");
-    }
+        // Append pointing
+        if (m_pointing != NULL) {
+            result.append("\n"+m_pointing->print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("Pointing")+"undefined");
+        }
 
-    // Append DRB, DRG and DRX
-    //result.append("\n"+m_drb.print());
-    //result.append("\n"+m_drg.print());
-    //result.append("\n"+m_drx.print());
+        // Append response
+        if (m_response != NULL) {
+            result.append("\n"+response()->print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("Response")+"undefined");
+        }
+
+        // Append events
+        if (m_events != NULL) {
+            result.append("\n"+m_events->print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("Events")+"undefined");
+        }
+
+        // Append DRB, DRG and DRX
+        //result.append("\n"+m_drb.print(chatter));
+        //result.append("\n"+m_drg.print(chatter));
+        //result.append("\n"+m_drx.print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

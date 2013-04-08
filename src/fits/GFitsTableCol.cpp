@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GFitsTableCol.cpp  - FITS table column abstract base class       *
+ *        GFitsTableCol.cpp - FITS table column abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -336,63 +336,71 @@ int GFitsTableCol::anynul(void) const
 /***********************************************************************//**
  * @brief Print column information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing column information.
+ *
  * @todo Format and cfitsio information is mainly for debugging. This could
  * be vanish in a more stable version of the code, or it could be compiled
  * in conditionally using a debug option.
  ***************************************************************************/
-std::string GFitsTableCol::print(void) const
+std::string GFitsTableCol::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append formatted column name. Optionally add units
-    if (m_unit.length() > 0) {
-        result.append(parformat(m_name+" ("+m_unit+")"));
-    }
-    else {
-        result.append(parformat(m_name));
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append column number. This will be "-" if the column does not exist
-    // in the FITS file.
-    if (m_colnum > 0) {
-        result.append(right(str(m_colnum),4)+" ");
-    }
-    else {
-        result.append(right("[-]",4)+" ");
-    }
-
-    // Append loading information
-    if (m_size == 0) {
-        result.append("[not loaded] ");
-    }
-    else {
-        result.append("[loaded]     ");
-    }
-
-    // Append format information
-    result.append("["+binary_format()+","+ascii_format()+"]");
-
-    // Append dimensions (if available)
-    if (!m_dim.empty()) {
-    
-        // Build TDIM string
-        std::string value = "("+str(m_dim[0]);
-        for (int k = 1; k < m_dim.size(); ++k) {
-            value += ","+str(m_dim[k]);
+        // Append formatted column name. Optionally add units
+        if (m_unit.length() > 0) {
+            result.append(parformat(m_name+" ("+m_unit+")"));
         }
-        value += ")";
-        
-        // Append
-        result.append(" "+value);
-    }
+        else {
+            result.append(parformat(m_name));
+        }
 
-    // Append cfitsio information
-    result.append(" repeat="+str(m_repeat));
-    result.append(" width="+str(m_width));
-    result.append(" number="+str(m_number));
-    result.append(" length="+str(m_length));
-    result.append(" size="+str(m_size));
+        // Append column number. This will be "-" if the column does not exist
+        // in the FITS file.
+        if (m_colnum > 0) {
+            result.append(right(str(m_colnum),4)+" ");
+        }
+        else {
+            result.append(right("[-]",4)+" ");
+        }
+
+        // Append loading information
+        if (m_size == 0) {
+            result.append("[not loaded] ");
+        }
+        else {
+            result.append("[loaded]     ");
+        }
+
+        // Append format information
+        result.append("["+binary_format()+","+ascii_format()+"]");
+
+        // Append dimensions (if available)
+        if (!m_dim.empty()) {
+    
+            // Build TDIM string
+            std::string value = "("+str(m_dim[0]);
+            for (int k = 1; k < m_dim.size(); ++k) {
+                value += ","+str(m_dim[k]);
+            }
+            value += ")";
+        
+            // Append
+            result.append(" "+value);
+        }
+
+        // Append cfitsio information
+        result.append(" repeat="+str(m_repeat));
+        result.append(" width="+str(m_width));
+        result.append(" number="+str(m_number));
+        result.append(" length="+str(m_length));
+        result.append(" size="+str(m_size));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

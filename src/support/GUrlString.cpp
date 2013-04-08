@@ -486,19 +486,25 @@ void GUrlString::printf(const char* format, ...)
 /***********************************************************************//**
  * @brief Print URL information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing URL information.
  ***************************************************************************/
-std::string GUrlString::print(void) const
+std::string GUrlString::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GUrlString ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append URL information
-    result.append("\n"+parformat("String size")+str(m_buffer.length()));
-    result.append("\n"+parformat("String position indicator")+str(m_index));
+        // Append header
+        result.append("=== GUrlString ===");
+
+        // Append URL information
+        result.append("\n"+parformat("String size")+str(m_buffer.length()));
+        result.append("\n"+parformat("String position indicator")+str(m_index));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

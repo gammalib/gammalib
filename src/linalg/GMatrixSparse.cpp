@@ -1830,63 +1830,73 @@ void GMatrixSparse::cholesky_invert(bool compress)
  *
  * @return String containing matrix information
  ***************************************************************************/
-std::string GMatrixSparse::print(void) const
+std::string GMatrixSparse::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Determine number of elements
-    int nonzero;
-    int elements = m_elements;
-    if (m_fill_val == 0.0) {
-        nonzero  = (m_colstart != NULL) ? m_colstart[m_cols] : 0;
-    }
-    else {
-        nonzero  = (m_colstart != NULL) ? m_colstart[m_cols]+1 : 0;
-        elements++;
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append header
-    result.append("=== GMatrixSparse ===");
+        // Determine number of elements
+        int nonzero;
+        int elements = m_elements;
+        if (m_fill_val == 0.0) {
+            nonzero  = (m_colstart != NULL) ? m_colstart[m_cols] : 0;
+        }
+        else {
+            nonzero  = (m_colstart != NULL) ? m_colstart[m_cols]+1 : 0;
+            elements++;
+        }
 
-    // Append information
-    result.append("\n"+parformat("Number of rows")+str(m_rows));
-    if (m_rowsel != NULL) {
-        result.append(" (compressed "+str(m_num_rowsel)+")");
-    }
-    result.append("\n"+parformat("Number of columns")+str(m_cols));
-    if (m_colsel != NULL) {
-        result.append(" (compressed "+str(m_num_colsel)+")");
-    }
-    result.append("\n"+parformat("Number of nonzero elements")+str(nonzero));
-    if (m_fill_val != 0.0) {
-        result.append("\n"+parformat("Pending element"));
-        result.append("("+str(m_fill_row)+","+str(m_fill_col)+")=");
-        result.append(str(m_fill_val));
-    }
-    result.append("\n"+parformat("Number of allocated cells")+str(m_alloc));
-    result.append("\n"+parformat("Memory block size")+str(m_mem_block));
-    result.append("\n"+parformat("Sparse matrix fill")+str(fill()));
-    result.append("\n"+parformat("Pending element")+str(m_fill_val));
-    result.append("\n"+parformat("Fill stack size")+str(m_stack_size));
-    if (m_stack_data == NULL) {
-        result.append(" (none)");
-    }
+        // Append header
+        result.append("=== GMatrixSparse ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of rows")+str(m_rows));
+        if (m_rowsel != NULL) {
+            result.append(" (compressed "+str(m_num_rowsel)+")");
+        }
+        result.append("\n"+parformat("Number of columns")+str(m_cols));
+        if (m_colsel != NULL) {
+            result.append(" (compressed "+str(m_num_colsel)+")");
+        }
+        result.append("\n"+parformat("Number of nonzero elements")+str(nonzero));
+        if (m_fill_val != 0.0) {
+            result.append("\n"+parformat("Pending element"));
+            result.append("("+str(m_fill_row)+","+str(m_fill_col)+")=");
+            result.append(str(m_fill_val));
+        }
+        result.append("\n"+parformat("Number of allocated cells")+str(m_alloc));
+        result.append("\n"+parformat("Memory block size")+str(m_mem_block));
+        result.append("\n"+parformat("Sparse matrix fill")+str(fill()));
+        result.append("\n"+parformat("Pending element")+str(m_fill_val));
+        result.append("\n"+parformat("Fill stack size")+str(m_stack_size));
+        if (m_stack_data == NULL) {
+            result.append(" (none)");
+        }
     
-    // Append elements and compression schemes
-    result.append(print_elements());
-    result.append(print_row_compression());
-    result.append(print_col_compression());
+        // Append elements and compression schemes
+        result.append(print_elements(chatter));
+        result.append(print_row_compression(chatter));
+        result.append(print_col_compression(chatter));
 
-    // Append symbolic decomposition if available
-    //if (m_symbolic != NULL) {
-    //    result.append(m_symbolic->print());
-    //}
+        // VERBOSE
+        if (chatter >= VERBOSE) {
 
-    // Append numeric decomposition if available
-    //if (m_numeric != NULL) {
-    //    result.append(m_numeric->print());
-    //}
+            // Append symbolic decomposition if available
+            //if (m_symbolic != NULL) {
+            //    result.append(m_symbolic->print(chatter));
+            //}
+
+            // Append numeric decomposition if available
+            //if (m_numeric != NULL) {
+            //    result.append(m_numeric->print(chatter));
+            //}
+
+        } // endif: chatter was verbose
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GSkymap.hpp  -  Class that implements a sky map              *
+ *             GSkymap.hpp - Class that implements a sky map               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -114,7 +114,7 @@ public:
     double*       pixels(void) const { return m_pixels; }
     bool          isinmap(const GSkyDir& dir) const;
     bool          isinmap(const GSkyPixel& pixel) const;
-    std::string   print(void) const;
+    std::string   print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

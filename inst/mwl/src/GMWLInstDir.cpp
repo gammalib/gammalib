@@ -1,7 +1,7 @@
 /***************************************************************************
- *    GMWLInstDir.cpp  -  Multi-wavelength instrument direction class      *
+ *     GMWLInstDir.cpp - Multi-wavelength instrument direction class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GMWLInstDir.cpp
- * @brief GMWLInstDir class implementation.
- * @author J. Knodlseder
+ * @brief Instrument direction class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -160,14 +160,22 @@ GMWLInstDir* GMWLInstDir::clone(void) const
 
 /***********************************************************************//**
  * @brief Print instrument direction information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing instrument direction information.
  ***************************************************************************/
-std::string GMWLInstDir::print(void) const
+std::string GMWLInstDir::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("GMWLInstDir(dummy)");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("GMWLInstDir(dummy)");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

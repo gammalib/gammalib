@@ -74,7 +74,7 @@ public:
     virtual double                    theta_max(void) const;
     virtual void                      read(const GXmlElement& xml);
     virtual void                      write(GXmlElement& xml) const;
-    virtual std::string               print(void) const;
+    virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     double  sigma(void) const;

@@ -69,7 +69,7 @@ public:
     virtual double      value(void) const = 0;
     virtual int         status(void) const = 0;
     virtual int         iter(void) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
     // Protected methods

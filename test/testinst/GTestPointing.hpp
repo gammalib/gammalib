@@ -85,7 +85,7 @@ public:
     
     GTestPointing*  clone(void) const{ return new GTestPointing(*this);}
     const GSkyDir& dir(void) const { return m_dir; }
-    std::string    print(void) const{return "=== GTestPointing ===";}
+    std::string    print(const GChatter& chatter = NORMAL) const{return "=== GTestPointing ===";}
 
 protected:
     // Protected methods

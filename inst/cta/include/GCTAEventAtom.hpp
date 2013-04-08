@@ -66,7 +66,7 @@ public:
     void               dir(const GCTAInstDir& dir) { m_dir=dir; }
     void               energy(const GEnergy& energy) { m_energy=energy; }
     void               time(const GTime& time) { m_time=time; }
-    std::string        print(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const int&           index(void) const { return m_index; }

@@ -67,7 +67,7 @@ public:
     virtual double           deadc(const GTime& time) const { return m_deadc; }
     virtual void             read(const GXmlElement& xml);
     virtual void             write(GXmlElement& xml) const;
-    virtual std::string      print(void) const;
+    virtual std::string      print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void        load_unbinned(const std::string& filename);

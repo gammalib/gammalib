@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GRan.hpp - Random number generator class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,7 @@ public:
     double                 exp(const double& lambda);
     double                 poisson(const double& lambda);
     double                 chisq2(void);
-    std::string            print(void) const;
+    std::string            print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods

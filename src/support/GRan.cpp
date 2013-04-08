@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GRan.cpp - Random number generator class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -362,19 +362,29 @@ double GRan::chisq2(void)
 
 
 /***********************************************************************//**
- * @brief Print class information
+ * @brief Print random number generator information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing random number generator information.
  ***************************************************************************/
-std::string GRan::print(void) const
+std::string GRan::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GRan ===");
-    result.append("\n"+parformat("Seed")+str(m_seed));
-    result.append("\n"+parformat("u")+str(m_u));
-    result.append("\n"+parformat("v")+str(m_v));
-    result.append("\n"+parformat("w")+str(m_w));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GRan ===");
+
+        // Append information
+        result.append("\n"+parformat("Seed")+str(m_seed));
+        result.append("\n"+parformat("u")+str(m_u));
+        result.append("\n"+parformat("v")+str(m_v));
+        result.append("\n"+parformat("w")+str(m_w));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

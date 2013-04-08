@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GEventList.hpp  -  Abstract event atom container class        *
+ *            GEventList.hpp - Abstract event atom container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventList.hpp
  * @brief Abstract event atom container class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GEVENTLIST_HPP
@@ -67,7 +67,7 @@ public:
     virtual int         number(void) const = 0;
     virtual void        roi(const GRoi& roi) = 0;
     virtual const GRoi& roi(void) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
     // Protected methods

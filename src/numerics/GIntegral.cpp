@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GIntegral.cpp  -  Integration class                    *
+ *                   GIntegral.cpp - Integration class                     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -361,24 +361,32 @@ double GIntegral::trapzd(double a, double b, int n, double result)
 
 /***********************************************************************//**
  * @brief Print integral information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing integral information.
  ***************************************************************************/
-std::string GIntegral::print(void) const
+std::string GIntegral::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GIntegral ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append("\n"+parformat("Relative precision")+str(eps()));
-    result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
-    if (silent()) {
-        result.append("\n"+parformat("Warnings")+"suppressed");
-    }
-    else {
-        result.append("\n"+parformat("Warnings")+"in standard output");
-    }
+        // Append header
+        result.append("=== GIntegral ===");
+
+        // Append information
+        result.append("\n"+parformat("Relative precision")+str(eps()));
+        result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
+        if (silent()) {
+            result.append("\n"+parformat("Warnings")+"suppressed");
+        }
+        else {
+            result.append("\n"+parformat("Warnings")+"in standard output");
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

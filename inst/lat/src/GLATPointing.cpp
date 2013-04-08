@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATPointing.cpp  -  LAT pointing class                 *
+ *               GLATPointing.cpp - Fermi-LAT pointing class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATPointing.cpp
- * @brief GLATPointing class interface implementation.
- * @author J. Knodlseder
+ * @brief Fermi-LAT pointing class interface implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -158,16 +158,27 @@ GLATPointing* GLATPointing::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Print LAT pointing information
+ * @brief Print Fermi-LAT pointing information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing Fermi-LAT pointing information.
  ***************************************************************************/
-std::string GLATPointing::print(void) const
+std::string GLATPointing::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATPointing ===");
-    result.append("\n"+parformat("Pointing direction")+this->dir().print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATPointing ===");
+
+        // Append information
+        result.append("\n"+parformat("Pointing direction"));
+        result.append(this->dir().print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

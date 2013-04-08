@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GModelTemporalRegistry.cpp - Temporal model registry class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -254,26 +254,35 @@ std::string GModelTemporalRegistry::name(const int& index) const
 /***********************************************************************//**
  * @brief Print registry information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return Registry content.
  ***************************************************************************/
-std::string GModelTemporalRegistry::print(void) const
+std::string GModelTemporalRegistry::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelTemporalRegistry ===");
-    result.append("\n"+parformat("Number of models")+str(m_number));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append models
-    for (int i = 0; i < m_number; ++i) {
-        result.append("\n"+parformat(m_names[i]));
-        result.append(m_models[i]->type());
-    }
+        // Append header
+        result.append("=== GModelTemporalRegistry ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of models")+str(m_number));
+
+        // Append models
+        for (int i = 0; i < m_number; ++i) {
+            result.append("\n"+parformat(m_names[i]));
+            result.append(m_models[i]->type());
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;
 }
+
 
 /*==========================================================================
  =                                                                         =

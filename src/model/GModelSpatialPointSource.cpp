@@ -466,19 +466,24 @@ void GModelSpatialPointSource::write(GXmlElement& xml) const
  *
  * @return String containing point source information.
  ***************************************************************************/
-std::string GModelSpatialPointSource::print(void) const
+std::string GModelSpatialPointSource::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpatialPointSource ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append parameters
-    result.append(parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpatialPointSource ===");
+
+        // Append parameters
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

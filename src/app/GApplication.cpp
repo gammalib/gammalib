@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.cpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,11 +29,9 @@
 #include <config.h>
 #endif
 #include "GApplication.hpp"
-#include "GException.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OPERATOR                   "GApplication::operator[](std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -67,6 +65,12 @@ GApplication::GApplication(void)
  *
  * @param[in] name Application name.
  * @param[in] version Application version.
+ *
+ * Constructs an application from an application @p name and @p version. The
+ * application parameters will be loaded from the parameter file. No log
+ * file will be opened.
+ *
+ * This constructor should be used for Python scripts.
  ***************************************************************************/
 GApplication::GApplication(const std::string& name, const std::string& version)
 {
@@ -77,16 +81,13 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     m_name    = name;
     m_version = version;
 
-    // Initialise the application logger
-    //logFileOpen();
-
     // Initialise application parameters
     m_pars.load(par_filename());
 
     // Return
     return;
 }
-
+    
 
 /***********************************************************************//**
  * @brief Application constructor
@@ -95,6 +96,13 @@ GApplication::GApplication(const std::string& name, const std::string& version)
  * @param[in] version Application version.
  * @param[in] argc Number of command line arguments
  * @param[in] argv Command line arguments
+ *
+ * Constructs an application from an application @p name, @p version and a
+ * number @p argc of command line arguments @p argv. The application
+ * parameters will be loaded from the parameter file and the log file will
+ * be opened.
+ *
+ * This constructor should be used for C++ applications.
  ***************************************************************************/
 GApplication::GApplication(const std::string& name, const std::string& version,
                            int argc, char *argv[])
@@ -106,15 +114,16 @@ GApplication::GApplication(const std::string& name, const std::string& version,
     m_name    = name;
     m_version = version;
 
-    // Initialise the application logger
-    logFileOpen();
-
     // Save arguments as vector of strings
-    for (int i = 0; i < argc; ++i)
+    for (int i = 0; i < argc; ++i) {
         m_args.push_back(strip_whitespace(argv[i]));
+    }
 
     // Initialise application parameters
     m_pars.load(par_filename(), m_args);
+
+    // Initialise the application logger
+    logFileOpen();
 
     // Return
     return;
@@ -162,8 +171,9 @@ GApplication::~GApplication(void)
  * @brief Assignment operator
  *
  * @param[in] app Application.
+ * @return Application.
  ***************************************************************************/
-GApplication& GApplication::operator= (const GApplication& app)
+GApplication& GApplication::operator=(const GApplication& app)
 {
     // Execute only if object is not identical
     if (this != &app) {
@@ -184,30 +194,6 @@ GApplication& GApplication::operator= (const GApplication& app)
 }
 
 
-/***********************************************************************//**
- * @brief Parameter access operator
- *
- * @param[in] name Parameter name.
- ***************************************************************************/
-GPar& GApplication::operator[](const std::string& name)
-{
-    // Return parameter
-    return (m_pars[name]);
-}
-
-
-/***********************************************************************//**
- * @brief Parameter access operator (const version)
- *
- * @param[in] name Parameter name.
- ***************************************************************************/
-const GPar& GApplication::operator[](const std::string& name) const
-{
-    // Return parameter
-    return (m_pars[name]);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -215,7 +201,7 @@ const GPar& GApplication::operator[](const std::string& name) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
+ * @brief Clear application
  ***************************************************************************/
 void GApplication::clear(void)
 {
@@ -231,36 +217,21 @@ void GApplication::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone application
+ *
+ * @return Pointer to deep copy of application.
  ***************************************************************************/
 GApplication* GApplication::clone(void) const
 {
+    // Clone application
     return new GApplication(*this);
 }
 
 
 /***********************************************************************//**
- * @brief Return application name
- ***************************************************************************/
-std::string GApplication::name(void) const
-{
-    // Return name
-    return m_name;
-}
-
-
-/***********************************************************************//**
- * @brief Return application version
- ***************************************************************************/
-std::string GApplication::version(void) const
-{
-    // Return version
-    return m_version;
-}
-
-
-/***********************************************************************//**
  * @brief Return application elapsed time in calendar seconds
+ *
+ * @return Application elapsed time in calendar seconds.
  ***************************************************************************/
 double GApplication::telapse(void) const
 {
@@ -278,6 +249,8 @@ double GApplication::telapse(void) const
 
 /***********************************************************************//**
  * @brief Return application elapsed time in CPU seconds
+ *
+ * @return Application elapsed time in CPU seconds.
  ***************************************************************************/
 double GApplication::celapse(void) const
 {
@@ -292,14 +265,18 @@ double GApplication::celapse(void) const
 /***********************************************************************//**
  * @brief Open log file
  *
- * @param[in] clobber (default: true)
+ * @param[in] clobber (defaults to true)
  *
- * Opens application log file.
+ * Opens application log file and sets the logger chattiness dependent on
+ * the chatter parameter of the application.
  ***************************************************************************/
-void GApplication::logFileOpen(bool clobber)
+void GApplication::logFileOpen(const bool& clobber)
 {
     // Initialise the application logger
     log.open(log_filename(), clobber);
+
+    // Set logger chattiness
+    set_log_chatter();
 
     // Return
     return;
@@ -309,6 +286,8 @@ void GApplication::logFileOpen(bool clobber)
 /***********************************************************************//**
  * @brief Signal terse logging
  *
+ * @return True if at least terse logging is requested.
+ * 
  * The terse level is used for the most crucial application information that
  * should be logged in all cases (chatter >= 1).
  ***************************************************************************/
@@ -325,6 +304,8 @@ bool GApplication::logTerse(void) const
 /***********************************************************************//**
  * @brief Signal normal logging
  *
+ * @return True if at least normal logging is requested.
+ * 
  * The normal level is used for standard application information that should
  * be logged in normal operations (chatter >= 2).
  ***************************************************************************/
@@ -341,6 +322,8 @@ bool GApplication::logNormal(void) const
 /***********************************************************************//**
  * @brief Signal explicit logging
  *
+ * @return True if at least explicit logging is requested.
+ * 
  * The explicit level is used for detailed application information that
  * should be logged in detailed studies (chatter >= 3).
  ***************************************************************************/
@@ -357,6 +340,8 @@ bool GApplication::logExplicit(void) const
 /***********************************************************************//**
  * @brief Signal verbose logging
  *
+ * @return True if verbose logging is requested.
+ * 
  * The verbose level is used for full application information (chatter >= 4).
  ***************************************************************************/
 bool GApplication::logVerbose(void) const
@@ -372,6 +357,8 @@ bool GApplication::logVerbose(void) const
 /***********************************************************************//**
  * @brief Signal debug logging
  *
+ * @return True if the debugging mode has been selected.
+ * 
  * The debug level is used for application debugging.
  ***************************************************************************/
 bool GApplication::logDebug(void) const
@@ -387,6 +374,8 @@ bool GApplication::logDebug(void) const
 /***********************************************************************//**
  * @brief Return clobber
  *
+ * @return True if the clobber parameter is true.
+ * 
  * The clobber indicates if existing files should be overwritten.
  ***************************************************************************/
 bool GApplication::clobber(void) const
@@ -403,6 +392,7 @@ bool GApplication::clobber(void) const
  * @brief Signal if specified parameter exists
  *
  * @param[in] name Parameter name.
+ * @return True if an application parameter with the specified name exists.
  ***************************************************************************/
 bool GApplication::haspar(const std::string& name) const
 {
@@ -412,33 +402,158 @@ bool GApplication::haspar(const std::string& name) const
 
 
 /***********************************************************************//**
- * @brief Print application
+ * @brief Returns parameter filename
+ *
+ * @return Parameter filename.
+ *
+ * The parameter filename is given by the task name to which the suffix
+ * '.par' is added.
  ***************************************************************************/
-std::string GApplication::print(void) const
+std::string GApplication::par_filename(void) const
+{
+    // Return
+    return (m_name+".par");
+}
+
+
+/***********************************************************************//**
+ * @brief Returns log filename
+ *
+ * @return Log filename.
+ *
+ * The log filename is given by the task name to which the suffix ".log" is
+ * added.
+ ***************************************************************************/
+std::string GApplication::log_filename(void) const
+{
+    // Return
+    return (m_name+".log");
+}
+
+
+/***********************************************************************//**
+ * @brief Write application header in log file
+ *
+ * Dump the application header into the log file. The header is composed of
+ * a fixed width block delimined by "*" characters that contains information
+ * about the application name and version.
+ ***************************************************************************/
+void GApplication::log_header(void)
+{
+    // Reset any indentation
+    log.indent(0);
+
+    // Dump header
+    log << fill("*", header_width) << std::endl;
+    log << "*" << center(m_name, header_width-2) << "*" << std::endl;
+    log << "* " << fill("-", header_width-4) << " *" << std::endl;
+    log << "* Version: " << left(m_version, header_width-12) << "*" << std::endl;
+    log << fill("*", header_width) << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write application trailer in log file
+ *
+ * The application trailer gives the total number of elapsed calendar and
+ * CPU seconds.
+ ***************************************************************************/
+void GApplication::log_trailer(void)
+{
+    // Reset any indentation
+    log.indent(0);
+
+    // Dump trailer
+    log << "Application \"" << m_name << "\" terminated after ";
+    log << telapse() << " wall clock seconds, consuming ";
+    log << celapse() << " seconds of CPU time.";
+    if (telapse() < 0.1) {
+         log << " This was rather quick!";
+    }
+    if (telapse() > 86400.0) {
+         log << " Hope it was worth waiting ...";
+    }
+    log << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write application parameters in log file
+ *
+ * Writes all application parameters in the log file.
+ ***************************************************************************/
+void GApplication::log_parameters(void)
+{
+    // Write header
+    log.header1("Parameters");
+
+    // Write parameters in logger
+    for (int i = 0; i < m_pars.size(); ++i) {
+
+        // Add line feed
+        if (i > 0) {
+            log << std::endl;
+        }
+
+        // Set parameter name
+        std::string name = " " + m_pars.m_pars[i].name() + " ";
+        name = name + fill(".", 28-name.length()) + ": ";
+
+        // Write parameter
+        log << name << m_pars.m_pars[i].m_value;
+
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Print application
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing application information.
+ ***************************************************************************/
+std::string GApplication::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GApplication ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append application name, version and arguments
-    result.append("\n"+parformat("Name")+name());
-    result.append("\n"+parformat("Version")+version());
-    for (int i = 0; i < m_args.size(); ++i) {
-        if (i == 0)
-            result.append("\n"+parformat("Command")+m_args[i]);
-        else if (i == 1)
-            result.append("\n"+parformat("Arguments")+m_args[i]);
-        else
-            result.append("\n"+parformat("                           ")+m_args[i]);
-    }
+        // Append header
+        result.append("=== GApplication ===");
 
-    // Append parameters
-    for (int i = 0; i < m_pars.size(); ++i) {
-        result.append("\n"+parformat(m_pars.m_pars[i].name()) +
-                           m_pars.m_pars[i].m_value);
-    }
+        // Append application name, version and arguments
+        result.append("\n"+parformat("Name")+name());
+        result.append("\n"+parformat("Version")+version());
+        for (int i = 0; i < m_args.size(); ++i) {
+            if (i == 0) {
+                result.append("\n"+parformat("Command")+m_args[i]);
+            }
+            else if (i == 1) {
+                result.append("\n"+parformat("Arguments")+m_args[i]);
+            }
+            else {
+                result.append("\n"+parformat("                           ")+m_args[i]);
+            }
+        }
+
+        // Append parameters
+        for (int i = 0; i < m_pars.size(); ++i) {
+            result.append("\n"+parformat(m_pars.m_pars[i].name()) +
+                          m_pars.m_pars[i].m_value);
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;
@@ -519,106 +634,23 @@ void GApplication::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Returns parameter filename
- *
- * The parameter filename is given by the task name to which the suffix
- * '.par' is added.
+ * @brief Set chattiness of logger
  ***************************************************************************/
-std::string GApplication::par_filename(void) const
+void GApplication::set_log_chatter(void)
 {
-    // Return
-    return (m_name+".par");
-}
+    // Get chattiness from application parameter
+    int chatter = (const_cast<GPar*>(&m_pars["chatter"]))->integer();
 
-
-/***********************************************************************//**
- * @brief Returns log filename
- *
- * The log filename is given by the task name to which the suffix ".log" is
- * added.
- ***************************************************************************/
-std::string GApplication::log_filename(void) const
-{
-    // Return
-    return (m_name+".log");
-}
-
-
-/***********************************************************************//**
- * @brief Write application header in log file
- *
- * Dump the application header into the log file. The header is composed of
- * a fixed width block delimined by "*" characters that contains information
- * about the application name and version.
- ***************************************************************************/
-void GApplication::log_header(void)
-{
-    // Reset any indentation
-    log.indent(0);
-
-    // Dump header
-    log << fill("*", header_width) << std::endl;
-    log << "*" << center(m_name, header_width-2) << "*" << std::endl;
-    log << "* " << fill("-", header_width-4) << " *" << std::endl;
-    log << "* Version: " << left(m_version, header_width-12) << "*" << std::endl;
-    log << fill("*", header_width) << std::endl;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Write application trailer in log file
- *
- * The application trailer gives the total number of elapsed calendar and
- * CPU seconds.
- ***************************************************************************/
-void GApplication::log_trailer(void)
-{
-    // Reset any indentation
-    log.indent(0);
-
-    // Dump trailer
-    log << "Application \"" << m_name << "\" terminated after ";
-    log << telapse() << " wall clock seconds, consuming ";
-    log << celapse() << " seconds of CPU time.";
-    if (telapse() < 0.1)
-         log << " This was rather quick!";
-    if (telapse() > 86400.0)
-         log << " We hope it was worth waiting ...";
-    log << std::endl;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Write application parameters in log file
- *
- * The application trailer gives the total number of elapsed CPU time.
- ***************************************************************************/
-void GApplication::log_parameters(void)
-{
-    // Write header
-    log.header1("Parameters");
-
-    // Write parameters in logger
-    for (int i = 0; i < m_pars.size(); ++i) {
-
-        // Add line feed
-        if (i > 0)
-            log << std::endl;
-
-        // Set parameter name
-        std::string name = " " + m_pars.m_pars[i].name() + " ";
-        name = name + fill(".", 28-name.length()) + ": ";
-
-        // Write parameter
-        log << name << m_pars.m_pars[i].m_value;
-
+    // Make sure that chatter is within valid range
+    if (chatter < 0) {
+        chatter = 0;
     }
+    else if (chatter > 4) {
+        chatter = 4;
+    }
+
+    // Set logger chatter
+    log.chatter((GChatter)chatter);
 
     // Return
     return;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GPar.cpp - Application parameter                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -715,47 +715,58 @@ bool GPar::isnotanumber(void)
 /***********************************************************************//**
  * @brief Print parameter
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing parameter information.
+ *
  * @todo Implement writing of parameter options. I guess that parameter
  *       options occur if there is only a minimum but not a maximum
  *       parameter. Check IRAF documentation.
  ***************************************************************************/
-std::string GPar::print(void) const
+std::string GPar::print(const GChatter& chatter) const
 {
-    // Write parameter name
-    std::string result = parformat(name());
+    // Initialise result string
+    std::string result;
 
-    // Write value (use m_value here to avoid querying when printing)
-    switch (m_status) {
-    case ST_VALID:
-        result.append(m_value);
-        break;
-    case ST_UNDEFINED:
-        result.append("undefined");
-        break;
-    case ST_NAN:
-        result.append("nan");
-        break;
-    case ST_UNDERFLOW:
-        result.append(m_value+" (underflow)");
-        break;
-    case ST_OVERFLOW:
-        result.append(m_value+" (overflow)");
-        break;
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Write limits
-    if (min().length() > 0 && max().length() > 0) {
-        result.append(" ("+min()+"-"+max()+")");
-    }
-    else if (min().length() > 0) {
-        result.append(" (>"+min()+")");
-    }
-    else if (max().length() > 0) {
-        result.append(" (<"+max()+")");
-    }
+        // Write parameter name
+        result = parformat(name());
 
-    // Write type information
-    result.append(" [t="+type()+", m="+mode()+"]");
+        // Write value (use m_value here to avoid querying when printing)
+        switch (m_status) {
+        case ST_VALID:
+            result.append(m_value);
+            break;
+        case ST_UNDEFINED:
+            result.append("undefined");
+            break;
+        case ST_NAN:
+            result.append("nan");
+            break;
+        case ST_UNDERFLOW:
+            result.append(m_value+" (underflow)");
+            break;
+        case ST_OVERFLOW:
+            result.append(m_value+" (overflow)");
+            break;
+        }
+
+        // Write limits
+        if (min().length() > 0 && max().length() > 0) {
+            result.append(" ("+min()+"-"+max()+")");
+        }
+        else if (min().length() > 0) {
+            result.append(" (>"+min()+")");
+        }
+        else if (max().length() > 0) {
+            result.append(" (<"+max()+")");
+        }
+
+        // Write type information
+        result.append(" [t="+type()+", m="+mode()+"]");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

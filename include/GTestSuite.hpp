@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GTestSuite.hpp  - Test Suite class for GammaLib             *
+ *             GTestSuite.hpp - Test Suite class for GammaLib              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -39,6 +39,7 @@ typedef void (GTestSuite::*pfunction)(void);
 #include "GLog.hpp"
 #include "GException.hpp"
 #include "GTestCase.hpp"
+#include "GTypemaps.hpp"
 
 
 /***********************************************************************//**
@@ -97,7 +98,7 @@ public:
     int                       success(void) const;
     time_t                    timestamp(void) const;
     double                    duration(void) const;
-    std::string               print(void) const;
+    std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Old methods (will become obsolete)
     void add_test(pfunction function, const std::string& name);

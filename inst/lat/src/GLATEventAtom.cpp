@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATEventAtom.cpp  -  LAT event atom class                *
+ *                GLATEventAtom.cpp - LAT event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -166,16 +166,24 @@ GLATEventAtom* GLATEventAtom::clone(void) const
 
 /***********************************************************************//**
  * @brief Print event information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing event information.
  ***************************************************************************/
-std::string GLATEventAtom::print(void) const
+std::string GLATEventAtom::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append number of counts
-    result.append("Dir="+m_dir.print());
-    result.append(" Energy="+m_energy.print());
-    result.append(" Time="+m_time.print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append event attributes
+        result.append("Dir="+m_dir.print(chatter));
+        result.append(" Energy="+m_energy.print(chatter));
+        result.append(" Time="+m_time.print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

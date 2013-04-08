@@ -87,7 +87,7 @@ public:
     double        dist_deg(const GSkyDir& dir) const;
     double        posang(const GSkyDir& dir) const;
     double        posang_deg(const GSkyDir& dir) const;
-    std::string   print(void) const;
+    std::string   print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

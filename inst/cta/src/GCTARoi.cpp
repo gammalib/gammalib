@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GCTARoi.cpp  -  CTA region of interest class             *
+ *                 GCTARoi.cpp - CTA region of interest class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTARoi.cpp
  * @brief GCTARoi class interface implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -161,16 +161,26 @@ GCTARoi* GCTARoi::clone(void) const
 
 /***********************************************************************//**
  * @brief Print ROI information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing ROI information.
  ***************************************************************************/
-std::string GCTARoi::print(void) const
+std::string GCTARoi::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTARoi ===\n");
-    result.append(parformat("ROI centre")+m_centre.print()+"\n");
-    result.append(parformat("ROI radius")+str(m_radius)+" deg");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCTARoi ===");
+
+        // Append information
+        result.append("\n"+parformat("ROI centre")+m_centre.print());
+        result.append("\n"+parformat("ROI radius")+str(m_radius)+" deg");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

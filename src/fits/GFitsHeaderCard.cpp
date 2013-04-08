@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GFitsHeaderCard.cpp  - FITS header card abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -671,25 +671,34 @@ int GFitsHeaderCard::integer(void)
 
 
 /***********************************************************************//**
- * @brief Print FITS file information
+ * @brief Print header card information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing header card information.
  ***************************************************************************/
-std::string GFitsHeaderCard::print(void) const
+std::string GFitsHeaderCard::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
     
-    // Append keyname
-    result.append(left(m_keyname,8));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Format values
-    if (m_keyname != "COMMENT" && m_keyname != "HISTORY") {
-        if (m_unit.length() > 0)
-            result.append(" ="+right(m_value,21)+" / ["+m_unit+"] "+m_comment);
-        else
-            result.append(" ="+right(m_value,21)+" / "+m_comment);
-    }
-    else
-        result.append(" "+m_comment);
+        // Append keyname
+        result.append(left(m_keyname,8));
+
+        // Format values
+        if (m_keyname != "COMMENT" && m_keyname != "HISTORY") {
+            if (m_unit.length() > 0) {
+                result.append(" ="+right(m_value,21)+" / ["+m_unit+"] "+m_comment);
+            }
+            else {
+                result.append(" ="+right(m_value,21)+" / "+m_comment);
+            }
+        }
+        else {
+            result.append(" "+m_comment);
+        }
 
     // Attach card type
     if (m_value_dtype != NULL) {
@@ -747,8 +756,11 @@ std::string GFitsHeaderCard::print(void) const
             break;
         }
     }
-    else
+    else {
         result.append(" <non native>");
+    }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

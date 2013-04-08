@@ -1,7 +1,7 @@
 /***************************************************************************
  *                        GLog.i - Information logger                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLog.i
- * @brief Information logger python bindings
+ * @brief Information logger class definition
  * @author Jurgen Knodlseder
  */
 %{
@@ -39,32 +39,35 @@ class GLog {
 public:
     // Constructors and destructors
     GLog(void);
-    GLog(const std::string& filename, bool clobber = false);
+    GLog(const std::string& filename, const bool& clobber = false);
     GLog(const GLog& log);
-    ~GLog(void);
+    virtual ~GLog(void);
 
     // Methods
-    void        clear(void);
-    int         size(void) const;
-    void        open(const std::string& filename, bool clobber = false);
-    void        close(void);
-    void        date(bool flag);
-    void        cout(bool flag);
-    void        cerr(bool flag);
-    void        name(const std::string& name);
-    void        max_size(int size);
-    void        indent(int indent);
-    void        header0(const std::string& arg);
-    void        header1(const std::string& arg);
-    void        header2(const std::string& arg);
-    void        header3(const std::string& arg);
-    bool        date(void) const;
-    bool        cout(void) const;
-    bool        cerr(void) const;
-    std::string name(void) const;
-    int         max_size(void) const;
-    int         indent(void) const;
-    std::string filename(void) const;
+    void               clear(void);
+    int                size(void) const;
+    void               open(const std::string& filename, const bool& clobber = false);
+    void               close(void);
+    void               flush(const bool& force = false);
+    void               date(const bool& flag);
+    void               cout(const bool& flag);
+    void               cerr(const bool& flag);
+    void               name(const std::string& name);
+    void               max_size(const int& size);
+    void               indent(const int& indent);
+    void               chatter(const GChatter& chatter);
+    void               header0(const std::string& arg);
+    void               header1(const std::string& arg);
+    void               header2(const std::string& arg);
+    void               header3(const std::string& arg);
+    const bool&        date(void) const;
+    const bool&        cout(void) const;
+    const bool&        cerr(void) const;
+    const std::string& name(void) const;
+    const int&         max_size(void) const;
+    const int&         indent(void) const;
+    const GChatter&    chatter(void) const;
+    const std::string& filename(void) const;
 };
 
 
@@ -99,16 +102,16 @@ public:
     void tolower(const std::string& arg) {
         (*self) << tolower(arg);
     }
-    void fill(const std::string& arg, int n) {
+    void fill(const std::string& arg, const int& n) {
         (*self) << fill(arg, n);
     }
-    void left(const std::string& arg, int n) {
+    void left(const std::string& arg, const int& n) {
         (*self) << left(arg, n);
     }
-    void right(const std::string& arg, int n) {
+    void right(const std::string& arg, const int& n) {
         (*self) << right(arg, n);
     }
-    void center(const std::string& arg, int n) {
+    void center(const std::string& arg, const int& n) {
         (*self) << center(arg, n);
     }
 }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GLATEfficiency.cpp  -  Fermi/LAT IRF efficiency factor functor      *
+ *      GLATEfficiency.cpp - Fermi-LAT IRF efficiency factor functor       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATEfficiency.cpp
- * @brief Fermi/LAT IRF efficiency factor functor class implementation
- * @author J. Knoedlseder
+ * @brief Fermi-LAT IRF efficiency factor functor class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -212,22 +212,32 @@ GLATEfficiency* GLATEfficiency::clone(void) const
 
 /***********************************************************************//**
  * @brief Print efficiency factors
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing efficiency factors information.
  ***************************************************************************/
-std::string GLATEfficiency::print(void) const
+std::string GLATEfficiency::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATEfficiency ===");
-    result.append("\n"+parformat("Scale 1 (a0)")+str(m_a0));
-    result.append("\n"+parformat("Scale 2 (a1)")+str(m_a1));
-    result.append("\n"+parformat("Scale 3 (a2)")+str(m_a2));
-    result.append("\n"+parformat("Offset 1 (b0)")+str(m_b0));
-    result.append("\n"+parformat("Offset 2 (b1)")+str(m_b1));
-    result.append("\n"+parformat("Offset 3 (b2)")+str(m_b2));
-    result.append("\n"+parformat("Energy domains 1/2 limit (logEb1)")+str(m_logEb1));
-    result.append("\n"+parformat("Energy domains 2/3 limit (logEb2)")+str(m_logEb2));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATEfficiency ===");
+
+        // Append information
+        result.append("\n"+parformat("Scale 1 (a0)")+str(m_a0));
+        result.append("\n"+parformat("Scale 2 (a1)")+str(m_a1));
+        result.append("\n"+parformat("Scale 3 (a2)")+str(m_a2));
+        result.append("\n"+parformat("Offset 1 (b0)")+str(m_b0));
+        result.append("\n"+parformat("Offset 2 (b1)")+str(m_b1));
+        result.append("\n"+parformat("Offset 3 (b2)")+str(m_b2));
+        result.append("\n"+parformat("Energy domains 1/2 limit (logEb1)")+str(m_logEb1));
+        result.append("\n"+parformat("Energy domains 2/3 limit (logEb2)")+str(m_logEb2));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

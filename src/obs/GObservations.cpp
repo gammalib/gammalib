@@ -718,28 +718,38 @@ void GObservations::optimize(GOptimizer& opt)
 /***********************************************************************//**
  * @brief Print observation list information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing observation list information
  ***************************************************************************/
-std::string GObservations::print(void) const
+std::string GObservations::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GObservations ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append(parformat("Number of observations")+str(size())+"\n");
-    result.append(parformat("Number of predicted events")+str(npred()));
+        // Append header
+        result.append("=== GObservations ===\n");
 
-    // Append observations
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n");
-        result.append((*this)[i]->print());
-    }
+        // Append information
+        result.append(parformat("Number of observations")+str(size())+"\n");
+        result.append(parformat("Number of predicted events")+str(npred()));
 
-    // Append models
-    result.append("\n"+m_models.print());
+        // NORMAL: Append observations
+        if (chatter >= NORMAL) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n");
+                result.append((*this)[i]->print());
+            }
+        } // endif: chatter was normal
+
+        // EXPLICIT: Append models
+        if (chatter >= EXPLICIT) {
+            result.append("\n"+m_models.print());
+        } // endif: chatter was explicit
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

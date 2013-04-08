@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GIntegral.hpp  -  Integration class                    *
+ *                   GIntegral.hpp - Integration class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,7 +68,7 @@ public:
     const GFunction* kernel(void) const { return m_kernel; }
     double           romb(double a, double b, int k = 5);
     double           trapzd(double a, double b, int n = 1, double result = 0.0);
-    std::string      print(void) const;
+    std::string      print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

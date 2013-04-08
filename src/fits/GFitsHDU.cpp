@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GFitsHDU.cpp  - FITS HDU handling class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GFitsHDU.cpp
  * @brief GFitsHDU class implementation.
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -516,15 +516,23 @@ void GFitsHDU::save(void)
 
 /***********************************************************************//**
  * @brief Print basic HDU information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing basic HDU information.
  ***************************************************************************/
-std::string GFitsHDU::print_hdu(void) const
+std::string GFitsHDU::print_hdu(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append HDU information
-    result.append(parformat("HDU number")+str(m_hdunum)+"\n");
-    result.append(parformat("HDU name")+m_name+"\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append HDU information
+        result.append(parformat("HDU number")+str(m_hdunum)+"\n");
+        result.append(parformat("HDU name")+m_name+"\n");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

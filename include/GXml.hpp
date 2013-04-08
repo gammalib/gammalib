@@ -209,8 +209,9 @@ public:
     void               save(const std::string& filename);
     void               read(GUrl& url);
     void               write(GUrl& url, const int& indent = 0) const;
-    std::string        print(void) const;
-    std::string        print(const int& indent = 0) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
+    std::string        print(const GChatter& chatter = NORMAL,
+                             const int&      indent = 0) const;
 
 protected:
     // Protected enumerators

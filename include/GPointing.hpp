@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GPointing.hpp  -  Pointing interface class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,7 +55,7 @@ public:
     virtual void           clear(void) = 0;
     virtual GPointing*     clone(void) const = 0;
     virtual const GSkyDir& dir(void) const = 0;
-    virtual std::string    print(void) const = 0;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
     // Protected methods

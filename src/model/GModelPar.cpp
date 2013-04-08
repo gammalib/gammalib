@@ -795,56 +795,62 @@ void GModelPar::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print parameter information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String with model parameter information.
  ***************************************************************************/
-std::string GModelPar::print(void) const
+std::string GModelPar::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append parameter name
-    result.append(parformat(" "+name()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append value
-    result.append(str(value()));
+        // Append parameter name
+        result.append(parformat(" "+name()));
 
-    // For free parameters, append statistical uncertainty
-    if (m_free) {
-        result.append(" +/- "+str(std::abs(error())));
-    }
+        // Append value
+        result.append(str(value()));
 
-    // Append parameter limites if they exist
-    if (m_hasmin && m_hasmax) {
-        result.append(" ["+str(min()) + ","+str(max())+"]");
-    }
-    else if (m_hasmin) {
-        result.append(" ["+str(min()) + ",infty[");
-    }
-    else if (m_hasmax) {
-        result.append(" ]-infty,"+str(max())+"]");
-    }
+        // For free parameters, append statistical uncertainty
+        if (m_free) {
+            result.append(" +/- "+str(std::abs(error())));
+        }
 
-    // Append parameter unit
-    result.append(" "+m_unit);
+        // Append parameter limites if they exist
+        if (m_hasmin && m_hasmax) {
+            result.append(" ["+str(min()) + ","+str(max())+"]");
+        }
+        else if (m_hasmin) {
+            result.append(" ["+str(min()) + ",infty[");
+        }
+        else if (m_hasmax) {
+            result.append(" ]-infty,"+str(max())+"]");
+        }
 
-    // Signal if parameter was free or fixed
-    if (m_free) {
-        result.append(" (free");
-    }
-    else {
-        result.append(" (fixed");
-    }
+        // Append parameter unit
+        result.append(" "+m_unit);
 
-    // Append parameter scale
-    result.append(",scale="+str(m_scale));
+        // Signal if parameter was free or fixed
+        if (m_free) {
+            result.append(" (free");
+        }
+        else {
+            result.append(" (fixed");
+        }
 
-    // Signal if parameter has analytic gradient
-    if (m_hasgrad) {
-        result.append(",gradient)");
-    }
-    else {
-        result.append(")");
-    }
+        // Append parameter scale
+        result.append(",scale="+str(m_scale));
+
+        // Signal if parameter has analytic gradient
+        if (m_hasgrad) {
+            result.append(",gradient)");
+        }
+        else {
+            result.append(")");
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

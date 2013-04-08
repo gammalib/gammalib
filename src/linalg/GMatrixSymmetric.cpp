@@ -1091,9 +1091,10 @@ void GMatrixSymmetric::cholesky_invert(bool compress)
 /***********************************************************************//**
  * @brief Print matrix
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing matrix information
  ***************************************************************************/
-std::string GMatrixSymmetric::print(void) const
+std::string GMatrixSymmetric::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -1101,22 +1102,27 @@ std::string GMatrixSymmetric::print(void) const
     // Append header
     result.append("=== GMatrixSymmetric ===");
 
-    // Append information
-    result.append("\n"+parformat("Number of rows")+str(m_rows));
-    if (m_rowsel != NULL) {
-        result.append(" (compressed "+str(m_num_rowsel)+")");
-    }
-    result.append("\n"+parformat("Number of columns")+str(m_cols));
-    if (m_colsel != NULL) {
-        result.append(" (compressed "+str(m_num_colsel)+")");
-    }
-    result.append("\n"+parformat("Number of elements")+str(m_elements));
-    result.append("\n"+parformat("Number of allocated cells")+str(m_alloc));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append elements and compression schemes
-    result.append(print_elements());
-    result.append(print_row_compression());
-    result.append(print_col_compression());
+        // Append information
+        result.append("\n"+parformat("Number of rows")+str(m_rows));
+        if (m_rowsel != NULL) {
+            result.append(" (compressed "+str(m_num_rowsel)+")");
+        }
+        result.append("\n"+parformat("Number of columns")+str(m_cols));
+        if (m_colsel != NULL) {
+            result.append(" (compressed "+str(m_num_colsel)+")");
+        }
+        result.append("\n"+parformat("Number of elements")+str(m_elements));
+        result.append("\n"+parformat("Number of allocated cells")+str(m_alloc));
+
+        // Append elements and compression schemes
+        result.append(print_elements(chatter));
+        result.append(print_row_compression(chatter));
+        result.append(print_col_compression(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

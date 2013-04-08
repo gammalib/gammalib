@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GWcsSTG.cpp  -  Stereographic (STG) projection class          *
+ *            GWcsSTG.cpp - Stereographic (STG) projection class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsSTG.cpp
  * @brief Stereographic (STG) projection class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -200,18 +200,27 @@ GWcsSTG* GWcsSTG::clone(void) const
 }
 
 
-
 /***********************************************************************//**
  * @brief Print WCS information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing WCS information.
  ***************************************************************************/
-std::string GWcsSTG::print(void) const
+std::string GWcsSTG::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GWcsSTG ===\n");
-    result.append(wcs_print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GWcsSTG ===");
+
+        // Append information
+        result.append(wcs_print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

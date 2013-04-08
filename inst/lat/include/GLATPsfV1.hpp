@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GLATPsfV1.hpp  -  Fermi:LAT point spread function version 1       *
+ *        GLATPsfV1.hpp - Fermi-LAT point spread function version 1        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfV1.hpp
- * @brief Fermi:LAT point spread function version 1 class definition
+ * @brief Fermi-LAT point spread function version 1 class definition
  * @author Juergen Knoedlseder
  */
 
@@ -63,7 +63,7 @@ public:
     double      psf(const double& offset, const double& logE,
                     const double& ctheta);
     int         version(void) const { return 1; }
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

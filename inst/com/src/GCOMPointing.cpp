@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GCOMPointing.cpp  -  COMPTEL pointing class               *
+ *                GCOMPointing.cpp - COMPTEL pointing class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -210,15 +210,26 @@ void GCOMPointing::dir(const GSkyDir& dir)
 
 /***********************************************************************//**
  * @brief Print COMPTEL pointing information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing COMPTEL pointing information.
  ***************************************************************************/
-std::string GCOMPointing::print(void) const
+std::string GCOMPointing::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCOMPointing ===");
-    result.append("\n"+parformat("Pointing direction")+this->dir().print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCOMPointing ===");
+
+        // Append information
+        result.append("\n"+parformat("Pointing direction"));
+        result.append(this->dir().print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

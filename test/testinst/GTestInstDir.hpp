@@ -86,7 +86,7 @@ public:
     
     GTestInstDir* clone(void) const{ return new GTestInstDir(*this); }
         
-    std::string  print(void) const{ 
+    std::string  print(const GChatter& chatter = NORMAL) const{ 
         std::string result = "=== GTestInstDir ===";
             return result;
         }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GLATResponseTable.cpp  -  Fermi/LAT Response table class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -601,16 +601,26 @@ std::vector<double> GLATResponseTable::weights(void) const
 
 /***********************************************************************//**
  * @brief Print response table information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing response table information.
  ***************************************************************************/
-std::string GLATResponseTable::print(void) const
+std::string GLATResponseTable::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATResponseTable ===");
-    result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
-    result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GLATResponseTable ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
+        result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

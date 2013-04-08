@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATLtCube.hpp  -  Fermi/LAT livetime cube               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,7 +72,7 @@ public:
     GLATLtCube* clone(void) const;
     void        load(const std::string& filename);
     void        save(const std::string& filename, bool clobber=false) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

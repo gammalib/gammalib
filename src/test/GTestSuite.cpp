@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GTestSuite.cpp  - Test Suite class for GammaLib             *
+ *             GTestSuite.cpp - Test Suite class for GammaLib              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -881,19 +881,29 @@ double GTestSuite::duration(void) const
 
 /***********************************************************************//**
  * @brief Print test suite information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing test suite information.
  ***************************************************************************/
-std::string GTestSuite::print(void) const
+std::string GTestSuite::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GTestSuite ===");
-    result.append("\n"+parformat("Name")+m_name);
-    result.append("\n"+parformat("Number of functions")+str(m_names.size()));
-    result.append("\n"+parformat("Number of executed tests")+str(size()));
-    result.append("\n"+parformat("Number of errors")+str(errors()));
-    result.append("\n"+parformat("Number of failures")+str(failures()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GTestSuite ===");
+
+        // Append information
+        result.append("\n"+parformat("Name")+m_name);
+        result.append("\n"+parformat("Number of functions")+str(m_names.size()));
+        result.append("\n"+parformat("Number of executed tests")+str(size()));
+        result.append("\n"+parformat("Number of errors")+str(errors()));
+        result.append("\n"+parformat("Number of failures")+str(failures()));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

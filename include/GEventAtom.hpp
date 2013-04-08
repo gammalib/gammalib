@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GEventAtom.hpp  -  Event atom abstract base class          *
+ *               GEventAtom.hpp - Event atom abstract base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventAtom.hpp
  * @brief GEventAtom abstract base class interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GEVENTATOM_HPP
@@ -82,7 +82,7 @@ public:
     virtual const GTime&    time(void) const = 0;
     virtual double          counts(void) const { return 1.0; }
     virtual double          error(void) const { return 0.0; }
-    virtual std::string     print(void) const = 0;
+    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
     bool isatom(void) const { return true; }

@@ -337,24 +337,32 @@ void GPhotons::reserve(const int& num)
 /***********************************************************************//**
  * @brief Print photon container information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing photon container information.
  ***************************************************************************/
-std::string GPhotons::print(void) const
+std::string GPhotons::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GPhotons ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append photon container information
-    result.append(parformat("Number of photons")+str(size())+"\n");
+        // Append header
+        result.append("=== GPhotons ===\n");
 
-    // Append photons
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n");
-        result.append(m_photons[i].print());
-    }
+        // Append photon container information
+        result.append(parformat("Number of photons")+str(size())+"\n");
+
+        // EXPLICIT: Append photons
+        if (chatter >= EXPLICIT) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n");
+                result.append(m_photons[i].print());
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

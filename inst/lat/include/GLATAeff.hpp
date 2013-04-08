@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATAeff.hpp  -  Fermi/LAT effective area               *
+ *                  GLATAeff.hpp - Fermi/LAT effective area                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,7 +82,7 @@ public:
     bool         hasefficiency(void) const;
     double       efficiency_factor1(const GEnergy& srcEng) const;
     double       efficiency_factor2(const GEnergy& srcEng) const;
-    std::string  print(void) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

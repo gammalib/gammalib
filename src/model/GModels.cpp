@@ -866,22 +866,32 @@ double GModels::eval_gradients(const GEvent& event,
 /***********************************************************************//**
  * @brief Print models
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing model container information.
+ *
  * Prints all models into a string.
  ***************************************************************************/
-std::string GModels::print(void) const
+std::string GModels::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModels ===");
-    result.append("\n"+parformat("Number of models")+str(size()));
-    result.append("\n"+parformat("Number of parameters")+str(npars()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append models
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_models[i]->print());
-    }
+        // Append header
+        result.append("=== GModels ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of models")+str(size()));
+        result.append("\n"+parformat("Number of parameters")+str(npars()));
+
+        // Append models
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_models[i]->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

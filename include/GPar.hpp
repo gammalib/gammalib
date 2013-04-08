@@ -85,7 +85,7 @@ public:
     bool        isvalid(void);
     bool        isundefined(void);
     bool        isnotanumber(void);
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected enumerators

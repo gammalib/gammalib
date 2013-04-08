@@ -167,16 +167,24 @@ GCTAEventAtom* GCTAEventAtom::clone(void) const
 
 /***********************************************************************//**
  * @brief Print event information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing event information.
  ***************************************************************************/
-std::string GCTAEventAtom::print(void) const
+std::string GCTAEventAtom::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append event information
-    result.append("Dir="+m_dir.print());
-    result.append(" Energy="+m_energy.print());
-    result.append(" Time="+m_time.print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append event information
+        result.append("Dir="+m_dir.print());
+        result.append(" Energy="+m_energy.print());
+        result.append(" Time="+m_time.print());
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

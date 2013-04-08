@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GTestSuites.hpp  - Test Suites class for GammaLib             *
+ *           GTestSuites.hpp - Test Suites class for GammaLib              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,7 +73,7 @@ public:
     int          failures(void) const;
     int          tests(void) const;
     time_t       timestamp(void) const;
-    std::string  print(void) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
     
 protected:
     // Protected methods

@@ -125,7 +125,7 @@ public:
     const GModels&      models(void) const;
     void                optimize(GOptimizer& opt);
     double              npred(void) const;
-    std::string         print(void) const;
+    std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Optimizer
     class optimizer : public GOptimizerFunction {

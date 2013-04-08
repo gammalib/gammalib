@@ -466,27 +466,33 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
 /***********************************************************************//**
  * @brief Print map cube information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing model information.
  ***************************************************************************/
-std::string GModelSpatialDiffuseCube::print(void) const
+std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpatialDiffuseCube ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append parameters
-    result.append("\n"+parformat("Map cube file")+m_filename);
-    result.append("\n"+parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpatialDiffuseCube ===");
 
-    // Append sky map
-    if (m_loaded) {
-        result.append("\n"+m_cube.print());
-    }
+        // Append parameters
+        result.append("\n"+parformat("Map cube file")+m_filename);
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+        // Append sky map
+        if (m_loaded) {
+            result.append("\n"+m_cube.print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

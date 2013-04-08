@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GCaldb.cpp  -  Calibration database class                *
+ *                 GCaldb.cpp - Calibration database class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -316,24 +316,34 @@ void GCaldb::close(void)
 
 
 /***********************************************************************//**
- * @brief Print calibration database
+ * @brief Print calibration database information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing calibration database information.
  ***************************************************************************/
-std::string GCaldb::print(void) const
+std::string GCaldb::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append Header
-    result.append("=== GCaldb ===");
-    result.append("\n"+parformat("Database root")+m_caldb);
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information about opened database
-    if (m_cif != NULL) {
-        result.append("\n"+parformat("Selected Mission")+toupper(m_mission));
-        result.append("\n"+parformat("Selected Instrument")+toupper(m_instrument));
-        result.append("\n"+parformat("Calibration Index File")+m_cifname);
-        result.append("\n"+parformat("Number of entries")+str(size()));
-    }
+        // Append Header
+        result.append("=== GCaldb ===");
+
+        // Append information
+        result.append("\n"+parformat("Database root")+m_caldb);
+
+        // Append information about opened database
+        if (m_cif != NULL) {
+            result.append("\n"+parformat("Selected Mission")+toupper(m_mission));
+            result.append("\n"+parformat("Selected Instrument")+toupper(m_instrument));
+            result.append("\n"+parformat("Calibration Index File")+m_cifname);
+            result.append("\n"+parformat("Number of entries")+str(size()));
+        }
+
+    } // endif: chatter was not silent
     
     // Return
     return result;

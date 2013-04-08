@@ -68,7 +68,7 @@ public:
     virtual double        value(void) const { return m_value; }   //!< @brief Return function value
     virtual int           status(void) const { return m_status; } //!< @brief Return optimization status
     virtual int           iter(void) const { return m_iter; }     //!< @brief Return number of iterations
-    virtual std::string   print(void) const;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const;
     
     // Methods
     void          max_iter(const int& n) { m_max_iter=n; }                //!< @brief Set maximum number of iterations

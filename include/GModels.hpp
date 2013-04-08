@@ -189,7 +189,7 @@ public:
     void          write(GXml& xml) const;
     double        eval(const GEvent& event, const GObservation& obs) const;
     double        eval_gradients(const GEvent& event, const GObservation& obs) const;
-    std::string   print(void) const;
+    std::string   print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

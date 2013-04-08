@@ -94,7 +94,7 @@ public:
                                const GTime& time, GRan& ran) const = 0;
     virtual void            read(const GXmlElement& xml) = 0;
     virtual void            write(GXmlElement& xml) const = 0;
-    virtual std::string     print(void) const = 0;
+    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
     // Methods
     int  size(void) const;

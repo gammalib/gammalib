@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GWcsRegistry.cpp - World Coordinate Projection registry class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -309,20 +309,27 @@ std::string GWcsRegistry::list(void) const
  *
  * @return Registry content.
  ***************************************************************************/
-std::string GWcsRegistry::print(void) const
+std::string GWcsRegistry::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GWcsRegistry ===");
-    result.append("\n"+parformat("Number of projections")+str(m_number));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append projections
-    for (int i = 0; i < m_number; ++i) {
-        result.append("\n"+parformat(m_codes[i]));
-        result.append(m_names[i]);
-    }
+        // Append header
+        result.append("=== GWcsRegistry ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of projections")+str(m_number));
+
+        // Append projections
+        for (int i = 0; i < m_number; ++i) {
+            result.append("\n"+parformat(m_codes[i]));
+            result.append(m_names[i]);
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

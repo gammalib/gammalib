@@ -89,7 +89,7 @@ public:
     void           days(const double& days);
     void           set(const double& time, const GTimeReference& ref);
     GTimeReference reference(void) const;
-    std::string    print(void) const;
+    std::string    print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods

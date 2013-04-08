@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATEventList.hpp  -  LAT Event list class               *
+ *                 GLATEventList.hpp - LAT Event list class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventList.hpp
  * @brief LAT Event list class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATEVENTLIST_HPP
@@ -67,7 +67,7 @@ public:
     virtual int            number(void) const { return m_events.size(); }
     virtual void           roi(const GRoi& roi);
     virtual const GLATRoi& roi(void) const { return m_roi; }
-    virtual std::string    print(void) const;
+    virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GWcsHPX.hpp  -  Healpix projection class                *
+ *                  GWcsHPX.hpp - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsHPX.hpp
  * @brief HealPix projection class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GWCSHPX_HPP
@@ -55,7 +55,7 @@ public:
     virtual ~GWcsHPX(void);
 
     // Operators
-    GWcsHPX& operator= (const GWcsHPX& wcs);
+    GWcsHPX& operator=(const GWcsHPX& wcs);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
@@ -70,7 +70,7 @@ public:
     virtual int         dir2pix(const GSkyDir& dir) const;
     virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
     virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
-    virtual std::string print(void) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Additional class specific methods
     int          npix(void) const;

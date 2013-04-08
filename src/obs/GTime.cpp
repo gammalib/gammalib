@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.cpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -424,17 +424,23 @@ GTimeReference GTime::reference(void) const
 /***********************************************************************//**
  * @brief Print time
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing time in seconds in native reference.
  *
  * Prints time in seconds in the native reference.
  ***************************************************************************/
-std::string GTime::print(void) const
+std::string GTime::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append time
-    result.append(str(m_time)+" s (TT)");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append time
+        result.append(str(m_time)+" s (TT)");
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

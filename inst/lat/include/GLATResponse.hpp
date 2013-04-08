@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATResponse.hpp  -  Fermi/LAT Response class             *
+ *                GLATResponse.hpp - Fermi-LAT Response class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.hpp
- * @brief Fermi/LAT Response class definition
+ * @brief Fermi-LAT Response class definition
  * @author Juergen Knoedlseder
  */
 
@@ -56,7 +56,7 @@ public:
     virtual ~GLATResponse(void);
 
     // Operators
-    GLATResponse& operator= (const GLATResponse & rsp);
+    GLATResponse& operator=(const GLATResponse & rsp);
 
     // Implemented pure virtual methods
     virtual void          clear(void);
@@ -68,7 +68,7 @@ public:
                               const GObservation& obs) const;
     virtual double        npred(const GPhoton&      photon,
                                 const GObservation& obs) const;
-    virtual std::string   print(void) const;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Implemented virtual methods
     virtual double irf(const GEvent&       event,

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GFitsHDU.hpp  - FITS HDU handling class                *
+ *                  GFitsHDU.hpp - FITS HDU handling class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,7 +73,7 @@ public:
     virtual void        clear(void) = 0;
     virtual GFitsHDU*   clone(void) const = 0;
     virtual HDUType     exttype(void) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented methods
     int              size(void) const { return m_header.size(); }
@@ -106,7 +106,7 @@ protected:
     HDUType      get_hdu_type(void) const;
     void         open(void* vptr, int hdunum);
     void         save(void);
-    std::string  print_hdu(void) const;
+    std::string  print_hdu(const GChatter& chatter = NORMAL) const;
     std::string  typecode(int type) const;
 
     // Pure virtual protected methods

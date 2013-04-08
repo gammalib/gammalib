@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAPsfPerfTable.cpp - CTA performance table PSF class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -376,24 +376,32 @@ double GCTAPsfPerfTable::delta_max(const double& logE,
 /***********************************************************************//**
  * @brief Print point spread function information
  *
- * @return Content of point spread function instance.
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing point spread function information.
  ***************************************************************************/
-std::string GCTAPsfPerfTable::print(void) const
+std::string GCTAPsfPerfTable::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Compute energy boundaries in TeV
-    int    num  = m_logE.size();
-    double emin = std::pow(10.0, m_logE[0]);
-    double emax = std::pow(10.0, m_logE[num-1]);
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append("=== GCTAPsfPerfTable ===");
-    result.append("\n"+parformat("Filename")+m_filename);
-    result.append("\n"+parformat("Number of energy bins")+str(num));
-    result.append("\n"+parformat("Log10(Energy) range"));
-    result.append(str(emin)+" - "+str(emax)+" TeV");
+        // Compute energy boundaries in TeV
+        int    num  = m_logE.size();
+        double emin = std::pow(10.0, m_logE[0]);
+        double emax = std::pow(10.0, m_logE[num-1]);
+
+        // Append header
+        result.append("=== GCTAPsfPerfTable ===");
+
+        // Append information
+        result.append("\n"+parformat("Filename")+m_filename);
+        result.append("\n"+parformat("Number of energy bins")+str(num));
+        result.append("\n"+parformat("Log10(Energy) range"));
+        result.append(str(emin)+" - "+str(emax)+" TeV");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

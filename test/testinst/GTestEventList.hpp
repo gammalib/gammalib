@@ -130,7 +130,7 @@ public:
         return;
     }
     virtual const GTestRoi& roi(void) const { return m_roi; }
-    virtual std::string print(void) const{
+    virtual std::string print(const GChatter& chatter = NORMAL) const{
         std::string result;
         result.append("=== GTestEventList ===");
         result.append("\n"+parformat("Number of events")+str(number()));

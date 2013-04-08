@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GTimeReference.cpp - Time reference class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -524,21 +524,27 @@ double GTimeReference::unitseconds(void) const
 /***********************************************************************//**
  * @brief Print time reference
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing the time reference.
  ***************************************************************************/
-std::string GTimeReference::print(void) const
+std::string GTimeReference::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GTimeReference ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append(parformat("MJD reference time")+str(mjdref())+"\n");
-    result.append(parformat("Time unit")+timeunit()+"\n");
-    result.append(parformat("Time system")+timesys()+"\n");
-    result.append(parformat("Time reference")+timeref()+"\n");
+        // Append header
+        result.append("=== GTimeReference ===");
+
+        // Append information
+        result.append("\n"+parformat("MJD reference time")+str(mjdref()));
+        result.append("\n"+parformat("Time unit")+timeunit());
+        result.append("\n"+parformat("Time system")+timesys());
+        result.append("\n"+parformat("Time reference")+timeref());
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

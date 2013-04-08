@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GLATInstDir.cpp  -  LAT instrument direction class           *
+ *          GLATInstDir.cpp - Fermi-LAT instrument direction class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATInstDir.cpp
- * @brief GLATInstDir class implementation.
- * @author J. Knodlseder
+ * @brief Instrument direction class implementation
+ * @author Juergen Knodlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -214,14 +214,22 @@ double GLATInstDir::dist_deg(const GLATInstDir& dir) const
 
 /***********************************************************************//**
  * @brief Print instrument direction information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing instrument direction information.
  ***************************************************************************/
-std::string GLATInstDir::print(void) const
+std::string GLATInstDir::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append instrument direction
-    result.append("RA="+str(ra_deg())+", DEC="+str(dec_deg()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append instrument direction
+        result.append("RA="+str(ra_deg())+", DEC="+str(dec_deg()));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

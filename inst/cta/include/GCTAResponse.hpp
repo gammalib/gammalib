@@ -90,7 +90,7 @@ public:
                               const GObservation& obs) const;
     virtual double        npred(const GPhoton&      photon,
                                 const GObservation& obs) const;
-    virtual std::string   print(void) const;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Overload virtual base class methods
     virtual double irf_radial(const GEvent&       event,

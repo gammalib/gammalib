@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GCTAPsf2D.cpp - CTA 2D point spread function class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -383,17 +383,25 @@ double GCTAPsf2D::delta_max(const double& logE,
 /***********************************************************************//**
  * @brief Print point spread function information
  *
- * @return Content of point spread function instance.
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing point spread function information.
  ***************************************************************************/
-std::string GCTAPsf2D::print(void) const
+std::string GCTAPsf2D::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append information
-    result.append("=== GCTAPsf2D ===");
-    result.append("\n"+parformat("Filename")+m_filename);
-    result.append("\n"+m_psf.print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCTAPsf2D ===");
+
+        // Append information
+        result.append("\n"+parformat("Filename")+m_filename);
+        result.append("\n"+m_psf.print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

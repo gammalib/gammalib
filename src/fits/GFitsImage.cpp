@@ -430,32 +430,40 @@ void* GFitsImage::nulval(void)
 /***********************************************************************//**
  * @brief Print column information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing column information.
+ *
  * @todo Format and cfitsio information is mainly for debugging. This could
  * be vanish in a more stable version of the code, or it could be compiled
  * in conditionally using a debug option.
  ***************************************************************************/
-std::string GFitsImage::print(void) const
+std::string GFitsImage::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GFitsImage ===\n");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append HDU information
-    result.append(print_hdu());
+        // Append header
+        result.append("=== GFitsImage ===\n");
 
-    // Append image dimensions
-    result.append(parformat("Image type")+typecode(type())+"\n");
-    result.append(parformat("Number of dimensions")+str(naxis())+"\n");
-    result.append(parformat("Number of image pixels")+str(size()));
-    for (int i = 0; i < naxis(); ++i) {
-        result.append("\n"+parformat("Number of bins in "+str(i)) +
-                      str(naxes(i)));
-    }
+        // Append HDU information
+        result.append(print_hdu(chatter));
 
-    // Append header information
-    result.append(+"\n"+m_header.print());
+        // Append image dimensions
+        result.append(parformat("Image type")+typecode(type())+"\n");
+        result.append(parformat("Number of dimensions")+str(naxis())+"\n");
+        result.append(parformat("Number of image pixels")+str(size()));
+        for (int i = 0; i < naxis(); ++i) {
+            result.append("\n"+parformat("Number of bins in "+str(i)) +
+                          str(naxes(i)));
+        }
+
+        // Append header information
+        result.append(+"\n"+m_header.print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

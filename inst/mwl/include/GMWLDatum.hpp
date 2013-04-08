@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GMWLDatum.hpp  -  Multi-wavelength spectral point class         *
+ *          GMWLDatum.hpp - Multi-wavelength spectral point class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLDatum.hpp
  * @brief Multi-wavelength spectral point class interface definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GMWLDATUM_HPP
@@ -66,7 +66,7 @@ public:
     virtual double             counts(void) const { return m_flux; }
     virtual double             error(void) const;
     virtual void               counts(const double& counts) { m_flux=counts; }
-    virtual std::string        print(void) const;
+    virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     GEnergy energy_err(void) const { return m_eng_err; }

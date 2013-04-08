@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GCTAPsfPerfTable.hpp - CTA performance table PSF class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,7 +82,7 @@ public:
                                 const double& zenith = 0.0,
                                 const double& azimuth = 0.0,
                                 const bool&   etrue = true) const;
-    std::string       print(void) const;
+    std::string       print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

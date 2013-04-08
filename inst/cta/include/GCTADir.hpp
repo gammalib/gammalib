@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GCTADir.hpp  -  CTA direction class                   *
+ *                    GCTADir.hpp - CTA direction class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,7 +68,7 @@ public:
     double        phi_deg(void) const;
     const double& costheta(void) const;
     const double& sintheta(void) const;
-    std::string   print(void) const;
+    std::string   print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

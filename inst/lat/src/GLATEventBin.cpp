@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GLATEventBin.cpp - LAT event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -411,15 +411,21 @@ const double& GLATEventBin::ontime(void) const
 /***********************************************************************//**
  * @brief Print event information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing number of counts in event bin.
  ***************************************************************************/
-std::string GLATEventBin::print(void) const
+std::string GLATEventBin::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append number of counts
-    result.append(str(counts()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append number of counts
+        result.append(str(counts()));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

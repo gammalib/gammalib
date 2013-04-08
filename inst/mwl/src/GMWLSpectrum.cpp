@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GMWLSpectrum.cpp  -  Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -459,52 +459,67 @@ int GMWLSpectrum::number(void) const
 
 /***********************************************************************//**
  * @brief Print spectrum
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing spectrum
  ***************************************************************************/
-std::string GMWLSpectrum::print(void) const
+std::string GMWLSpectrum::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GMWLSpectrum ===");
-    result.append("\n"+parformat("Telescope")+m_telescope);
-    result.append("\n"+parformat("Instrument")+m_instrument);
-    result.append("\n"+parformat("Number of points")+str(size()));
-    result.append("\n"+parformat("Time interval"));
-    if (m_gti.size() > 0) {
-        result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
-    }
-    else {
-        result.append("not defined");
-    }
-    result.append("\n"+parformat("Energy range"));
-    if (m_ebounds.size() > 0) {
-        result.append(emin().print()+" - "+emax().print());
-    }
-    else {
-        result.append("not defined");
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append spectral points
-    for (int i = 0; i < size(); ++i) {
+        // Append header
+        result.append("=== GMWLSpectrum ===");
 
-        // Build energy string
-        std::string energy = m_data[i].m_eng.print();
-        if (m_data[i].m_eng_err.MeV() > 0.0)
-            energy += " +/- "+m_data[i].m_eng_err.print();
+        // Append information
+        result.append("\n"+parformat("Telescope")+m_telescope);
+        result.append("\n"+parformat("Instrument")+m_instrument);
+        result.append("\n"+parformat("Number of points")+str(size()));
+        result.append("\n"+parformat("Time interval"));
+        if (m_gti.size() > 0) {
+            result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
+        }
+        else {
+            result.append("not defined");
+        }
+        result.append("\n"+parformat("Energy range"));
+        if (m_ebounds.size() > 0) {
+            result.append(emin().print()+" - "+emax().print());
+        }
+        else {
+            result.append("not defined");
+        }
 
-        // Build flux string
-        std::string flux = str(m_data[i].m_flux);
-        if (m_data[i].m_flux_err > 0.0)
-            flux += " +/- "+str(m_data[i].m_flux_err);
-        flux += " ph/cm2/s/MeV";
+        // EXPLICIT: Append spectral points
+        if (chatter >= EXPLICIT) {
+            for (int i = 0; i < size(); ++i) {
 
-        // Append to string
-        result.append("\n"+parformat(energy));
-        result.append(flux);
+                // Build energy string
+                std::string energy = m_data[i].m_eng.print();
+                if (m_data[i].m_eng_err.MeV() > 0.0) {
+                    energy += " +/- "+m_data[i].m_eng_err.print();
+                }
 
-    } // endfor: looped over spectral points
+                // Build flux string
+                std::string flux = str(m_data[i].m_flux);
+                if (m_data[i].m_flux_err > 0.0) {
+                    flux += " +/- "+str(m_data[i].m_flux_err);
+                }
+                flux += " ph/cm2/s/MeV";
 
+                // Append to string
+                result.append("\n"+parformat(energy));
+                result.append(flux);
+
+            } // endfor: looped over spectral points
+            
+        } // endif: EXPLICIT level
+
+    } // endif: chatter was not silent
+    
     // Return result
     return result;
 }

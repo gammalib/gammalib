@@ -90,7 +90,7 @@ public:
         return new GTestRoi(*this);
     }
     
-    std::string  print(void) const{
+    std::string  print(const GChatter& chatter = NORMAL) const{
         return "=== GTestRoi ===";
     }
 

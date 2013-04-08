@@ -1,7 +1,7 @@
 /***************************************************************************
  *                    GTestCase.hpp  - Test case class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -77,7 +77,7 @@ public:
     void        passed(const bool& passed);
     double      duration(void) const;
     void        duration(const double& duration);
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
      // Protected methods

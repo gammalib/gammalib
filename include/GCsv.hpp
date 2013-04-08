@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCsv.hpp - Column separated values table class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -62,7 +62,7 @@ public:
     int         ncols(void) const { return m_cols; }
     int         nrows(void) const { return m_rows; }
     int         size(void) const { return m_rows*m_cols; }
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods

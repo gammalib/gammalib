@@ -531,36 +531,53 @@ void GLATObservation::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print LAT observation information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing LAT observation information.
  ***************************************************************************/
-std::string GLATObservation::print(void) const
+std::string GLATObservation::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GLATObservation ===");
-    result.append("\n"+parformat("Name")+name());
-    result.append("\n"+parformat("Identifier")+id());
-    result.append("\n"+parformat("Instrument")+instrument());
-    result.append("\n"+parformat("Statistics")+statistics());
-    result.append("\n"+parformat("Ontime")+str(ontime()));
-    result.append("\n"+parformat("Livetime")+str(livetime()));
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append response
-    if (m_response != NULL)
-        result.append("\n"+m_response->print());
-    else
-        result.append("\n"+parformat("LAT response")+"undefined");
+        // Append header
+        result.append("=== GLATObservation ===");
 
-    // Append livetime cube
-    if (m_ltcube != NULL)
-        result.append("\n"+m_ltcube->print());
-    else
-        result.append("\n"+parformat("LAT livetime cube")+"undefined");
+        // Append information
+        result.append("\n"+parformat("Name")+name());
+        result.append("\n"+parformat("Identifier")+id());
+        result.append("\n"+parformat("Instrument")+instrument());
+        result.append("\n"+parformat("Statistics")+statistics());
+        result.append("\n"+parformat("Ontime")+str(ontime()));
+        result.append("\n"+parformat("Livetime")+str(livetime()));
 
-    // Append events
-    if (m_events != NULL)
-        result.append("\n"+m_events->print());
+        // Append response
+        if (m_response != NULL) {
+            result.append("\n"+m_response->print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("LAT response")+"undefined");
+        }
+
+        // Append livetime cube
+        if (m_ltcube != NULL) {
+            result.append("\n"+m_ltcube->print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("LAT livetime cube")+"undefined");
+        }
+
+        // EXPLICIT: Append events
+        if (chatter >= EXPLICIT) {
+            if (m_events != NULL) {
+                result.append("\n"+m_events->print(chatter));
+            }
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GCTAResponseTable.hpp - CTA response table class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,7 +75,7 @@ public:
     void               scale(const int& index, const double& scale);
     void               read(const GFitsTable* hdu);
     void               write(GFitsTable* hdu) const;
-    std::string        print(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

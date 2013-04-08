@@ -559,19 +559,25 @@ void GXml::write(GUrl& url, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML object
  *
- * @param[in] indent Text indentation (default = 0).
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] indent Text indentation (default to 0).
  * @return String containing XML object.
  ***************************************************************************/
-std::string GXml::print(const int& indent) const
+std::string GXml::print(const GChatter& chatter, const int& indent) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GXml ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append model
-    result.append("\n"+m_root.print(0));
+        // Append header
+        result.append("=== GXml ===");
+
+        // Append model
+        result.append("\n"+m_root.print(chatter, 0));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;
@@ -581,12 +587,13 @@ std::string GXml::print(const int& indent) const
 /***********************************************************************//**
  * @brief Print XML object
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing XML object.
  ***************************************************************************/
-std::string GXml::print(void) const
+std::string GXml::print(const GChatter& chatter) const
 {
-    // Initialise result string
-    std::string result = print(0);
+    // Set result string
+    std::string result = print(chatter, 0);
 
     // Return result
     return result;

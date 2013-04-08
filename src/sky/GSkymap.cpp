@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GSkymap.cpp  -  Class that implements a sky map             *
+ *              GSkymap.cpp - Class that implements a sky map              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -1064,29 +1064,39 @@ bool GSkymap::isinmap(const GSkyPixel& pixel) const
 
 
 /***********************************************************************//**
- * @brief Print models
+ * @brief Print sky map
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing sky map information.
  ***************************************************************************/
-std::string GSkymap::print(void) const
+std::string GSkymap::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GSkymap ===\n");
-    result.append(parformat("Number of pixels")+str(m_num_pixels)+"\n");
-    result.append(parformat("Number of maps")+str(m_num_maps));
-    if (m_wcs != NULL && m_wcs->code() != "HPX") {
-        result.append("\n"+parformat("X axis dimension")+str(m_num_x));
-        result.append("\n"+parformat("Y axis dimension")+str(m_num_y));
-    }
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append WCS information
-    if (m_wcs != NULL) {
-        result.append("\n"+m_wcs->print());
-    }
-    else {
-        result.append("\n"+parformat("WCS")+"not defined");
-    }
+        // Append header
+        result.append("=== GSkymap ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of pixels")+str(m_num_pixels));
+        result.append("\n"+parformat("Number of maps")+str(m_num_maps));
+        if (m_wcs != NULL && m_wcs->code() != "HPX") {
+            result.append("\n"+parformat("X axis dimension")+str(m_num_x));
+            result.append("\n"+parformat("Y axis dimension")+str(m_num_y));
+        }
+
+        // Append WCS information
+        if (m_wcs != NULL) {
+            result.append("\n"+m_wcs->print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("WCS")+"not defined");
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

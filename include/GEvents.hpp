@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GEvents.hpp  -  Abstract event container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -82,7 +82,7 @@ public:
     virtual void        read(const GFits& file) = 0;
     virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented methods
     void                ebounds(const GEbounds& ebounds);

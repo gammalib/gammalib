@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GWcsMER.cpp  -  Mercator's (MER) projection class           *
+ *              GWcsMER.cpp - Mercator's (MER) projection class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsMER.cpp
  * @brief Mercator's (MER) projection class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -198,18 +198,27 @@ GWcsMER* GWcsMER::clone(void) const
 }
 
 
-
 /***********************************************************************//**
  * @brief Print WCS information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing WCS information.
  ***************************************************************************/
-std::string GWcsMER::print(void) const
+std::string GWcsMER::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GWcsMER ===\n");
-    result.append(wcs_print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GWcsMER ===");
+
+        // Append information
+        result.append(wcs_print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -83,7 +83,7 @@ public:
     const int&    inx_right(void) const { return m_inx_right; }
     const double& wgt_left(void) const { return m_wgt_left; }
     const double& wgt_right(void) const { return m_wgt_right; }
-    std::string   print(void) const;
+    std::string   print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

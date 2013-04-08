@@ -686,44 +686,52 @@ void GCTAObservation::write(GXmlElement& xml) const
 
 /***********************************************************************//**
  * @brief Print CTA observation information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing observation information.
  ***************************************************************************/
-std::string GCTAObservation::print(void) const
+std::string GCTAObservation::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTAObservation ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append informations
-    result.append("\n"+parformat("Name")+name());
-    result.append("\n"+parformat("Identifier")+id());
-    result.append("\n"+parformat("Instrument")+instrument());
-    result.append("\n"+parformat("Statistics")+statistics());
-    result.append("\n"+parformat("Ontime")+str(ontime())+" s");
-    result.append("\n"+parformat("Livetime")+str(livetime())+" s");
-    result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
+        // Append header
+        result.append("=== GCTAObservation ===");
 
-    // Append pointing
-    if (m_pointing != NULL) {
-        result.append("\n"+m_pointing->print());
-    }
-    else {
-        result.append("\n"+parformat("CTA pointing")+"undefined");
-    }
+        // Append information
+        result.append("\n"+parformat("Name")+name());
+        result.append("\n"+parformat("Identifier")+id());
+        result.append("\n"+parformat("Instrument")+instrument());
+        result.append("\n"+parformat("Statistics")+statistics());
+        result.append("\n"+parformat("Ontime")+str(ontime())+" s");
+        result.append("\n"+parformat("Livetime")+str(livetime())+" s");
+        result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
 
-    // Append response
-    if (m_response != NULL) {
-        result.append("\n"+response()->print());
-    }
-    else {
-        result.append("\n"+parformat("CTA response")+"undefined");
-    }
+        // Append pointing
+        if (m_pointing != NULL) {
+            result.append("\n"+m_pointing->print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("CTA pointing")+"undefined");
+        }
 
-    // Append events
-    if (m_events != NULL) {
-        result.append("\n"+m_events->print());
-    }
+        // Append response
+        if (m_response != NULL) {
+            result.append("\n"+response()->print(chatter));
+        }
+        else {
+            result.append("\n"+parformat("CTA response")+"undefined");
+        }
+
+        // Append events
+        if (m_events != NULL) {
+            result.append("\n"+m_events->print(chatter));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

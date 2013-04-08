@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GMWLResponse.cpp  -  Multi-wavelength response class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010 by Jurgen Knodlseder                                *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GMWLResponse.cpp
  * @brief GMWLResponse class interface implementation.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -160,16 +160,26 @@ GMWLResponse* GMWLResponse::clone(void) const
 
 /***********************************************************************//**
  * @brief Print response information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing response information
  ***************************************************************************/
-std::string GMWLResponse::print(void) const
+std::string GMWLResponse::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GMWLResponse ===\n");
-    //result.append(parformat("Calibration database")+m_caldb+"\n");
-    //result.append(parformat("Response functions")+m_rspname);
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GMWLResponse ===");
+
+        // Append information
+        //result.append(parformat("Calibration database")+m_caldb+"\n");
+        //result.append(parformat("Response functions")+m_rspname);
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

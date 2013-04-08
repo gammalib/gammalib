@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GApplication.hpp - GammaLib application base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,40 +58,41 @@ public:
     ~GApplication(void);
 
     // Operators
-    GApplication& operator= (const GApplication& app);
+    GApplication& operator=(const GApplication& app);
     GPar&         operator[](const std::string& name);
     const GPar&   operator[](const std::string& name) const;
 
     // Methods
-    void          clear(void);
-    GApplication* clone(void) const;
-    std::string   name(void) const;
-    std::string   version(void) const;
-    double        telapse(void) const;
-    double        celapse(void) const;
-    void          logFileOpen(bool clobber = true);
-    bool          logTerse(void) const;
-    bool          logNormal(void) const;
-    bool          logExplicit(void) const;
-    bool          logVerbose(void) const;
-    bool          logDebug(void) const;
-    bool          clobber(void) const;
-    bool          haspar(const std::string& name) const;
-    std::string   par_filename(void) const;
-    std::string   log_filename(void) const;
-    void          log_header(void);
-    void          log_trailer(void);
-    void          log_parameters(void);
-    std::string   print(void) const;
+    void               clear(void);
+    GApplication*      clone(void) const;
+    const std::string& name(void) const;
+    const std::string& version(void) const;
+    double             telapse(void) const;
+    double             celapse(void) const;
+    void               logFileOpen(const bool& clobber = true);
+    bool               logTerse(void) const;
+    bool               logNormal(void) const;
+    bool               logExplicit(void) const;
+    bool               logVerbose(void) const;
+    bool               logDebug(void) const;
+    bool               clobber(void) const;
+    bool               haspar(const std::string& name) const;
+    std::string        par_filename(void) const;
+    std::string        log_filename(void) const;
+    void               log_header(void);
+    void               log_trailer(void);
+    void               log_parameters(void);
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Public members
-    GLog          log;                       //!< Application logger
+    GLog log;   //!< Application logger
     
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GApplication& app);
     void free_members(void);
+    void set_log_chatter(void);
 
     // Protected data members
     std::string              m_name;       //!< Application name
@@ -101,5 +102,53 @@ protected:
     std::clock_t             m_cstart;     //!< Clock start time of execution
     GPars                    m_pars;       //!< Application parameters
 };
+
+
+/***********************************************************************//**
+ * @brief Parameter access operator
+ *
+ * @param[in] name Parameter name.
+ ***************************************************************************/
+inline
+GPar& GApplication::operator[](const std::string& name)
+{
+    return (m_pars[name]);
+}
+
+
+/***********************************************************************//**
+ * @brief Parameter access operator (const version)
+ *
+ * @param[in] name Parameter name.
+ ***************************************************************************/
+inline
+const GPar& GApplication::operator[](const std::string& name) const
+{
+    return (m_pars[name]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return application name
+ *
+ * @return Application name.
+ ***************************************************************************/
+const std::string& GApplication::name(void) const
+{
+    // Return name
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Return application version
+ *
+ * @return Application version.
+ ***************************************************************************/
+const std::string& GApplication::version(void) const
+{
+    // Return version
+    return m_version;
+}
 
 #endif /* GAPPLICATION_HPP */

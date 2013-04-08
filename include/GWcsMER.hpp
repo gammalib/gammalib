@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GWcsMER.hpp  -  Mercator's (MER) projection class           *
+ *              GWcsMER.hpp - Mercator's (MER) projection class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsMER.hpp
  * @brief Mercator's (MER) projection class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GWCSMER_HPP
@@ -59,7 +59,7 @@ public:
     virtual GWcsMER*    clone(void) const;
     virtual std::string code(void) const { return "MER"; }
     virtual std::string name(void) const { return "Mercator's"; }
-    virtual std::string print(void) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

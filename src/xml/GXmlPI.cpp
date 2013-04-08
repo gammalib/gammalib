@@ -213,16 +213,26 @@ void GXmlPI::write(GUrl& url, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML Processing Instruction
  *
- * @param[in] indent Text indentation (default = 0).
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] indent Text indentation (default to 0).
  * @return String containing XML Processing Instruction.
  ***************************************************************************/
-std::string GXmlPI::print(const int& indent) const
+std::string GXmlPI::print(const GChatter& chatter,
+                          const int&      indent) const
 {
     // Initialise result string
-    std::string result = fill(" ", indent);
+    std::string result;
 
-    // Append comment to string
-    result.append("GXmlPI::"+m_pi);
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Initialise result string
+        result = fill(" ", indent);
+
+        // Append comment to string
+        result.append("GXmlPI::"+m_pi);
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

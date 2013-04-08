@@ -467,38 +467,44 @@ void GUrlFile::printf(const char* format, ...)
 /***********************************************************************//**
  * @brief Print URL information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing URL information.
  ***************************************************************************/
-std::string GUrlFile::print(void) const
+std::string GUrlFile::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GUrlFile ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    if (m_fptr != NULL) {
+        // Append header
+        result.append("=== GUrlFile ===");
+
+        // Append information
+        if (m_fptr != NULL) {
     
-        // Get information
-        int pos = std::ftell(m_fptr);
-        int err = std::ferror(m_fptr);
+            // Get information
+            int pos = std::ftell(m_fptr);
+            int err = std::ferror(m_fptr);
         
-        // Append it
-        result.append("\n"+parformat("File URL")+m_url);
-        result.append("\n"+parformat("File mode")+m_mode);
-        result.append("\n"+parformat("File position indicator")+str(pos));
-        result.append("\n"+parformat("File error"));
-        if (err == 0) {
-            result.append("none");
+            // Append it
+            result.append("\n"+parformat("File URL")+m_url);
+            result.append("\n"+parformat("File mode")+m_mode);
+            result.append("\n"+parformat("File position indicator")+str(pos));
+            result.append("\n"+parformat("File error"));
+            if (err == 0) {
+                result.append("none");
+            }
+            else {
+                result.append(str(err));
+            }
         }
         else {
-            result.append(str(err));
+            result.append("\n"+parformat("URL")+"none");
         }
-    }
-    else {
-        result.append("\n"+parformat("URL")+"none");
-    }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

@@ -69,7 +69,8 @@ public:
     void                 parent(GXmlNode* node) { m_parent = node; }
     virtual void         write(GUrl& url, const int& indent = 0) const;
     virtual NodeType     type(void) const { return NT_ELEMENT; }
-    virtual std::string  print(const int& indent = 0) const;
+    virtual std::string  print(const GChatter& chatter = NORMAL,
+                               const int&     indent = 0) const;
 
 protected:
     // Protected methods

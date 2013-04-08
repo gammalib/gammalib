@@ -65,7 +65,7 @@ public:
     void           remove(const int& index);
     void           reserve(const int& num);
     void           extend(const GPhotons& photons);
-    std::string    print(void) const;
+    std::string    print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods

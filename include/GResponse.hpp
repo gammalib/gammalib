@@ -79,7 +79,7 @@ public:
                             const GObservation& obs) const = 0;
     virtual double      npred(const GPhoton&      photon,
                               const GObservation& obs) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
     virtual double irf(const GEvent&       event,

@@ -1138,32 +1138,38 @@ void GModelSpectralNodes::intensity(const int& index, const double& intensity)
 /***********************************************************************//**
  * @brief Print node function information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing node function information.
  ***************************************************************************/
-std::string GModelSpectralNodes::print(void) const
+std::string GModelSpectralNodes::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSpectralNodes ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append information
-    result.append("\n"+parformat("Number of nodes")+str(m_energies.size()));
-    result.append("\n"+parformat("Number of parameters")+str(size()));
-    for (int i = 0; i < size(); ++i) {
-        result.append("\n"+m_pars[i]->print());
-    }
+        // Append header
+        result.append("=== GModelSpectralNodes ===");
 
-    // Append node information
-    for (int i = 0; i < m_prefactor.size(); ++i) {
-        result.append("\n"+parformat("Node "+str(i+1)));
-        result.append("Epivot="+str(m_epivot[i]));
-        result.append(" Prefactor="+str(m_prefactor[i]));
-        result.append(" Gamma="+str(m_gamma[i]));
-        result.append(" Flux="+str(m_flux[i]));
-        result.append(" EFlux="+str(m_eflux[i]));
-    }
+        // Append information
+        result.append("\n"+parformat("Number of nodes")+str(m_energies.size()));
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        for (int i = 0; i < size(); ++i) {
+            result.append("\n"+m_pars[i]->print(chatter));
+        }
+
+        // Append node information
+        for (int i = 0; i < m_prefactor.size(); ++i) {
+            result.append("\n"+parformat("Node "+str(i+1)));
+            result.append("Epivot="+str(m_epivot[i]));
+            result.append(" Prefactor="+str(m_prefactor[i]));
+            result.append(" Gamma="+str(m_gamma[i]));
+            result.append(" Flux="+str(m_flux[i]));
+            result.append(" EFlux="+str(m_eflux[i]));
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

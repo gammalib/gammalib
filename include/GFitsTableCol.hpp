@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GFitsTableCol.hpp  - FITS table column abstract base class       *
+ *        GFitsTableCol.hpp - FITS table column abstract base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -79,7 +79,7 @@ public:
     int              number(void) const;
     int              length(void) const;
     int              anynul(void) const;
-    std::string      print(void) const;
+    std::string      print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected data area

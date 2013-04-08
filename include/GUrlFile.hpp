@@ -61,7 +61,7 @@ public:
     virtual void        putchar(const int& character);
     virtual void        scanf(const char* format, ...);
     virtual void        printf(const char* format, ...);
-    virtual std::string print(void) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

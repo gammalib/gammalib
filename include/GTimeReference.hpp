@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GTimeReference.hpp - Time reference class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -92,7 +92,7 @@ public:
     const std::string& timesys(void) const;
     const std::string& timeref(void) const;
     double             unitseconds(void) const;
-    std::string        print(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods

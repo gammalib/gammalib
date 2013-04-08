@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GCOMEventCube.cpp  -  COMPTEL event bin container class         *
+ *          GCOMEventCube.cpp - COMPTEL event bin container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -550,30 +550,38 @@ void GCOMEventCube::map(const GSkymap& map, const double& phimin,
 /***********************************************************************//**
  * @brief Print event cube information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing event cube information.
  ***************************************************************************/
-std::string GCOMEventCube::print(void) const
+std::string GCOMEventCube::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCOMEventCube ===");
-    result.append("\n"+parformat("Number of events")+str(number()));
-    result.append("\n"+parformat("Number of elements")+str(size()));
-    result.append("\n"+parformat("Size (Chi x Psi x Phi)"));
-    result.append(str(nchi())+" x "+str(npsi())+" x "+str(nphi()));
-    result.append("\n"+parformat("Energy range"));
-    result.append(str(emin().MeV())+" - "+str(emax().MeV())+" MeV");
-    result.append("\n"+parformat("Mean energy")+m_energy.print());
-    result.append("\n"+parformat("Energy bin width")+m_ewidth.print());
-    result.append("\n"+parformat("Time interval"));
-    result.append(str(tstart().jd())+" - "+str(tstop().jd())+" Julian days");
-    result.append("\n"+parformat("Mean time")+m_time.print());
-    result.append("\n"+parformat("Ontime")+str(m_ontime)+" s");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append skymap definition
-    result.append("\n"+m_map.print());
+        // Append header
+        result.append("=== GCOMEventCube ===");
+
+        // Append information
+        result.append("\n"+parformat("Number of events")+str(number()));
+        result.append("\n"+parformat("Number of elements")+str(size()));
+        result.append("\n"+parformat("Size (Chi x Psi x Phi)"));
+        result.append(str(nchi())+" x "+str(npsi())+" x "+str(nphi()));
+        result.append("\n"+parformat("Energy range"));
+        result.append(str(emin().MeV())+" - "+str(emax().MeV())+" MeV");
+        result.append("\n"+parformat("Mean energy")+m_energy.print(chatter));
+        result.append("\n"+parformat("Energy bin width")+m_ewidth.print(chatter));
+        result.append("\n"+parformat("Time interval"));
+        result.append(str(tstart().jd())+" - "+str(tstop().jd())+" Julian days");
+        result.append("\n"+parformat("Mean time")+m_time.print(chatter));
+        result.append("\n"+parformat("Ontime")+str(m_ontime)+" s");
+
+        // Append skymap definition
+        result.append("\n"+m_map.print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

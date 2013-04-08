@@ -68,7 +68,7 @@ public:
     bool        hashub(void) const;
     bool        isconnected(void) const;
     GXml        response(void) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

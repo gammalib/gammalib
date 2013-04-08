@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GWcslib.hpp  -  Virtual base class for wcslib based WCS        *
+ *           GWcslib.hpp - Virtual base class for wcslib based WCS         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcslib.hpp
  * @brief Definition of virtual base class for wcslib based WCS
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GWCSLIB_HPP
@@ -64,7 +64,7 @@ public:
     virtual GWcslib*    clone(void) const = 0;
     virtual std::string code(void) const = 0;
     virtual std::string name(void) const = 0;
-    virtual std::string print(void) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
     
     // Implemented virtual methods
     virtual void        read(const GFitsHDU* hdu);
@@ -111,7 +111,7 @@ protected:
     void        wcs_s2p(int ncoord, int nelem, const double* world,
                         double* phi, double* theta,  double* imgcrd,
                         double* pixcrd, int* stat) const;
-    std::string wcs_print(void) const;
+    std::string wcs_print(const GChatter& chatter = NORMAL) const;
     std::string wcs_print_value(const double& value) const;
     
     // Methods adapted from wcslib::cel.c

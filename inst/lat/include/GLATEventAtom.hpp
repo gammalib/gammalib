@@ -1,7 +1,7 @@
 /***************************************************************************
  *                GLATEventAtom.hpp  -  LAT event atom class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATEventAtom.hpp
  * @brief GLATEventAtom class interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATEVENTATOM_HPP
@@ -60,7 +60,7 @@ public:
     const GLATInstDir& dir(void) const { return m_dir; }
     const GEnergy&     energy(void) const { return m_energy; }
     const GTime&       time(void) const { return m_time; }
-    std::string        print(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

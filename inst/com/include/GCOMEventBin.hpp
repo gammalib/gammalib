@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GCOMEventBin.hpp  -  COMPTEL event bin class              *
+ *                GCOMEventBin.hpp - COMPTEL event bin class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,7 +70,7 @@ public:
     virtual double             counts(void) const { return *m_counts; }
     virtual double             error(void) const;
     virtual void               counts(const double& counts) { *m_counts=counts; }
-    virtual std::string        print(void) const;
+    virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     const int&     index(void) const { return m_index; }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GCOMResponse.cpp  -  COMPTEL Response class               *
+ *                GCOMResponse.cpp - COMPTEL Response class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -503,27 +503,35 @@ void GCOMResponse::read_iaq(const GFitsImage* hdu)
 /***********************************************************************//**
  * @brief Print COMPTEL response information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing COMPTEL response information.
  ***************************************************************************/
-std::string GCOMResponse::print(void) const
+std::string GCOMResponse::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCOMResponse ===");
-    result.append("\n"+parformat("Calibration database")+m_caldb);
-    result.append("\n"+parformat("IAQ file name")+m_iaqname);
-    result.append("\n"+parformat("Number of Phigeo bins")+str(m_phigeo_bins));
-    result.append("\n"+parformat("Number of Phibar bins")+str(m_phibar_bins));
-    result.append("\n"+parformat("Phigeo reference value")+str(m_phigeo_ref_value)+" deg");
-    result.append("\n"+parformat("Phigeo reference pixel")+str(m_phigeo_ref_pixel));
-    result.append("\n"+parformat("Phigeo bin size")+str(m_phigeo_bin_size)+" deg");
-    result.append("\n"+parformat("Phigeo first bin value")+str(m_phigeo_min)+" deg");
-    result.append("\n"+parformat("Phibar reference value")+str(m_phibar_ref_value)+" deg");
-    result.append("\n"+parformat("Phibar reference pixel")+str(m_phibar_ref_pixel));
-    result.append("\n"+parformat("Phibar bin size")+str(m_phibar_bin_size)+" deg");
-    result.append("\n"+parformat("Phibar first bin value")+str(m_phibar_min)+" deg");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCOMResponse ===");
+
+        // Append information
+        result.append("\n"+parformat("Calibration database")+m_caldb);
+        result.append("\n"+parformat("IAQ file name")+m_iaqname);
+        result.append("\n"+parformat("Number of Phigeo bins")+str(m_phigeo_bins));
+        result.append("\n"+parformat("Number of Phibar bins")+str(m_phibar_bins));
+        result.append("\n"+parformat("Phigeo reference value")+str(m_phigeo_ref_value)+" deg");
+        result.append("\n"+parformat("Phigeo reference pixel")+str(m_phigeo_ref_pixel));
+        result.append("\n"+parformat("Phigeo bin size")+str(m_phigeo_bin_size)+" deg");
+        result.append("\n"+parformat("Phigeo first bin value")+str(m_phigeo_min)+" deg");
+        result.append("\n"+parformat("Phibar reference value")+str(m_phibar_ref_value)+" deg");
+        result.append("\n"+parformat("Phibar reference pixel")+str(m_phibar_ref_pixel));
+        result.append("\n"+parformat("Phibar bin size")+str(m_phibar_bin_size)+" deg");
+        result.append("\n"+parformat("Phibar first bin value")+str(m_phibar_min)+" deg");
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

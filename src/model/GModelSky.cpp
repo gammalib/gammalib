@@ -879,18 +879,68 @@ GPhotons GModelSky::mc(const double& area,
 /***********************************************************************//**
  * @brief Print model information
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing model information.
  ***************************************************************************/
-std::string GModelSky::print(void) const
+std::string GModelSky::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GModelSky ===");
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
 
-    // Append model
-    result.append("\n"+print_model());
+        // Append header
+        result.append("=== GModelSky ===");
+
+        // Append model
+        //result.append("\n"+print_model(chatter));
+
+        // Determine number of parameters per type
+        int n_spatial  = (m_spatial  != NULL) ? m_spatial->size()  : 0;
+        int n_spectral = (m_spectral != NULL) ? m_spectral->size() : 0;
+        int n_temporal = (m_temporal != NULL) ? m_temporal->size() : 0;
+
+        // Append attributes
+        result.append(print_attributes());
+
+        // Append model type
+        result.append("\n"+parformat("Model type")+type());
+
+        // Append model components
+        result.append("\n"+parformat("Model components"));
+        if (n_spatial > 0) {
+            result.append("\""+spatial()->type()+"\"");
+            if (n_spectral > 0 || n_temporal > 0) {
+                result.append(" * ");
+            }
+        }
+        if (n_spectral > 0) {
+            result.append("\""+spectral()->type()+"\"");
+            if (n_temporal > 0) {
+                result.append(" * ");
+            }
+        }
+        if (n_temporal > 0) {
+            result.append("\""+temporal()->type()+"\"");
+        }
+
+        // Append parameters
+        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
+        for (int i = 0; i < n_spatial; ++i) {
+            result.append("\n"+(*spatial())[i].print());
+        }
+        result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
+        for (int i = 0; i < n_spectral; ++i) {
+            result.append("\n"+(*spectral())[i].print());
+        }
+        result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
+        for (int i = 0; i < n_temporal; ++i) {
+            result.append("\n"+(*temporal())[i].print());
+        }
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;
@@ -1437,63 +1487,6 @@ bool GModelSky::valid_model(void) const
     bool result = ((m_spatial  != NULL) &&
                    (m_spectral != NULL) &&
                    (m_temporal != NULL));
-
-    // Return result
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Print model information
- ***************************************************************************/
-std::string GModelSky::print_model(void) const
-{
-    // Initialise result string
-    std::string result;
-
-    // Determine number of parameters per type
-    int n_spatial  = (m_spatial  != NULL) ? m_spatial->size()  : 0;
-    int n_spectral = (m_spectral != NULL) ? m_spectral->size() : 0;
-    int n_temporal = (m_temporal != NULL) ? m_temporal->size() : 0;
-
-    // Append attributes
-    result.append(print_attributes());
-
-    // Append model type
-    result.append("\n"+parformat("Model type")+type());
-
-    // Append model components
-    result.append("\n"+parformat("Model components"));
-    if (n_spatial > 0) {
-        result.append("\""+spatial()->type()+"\"");
-        if (n_spectral > 0 || n_temporal > 0) {
-            result.append(" * ");
-        }
-    }
-    if (n_spectral > 0) {
-        result.append("\""+spectral()->type()+"\"");
-        if (n_temporal > 0) {
-            result.append(" * ");
-        }
-    }
-    if (n_temporal > 0) {
-        result.append("\""+temporal()->type()+"\"");
-    }
-
-    // Append parameters
-    result.append("\n"+parformat("Number of parameters")+str(size()));
-    result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
-    for (int i = 0; i < n_spatial; ++i) {
-        result.append("\n"+(*spatial())[i].print());
-    }
-    result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
-    for (int i = 0; i < n_spectral; ++i) {
-        result.append("\n"+(*spectral())[i].print());
-    }
-    result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
-    for (int i = 0; i < n_temporal; ++i) {
-        result.append("\n"+(*temporal())[i].print());
-    }
 
     // Return result
     return result;

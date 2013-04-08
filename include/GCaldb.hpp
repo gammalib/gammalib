@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GCaldb.hpp  -  Calibration database class                *
+ *                 GCaldb.hpp - Calibration database class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -89,7 +89,7 @@ public:
     void        dir(const std::string& pathname);
     void        open(const std::string& mission, const std::string& instrument = "");
     void        close(void);
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods

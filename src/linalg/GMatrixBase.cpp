@@ -496,6 +496,7 @@ double GMatrixBase::get_element_sum(void) const
 /***********************************************************************//**
  * @brief Print all matrix elements
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @param[in] num Maximum number of rows and columns to print (default: 10)
  *
  * Prints all matrix elements into a string. The parameter max_elements
@@ -503,7 +504,8 @@ double GMatrixBase::get_element_sum(void) const
  * printed. If set to 0, all elements will be printed. Otherwise, the number
  * of rows and columns will be limited by ommitting the central values.
  ***************************************************************************/
-std::string GMatrixBase::print_elements(const int& num) const
+std::string GMatrixBase::print_elements(const GChatter& chatter,
+                                        const int&      num) const
 {
     // Initialise result string
     std::string result;
@@ -581,8 +583,10 @@ std::string GMatrixBase::print_elements(const int& num) const
 
 /***********************************************************************//**
  * @brief Print row compression scheme if it exists
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  ***************************************************************************/
-std::string GMatrixBase::print_row_compression(void) const
+std::string GMatrixBase::print_row_compression(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -603,8 +607,10 @@ std::string GMatrixBase::print_row_compression(void) const
 
 /***********************************************************************//**
  * @brief Print column compression scheme if it exists
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  ***************************************************************************/
-std::string GMatrixBase::print_col_compression(void) const
+std::string GMatrixBase::print_col_compression(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;

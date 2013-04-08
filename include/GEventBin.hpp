@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GEventBin.hpp  -  Event bin abstract base class           *
+ *                GEventBin.hpp - Event bin abstract base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2010 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventBin.hpp
  * @brief GEventBin abstract base class interface definition.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GEVENTBIN_HPP
@@ -85,7 +85,7 @@ public:
     virtual double          counts(void) const = 0;
     virtual double          error(void) const = 0;
     virtual void            counts(const double& counts) = 0;
-    virtual std::string     print(void) const = 0;
+    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
     bool isatom(void) const { return false; }

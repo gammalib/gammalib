@@ -1,7 +1,7 @@
 /***************************************************************************
- * GLATPsfBase.hpp  -  Fermi/LAT point spread function abstract base class *
+ *  GLATPsfBase.hpp - Fermi-LAT point spread function abstract base class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,7 +63,7 @@ public:
     virtual double       psf(const double& offset, const double& logE,
                              const double& ctheta) = 0;
     virtual int          version(void) const = 0;
-    virtual std::string  print(void) const = 0;
+    virtual std::string  print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
     void   read_scale(const GFitsTable* hdu);

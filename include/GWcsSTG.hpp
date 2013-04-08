@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GWcsSTG.hpp  -  Stereographic (STG) projection class         *
+ *             GWcsSTG.hpp - Stereographic (STG) projection class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsSTG.hpp
  * @brief Stereographic (STG) projection class definition
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GWCSSTG_HPP
@@ -59,7 +59,7 @@ public:
     virtual GWcsSTG*    clone(void) const;
     virtual std::string code(void) const { return "STG"; }
     virtual std::string name(void) const { return "stereographic"; }
-    virtual std::string print(void) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods

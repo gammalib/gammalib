@@ -63,7 +63,8 @@ public:
     GXmlDocument* clone(void) const;
     void          write(GUrl& url, const int& indent = 0) const;
     NodeType      type(void) const { return NT_DOCUMENT; }
-    std::string   print(const int& indent = 0) const;
+    std::string   print(const GChatter& chatter = NORMAL,
+                        const int&      indent = 0) const;
 
     // Methods
     std::string   version(void) const { return m_version.value(); }

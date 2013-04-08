@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GLATLtCubeMap.hpp  -  Fermi LAT livetime cube map            *
+ *             GLATLtCubeMap.hpp - Fermi LAT livetime cube map             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,13 +59,13 @@ public:
 
     // Operators
     GLATLtCubeMap& operator= (const GLATLtCubeMap& cube);
-    double         operator() (const GSkyDir& dir, _ltcube_ctheta fct);
-    double         operator() (const GSkyDir& dir, _ltcube_ctheta_phi fct);
-    double         operator() (const GSkyDir& dir, const GEnergy& energy,
-                               const GLATAeff& aeff);
-    double         operator() (const GSkyDir& dir, const GEnergy& energy,
-                               const double& offset, const GLATPsf& psf,
-                               const GLATAeff& aeff);
+    double         operator()(const GSkyDir& dir, _ltcube_ctheta fct);
+    double         operator()(const GSkyDir& dir, _ltcube_ctheta_phi fct);
+    double         operator()(const GSkyDir& dir, const GEnergy& energy,
+                              const GLATAeff& aeff);
+    double         operator()(const GSkyDir& dir, const GEnergy& energy,
+                              const double& offset, const GLATPsf& psf,
+                              const GLATAeff& aeff);
 
     // Methods
     void           clear(void);
@@ -79,7 +79,7 @@ public:
     double         phi(const int& index) const;
     double         costhetamin(void) const { return m_min_ctheta; }
     std::string    costhetabin(void) const;
-    std::string    print(void) const;
+    std::string    print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

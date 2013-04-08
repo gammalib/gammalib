@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAPointing.cpp  -  CTA pointing class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTAPointing.cpp
  * @brief CTA pointing class interface implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -210,15 +210,26 @@ const GMatrix& GCTAPointing::rot(void) const
 
 /***********************************************************************//**
  * @brief Print CTA pointing information
+ *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @return String containing pointing information.
  ***************************************************************************/
-std::string GCTAPointing::print(void) const
+std::string GCTAPointing::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
 
-    // Append header
-    result.append("=== GCTAPointing ===");
-    result.append("\n"+parformat("Pointing direction")+this->dir().print());
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Append header
+        result.append("=== GCTAPointing ===");
+
+        // Append information
+        result.append("\n"+parformat("Pointing direction"));
+        result.append(this->dir().print(chatter));
+
+    } // endif: chatter was not silent
 
     // Return result
     return result;

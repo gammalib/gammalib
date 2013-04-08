@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GLog.cpp - Information logger                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,7 +75,7 @@ GLog::GLog(void)
  *
  * Construct a logger with an open log file.
  ***************************************************************************/
-GLog::GLog(const std::string& filename, bool clobber)
+GLog::GLog(const std::string& filename, const bool& clobber)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -477,7 +477,7 @@ int GLog::size(void) const
  * Opens a file for logging. If a log file was already open it is closed
  * before opening a new file.
  ***************************************************************************/
-void GLog::open(const std::string& filename, bool clobber)
+void GLog::open(const std::string& filename, const bool& clobber)
 {
     // Store the filename
     m_filename = filename;
@@ -520,121 +520,6 @@ void GLog::close(void)
 }
 
 
-/***********************************************************************//**
- * @brief Set data flag that controls date prefixing
- *
- * @param[in] flag Enable/disable date flag (true/false). 
- *
- * If the data flag is set to true, each new line will be prepended by the
- * actual date when the writing of the line was started.
- ***************************************************************************/
-void GLog::date(bool flag)
-{
-    // Set flag
-    m_use_date = flag;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Enables/disables logging into standard output stream
- *
- * @param[in] flag Enable/disable logging (true/false).
- *
- * Enables or disables logging into the standard output stream.
- ***************************************************************************/
-void GLog::cout(bool flag)
-{
-    // Set flag
-    m_stdout = flag;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Enables/disables logging into standard error stream
- *
- * @param[in] flag Enable/disable logging (true/false).
- *
- * Enables or disables logging into the standard error stream.
- ***************************************************************************/
-void GLog::cerr(bool flag)
-{
-    // Set flag
-    m_stderr = flag;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set name to put into prefix
- *
- * @param[in] name Name to put into prefix. 
- *
- * If the name is set to a non-zero string, each new line will be prepended
- * by the specified name. If also the date should be prepended, the name
- * will be inserted after the date.
- *
- * Specifying an empty string will suppress the insertion of the name into
- * the logger.
- ***************************************************************************/
-void GLog::name(const std::string& name)
-{
-    // Set name
-    m_name = name;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set the maximum buffer size
- *
- * @param[in] size Maximum buffer size.
- *
- * Set the maximum number of characters allowed in the internal buffer before
- * the buffer is flushed into the specified streams or file.
- *
- * @todo No maximum buffer size checking is performed. This could be
- * implemented but is not really crucial since the physical buffer size can
- * indeed be larger than this maximum size.
- ***************************************************************************/
-void GLog::max_size(int size)
-{
-    // Set size
-    m_max_length = size;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set indentation
- *
- * @param[in] indent Indentation in number of characters.
- *
- * Set the indentation of the logger. This specifies the number of whitespace
- * characters that is added between the prefix and the log message of each
- * line. Indentation allows for easy formatting of text in the log file.
- ***************************************************************************/
-void GLog::indent(int indent)
-{
-    // Set size
-    m_indent = indent;
-
-    // Return
-    return;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Private methods                             =
@@ -656,6 +541,7 @@ void GLog::init_members(void)
     m_filename.clear();
     m_name.clear();
     m_buffer.clear();
+    m_chatter    = NORMAL;
 
     // Return
     return;
@@ -679,6 +565,7 @@ void GLog::copy_members(const GLog& log)
     m_filename   = log.m_filename;
     m_name       = log.m_name;
     m_buffer     = log.m_buffer;
+    m_chatter    = log.m_chatter;
 
     // Return
     return;
@@ -714,7 +601,7 @@ void GLog::free_members(void)
  * streams are currently implemented (and will be filled in parallel):
  * stdout, stderr, and an ASCII file.
  ***************************************************************************/
-void GLog::flush(bool force)
+void GLog::flush(const bool& force)
 {
     // Check if buffer should be flushed
     bool flush = (force || size() > m_max_length);

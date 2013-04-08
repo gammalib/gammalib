@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GLATEfficiency.hpp  -  Fermi/LAT IRF efficiency factor functor     *
+ *       GLATEfficiency.hpp - Fermi/LAT IRF efficiency factor functor      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,7 +54,7 @@ public:
     // Methods
     void            clear(void);
     GLATEfficiency* clone(void) const;
-    std::string     print(void) const;
+    std::string     print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods

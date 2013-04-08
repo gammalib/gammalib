@@ -205,16 +205,26 @@ void GXmlText::write(GUrl& url, const int& indent) const
 /***********************************************************************//**
  * @brief Print XML text
  *
- * @param[in] indent Text indentation (default = 0).
+ * @param[in] chatter Chattiness (defaults to NORMAL).
+ * @param[in] indent Text indentation (default to 0).
  * @return String containing XML text.
  ***************************************************************************/
-std::string GXmlText::print(const int& indent) const
+std::string GXmlText::print(const GChatter& chatter,
+                            const int&      indent) const
 {
     // Initialise result string
-    std::string result = fill(" ", indent);
+    std::string result;
 
-    // Append text to string
-    result.append("GXmlText::"+m_text);
+    // Continue only if chatter is not silent
+    if (chatter != SILENT) {
+
+        // Initialise result string
+        result = fill(" ", indent);
+
+        // Append text to string
+        result.append("GXmlText::"+m_text);
+
+    } // endif: chatter was not silent
 
     // Return
     return result;

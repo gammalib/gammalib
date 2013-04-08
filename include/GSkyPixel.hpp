@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GSkyPixel.cpp  -  Class that implements a 2D sky pixel index      *
+ *        GSkyPixel.cpp - Class that implements a 2D sky pixel index       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,7 +56,7 @@ public:
     void        y(const double& y);
     double      x(void) const;
     double      y(void) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods
