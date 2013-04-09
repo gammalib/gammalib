@@ -114,6 +114,7 @@ GCTAEventList::~GCTAEventList(void)
  * @brief Assignment operator
  *
  * @param[in] list Event list.
+ * @return Event list.
  ***************************************************************************/
 GCTAEventList& GCTAEventList::operator=(const GCTAEventList& list)
 {
@@ -437,7 +438,9 @@ std::string GCTAEventList::print(const GChatter& chatter) const
         // Append GTI interval
         result.append("\n"+parformat("Time interval"));
         if (gti().size() > 0) {
-            result.append(str(tstart().mjd())+" - "+str(tstop().mjd())+" days");
+            result.append(str(tstart().mjd()));
+            result.append(" - ");
+            result.append(str(tstop().mjd())+" days");
         }
         else {
             result.append("not defined");
@@ -492,6 +495,10 @@ void GCTAEventList::append(const GCTAEventAtom& event)
 {
     // Append event
     m_events.push_back(event);
+
+    // Set event index
+    int index = m_events.size()-1;
+    m_events[index].m_index = index;
 
     // Return
     return;
