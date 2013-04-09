@@ -77,6 +77,8 @@
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_USE_IRF_CACHE            //!< Use IRF cache in irf_diffuse method
+#define G_USE_NPRED_CACHE      //!< Use Npred cache in npred_diffuse method
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_READ_ARF                         //!< Debug read_arf method
@@ -1275,6 +1277,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
     }
 
     // Try getting the IRF value from cache
+    #if defined(G_USE_IRF_CACHE)
     const GCTAEventList* list = dynamic_cast<const GCTAEventList*>(obs.events());
     const GCTAEventAtom* atom = dynamic_cast<const GCTAEventAtom*>(&event);
     if (list != NULL && atom != NULL) {
@@ -1290,6 +1293,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
             irf = 0.0;
         }
     }
+    #endif
 
     // Continue only if we have no IRF value
     if (!has_irf) {
@@ -1375,7 +1379,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
 
             // Integrate over zenith angle
             GIntegral integral(&integrand);
-            integral.eps(1.0e-2);
+            integral.eps(1.0e-4);
             irf = integral.romb(0.0, delta_max);
 
             // Compile option: Check for NaN/Inf
@@ -1391,9 +1395,11 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
         }
 
         // Put IRF value in cache
+        #if defined(G_USE_IRF_CACHE)
         if (list != NULL && atom != NULL) {
             list->irf_cache(source.name(), atom->index(), irf);
         }
+        #endif
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_IRF_DIFFUSE)
@@ -1820,13 +1826,14 @@ double GCTAResponse::npred_diffuse(const GSource& source,
                                    const GObservation& obs) const
 {
     // Initialise Npred value
-    double npred = 0.0;
+    double npred     = 0.0;
+    bool   has_npred = false;
 
     // Build unique identifier
     std::string id = source.name() + "::" + obs.id();
 
     // Check if Npred value is already in cache
-    bool has_npred = false;
+    #if defined(G_USE_NPRED_CACHE)
     if (!m_npred_names.empty()) {
 
          // Search for unique identifier, and if found, recover Npred value
@@ -1847,6 +1854,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
          }
 
     } // endif: there were values in the Npred cache
+    #endif
 
     // Continue only if no Npred cache value was found
     if (!has_npred) {
@@ -1939,10 +1947,12 @@ double GCTAResponse::npred_diffuse(const GSource& source,
         } // endif: offset angle range was valid
 
         // Store result in Npred cache
+        #if defined(G_USE_NPRED_CACHE)
         m_npred_names.push_back(id);
         m_npred_energies.push_back(source.energy());
         m_npred_times.push_back(source.time());
         m_npred_values.push_back(npred);
+        #endif
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
