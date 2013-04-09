@@ -227,7 +227,8 @@ void TestGCTAResponse::test_response_npsf(void)
 void TestGCTAResponse::test_response_irf_diffuse(void)
 {
     // Set reference value
-    double ref = 13803.800313356;
+    //double ref = 13803.800313356;
+    const double ref = 13803.5186374;
 
     // Set parameters
     double src_ra  = 201.3651;
@@ -304,7 +305,7 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
 {
     // Set reference value
     //double ref = 11212.26274; // npred_spec precision of 1e-6
-    double ref = 11212.437464; // npred_spec precision of 1e-5
+    const double ref = 11212.437464; // npred_spec precision of 1e-5
 
     // Set parameters
     double src_ra  = 201.3651;
