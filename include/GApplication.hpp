@@ -86,7 +86,7 @@ public:
 
     // Public members
     GLog log;   //!< Application logger
-    
+
 protected:
     // Protected methods
     void init_members(void);
@@ -133,6 +133,7 @@ const GPar& GApplication::operator[](const std::string& name) const
  *
  * @return Application name.
  ***************************************************************************/
+inline
 const std::string& GApplication::name(void) const
 {
     // Return name
@@ -145,6 +146,7 @@ const std::string& GApplication::name(void) const
  *
  * @return Application version.
  ***************************************************************************/
+inline
 const std::string& GApplication::version(void) const
 {
     // Return version
