@@ -49,6 +49,7 @@ const GModelSpatialRegistry   g_spatial_map_registry(&g_spatial_map_seed);
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_CACHE              //!< Debug Monte Carlo Cache computation
+//#define G_DEBUG_PREPARE            //!< Debug map preparation
 
 
 /*==========================================================================
@@ -224,7 +225,7 @@ GModelSpatialDiffuseMap& GModelSpatialDiffuseMap::operator=(const GModelSpatialD
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear diffuse map
  ***************************************************************************/
 void GModelSpatialDiffuseMap::clear(void)
 {
@@ -244,12 +245,13 @@ void GModelSpatialDiffuseMap::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone diffuse map
  *
  * @return Pointer to deep copy of diffuse map model.
  ***************************************************************************/
 GModelSpatialDiffuseMap* GModelSpatialDiffuseMap::clone(void) const
 {
+    // Clone diffuse map
     return new GModelSpatialDiffuseMap(*this);
 }
 
@@ -359,7 +361,7 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
         dir = m_map.xy2dir(pixel);
 
     } // endif: there were pixels in sky map
-    
+
     // Return sky direction
     return dir;
 }
@@ -654,9 +656,22 @@ void GModelSpatialDiffuseMap::prepare_map(void)
                 m_mc_cache[i] /= sum;
             }
         }
-        
+
         // Make sure that last pixel in the cache is >1
         m_mc_cache[npix] = 1.0001;
+
+        // Dump premaration results
+        #if defined(G_DEBUG_PREPARE)
+        double sum_control = 0.0;
+        for (int i = 0; i < npix; ++i) {
+            double flux = m_map(i) * m_map.omega(i);
+            if (flux >= 0.0) {
+                sum_control += flux;
+            }
+        }
+        std::cout << "Total flux before normalization: " << sum << std::endl;
+        std::cout << "Total flux after normalization : " << sum_control << std::endl;
+        #endif
 
         // Dump cache values for debugging
         #if defined(G_DEBUG_CACHE)
@@ -665,7 +680,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
             std::cout << " c=" << m_mc_cache[i] << std::endl;
         }
         #endif
-        
+
     } // endif: there were skymap pixels
 
     // Return
