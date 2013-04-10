@@ -579,7 +579,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
         double npred_spatial  = rsp->npred(source, obs);
         double npred_spectral = spectral()->eval(srcEng, srcTime);
         double npred_temporal = temporal()->eval(srcTime);
-                
+
         // Compute response
         npred = npred_spatial * npred_spectral * npred_temporal;
 
@@ -902,7 +902,7 @@ std::string GModelSky::print(const GChatter& chatter) const
         int n_temporal = (m_temporal != NULL) ? m_temporal->size() : 0;
 
         // Append attributes
-        result.append(print_attributes());
+        result.append("\n"+print_attributes());
 
         // Append model type
         result.append("\n"+parformat("Model type")+type());
