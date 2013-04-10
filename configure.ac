@@ -998,8 +998,10 @@ fi
 #############################################################################
 has_readline="no"
 use_readline="no"
+LIBS_READLINE=
 LIBDIR_READLINE=
 INCDIR_READLINE=
+AC_SUBST(LIBS_READLINE)
 AC_SUBST(LIBDIR_READLINE)
 AC_SUBST(INCDIR_READLINE)
 
@@ -1057,6 +1059,7 @@ if [test "x$has_readline" = "xyes" -a "x$has_ncurses" = "xyes"]; then
     use_readline="yes"
     AC_DEFINE([HAVE_LIBREADLINE], [1], [Define if readline library is available])
     LIBS="${LIBS} -lreadline -lncurses"
+    LIBS_READLINE="-lreadline -lncurses"
 fi
 AM_CONDITIONAL(WITH_READLINE, test "x$use_readline" = "xyes")
 
@@ -1071,8 +1074,12 @@ AM_CONDITIONAL(WITH_READLINE, test "x$use_readline" = "xyes")
 #           /usr/local (FreeBSD)                                            #
 #############################################################################
 has_cfitsio="no"
+CFITSIO=
+LIBS_CFITSIO=
 LIBDIR_CFITSIO=
 INCDIR_CFITSIO=
+AC_SUBST(CFITSIO)
+AC_SUBST(LIBS_CFITSIO)
 AC_SUBST(LIBDIR_CFITSIO)
 AC_SUBST(INCDIR_CFITSIO)
 
@@ -1177,6 +1184,8 @@ fi
 if [test "x$has_cfitsio" = "xyes"]; then
     AC_DEFINE([HAVE_LIBCFITSIO], [1], [Define if cfitsio library is available])
     LIBS="${LIBS} -lcfitsio ${cfitsio_deps}"
+    LIBS_CFITSIO="-lcfitsio ${cfitsio_deps}"
+    CFITSIO="cfitsio"
 fi
 AM_CONDITIONAL(WITH_CFITSIO, test "x$has_cfitsio" = "xyes")
 
