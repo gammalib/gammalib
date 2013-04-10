@@ -138,7 +138,8 @@ endif
 # Rule for COM module
 if WITH_INST_COM
 gammalib/com_wrap.cpp gammalib/com.py: $(top_srcdir)/inst/com/pyext/com.i
-	$(SWIG) -c++ -python -Wall -o gammalib/com_wrap.cpp -outdir gammalib $<
+	if $(SWIGCOMPILE) -MMD -MF "gammalib/com.Tpi" -o gammalib/com_wrap.cpp -outdir gammalib $<; \
+	then mv -f "gammalib/com.Tpi" "gammalib/com.Pi"; else rm -f "gammalib/com.Tpi"; exit 1; fi
 endif
 
 endif # HAVE_SWIG
