@@ -1,7 +1,7 @@
 /***************************************************************************
- *                       GClass.cpp - <brief descriptor>                   *
+ *                       GClass.cpp - [brief descriptor]                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-20xx by <author>                                    *
+ *  copyright (C) 2010-20xx by [author]                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GClass.cpp
- * @brief <brief descriptor>
- * @author <author>
+ * @brief [brief descriptor]
+ * @author [author]
  */
 
 /* __ Includes ___________________________________________________________ */
