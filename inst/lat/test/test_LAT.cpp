@@ -241,6 +241,7 @@ void TestGLATLtCube::test_ltcube_p7(void)
  * @brief Test livetime cube handling for a specific dataset
  *
  * @param[in] datadir Directory of test data.
+ * @param[in] reference Reference value.
  *
  * Verifies the ability to handle Fermi/LAT livetime cubes.
  ***************************************************************************/
@@ -458,6 +459,7 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
  * @brief Test binned observation handling for a specific dataset
  *
  * @param[in] datadir Directory of test data.
+ * @param[in] irf Instrument response function.
  *
  * Verifies the ability to handle binned Fermi/LAT data.
  ***************************************************************************/
