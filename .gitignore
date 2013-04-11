@@ -57,11 +57,13 @@ config.h.in
 config.status
 config.sub
 configure
+test-driver
 src/gammalib-setup
 doc/Doxyfile.bak
 test/test_url.dat
 test/*.xml
 test/reports/*.xml
+test/*.trs
 examples/python/*.xml
 examples/python/*.html
 
