@@ -1,7 +1,7 @@
 /***************************************************************************
- *                       GClass.hpp - <brief descriptor>                   *
+ *                       GClass.hpp - [brief descriptor]                   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-20xx by <author>                                    *
+ *  copyright (C) 2010-20xx by [author]                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GClass.hpp
- * @brief <brief descriptor>
- * @author <author>
+ * @brief [brief descriptor]
+ * @author [author]
  */
 
 #ifndef GCLASS_HPP
@@ -36,7 +36,7 @@
 /***********************************************************************//**
  * @class GClass
  *
- * @brief <brief descriptor> interface defintion
+ * @brief [brief descriptor] interface defintion
  ***************************************************************************/
 class GClass {
 

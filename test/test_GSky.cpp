@@ -62,6 +62,7 @@ void TestGSky::set(void){
 /***********************************************************************//**
  * @brief Test consistency of forward and background transformations
  *
+ * @param[in] wcs WCS object
  * @param[in] nx Number of points in X
  * @param[in] ny Number of points in Y
  * @param[in] crpix1 Reference pixel in X
@@ -137,6 +138,7 @@ double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpi
 /***********************************************************************//**
  * @brief Test consistency of copy
  *
+ * @param[in] wcs WCS object
  * @param[in] nx Number of points in X
  * @param[in] ny Number of points in Y
  * @param[in] crpix1 Reference pixel in X
