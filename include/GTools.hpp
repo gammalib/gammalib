@@ -60,53 +60,54 @@ namespace gammalib {
 }
 
 /* __ Prototypes ________________________________________________________ */
-std::string              strip_whitespace(const std::string& arg);
-std::string              strip_chars(const std::string& arg,
-                                     const std::string& chars);
-std::string              expand_env(const std::string& arg);
-std::string              str(const unsigned short int& value);
-std::string              str(const unsigned int& value);
-std::string              str(const unsigned long int& value);
-std::string              str(const unsigned long long int& value);
-std::string              str(const short int& value);
-std::string              str(const int& value);
-std::string              str(const long int& value);
-std::string              str(const long long int& value);
-std::string              str(const float& value);
-std::string              str(const double& value);
-char*                    tochar(const std::string& arg);
-short                    toshort(const std::string& arg);
-unsigned short           toushort(const std::string& arg);
-int                      toint(const std::string& arg);
-unsigned int             touint(const std::string& arg);
-long                     tolong(const std::string& arg);
-unsigned long            toulong(const std::string& arg);
-long long                tolonglong(const std::string& arg);
-unsigned long long       toulonglong(const std::string& arg);
-float                    tofloat(const std::string& arg);
-double                   todouble(const std::string& arg);
-std::string              toupper(const std::string& s);
-std::string              tolower(const std::string& s);
-std::vector<std::string> split(const std::string& s, const std::string& sep);
-std::string              fill(const std::string& s, int n);
-std::string              left(const std::string& s, int n, char c = ' ');
-std::string              right(const std::string& s, int n, char c = ' ');
-std::string              center(const std::string& s, int n, char c = ' ');
-std::string              parformat(const std::string& s, const int& indent = 0);
-double                   modulo(double v1, double v2);
-double                   arccos(const double& arg);
-double                   plaw_photon_flux(const double& emin,
-                                          const double& emax,
-                                          const double& epivot,
-                                          const double& gamma);
-double                   plaw_energy_flux(const double& emin,
-                                          const double& emax,
-                                          const double& epivot,
-                                          const double& gamma);
-bool                     file_exists(const std::string& filename);
-bool                     isinfinite(const double& x);
-bool                     isnotanumber(const double& x);
-
+namespace gammalib {
+    std::string              strip_whitespace(const std::string& arg);
+    std::string              strip_chars(const std::string& arg,
+                                         const std::string& chars);
+    std::string              expand_env(const std::string& arg);
+    std::string              str(const unsigned short int& value);
+    std::string              str(const unsigned int& value);
+    std::string              str(const unsigned long int& value);
+    std::string              str(const unsigned long long int& value);
+    std::string              str(const short int& value);
+    std::string              str(const int& value);
+    std::string              str(const long int& value);
+    std::string              str(const long long int& value);
+    std::string              str(const float& value);
+    std::string              str(const double& value);
+    char*                    tochar(const std::string& arg);
+    short                    toshort(const std::string& arg);
+    unsigned short           toushort(const std::string& arg);
+    int                      toint(const std::string& arg);
+    unsigned int             touint(const std::string& arg);
+    long                     tolong(const std::string& arg);
+    unsigned long            toulong(const std::string& arg);
+    long long                tolonglong(const std::string& arg);
+    unsigned long long       toulonglong(const std::string& arg);
+    float                    tofloat(const std::string& arg);
+    double                   todouble(const std::string& arg);
+    std::string              toupper(const std::string& s);
+    std::string              tolower(const std::string& s);
+    std::vector<std::string> split(const std::string& s, const std::string& sep);
+    std::string              fill(const std::string& s, int n);
+    std::string              left(const std::string& s, int n, char c = ' ');
+    std::string              right(const std::string& s, int n, char c = ' ');
+    std::string              center(const std::string& s, int n, char c = ' ');
+    std::string              parformat(const std::string& s, const int& indent = 0);
+    double                   modulo(double v1, double v2);
+    double                   arccos(const double& arg);
+    double                   plaw_photon_flux(const double& emin,
+                                              const double& emax,
+                                              const double& epivot,
+                                              const double& gamma);
+    double                   plaw_energy_flux(const double& emin,
+                                              const double& emax,
+                                              const double& epivot,
+                                              const double& gamma);
+    bool                     file_exists(const std::string& filename);
+    bool                     isinfinite(const double& x);
+    bool                     isnotanumber(const double& x);
+}
 
 /***********************************************************************//**
  * @brief Signal if argument is infinite
@@ -119,7 +120,7 @@ bool                     isnotanumber(const double& x);
  * This function has been copied from gnulib.
  ***************************************************************************/
 inline
-bool isinfinite(const double& x)
+bool gammalib::isinfinite(const double& x)
 {
   return (x < -DBL_MAX || x > DBL_MAX);
 }
@@ -136,7 +137,7 @@ bool isinfinite(const double& x)
  * This function is a very simple kluge. It may not work on all systems.
  ***************************************************************************/
 inline
-bool isnotanumber(const double& x)
+bool gammalib::isnotanumber(const double& x)
 {
   return (x != x);
 }

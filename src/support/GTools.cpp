@@ -52,7 +52,7 @@
  *
  * @param[in] arg String from which whitespace should be stripped.
  ***************************************************************************/
-std::string strip_whitespace(const std::string& arg)
+std::string gammalib::strip_whitespace(const std::string& arg)
 {
     // Return result
     return (strip_chars(arg, " "));
@@ -65,7 +65,8 @@ std::string strip_whitespace(const std::string& arg)
  * @param[in] arg String from which character should be stripped.
  * @param[in] chars Character(s) to be stripped.
  ***************************************************************************/
-std::string strip_chars(const std::string& arg, const std::string& chars)
+std::string gammalib::strip_chars(const std::string& arg,
+                                  const std::string& chars)
 {
     // Initialise empty result string
     std::string result;
@@ -108,7 +109,7 @@ std::string strip_chars(const std::string& arg, const std::string& chars)
  * This function has been inspired by the function ape_util_expand_env_var
  * from ape_util.c in the ape software developed at HEASARC.
  ***************************************************************************/
-std::string expand_env(const std::string& arg)
+std::string gammalib::expand_env(const std::string& arg)
 {
     // Set environment variable delimiters
     static const char* begin_delim[] = { "$ENV{", "$ENV(", "${", "$(", "$" };
@@ -240,7 +241,7 @@ std::string expand_env(const std::string& arg)
  *
  * @param[in] value Unsigned short integer to be converted into string.
  ***************************************************************************/
-std::string str(const unsigned short int& value)
+std::string gammalib::str(const unsigned short int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -253,7 +254,7 @@ std::string str(const unsigned short int& value)
  *
  * @param[in] value Unsigned integer to be converted into string.
  ***************************************************************************/
-std::string str(const unsigned int& value)
+std::string gammalib::str(const unsigned int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -266,7 +267,7 @@ std::string str(const unsigned int& value)
  *
  * @param[in] value Unsigned long integer to be converted into string.
  ***************************************************************************/
-std::string str(const unsigned long int& value)
+std::string gammalib::str(const unsigned long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -279,7 +280,7 @@ std::string str(const unsigned long int& value)
  *
  * @param[in] value Unsigned long long integer to be converted into string.
  ***************************************************************************/
-std::string str(const unsigned long long int& value)
+std::string gammalib::str(const unsigned long long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -292,7 +293,7 @@ std::string str(const unsigned long long int& value)
  *
  * @param[in] value Short integer to be converted into string.
  ***************************************************************************/
-std::string str(const short int& value)
+std::string gammalib::str(const short int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -305,7 +306,7 @@ std::string str(const short int& value)
  *
  * @param[in] value Integer to be converted into string.
  ***************************************************************************/
-std::string str(const int& value)
+std::string gammalib::str(const int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -318,7 +319,7 @@ std::string str(const int& value)
  *
  * @param[in] value Long integer to be converted into string.
  ***************************************************************************/
-std::string str(const long int& value)
+std::string gammalib::str(const long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -331,7 +332,7 @@ std::string str(const long int& value)
  *
  * @param[in] value Long long integer to be converted into string.
  ***************************************************************************/
-std::string str(const long long int& value)
+std::string gammalib::str(const long long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -344,7 +345,7 @@ std::string str(const long long int& value)
  *
  * @param[in] value Single precision value to be converted into string.
  ***************************************************************************/
-std::string str(const float& value)
+std::string gammalib::str(const float& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -357,7 +358,7 @@ std::string str(const float& value)
  *
  * @param[in] value Double precision value to be converted into string.
  ***************************************************************************/
-std::string str(const double& value)
+std::string gammalib::str(const double& value)
 {
     std::ostringstream s_value;
     s_value << value;
@@ -372,7 +373,7 @@ std::string str(const double& value)
  *
  * Allocates a C string with the content of a C++ string.
  ***************************************************************************/
-char* tochar(const std::string& arg)
+char* gammalib::tochar(const std::string& arg)
 {
     // Allocate C string
     char* str = new char[arg.length()+1];
@@ -395,7 +396,7 @@ char* tochar(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-short toshort(const std::string& arg)
+short gammalib::toshort(const std::string& arg)
 {
     std::istringstream iss(arg);
     short              result;
@@ -409,7 +410,7 @@ short toshort(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-unsigned short toushort(const std::string& arg)
+unsigned short gammalib::toushort(const std::string& arg)
 {
     std::istringstream iss(arg);
     unsigned short     result;
@@ -423,7 +424,7 @@ unsigned short toushort(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-int toint(const std::string& arg)
+int gammalib::toint(const std::string& arg)
 {
     std::istringstream iss(arg);
     int                result;
@@ -437,7 +438,7 @@ int toint(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-unsigned int touint(const std::string& arg)
+unsigned int gammalib::touint(const std::string& arg)
 {
     std::istringstream iss(arg);
     unsigned int       result;
@@ -451,7 +452,7 @@ unsigned int touint(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-long tolong(const std::string& arg)
+long gammalib::tolong(const std::string& arg)
 {
     std::istringstream iss(arg);
     long               result;
@@ -465,7 +466,7 @@ long tolong(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-unsigned long toulong(const std::string& arg)
+unsigned long gammalib::toulong(const std::string& arg)
 {
     std::istringstream iss(arg);
     unsigned long      result;
@@ -479,7 +480,7 @@ unsigned long toulong(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-long long tolonglong(const std::string& arg)
+long long gammalib::tolonglong(const std::string& arg)
 {
     std::istringstream iss(arg);
     long long          result;
@@ -493,7 +494,7 @@ long long tolonglong(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-unsigned long long toulonglong(const std::string& arg)
+unsigned long long gammalib::toulonglong(const std::string& arg)
 {
     std::istringstream iss(arg);
     unsigned long long result;
@@ -507,7 +508,7 @@ unsigned long long toulonglong(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-float tofloat(const std::string& arg)
+float gammalib::tofloat(const std::string& arg)
 {
     std::istringstream iss(arg);
     float              result;
@@ -521,7 +522,7 @@ float tofloat(const std::string& arg)
  *
  * @param[in] arg String to be converted.
  ***************************************************************************/
-double todouble(const std::string& arg)
+double gammalib::todouble(const std::string& arg)
 {
     std::istringstream iss(arg);
     double             result;
@@ -535,7 +536,7 @@ double todouble(const std::string& arg)
  *
  * @param[in] arg String to be converted to upper case.
  ***************************************************************************/
-std::string toupper(const std::string& arg)
+std::string gammalib::toupper(const std::string& arg)
 {
     std::string s = arg;
     std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper);
@@ -548,7 +549,7 @@ std::string toupper(const std::string& arg)
  *
  * @param[in] arg String to be converted to upper case.
  ***************************************************************************/
-std::string tolower(const std::string& arg)
+std::string gammalib::tolower(const std::string& arg)
 {
     std::string s = arg;
     std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower);
@@ -562,7 +563,8 @@ std::string tolower(const std::string& arg)
  * @param[in] s String to be splitted.
  * @param[in] sep Separator(s).
  ***************************************************************************/
-std::vector<std::string> split(const std::string& s, const std::string& sep)
+std::vector<std::string> gammalib::split(const std::string& s,
+                                         const std::string& sep)
 {
     // Allocate result string vector
     std::vector<std::string> result;
@@ -597,7 +599,7 @@ std::vector<std::string> split(const std::string& s, const std::string& sep)
  *
  * Replicates a given string n time.
  ***************************************************************************/
-std::string fill(const std::string& s, int n)
+std::string gammalib::fill(const std::string& s, int n)
 {
     // Initialise result
     std::string result = "";
@@ -622,7 +624,7 @@ std::string fill(const std::string& s, int n)
  * Left justify string by adding whitespace to the right to achieve a length
  * of n characters.
  ***************************************************************************/
-std::string left(const std::string& s, int n, char c)
+std::string gammalib::left(const std::string& s, int n, char c)
 {
     // Compute number of characters to fill right
     int n_right  = n - s.length();
@@ -645,7 +647,7 @@ std::string left(const std::string& s, int n, char c)
  * Right justify string by adding whitespace to the left to achieve a length
  * of n characters.
  ***************************************************************************/
-std::string right(const std::string& s, int n, char c)
+std::string gammalib::right(const std::string& s, int n, char c)
 {
     // Compute number of characters to fill right
     int n_left  = n - s.length();
@@ -668,7 +670,7 @@ std::string right(const std::string& s, int n, char c)
  * Center string by adding whitespace to the left and the right to achieve a
  * length of n characters.
  ***************************************************************************/
-std::string center(const std::string& s, int n, char c)
+std::string gammalib::center(const std::string& s, int n, char c)
 {
     // Compute number of characters to fill left and right
     int n_right = (n-s.length()) / 2;
@@ -692,7 +694,7 @@ std::string center(const std::string& s, int n, char c)
  * Converts and string into the parameter format of type "s ......: " with a
  * total length of G_PARFORMAT_LENGTH.
  ***************************************************************************/
-std::string parformat(const std::string& s, const int& indent)
+std::string gammalib::parformat(const std::string& s, const int& indent)
 {
     // Compute number of characters to fill right. Do not clip the string if
     // it is too long since we do not want to loose information.
@@ -716,7 +718,7 @@ std::string parformat(const std::string& s, const int& indent)
  * The result is non-negative.
  * \a v1 can be positive or negative; \a v2 must be positive.
  ***************************************************************************/
-double modulo(double v1, double v2)
+double gammalib::modulo(double v1, double v2)
 {
     // Return
     return (v1 >= 0) ? ((v1 < v2) ? v1 : std::fmod(v1,v2)) : (std::fmod(v1,v2)+v2);
@@ -739,7 +741,7 @@ double modulo(double v1, double v2)
  *
  * which happens to be faster on most systems.
  ***************************************************************************/
-double arccos(const double& arg)
+double gammalib::arccos(const double& arg)
 {
     // Allocate result
     double arccos;
@@ -781,8 +783,8 @@ double arccos(const double& arg)
  * \f$E_{\rm pivot}\f$ is the pivot energy, and
  * \f$\gamma\f$ is the spectral index.
  ***************************************************************************/
-double plaw_photon_flux(const double& emin, const double& emax,
-                        const double& epivot, const double& gamma)
+double gammalib::plaw_photon_flux(const double& emin, const double& emax,
+                                  const double& epivot, const double& gamma)
 {
     // Initialise flux
     double flux = 0.0;
@@ -826,8 +828,8 @@ double plaw_photon_flux(const double& emin, const double& emax,
  * \f$E_{\rm pivot}\f$ is the pivot energy, and
  * \f$\gamma\f$ is the spectral index.
  ***************************************************************************/
-double plaw_energy_flux(const double& emin, const double& emax,
-                        const double& epivot, const double& gamma)
+double gammalib::plaw_energy_flux(const double& emin, const double& emax,
+                                  const double& epivot, const double& gamma)
 {
     // Initialise flux
     double flux = 0.0;
@@ -862,7 +864,7 @@ double plaw_energy_flux(const double& emin, const double& emax,
  * Checks if a file exists. If a directory with the same name if found, false
  * is returned.
  ***************************************************************************/
-bool file_exists(const std::string& filename)
+bool gammalib::file_exists(const std::string& filename)
 {
     // Initialise result
     bool result = false;
