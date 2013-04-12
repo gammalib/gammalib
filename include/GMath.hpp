@@ -33,7 +33,9 @@
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
-    double gammln(const double& x);
+    double arccos(const double& arg);
+    double gammln(const double& arg);
+    double modulo(const double& v1, const double& v2);
 }
 
 #endif /* GMATH_HPP */

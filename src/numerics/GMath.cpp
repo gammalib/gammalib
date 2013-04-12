@@ -27,12 +27,14 @@
 /* __ Includes ___________________________________________________________ */
 #include <cmath>
 #include "GMath.hpp"
+#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_USE_ASIN_FOR_ACOS             //!< Use asin for acos computations
 
 /* __ Debug definitions __________________________________________________ */
 
@@ -44,12 +46,54 @@
  ==========================================================================*/
 
 /***********************************************************************//**
+ * @brief Computes acos by avoiding NaN due to rounding errors
+ *
+ * @param[in] arg Argument.
+ * @return Arc cosine of argument.
+ *
+ * Returns the arc cosine by restricting the argument to [-1,1].
+ *
+ * If the compile option G_USE_ASIN_FOR_ACOS is defined, the function will
+ * compute
+ *
+ * \f[
+ *    acos(x) = \frac{\pi}{2} - asin(x)
+ * \f]
+ *
+ * which happens to be faster on most systems.
+ ***************************************************************************/
+double gammalib::arccos(const double& arg)
+{
+    // Allocate result
+    double arccos;
+
+    // Compute acos
+    if (arg >= 1) {
+        arccos = 0.0;
+    }
+    else if (arg <= -1.0) {
+        arccos = gammalib::pi;
+    }
+    else {
+        #if defined(G_USE_ASIN_FOR_ACOS)
+        arccos = gammalib::pihalf - std::asin(arg);
+        #else
+        arccos = std::acos(arg);
+        #endif
+    }
+
+    // Return result
+    return arccos;
+}
+
+
+/***********************************************************************//**
  * @brief Computes logarithm of gamma function
  *
  * @param[in] x Argument.
  * @return Logarithm of gamma function.
  ***************************************************************************/
-double gammalib::gammln(const double& x) {
+double gammalib::gammln(const double& arg) {
 
     // Define static constants
     static const double cof[6] = { 76.18009172947146,
@@ -60,8 +104,8 @@ double gammalib::gammln(const double& x) {
                                    -0.5395239384953e-5};
 
     // Evaluate logarithm of gamma function
-    double a = x;
-    double b = x;
+    double a = arg;
+    double b = arg;
     double c = a + 5.5;
     c -= (a + 0.5) * std::log(c);
     double d = 1.000000000190015;
@@ -73,3 +117,21 @@ double gammalib::gammln(const double& x) {
     // Return result
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Returns the remainder of the division \a v1/v2.
+ *
+ * @param[in] v1 Argument 1.
+ * @param[in] v2 Argument 2.
+ *
+ * Returns the remainder of the division \a v1/v2.
+ * The result is non-negative.
+ * \a v1 can be positive or negative; \a v2 must be positive.
+ ***************************************************************************/
+double gammalib::modulo(const double& v1, const double& v2)
+{
+    // Return
+    return (v1 >= 0) ? ((v1 < v2) ? v1 : std::fmod(v1,v2)) : (std::fmod(v1,v2)+v2);
+}
+
