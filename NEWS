@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-April, 9th, 2013
+April, 12th, 2013
 
 
 1. Introduction
@@ -88,6 +88,9 @@ GOptimizerFunction
 GOptimizer & GOptimizerLM
   The optimization operators have been removed and replaced by the
   optimize method.
+
+All GammaLib constants, defined in GTools.hpp, are now put in the
+gammalib namespace to avoid name clashes.
 
 
 3. Configuration

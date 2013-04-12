@@ -10,6 +10,7 @@
         Introduce GUrl classes for transparent URL handling
         Make use of GUrl class in XML I/O
         Optimize computations
+        Introduce gammalib namespace for constants
 
 2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

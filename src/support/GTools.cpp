@@ -749,11 +749,11 @@ double arccos(const double& arg)
         arccos = 0.0;
     }
     else if (arg <= -1.0) {
-        arccos = pi;
+        arccos = gammalib::pi;
     }
     else {
         #if defined(G_USE_ASIN_FOR_ACOS)
-        arccos = pihalf - std::asin(arg);
+        arccos = gammalib::pihalf - std::asin(arg);
         #else
         arccos = std::acos(arg);
         #endif
