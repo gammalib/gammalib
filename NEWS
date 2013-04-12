@@ -89,8 +89,9 @@ GOptimizer & GOptimizerLM
   The optimization operators have been removed and replaced by the
   optimize method.
 
-All GammaLib constants, defined in GTools.hpp, are now put in the
-gammalib namespace to avoid name clashes.
+All GammaLib constants, defined in GTools.hpp, and functions are now
+put in the gammalib namespace to avoid name clashes. Mathematical
+constants and functions have been moved to a new model named GMath.
 
 
 3. Configuration
@@ -169,7 +170,8 @@ GModelSpatialDiffuse
 
 9. Numerics module
 ------------------
-None
+The GNumerics file was renamed to GMath, and mathematical functions
+from GTools and GWcslib have been moved into this file.
 
 
 10. Observation module
