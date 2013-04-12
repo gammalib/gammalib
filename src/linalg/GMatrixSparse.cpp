@@ -1871,9 +1871,9 @@ std::string GMatrixSparse::print(const GChatter& chatter) const
             result.append(gammalib::str(m_fill_val));
         }
         result.append("\n"+gammalib::parformat("Number of allocated cells"));
-        result.append("\n"+gammalib::str(m_alloc));
+        result.append(gammalib::str(m_alloc));
         result.append("\n"+gammalib::parformat("Memory block size"));
-        result.append("\n"+gammalib::str(m_mem_block));
+        result.append(gammalib::str(m_mem_block));
         result.append("\n"+gammalib::parformat("Sparse matrix fill"));
         result.append(gammalib::str(fill()));
         result.append("\n"+gammalib::parformat("Pending element"));
