@@ -374,7 +374,7 @@ void GLATLtCubeMap::read(const GFitsTable* hdu)
     m_map.read(hdu);
 
     // Set costheta binning scheme
-    std::string scheme = strip_whitespace(toupper(hdu->string("THETABIN")));
+    std::string scheme = gammalib::strip_whitespace(gammalib::toupper(hdu->string("THETABIN")));
     m_sqrt_bin = (scheme == "SQRT(1-COSTHETA)");
 
     // Read attributes
@@ -503,16 +503,19 @@ std::string GLATLtCubeMap::print(const GChatter& chatter) const
         result.append("=== GLATLtCubeMap ===");
 
         // Append information
-        result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
-        result.append("\n"+parformat("Number of phi bins")+str(nphi()));
-        result.append("\n"+parformat("Cos theta binning"));
+        result.append("\n"+gammalib::parformat("Number of cos theta bins") +
+                      gammalib::str(ncostheta()));
+        result.append("\n"+gammalib::parformat("Number of phi bins") +
+                      gammalib::str(nphi()));
+        result.append("\n"+gammalib::parformat("Cos theta binning"));
         if (m_sqrt_bin) {
             result.append("sqrt");
         }
         else {
             result.append("linear");
         }
-        result.append("\n"+parformat("Minimum cos theta")+str(costhetamin()));
+        result.append("\n"+gammalib::parformat("Minimum cos theta") +
+                      gammalib::str(costhetamin()));
         result.append("\n"+m_map.print(chatter));
 
     } // endif: chatter was not silent

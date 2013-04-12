@@ -38,7 +38,7 @@ const char* GExceptionHandler::what() const throw()
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
 
     // Return message as C character array
-    return (tochar(message));
+    return (gammalib::tochar(message));
 }
 
 
@@ -202,7 +202,7 @@ GException::mem_alloc::mem_alloc(std::string origin, unsigned num)
     m_origin = origin;
 
     // Set message string
-    m_message = "Memory allocation error (" + str((int)num) + " elements)";
+    m_message = "Memory allocation error (" + gammalib::str((int)num) + " elements)";
 
     // Return
     return;
@@ -221,7 +221,7 @@ GException::not_enough_nodes::not_enough_nodes(std::string origin, int num)
     m_origin = origin;
 
     // Set message string
-    m_message = "Not enough nodes in node array (" + str(num) + " nodes).";
+    m_message = "Not enough nodes in node array (" + gammalib::str(num) + " nodes).";
 
     // Return
     return;
@@ -346,8 +346,8 @@ GException::csv_bad_columns::csv_bad_columns(std::string origin,
                                              std::string message)
 {
     m_origin  = origin;
-    m_message = "Inconsistent number of columns found in row "+str(row)+
-                " of file \""+filename+"\" ("+str(cols)+" expected, "+
-                str(elements)+" encountered). "+message;
+    m_message = "Inconsistent number of columns found in row "+gammalib::str(row)+
+                " of file \""+filename+"\" ("+gammalib::str(cols)+" expected, "+
+                gammalib::str(elements)+" encountered). "+message;
     return;
 }

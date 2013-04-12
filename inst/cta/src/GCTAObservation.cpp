@@ -407,7 +407,7 @@ void GCTAObservation::read(const GXmlElement& xml)
             std::string filename = par->attribute("file");
 
             // If filename is not empty then load effective area
-            if (strip_whitespace(filename).length() > 0) {
+            if (gammalib::strip_whitespace(filename).length() > 0) {
 
                 // Load effective area
                 m_response->load_aeff(filename);
@@ -420,19 +420,19 @@ void GCTAObservation::read(const GXmlElement& xml)
                 // Optionally extract thetacut (0.0 if no thetacut)
                 std::string s_thetacut = par->attribute("thetacut");
                 if (s_thetacut.length() > 0) {
-                    thetacut = todouble(s_thetacut);
+                    thetacut = gammalib::todouble(s_thetacut);
                 }
 
                 // Optionally extract scale factor (1.0 if no scale)
                 std::string s_scale = par->attribute("scale");
                 if (s_scale.length() > 0) {
-                    scale = todouble(s_scale);
+                    scale = gammalib::todouble(s_scale);
                 }
 
                 // Optionally extract sigma (0.0 if no sigma)
                 std::string s_sigma = par->attribute("sigma");
                 if (s_sigma.length() > 0) {
-                    sigma = todouble(s_sigma);
+                    sigma = gammalib::todouble(s_sigma);
                 }
 
                 // If we have an ARF then set attributes
@@ -463,7 +463,7 @@ void GCTAObservation::read(const GXmlElement& xml)
             std::string filename = par->attribute("file");
 
             // If filename is not empty then load point spread function
-            if (strip_whitespace(filename).length() > 0) {
+            if (gammalib::strip_whitespace(filename).length() > 0) {
                 m_response->load_psf(filename);
             }
 
@@ -480,7 +480,7 @@ void GCTAObservation::read(const GXmlElement& xml)
             std::string filename = par->attribute("file");
 
             // If filename is not empty then load energy dispersion
-            if (strip_whitespace(filename).length() > 0) {
+            if (gammalib::strip_whitespace(filename).length() > 0) {
                 m_response->load_edisp(filename);
             }
 
@@ -637,13 +637,13 @@ void GCTAObservation::write(GXmlElement& xml) const
             // Set attributes
             par->attribute("file", filename);
             if (thetacut > 0.0) {
-                par->attribute("thetacut", str(thetacut));
+                par->attribute("thetacut", gammalib::str(thetacut));
             }
             if (scale != 1.0) {
-                par->attribute("scale", str(scale));
+                par->attribute("scale", gammalib::str(scale));
             }
             if (sigma > 0.0) {
-                par->attribute("sigma", str(sigma));
+                par->attribute("sigma", gammalib::str(sigma));
             }
             npar[1]++;
         }
@@ -702,20 +702,24 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append("=== GCTAObservation ===");
 
         // Append information
-        result.append("\n"+parformat("Name")+name());
-        result.append("\n"+parformat("Identifier")+id());
-        result.append("\n"+parformat("Instrument")+instrument());
-        result.append("\n"+parformat("Statistics")+statistics());
-        result.append("\n"+parformat("Ontime")+str(ontime())+" s");
-        result.append("\n"+parformat("Livetime")+str(livetime())+" s");
-        result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
+        result.append("\n"+gammalib::parformat("Name")+name());
+        result.append("\n"+gammalib::parformat("Identifier")+id());
+        result.append("\n"+gammalib::parformat("Instrument")+instrument());
+        result.append("\n"+gammalib::parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Ontime"));
+        result.append(gammalib::str(ontime())+" s");
+        result.append("\n"+gammalib::parformat("Livetime"));
+        result.append(gammalib::str(livetime())+" s");
+        result.append("\n"+gammalib::parformat("Deadtime correction"));
+        result.append(gammalib::str(m_deadc));
 
         // Append pointing
         if (m_pointing != NULL) {
             result.append("\n"+m_pointing->print(chatter));
         }
         else {
-            result.append("\n"+parformat("CTA pointing")+"undefined");
+            result.append("\n"+gammalib::parformat("CTA pointing"));
+            result.append("undefined");
         }
 
         // Append response
@@ -723,7 +727,8 @@ std::string GCTAObservation::print(const GChatter& chatter) const
             result.append("\n"+response()->print(chatter));
         }
         else {
-            result.append("\n"+parformat("CTA response")+"undefined");
+            result.append("\n"+gammalib::parformat("CTA response"));
+            result.append("undefined");
         }
 
         // Append events

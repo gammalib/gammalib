@@ -91,7 +91,7 @@ double cta_roi_arclength(const double& rad,     const double& dist,
                 double cosrad = std::cos(rad);
                 double sinrad = std::sin(rad);
                 double cosang = (cosroi - cosdist*cosrad) / (sindist*sinrad);
-                arclength     = 2.0 * arccos(cosang);
+                arclength     = 2.0 * gammalib::arccos(cosang);
                 #if G_CHECK_FOR_NAN
                 if (std::isnan(arclength)) {
                     std::cout << "cta_roi_arclength: NaN occured";

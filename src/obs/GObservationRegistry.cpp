@@ -269,12 +269,13 @@ std::string GObservationRegistry::print(const GChatter& chatter) const
         result.append("=== GObservationRegistry ===");
 
         // Append information
-        result.append("\n"+parformat("Number of observations")+str(m_number));
+        result.append("\n"+gammalib::parformat("Number of observations"));
+        result.append(gammalib::str(m_number));
 
         // NORMAL: Append observations
         if (chatter >= NORMAL) {
             for (int i = 0; i < m_number; ++i) {
-                result.append("\n"+parformat(m_names[i]));
+                result.append("\n"+gammalib::parformat(m_names[i]));
                 result.append(m_obs[i]->instrument());
             }
         }

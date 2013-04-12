@@ -460,7 +460,7 @@ void GFitsHDU::open(void* vptr, int hdunum)
     // Get HDU name from header. If no name was found and this is the primary
     // HDU then set the name to "PRIMARY", otherwise to "NoName".
     try {
-        m_name = strip_whitespace(m_header.string("EXTNAME"));
+        m_name = gammalib::strip_whitespace(m_header.string("EXTNAME"));
     }
     catch (GException::fits_key_not_found &e) {
         m_name.clear();
@@ -529,8 +529,9 @@ std::string GFitsHDU::print_hdu(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append HDU information
-        result.append(parformat("HDU number")+str(m_hdunum)+"\n");
-        result.append(parformat("HDU name")+m_name+"\n");
+        result.append(gammalib::parformat("HDU number"));
+        result.append(gammalib::str(m_hdunum)+"\n");
+        result.append(gammalib::parformat("HDU name")+m_name+"\n");
 
     } // endif: chatter was not silent
 

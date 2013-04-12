@@ -551,21 +551,25 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         result.append("=== GCOMObservation ===");
 
         // Append information
-        result.append("\n"+parformat("Name")+name());
-        result.append("\n"+parformat("Identifier")+id());
-        result.append("\n"+parformat("Instrument")+instrument());
-        result.append("\n"+parformat("Statistics")+statistics());
-        result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
-        result.append("\n"+parformat("Livetime")+str(livetime())+" sec");
-        result.append("\n"+parformat("Deadtime correction")+str(m_deadc));
-        result.append("\n"+parformat("Energy band")+str(ewidth())+" MeV");
+        result.append("\n"+gammalib::parformat("Name")+name());
+        result.append("\n"+gammalib::parformat("Identifier")+id());
+        result.append("\n"+gammalib::parformat("Instrument")+instrument());
+        result.append("\n"+gammalib::parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Ontime"));
+        result.append(gammalib::str(ontime())+" sec");
+        result.append("\n"+gammalib::parformat("Livetime"));
+        result.append(gammalib::str(livetime())+" sec");
+        result.append("\n"+gammalib::parformat("Deadtime correction"));
+        result.append(gammalib::str(m_deadc));
+        result.append("\n"+gammalib::parformat("Energy band"));
+        result.append(gammalib::str(ewidth())+" MeV");
 
         // Append pointing
         if (m_pointing != NULL) {
             result.append("\n"+m_pointing->print(chatter));
         }
         else {
-            result.append("\n"+parformat("Pointing")+"undefined");
+            result.append("\n"+gammalib::parformat("Pointing")+"undefined");
         }
 
         // Append response
@@ -573,7 +577,7 @@ std::string GCOMObservation::print(const GChatter& chatter) const
             result.append("\n"+response()->print(chatter));
         }
         else {
-            result.append("\n"+parformat("Response")+"undefined");
+            result.append("\n"+gammalib::parformat("Response")+"undefined");
         }
 
         // Append events
@@ -581,7 +585,7 @@ std::string GCOMObservation::print(const GChatter& chatter) const
             result.append("\n"+m_events->print(chatter));
         }
         else {
-            result.append("\n"+parformat("Events")+"undefined");
+            result.append("\n"+gammalib::parformat("Events")+"undefined");
         }
 
         // Append DRB, DRG and DRX

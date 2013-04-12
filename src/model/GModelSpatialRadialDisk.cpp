@@ -264,7 +264,7 @@ double GModelSpatialRadialDisk::eval(const double&  theta,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpatialRadialDisk::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -504,7 +504,8 @@ std::string GModelSpatialRadialDisk::print(const GChatter& chatter) const
         result.append("=== GModelSpatialRadialDisk ===");
 
         // Append parameters
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }

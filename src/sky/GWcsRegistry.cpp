@@ -321,11 +321,12 @@ std::string GWcsRegistry::print(const GChatter& chatter) const
         result.append("=== GWcsRegistry ===");
 
         // Append information
-        result.append("\n"+parformat("Number of projections")+str(m_number));
+        result.append("\n"+gammalib::parformat("Number of projections"));
+        result.append(gammalib::str(m_number));
 
         // Append projections
         for (int i = 0; i < m_number; ++i) {
-            result.append("\n"+parformat(m_codes[i]));
+            result.append("\n"+gammalib::parformat(m_codes[i]));
             result.append(m_names[i]);
         }
 

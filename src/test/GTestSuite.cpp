@@ -460,8 +460,8 @@ void GTestSuite::test_value(const int&         value,
         formated_name = format_name(name);
     }
     else {
-        formated_name = format_name("Test if " + str(value) + " is " + 
-                                    str(expected));
+        formated_name = format_name("Test if " + gammalib::str(value) + " is " + 
+                                    gammalib::str(expected));
     }
 
     // Create a test case of failure type
@@ -480,8 +480,8 @@ void GTestSuite::test_value(const int&         value,
         formated_message = message;
     }
     else {
-        formated_message = "Value " + str(value) + " equals not the " +
-                           "expected value of " + str(expected) + ".";
+        formated_message = "Value " + gammalib::str(value) + " equals not the " +
+                           "expected value of " + gammalib::str(expected) + ".";
     }
 
     // Set message
@@ -523,8 +523,8 @@ void GTestSuite::test_value(const double&      value,
         formated_name = format_name(name);
     }
     else {
-        formated_name = format_name("Test if " + str(value) + " is within " + 
-                                    str(expected) + " +/- " + str(eps));
+        formated_name = format_name("Test if " + gammalib::str(value) + " is within " + 
+                                    gammalib::str(expected) + " +/- " + gammalib::str(eps));
     }
 
     // Create a test case of failure type
@@ -543,9 +543,9 @@ void GTestSuite::test_value(const double&      value,
         formated_message = message;
     }
     else {
-        formated_message = "Value " + str(value) + " not within " +
-                           str(expected) + " +/- " + str(eps) +
-                           " (value-expected = " + str(value-expected) + ").";
+        formated_message = "Value " + gammalib::str(value) + " not within " +
+                           gammalib::str(expected) + " +/- " + gammalib::str(eps) +
+                           " (value-expected = " + gammalib::str(value-expected) + ").";
     }
 
     // Set message
@@ -897,11 +897,15 @@ std::string GTestSuite::print(const GChatter& chatter) const
         result.append("=== GTestSuite ===");
 
         // Append information
-        result.append("\n"+parformat("Name")+m_name);
-        result.append("\n"+parformat("Number of functions")+str(m_names.size()));
-        result.append("\n"+parformat("Number of executed tests")+str(size()));
-        result.append("\n"+parformat("Number of errors")+str(errors()));
-        result.append("\n"+parformat("Number of failures")+str(failures()));
+        result.append("\n"+gammalib::parformat("Name")+m_name);
+        result.append("\n"+gammalib::parformat("Number of functions"));
+        result.append(gammalib::str(m_names.size()));
+        result.append("\n"+gammalib::parformat("Number of executed tests"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of errors"));
+        result.append(gammalib::str(errors()));
+        result.append("\n"+gammalib::parformat("Number of failures"));
+        result.append(gammalib::str(failures()));
 
     } // endif: chatter was not silent
 

@@ -387,7 +387,7 @@ std::string GXmlElement::print(const GChatter& chatter,
     if (chatter != SILENT) {
 
         // Initialise result string
-        result = fill(" ", indent);
+        result = gammalib::fill(" ", indent);
 
         // Append element to string
         result.append("GXmlElement::"+m_name);

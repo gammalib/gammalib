@@ -874,8 +874,9 @@ std::string GEbounds::print(const GChatter& chatter) const
         result.append("=== GEbounds ===");
 
         // Append information
-        result.append("\n"+parformat("Number of intervals")+str(size()));
-        result.append("\n"+parformat("Energy range"));
+        result.append("\n"+gammalib::parformat("Number of intervals"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Energy range"));
         result.append(emin().print());
         result.append(" - ");
         result.append(emax().print());
@@ -885,7 +886,8 @@ std::string GEbounds::print(const GChatter& chatter) const
             if (size() > 1) {
                 for (int i = 0; i < size(); ++i) {
                     result.append("\n");
-                    result.append(parformat("Energy interval "+str(i)));
+                    result.append(gammalib::parformat("Energy interval "));
+                    result.append(gammalib::str(i));
                     result.append(emin(i).print());
                     result.append(" - ");
                     result.append(emax(i).print());

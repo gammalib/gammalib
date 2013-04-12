@@ -353,19 +353,19 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
 
         // Append formatted column name. Optionally add units
         if (m_unit.length() > 0) {
-            result.append(parformat(m_name+" ("+m_unit+")"));
+            result.append(gammalib::parformat(m_name+" ("+m_unit+")"));
         }
         else {
-            result.append(parformat(m_name));
+            result.append(gammalib::parformat(m_name));
         }
 
         // Append column number. This will be "-" if the column does not exist
         // in the FITS file.
         if (m_colnum > 0) {
-            result.append(right(str(m_colnum),4)+" ");
+            result.append(gammalib::right(gammalib::str(m_colnum),4)+" ");
         }
         else {
-            result.append(right("[-]",4)+" ");
+            result.append(gammalib::right("[-]",4)+" ");
         }
 
         // Append loading information
@@ -383,9 +383,9 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         if (!m_dim.empty()) {
     
             // Build TDIM string
-            std::string value = "("+str(m_dim[0]);
+            std::string value = "("+gammalib::str(m_dim[0]);
             for (int k = 1; k < m_dim.size(); ++k) {
-                value += ","+str(m_dim[k]);
+                value += ","+gammalib::str(m_dim[k]);
             }
             value += ")";
         
@@ -394,11 +394,11 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         }
 
         // Append cfitsio information
-        result.append(" repeat="+str(m_repeat));
-        result.append(" width="+str(m_width));
-        result.append(" number="+str(m_number));
-        result.append(" length="+str(m_length));
-        result.append(" size="+str(m_size));
+        result.append(" repeat=" + gammalib::str(m_repeat));
+        result.append(" width="  + gammalib::str(m_width));
+        result.append(" number=" + gammalib::str(m_number));
+        result.append(" length=" + gammalib::str(m_length));
+        result.append(" size="   + gammalib::str(m_size));
 
     } // endif: chatter was not silent
 

@@ -37,7 +37,7 @@ const char* GLATExceptionHandler::what() const throw()
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
 
     // Return message as C character array
-    return tochar(message);
+    return gammalib::tochar(message);
 }
 
 
@@ -284,8 +284,8 @@ GLATException::inconsistent_response::inconsistent_response(std::string origin,
                                                             std::string message)
 {
     m_origin  = origin;
-    m_message = "Inconsistent response table found. Expected "+str(expect)+
-                " elements, found "+str(size)+". " + message;
+    m_message = "Inconsistent response table found. Expected "+gammalib::str(expect)+
+                " elements, found "+gammalib::str(size)+". " + message;
     return;
 }
 

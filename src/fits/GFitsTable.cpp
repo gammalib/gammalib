@@ -574,7 +574,7 @@ std::string GFitsTable::print(const GChatter& chatter) const
         result.append(print_hdu(chatter));
 
         // Append table type
-        result.append(parformat("Table type"));
+        result.append(gammalib::parformat("Table type"));
         switch (m_type) {
         case GFitsHDU::HT_ASCII_TABLE:
             result.append("ASCII table\n");
@@ -588,8 +588,8 @@ std::string GFitsTable::print(const GChatter& chatter) const
         }
 
         // Append table dimensions
-        result.append(parformat("Number of rows")+str(m_rows)+"\n");
-        result.append(parformat("Number of columns")+str(m_cols)+"\n");
+        result.append(gammalib::parformat("Number of rows")+gammalib::str(m_rows)+"\n");
+        result.append(gammalib::parformat("Number of columns")+gammalib::str(m_cols)+"\n");
 
         // Append header information
         result.append(m_header.print(chatter));
@@ -602,7 +602,7 @@ std::string GFitsTable::print(const GChatter& chatter) const
                     result.append(m_columns[i]->print(chatter));
                 }
                 else {
-                    result.append(" Column "+str(i)+" undefined");
+                    result.append(" Column "+gammalib::str(i)+" undefined");
                 }
             }
         }
@@ -744,11 +744,11 @@ void GFitsTable::data_open(void* vptr)
         
         // If found, extract column dimension into vector array of integers
         std::vector<int> vdim;
-        std::string      sdim = strip_chars(strip_whitespace(&(dim[1])),"()");
+        std::string      sdim = gammalib::strip_chars(gammalib::strip_whitespace(&(dim[1])),"()");
         if (sdim.length() > 0) {
-            std::vector<std::string> elements = split(sdim, ",");
+            std::vector<std::string> elements = gammalib::split(sdim, ",");
             for (int k = 0; k < elements.size(); ++k) {
-                vdim.push_back(toint(elements[k]));
+                vdim.push_back(gammalib::toint(elements[k]));
             }
         }
 
@@ -761,8 +761,8 @@ void GFitsTable::data_open(void* vptr)
         }
 
         // Store column definition
-        m_columns[i]->name(strip_whitespace(&(value[1])));
-        m_columns[i]->unit(strip_whitespace(&(unit[1])));
+        m_columns[i]->name(gammalib::strip_whitespace(&(value[1])));
+        m_columns[i]->unit(gammalib::strip_whitespace(&(unit[1])));
         m_columns[i]->dim(vdim);
         m_columns[i]->m_colnum = i+1;
         m_columns[i]->m_type   = typecode;
@@ -1062,7 +1062,7 @@ void GFitsTable::data_save(void)
                 throw GException::fits_error(G_DATA_SAVE, status);
             }
             value[strlen(value)-1] = '\0';
-            std::string colname = strip_whitespace(&(value[1]));
+            std::string colname = gammalib::strip_whitespace(&(value[1]));
             
             // Check if this column is actually in our list of columns
             bool used = false;
@@ -1109,7 +1109,7 @@ void GFitsTable::data_save(void)
             if (m_columns[i]->unit().length() > 0) {
 
                 // Build keyname
-                std::string keyname = "TUNIT"+str(colnum);
+                std::string keyname = "TUNIT"+gammalib::str(colnum);
 
                 // Update header card
                 card(keyname, m_columns[i]->unit(), "physical unit of field");
@@ -1119,12 +1119,12 @@ void GFitsTable::data_save(void)
             if (m_columns[i]->dim().size() > 0) {
         
                 // Build keyname
-                std::string keyname = "TDIM"+str(colnum);
+                std::string keyname = "TDIM"+gammalib::str(colnum);
             
                 // Build value string
-                std::string value = "("+str(m_columns[i]->dim()[0]);
+                std::string value = "("+gammalib::str(m_columns[i]->dim()[0]);
                 for (int k = 1; k < m_columns[i]->dim().size(); ++k) {
-                    value += ","+str(m_columns[i]->dim()[k]);
+                    value += ","+gammalib::str(m_columns[i]->dim()[k]);
                 }
                 value += ")";
                 

@@ -267,11 +267,12 @@ std::string GCTAModelRadialRegistry::print(const GChatter& chatter) const
         result.append("=== GCTAModelRadialRegistry ===");
 
         // Append information
-        result.append("\n"+parformat("Number of models")+str(m_number));
+        result.append("\n"+gammalib::parformat("Number of models") +
+                      gammalib::str(m_number));
 
         // Append models
         for (int i = 0; i < m_number; ++i) {
-            result.append("\n"+parformat(m_names[i]));
+            result.append("\n"+gammalib::parformat(m_names[i]));
             result.append(m_models[i]->type());
         }
 

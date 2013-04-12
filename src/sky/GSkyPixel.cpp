@@ -232,9 +232,9 @@ std::string GSkyPixel::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append pixel
-        result.append(str(x()));
+        result.append(gammalib::str(x()));
         result.append(",");
-        result.append(str(y()));
+        result.append(gammalib::str(y()));
         result.append(")");
 
     } // endif: chatter was not silent

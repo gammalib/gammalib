@@ -303,7 +303,7 @@ double GCOMResponse::irf(const GEvent&       event,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(irf) || isinfinite(irf)) {
+    if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
         std::cout << "*** ERROR: GCOMResponse::irf:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (irf=" << irf;
@@ -337,7 +337,7 @@ double GCOMResponse::npred(const GPhoton&      photon,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: GCOMResponse::npred:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (";
@@ -519,18 +519,30 @@ std::string GCOMResponse::print(const GChatter& chatter) const
         result.append("=== GCOMResponse ===");
 
         // Append information
-        result.append("\n"+parformat("Calibration database")+m_caldb);
-        result.append("\n"+parformat("IAQ file name")+m_iaqname);
-        result.append("\n"+parformat("Number of Phigeo bins")+str(m_phigeo_bins));
-        result.append("\n"+parformat("Number of Phibar bins")+str(m_phibar_bins));
-        result.append("\n"+parformat("Phigeo reference value")+str(m_phigeo_ref_value)+" deg");
-        result.append("\n"+parformat("Phigeo reference pixel")+str(m_phigeo_ref_pixel));
-        result.append("\n"+parformat("Phigeo bin size")+str(m_phigeo_bin_size)+" deg");
-        result.append("\n"+parformat("Phigeo first bin value")+str(m_phigeo_min)+" deg");
-        result.append("\n"+parformat("Phibar reference value")+str(m_phibar_ref_value)+" deg");
-        result.append("\n"+parformat("Phibar reference pixel")+str(m_phibar_ref_pixel));
-        result.append("\n"+parformat("Phibar bin size")+str(m_phibar_bin_size)+" deg");
-        result.append("\n"+parformat("Phibar first bin value")+str(m_phibar_min)+" deg");
+        result.append("\n"+gammalib::parformat("Calibration database"));
+        result.append(m_caldb);
+        result.append("\n"+gammalib::parformat("IAQ file name"));
+        result.append(m_iaqname);
+        result.append("\n"+gammalib::parformat("Number of Phigeo bins"));
+        result.append(gammalib::str(m_phigeo_bins));
+        result.append("\n"+gammalib::parformat("Number of Phibar bins"));
+        result.append(gammalib::str(m_phibar_bins));
+        result.append("\n"+gammalib::parformat("Phigeo reference value"));
+        result.append(gammalib::str(m_phigeo_ref_value)+" deg");
+        result.append("\n"+gammalib::parformat("Phigeo reference pixel"));
+        result.append(gammalib::str(m_phigeo_ref_pixel));
+        result.append("\n"+gammalib::parformat("Phigeo bin size"));
+        result.append(gammalib::str(m_phigeo_bin_size)+" deg");
+        result.append("\n"+gammalib::parformat("Phigeo first bin value"));
+        result.append(gammalib::str(m_phigeo_min)+" deg");
+        result.append("\n"+gammalib::parformat("Phibar reference value"));
+        result.append(gammalib::str(m_phibar_ref_value)+" deg");
+        result.append("\n"+gammalib::parformat("Phibar reference pixel"));
+        result.append(gammalib::str(m_phibar_ref_pixel));
+        result.append("\n"+gammalib::parformat("Phibar bin size"));
+        result.append(gammalib::str(m_phibar_bin_size)+" deg");
+        result.append("\n"+gammalib::parformat("Phibar first bin value"));
+        result.append(gammalib::str(m_phibar_min)+" deg");
 
     } // endif: chatter was not silent
 

@@ -193,7 +193,7 @@ std::string GWcs::coordsys(void) const
 void GWcs::coordsys(const std::string& coordsys)
 {
     // Convert argument to upper case
-    std::string ucoordsys = toupper(coordsys);
+    std::string ucoordsys = gammalib::toupper(coordsys);
 
     // Set coordinate system
     if (ucoordsys == "EQU" || ucoordsys == "CEL" || ucoordsys == "C")

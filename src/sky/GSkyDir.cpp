@@ -551,7 +551,7 @@ double GSkyDir::dist(const GSkyDir& dir) const
     }
 
     // Compute distance (use argument save GTools function)
-    double dist = arccos(cosdis);
+    double dist = gammalib::arccos(cosdis);
 
     // Return distance
     return dist;
@@ -705,12 +705,12 @@ std::string GSkyDir::print(const GChatter& chatter) const
 
         // Put coordinates in string
         if (m_has_lb) {
-            result = "(l,b)=("+str(m_l*gammalib::rad2deg) + "," +
-                     str(m_b*gammalib::rad2deg)+")";
+            result = "(l,b)=("+gammalib::str(m_l*gammalib::rad2deg) + "," +
+                     gammalib::str(m_b*gammalib::rad2deg)+")";
         }
         else if (m_has_radec) {
-            result = "(RA,Dec)=("+str(m_ra*gammalib::rad2deg) + "," +
-                     str(m_dec*gammalib::rad2deg)+")";
+            result = "(RA,Dec)=("+gammalib::str(m_ra*gammalib::rad2deg) + "," +
+                     gammalib::str(m_dec*gammalib::rad2deg)+")";
         }
         else {
             result = "(RA,Dec)=(not initialised)";
@@ -868,7 +868,7 @@ void GSkyDir::euler(const int& type, const double& xin, const double &yin,
 
     //
     *yout = std::asin(b);
-    *xout = modulo((a+psi[type] + gammalib::fourpi), gammalib::twopi);
+    *xout = gammalib::modulo((a+psi[type] + gammalib::fourpi), gammalib::twopi);
 
     // Return
     return;

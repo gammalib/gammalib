@@ -565,18 +565,28 @@ std::string GCOMEventCube::print(const GChatter& chatter) const
         result.append("=== GCOMEventCube ===");
 
         // Append information
-        result.append("\n"+parformat("Number of events")+str(number()));
-        result.append("\n"+parformat("Number of elements")+str(size()));
-        result.append("\n"+parformat("Size (Chi x Psi x Phi)"));
-        result.append(str(nchi())+" x "+str(npsi())+" x "+str(nphi()));
-        result.append("\n"+parformat("Energy range"));
-        result.append(str(emin().MeV())+" - "+str(emax().MeV())+" MeV");
-        result.append("\n"+parformat("Mean energy")+m_energy.print(chatter));
-        result.append("\n"+parformat("Energy bin width")+m_ewidth.print(chatter));
-        result.append("\n"+parformat("Time interval"));
-        result.append(str(tstart().jd())+" - "+str(tstop().jd())+" Julian days");
-        result.append("\n"+parformat("Mean time")+m_time.print(chatter));
-        result.append("\n"+parformat("Ontime")+str(m_ontime)+" s");
+        result.append("\n"+gammalib::parformat("Number of events"));
+        result.append(gammalib::str(number()));
+        result.append("\n"+gammalib::parformat("Number of elements"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Size (Chi x Psi x Phi)"));
+        result.append(gammalib::str(nchi())+" x ");
+        result.append(gammalib::str(npsi())+" x ");
+        result.append(gammalib::str(nphi()));
+        result.append("\n"+gammalib::parformat("Energy range"));
+        result.append(gammalib::str(emin().MeV())+" - ");
+        result.append(gammalib::str(emax().MeV())+" MeV");
+        result.append("\n"+gammalib::parformat("Mean energy"));
+        result.append(m_energy.print(chatter));
+        result.append("\n"+gammalib::parformat("Energy bin width"));
+        result.append(m_ewidth.print(chatter));
+        result.append("\n"+gammalib::parformat("Time interval"));
+        result.append(gammalib::str(tstart().jd())+" - ");
+        result.append(gammalib::str(tstop().jd())+" Julian days");
+        result.append("\n"+gammalib::parformat("Mean time"));
+        result.append(m_time.print(chatter));
+        result.append("\n"+gammalib::parformat("Ontime"));
+        result.append(gammalib::str(m_ontime)+" s");
 
         // Append skymap definition
         result.append("\n"+m_map.print(chatter));

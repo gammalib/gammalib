@@ -453,7 +453,7 @@ double GResponse::npred_radial(const GSource& source,
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: GResponse::npred_radial:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
@@ -529,7 +529,7 @@ double GResponse::npred_elliptical(const GSource& source,
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: GResponse::npred_elliptical:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
@@ -636,7 +636,7 @@ double GResponse::npred_radial_kern_theta::eval(double theta)
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: GResponse::npred_radial_kern_theta::eval";
         std::cout << "(theta=" << theta << "):";
         std::cout << " NaN/Inf encountered";
@@ -679,7 +679,7 @@ double GResponse::npred_radial_kern_phi::eval(double phi)
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: GResponse::npred_radial_kern_phi::eval";
         std::cout << "(phi=" << phi << "):";
         std::cout << " NaN/Inf encountered";
@@ -724,7 +724,7 @@ double GResponse::npred_elliptical_kern_theta::eval(double theta)
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: GResponse::npred_radial_kern_theta::eval";
         std::cout << "(theta=" << theta << "):";
         std::cout << " NaN/Inf encountered";
@@ -769,7 +769,7 @@ double GResponse::npred_elliptical_kern_phi::eval(double phi)
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: GResponse::npred_radial_kern_phi::eval";
         std::cout << "(phi=" << phi << "):";
         std::cout << " NaN/Inf encountered";

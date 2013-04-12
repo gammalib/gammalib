@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GCOMException.cpp  - COMPTEL exception handler             *
+ *              GCOMException.cpp - COMPTEL exception handler              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,7 +38,7 @@ const char* GCOMExceptionHandler::what() const throw()
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
 
     // Return message as C character array
-    return tochar(message);
+    return gammalib::tochar(message);
 }
 
 

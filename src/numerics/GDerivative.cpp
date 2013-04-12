@@ -537,14 +537,18 @@ std::string GDerivative::print(const GChatter& chatter) const
         result.append("=== GDerivative ===");
 
         // Append information
-        result.append("\n"+parformat("Relative precision")+str(eps()));
-        result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
-        result.append("\n"+parformat("Initial step fraction")+str(step_frac()));
+        result.append("\n"+gammalib::parformat("Relative precision"));
+        result.append(gammalib::str(eps()));
+        result.append("\n"+gammalib::parformat("Max. number of iterations"));
+        result.append(gammalib::str(max_iter()));
+        result.append("\n"+gammalib::parformat("Initial step fraction"));
+        result.append(gammalib::str(step_frac()));
         if (silent()) {
-            result.append("\n"+parformat("Warnings")+"suppressed");
+            result.append("\n"+gammalib::parformat("Warnings")+"suppressed");
         }
         else {
-            result.append("\n"+parformat("Warnings")+"in standard output");
+            result.append("\n"+gammalib::parformat("Warnings"));
+            result.append("in standard output");
         }
 
     } // endif: chatter was not silent

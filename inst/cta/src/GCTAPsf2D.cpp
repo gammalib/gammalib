@@ -398,7 +398,7 @@ std::string GCTAPsf2D::print(const GChatter& chatter) const
         result.append("=== GCTAPsf2D ===");
 
         // Append information
-        result.append("\n"+parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
         result.append("\n"+m_psf.print(chatter));
 
     } // endif: chatter was not silent

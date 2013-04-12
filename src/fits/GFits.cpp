@@ -245,7 +245,7 @@ void GFits::open(const std::string& filename, bool create)
         throw GException::fits_already_opened(G_OPEN, m_filename);
 
     // Expand environment variables
-    std::string fname = expand_env(filename);
+    std::string fname = gammalib::expand_env(filename);
 
     // Initialise FITS file as readwrite and non created
     m_readwrite = true;
@@ -322,7 +322,7 @@ void GFits::open(const std::string& filename, bool create)
             hdu = new GFitsBinTable;
             break;
         default:
-            std::string msg = "Unknown HDU type \""+str(type)+"\"";
+            std::string msg = "Unknown HDU type \""+gammalib::str(type)+"\"";
             throw GException::fits_invalid_type(G_OPEN, msg);
             break;
         }
@@ -421,7 +421,7 @@ void GFits::save(bool clobber)
 void GFits::saveto(const std::string& filename, bool clobber)
 {
     // Expand environment variables
-    std::string fname = expand_env(filename);
+    std::string fname = gammalib::expand_env(filename);
 
     // Debug header
     #if DEBUG
@@ -435,7 +435,7 @@ void GFits::saveto(const std::string& filename, bool clobber)
     }
 
     // ... otherwise, if file exists then throw an exception
-    else if (file_exists(fname)) {
+    else if (gammalib::file_exists(fname)) {
         throw GException::fits_file_exist(G_SAVETO, fname);
     }
 
@@ -593,7 +593,7 @@ bool GFits::hashdu(const std::string& extname) const
     bool present = false;
 
     // Check primary HDU if requested ...
-    if (toupper(extname) == "PRIMARY") {
+    if (gammalib::toupper(extname) == "PRIMARY") {
         if (size() > 0) {
             present = true;
         }
@@ -648,7 +648,7 @@ GFitsHDU* GFits::hdu(const std::string& extname) const
     GFitsHDU* ptr = NULL;
 
     // Return primary HDU if requested ...
-    if (toupper(extname) == "PRIMARY") {
+    if (gammalib::toupper(extname) == "PRIMARY") {
         if (size() > 0) {
             ptr = m_hdu[0];
         }
@@ -753,7 +753,7 @@ GFitsImage* GFits::image(int extno) const
     // Throw an error if HDU is not an image
     if (ptr->exttype() != GFitsHDU::HT_IMAGE) {
         throw GException::fits_hdu_not_image(G_IMAGE2,
-                                             "(extno="+str(extno)+")",
+                                             "(extno="+gammalib::str(extno)+")",
                                              ptr->exttype());
     }
 
@@ -807,7 +807,7 @@ GFitsTable* GFits::table(int extno) const
     if (ptr->exttype() != GFitsHDU::HT_ASCII_TABLE &&
         ptr->exttype() != GFitsHDU::HT_BIN_TABLE) {
         throw GException::fits_hdu_not_table(G_TABLE2,
-                                             "(extno="+str(extno)+")",
+                                             "(extno="+gammalib::str(extno)+")",
                                              ptr->exttype());
     }
 
@@ -831,25 +831,26 @@ std::string GFits::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GFits ===\n");
+        result.append("=== GFits ===");
 
         // Append file information
-        result.append(parformat("Filename")+m_filename+"\n");
-        result.append(parformat("History"));
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("History"));
         if (m_created) {
-            result.append("new file\n");
+            result.append("new file");
         }
         else {
-            result.append("existing file\n");
+            result.append("existing file");
         }
-        result.append(parformat("Mode"));
+        result.append("\n"+gammalib::parformat("Mode"));
         if (m_readwrite) {
-            result.append("read/write\n");
+            result.append("read/write");
         }
         else {
-            result.append("read only\n");
+            result.append("read only");
         }
-        result.append(parformat("Number of HDUs")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of HDUs"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n");
             result.append(m_hdu[i]->print(chatter));

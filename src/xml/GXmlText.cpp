@@ -219,7 +219,7 @@ std::string GXmlText::print(const GChatter& chatter,
     if (chatter != SILENT) {
 
         // Initialise result string
-        result = fill(" ", indent);
+        result = gammalib::fill(" ", indent);
 
         // Append text to string
         result.append("GXmlText::"+m_text);

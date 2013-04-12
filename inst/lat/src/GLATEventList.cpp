@@ -383,13 +383,14 @@ std::string GLATEventList::print(const GChatter& chatter) const
         result.append("=== GLATEventList ===");
 
         // Append information
-        result.append("\n"+parformat("Number of events")+str(number()));
+        result.append("\n"+gammalib::parformat("Number of events") +
+                      gammalib::str(number()));
 
         // Append DS keywords
-        result.append("\n"+parformat("Number of DS keywords"));
-        result.append(str(m_ds_type.size()));
+        result.append("\n"+gammalib::parformat("Number of DS keywords"));
+        result.append(gammalib::str(m_ds_type.size()));
         for (int i = 0; i < m_ds_type.size(); ++i) {
-            result.append("\n"+parformat(" Data selection"));
+            result.append("\n"+gammalib::parformat(" Data selection"));
             result.append("Type="+m_ds_type[i]);
             if (m_ds_unit[i].length() > 0) {
                 result.append(" Unit="+m_ds_unit[i]);
@@ -400,10 +401,10 @@ std::string GLATEventList::print(const GChatter& chatter) const
         }
 
         // Append diffuse keywords
-        result.append("\n"+parformat("Number of diffuse models"));
-        result.append(str(m_difrsp_label.size()));
+        result.append("\n"+gammalib::parformat("Number of diffuse models"));
+        result.append(gammalib::str(m_difrsp_label.size()));
         for (int i = 0; i < m_difrsp_label.size(); ++i) {
-            result.append("\n"+parformat(" Diffuse component"));
+            result.append("\n"+gammalib::parformat(" Diffuse component"));
             result.append(m_difrsp_label[i]);
         }
 

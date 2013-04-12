@@ -442,11 +442,13 @@ std::string GOptimizerLM::print(const GChatter& chatter) const
         result.append("=== GOptimizerLM ===");
 
         // Append information
-        result.append("\n"+parformat("Optimized function value")+str(m_value));
-        result.append("\n"+parformat("Absolute precision")+str(m_eps));
+        result.append("\n"+gammalib::parformat("Optimized function value"));
+        result.append(gammalib::str(m_value));
+        result.append("\n"+gammalib::parformat("Absolute precision"));
+        result.append(gammalib::str(m_eps));
 
         // Append status
-        result.append("\n"+parformat("Optimization status"));
+        result.append("\n"+gammalib::parformat("Optimization status"));
         switch (m_status) {
         case G_LM_CONVERGED:
             result.append("converged");
@@ -469,10 +471,14 @@ std::string GOptimizerLM::print(const GChatter& chatter) const
         }
 
         // Append further information
-        result.append("\n"+parformat("Number of parameters")+str(m_npars));
-        result.append("\n"+parformat("Number of free parameters")+str(m_nfree));
-        result.append("\n"+parformat("Number of iterations")+str(m_iter));
-        result.append("\n"+parformat("Lambda")+str(m_lambda));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(m_npars));
+        result.append("\n"+gammalib::parformat("Number of free parameters"));
+        result.append(gammalib::str(m_nfree));
+        result.append("\n"+gammalib::parformat("Number of iterations"));
+        result.append(gammalib::str(m_iter));
+        result.append("\n"+gammalib::parformat("Lambda"));
+        result.append(gammalib::str(m_lambda));
 
     } // endif: chatter was not silent
 

@@ -1853,25 +1853,33 @@ std::string GMatrixSparse::print(const GChatter& chatter) const
         result.append("=== GMatrixSparse ===");
 
         // Append information
-        result.append("\n"+parformat("Number of rows")+str(m_rows));
+        result.append("\n"+gammalib::parformat("Number of rows"));
+        result.append(gammalib::str(m_rows));
         if (m_rowsel != NULL) {
-            result.append(" (compressed "+str(m_num_rowsel)+")");
+            result.append(" (compressed "+gammalib::str(m_num_rowsel)+")");
         }
-        result.append("\n"+parformat("Number of columns")+str(m_cols));
+        result.append("\n"+gammalib::parformat("Number of columns"));
+        result.append(gammalib::str(m_cols));
         if (m_colsel != NULL) {
-            result.append(" (compressed "+str(m_num_colsel)+")");
+            result.append(" (compressed "+gammalib::str(m_num_colsel)+")");
         }
-        result.append("\n"+parformat("Number of nonzero elements")+str(nonzero));
+        result.append("\n"+gammalib::parformat("Number of nonzero elements"));
+        result.append(gammalib::str(nonzero));
         if (m_fill_val != 0.0) {
-            result.append("\n"+parformat("Pending element"));
-            result.append("("+str(m_fill_row)+","+str(m_fill_col)+")=");
-            result.append(str(m_fill_val));
+            result.append("\n"+gammalib::parformat("Pending element"));
+            result.append("("+gammalib::str(m_fill_row)+","+gammalib::str(m_fill_col)+")=");
+            result.append(gammalib::str(m_fill_val));
         }
-        result.append("\n"+parformat("Number of allocated cells")+str(m_alloc));
-        result.append("\n"+parformat("Memory block size")+str(m_mem_block));
-        result.append("\n"+parformat("Sparse matrix fill")+str(fill()));
-        result.append("\n"+parformat("Pending element")+str(m_fill_val));
-        result.append("\n"+parformat("Fill stack size")+str(m_stack_size));
+        result.append("\n"+gammalib::parformat("Number of allocated cells"));
+        result.append("\n"+gammalib::str(m_alloc));
+        result.append("\n"+gammalib::parformat("Memory block size"));
+        result.append("\n"+gammalib::str(m_mem_block));
+        result.append("\n"+gammalib::parformat("Sparse matrix fill"));
+        result.append(gammalib::str(fill()));
+        result.append("\n"+gammalib::parformat("Pending element"));
+        result.append(gammalib::str(m_fill_val));
+        result.append("\n"+gammalib::parformat("Fill stack size"));
+        result.append(gammalib::str(m_stack_size));
         if (m_stack_data == NULL) {
             result.append(" (none)");
         }

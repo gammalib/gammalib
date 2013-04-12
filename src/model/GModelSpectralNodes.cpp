@@ -246,7 +246,7 @@ double GModelSpectralNodes::eval(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralNodes::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -340,7 +340,7 @@ double GModelSpectralNodes::eval_gradients(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralNodes::eval_gradients";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -401,10 +401,10 @@ double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
         // law parameters
         if (inx_emin == inx_emax) {
             flux = m_prefactor[inx_emin] * 
-                   plaw_photon_flux(e_min,
-                                    e_max, 
-                                    m_epivot[inx_emin],
-                                    m_gamma[inx_emin]);
+                   gammalib::plaw_photon_flux(e_min,
+                                              e_max, 
+                                              m_epivot[inx_emin],
+                                              m_gamma[inx_emin]);
         }
     
         // ... otherwise integrate over the nodes where emin and emax
@@ -418,10 +418,10 @@ double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
 
             // Integrate from emin to the node boundary
             flux = m_prefactor[inx_emin] *
-                   plaw_photon_flux(e_min,
-                                    m_lin_energies[i_start],
-                                    m_epivot[inx_emin],
-                                    m_gamma[inx_emin]);
+                   gammalib::plaw_photon_flux(e_min,
+                                              m_lin_energies[i_start],
+                                              m_epivot[inx_emin],
+                                              m_gamma[inx_emin]);
 
             // Integrate over all nodes between
             for (int i = i_start; i < inx_emax; ++i) {
@@ -430,10 +430,10 @@ double GModelSpectralNodes::flux(const GEnergy& emin, const GEnergy& emax) const
 
             // Integrate from node boundary to emax
             flux += m_prefactor[inx_emax] *
-                    plaw_photon_flux(m_lin_energies[inx_emax],
-                                     e_max,
-                                     m_epivot[inx_emax],
-                                     m_gamma[inx_emax]);
+                    gammalib::plaw_photon_flux(m_lin_energies[inx_emax],
+                                               e_max,
+                                               m_epivot[inx_emax],
+                                               m_gamma[inx_emax]);
         }
 
     } // endif: integration range was valid
@@ -488,10 +488,11 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
         // law parameters
         if (inx_emin == inx_emax) {
             eflux = m_prefactor[inx_emin] * 
-                    plaw_energy_flux(e_min,
-                                     e_max, 
-                                     m_epivot[inx_emin],
-                                     m_gamma[inx_emin]) * gammalib::MeV2erg;
+                    gammalib::plaw_energy_flux(e_min,
+                                               e_max, 
+                                               m_epivot[inx_emin],
+                                               m_gamma[inx_emin]) *
+                                               gammalib::MeV2erg;
         }
 
         // ... otherwise integrate over the nodes where emin and emax
@@ -505,10 +506,11 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
 
             // Integrate from emin to the node boundary
             eflux = m_prefactor[inx_emin] *
-                    plaw_energy_flux(e_min,
-                                     m_lin_energies[i_start],
-                                     m_epivot[inx_emin],
-                                     m_gamma[inx_emin]) * gammalib::MeV2erg;
+                    gammalib::plaw_energy_flux(e_min,
+                                               m_lin_energies[i_start],
+                                               m_epivot[inx_emin],
+                                               m_gamma[inx_emin]) *
+                                               gammalib::MeV2erg;
 
             // Integrate over all nodes between
             for (int i = i_start; i < inx_emax; ++i) {
@@ -517,10 +519,11 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
 
             // Integrate from node boundary to emax
             eflux += m_prefactor[inx_emax] *
-                     plaw_energy_flux(m_lin_energies[inx_emax],
-                                      e_max,
-                                      m_epivot[inx_emax],
-                                      m_gamma[inx_emax]) * gammalib::MeV2erg;
+                     gammalib::plaw_energy_flux(m_lin_energies[inx_emax],
+                                                e_max,
+                                                m_epivot[inx_emax],
+                                                m_gamma[inx_emax]) *
+                                                gammalib::MeV2erg;
         
         } // endelse: emin and emax not between same nodes
     
@@ -684,8 +687,8 @@ void GModelSpectralNodes::read(const GXmlElement& xml)
         }
 
         // Set parameter names
-        std::string energy_name    = "Energy"+str(i);
-        std::string intensity_name = "Intensity"+str(i);
+        std::string energy_name    = "Energy"+gammalib::str(i);
+        std::string intensity_name = "Intensity"+gammalib::str(i);
 
         // Set energy attributes
         energy.name(energy_name);
@@ -767,7 +770,7 @@ void GModelSpectralNodes::write(GXmlElement& xml) const
     // Verify that XML element has the required number of nodes
     if (xml.elements() != nodes || xml.elements("node") != nodes) {
         std::string message = "Spectral model requires exactly " +
-                              str(nodes) + " nodes.";
+                              gammalib::str(nodes) + " nodes.";
         throw GException::model_invalid_parnum(G_WRITE, xml, message);
     }
 
@@ -1153,20 +1156,22 @@ std::string GModelSpectralNodes::print(const GChatter& chatter) const
         result.append("=== GModelSpectralNodes ===");
 
         // Append information
-        result.append("\n"+parformat("Number of nodes")+str(m_energies.size()));
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of nodes"));
+        result.append(gammalib::str(m_energies.size()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }
 
         // Append node information
         for (int i = 0; i < m_prefactor.size(); ++i) {
-            result.append("\n"+parformat("Node "+str(i+1)));
-            result.append("Epivot="+str(m_epivot[i]));
-            result.append(" Prefactor="+str(m_prefactor[i]));
-            result.append(" Gamma="+str(m_gamma[i]));
-            result.append(" Flux="+str(m_flux[i]));
-            result.append(" EFlux="+str(m_eflux[i]));
+            result.append("\n"+gammalib::parformat("Node "+gammalib::str(i+1)));
+            result.append("Epivot="+gammalib::str(m_epivot[i]));
+            result.append(" Prefactor="+gammalib::str(m_prefactor[i]));
+            result.append(" Gamma="+gammalib::str(m_gamma[i]));
+            result.append(" Flux="+gammalib::str(m_flux[i]));
+            result.append(" EFlux="+gammalib::str(m_eflux[i]));
         }
 
     } // endif: chatter was not silent
@@ -1294,8 +1299,8 @@ void GModelSpectralNodes::update_pars(void)
     for (int i = 0; i < nodes; ++i) {
 
         // Set parameter names
-        std::string energy_name    = "Energy"+str(i);
-        std::string intensity_name = "Intensity"+str(i);
+        std::string energy_name    = "Energy"+gammalib::str(i);
+        std::string intensity_name = "Intensity"+gammalib::str(i);
 
         // Set energy attributes
         m_energies[i].name(energy_name);
@@ -1414,10 +1419,12 @@ void GModelSpectralNodes::set_flux_cache(void) const
         double prefactor = fmin / std::pow(emin/epivot, gamma);
         
         // Compute photon flux between nodes
-        double flux = prefactor*plaw_photon_flux(emin, emax, epivot, gamma);
+        double flux = prefactor *
+                      gammalib::plaw_photon_flux(emin, emax, epivot, gamma);
 
         // Compute energy flux between nodes
-        double eflux = prefactor*plaw_energy_flux(emin, emax, epivot, gamma);
+        double eflux = prefactor *
+                       gammalib::plaw_energy_flux(emin, emax, epivot, gamma);
 
         // Convert energy flux from MeV/cm2/s to erg/cm2/s
         eflux *= gammalib::MeV2erg;
@@ -1505,10 +1512,12 @@ void GModelSpectralNodes::update_flux_cache(void) const
             double prefactor = fmin / std::pow(emin/epivot, gamma);
         
             // Compute photon flux between nodes
-            double flux = prefactor*plaw_photon_flux(emin, emax, epivot, gamma);
+            double flux = prefactor *
+                          gammalib::plaw_photon_flux(emin, emax, epivot, gamma);
 
             // Compute energy flux between nodes
-            double eflux = prefactor*plaw_energy_flux(emin, emax, epivot, gamma);
+            double eflux = prefactor *
+                           gammalib::plaw_energy_flux(emin, emax, epivot, gamma);
 
             // Convert energy flux from MeV/cm2/s to erg/cm2/s
             eflux *= gammalib::MeV2erg;
@@ -1575,10 +1584,10 @@ void GModelSpectralNodes::mc_update(const GEnergy& emin, const GEnergy& emax) co
             // add this one node on the stack
             if (inx_emin == inx_emax) {
                 flux = m_prefactor[inx_emin] * 
-                       plaw_photon_flux(e_min,
-                                        e_max, 
-                                        m_epivot[inx_emin],
-                                        m_gamma[inx_emin]);
+                       gammalib::plaw_photon_flux(e_min,
+                                                  e_max, 
+                                                  m_epivot[inx_emin],
+                                                  m_gamma[inx_emin]);
                 m_mc_cum.push_back(flux);
                 m_mc_min.push_back(e_min);
                 m_mc_max.push_back(e_max);
@@ -1596,10 +1605,10 @@ void GModelSpectralNodes::mc_update(const GEnergy& emin, const GEnergy& emax) co
 
                 // Add emin to the node boundary
                 flux = m_prefactor[inx_emin] *
-                       plaw_photon_flux(e_min,
-                                        m_lin_energies[i_start],
-                                        m_epivot[inx_emin],
-                                        m_gamma[inx_emin]);
+                       gammalib::plaw_photon_flux(e_min,
+                                                  m_lin_energies[i_start],
+                                                  m_epivot[inx_emin],
+                                                  m_gamma[inx_emin]);
                 m_mc_cum.push_back(flux);
                 m_mc_min.push_back(e_min);
                 m_mc_max.push_back(m_lin_energies[i_start]);
@@ -1616,10 +1625,10 @@ void GModelSpectralNodes::mc_update(const GEnergy& emin, const GEnergy& emax) co
 
                 // Add node boundary to emax
                 flux = m_prefactor[inx_emax] *
-                       plaw_photon_flux(m_lin_energies[inx_emax],
-                                        e_max,
-                                        m_epivot[inx_emax],
-                                        m_gamma[inx_emax]);
+                       gammalib::plaw_photon_flux(m_lin_energies[inx_emax],
+                                                  e_max,
+                                                  m_epivot[inx_emax],
+                                                  m_gamma[inx_emax]);
                 m_mc_cum.push_back(flux);
                 m_mc_min.push_back(m_lin_energies[inx_emax]);
                 m_mc_max.push_back(e_max);

@@ -283,15 +283,17 @@ std::string GVOClient::print(const GChatter& chatter) const
         result.append("=== GVOClient ===");
 
         // Append client information
-        result.append("\n"+parformat("Name")+m_name);
+        result.append("\n"+gammalib::parformat("Name")+m_name);
 
         // Append Hub information
         if (hashub()) {
-            result.append("\n"+parformat("Hub key")+m_secret);
-            result.append("\n"+parformat("Hub URL")+m_hub_url);
-            result.append("\n"+parformat("Hub host (port)")+m_hub_host+" ("+m_hub_port+")");
-            result.append("\n"+parformat("SAMP protocol version")+m_version);
-            result.append("\n"+parformat("Hub connection"));
+            result.append("\n"+gammalib::parformat("Hub key")+m_secret);
+            result.append("\n"+gammalib::parformat("Hub URL")+m_hub_url);
+            result.append("\n"+gammalib::parformat("Hub host (port)"));
+            result.append(m_hub_host+" ("+m_hub_port+")");
+            result.append("\n"+gammalib::parformat("SAMP protocol version"));
+            result.append(m_version);
+            result.append("\n"+gammalib::parformat("Hub connection"));
             if (m_socket == -1) {
                 result.append("no");
             }
@@ -299,15 +301,17 @@ std::string GVOClient::print(const GChatter& chatter) const
                 if (!m_client_key.empty()) {
                     result.append("registered as \""+m_client_id);
                     result.append("\" on Hub \""+m_hub_id);
-                    result.append("\" via socket "+str(m_socket));
+                    result.append("\" via socket "+gammalib::str(m_socket));
                 }
                 else {
-                    result.append("established on socket "+str(m_socket));
+                    result.append("established on socket ");
+                    result.append(gammalib::str(m_socket));
                 }
             }
         }
         else {
-            result.append("\n"+parformat("Hub key")+"No Hub has been found");
+            result.append("\n"+gammalib::parformat("Hub key"));
+            result.append("No Hub has been found");
         }
 
     } // endif: chatter was not silent
@@ -439,17 +443,17 @@ bool GVOClient::find_hub(void)
 
                 // Check for secret key
                 if (cline.compare(0, 12, "samp.secret=") == 0) {
-                    m_secret = strip_chars(cline.substr(12, std::string::npos), "\r\n");
+                    m_secret = gammalib::strip_chars(cline.substr(12, std::string::npos), "\r\n");
                 }
 
                 // Check for Hub URL
                 else if (cline.compare(0, 20, "samp.hub.xmlrpc.url=") == 0) {
-                    m_hub_url = strip_chars(cline.substr(20, std::string::npos), "\r\n");
+                    m_hub_url = gammalib::strip_chars(cline.substr(20, std::string::npos), "\r\n");
                 }
 
                 // Check for profile version
                 else if (cline.compare(0, 21, "samp.profile.version=") == 0) {
-                    m_version = strip_chars(cline.substr(21, std::string::npos), "\r\n");
+                    m_version = gammalib::strip_chars(cline.substr(21, std::string::npos), "\r\n");
                 }
 
             }
@@ -846,7 +850,7 @@ void GVOClient::post_string(const std::string& content) const
         std::string prefix = "POST /xmlrpc HTTP/1.0\n"
                              "User-Agent: GammaLib\n"
                              "Content-Type: text/xml\n"
-                             "Content-Length: "+str(length)+"\n\n";
+                             "Content-Length: "+gammalib::str(length)+"\n\n";
 
         // Build post string
         std::string post = prefix + content;

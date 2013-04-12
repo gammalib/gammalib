@@ -325,8 +325,9 @@ GModel* GModels::set(const int& index, const GModel& model)
     if (inx != -1 && inx != index) {
         std::string msg =
             "Attempt to set model with name \""+model.name()+"\" in model"
-            " container at index "+str(index)+", but a model with the same"
-            " name exists already at index "+str(inx)+" in the container.\n"
+            " container at index "+gammalib::str(index)+", but a model with"
+            " the same name exists already at index "+gammalib::str(inx)+
+            " in the container.\n"
             "Every model in the model container needs a unique name.";
         throw GException::invalid_value(G_SET1, msg);
     }
@@ -374,8 +375,9 @@ GModel* GModels::set(const std::string& name, const GModel& model)
     if (inx != -1 && inx != index) {
         std::string msg =
             "Attempt to set model with name \""+model.name()+"\" in model"
-            " container at index "+str(index)+", but a model with the same"
-            " name exists already at index "+str(inx)+" in the container.\n"
+            " container at index "+gammalib::str(index)+", but a model with"
+            " the same name exists already at index "+gammalib::str(inx)+
+            " in the container.\n"
             "Every model in the model container needs a unique name.";
         throw GException::invalid_value(G_SET2, msg);
     }
@@ -414,7 +416,7 @@ GModel* GModels::append(const GModel& model)
         std::string msg = 
             "Attempt to append model with name \""+model.name()+"\" to model"
             " container, but a model with the same name exists already at"
-            " index "+str(inx)+" in the container.\n"
+            " index "+gammalib::str(inx)+" in the container.\n"
             "Every model in the model container needs a unique name.";
         throw GException::invalid_value(G_APPEND, msg);
     }
@@ -469,9 +471,9 @@ GModel* GModels::insert(const int& index, const GModel& model)
     if (inx != -1) {
         std::string msg =
             "Attempt to insert model with name \""+model.name()+"\" in model"
-            " container before index "+str(index)+", but a model with the"
-            " same name exists already at index "+str(inx)+" in the"
-            " container.\n"
+            " container before index "+gammalib::str(index)+", but a model"
+            " with the same name exists already at index "+gammalib::str(inx)+
+            " in the container.\n"
             "Every model in the model container needs a unique name.";
         throw GException::invalid_value(G_INSERT1, msg);
     }
@@ -520,9 +522,9 @@ GModel* GModels::insert(const std::string& name, const GModel& model)
     if (inx != -1) {
         std::string msg =
             "Attempt to insert model with name \""+model.name()+"\" in model"
-            " container before index "+str(index)+", but a model with the"
-            " same name exists already at index "+str(inx)+" in the"
-            " container.\n"
+            " container before index "+gammalib::str(index)+", but a model"
+            " with the same name exists already at index "+gammalib::str(inx)+
+            " in the container.\n"
             "Every model in the model container needs a unique name.";
         throw GException::invalid_value(G_INSERT2, msg);
     }
@@ -631,7 +633,7 @@ void GModels::extend(const GModels& models)
                 std::string msg =
                     "Attempt to append model with name \""+models[i]->name()+
                     "\" to model container, but a model with the same name"
-                    " exists already at index "+str(inx)+" in the"
+                    " exists already at index "+gammalib::str(inx)+" in the"
                     " container.\n"
                     "Every model in the model container needs a unique name.";
                 throw GException::invalid_value(G_EXTEND, msg);
@@ -883,8 +885,10 @@ std::string GModels::print(const GChatter& chatter) const
         result.append("=== GModels ===");
 
         // Append information
-        result.append("\n"+parformat("Number of models")+str(size()));
-        result.append("\n"+parformat("Number of parameters")+str(npars()));
+        result.append("\n"+gammalib::parformat("Number of models"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(npars()));
 
         // Append models
         for (int i = 0; i < size(); ++i) {

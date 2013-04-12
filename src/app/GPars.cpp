@@ -704,7 +704,7 @@ std::string GPars::inpath(const std::string& filename) const
 
         // Extract directories from PFILES environment variable
         std::string              pfiles = ptr;
-        std::vector<std::string> dirs   = split(pfiles, ":;");
+        std::vector<std::string> dirs   = gammalib::split(pfiles, ":;");
 
         // Search for first occurence of parameter file
         for (int i = 0; i < dirs.size(); ++i) {
@@ -794,7 +794,7 @@ std::string GPars::outpath(const std::string& filename) const
 
         // Extract directories from PFILES environment variable
         std::string              pfiles = ptr;
-        std::vector<std::string> dirs   = split(pfiles, ":;");
+        std::vector<std::string> dirs   = gammalib::split(pfiles, ":;");
 
         // Search for first writeable
         for (int i = 0; i < dirs.size(); ++i) {
@@ -1037,7 +1037,7 @@ void GPars::parse(void)
     for (int i = 0; i < m_parfile.size(); ++i) {
 
         // Get line without any leading and trailing whitespace
-        std::string line = strip_whitespace(m_parfile[i]);
+        std::string line = gammalib::strip_whitespace(m_parfile[i]);
 
         // If line contains a single linefeed then skip the line
         if (line.length() == 1 && line[0] == '\n')
@@ -1071,8 +1071,8 @@ void GPars::parse(void)
                 if (line[pos] == ',' || pos == end) {
                     if (index < 7) {
                         fields[index] = 
-                          strip_chars(strip_whitespace(line.substr(start, 
-                                                       pos-start)), "\"");
+                          gammalib::strip_chars(gammalib::strip_whitespace(line.substr(start, 
+                                                                 pos-start)), "\"");
                         if (index == 3) {
                             vstart = start;
                             vstop  = pos;
@@ -1088,21 +1088,21 @@ void GPars::parse(void)
         // Throw an error if quotes are not balanced
         if (quotes != 0) {
             throw GException::par_file_syntax_error(G_PARSE, 
-                                                    strip_chars(line,"\n"),
+                                                    gammalib::strip_chars(line,"\n"),
                                                 "quotes are not balanced");
         }
 
         // Throw an error if line has not 7 fields
         if (index != 7) {
             throw GException::par_file_syntax_error(G_PARSE, 
-                                                    strip_chars(line,"\n"),
-                                 "found "+str(index)+" fields, require 7");
+                                                    gammalib::strip_chars(line,"\n"),
+                                 "found "+gammalib::str(index)+" fields, require 7");
         }
 
         // Verify if parameter name does not yet exist
         if (haspar(fields[0])) {
             throw GException::par_file_syntax_error(G_PARSE, 
-                                                    strip_chars(line,"\n"),
+                                                    gammalib::strip_chars(line,"\n"),
                           "redefiniton of parameter name \""+fields[0]+"\"");
         }
 
@@ -1117,7 +1117,7 @@ void GPars::parse(void)
         }
         catch (GException::par_error &e) {
             throw GException::par_file_syntax_error(G_PARSE, 
-                                                    strip_chars(line,"\n"),
+                                                    gammalib::strip_chars(line,"\n"),
                                                                  e.what());
         }
 
@@ -1127,7 +1127,7 @@ void GPars::parse(void)
                 fields[3] != "hl" && fields[3] != "ql" &&
                 fields[3] != "lh" && fields[3] != "lq") {
                 throw GException::par_file_syntax_error(G_PARSE, 
-                                                    strip_chars(line,"\n"),
+                                                    gammalib::strip_chars(line,"\n"),
                        "mode parameter has invalid value \""+fields[3]+"\"");
             }
             m_mode = fields[3];

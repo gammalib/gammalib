@@ -349,10 +349,11 @@ std::string GPhotons::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GPhotons ===\n");
+        result.append("=== GPhotons ===");
 
         // Append photon container information
-        result.append(parformat("Number of photons")+str(size())+"\n");
+        result.append("\n"+gammalib::parformat("Number of photons"));
+        result.append(gammalib::str(size()));
 
         // EXPLICIT: Append photons
         if (chatter >= EXPLICIT) {

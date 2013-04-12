@@ -436,23 +436,30 @@ std::string GLATEventCube::print(const GChatter& chatter) const
         result.append("=== GLATEventCube ===");
 
         // Append information
-        result.append("\n"+parformat("Number of elements")+str(size()));
-        result.append("\n"+parformat("Number of pixels"));
-        result.append(str(m_map.nx())+" x "+str(m_map.ny()));
-        result.append("\n"+parformat("Number of energy bins")+str(ebins()));
-        result.append("\n"+parformat("Number of events")+str(number()));
+        result.append("\n"+gammalib::parformat("Number of elements") +
+                      gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of pixels"));
+        result.append(gammalib::str(m_map.nx()) +
+                      " x " +
+                      gammalib::str(m_map.ny()));
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(ebins()));
+        result.append("\n"+gammalib::parformat("Number of events") +
+                      gammalib::str(number()));
 
         // Append time interval
-        result.append("\n"+parformat("Time interval"));
+        result.append("\n"+gammalib::parformat("Time interval"));
         if (gti().size() > 0) {
-            result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
+            result.append(gammalib::str(tstart().secs()) +
+                          " - " +
+                          gammalib::str(tstop().secs())+" sec");
         }
         else {
             result.append("not defined");
         }
 
         // Append energy range
-        result.append("\n"+parformat("Energy range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         if (ebounds().size() > 0) {
             result.append(emin().print()+" - "+emax().print(chatter));
         }
@@ -466,15 +473,15 @@ std::string GLATEventCube::print(const GChatter& chatter) const
         }
 
         // Append source maps
-        result.append("\n"+parformat("Number of source maps"));
-        result.append(str(m_srcmap.size()));
+        result.append("\n"+gammalib::parformat("Number of source maps"));
+        result.append(gammalib::str(m_srcmap.size()));
         for (int i = 0; i < m_srcmap.size(); ++i) {
-            result.append("\n"+parformat(" "+m_srcmap_names[i]));
-            result.append(str(m_srcmap[i]->nx()));
+            result.append("\n"+gammalib::parformat(" "+m_srcmap_names[i]));
+            result.append(gammalib::str(m_srcmap[i]->nx()));
             result.append(" x ");
-            result.append(str(m_srcmap[i]->ny()));
+            result.append(gammalib::str(m_srcmap[i]->ny()));
             result.append(" x ");
-            result.append(str(m_srcmap[i]->nmaps()));
+            result.append(gammalib::str(m_srcmap[i]->nmaps()));
         }
 
     } // endif: chatter was not silent

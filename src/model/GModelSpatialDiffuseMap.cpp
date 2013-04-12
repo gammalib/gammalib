@@ -493,8 +493,9 @@ std::string GModelSpatialDiffuseMap::print(const GChatter& chatter) const
         result.append("=== GModelSpatialDiffuseMap ===");
 
         // Append parameters
-        result.append("\n"+parformat("Sky map file")+m_filename);
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Sky map file")+m_filename);
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }
@@ -526,7 +527,7 @@ void GModelSpatialDiffuseMap::load(const std::string& filename)
     m_filename = filename;
 
     // Load skymap
-    m_map.load(expand_env(m_filename));
+    m_map.load(gammalib::expand_env(m_filename));
 
     // Prepare sky map
     prepare_map();

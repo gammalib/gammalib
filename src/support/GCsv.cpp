@@ -244,7 +244,7 @@ std::string GCsv::string(const int& row, const int& col) const
 double GCsv::real(const int& row, const int& col) const
 {
     // Convert element into double
-    double value = todouble((*this)(row, col));
+    double value = gammalib::todouble((*this)(row, col));
 
     // Return value
     return value;
@@ -262,7 +262,7 @@ double GCsv::real(const int& row, const int& col) const
 int GCsv::integer(const int& row, const int& col) const
 {
     // Convert element into int
-    int value = toint((*this)(row, col));
+    int value = gammalib::toint((*this)(row, col));
 
     // Return value
     return value;
@@ -298,7 +298,7 @@ void GCsv::load(const std::string& filename, std::string sep)
     char  line[n];
 
     // Expand environment variables
-    std::string fname = expand_env(filename);
+    std::string fname = gammalib::expand_env(filename);
 
     // Open CSV table (read-only
     FILE* fptr = std::fopen(fname.c_str(), "r");
@@ -314,16 +314,16 @@ void GCsv::load(const std::string& filename, std::string sep)
         iline++;
 
         // Get line with leading and trailing whitespace removed
-        std::string sline = strip_chars(strip_whitespace(std::string(line)),"\n");
+        std::string sline = gammalib::strip_chars(gammalib::strip_whitespace(std::string(line)),"\n");
 
         // Skip line if empty
         if (sline.length() == 0)
             continue;
 
         // Split line in elements
-        std::vector<std::string> elements = split(sline, sep);
+        std::vector<std::string> elements = gammalib::split(sline, sep);
         for (int i = 0; i < elements.size(); ++i) {
-            elements[i] = strip_whitespace(elements[i]);
+            elements[i] = gammalib::strip_whitespace(elements[i]);
         }
 
         // If this is the first valid line then simply store the elements
@@ -375,8 +375,10 @@ std::string GCsv::print(const GChatter& chatter) const
         result.append("=== GCsv ===");
 
         // Append information
-        result.append("\n"+parformat("Number of columns")+str(m_cols));
-        result.append("\n"+parformat("Number of rows")+str(m_rows));
+        result.append("\n"+gammalib::parformat("Number of columns"));
+        result.append(gammalib::str(m_cols));
+        result.append("\n"+gammalib::parformat("Number of rows"));
+        result.append(gammalib::str(m_rows));
 
     } // endif: chatter was not silent
 

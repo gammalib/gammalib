@@ -351,7 +351,8 @@ std::string GTimes::print(const GChatter& chatter) const
         result.append("=== GTimes ===");
 
         // Append time container information
-        result.append("\n"+parformat("Number of times")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of times"));
+        result.append(gammalib::str(size()));
 
         // EXPLICIT: Append times
         if (chatter >= EXPLICIT) {

@@ -228,14 +228,14 @@ std::string GLATEfficiency::print(const GChatter& chatter) const
         result.append("=== GLATEfficiency ===");
 
         // Append information
-        result.append("\n"+parformat("Scale 1 (a0)")+str(m_a0));
-        result.append("\n"+parformat("Scale 2 (a1)")+str(m_a1));
-        result.append("\n"+parformat("Scale 3 (a2)")+str(m_a2));
-        result.append("\n"+parformat("Offset 1 (b0)")+str(m_b0));
-        result.append("\n"+parformat("Offset 2 (b1)")+str(m_b1));
-        result.append("\n"+parformat("Offset 3 (b2)")+str(m_b2));
-        result.append("\n"+parformat("Energy domains 1/2 limit (logEb1)")+str(m_logEb1));
-        result.append("\n"+parformat("Energy domains 2/3 limit (logEb2)")+str(m_logEb2));
+        result.append("\n"+gammalib::parformat("Scale 1 (a0)")+gammalib::str(m_a0));
+        result.append("\n"+gammalib::parformat("Scale 2 (a1)")+gammalib::str(m_a1));
+        result.append("\n"+gammalib::parformat("Scale 3 (a2)")+gammalib::str(m_a2));
+        result.append("\n"+gammalib::parformat("Offset 1 (b0)")+gammalib::str(m_b0));
+        result.append("\n"+gammalib::parformat("Offset 2 (b1)")+gammalib::str(m_b1));
+        result.append("\n"+gammalib::parformat("Offset 3 (b2)")+gammalib::str(m_b2));
+        result.append("\n"+gammalib::parformat("Energy domains 1/2 limit (logEb1)")+gammalib::str(m_logEb1));
+        result.append("\n"+gammalib::parformat("Energy domains 2/3 limit (logEb2)")+gammalib::str(m_logEb2));
 
     } // endif: chatter was not silent
 

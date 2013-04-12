@@ -64,8 +64,8 @@ GException::out_of_range::out_of_range(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Index " + str(inx) + " out of range [" + str(min) +
-                "," + str(max) + "].";
+    m_message = "Index " + gammalib::str(inx) + " out of range [" + gammalib::str(min) +
+                "," + gammalib::str(max) + "].";
 
     // Return
     return;
@@ -89,8 +89,8 @@ GException::out_of_range::out_of_range(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Value " + str(value) + " out of range [" + str(min) +
-                "," + str(max) + "].";
+    m_message = "Value " + gammalib::str(value) + " out of range [" + gammalib::str(min) +
+                "," + gammalib::str(max) + "].";
 
     // Return
     return;
@@ -113,8 +113,8 @@ GException::out_of_range::out_of_range(std::string origin,
 
     // Set message
     if (elements > 0) {
-        m_message = "Vector index " + str(inx) + " out of range [0," +
-                    str(elements-1) + "].";
+        m_message = "Vector index " + gammalib::str(inx) + " out of range [0," +
+                    gammalib::str(elements-1) + "].";
     }
     else {
         m_message = "Empty vector cannot be indexed.";
@@ -145,9 +145,9 @@ GException::out_of_range::out_of_range(std::string origin,
 
     // Set message
     if (rows > 0 && cols > 0) {
-        m_message = "Matrix element (" + str(row) + "," + str(col) +
-                    ") out of range ([0," + str(rows-1) + "], [0," +
-                    str(cols-1) + "])";
+        m_message = "Matrix element (" + gammalib::str(row) + "," + gammalib::str(col) +
+                    ") out of range ([0," + gammalib::str(rows-1) + "], [0," +
+                    gammalib::str(cols-1) + "])";
     }
     else {
         m_message = "Empty matrix cannot be indexed.";
@@ -172,8 +172,8 @@ GException::vector_mismatch::vector_mismatch(std::string origin, int size1,
     m_origin  = origin;
 
     // Set message
-    m_message = "Vector dimensions differ (" + str(size1) + " <-> " +
-                str(size2) + ").";
+    m_message = "Vector dimensions differ (" + gammalib::str(size1) + " <-> " +
+                gammalib::str(size2) + ").";
 
     // Return
     return;
@@ -194,7 +194,7 @@ GException::vector_bad_cross_dim::vector_bad_cross_dim(std::string origin,
 
     // Set message
     m_message = "Vector cross product only defined for 3 dimensions but"
-                " vector size is " + str(elements) +".";
+                " vector size is " + gammalib::str(elements) +".";
 
     // Return
     return;
@@ -218,9 +218,9 @@ GException::matrix_vector_mismatch::matrix_vector_mismatch(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Vector length " + str(num) +
+    m_message = "Vector length " + gammalib::str(num) +
                 " is incompatible with matrix size (" +
-                str(rows) + "," + str(cols) + ").";
+                gammalib::str(rows) + "," + gammalib::str(cols) + ").";
 
     // Return
     return;
@@ -245,9 +245,9 @@ GException::matrix_mismatch::matrix_mismatch(std::string origin, int rows1,
     // Set message
     m_message  = "Matrices are incompatible for operation.";
     m_message += "Matrix size ";
-    m_message += "(" + str(rows1) + "," + str(cols1) + ")";
+    m_message += "(" + gammalib::str(rows1) + "," + gammalib::str(cols1) + ")";
     m_message += " differs from matrix size ";
-    m_message += "(" + str(rows2) + "," + str(cols2) + ").";
+    m_message += "(" + gammalib::str(rows2) + "," + gammalib::str(cols2) + ").";
 
     // Return
     return;
@@ -269,7 +269,7 @@ GException::matrix_not_square::matrix_not_square(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message  = "Matrix of size (" + str(rows) + "," + str(cols) + ")";
+    m_message  = "Matrix of size (" + gammalib::str(rows) + "," + gammalib::str(cols) + ")";
     m_message += " is not square.";
 
     // Return
@@ -291,8 +291,8 @@ GException::matrix_not_pos_definite::matrix_not_pos_definite(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Matrix is not positive definite (sum " + str(sum) +
-                " occured in row/column " + str(row) + ").";
+    m_message = "Matrix is not positive definite (sum " + gammalib::str(sum) +
+                " occured in row/column " + gammalib::str(row) + ").";
 
     // Return
     return;
@@ -313,7 +313,7 @@ GException::matrix_not_symmetric::matrix_not_symmetric(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Matrix (" + str(rows) + "," + str(cols) + ") is not symmetric.";
+    m_message = "Matrix (" + gammalib::str(rows) + "," + gammalib::str(cols) + ") is not symmetric.";
 
     // Return
     return;
@@ -373,9 +373,9 @@ GException::invalid_order::invalid_order(std::string origin, int order,
     m_origin  = origin;
 
     // Set message
-    m_message = "Invalid ordering type " + str(order) + 
-                "requested; must be comprised in [" + str(min_order) +
-                "," + str(max_order) + "]";
+    m_message = "Invalid ordering type " + gammalib::str(order) + 
+                "requested; must be comprised in [" + gammalib::str(min_order) +
+                "," + gammalib::str(max_order) + "]";
 
     // Return
     return;

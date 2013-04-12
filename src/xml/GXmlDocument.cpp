@@ -207,7 +207,7 @@ std::string GXmlDocument::print(const GChatter& chatter,
     if (chatter != SILENT) {
 
         // Initialise result string
-        result = fill(" ", indent);
+        result = gammalib::fill(" ", indent);
 
         // Append document to string
         result.append("GXmlDocument::");

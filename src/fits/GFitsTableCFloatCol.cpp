@@ -238,8 +238,8 @@ std::string GFitsTableCFloatCol::string(const int& row, const int& inx) const
     if (m_data == NULL) fetch_data();
 
     // Convert complex into string
-    std::string result = str(m_data[offset(row,inx)].re) + ", " +
-                         str(m_data[offset(row,inx)].im);
+    std::string result = gammalib::str(m_data[offset(row,inx)].re) + ", " +
+                         gammalib::str(m_data[offset(row,inx)].im);
 
     // Return result
     return result;
@@ -587,7 +587,7 @@ std::string GFitsTableCFloatCol::ascii_format(void) const
     format.append("C");
 
     // Set width
-    format.append(str(m_width));
+    format.append(gammalib::str(m_width));
 
     // Return format
     return format;
@@ -603,7 +603,7 @@ std::string GFitsTableCFloatCol::binary_format(void) const
     std::string format;
 
     // Set number of elements
-    format.append(str(m_number));
+    format.append(gammalib::str(m_number));
 
     // Set type code
     format.append("C");

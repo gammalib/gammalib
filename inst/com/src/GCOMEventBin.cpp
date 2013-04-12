@@ -227,7 +227,7 @@ std::string GCOMEventBin::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append number of counts
-        result.append(str(counts()));
+        result.append(gammalib::str(counts()));
 
     } // endif: chatter was not silent
 

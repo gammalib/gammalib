@@ -209,7 +209,7 @@ void GUrlFile::open(const std::string& url, const std::string& mode)
     close();
 
     // Expand environment variables
-    std::string filename = expand_env(url);
+    std::string filename = gammalib::expand_env(url);
 
     // Try opening file. Throw an exception if opening failed.
     m_fptr = std::fopen(filename.c_str(), mode.c_str());
@@ -489,19 +489,20 @@ std::string GUrlFile::print(const GChatter& chatter) const
             int err = std::ferror(m_fptr);
         
             // Append it
-            result.append("\n"+parformat("File URL")+m_url);
-            result.append("\n"+parformat("File mode")+m_mode);
-            result.append("\n"+parformat("File position indicator")+str(pos));
-            result.append("\n"+parformat("File error"));
+            result.append("\n"+gammalib::parformat("File URL")+m_url);
+            result.append("\n"+gammalib::parformat("File mode")+m_mode);
+            result.append("\n"+gammalib::parformat("File position indicator"));
+            result.append(gammalib::str(pos));
+            result.append("\n"+gammalib::parformat("File error"));
             if (err == 0) {
                 result.append("none");
             }
             else {
-                result.append(str(err));
+                result.append(gammalib::str(err));
             }
         }
         else {
-            result.append("\n"+parformat("URL")+"none");
+            result.append("\n"+gammalib::parformat("URL")+"none");
         }
 
     } // endif: chatter was not silent

@@ -322,7 +322,7 @@ double GModelSpatialRadialShell::eval(const double&  theta,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(result) || isinfinite(result)) {
+    if (gammalib::isnotanumber(result) || gammalib::isinfinite(result)) {
         std::cout << "*** ERROR: GModelSpatialRadialShell::eval";
         std::cout << "(theta=" << theta << "): NaN/Inf encountered";
         std::cout << " (result=" << result;
@@ -613,7 +613,8 @@ std::string GModelSpatialRadialShell::print(const GChatter& chatter) const
         result.append("=== GModelSpatialRadialShell ===");
 
         // Append parameters
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }
@@ -788,7 +789,7 @@ void GModelSpatialRadialShell::update() const
     
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(m_norm) || isinfinite(m_norm)) {
+    if (gammalib::isnotanumber(m_norm) || gammalib::isinfinite(m_norm)) {
         std::cout << "*** ERROR: GModelSpatialRadialShell::update:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (m_norm=" << m_norm;

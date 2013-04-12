@@ -842,17 +842,20 @@ std::string GGti::print(const GChatter& chatter) const
         result.append("=== GGti ===");
 
         // Append GTI information
-        result.append("\n"+parformat("Number of intervals")+str(size()));
-        result.append("\n"+parformat("Ontime")+str(ontime())+" sec");
-        result.append("\n"+parformat("Elapsed time")+str(telapse())+" sec");
-        result.append("\n"+parformat("Time range"));
-        result.append(str(tstart().convert(m_reference)));
+        result.append("\n"+gammalib::parformat("Number of intervals"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Ontime"));
+        result.append(gammalib::str(ontime())+" sec");
+        result.append("\n"+gammalib::parformat("Elapsed time"));
+        result.append(gammalib::str(telapse())+" sec");
+        result.append("\n"+gammalib::parformat("Time range"));
+        result.append(gammalib::str(tstart().convert(m_reference)));
         result.append(" - ");
-        result.append(str(tstop().convert(m_reference)));
+        result.append(gammalib::str(tstop().convert(m_reference)));
         result.append(" "+reference().timeunit());
         result.append(" ("+reference().timesys()+")");
-        result.append("\n"+parformat("Reference MDJ"));
-        result.append(str(reference().mjdref()));
+        result.append("\n"+gammalib::parformat("Reference MDJ"));
+        result.append(gammalib::str(reference().mjdref()));
 
         // EXPLICIT: Append time reference information
         if (chatter >= EXPLICIT) {

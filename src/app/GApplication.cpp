@@ -116,7 +116,7 @@ GApplication::GApplication(const std::string& name, const std::string& version,
 
     // Save arguments as vector of strings
     for (int i = 0; i < argc; ++i) {
-        m_args.push_back(strip_whitespace(argv[i]));
+        m_args.push_back(gammalib::strip_whitespace(argv[i]));
     }
 
     // Initialise application parameters
@@ -444,11 +444,11 @@ void GApplication::log_header(void)
     log.indent(0);
 
     // Dump header
-    log << fill("*", header_width) << std::endl;
-    log << "*" << center(m_name, header_width-2) << "*" << std::endl;
-    log << "* " << fill("-", header_width-4) << " *" << std::endl;
-    log << "* Version: " << left(m_version, header_width-12) << "*" << std::endl;
-    log << fill("*", header_width) << std::endl;
+    log << gammalib::fill("*", header_width) << std::endl;
+    log << "*" << gammalib::center(m_name, header_width-2) << "*" << std::endl;
+    log << "* " << gammalib::fill("-", header_width-4) << " *" << std::endl;
+    log << "* Version: " << gammalib::left(m_version, header_width-12) << "*" << std::endl;
+    log << gammalib::fill("*", header_width) << std::endl;
 
     // Return
     return;
@@ -503,7 +503,7 @@ void GApplication::log_parameters(void)
 
         // Set parameter name
         std::string name = " " + m_pars.m_pars[i].name() + " ";
-        name = name + fill(".", 28-name.length()) + ": ";
+        name = name + gammalib::fill(".", 28-name.length()) + ": ";
 
         // Write parameter
         log << name << m_pars.m_pars[i].m_value;
@@ -533,23 +533,23 @@ std::string GApplication::print(const GChatter& chatter) const
         result.append("=== GApplication ===");
 
         // Append application name, version and arguments
-        result.append("\n"+parformat("Name")+name());
-        result.append("\n"+parformat("Version")+version());
+        result.append("\n"+gammalib::parformat("Name")+name());
+        result.append("\n"+gammalib::parformat("Version")+version());
         for (int i = 0; i < m_args.size(); ++i) {
             if (i == 0) {
-                result.append("\n"+parformat("Command")+m_args[i]);
+                result.append("\n"+gammalib::parformat("Command")+m_args[i]);
             }
             else if (i == 1) {
-                result.append("\n"+parformat("Arguments")+m_args[i]);
+                result.append("\n"+gammalib::parformat("Arguments")+m_args[i]);
             }
             else {
-                result.append("\n"+parformat("                           ")+m_args[i]);
+                result.append("\n"+gammalib::parformat("                           ")+m_args[i]);
             }
         }
 
         // Append parameters
         for (int i = 0; i < m_pars.size(); ++i) {
-            result.append("\n"+parformat(m_pars.m_pars[i].name()) +
+            result.append("\n"+gammalib::parformat(m_pars.m_pars[i].name()) +
                           m_pars.m_pars[i].m_value);
         }
 

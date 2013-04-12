@@ -177,8 +177,8 @@ std::string GLATRoi::print(const GChatter& chatter) const
         result.append("=== GLATRoi ===");
 
         // Append information
-        result.append("\n"+parformat("ROI centre")+m_centre.print());
-        result.append("\n"+parformat("ROI radius")+str(m_radius)+" deg");
+        result.append("\n"+gammalib::parformat("ROI centre")+m_centre.print());
+        result.append("\n"+gammalib::parformat("ROI radius")+gammalib::str(m_radius)+" deg");
 
     } // endif: chatter was not silent
 

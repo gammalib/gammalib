@@ -63,7 +63,7 @@ GException::skymap_bad_par::skymap_bad_par(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Invalid map parameter ("+str(par)+"). " + message;
+    m_message = "Invalid map parameter ("+gammalib::str(par)+"). " + message;
 
     // Return
     return;
@@ -85,8 +85,8 @@ GException::skymap_bad_size::skymap_bad_size(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Data size ("+str(size)+") is incompatible with "
-                "expected size ("+str(expected)+"). " + message;
+    m_message = "Data size ("+gammalib::str(size)+") is incompatible with "
+                "expected size ("+gammalib::str(expected)+"). " + message;
 
     // Return
     return;
@@ -129,7 +129,7 @@ GException::skymap_bad_image_dim::skymap_bad_image_dim(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Invalid number of image dimensions (naxis="+str(naxis)+")."
+    m_message = "Invalid number of image dimensions (naxis="+gammalib::str(naxis)+")."
                 " " + message;
 
     // Return
@@ -223,7 +223,7 @@ GException::wcs_hpx_bad_nside::wcs_hpx_bad_nside(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Invalid Healpix nside value ("+str(nside)+"). "
+    m_message = "Invalid Healpix nside value ("+gammalib::str(nside)+"). "
                 "Should be one of 1,2,4,8,16,32,64,128,256,512,1024,2048,"
                 "4096,8192.";
 
@@ -275,7 +275,7 @@ GException::wcs_singular_matrix::wcs_singular_matrix(std::string                
                 m_message += ",";
             }
             if (ij < mat.size()) {
-                m_message += str(mat[ij]);
+                m_message += gammalib::str(mat[ij]);
             }
             else {
                 m_message += " ... ";
@@ -323,7 +323,7 @@ GException::wcs_invalid_x_y::wcs_invalid_x_y(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = str(num)+" (x,y) coordinates were invalid.";
+    m_message = gammalib::str(num)+" (x,y) coordinates were invalid.";
     if (message.length() > 0)
         m_message += " "+message;
 
@@ -345,7 +345,7 @@ GException::wcs_invalid_phi_theta::wcs_invalid_phi_theta(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = str(num)+" (phi,theta) coordinates were invalid.";
+    m_message = gammalib::str(num)+" (phi,theta) coordinates were invalid.";
     if (message.length() > 0)
         m_message += " "+message;
 

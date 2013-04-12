@@ -669,8 +669,8 @@ void GLog::header(const std::string& arg, int level)
     case 1:
     case 2:
         text  = "| " + arg + " |";
-        frame = (level == 1) ? "+" +  fill("=", text.length()-2) + "+"
-                             : "+" +  fill("-", text.length()-2) + "+";
+        frame = (level == 1) ? "+" +  gammalib::fill("=", text.length()-2) + "+"
+                             : "+" +  gammalib::fill("-", text.length()-2) + "+";
         break;
     case 3:
         text  = "=== " + arg + " ===";
@@ -761,7 +761,7 @@ std::string GLog::prefix(void) const
     }
 
     // Add any indent
-    prefix.append(fill(" ", m_indent));
+    prefix.append(gammalib::fill(" ", m_indent));
 
     // Return prefix
     return prefix;

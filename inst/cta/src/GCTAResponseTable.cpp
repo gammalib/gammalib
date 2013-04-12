@@ -796,12 +796,14 @@ std::string GCTAResponseTable::print(const GChatter& chatter) const
         result.append("=== GCTAResponseTable ===");
 
         // Append information
-        result.append("\n"+parformat("Dimension")+str(axes()));
+        result.append("\n"+gammalib::parformat("Dimension") +
+                      gammalib::str(axes()));
     
         // Append axes information
         for (int i = 0; i < axes(); ++i) {
-            result.append("\n"+parformat("Axis "+str(i)));
-            result.append(str(axis(i)));
+            result.append("\n"+gammalib::parformat("Axis " +
+                          gammalib::str(i)));
+            result.append(gammalib::str(axis(i)));
             result.append(" ["+m_colname_lo[i]);
             result.append(", ");
             result.append(m_colname_hi[i]+"]");
@@ -809,7 +811,8 @@ std::string GCTAResponseTable::print(const GChatter& chatter) const
 
         // Append parameter information
         for (int i = 0; i < size(); ++i) {
-            result.append("\n"+parformat("Parameter "+str(i)));
+            result.append("\n"+gammalib::parformat("Parameter " +
+                          gammalib::str(i)));
             result.append(m_colname_par[i]);
         }
 
@@ -1113,9 +1116,9 @@ void GCTAResponseTable::read_axes(const GFitsTable* hdu)
             if (num != col_hi->number()) {
                 std::string message = "Incompatible number of bins found"
                                       " for columns '"+m_colname_lo[i]+"'"+
-                                      " ("+str(num)+") and '"+
+                                      " ("+gammalib::str(num)+") and '"+
                                       m_colname_hi[i]+"' ("+
-                                      str(col_hi->number())+".";
+                                      gammalib::str(col_hi->number())+".";
                 throw GCTAException::bad_rsp_table_format(G_READ_AXES,
                                                           message);
             }
@@ -1192,8 +1195,9 @@ void GCTAResponseTable::read_pars(const GFitsTable* hdu)
             int num = col->number();
             if (num != m_nelements) {
                 std::string message = "Parameter vector '"+m_colname_par[i]+
-                                      "' has wrong size "+str(num)+" (expected"+
-                                      str(m_nelements)+").";
+                                      "' has wrong size "+gammalib::str(num)+
+                                      " (expected"+
+                                      gammalib::str(m_nelements)+").";
                 throw GCTAException::bad_rsp_table_format(G_READ_PARS,
                                                           message);
             }

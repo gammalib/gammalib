@@ -94,7 +94,7 @@ GCTAModelRadialPolynom::GCTAModelRadialPolynom(const std::vector<double>& coeffs
         par.value(coeffs[i]);
 
         // Set other attributes
-        std::string name = "coeff"+str(i);
+        std::string name = "coeff" + gammalib::str(i);
         par.name(name);
         par.unit("");
         par.free();
@@ -271,7 +271,7 @@ double GCTAModelRadialPolynom::eval(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialPolynom::eval";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -349,7 +349,7 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GCTAModelRadialPolynom::eval_gradients";
         std::cout << "(offset=" << offset << "): NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -524,7 +524,7 @@ void GCTAModelRadialPolynom::read(const GXmlElement& xml)
         int index = -1;
         size_t nchars = par->attribute("name").length() - 5;
         if (nchars > 0) {
-            index = toint(par->attribute("name").substr(5, nchars));
+            index = gammalib::toint(par->attribute("name").substr(5, nchars));
         }
         else {
             throw GException::model_invalid_parnames(G_READ, xml,
@@ -535,10 +535,10 @@ void GCTAModelRadialPolynom::read(const GXmlElement& xml)
                   "Radial polynomial \"Coeff\" parameter index < 0.");
         }
         if (index >= max_coeffs) {
-            std::string message = "There are "+str(max_coeffs)+" parameters,"
+            std::string message = "There are "+gammalib::str(max_coeffs)+" parameters,"
                                   " hence polynomial coefficients are expected"
-                                  " to run from 0 to "+str(max_coeffs-1)+", yet"
-                                  " a coefficient with index "+str(index)+" was"
+                                  " to run from 0 to "+gammalib::str(max_coeffs-1)+", yet"
+                                  " a coefficient with index "+gammalib::str(index)+" was"
                                   " encountered.";
             throw GException::model_invalid_parnames(G_READ, xml, message);
         }
@@ -556,19 +556,19 @@ void GCTAModelRadialPolynom::read(const GXmlElement& xml)
     // Verify that the number of coefficients is between 1 and max_coeffs
     if (ncoeffs < 0 || ncoeffs > max_coeffs) {
         std::string message = "Radial polynomial model requires at between"
-                              " 1 and "+str(max_coeffs)+" parameters.";
+                              " 1 and "+gammalib::str(max_coeffs)+" parameters.";
         throw GException::model_invalid_parnum(G_READ, xml, message);
     }
 
     // Verify that all parameters were found
     for (int i = 0; i < ncoeffs; ++i) {
         if (npar[i] == 0) {
-            std::string message = "Parameter \"Coeff"+str(i)+"\" required,"
+            std::string message = "Parameter \"Coeff"+gammalib::str(i)+"\" required,"
                                   " but not found in XML file.";
             throw GException::model_invalid_parnames(G_READ, xml, message);
         }
         else if (npar[i] > 1) {
-            std::string message = "Multiple parameters \"Coeff"+str(i)+"\""
+            std::string message = "Multiple parameters \"Coeff"+gammalib::str(i)+"\""
                                   " found in XML file.";
             throw GException::model_invalid_parnames(G_READ, xml, message);
         }
@@ -578,7 +578,7 @@ void GCTAModelRadialPolynom::read(const GXmlElement& xml)
     for (int i = 0; i < ncoeffs; ++i) {
 
         // Set parameter name
-        std::string name = "Coeff"+str(i);
+        std::string name = "Coeff"+gammalib::str(i);
 
         // Get corresponding parameter element
         const GXmlElement* par = NULL;
@@ -655,7 +655,7 @@ void GCTAModelRadialPolynom::write(GXmlElement& xml) const
     // If XML element has 0 nodes then append nodes for coefficients
     if (xml.elements() == 0) {
         for (int i = 0; i < ncoeffs; ++i) {
-            std::string name = "parameter name=\"Coeff"+str(i)+"\"";
+            std::string name = "parameter name=\"Coeff"+gammalib::str(i)+"\"";
             xml.append(GXmlElement(name));
         }
     }
@@ -663,7 +663,7 @@ void GCTAModelRadialPolynom::write(GXmlElement& xml) const
     // Verify that XML element has one parameter per coefficient
     if (xml.elements() != ncoeffs || xml.elements("parameter") != ncoeffs) {
         std::string message = "Radial polynomial model requires exactly " +
-                              str(ncoeffs) + " parameters.";
+                              gammalib::str(ncoeffs) + " parameters.";
         throw GException::model_invalid_parnum(G_WRITE, xml, message);
     }
 
@@ -673,7 +673,7 @@ void GCTAModelRadialPolynom::write(GXmlElement& xml) const
     for (int i = 0; i < ncoeffs; ++i) {
 
         // Set parameter name
-        std::string name = "Coeff"+str(i);
+        std::string name = "Coeff"+gammalib::str(i);
 
         // Get corresponding parameter element
         GXmlElement* par = NULL;
@@ -703,7 +703,7 @@ void GCTAModelRadialPolynom::write(GXmlElement& xml) const
     // Verify that all parameters were present
     for (int i = 0; i < ncoeffs; ++i) {
         if (npar[i] != 1) {
-            std::string message = "Parameter \"Coeff"+str(i)+"\" required,"
+            std::string message = "Parameter \"Coeff"+gammalib::str(i)+"\" required,"
                                   " but not found in XML file.";
             throw GException::model_invalid_parnames(G_WRITE, xml, message);
         }
@@ -732,7 +732,8 @@ std::string GCTAModelRadialPolynom::print(const GChatter& chatter) const
         result.append("=== GCTAModelRadialPolynom ===");
 
         // Append information
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of parameters") +
+                      gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }

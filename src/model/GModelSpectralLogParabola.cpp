@@ -273,7 +273,7 @@ double GModelSpectralLogParabola::eval(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralLogParabola::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -366,7 +366,7 @@ double GModelSpectralLogParabola::eval_gradients(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralLogParabola::eval_gradients";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -775,7 +775,8 @@ std::string GModelSpectralLogParabola::print(const GChatter& chatter) const
         result.append("=== GModelSpectralLogParabola ===");
 
         // Append information
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }

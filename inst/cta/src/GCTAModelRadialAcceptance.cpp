@@ -753,7 +753,7 @@ std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const
         result.append("\n"+print_attributes());
 
         // Append model type
-        result.append("\n"+parformat("Model type"));
+        result.append("\n"+gammalib::parformat("Model type"));
         if (n_radial > 0) {
             result.append("\""+radial()->type()+"\"");
             if (n_spectral > 0 || n_temporal > 0) {
@@ -771,16 +771,20 @@ std::string GCTAModelRadialAcceptance::print(const GChatter& chatter) const
         }
 
         // Append parameters
-            result.append("\n"+parformat("Number of parameters")+str(size()));
-        result.append("\n"+parformat("Number of radial par's")+str(n_radial));
+        result.append("\n"+gammalib::parformat("Number of parameters") +
+                      gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of radial par's") +
+                      gammalib::str(n_radial));
         for (int i = 0; i < n_radial; ++i) {
             result.append("\n"+(*radial())[i].print());
         }
-        result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
+        result.append("\n"+gammalib::parformat("Number of spectral par's") +
+                      gammalib::str(n_spectral));
         for (int i = 0; i < n_spectral; ++i) {
             result.append("\n"+(*spectral())[i].print());
         }
-        result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
+        result.append("\n"+gammalib::parformat("Number of temporal par's") +
+                      gammalib::str(n_temporal));
         for (int i = 0; i < n_temporal; ++i) {
             result.append("\n"+(*temporal())[i].print());
         }

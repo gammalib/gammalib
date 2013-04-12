@@ -176,7 +176,8 @@ std::string GMWLPointing::print(const GChatter& chatter) const
         result.append("=== GMWLPointing ===");
 
         // Append information
-        result.append("\n"+parformat("Pointing direction")+"not applicable");
+        result.append("\n"+gammalib::parformat("Pointing direction"));
+        result.append("not applicable");
 
     } // endif: chatter was not silent
 

@@ -482,9 +482,11 @@ std::string GLATAeff::print(const GChatter& chatter) const
         result.append("=== GLATAeff ===");
 
         // Append information
-        result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
-        result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
-        result.append("\n"+parformat("Detector section"));
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(nenergies()));
+        result.append("\n"+gammalib::parformat("Number of cos theta bins") +
+                      gammalib::str(ncostheta()));
+        result.append("\n"+gammalib::parformat("Detector section"));
         if (m_front) {
             result.append("front");
         }
@@ -494,7 +496,7 @@ std::string GLATAeff::print(const GChatter& chatter) const
         else {
             result.append("unknown");
         }
-        result.append("\n"+parformat("Efficiency factors"));
+        result.append("\n"+gammalib::parformat("Efficiency factors"));
         if (hasefficiency()) {
             result.append("present");
         }
@@ -623,7 +625,7 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
         } // endif: there were effective area bins
 
         // Set detector section using the DETNAM keyword in the HDU
-        std::string detnam = strip_whitespace(hdu->string("DETNAM"));
+        std::string detnam = gammalib::strip_whitespace(hdu->string("DETNAM"));
         m_front            = (detnam == "FRONT");
         m_back             = (detnam == "BACK");
 

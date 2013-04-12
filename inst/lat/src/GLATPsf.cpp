@@ -324,7 +324,7 @@ void GLATPsf::read(const GFits& fits)
 
     // Determine PSF type
     bool        front  = true;
-    std::string detnam = strip_whitespace(toupper(hdu_rpsf->string("DETNAM")));
+    std::string detnam = gammalib::strip_whitespace(gammalib::toupper(hdu_rpsf->string("DETNAM")));
     if (detnam == "FRONT") {
         front = true;
     }
@@ -346,7 +346,7 @@ void GLATPsf::read(const GFits& fits)
         break;
     default:
         throw GLATException::invalid_response(G_READ, 
-              "Unsupported response function version "+str(version)+".");
+              "Unsupported response function version "+gammalib::str(version)+".");
         break;
     }
 
@@ -563,24 +563,24 @@ std::string GLATPsf::print(const GChatter& chatter) const
     
         // No PSF has been loaded ...
         if (m_psf == NULL) {
-            result.append("\n"+parformat("Version")+"No PSF loaded");
+            result.append("\n"+gammalib::parformat("Version")+"No PSF loaded");
         }
     
         // ... PSF has been loaded
         else {
-            result.append("\n"+parformat("Version")+str(version()));
-            result.append("\n"+parformat("Detector section"));
+            result.append("\n"+gammalib::parformat("Version")+gammalib::str(version()));
+            result.append("\n"+gammalib::parformat("Detector section"));
             if (isfront()) {
                 result.append("front");
             }
             else {
                 result.append("back");
             }
-            result.append("\n"+parformat("Energy scaling"));
+            result.append("\n"+gammalib::parformat("Energy scaling"));
             result.append("sqrt(");
-            result.append("("+str(m_psf->scale_par1())+"*(E/100)^");
-            result.append(str(m_psf->scale_index())+")^2");
-            result.append(" + ("+str(m_psf->scale_par2())+")^2)");
+            result.append("("+gammalib::str(m_psf->scale_par1())+"*(E/100)^");
+            result.append(gammalib::str(m_psf->scale_index())+")^2");
+            result.append(" + ("+gammalib::str(m_psf->scale_par2())+")^2)");
         }
 
     } // endif: chatter was not silent

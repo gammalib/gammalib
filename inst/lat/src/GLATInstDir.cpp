@@ -227,7 +227,8 @@ std::string GLATInstDir::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append instrument direction
-        result.append("RA="+str(ra_deg())+", DEC="+str(dec_deg()));
+        result.append("RA="+gammalib::str(ra_deg()) +
+                      ", DEC="+gammalib::str(dec_deg()));
 
     } // endif: chatter was not silent
 

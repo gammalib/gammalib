@@ -251,7 +251,7 @@ void GCTAPsfPerfTable::load(const std::string& filename)
     char  line[n];
 
     // Expand environment variables
-    std::string fname = expand_env(filename);
+    std::string fname = gammalib::expand_env(filename);
 
     // Open performance table readonly
     FILE* fptr = std::fopen(fname.c_str(), "r");
@@ -263,9 +263,9 @@ void GCTAPsfPerfTable::load(const std::string& filename)
     while (std::fgets(line, n, fptr) != NULL) {
 
         // Split line in elements. Strip empty elements from vector.
-        std::vector<std::string> elements = split(line, " ");
+        std::vector<std::string> elements = gammalib::split(line, " ");
         for (int i = elements.size()-1; i >= 0; i--) {
-            if (strip_whitespace(elements[i]).length() == 0) {
+            if (gammalib::strip_whitespace(elements[i]).length() == 0) {
                 elements.erase(elements.begin()+i);
             }
         }
@@ -281,10 +281,10 @@ void GCTAPsfPerfTable::load(const std::string& filename)
         }
 
         // Push elements in node array and vector
-        m_logE.append(todouble(elements[0]));
-        m_r68.push_back(todouble(elements[2]));
-        m_r80.push_back(todouble(elements[3]));
-        m_sigma.push_back(todouble(elements[2])*conv);
+        m_logE.append(gammalib::todouble(elements[0]));
+        m_r68.push_back(gammalib::todouble(elements[2]));
+        m_r80.push_back(gammalib::todouble(elements[3]));
+        m_sigma.push_back(gammalib::todouble(elements[2])*conv);
 
     } // endwhile: looped over lines
 
@@ -396,10 +396,11 @@ std::string GCTAPsfPerfTable::print(const GChatter& chatter) const
         result.append("=== GCTAPsfPerfTable ===");
 
         // Append information
-        result.append("\n"+parformat("Filename")+m_filename);
-        result.append("\n"+parformat("Number of energy bins")+str(num));
-        result.append("\n"+parformat("Log10(Energy) range"));
-        result.append(str(emin)+" - "+str(emax)+" TeV");
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(num));
+        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
 
     } // endif: chatter was not silent
 

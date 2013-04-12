@@ -346,7 +346,8 @@ std::string GModelTemporalConst::print(const GChatter& chatter) const
         result.append("=== GModelTemporalConst ===");
 
         // Append information
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }

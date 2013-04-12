@@ -366,7 +366,7 @@ void GTimeReference::set(const double&      mjdref,
                          const std::string& timeref)
 {
     // Check timeunit string
-    std::string ltimeunit = tolower(timeunit);
+    std::string ltimeunit = gammalib::tolower(timeunit);
     if (ltimeunit == "d" || ltimeunit == "day" || ltimeunit == "days") {
         m_unit_sec = false;
     }
@@ -382,8 +382,8 @@ void GTimeReference::set(const double&      mjdref,
     // Set members
     m_mjdref   = mjdref;
     m_timeunit = ltimeunit;
-    m_timesys  = toupper(timesys);
-    m_timeref  = toupper(timeref);
+    m_timesys  = gammalib::toupper(timesys);
+    m_timeref  = gammalib::toupper(timeref);
 
     // Return
     return;
@@ -539,10 +539,11 @@ std::string GTimeReference::print(const GChatter& chatter) const
         result.append("=== GTimeReference ===");
 
         // Append information
-        result.append("\n"+parformat("MJD reference time")+str(mjdref()));
-        result.append("\n"+parformat("Time unit")+timeunit());
-        result.append("\n"+parformat("Time system")+timesys());
-        result.append("\n"+parformat("Time reference")+timeref());
+        result.append("\n"+gammalib::parformat("MJD reference time"));
+        result.append(gammalib::str(mjdref()));
+        result.append("\n"+gammalib::parformat("Time unit")+timeunit());
+        result.append("\n"+gammalib::parformat("Time system")+timesys());
+        result.append("\n"+gammalib::parformat("Time reference")+timeref());
 
     } // endif: chatter was not silent
 

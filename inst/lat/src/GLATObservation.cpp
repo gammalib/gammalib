@@ -547,19 +547,19 @@ std::string GLATObservation::print(const GChatter& chatter) const
         result.append("=== GLATObservation ===");
 
         // Append information
-        result.append("\n"+parformat("Name")+name());
-        result.append("\n"+parformat("Identifier")+id());
-        result.append("\n"+parformat("Instrument")+instrument());
-        result.append("\n"+parformat("Statistics")+statistics());
-        result.append("\n"+parformat("Ontime")+str(ontime()));
-        result.append("\n"+parformat("Livetime")+str(livetime()));
+        result.append("\n"+gammalib::parformat("Name")+name());
+        result.append("\n"+gammalib::parformat("Identifier")+id());
+        result.append("\n"+gammalib::parformat("Instrument")+instrument());
+        result.append("\n"+gammalib::parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Ontime")+gammalib::str(ontime()));
+        result.append("\n"+gammalib::parformat("Livetime")+gammalib::str(livetime()));
 
         // Append response
         if (m_response != NULL) {
             result.append("\n"+m_response->print(chatter));
         }
         else {
-            result.append("\n"+parformat("LAT response")+"undefined");
+            result.append("\n"+gammalib::parformat("LAT response")+"undefined");
         }
 
         // Append livetime cube
@@ -567,7 +567,7 @@ std::string GLATObservation::print(const GChatter& chatter) const
             result.append("\n"+m_ltcube->print(chatter));
         }
         else {
-            result.append("\n"+parformat("LAT livetime cube")+"undefined");
+            result.append("\n"+gammalib::parformat("LAT livetime cube")+"undefined");
         }
 
         // EXPLICIT: Append events

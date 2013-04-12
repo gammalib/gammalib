@@ -305,9 +305,9 @@ void GCTAAeffArf::read_arf(const GFitsTable* hdu)
     const GFitsTableCol* specresp  = &(*hdu)["SPECRESP"];
 
     // Determine unit conversion factors (default: TeV and cm^2)
-    std::string u_energy_lo = tolower(strip_whitespace(energy_lo->unit()));
-    std::string u_energy_hi = tolower(strip_whitespace(energy_hi->unit()));
-    std::string u_specresp  = tolower(strip_whitespace(specresp->unit()));
+    std::string u_energy_lo = gammalib::tolower(gammalib::strip_whitespace(energy_lo->unit()));
+    std::string u_energy_hi = gammalib::tolower(gammalib::strip_whitespace(energy_hi->unit()));
+    std::string u_specresp  = gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
     double c_energy_lo = 1.0;
     double c_energy_hi = 1.0;
     double c_specresp  = 1.0;
@@ -432,18 +432,24 @@ std::string GCTAAeffArf::print(const GChatter& chatter) const
         result.append("=== GCTAAeffArf ===");
 
         // Append information
-        result.append("\n"+parformat("Filename")+m_filename);
-        result.append("\n"+parformat("Number of energy bins")+str(size()));
-        result.append("\n"+parformat("Log10(Energy) range"));
-        result.append(str(emin)+" - "+str(emax)+" TeV");
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append(gammalib::str(emin) +
+                      " - " +
+                      gammalib::str(emax) +
+                      " TeV");
 
         // Append offset angle dependence
         if (m_sigma == 0) {
-            result.append("\n"+parformat("Offset angle dependence")+"none");
+            result.append("\n"+gammalib::parformat("Offset angle dependence") +
+                          "none");
         }
         else {
-            std::string txt = "Fixed sigma="+str(m_sigma);
-            result.append("\n"+parformat("Offset angle dependence")+txt);
+            std::string txt = "Fixed sigma=" + gammalib::str(m_sigma);
+            result.append("\n"+gammalib::parformat("Offset angle dependence") +
+                          txt);
         }
 
     } // endif: chatter was not silent

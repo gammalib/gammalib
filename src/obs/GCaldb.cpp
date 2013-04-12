@@ -120,7 +120,7 @@ GCaldb::GCaldb(const std::string& pathname)
 
     // If pathname is not empty then use it as root pathname
     if (pathname.length() > 0) {
-        set_database(expand_env(pathname));
+        set_database(gammalib::expand_env(pathname));
     }
 
     // ... otherwise try to determine root pathname from GAMMALIB_CALDB
@@ -251,7 +251,7 @@ void GCaldb::dir(const std::string& pathname)
     clear();
 
     // Set calibration database
-    set_database(expand_env(pathname));
+    set_database(gammalib::expand_env(pathname));
 
     // Return
     return;
@@ -333,14 +333,18 @@ std::string GCaldb::print(const GChatter& chatter) const
         result.append("=== GCaldb ===");
 
         // Append information
-        result.append("\n"+parformat("Database root")+m_caldb);
+        result.append("\n"+gammalib::parformat("Database root")+m_caldb);
 
         // Append information about opened database
         if (m_cif != NULL) {
-            result.append("\n"+parformat("Selected Mission")+toupper(m_mission));
-            result.append("\n"+parformat("Selected Instrument")+toupper(m_instrument));
-            result.append("\n"+parformat("Calibration Index File")+m_cifname);
-            result.append("\n"+parformat("Number of entries")+str(size()));
+            result.append("\n"+gammalib::parformat("Selected Mission"));
+            result.append(gammalib::toupper(m_mission));
+            result.append("\n"+gammalib::parformat("Selected Instrument"));
+            result.append(gammalib::toupper(m_instrument));
+            result.append("\n"+gammalib::parformat("Calibration Index File"));
+            result.append(m_cifname);
+            result.append("\n"+gammalib::parformat("Number of entries"));
+            result.append(gammalib::str(size()));
         }
 
     } // endif: chatter was not silent
@@ -531,16 +535,16 @@ void GCaldb::set_database(const std::string& pathname)
 std::string GCaldb::path(const std::string& mission, const std::string& instrument)
 {
     // Verify that mission name is valid and directory is accessible
-    std::string path = m_caldb + "/data/" + tolower(mission);
+    std::string path = m_caldb + "/data/" + gammalib::tolower(mission);
     if (access(path.c_str(), F_OK) != 0) {
         throw GException::directory_not_found(G_PATH, path,
-              "Requested mission \""+toupper(mission)+"\" not found in"
+              "Requested mission \""+gammalib::toupper(mission)+"\" not found in"
               " calibration database.");
     }
     if (access(path.c_str(), R_OK) != 0) {
         throw GException::directory_not_accessible(G_PATH, path,
               "Requested read permission not granted for mission \""+
-              toupper(mission)+"\".");
+              gammalib::toupper(mission)+"\".");
     }
 
     // If an instrument has been specified, verify that instrument name is
@@ -548,19 +552,19 @@ std::string GCaldb::path(const std::string& mission, const std::string& instrume
     if (instrument.length() > 0) {
 
         // Add instrument to path
-        path += "/" + tolower(instrument);
+        path += "/" + gammalib::tolower(instrument);
 
         // Verify path
         if (access(path.c_str(), F_OK) != 0) {
             throw GException::directory_not_found(G_PATH, path,
-                  "Requested instrument \""+toupper(instrument)+"\" on"
-                  " mission \""+toupper(mission)+"\" not found in"
+                  "Requested instrument \""+gammalib::toupper(instrument)+"\" on"
+                  " mission \""+gammalib::toupper(mission)+"\" not found in"
                   " calibration database.");
         }
         if (access(path.c_str(), R_OK) != 0) {
             throw GException::directory_not_accessible(G_PATH, path,
                 "Requested read permission not granted for instrument \""+
-                toupper(instrument)+"\" on mission \""+toupper(mission)+
+                gammalib::toupper(instrument)+"\" on mission \""+gammalib::toupper(mission)+
                 "\".");
         }
         

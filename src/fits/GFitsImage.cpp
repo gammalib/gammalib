@@ -452,12 +452,12 @@ std::string GFitsImage::print(const GChatter& chatter) const
         result.append(print_hdu(chatter));
 
         // Append image dimensions
-        result.append(parformat("Image type")+typecode(type())+"\n");
-        result.append(parformat("Number of dimensions")+str(naxis())+"\n");
-        result.append(parformat("Number of image pixels")+str(size()));
+        result.append(gammalib::parformat("Image type")+typecode(type())+"\n");
+        result.append(gammalib::parformat("Number of dimensions")+gammalib::str(naxis())+"\n");
+        result.append(gammalib::parformat("Number of image pixels")+gammalib::str(size()));
         for (int i = 0; i < naxis(); ++i) {
-            result.append("\n"+parformat("Number of bins in "+str(i)) +
-                          str(naxes(i)));
+            result.append("\n"+gammalib::parformat("Number of bins in "+gammalib::str(i)) +
+                          gammalib::str(naxes(i)));
         }
 
         // Append header information

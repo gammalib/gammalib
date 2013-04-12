@@ -329,13 +329,15 @@ std::string GCTAAeff2D::print(const GChatter& chatter) const
         result.append("=== GCTAAeff2D ===");
 
         // Append information
-        result.append("\n"+parformat("Filename")+m_filename);
-        result.append("\n"+parformat("Number of energy bins")+str(m_aeff.axis(0)));
-        result.append("\n"+parformat("Number of offset bins")+str(m_aeff.axis(1)));
-        result.append("\n"+parformat("Log10(Energy) range"));
-        result.append(str(emin)+" - "+str(emax)+" TeV");
-        result.append("\n"+parformat("Offset angle range"));
-        result.append(str(omin)+" - "+str(omax)+" deg");
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(m_aeff.axis(0)));
+        result.append("\n"+gammalib::parformat("Number of offset bins") +
+                      gammalib::str(m_aeff.axis(1)));
+        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
+        result.append("\n"+gammalib::parformat("Offset angle range"));
+        result.append(gammalib::str(omin)+" - "+gammalib::str(omax)+" deg");
 
     } // endif: chatter was not silent
 

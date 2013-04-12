@@ -382,7 +382,7 @@ void GPar::integer(const int& value)
     }
 
     // Set value string
-    std::string value_string = str(value);
+    std::string value_string = gammalib::str(value);
 
     // Set value
     set_value(value_string);
@@ -413,7 +413,7 @@ void GPar::real(const double& value)
     }
 
     // Set value string
-    std::string value_string = str(value);
+    std::string value_string = gammalib::str(value);
 
     // Set value
     set_value(value_string);
@@ -504,7 +504,7 @@ std::string GPar::filename(void)
     }
 
     // Return value
-    return (expand_env(m_value));
+    return (gammalib::expand_env(m_value));
 }
 
 
@@ -538,7 +538,7 @@ bool GPar::boolean(void)
     }
 
     // Convert boolean value to upper case
-    std::string uvalue = toupper(m_value);
+    std::string uvalue = gammalib::toupper(m_value);
 
     // Set result
     bool result = (uvalue == "YES"  || uvalue == "Y" ||
@@ -579,7 +579,7 @@ int GPar::integer(void)
     }
 
     // Set result
-    int result = toint(m_value);
+    int result = gammalib::toint(m_value);
 
     // Return result
     return result;
@@ -616,7 +616,7 @@ double GPar::real(void)
     }
 
     // Set result
-    double result = todouble(m_value);
+    double result = gammalib::todouble(m_value);
 
     // Return result
     return result;
@@ -731,7 +731,7 @@ std::string GPar::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Write parameter name
-        result = parformat(name());
+        result = gammalib::parformat(name());
 
         // Write value (use m_value here to avoid querying when printing)
         switch (m_status) {
@@ -930,7 +930,7 @@ void GPar::check_value(const std::string& value) const
 void GPar::check_value_bool(const std::string& value) const
 {
     // Turn value to lower case for testing
-    std::string lvalue = tolower(value);
+    std::string lvalue = gammalib::tolower(value);
 
     // Test for validity
     if (lvalue != "y" && lvalue != "yes" && lvalue != "true"  && lvalue != "t" &&
@@ -1042,7 +1042,7 @@ void GPar::set_value(const std::string& value)
     // parameter is undefined. Any infinity or nan is set to the maximum
     // long value (APE standard)
     if (m_type == "i") {
-        std::string lvalue = tolower(value);
+        std::string lvalue = gammalib::tolower(value);
         if (lvalue == "indef" ||
             lvalue == "none"  ||
             lvalue == "undef" ||
@@ -1053,7 +1053,7 @@ void GPar::set_value(const std::string& value)
         else if (lvalue == "inf" ||
                  lvalue == "infinity" ||
                  lvalue == "nan") {
-            m_value  = str(LONG_MAX);
+            m_value  = gammalib::str(LONG_MAX);
             m_status = ST_VALID;
         }
         else {
@@ -1065,7 +1065,7 @@ void GPar::set_value(const std::string& value)
     // Set real value. Catch the special values that signal that a
     // parameter is undefined, infinity or nan (APE standard).
     else if (m_type == "r") {
-        std::string lvalue = tolower(value);
+        std::string lvalue = gammalib::tolower(value);
         if (lvalue == "indef" ||
             lvalue == "none"  ||
             lvalue == "undef" ||
@@ -1142,11 +1142,10 @@ void GPar::query(void)
         #endif
 
         // Strip any whitespace from string
-        value = strip_whitespace(value);
+        value = gammalib::strip_whitespace(value);
 
         // Update value if value is not the default
         if (value.length() > 0) {
-            //m_value  = value;
             set_value(value);
             m_update = true;
         }

@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GException_fits.cpp  -  fits exception handlers           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2006-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2006-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -76,7 +76,7 @@ GException::fits_open_error::fits_open_error(std::string origin,
 
     // Add status
     if (status != 0)
-        m_message += " (status=" + str(status) + ")";
+        m_message += " (status=" + gammalib::str(status) + ")";
 
     // Add optional error message
     if (message.length() > 0)
@@ -106,7 +106,7 @@ GException::fits_file_exist::fits_file_exist(std::string origin,
 
     // Add status
     if (status != 0)
-        m_message += " (status=" + str(status) + ")";
+        m_message += " (status=" + gammalib::str(status) + ")";
 
     // Return
     return;
@@ -177,7 +177,7 @@ GException::fits_key_not_found::fits_key_not_found(std::string origin,
 
     // Add status
     if (status != 0)
-        m_message += " (status=" + str(status) + ")";
+        m_message += " (status=" + gammalib::str(status) + ")";
 
     // Return
     return;
@@ -203,7 +203,7 @@ GException::fits_column_not_found::fits_column_not_found(std::string origin,
 
     // Add status
     if (status != 0)
-        m_message += " (status=" + str(status) + ")";
+        m_message += " (status=" + gammalib::str(status) + ")";
 
     // Return
     return;
@@ -229,7 +229,7 @@ GException::fits_no_header::fits_no_header(std::string origin,
 
     // Add status
     if (status != 0)
-        m_message += " (status=" + str(status) + ")";
+        m_message += " (status=" + gammalib::str(status) + ")";
 
     // Return
     return;
@@ -255,7 +255,7 @@ GException::fits_no_data::fits_no_data(std::string origin,
 
     // Add status
     if (status != 0)
-        m_message += " (status=" + str(status) + ")";
+        m_message += " (status=" + gammalib::str(status) + ")";
 
     // Return
     return;
@@ -281,7 +281,7 @@ GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
 
     // Add status
     if (status != 0)
-        m_message += " (status=" + str(status) + ")";
+        m_message += " (status=" + gammalib::str(status) + ")";
 
     // Return
     return;
@@ -303,11 +303,11 @@ GException::fits_hdu_not_found::fits_hdu_not_found(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "HDU number " + str(extno) + " not found in FITS file";
+    m_message = "HDU number " + gammalib::str(extno) + " not found in FITS file";
 
     // Add status
     if (status != 0)
-        m_message += " (status=" + str(status) + ")";
+        m_message += " (status=" + gammalib::str(status) + ")";
 
     // Return
     return;
@@ -329,7 +329,7 @@ GException::fits_hdu_not_image::fits_hdu_not_image(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "HDU \""+extname+"\" is not an image (type="+str(type)+")";
+    m_message = "HDU \""+extname+"\" is not an image (type="+gammalib::str(type)+")";
 
     // Return
     return;
@@ -351,7 +351,7 @@ GException::fits_hdu_not_table::fits_hdu_not_table(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "HDU \""+extname+"\" is not a table (type="+str(type)+")";
+    m_message = "HDU \""+extname+"\" is not a table (type="+gammalib::str(type)+")";
 
     // Return
     return;
@@ -371,7 +371,7 @@ GException::fits_unknown_HDU_type::fits_unknown_HDU_type(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "HDU type (type="+str(type)+") is not defined";
+    m_message = "HDU type (type="+gammalib::str(type)+") is not defined";
 
     // Return
     return;
@@ -411,7 +411,7 @@ GException::fits_unknown_tabtype::fits_unknown_tabtype(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Table type \"" + str(type) + "\" is unknown";
+    m_message = "Table type \"" + gammalib::str(type) + "\" is unknown";
 
     // Return
     return;
@@ -433,7 +433,7 @@ GException::fits_unknown_coltype::fits_unknown_coltype(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Column \""+colname+"\" has unsupported typecode="+str(type);
+    m_message = "Column \""+colname+"\" has unsupported typecode="+gammalib::str(type);
 
     // Return
     return;
@@ -455,8 +455,8 @@ GException::fits_bad_col_length::fits_bad_col_length(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Column length (" + str(length) + ") is not compatible"
-                " with the number of rows (" + str(rows) + ") in the"
+    m_message = "Column length (" + gammalib::str(length) + ") is not compatible"
+                " with the number of rows (" + gammalib::str(rows) + ") in the"
                 " table";
 
     // Return
@@ -477,7 +477,7 @@ GException::fits_bad_bitpix::fits_bad_bitpix(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message = "Invalid number of bits per pixel (bitpix="+str(bitpix)+")";
+    m_message = "Invalid number of bits per pixel (bitpix="+gammalib::str(bitpix)+")";
 
     // Return
     return;
@@ -500,7 +500,7 @@ GException::fits_wrong_image_operator::fits_wrong_image_operator(std::string ori
 
     // Set message
     m_message = "Wrong image pixel access operator has been used (dimension=" +
-                str(naxis) + " < arguments=" + str(nargs) + ")";
+                gammalib::str(naxis) + " < arguments=" + gammalib::str(nargs) + ")";
 
     // Return
     return;
@@ -524,8 +524,8 @@ GException::fits_invalid_row::fits_invalid_row(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message  = "Invalid row number "+str(row)+" specified";
-    m_message += " (must be within [0,"+str(nrows)+"]).";
+    m_message  = "Invalid row number "+gammalib::str(row)+" specified";
+    m_message += " (must be within [0,"+gammalib::str(nrows)+"]).";
 
     // Set optional message
     if (message.length() > 0)
@@ -553,8 +553,8 @@ GException::fits_invalid_nrows::fits_invalid_nrows(std::string origin,
     m_origin  = origin;
 
     // Set message
-    m_message  = "Invalid number of rows ("+str(nrows)+") specified";
-    m_message += " (must be within [0,"+str(max_rows)+"]).";
+    m_message  = "Invalid number of rows ("+gammalib::str(nrows)+") specified";
+    m_message += " (must be within [0,"+gammalib::str(max_rows)+"]).";
 
     // Set optional message
     if (message.length() > 0)
@@ -587,17 +587,17 @@ GException::fits_inconsistent_tdim::fits_inconsistent_tdim(std::string      orig
     }
     else {
         // Compute expectation
-        std::string sdim = "("+str(tdim[0]);
+        std::string sdim = "("+gammalib::str(tdim[0]);
         int         num  = tdim[0];
         for (int k = 1; k < tdim.size(); ++k) {
-            sdim += ","+str(tdim[k]);
+            sdim += ","+gammalib::str(tdim[k]);
             num  *= tdim[k];
         }
         sdim += ")";
         
         // Set message
-        m_message  = "TDIM keyword "+sdim+" predicts "+str(num)+" column"
-                     " elements, while there are "+str(number)+" elements"
+        m_message  = "TDIM keyword "+sdim+" predicts "+gammalib::str(num)+" column"
+                     " elements, while there are "+gammalib::str(number)+" elements"
                      " in the column.";
     }
 

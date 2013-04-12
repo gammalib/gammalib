@@ -282,7 +282,7 @@ void GFitsHeaderCard::value(const std::string& value)
     // Strip hyphens and whitespace from datatype value that is used for
     // keyword writing
     std::string value_dtype = 
-                strip_whitespace(m_value.substr(1, m_value.length() - 2));
+                gammalib::strip_whitespace(m_value.substr(1, m_value.length() - 2));
 
     // Set data type
     m_dtype       = __TSTRING;
@@ -324,7 +324,7 @@ void GFitsHeaderCard::value(const float& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TFLOAT;
     m_value_dtype = new float(value);
 
@@ -344,7 +344,7 @@ void GFitsHeaderCard::value(const double& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TDOUBLE;
     m_value_dtype = new double(value);
 
@@ -364,7 +364,7 @@ void GFitsHeaderCard::value(const unsigned short& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TUSHORT;
     m_value_dtype = new unsigned short(value);
 
@@ -384,7 +384,7 @@ void GFitsHeaderCard::value(const short& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TSHORT;
     m_value_dtype = new short(value);
 
@@ -404,7 +404,7 @@ void GFitsHeaderCard::value(const unsigned int& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TUINT;
     m_value_dtype = new unsigned int(value);
 
@@ -424,7 +424,7 @@ void GFitsHeaderCard::value(const int& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TINT;
     m_value_dtype = new int(value);
 
@@ -444,7 +444,7 @@ void GFitsHeaderCard::value(const long& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TLONG;
     m_value_dtype = new long(value);
 
@@ -464,7 +464,7 @@ void GFitsHeaderCard::value(const unsigned long& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TULONG;
     m_value_dtype = new unsigned long(value);
 
@@ -484,7 +484,7 @@ void GFitsHeaderCard::value(const long long& value)
     free_dtype();
 
     // Set value and data type
-    m_value       = str(value);
+    m_value       = gammalib::str(value);
     m_dtype       = __TLONGLONG;
     m_value_dtype = new long long(value);
 
@@ -589,7 +589,7 @@ std::string GFitsHeaderCard::string(void)
         switch (m_dtype) {
         case __TSTRING:
             if (m_value.length() > 2)
-                result = strip_whitespace(m_value.substr(1, m_value.length() - 2));
+                result = gammalib::strip_whitespace(m_value.substr(1, m_value.length() - 2));
             break;
         default:
             break;
@@ -619,13 +619,13 @@ double GFitsHeaderCard::real(void)
         switch (m_dtype) {
         case __TSTRING:
             if (m_value.length() > 2)
-                result = todouble(m_value.substr(1, m_value.length() - 2));
+                result = gammalib::todouble(m_value.substr(1, m_value.length() - 2));
             break;
         case __TLOGICAL:
             result = (m_value == "T") ? 1.0 : 0.0;
             break;
         default:
-            result = todouble(m_value);
+            result = gammalib::todouble(m_value);
             break;
         }
     }
@@ -653,13 +653,13 @@ int GFitsHeaderCard::integer(void)
         switch (m_dtype) {
         case __TSTRING:
             if (m_value.length() > 2)
-                result = toint(m_value.substr(1, m_value.length() - 2));
+                result = gammalib::toint(m_value.substr(1, m_value.length() - 2));
             break;
         case __TLOGICAL:
             result = (m_value == "T") ? 1 : 0;
             break;
         default:
-            result = toint(m_value);
+            result = gammalib::toint(m_value);
             break;
         }
     }
@@ -685,15 +685,15 @@ std::string GFitsHeaderCard::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append keyname
-        result.append(left(m_keyname,8));
+        result.append(gammalib::left(m_keyname,8));
 
         // Format values
         if (m_keyname != "COMMENT" && m_keyname != "HISTORY") {
             if (m_unit.length() > 0) {
-                result.append(" ="+right(m_value,21)+" / ["+m_unit+"] "+m_comment);
+                result.append(" ="+gammalib::right(m_value,21)+" / ["+m_unit+"] "+m_comment);
             }
             else {
-                result.append(" ="+right(m_value,21)+" / "+m_comment);
+                result.append(" ="+gammalib::right(m_value,21)+" / "+m_comment);
             }
         }
         else {
@@ -987,9 +987,9 @@ void GFitsHeaderCard::set_dtype(const std::string& value)
         }
 
         // Conversion
-        double             value_dbl = todouble(m_value);
-        long long          value_ll  = tolonglong(m_value);
-        unsigned long long value_ull = toulonglong(m_value);
+        double             value_dbl = gammalib::todouble(m_value);
+        long long          value_ll  = gammalib::tolonglong(m_value);
+        unsigned long long value_ull = gammalib::toulonglong(m_value);
 
         // Check if we have an integer
         if ((value_dbl >= 0 && value_dbl == value_ull) ||

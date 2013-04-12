@@ -570,7 +570,7 @@ std::string GWcsHPX::ordering(void) const
 void GWcsHPX::ordering(const std::string& ordering)
 {
     // Convert argument to upper case
-    std::string uordering = toupper(ordering);
+    std::string uordering = gammalib::toupper(ordering);
 
     // Set pixel ordering
     if (uordering == "RING") {
@@ -606,14 +606,21 @@ std::string GWcsHPX::print(const GChatter& chatter) const
         result.append("=== GWcsHPX ===");
 
         // Append information
-        result.append("\n"+parformat("Coordinate system")+coordsys());
-        result.append("\n"+parformat("Nside (# of divisions)")+str(m_nside));
-        result.append("\n"+parformat("Npface (pixels per face)")+str(m_npface));
-        result.append("\n"+parformat("Ncap (# of cap pixels)")+str(m_ncap));
-        result.append("\n"+parformat("Npix (# of pixels)")+str(m_num_pixels));
-        result.append("\n"+parformat("Order")+str(m_order));
-        result.append("\n"+parformat("Solid angle per pixel")+str(m_omega)+" sr");
-        result.append("\n"+parformat("Ordering")+ordering());
+        result.append("\n"+gammalib::parformat("Coordinate system"));
+        result.append(coordsys());
+        result.append("\n"+gammalib::parformat("Nside (# of divisions)"));
+        result.append(gammalib::str(m_nside));
+        result.append("\n"+gammalib::parformat("Npface (pixels per face)"));
+        result.append(gammalib::str(m_npface));
+        result.append("\n"+gammalib::parformat("Ncap (# of cap pixels)"));
+        result.append(gammalib::str(m_ncap));
+        result.append("\n"+gammalib::parformat("Npix (# of pixels)"));
+        result.append(gammalib::str(m_num_pixels));
+        result.append("\n"+gammalib::parformat("Order"));
+        result.append(gammalib::str(m_order));
+        result.append("\n"+gammalib::parformat("Solid angle per pixel"));
+        result.append(gammalib::str(m_omega)+" sr");
+        result.append("\n"+gammalib::parformat("Ordering")+ordering());
 
     } // endif: chatter was not silent
 
@@ -914,7 +921,7 @@ int GWcsHPX::ang2pix_z_phi_ring(double z, double phi) const
 
     // Setup
     double za = fabs(z);
-    double tt = modulo(phi, gammalib::twopi) * gammalib::inv_pihalf; // in [0,4)
+    double tt = gammalib::modulo(phi, gammalib::twopi) * gammalib::inv_pihalf; // in [0,4)
 
     // Equatorial region
     if (za <= gammalib::twothird) {
@@ -925,7 +932,7 @@ int GWcsHPX::ang2pix_z_phi_ring(double z, double phi) const
         int    ir     = m_nside + 1 + jp - jm;      // in {1,2n+1}
         int    kshift = 1 - (ir & 1);               // kshift=1 if ir even, 0 otherwise
         int    ip     = (jp+jm-m_nside+kshift+1)/2; // in {0,4n-1}
-        ip            = int(modulo(ip,4*m_nside));
+        ip            = int(gammalib::modulo(ip,4*m_nside));
         ipix          = m_ncap + (ir-1)*4*m_nside + ip;
     }
 
@@ -937,7 +944,7 @@ int GWcsHPX::ang2pix_z_phi_ring(double z, double phi) const
         int    jm  = int((1.0-tp)*tmp); // decreasing edge line index
         int    ir  = jp + jm + 1;       // ring number counted from the closest pole
         int    ip  = int(tt*ir);        // in {0,4*ir-1}
-        ip = int(modulo(ip,4*ir));
+        ip = int(gammalib::modulo(ip,4*ir));
         if (z>0)
             ipix = 2*ir*(ir-1) + ip;
         else
@@ -964,7 +971,7 @@ int GWcsHPX::ang2pix_z_phi_nest(double z, double phi) const
 
     // Setup
     double za = fabs(z);
-    double tt = modulo(phi, gammalib::twopi) * gammalib::inv_pihalf; // in [0,4)
+    double tt = gammalib::modulo(phi, gammalib::twopi) * gammalib::inv_pihalf; // in [0,4)
 
     // Equatorial region
     if (za <= gammalib::twothird) {
@@ -1064,10 +1071,3 @@ int GWcsHPX::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     // Return
     return 0;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                  Friends                                =
- =                                                                         =
- ==========================================================================*/

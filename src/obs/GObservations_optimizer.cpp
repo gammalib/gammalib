@@ -273,7 +273,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                 if (dynamic_cast<const GEventList*>(m_this->m_obs[i]->events()) != NULL) {
 
                     // Poisson statistics
-                    if (toupper(statistics) == "POISSON") {
+                    if (gammalib::toupper(statistics) == "POISSON") {
 
                         // Determine Npred value and gradient for this observation
                         double npred = m_this->m_obs[i]->npred(cpy_model, &cpy_wrk_grad);
@@ -320,7 +320,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                 else {
 
                     // Poisson statistics
-                    if (toupper(statistics) == "POISSON") {
+                    if (gammalib::toupper(statistics) == "POISSON") {
                         #if G_EVAL_DEBUG
                         std::cout << "Binned Poisson" << std::endl;
                         #endif
@@ -334,7 +334,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
                     }
 
                     // ... or Gaussian statistics
-                    else if (toupper(statistics) == "GAUSSIAN") {
+                    else if (gammalib::toupper(statistics) == "GAUSSIAN") {
                         #if G_EVAL_DEBUG
                         std::cout << "Binned Gaussian" << std::endl;
                         #endif
@@ -522,7 +522,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
             values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !isinfinite(wrk_grad[i])) {
+            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -714,7 +714,7 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
             values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !isinfinite(wrk_grad[i])) {
+            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
                 inx[ndev] = i;
                 ndev++;
             }
@@ -937,7 +937,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
         int ndev = 0;
         for (int i = 0; i < npars; ++i) {
             values[i] = 0.0;
-            if (wrk_grad[i] != 0.0 && !isinfinite(wrk_grad[i])) {
+            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
                 inx[ndev] = i;
                 ndev++;
             }

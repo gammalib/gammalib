@@ -501,8 +501,10 @@ std::string GUrlString::print(const GChatter& chatter) const
         result.append("=== GUrlString ===");
 
         // Append URL information
-        result.append("\n"+parformat("String size")+str(m_buffer.length()));
-        result.append("\n"+parformat("String position indicator")+str(m_index));
+        result.append("\n"+gammalib::parformat("String size"));
+        result.append(gammalib::str(m_buffer.length()));
+        result.append("\n"+gammalib::parformat("String position indicator"));
+        result.append(gammalib::str(m_index));
 
     } // endif: chatter was not silent
 

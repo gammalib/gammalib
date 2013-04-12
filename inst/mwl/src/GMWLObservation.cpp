@@ -359,10 +359,10 @@ void GMWLObservation::read(const GXmlElement& xml)
             
             // Load file (this also stores the filename, extno and
             // extname)
-            if (strip_whitespace(extno).length() > 0) {
-                load(filename, toint(extno));
+            if (gammalib::strip_whitespace(extno).length() > 0) {
+                load(filename, gammalib::toint(extno));
             }
-            else if (strip_whitespace(extname).length() > 0) {
+            else if (gammalib::strip_whitespace(extname).length() > 0) {
                 load(filename, extname);
             }
             else {
@@ -435,10 +435,10 @@ void GMWLObservation::write(GXmlElement& xml) const
         else if (par->attribute("name") == "Data") {
             npar[1]++;
             par->attribute("file", m_filename);
-            if (strip_whitespace(m_extno).length() > 0) {
+            if (gammalib::strip_whitespace(m_extno).length() > 0) {
                 par->attribute("extno", m_extno);
             }
-            if (strip_whitespace(m_extname).length() > 0) {
+            if (gammalib::strip_whitespace(m_extname).length() > 0) {
                 par->attribute("extname", m_extname);
             }
         }
@@ -504,9 +504,9 @@ void GMWLObservation::load(const std::string& filename,
 
     // Set attributes
     name("Multi-wavelength observation");
-    id(filename+"["+str(extno)+"]");
+    id(filename+"["+gammalib::str(extno)+"]");
     m_filename   = filename;
-    m_extno      = str(extno);
+    m_extno      = gammalib::str(extno);
     m_instrument = spec->instrument();
 
     // Return
@@ -563,10 +563,10 @@ std::string GMWLObservation::print(const GChatter& chatter) const
         result.append("=== GMWLObservation ===");
 
         // Append information
-        result.append("\n"+parformat("Name")+name());
-        result.append("\n"+parformat("Identifier")+id());
-        result.append("\n"+parformat("Instrument")+instrument());
-        result.append("\n"+parformat("Statistics")+statistics());
+        result.append("\n"+gammalib::parformat("Name")+name());
+        result.append("\n"+gammalib::parformat("Identifier")+id());
+        result.append("\n"+gammalib::parformat("Instrument")+instrument());
+        result.append("\n"+gammalib::parformat("Statistics")+statistics());
 
         // EXPLICIT: Append events
         if (chatter >=  EXPLICIT) {

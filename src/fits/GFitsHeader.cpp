@@ -545,7 +545,7 @@ std::string GFitsHeader::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GFitsHeader ("+str(m_num_cards)+" cards) ===");
+        result.append("=== GFitsHeader ("+gammalib::str(m_num_cards)+" cards) ===");
 
         // NORMAL: Append cards
         if (chatter >= NORMAL) {

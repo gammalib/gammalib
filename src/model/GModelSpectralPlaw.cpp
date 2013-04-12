@@ -262,7 +262,7 @@ double GModelSpectralPlaw::eval(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw::eval";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -345,7 +345,7 @@ double GModelSpectralPlaw::eval_gradients(const GEnergy& srcEng,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSpectralPlaw::eval_gradients";
         std::cout << "(srcEng=" << srcEng;
         std::cout << ", srcTime=" << srcTime << "):";
@@ -393,10 +393,11 @@ double GModelSpectralPlaw::flux(const GEnergy& emin,
     if (emin < emax) {
 
         // Compute photon flux
-        flux = m_norm.value() * plaw_photon_flux(emin.MeV(),
-                                                 emax.MeV(),
-                                                 m_pivot.value(),
-                                                 m_index.value());
+        flux = m_norm.value() *
+               gammalib::plaw_photon_flux(emin.MeV(),
+                                          emax.MeV(),
+                                          m_pivot.value(),
+                                          m_index.value());
 
     } // endif: integration range was valid
 
@@ -433,10 +434,11 @@ double GModelSpectralPlaw::eflux(const GEnergy& emin,
     if (emin < emax) {
 
         // Compute photon flux
-        eflux = m_norm.value() * plaw_energy_flux(emin.MeV(),
-                                                  emax.MeV(),
-                                                  m_pivot.value(),
-                                                  m_index.value());
+        eflux = m_norm.value() *
+                gammalib::plaw_energy_flux(emin.MeV(),
+                                           emax.MeV(),
+                                           m_pivot.value(),
+                                           m_index.value());
 
         // Convert from MeV/cm2/s to erg/cm2/s
         eflux *= gammalib::MeV2erg;
@@ -677,7 +679,8 @@ std::string GModelSpectralPlaw::print(const GChatter& chatter) const
         result.append("=== GModelSpectralPlaw ===");
 
         // Append information
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }

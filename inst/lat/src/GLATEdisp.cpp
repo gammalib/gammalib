@@ -287,8 +287,10 @@ std::string GLATEdisp::print(const GChatter& chatter) const
     result.append("=== GLATEdisp ===");
 
         // Append information
-    result.append("\n"+parformat("Number of energy bins")+str(nenergies()));
-    result.append("\n"+parformat("Number of cos theta bins")+str(ncostheta()));
+    result.append("\n"+gammalib::parformat("Number of energy bins") +
+                  gammalib::str(nenergies()));
+    result.append("\n"+gammalib::parformat("Number of cos theta bins") +
+                  gammalib::str(ncostheta()));
 
     } // endif: chatter was not silent
 

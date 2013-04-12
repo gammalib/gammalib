@@ -291,7 +291,7 @@ std::string GCTADir::print(const GChatter& chatter) const
 
         // Append camera direction
         result.append("(theta,phi)=(");
-        result.append(str(theta_deg())+","+str(phi_deg()));
+        result.append(gammalib::str(theta_deg())+","+gammalib::str(phi_deg()));
         result.append(")");
 
     } // endif: chatter was not silent

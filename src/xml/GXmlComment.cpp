@@ -226,7 +226,7 @@ std::string GXmlComment::print(const GChatter& chatter,
     if (chatter != SILENT) {
 
         // Initialise result string
-        result = fill(" ", indent);
+        result = gammalib::fill(" ", indent);
 
         // Append comment to string
         result.append("GXmlComment::"+m_comment);

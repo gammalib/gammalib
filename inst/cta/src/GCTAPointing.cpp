@@ -226,7 +226,7 @@ std::string GCTAPointing::print(const GChatter& chatter) const
         result.append("=== GCTAPointing ===");
 
         // Append information
-        result.append("\n"+parformat("Pointing direction"));
+        result.append("\n"+gammalib::parformat("Pointing direction"));
         result.append(this->dir().print(chatter));
 
     } // endif: chatter was not silent

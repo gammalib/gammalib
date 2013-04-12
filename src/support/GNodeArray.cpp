@@ -542,27 +542,32 @@ std::string GNodeArray::print(const GChatter& chatter) const
         result.append("=== GNodeArray ===");
 
         // Append array type
-        result.append("\n"+parformat("Number of nodes in array")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of nodes in array"));
+        result.append(gammalib::str(size()));
         if (m_is_linear) {
-            result.append("\n"+parformat("Array type")+"linear");
-            result.append("\n"+parformat("Linear slope")+str(m_linear_slope));
-            result.append("\n"+parformat("Linear offset")+str(m_linear_offset));
+            result.append("\n"+gammalib::parformat("Array type")+"linear");
+            result.append("\n"+gammalib::parformat("Linear slope"));
+            result.append(gammalib::str(m_linear_slope));
+            result.append("\n"+gammalib::parformat("Linear offset"));
+            result.append(gammalib::str(m_linear_offset));
         }
         else {
-            result.append("\n"+parformat("Array type")+"nonlinear");
+            result.append("\n"+gammalib::parformat("Array type")+"nonlinear");
         }
 
         // Append indices and weights
-        result.append("\n"+parformat("Indices and weights"));
-        result.append("("+str(m_inx_left)+","+str(m_inx_right)+")=");
-        result.append("("+str(m_wgt_left)+","+str(m_wgt_right)+")");
+        result.append("\n"+gammalib::parformat("Indices and weights"));
+        result.append("("+gammalib::str(m_inx_left)+",");
+        result.append(gammalib::str(m_inx_right)+")=");
+        result.append("("+gammalib::str(m_wgt_left)+",");
+        result.append(gammalib::str(m_wgt_right)+")");
 
         // Append nodes
         for (int i = 0; i < size(); ++i) {
-            result.append("\n"+parformat("Node "+str(i)));
-            result.append(str(m_node[i]));
+            result.append("\n"+gammalib::parformat("Node "+gammalib::str(i)));
+            result.append(gammalib::str(m_node[i]));
             if (i < m_step.size()) {
-                result.append(" (delta="+str(m_step[i])+")");
+                result.append(" (delta="+gammalib::str(m_step[i])+")");
             }
         }
 

@@ -931,7 +931,7 @@ double GObservation::npred_spec(const GModel& model,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(result) || isinfinite(result)) {
+    if (gammalib::isnotanumber(result) || gammalib::isinfinite(result)) {
         std::cout << "*** ERROR: GObservation::npred_spec:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (result=" << result;
@@ -982,7 +982,7 @@ double GObservation::npred_spec_kern::eval(double x)
 
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GObservation::npred_spec_kern::eval";
         std::cout << "(x=" << x_in << "): ";
         std::cout << " NaN/Inf encountered";

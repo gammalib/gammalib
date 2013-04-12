@@ -433,14 +433,15 @@ std::string GCTAEventList::print(const GChatter& chatter) const
         result.append("=== GCTAEventList ===");
 
         // Append information
-        result.append("\n"+parformat("Number of events")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of events") +
+                      gammalib::str(size()));
 
         // Append GTI interval
-        result.append("\n"+parformat("Time interval"));
+        result.append("\n"+gammalib::parformat("Time interval"));
         if (gti().size() > 0) {
-            result.append(str(tstart().mjd()));
+            result.append(gammalib::str(tstart().mjd()));
             result.append(" - ");
-            result.append(str(tstop().mjd())+" days");
+            result.append(gammalib::str(tstop().mjd())+" days");
         }
         else {
             result.append("not defined");
@@ -451,7 +452,8 @@ std::string GCTAEventList::print(const GChatter& chatter) const
             result.append("\n"+ebounds().print(chatter));
         }
         else {
-            result.append("\n"+parformat("Energy intervals")+"not defined");
+            result.append("\n"+gammalib::parformat("Energy intervals") +
+                          "not defined");
         }
 
         // Append ROI
@@ -459,13 +461,15 @@ std::string GCTAEventList::print(const GChatter& chatter) const
             result.append("\n"+roi().print(chatter));
         }
         else {
-            result.append("\n"+parformat("Region of interest")+"not defined");
+            result.append("\n"+gammalib::parformat("Region of interest") +
+                          "not defined");
         }
 
         // EXPLICIT: Append IRF cache
         if (chatter >= EXPLICIT) {
             for (int i = 0; i < m_irf_names.size(); ++i) {
-                result.append("\n"+parformat("IRF cache "+str(i)));
+                result.append("\n"+gammalib::parformat("IRF cache " +
+                              gammalib::str(i)));
                 result.append(m_irf_names[i]+" = ");
                 int num   = 0;
                 for (int k = 0; k < size(); ++k) {
@@ -473,7 +477,7 @@ std::string GCTAEventList::print(const GChatter& chatter) const
                         num++;
                     }
                 }
-                result.append(str(num)+" values");
+                result.append(gammalib::str(num)+" values");
             }
         } // endif: chatter was explicit
 
@@ -896,17 +900,17 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU* hdu)
 
         // Loop over all data selection keys
         for (int i = 1; i <= ndskeys; ++i) {
-            std::string type_key  = "DSTYP"+str(i);
-            std::string unit_key  = "DSUNI"+str(i);
-            std::string value_key = "DSVAL"+str(i);
+            std::string type_key  = "DSTYP"+gammalib::str(i);
+            std::string unit_key  = "DSUNI"+gammalib::str(i);
+            std::string value_key = "DSVAL"+gammalib::str(i);
             try {
                 if (hdu->string(type_key) == "ENERGY") {
-                    std::string unit                 = toupper(hdu->string(unit_key));
+                    std::string unit                 = gammalib::toupper(hdu->string(unit_key));
                     std::string value                = hdu->string(value_key);
-                    std::vector<std::string> ebounds = split(value, ":");
+                    std::vector<std::string> ebounds = gammalib::split(value, ":");
                     if (ebounds.size() == 2) {
-                        double  emin = todouble(ebounds[0]);
-                        double  emax = todouble(ebounds[1]);
+                        double  emin = gammalib::todouble(ebounds[0]);
+                        double  emax = gammalib::todouble(ebounds[1]);
                         GEnergy e_min;
                         GEnergy e_max;
                         if (unit == "KEV") {
@@ -989,20 +993,20 @@ void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
 
         // Loop over all data selection keys
         for (int i = 1; i <= ndskeys; ++i) {
-            std::string type_key  = "DSTYP"+str(i);
-            //std::string unit_key  = "DSUNI"+str(i);
-            std::string value_key = "DSVAL"+str(i);
+            std::string type_key  = "DSTYP"+gammalib::str(i);
+            //std::string unit_key  = "DSUNI"+gammalib::str(i);
+            std::string value_key = "DSVAL"+gammalib::str(i);
             try {
                 if (hdu->string(type_key) == "POS(RA,DEC)") {
-                    //std::string unit              = toupper(hdu->string(unit_key));
+                    //std::string unit              = gammalib::toupper(hdu->string(unit_key));
                     std::string value             = hdu->string(value_key);
-                    value                         = strip_chars(value, "CIRCLE(");
-                    value                         = strip_chars(value, ")");
-                    std::vector<std::string> args = split(value, ",");
+                    value                         = gammalib::strip_chars(value, "CIRCLE(");
+                    value                         = gammalib::strip_chars(value, ")");
+                    std::vector<std::string> args = gammalib::split(value, ",");
                     if (args.size() == 3) {
-                        double  ra  = todouble(args[0]);
-                        double  dec = todouble(args[1]);
-                        double  rad = todouble(args[2]);
+                        double  ra  = gammalib::todouble(args[0]);
+                        double  dec = gammalib::todouble(args[1]);
+                        double  rad = gammalib::todouble(args[2]);
                         GCTAInstDir dir;
                         dir.radec_deg(ra, dec);
                         m_roi.centre(dir);
@@ -1171,10 +1175,14 @@ void GCTAEventList::write_ds_keys(GFitsHDU* hdu) const
         double e_max = emax().TeV();
 
         // Set cone selection string
-        std::string dsval2 = "CIRCLE("+str(ra)+","+str(dec)+","+str(rad)+")";
+        std::string dsval2 = "CIRCLE(" +
+                             gammalib::str(ra) + "," +
+                             gammalib::str(dec) + "," +
+                             gammalib::str(rad) + ")";
 
         // Set energy selection string
-        std::string dsval3 = str(e_min)+":"+str(e_max);
+        std::string dsval3 = gammalib::str(e_min) + ":" +
+                             gammalib::str(e_max);
 
         // Add time selection keywords
         hdu->card("DSTYP1", "TIME",  "Data selection type");

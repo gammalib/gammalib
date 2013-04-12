@@ -379,10 +379,10 @@ std::string GRan::print(const GChatter& chatter) const
         result.append("=== GRan ===");
 
         // Append information
-        result.append("\n"+parformat("Seed")+str(m_seed));
-        result.append("\n"+parformat("u")+str(m_u));
-        result.append("\n"+parformat("v")+str(m_v));
-        result.append("\n"+parformat("w")+str(m_w));
+        result.append("\n"+gammalib::parformat("Seed")+gammalib::str(m_seed));
+        result.append("\n"+gammalib::parformat("u")+gammalib::str(m_u));
+        result.append("\n"+gammalib::parformat("v")+gammalib::str(m_v));
+        result.append("\n"+gammalib::parformat("w")+gammalib::str(m_w));
 
     } // endif: chatter was not silent
 

@@ -93,7 +93,7 @@ double cta_npsf_kern_rad_azsym::eval(double delta)
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(value) || isinfinite(value)) {
+        if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
             std::cout << "*** ERROR: cta_npsf_kern_rad_azsym::eval";
             std::cout << " NaN/Inf encountered";
             std::cout << " (value=" << value;
@@ -185,7 +185,7 @@ double cta_irf_radial_kern_rho::eval(double rho)
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(irf) || isinfinite(irf)) {
+        if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
             std::cout << "*** ERROR: cta_irf_radial_kern_rho";
             std::cout << "(rho=" << rho << "):";
             std::cout << " NaN/Inf encountered";
@@ -264,7 +264,7 @@ double cta_irf_radial_kern_omega::eval(double omega)
     
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(irf) || isinfinite(irf)) {
+    if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
         std::cout << "*** ERROR: cta_irf_radial_kern_omega::eval";
         std::cout << "(omega=" << omega << "):";
         std::cout << " NaN/Inf encountered";
@@ -342,7 +342,7 @@ double cta_npred_radial_kern_rho::eval(double rho)
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: cta_npred_radial_kern_rho::eval";
             std::cout << "(rho=" << rho << "):";
             std::cout << " NaN/Inf encountered";
@@ -392,7 +392,7 @@ double cta_npred_radial_kern_omega::eval(double omega)
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: cta_npred_radial_kern_omega::eval";
         std::cout << "(omega=" << omega << "):";
         std::cout << " NaN/Inf encountered";
@@ -481,7 +481,7 @@ double cta_irf_elliptical_kern_rho::eval(double rho)
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(irf) || isinfinite(irf)) {
+        if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
             std::cout << "*** ERROR: cta_irf_elliptical_kern_rho";
             std::cout << "(rho=" << rho << "):";
             std::cout << " NaN/Inf encountered";
@@ -567,7 +567,7 @@ double cta_irf_elliptical_kern_omega::eval(double omega)
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(irf) || isinfinite(irf)) {
+        if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
             std::cout << "*** ERROR: cta_irf_elliptical_kern_omega::eval";
             std::cout << "(omega=" << omega << "):";
             std::cout << " NaN/Inf encountered";
@@ -646,7 +646,7 @@ double cta_npred_elliptical_kern_rho::eval(double rho)
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: cta_npred_elliptical_kern_rho::eval";
             std::cout << "(rho=" << rho << "):";
             std::cout << " NaN/Inf encountered";
@@ -707,7 +707,7 @@ double cta_npred_elliptical_kern_omega::eval(double omega)
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: cta_npred_elliptical_kern_omega::eval";
             std::cout << "(omega=" << omega << "):";
             std::cout << " NaN/Inf encountered";
@@ -801,7 +801,7 @@ double cta_irf_diffuse_kern_theta::eval(double theta)
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (isnotanumber(irf) || isinfinite(irf)) {
+            if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
                 std::cout << "*** ERROR: cta_irf_diffuse_kern_theta";
                 std::cout << "(theta=" << theta << "):";
                 std::cout << " NaN/Inf encountered";
@@ -896,7 +896,7 @@ double cta_irf_diffuse_kern_phi::eval(double phi)
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(irf) || isinfinite(irf)) {
+        if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
             std::cout << "*** ERROR: cta_irf_diffuse_kern_phi::eval";
             std::cout << "(phi=" << phi << "):";
             std::cout << " NaN/Inf encountered";
@@ -970,7 +970,7 @@ double cta_npred_diffuse_kern_theta::eval(double theta)
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: cta_npred_radial_kern_theta::eval";
             std::cout << "(theta=" << theta << "):";
             std::cout << " NaN/Inf encountered";
@@ -1033,7 +1033,7 @@ double cta_npred_diffuse_kern_phi::eval(double phi)
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: cta_npred_diffuse_kern_phi::eval";
             std::cout << "(phi=" << phi << "):";
             std::cout << " NaN/Inf encountered";

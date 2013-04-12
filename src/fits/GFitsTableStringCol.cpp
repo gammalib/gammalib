@@ -257,7 +257,7 @@ double GFitsTableStringCol::real(const int& row, const int& inx) const
     if (m_data == NULL) fetch_data();
 
     // Assign string to double
-    double value = todouble(m_data[offset(row,inx)]);
+    double value = gammalib::todouble(m_data[offset(row,inx)]);
 
     // Return value
     return value;
@@ -278,7 +278,7 @@ int GFitsTableStringCol::integer(const int& row, const int& inx) const
     if (m_data == NULL) fetch_data();
 
     // Assign string to int
-    int value = toint(m_data[offset(row,inx)]);
+    int value = gammalib::toint(m_data[offset(row,inx)]);
 
     // Return value
     return value;
@@ -636,7 +636,7 @@ std::string GFitsTableStringCol::ascii_format(void) const
     format.append("A");
 
     // Set width
-    format.append(str(m_width));
+    format.append(gammalib::str(m_width));
 
     // Return format
     return format;
@@ -652,14 +652,14 @@ std::string GFitsTableStringCol::binary_format(void) const
     std::string format;
 
     // Set number of elements
-    format.append(str(m_repeat));
+    format.append(gammalib::str(m_repeat));
 
     // Set type code
     format.append("A");
 
     // If there are substrings then add width of substring
     if (m_repeat > m_width) {
-        format.append(str(m_width));
+        format.append(gammalib::str(m_width));
     }
 
     // Return format

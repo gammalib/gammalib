@@ -375,18 +375,18 @@ void GModelPar::factor_value(const double& value)
     // If there is a minimum boundary and if value is below this boundary
     // then throw an exception
     if (m_hasmin && value < m_factor_min) {
-        std::string msg = "Specified value factor "+str(value)+
+        std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is smaller than the minimum boundary "+
-                          str(m_factor_min)+".";
+                          gammalib::str(m_factor_min)+".";
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
     // If there is a maximum boundary and if value is above this boundary
     // then throw an exception
     if (m_hasmax && value > m_factor_max) {
-        std::string msg = "Specified value factor "+str(value)+
+        std::string msg = "Specified value factor "+gammalib::str(value)+
                           " is larger than the maximum boundary "+
-                          str(m_factor_max)+".";
+                          gammalib::str(m_factor_max)+".";
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
@@ -414,9 +414,9 @@ void GModelPar::factor_min(const double& min)
 {
     // Check if minimum is larger than value
     if (min > m_factor_value) {
-        std::string msg = "Specified minimum factor "+str(min)+
+        std::string msg = "Specified minimum factor "+gammalib::str(min)+
                           " is larger than the value factor "+
-                          str(m_factor_value)+".";
+                          gammalib::str(m_factor_value)+".";
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
@@ -447,9 +447,9 @@ void GModelPar::factor_max(const double& max)
 {
     // Check if maximum is smaller than value
     if (max < m_factor_value) {
-        std::string msg = "Specified maximum factor "+str(max)+
+        std::string msg = "Specified maximum factor "+gammalib::str(max)+
                           " is smaller than the value factor "+
-                          str(m_factor_value)+".";
+                          gammalib::str(m_factor_value)+".";
         throw GException::invalid_argument(G_FACTOR_VALUE, msg);
     }
 
@@ -648,7 +648,7 @@ void GModelPar::read(const GXmlElement& xml)
     // Get value
     std::string arg = xml.attribute("value");
     if (arg != "") {
-        m_factor_value = todouble(arg);
+        m_factor_value = gammalib::todouble(arg);
     }
     else {
         m_factor_value = 0.0;
@@ -657,7 +657,7 @@ void GModelPar::read(const GXmlElement& xml)
     // Get error
     arg = xml.attribute("error");
     if (arg != "") {
-        m_factor_error = todouble(arg);
+        m_factor_error = gammalib::todouble(arg);
     }
     else {
         m_factor_error = 0.0;
@@ -666,7 +666,7 @@ void GModelPar::read(const GXmlElement& xml)
     // Get scale factor
     arg = xml.attribute("scale");
     if (arg != "") {
-        m_scale = todouble(arg);
+        m_scale = gammalib::todouble(arg);
     }
     else {
         m_scale = 1.0;
@@ -675,7 +675,7 @@ void GModelPar::read(const GXmlElement& xml)
     // Get min
     arg = xml.attribute("min");
     if (arg != "") {
-        m_factor_min = todouble(arg);
+        m_factor_min = gammalib::todouble(arg);
         m_hasmin     = true;
     }
     else {
@@ -685,7 +685,7 @@ void GModelPar::read(const GXmlElement& xml)
     // Get max
     arg = xml.attribute("max");
     if (arg != "") {
-        m_factor_max = todouble(arg);
+        m_factor_max = gammalib::todouble(arg);
         m_hasmax     = true;
     }
     else {
@@ -694,7 +694,7 @@ void GModelPar::read(const GXmlElement& xml)
 
     // Get free
     if (xml.attribute("free") == "1" || 
-        tolower(xml.attribute("free")) == "true") {
+        gammalib::tolower(xml.attribute("free")) == "true") {
         free();
     }
     else {
@@ -707,9 +707,9 @@ void GModelPar::read(const GXmlElement& xml)
         if (m_factor_min > m_factor_max) {
             std::string msg = "The model parameter "+m_name+
                               " in the XML document has a minimum boundary "+
-                              str(m_factor_min)+
+                              gammalib::str(m_factor_min)+
                               " that is larger than the maximum boundary "+
-                              str(m_factor_max)+".\n"+xml.print();
+                              gammalib::str(m_factor_max)+".\n"+xml.print();
             throw GException::invalid_value(G_READ, msg);
         }
     }
@@ -718,9 +718,9 @@ void GModelPar::read(const GXmlElement& xml)
     if (m_hasmin && m_factor_value < m_factor_min) {
         std::string msg = "The model parameter "+m_name+
                           " in the XML document has a value "+
-                            str(m_factor_value)+
+                            gammalib::str(m_factor_value)+
                             " that is smaller than the minimum boundary "+
-                            str(m_factor_min)+".\n"+xml.print();
+                            gammalib::str(m_factor_min)+".\n"+xml.print();
         throw GException::invalid_value(G_READ, msg);
     }
 
@@ -728,9 +728,9 @@ void GModelPar::read(const GXmlElement& xml)
     if (m_hasmax && m_factor_value > m_factor_max) {
         std::string msg = "The model parameter "+m_name+
                           " in the XML document has a value "+
-                            str(m_factor_value)+
+                            gammalib::str(m_factor_value)+
                             " that is larger than the maximum boundary "+
-                            str(m_factor_max)+".\n"+xml.print();
+                            gammalib::str(m_factor_max)+".\n"+xml.print();
         throw GException::invalid_value(G_READ, msg);
     }
 
@@ -759,24 +759,24 @@ void GModelPar::read(const GXmlElement& xml)
 void GModelPar::write(GXmlElement& xml) const
 {
     // Set value
-    xml.attribute("value", str(m_factor_value));
+    xml.attribute("value", gammalib::str(m_factor_value));
 
     // Set error (only if parameter is free)
     if (isfree()) {
-        xml.attribute("error", str(m_factor_error));
+        xml.attribute("error", gammalib::str(m_factor_error));
     }
 
     // Set scale
-    xml.attribute("scale", str(m_scale));
+    xml.attribute("scale", gammalib::str(m_scale));
 
     // Set minimum
     if (hasmin()) {
-        xml.attribute("min", str(m_factor_min));
+        xml.attribute("min", gammalib::str(m_factor_min));
     }
 
     // Set maximum
     if (hasmax()) {
-        xml.attribute("max", str(m_factor_max));
+        xml.attribute("max", gammalib::str(m_factor_max));
     }
 
     // Set free/fix flag
@@ -807,25 +807,25 @@ std::string GModelPar::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append parameter name
-        result.append(parformat(" "+name()));
+        result.append(gammalib::parformat(" "+name()));
 
         // Append value
-        result.append(str(value()));
+        result.append(gammalib::str(value()));
 
         // For free parameters, append statistical uncertainty
         if (m_free) {
-            result.append(" +/- "+str(std::abs(error())));
+            result.append(" +/- "+gammalib::str(std::abs(error())));
         }
 
         // Append parameter limites if they exist
         if (m_hasmin && m_hasmax) {
-            result.append(" ["+str(min()) + ","+str(max())+"]");
+            result.append(" ["+gammalib::str(min()) + ","+gammalib::str(max())+"]");
         }
         else if (m_hasmin) {
-            result.append(" ["+str(min()) + ",infty[");
+            result.append(" ["+gammalib::str(min()) + ",infty[");
         }
         else if (m_hasmax) {
-            result.append(" ]-infty,"+str(max())+"]");
+            result.append(" ]-infty,"+gammalib::str(max())+"]");
         }
 
         // Append parameter unit
@@ -840,7 +840,7 @@ std::string GModelPar::print(const GChatter& chatter) const
         }
 
         // Append parameter scale
-        result.append(",scale="+str(m_scale));
+        result.append(",scale="+gammalib::str(m_scale));
 
         // Signal if parameter has analytic gradient
         if (m_hasgrad) {

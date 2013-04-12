@@ -530,7 +530,7 @@ std::string GMatrixBase::print_elements(const GChatter& chatter,
     for (int row = 0; row < row_stop; ++row) {
         result += "\n ";
         for (int col = 0; col < col_stop; ++col) {
-            result += str((*this)(row,col));
+            result += gammalib::str((*this)(row,col));
             if (col != m_cols-1) {
                 result += ", ";
             }
@@ -539,7 +539,7 @@ std::string GMatrixBase::print_elements(const GChatter& chatter,
             result += "... ";
         }
         for (int col = col_start; col < m_cols; ++col) {
-            result += str((*this)(row,col));
+            result += gammalib::str((*this)(row,col));
             if (col != m_cols-1) {
                 result += ", ";
             }
@@ -560,7 +560,7 @@ std::string GMatrixBase::print_elements(const GChatter& chatter,
     for (int row = row_start; row < m_rows; ++row) {
         result += "\n ";
         for (int col = 0; col < col_stop; ++col) {
-            result += str((*this)(row,col));
+            result += gammalib::str((*this)(row,col));
             if (col != m_cols-1) {
                 result += ", ";
             }
@@ -569,7 +569,7 @@ std::string GMatrixBase::print_elements(const GChatter& chatter,
             result += "... ";
         }
         for (int col = col_start; col < m_cols; ++col) {
-            result += str((*this)(row,col));
+            result += gammalib::str((*this)(row,col));
             if (col != m_cols-1) {
                 result += ", ";
             }
@@ -593,10 +593,10 @@ std::string GMatrixBase::print_row_compression(const GChatter& chatter) const
 
     // If there is a row compression the print the scheme
     if (m_rowsel != NULL) {
-        result.append("\n"+parformat("Row selection"));
+        result.append("\n"+gammalib::parformat("Row selection"));
         for (int row = 0; row < m_num_rowsel; ++row) {
             result.append(" ");
-            result.append(str(m_rowsel[row]));
+            result.append(gammalib::str(m_rowsel[row]));
         }
     }
   
@@ -617,10 +617,10 @@ std::string GMatrixBase::print_col_compression(const GChatter& chatter) const
 
     // If there is a row compression the print the scheme
     if (m_colsel != NULL) {
-        result.append("\n"+parformat("Column selection"));
+        result.append("\n"+gammalib::parformat("Column selection"));
         for (int col = 0; col < m_num_colsel; ++col) {
             result.append(" ");
-            result.append(str(m_colsel[col]));
+            result.append(gammalib::str(m_colsel[col]));
         }
     }
   

@@ -475,17 +475,19 @@ std::string GMWLSpectrum::print(const GChatter& chatter) const
         result.append("=== GMWLSpectrum ===");
 
         // Append information
-        result.append("\n"+parformat("Telescope")+m_telescope);
-        result.append("\n"+parformat("Instrument")+m_instrument);
-        result.append("\n"+parformat("Number of points")+str(size()));
-        result.append("\n"+parformat("Time interval"));
+        result.append("\n"+gammalib::parformat("Telescope")+m_telescope);
+        result.append("\n"+gammalib::parformat("Instrument")+m_instrument);
+        result.append("\n"+gammalib::parformat("Number of points"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Time interval"));
         if (m_gti.size() > 0) {
-            result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
+            result.append(gammalib::str(tstart().secs())+" - ");
+            result.append(gammalib::str(tstop().secs())+" sec");
         }
         else {
             result.append("not defined");
         }
-        result.append("\n"+parformat("Energy range"));
+        result.append("\n"+gammalib::parformat("Energy range"));
         if (m_ebounds.size() > 0) {
             result.append(emin().print()+" - "+emax().print());
         }
@@ -504,14 +506,14 @@ std::string GMWLSpectrum::print(const GChatter& chatter) const
                 }
 
                 // Build flux string
-                std::string flux = str(m_data[i].m_flux);
+                std::string flux = gammalib::str(m_data[i].m_flux);
                 if (m_data[i].m_flux_err > 0.0) {
-                    flux += " +/- "+str(m_data[i].m_flux_err);
+                    flux += " +/- "+gammalib::str(m_data[i].m_flux_err);
                 }
                 flux += " ph/cm2/s/MeV";
 
                 // Append to string
-                result.append("\n"+parformat(energy));
+                result.append("\n"+gammalib::parformat(energy));
                 result.append(flux);
 
             } // endfor: looped over spectral points
@@ -712,25 +714,31 @@ GEnergy GMWLSpectrum::conv_energy(const double& energy, const std::string& unit)
 
     // Convert unit string to upper base without any leading/trailing
     // whitespace
-    std::string str_unit = strip_whitespace(toupper(unit));
+    std::string str_unit = gammalib::strip_whitespace(gammalib::toupper(unit));
 
     // High-energy units
-    if (str_unit == "KEV")
+    if (str_unit == "KEV") {
         result.keV(energy);
-    else if (str_unit == "MEV")
+    }
+    else if (str_unit == "MEV") {
         result.MeV(energy);
-    else if (str_unit == "GEV")
+    }
+    else if (str_unit == "GEV") {
         result.GeV(energy);
-    else if (str_unit == "TEV")
+    }
+    else if (str_unit == "TEV") {
         result.TeV(energy);
+    }
 
     // Other units
-    else if (str_unit == "ERG")
+    else if (str_unit == "ERG") {
         result.erg(energy);
+    }
     
     // ... otherwise throw exception
-    else
+    else {
         throw GMWLException::invalid_unit(G_CONV_ENERGY, unit);
+    }
 
     // Return energy
     return result;
@@ -759,7 +767,7 @@ double GMWLSpectrum::conv_flux(const GEnergy& energy, const double& flux,
 
     // Convert unit string to upper base without any leading/trailing
     // whitespace
-    std::string str_unit = strip_whitespace(toupper(unit));
+    std::string str_unit = gammalib::strip_whitespace(gammalib::toupper(unit));
 
     // High-energy units
     if (str_unit == "PH/CM2/S/MEV" || str_unit == "PH/S/CM2/MEV")

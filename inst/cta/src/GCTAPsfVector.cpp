@@ -300,8 +300,8 @@ void GCTAPsfVector::read(const GFitsTable* hdu)
     }
 
     // Determine unit conversion factors (default: TeV)
-    std::string u_energy_lo = tolower(strip_whitespace(energy_lo->unit()));
-    std::string u_energy_hi = tolower(strip_whitespace(energy_hi->unit()));
+    std::string u_energy_lo = gammalib::tolower(gammalib::strip_whitespace(energy_lo->unit()));
+    std::string u_energy_hi = gammalib::tolower(gammalib::strip_whitespace(energy_hi->unit()));
     double c_energy_lo = 1.0;
     double c_energy_hi = 1.0;
     if (u_energy_lo == "kev") {
@@ -446,10 +446,11 @@ std::string GCTAPsfVector::print(const GChatter& chatter) const
         result.append("=== GCTAPsfVector ===");
 
         // Append information
-        result.append("\n"+parformat("Filename")+m_filename);
-        result.append("\n"+parformat("Number of energy bins")+str(num));
-        result.append("\n"+parformat("Log10(Energy) range"));
-        result.append(str(emin)+" - "+str(emax)+" TeV");
+        result.append("\n"+gammalib::parformat("Filename")+m_filename);
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(num));
+        result.append("\n"+gammalib::parformat("Log10(Energy) range"));
+        result.append(gammalib::str(emin)+" - "+gammalib::str(emax)+" TeV");
 
     } // endif: chatter was not silent
 

@@ -227,7 +227,7 @@ std::string GXmlPI::print(const GChatter& chatter,
     if (chatter != SILENT) {
 
         // Initialise result string
-        result = fill(" ", indent);
+        result = gammalib::fill(" ", indent);
 
         // Append comment to string
         result.append("GXmlPI::"+m_pi);

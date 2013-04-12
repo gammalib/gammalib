@@ -299,7 +299,7 @@ double GCOMModelDRBFitting::eval(const GEvent&       event,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(value) || isinfinite(value)) {
+        if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
             std::cout << "*** ERROR: GCOMModelDRBFitting::eval";
             std::cout << "(index=" << index << "):";
             std::cout << " NaN/Inf encountered";
@@ -423,7 +423,7 @@ double GCOMModelDRBFitting::eval_gradients(const GEvent&       event,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(value) || isinfinite(value)) {
+        if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
             std::cout << "*** ERROR: GCOMModelDRBFitting::eval_gradients";
             std::cout << "(index=" << index << "):";
             std::cout << " NaN/Inf encountered";
@@ -573,8 +573,8 @@ void GCOMModelDRBFitting::read(const GXmlElement& xml)
         }
 
         // Set parameter names
-        std::string phibar_name        = "Phibar layer "+str(i);
-        std::string normalization_name = "Scale factor "+str(i);
+        std::string phibar_name        = "Phibar layer "+gammalib::str(i);
+        std::string normalization_name = "Scale factor "+gammalib::str(i);
 
         // Set Phibar attributes
         phibar.name(phibar_name);
@@ -686,7 +686,7 @@ void GCOMModelDRBFitting::write(GXmlElement& xml) const
     // Verify that XML element has the required number of nodes
     if (src->elements() != nodes || src->elements("node") != nodes) {
         std::string message = "DRB fitting model requires exactly " +
-                              str(nodes) + " nodes.";
+                              gammalib::str(nodes) + " nodes.";
         throw GException::model_invalid_parnum(G_WRITE, *src, message);
     }
 
@@ -764,8 +764,10 @@ std::string GCOMModelDRBFitting::print(const GChatter& chatter) const
         result.append("\n"+print_attributes());
 
         // Append node summary
-        result.append("\n"+parformat("Number of nodes")+str(m_phibars.size()));
-        result.append("\n"+parformat("Number of parameters")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of nodes"));
+        result.append(gammalib::str(m_phibars.size()));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < size(); ++i) {
             result.append("\n"+m_pars[i]->print(chatter));
         }

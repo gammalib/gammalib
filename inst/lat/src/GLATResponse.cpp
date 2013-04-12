@@ -257,7 +257,9 @@ double GLATResponse::irf(const GEvent&       event,
         GLATMeanPsf* psf = new GLATMeanPsf(srcDir, static_cast<const GLATObservation&>(obs));
 
         // Set source name
-        std::string name = "SRC("+str(srcDir.ra_deg())+","+str(srcDir.dec_deg())+")";
+        std::string name = "SRC("+gammalib::str(srcDir.ra_deg()) +
+                                "," +
+                                gammalib::str(srcDir.dec_deg())+")";
         psf->name(name);
 
         // Push mean PSF on stack
@@ -531,7 +533,7 @@ void GLATResponse::load(const std::string& rspname)
     m_caldb = caldb;
 
     // Determine response types to be loaded
-    std::vector<std::string> array = split(rspname, "::");
+    std::vector<std::string> array = gammalib::split(rspname, "::");
     if (array.size() == 1) {
         m_rspname  = array[0];
         m_hasfront = true;
@@ -539,10 +541,10 @@ void GLATResponse::load(const std::string& rspname)
     }
     else if (array.size() == 2) {
         m_rspname = array[0];
-        if (strip_whitespace(tolower(array[1])) == "front") {
+        if (gammalib::strip_whitespace(gammalib::tolower(array[1])) == "front") {
             m_hasfront = true;
         }
-        else if (strip_whitespace(tolower(array[1])) == "back") {
+        else if (gammalib::strip_whitespace(gammalib::tolower(array[1])) == "back") {
             m_hasback  = true;
         }
         else {
@@ -702,9 +704,9 @@ std::string GLATResponse::print(const GChatter& chatter) const
         result.append("=== GLATResponse ===");
 
         // Append information
-        result.append("\n"+parformat("Calibration database")+m_caldb);
-        result.append("\n"+parformat("Response name")+m_rspname);
-        result.append("\n"+parformat("Section(s)"));
+        result.append("\n"+gammalib::parformat("Calibration database")+m_caldb);
+        result.append("\n"+gammalib::parformat("Response name")+m_rspname);
+        result.append("\n"+gammalib::parformat("Section(s)"));
         if (m_hasfront && m_hasback) {
             result.append("front & back");
         }

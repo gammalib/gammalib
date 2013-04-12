@@ -38,7 +38,7 @@ const char* GMWLExceptionHandler::what() const throw()
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
 
     // Return message as C character array
-    return tochar(message);
+    return gammalib::tochar(message);
 }
 
 

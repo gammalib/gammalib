@@ -463,15 +463,21 @@ std::string GCTAEventCube::print(const GChatter& chatter) const
 
         // Append header
         result.append("=== GCTAEventCube ===");
-        result.append("\n"+parformat("Number of events")+str(number()));
-        result.append("\n"+parformat("Number of elements")+str(size()));
-        result.append("\n"+parformat("Number of pixels")+str(npix()));
-        result.append("\n"+parformat("Number of energy bins")+str(ebins()));
+        result.append("\n"+gammalib::parformat("Number of events") +
+                      gammalib::str(number()));
+        result.append("\n"+gammalib::parformat("Number of elements") +
+                      gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of pixels") +
+                      gammalib::str(npix()));
+        result.append("\n"+gammalib::parformat("Number of energy bins") +
+                      gammalib::str(ebins()));
 
         // Append GTI intervals
-        result.append("\n"+parformat("Time interval"));
+        result.append("\n"+gammalib::parformat("Time interval"));
         if (gti().size() > 0) {
-            result.append(str(tstart().secs())+" - "+str(tstop().secs())+" sec");
+            result.append(gammalib::str(tstart().secs()) +
+                          " - " +
+                          gammalib::str(tstop().secs())+" sec");
         }
         else {
             result.append("not defined");
@@ -482,7 +488,8 @@ std::string GCTAEventCube::print(const GChatter& chatter) const
             result.append("\n"+ebounds().print(chatter));
         }
         else {
-            result.append("\n"+parformat("Energy intervals")+"not defined");
+            result.append("\n"+gammalib::parformat("Energy intervals") +
+                          "not defined");
         }
 
         // Append skymap definition

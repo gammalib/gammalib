@@ -1079,16 +1079,20 @@ std::string GMatrix::print(const GChatter& chatter) const
         result.append("=== GMatrix ===");
 
         // Append information
-        result.append("\n"+parformat("Number of rows")+str(m_rows));
+        result.append("\n"+gammalib::parformat("Number of rows"));
+        result.append(gammalib::str(m_rows));
         if (m_rowsel != NULL) {
-            result.append(" (compressed "+str(m_num_rowsel)+")");
+            result.append(" (compressed "+gammalib::str(m_num_rowsel)+")");
         }
-        result.append("\n"+parformat("Number of columns")+str(m_cols));
+        result.append("\n"+gammalib::parformat("Number of columns"));
+        result.append(gammalib::str(m_cols));
         if (m_colsel != NULL) {
-            result.append(" (compressed "+str(m_num_colsel)+")");
+            result.append(" (compressed "+gammalib::str(m_num_colsel)+")");
         }
-        result.append("\n"+parformat("Number of elements")+str(m_elements));
-        result.append("\n"+parformat("Number of allocated cells")+str(m_alloc));
+        result.append("\n"+gammalib::parformat("Number of elements"));
+        result.append(gammalib::str(m_elements));
+        result.append("\n"+gammalib::parformat("Number of allocated cells"));
+        result.append(gammalib::str(m_alloc));
 
         // Append elements and compression schemes
         result.append(print_elements(chatter));

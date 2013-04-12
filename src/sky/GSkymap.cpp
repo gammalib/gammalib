@@ -129,7 +129,7 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
     init_members();
 
     // Check if wcs is HPX
-    if (toupper(wcs) != "HPX") {
+    if (gammalib::toupper(wcs) != "HPX") {
         throw GException::wcs_invalid(G_CONSTRUCT_HPX, wcs,
                                       "WCS parameter must be 'HPX'.");
     }
@@ -1081,11 +1081,15 @@ std::string GSkymap::print(const GChatter& chatter) const
         result.append("=== GSkymap ===");
 
         // Append information
-        result.append("\n"+parformat("Number of pixels")+str(m_num_pixels));
-        result.append("\n"+parformat("Number of maps")+str(m_num_maps));
+        result.append("\n"+gammalib::parformat("Number of pixels"));
+        result.append(gammalib::str(m_num_pixels));
+        result.append("\n"+gammalib::parformat("Number of maps"));
+        result.append(gammalib::str(m_num_maps));
         if (m_wcs != NULL && m_wcs->code() != "HPX") {
-            result.append("\n"+parformat("X axis dimension")+str(m_num_x));
-            result.append("\n"+parformat("Y axis dimension")+str(m_num_y));
+            result.append("\n"+gammalib::parformat("X axis dimension"));
+            result.append(gammalib::str(m_num_x));
+            result.append("\n"+gammalib::parformat("Y axis dimension"));
+            result.append(gammalib::str(m_num_y));
         }
 
         // Append WCS information
@@ -1093,7 +1097,7 @@ std::string GSkymap::print(const GChatter& chatter) const
             result.append("\n"+m_wcs->print(chatter));
         }
         else {
-            result.append("\n"+parformat("WCS")+"not defined");
+            result.append("\n"+gammalib::parformat("WCS")+"not defined");
         }
 
     } // endif: chatter was not silent
@@ -1238,7 +1242,7 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
                       const GMatrix& cd, const GVector& pv2)
 {
     // Convert WCS to upper case
-    std::string uwcs = toupper(wcs);
+    std::string uwcs = gammalib::toupper(wcs);
     
     // Check if HPX was requested (since this is not allowed)
     if (uwcs == "HPX") {

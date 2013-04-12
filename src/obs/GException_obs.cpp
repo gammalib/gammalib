@@ -163,8 +163,8 @@ GException::gradient_par_mismatch::gradient_par_mismatch(std::string origin,
     m_origin = origin;
 
     // Set error message
-    m_message = "Gradient vector size "+str(nsize)+
-                " mismatches number "+str(npars)+" of model parameters.";
+    m_message = "Gradient vector size "+gammalib::str(nsize)+
+                " mismatches number "+gammalib::str(npars)+" of model parameters.";
 
     // Return
     return;
@@ -262,8 +262,8 @@ GException::erange_invalid::erange_invalid(std::string origin, double emin,
     m_origin = origin;
 
     // Set error message
-    m_message = "Invalid energy range (Emin="+str(emin)+" MeV, Emax="+
-                str(emax)+" MeV specified.";
+    m_message = "Invalid energy range (Emin="+gammalib::str(emin)+" MeV, Emax="+
+                gammalib::str(emax)+" MeV specified.";
     if (message.length() > 0) {
         m_message += " " + message;
     }

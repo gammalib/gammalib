@@ -272,7 +272,7 @@ GException::model_invalid_parscale::model_invalid_parscale(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Model parameter has invalid scale="+str(scale)+". " +
+    m_message = "Model parameter has invalid scale="+gammalib::str(scale)+". " +
                 message;
 
     // Return
@@ -316,7 +316,7 @@ GException::file_function_data::file_function_data(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "File function \""+filename+"\" contains "+str(num)+
+    m_message = "File function \""+filename+"\" contains "+gammalib::str(num)+
                 " energy nodes while at least 2 are required to describe a"
                 " spectral shape.";
     if (message.length() > 0) {
@@ -343,7 +343,7 @@ GException::file_function_columns::file_function_columns(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "File function \""+filename+"\" contains "+str(num)+
+    m_message = "File function \""+filename+"\" contains "+gammalib::str(num)+
                 " columns while at least 2 are required to define"
                 " energy and intensity.";
     if (message.length() > 0) {
@@ -370,7 +370,7 @@ GException::file_function_value::file_function_value(std::string origin,
 {
     // Set origin and message
     m_origin  = origin;
-    m_message = "Invalid value \""+str(value)+"\" encountered in"
+    m_message = "Invalid value \""+gammalib::str(value)+"\" encountered in"
                 " file function \""+filename+"\".";
     if (message.length() > 0) {
         m_message += " "+message;

@@ -194,12 +194,12 @@ std::string GPhoton::print(const GChatter& chatter) const
 
         // Build photon string
         result.append("GPhoton(");
-        result.append("RA="+str(m_dir.ra_deg()));
-        result.append(", Dec="+str(m_dir.dec_deg()));
+        result.append("RA="+gammalib::str(m_dir.ra_deg()));
+        result.append(", Dec="+gammalib::str(m_dir.dec_deg()));
         result.append(", E="+m_energy.print());
         result.append(", MET="+m_time.print());
         if (m_mc_id >= 0) {
-            result.append(", MCid="+str(m_mc_id));
+            result.append(", MCid="+gammalib::str(m_mc_id));
         }
         result.append(")");
 

@@ -320,7 +320,7 @@ void GWcslib::write(GFitsHDU* hdu) const
 
         // Write reference pixel coordinates
         for (int i = 0; i < m_naxis; ++i) {
-            std::string keyname = "CRPIX"+str(i+1);
+            std::string keyname = "CRPIX"+gammalib::str(i+1);
             std::string comment = "Pixel coordinate of reference point (starting from 1)";
             hdu->card(keyname, m_crpix.at(i), comment);
         }
@@ -329,10 +329,10 @@ void GWcslib::write(GFitsHDU* hdu) const
         
         // Write coordinate increment at reference point
         for (int i = 0; i < m_naxis; ++i) {
-            std::string keyname = "CDELT"+str(i+1);
+            std::string keyname = "CDELT"+gammalib::str(i+1);
             std::string comment;
             if (m_cunit.at(i).length() > 0) {
-                comment += "["+strip_whitespace(m_cunit.at(i))+"] ";
+                comment += "["+gammalib::strip_whitespace(m_cunit.at(i))+"] ";
             }
             comment += "Coordinate increment at reference point";
             hdu->card(keyname, m_cdelt.at(i), comment);
@@ -341,7 +341,7 @@ void GWcslib::write(GFitsHDU* hdu) const
         // Write units of coordinate increment and reference value
         for (int i = 0; i < m_naxis; ++i) {
             if (m_cunit.at(i).length() > 0) {
-                std::string keyname = "CUNIT"+str(i+1);
+                std::string keyname = "CUNIT"+gammalib::str(i+1);
                 std::string comment = "Units of coordinate increment and value";
                 hdu->card(keyname, m_cunit.at(0), comment);
             }
@@ -351,25 +351,25 @@ void GWcslib::write(GFitsHDU* hdu) const
         wcs_set_ctype();
         for (int i = 0; i < m_naxis; ++i) {
             if (i == m_lng) {
-                std::string keyname = "CTYPE"+str(i+1);
+                std::string keyname = "CTYPE"+gammalib::str(i+1);
                 hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
             }
             if (i == m_lat) {
-                std::string keyname = "CTYPE"+str(i+1);
+                std::string keyname = "CTYPE"+gammalib::str(i+1);
                 hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
             }
             if (i == m_spec) {
-                std::string keyname = "CTYPE"+str(i+1);
+                std::string keyname = "CTYPE"+gammalib::str(i+1);
                 hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
             }
         }
 
         // Write coordinate value at reference point
         for (int i = 0; i < m_naxis; ++i) {
-            std::string keyname = "CRVAL"+str(i+1);
+            std::string keyname = "CRVAL"+gammalib::str(i+1);
             std::string comment;
             if (m_cunit.at(i).length() > 0) {
-                comment += "["+strip_whitespace(m_cunit.at(i))+"] ";
+                comment += "["+gammalib::strip_whitespace(m_cunit.at(i))+"] ";
             }
             comment += "Coordinate value at reference point";
             hdu->card(keyname, m_crval.at(i), comment);
@@ -1212,10 +1212,10 @@ void GWcslib::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcr
     if (ncoord < 1 || (ncoord > 1 && nelem < m_naxis)) {
         std::string message;
         if (ncoord < 1) {
-            message = "ncoord="+str(ncoord)+", >0 required.";
+            message = "ncoord="+gammalib::str(ncoord)+", >0 required.";
         }
         else {
-            message = "nelem="+str(nelem)+", >="+str(m_naxis)+" required.";
+            message = "nelem="+gammalib::str(nelem)+", >="+gammalib::str(m_naxis)+" required.";
         }
         throw GException::wcs_invalid_parameter(G_WCS_P2S, message);
     }
@@ -1278,10 +1278,10 @@ void GWcslib::wcs_s2p(int ncoord, int nelem, const double* world,
     if (ncoord < 1 || (ncoord > 1 && nelem < m_naxis)) {
         std::string message;
         if (ncoord < 1) {
-            message = "ncoord="+str(ncoord)+", >0 required.";
+            message = "ncoord="+gammalib::str(ncoord)+", >0 required.";
         }
         else {
-            message = "nelem="+str(nelem)+", >="+str(m_naxis)+" required.";
+            message = "nelem="+gammalib::str(nelem)+", >="+gammalib::str(m_naxis)+" required.";
         }
         throw GException::wcs_invalid_parameter(G_WCS_S2P, message);
     }
@@ -1316,37 +1316,41 @@ std::string GWcslib::wcs_print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append World Coordinate parameters
-        result.append("\n"+parformat("Number of axes")+str(m_naxis));
-        result.append("\n"+parformat("Longitude axis")+str(m_lng));
-        result.append("\n"+parformat("Latitude axis")+str(m_lat));
-        result.append("\n"+parformat("Spectral axis")+str(m_spec));
+        result.append("\n"+gammalib::parformat("Number of axes"));
+        result.append(gammalib::str(m_naxis));
+        result.append("\n"+gammalib::parformat("Longitude axis"));
+        result.append(gammalib::str(m_lng));
+        result.append("\n"+gammalib::parformat("Latitude axis"));
+        result.append(gammalib::str(m_lat));
+        result.append("\n"+gammalib::parformat("Spectral axis"));
+        result.append(gammalib::str(m_spec));
     
         // Append coordinates
-        result.append("\n"+parformat("Reference coordinate")+"(");
+        result.append("\n"+gammalib::parformat("Reference coordinate")+"(");
         for (int i = 0; i < m_crval.size(); ++i) {
             if (i > 0) {
                 result.append(", ");
             }
-            result.append(str(m_crval[i]));
+            result.append(gammalib::str(m_crval[i]));
             if (m_cunit[i].length() > 0) {
                 result.append(" "+m_cunit[i]);
             }
         }
         result.append(")");
-        result.append("\n"+parformat("Reference pixel")+"(");
+        result.append("\n"+gammalib::parformat("Reference pixel")+"(");
         for (int i = 0; i < m_crpix.size(); ++i) {
             if (i > 0) {
                 result.append(", ");
             }
-            result.append(str(m_crpix[i]));
+            result.append(gammalib::str(m_crpix[i]));
         }
         result.append(")");
-        result.append("\n"+parformat("Increment at reference")+"(");
+        result.append("\n"+gammalib::parformat("Increment at reference")+"(");
         for (int i = 0; i < m_cdelt.size(); ++i) {
             if (i > 0) {
                 result.append(", ");
             }
-            result.append(str(m_cdelt[i]));
+            result.append(gammalib::str(m_cdelt[i]));
             if (m_cunit[i].length() > 0) {
                 result.append(" "+m_cunit[i]);
             }
@@ -1354,17 +1358,17 @@ std::string GWcslib::wcs_print(const GChatter& chatter) const
         result.append(")");
         
         // Append origin
-        result.append("\n"+parformat("(Phi_0, Theta_0)")+"(");
+        result.append("\n"+gammalib::parformat("(Phi_0, Theta_0)")+"(");
         result.append(wcs_print_value(m_phi0)+", ");
         result.append(wcs_print_value(m_theta0)+") deg");
     
         // Append native pole
-        result.append("\n"+parformat("(Phi_p, Theta_p)")+"(");
+        result.append("\n"+gammalib::parformat("(Phi_p, Theta_p)")+"(");
         result.append(wcs_print_value(m_lonpole)+", ");
         result.append(wcs_print_value(m_latpole)+") deg");
 
         // Append LATPOLEa keyword usage
-        result.append("\n"+parformat("LATPOLE keyword usage"));
+        result.append("\n"+gammalib::parformat("LATPOLE keyword usage"));
         switch (m_latpreq) {
         case 0:
             result.append("Not used. Theta_p determined uniquely by"
@@ -1383,7 +1387,7 @@ std::string GWcslib::wcs_print(const GChatter& chatter) const
         }
 
         // Append celestial transformation parameters
-        result.append("\n"+parformat("Reference vector (m_ref)")+"(");
+        result.append("\n"+gammalib::parformat("Reference vector (m_ref)")+"(");
         for (int k = 0; k < 4; ++k) {
             if (k > 0) {
                 result.append(", ");
@@ -1393,12 +1397,12 @@ std::string GWcslib::wcs_print(const GChatter& chatter) const
         result.append(") deg");
 
         // Append Euler angles
-        result.append("\n"+parformat("Euler angles")+"(");
+        result.append("\n"+gammalib::parformat("Euler angles")+"(");
         for (int k = 0; k < 5; ++k) {
             if (k > 0) {
                 result.append(", ");
             }
-            result.append(str(m_euler[k]));
+            result.append(gammalib::str(m_euler[k]));
             if (k < 3) {
                 result.append(" deg");
             }
@@ -1407,64 +1411,68 @@ std::string GWcslib::wcs_print(const GChatter& chatter) const
     
         // Append latitude preservement flag
         if (m_isolat) {
-            result.append("\n"+parformat("Latitude preserved")+"True");
+            result.append("\n"+gammalib::parformat("Latitude preserved")+"True");
         }
         else {
-            result.append("\n"+parformat("Latitude preserved")+"False");
+            result.append("\n"+gammalib::parformat("Latitude preserved")+"False");
         }
 
         // Append linear transformation parameters
         if (m_unity) {
-            result.append("\n"+parformat("Unity PC matrix")+"True");
+            result.append("\n"+gammalib::parformat("Unity PC matrix")+"True");
         }
         else {
-            result.append("\n"+parformat("Unity PC matrix")+"False");
+            result.append("\n"+gammalib::parformat("Unity PC matrix")+"False");
         }
-        result.append("\n"+parformat("Pixel-to-image trafo")+"(");
+        result.append("\n"+gammalib::parformat("Pixel-to-image trafo")+"(");
         for (int k = 0; k < m_piximg.size(); ++k) {
             if (k > 0) {
                 result.append(", ");
             }
-            result.append(str(m_piximg[k]));
+            result.append(gammalib::str(m_piximg[k]));
         }
         result.append(")");
-        result.append("\n"+parformat("Image-to-pixel trafo")+"(");
+        result.append("\n"+gammalib::parformat("Image-to-pixel trafo")+"(");
         for (int k = 0; k < m_imgpix.size(); ++k) {
             if (k > 0) {
                 result.append(", ");
             }
-            result.append(str(m_imgpix[k]));
+            result.append(gammalib::str(m_imgpix[k]));
         }
         result.append(")");
     
         // Append coordinate system
-        result.append("\n"+parformat("Coodinate system")+coordsys());
+        result.append("\n"+gammalib::parformat("Coodinate system")+coordsys());
     
         // Append projection parameters
-        result.append("\n"+parformat("Projection code")+code());
-        result.append("\n"+parformat("Projection name")+name());
-        result.append("\n"+parformat("Radius of the gen. sphere")+str(m_r0)+" deg");
+        result.append("\n"+gammalib::parformat("Projection code")+code());
+        result.append("\n"+gammalib::parformat("Projection name")+name());
+        result.append("\n"+gammalib::parformat("Radius of the gen. sphere"));
+        result.append(gammalib::str(m_r0)+" deg");
 
         // Append boundary checking information
+        result.append("\n"+gammalib::parformat("Strict bounds checking"));
         if (m_bounds) {
-            result.append("\n"+parformat("Strict bounds checking")+"True");
+            result.append("True");
         }
         else {
-            result.append("\n"+parformat("Strict bounds checking")+"False");
+            result.append("False");
         }
 
         // Append fiducial offset information
+        result.append("\n"+gammalib::parformat("Use fiducial offset"));
         if (m_offset) {
-            result.append("\n"+parformat("Use fiducial offset")+"True");
+            result.append("True");
         }
         else {
-            result.append("\n"+parformat("Use fiducial offset")+"False");
+            result.append("False");
         }
-        result.append("\n"+parformat("Fiducial offset")+"("+str(m_x0)+", "+str(m_y0)+")");
+        result.append("\n"+gammalib::parformat("Fiducial offset"));
+        result.append("("+gammalib::str(m_x0)+", "+gammalib::str(m_y0)+")");
     
         // Append spectral transformation parameters
-        result.append("\n"+parformat("Rest frequency")+wcs_print_value(m_restfrq));
-        result.append("\n"+parformat("Rest wavelength")+wcs_print_value(m_restwav));
+        result.append("\n"+gammalib::parformat("Rest frequency")+wcs_print_value(m_restfrq));
+        result.append("\n"+gammalib::parformat("Rest wavelength")+wcs_print_value(m_restwav));
 
     } // endif: chatter was not silent
 
@@ -1491,7 +1499,7 @@ std::string GWcslib::wcs_print_value(const double& value) const
         result.append("UNDEFINED");
     }
     else {
-        result.append(str(value));
+        result.append(gammalib::str(value));
     }
     
     // Return result
@@ -1649,7 +1657,7 @@ void GWcslib::cel_set(void) const
                 // Check of an invalid coordinate transformation parameter
                 // has been encountered. Since z=0 we exlect sin(lat0)=0.
                 if (slat0 != 0.0) {
-                    std::string message = "sin(lat0)="+str(slat0)+", expected 0.";
+                    std::string message = "sin(lat0)="+gammalib::str(slat0)+", expected 0.";
                     throw GException::wcs_invalid_parameter(G_CEL_SET, message);
                 }
 
@@ -1678,8 +1686,8 @@ void GWcslib::cel_set(void) const
                     }
                     else {
                         std::string message;
-                        message  = "abs(slz)-1 >= "+str(std::abs(slz) - 1.0);
-                        message += +", expected <"+str(tol)+".";
+                        message  = "abs(slz)-1 >= "+gammalib::str(std::abs(slz) - 1.0);
+                        message += +", expected <"+gammalib::str(tol)+".";
                         throw GException::wcs_invalid_parameter(G_CEL_SET, message);
                     }
                 }

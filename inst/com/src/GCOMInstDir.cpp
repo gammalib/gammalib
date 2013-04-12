@@ -180,8 +180,10 @@ std::string GCOMInstDir::print(const GChatter& chatter) const
         result.append("=== GCOMInstDir ===");
 
         // Append information
-        result.append("\n"+parformat("Sky direction (Chi,Psi)")+m_dir.print(chatter));
-        result.append("\n"+parformat("Scatter angle (Phibar)")+str(m_phibar));
+        result.append("\n"+gammalib::parformat("Sky direction (Chi,Psi)"));
+        result.append(m_dir.print(chatter));
+        result.append("\n"+gammalib::parformat("Scatter angle (Phibar)"));
+        result.append(gammalib::str(m_phibar));
 
     } // endif: chatter was not silent
 

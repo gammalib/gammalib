@@ -103,7 +103,7 @@ GTime::GTime(const double& time, const std::string& unit)
     init_members();
 
     // Set time according to timeunit string
-    std::string timeunit = tolower(unit);
+    std::string timeunit = gammalib::tolower(unit);
     if (timeunit == "d" || timeunit == "day" || timeunit == "days") {
         days(time);
     }
@@ -438,7 +438,7 @@ std::string GTime::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append time
-        result.append(str(m_time)+" s (TT)");
+        result.append(gammalib::str(m_time)+" s (TT)");
 
     } // endif: chatter was not silent
 

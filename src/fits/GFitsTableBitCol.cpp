@@ -634,7 +634,7 @@ std::string GFitsTableBitCol::ascii_format(void) const
     format.append("I");
 
     // Set width
-    format.append(str(m_width));
+    format.append(gammalib::str(m_width));
 
     // Return format
     return format;
@@ -650,7 +650,7 @@ std::string GFitsTableBitCol::binary_format(void) const
     std::string format;
 
     // Set number of elements
-    format.append(str(m_number));
+    format.append(gammalib::str(m_number));
 
     // Set type code
     format.append("X");

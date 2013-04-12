@@ -265,9 +265,9 @@ GObservation* GObservations::set(const int& index, const GObservation& obs)
         std::string msg =
             "Attempt to set \""+obs.instrument()+"\" observation with"
             " identifier \""+obs.id()+"\" in observation container at"
-            " index "+str(index)+", but an observation with the same"
-            " attributes exists already at index "+str(inx)+" in the"
-            " container.\n"
+            " index "+gammalib::str(index)+", but an observation with the"
+            " same attributes exists already at index "+gammalib::str(inx)+
+            " in the container.\n"
             "Every observation for a given instrument in the observation"
             " container needs a unique identifier.";
         throw GException::invalid_value(G_SET, msg);
@@ -306,7 +306,7 @@ GObservation* GObservations::append(const GObservation& obs)
             "Attempt to append \""+obs.instrument()+"\" observation with"
             " identifier \""+obs.id()+"\" to observation container, but an"
             " observation with the same attributes exists already at"
-            " index "+str(inx)+" in the container.\n"
+            " index "+gammalib::str(inx)+" in the container.\n"
             "Every observation for a given instrument in the observation"
             " container needs a unique identifier.";
         throw GException::invalid_value(G_APPEND, msg);
@@ -362,9 +362,9 @@ GObservation* GObservations::insert(const int& index, const GObservation& obs)
         std::string msg =
             "Attempt to insert \""+obs.instrument()+"\" observation with"
             " identifier \""+obs.id()+"\" in observation container before"
-            " index "+str(index)+", but an observation with the same"
-            " attributes exists already at index "+str(inx)+" in the"
-            " container.\n"
+            " index "+gammalib::str(index)+", but an observation with the"
+            " same attributes exists already at index "+gammalib::str(inx)+
+            " in the container.\n"
             "Every observation for a given instrument in the observation"
             " container needs a unique identifier.";
         throw GException::invalid_value(G_INSERT, msg);
@@ -444,8 +444,8 @@ void GObservations::extend(const GObservations& obs)
                     "Attempt to append \""+obs[i]->instrument()+"\""
                     " observation with identifier \""+obs[i]->id()+"\""
                     " to observation container, but an observation with the"
-                    " same attributes exists already at index "+str(inx)+
-                    " in the container.\n"
+                    " same attributes exists already at index "+
+                    gammalib::str(inx)+" in the container.\n"
                     "Every observation for a given instrument in the"
                     " observation container needs a unique identifier.";
                 throw GException::invalid_value(G_EXTEND, msg);
@@ -730,11 +730,13 @@ std::string GObservations::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GObservations ===\n");
+        result.append("=== GObservations ===");
 
         // Append information
-        result.append(parformat("Number of observations")+str(size())+"\n");
-        result.append(parformat("Number of predicted events")+str(npred()));
+        result.append("\n"+gammalib::parformat("Number of observations"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of predicted events"));
+        result.append(gammalib::str(npred()));
 
         // NORMAL: Append observations
         if (chatter >= NORMAL) {

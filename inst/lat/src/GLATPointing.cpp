@@ -175,7 +175,7 @@ std::string GLATPointing::print(const GChatter& chatter) const
         result.append("=== GLATPointing ===");
 
         // Append information
-        result.append("\n"+parformat("Pointing direction"));
+        result.append("\n"+gammalib::parformat("Pointing direction"));
         result.append(this->dir().print(chatter));
 
     } // endif: chatter was not silent

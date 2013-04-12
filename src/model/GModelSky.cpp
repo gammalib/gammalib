@@ -590,7 +590,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: GModelSky::npred:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
@@ -905,10 +905,10 @@ std::string GModelSky::print(const GChatter& chatter) const
         result.append("\n"+print_attributes());
 
         // Append model type
-        result.append("\n"+parformat("Model type")+type());
+        result.append("\n"+gammalib::parformat("Model type")+type());
 
         // Append model components
-        result.append("\n"+parformat("Model components"));
+        result.append("\n"+gammalib::parformat("Model components"));
         if (n_spatial > 0) {
             result.append("\""+spatial()->type()+"\"");
             if (n_spectral > 0 || n_temporal > 0) {
@@ -926,16 +926,20 @@ std::string GModelSky::print(const GChatter& chatter) const
         }
 
         // Append parameters
-        result.append("\n"+parformat("Number of parameters")+str(size()));
-        result.append("\n"+parformat("Number of spatial par's")+str(n_spatial));
+        result.append("\n"+gammalib::parformat("Number of parameters"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of spatial par's"));
+        result.append(gammalib::str(n_spatial));
         for (int i = 0; i < n_spatial; ++i) {
             result.append("\n"+(*spatial())[i].print());
         }
-        result.append("\n"+parformat("Number of spectral par's")+str(n_spectral));
+        result.append("\n"+gammalib::parformat("Number of spectral par's"));
+        result.append(gammalib::str(n_spectral));
         for (int i = 0; i < n_spectral; ++i) {
             result.append("\n"+(*spectral())[i].print());
         }
-        result.append("\n"+parformat("Number of temporal par's")+str(n_temporal));
+        result.append("\n"+gammalib::parformat("Number of temporal par's"));
+        result.append(gammalib::str(n_temporal));
         for (int i = 0; i < n_temporal; ++i) {
             result.append("\n"+(*temporal())[i].print());
         }
@@ -1256,7 +1260,7 @@ double GModelSky::integrate_time(const GEvent& event,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSky::integrate_time:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -1330,7 +1334,7 @@ double GModelSky::integrate_energy(const GEvent& event,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(value) || isinfinite(value)) {
+    if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GModelSky::integrate_energy:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
@@ -1413,7 +1417,7 @@ double GModelSky::integrate_dir(const GEvent&       event,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (isnotanumber(value) || isinfinite(value)) {
+            if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
                 std::cout << "*** ERROR: GModelSky::integrate_dir:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;
@@ -1458,7 +1462,7 @@ double GModelSky::integrate_dir(const GEvent&       event,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (isnotanumber(value) || isinfinite(value)) {
+            if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
                 std::cout << "*** ERROR: GModelSky::integrate_dir:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;

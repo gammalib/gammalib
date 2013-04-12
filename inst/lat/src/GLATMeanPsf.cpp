@@ -561,22 +561,22 @@ std::string GLATMeanPsf::print(const GChatter& chatter) const
         result.append("=== GLATMeanPsf ===");
 
         // Append information
-        result.append("\n"+parformat("Source name")+name());
-        result.append("\n"+parformat("Source direction"));
-        result.append(str(m_dir.ra_deg()));
+        result.append("\n"+gammalib::parformat("Source name")+name());
+        result.append("\n"+gammalib::parformat("Source direction"));
+        result.append(gammalib::str(m_dir.ra_deg()));
         result.append(", ");
-        result.append(str(m_dir.dec_deg()));
-        result.append("\n"+parformat("Offset angles")+str(noffsets()));
-        result.append("\n"+parformat("Energy values")+str(nenergies()));
-        result.append("\n"+parformat("Exposure range"));
-        result.append(str(min_exposure)+" - "+str(max_exposure)+" s cm2");
+        result.append(gammalib::str(m_dir.dec_deg()));
+        result.append("\n"+gammalib::parformat("Offset angles")+gammalib::str(noffsets()));
+        result.append("\n"+gammalib::parformat("Energy values")+gammalib::str(nenergies()));
+        result.append("\n"+gammalib::parformat("Exposure range"));
+        result.append(gammalib::str(min_exposure)+" - "+gammalib::str(max_exposure)+" s cm2");
         for (int i = 0; i < nenergies(); ++i) {
             GEnergy energy;
             energy.log10MeV(m_energy[i]);
-            result.append("\n"+parformat(energy.print()));
-            result.append(str(m_exposure[i])+" s cm2");
+            result.append("\n"+gammalib::parformat(energy.print()));
+            result.append(gammalib::str(m_exposure[i])+" s cm2");
             if (m_mapcorr.size() == nenergies()) {
-                result.append("   (map correction="+str(m_mapcorr[i])+")");
+                result.append("   (map correction="+gammalib::str(m_mapcorr[i])+")");
             }
         }
 

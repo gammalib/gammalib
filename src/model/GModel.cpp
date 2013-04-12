@@ -340,11 +340,11 @@ void GModel::instruments(const std::string& instruments)
     m_instruments.clear();
 
     // Extract instruments
-    std::vector<std::string> inst = split(instruments, ",");
+    std::vector<std::string> inst = gammalib::split(instruments, ",");
 
     // Attach all instruments
     for (int i = 0; i < inst.size(); ++i) {
-        m_instruments.push_back(strip_whitespace(inst[i]));
+        m_instruments.push_back(gammalib::strip_whitespace(inst[i]));
     }
 
     // Return
@@ -399,7 +399,7 @@ GModelPar GModel::scale(const std::string& instrument) const
 void GModel::scale(const GModelPar& par)
 {
     // String leading and trailing while space
-    std::string instrument = strip_whitespace(par.name());
+    std::string instrument = gammalib::strip_whitespace(par.name());
 
     // Search for instrument and copy the model parameter if the instrument
     // has been found. Make sure that the instrument name is in upper case.
@@ -468,11 +468,11 @@ void GModel::ids(const std::string& ids)
     m_ids.clear();
 
     // Extract observation identifiers
-    std::vector<std::string> id = split(ids, ",");
+    std::vector<std::string> id = gammalib::split(ids, ",");
 
     // Attach all observation identifiers
     for (int i = 0; i < id.size(); ++i) {
-        m_ids.push_back(strip_whitespace(id[i]));
+        m_ids.push_back(gammalib::strip_whitespace(id[i]));
     }
 
     // Return
@@ -625,7 +625,7 @@ void GModel::read_scales(const GXmlElement& xml)
             const GXmlElement* par = scales->element("instrument", i);
             GModelPar scale;
             scale.read(*par);
-            scale.name(strip_whitespace(par->attribute("name")));
+            scale.name(gammalib::strip_whitespace(par->attribute("name")));
             m_scales.push_back(scale);
         }
 
@@ -680,7 +680,7 @@ void GModel::write_scales(GXmlElement& xml) const
         // Verify that scaling tag  has the required number of instruments
         if (scale->elements() != num || scale->elements("instrument") != num) {
             throw GException::model_invalid_parnum(G_WRITE_SCALES, *scale,
-                  "Instrument scaling needs "+str(num)+" instrument tags.");
+                  "Instrument scaling needs "+gammalib::str(num)+" instrument tags.");
         }
 
         // Write all instruments
@@ -715,10 +715,10 @@ std::string GModel::print_attributes(void) const
     std::string result;
 
     // Append model name
-    result.append(parformat("Name")+name());
+    result.append(gammalib::parformat("Name")+name());
 
     // Append instruments
-    result.append("\n"+parformat("Instruments"));
+    result.append("\n"+gammalib::parformat("Instruments"));
     if (!m_instruments.empty()) {
         for (int i = 0; i < m_instruments.size(); ++i) {
             if (i > 0) {
@@ -732,7 +732,7 @@ std::string GModel::print_attributes(void) const
     }
 
     // Append instrument scale factors
-    result.append("\n"+parformat("Instrument scale factors"));
+    result.append("\n"+gammalib::parformat("Instrument scale factors"));
     if (!m_scales.empty()) {
         for (int i = 0; i < m_scales.size(); ++i) {
             if (i > 0) {
@@ -740,7 +740,7 @@ std::string GModel::print_attributes(void) const
             }
             result.append(m_scales[i].name());
             result.append("=");
-            result.append(str(m_scales[i].value()));
+            result.append(gammalib::str(m_scales[i].value()));
         }
         result.append(", others unity");
     }
@@ -749,7 +749,7 @@ std::string GModel::print_attributes(void) const
     }
 
     // Append observation identifiers
-    result.append("\n"+parformat("Observation identifiers"));
+    result.append("\n"+gammalib::parformat("Observation identifiers"));
     if (!m_ids.empty()) {
         for (int i = 0; i < m_ids.size(); ++i) {
             if (i > 0) {

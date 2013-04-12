@@ -101,7 +101,7 @@ GEnergy::GEnergy(const double& eng, const std::string& unit)
     init_members();
 
     // Set energy according to unit string
-    std::string eunit = tolower(unit);
+    std::string eunit = gammalib::tolower(unit);
     if (eunit == "erg" || eunit == "ergs") {
         this->erg(eng);
     }
@@ -514,23 +514,23 @@ std::string GEnergy::print(const GChatter& chatter) const
 
         // Append energy
         if (GeV() > 1000.0) {
-            result.append(str(TeV())+" TeV");
+            result.append(gammalib::str(TeV())+" TeV");
         }
         else if (MeV() > 1000.0) {
-            result.append(str(GeV())+" GeV");
+            result.append(gammalib::str(GeV())+" GeV");
         }
         else if (keV() > 1000.0) {
-            result.append(str(MeV())+" MeV");
+            result.append(gammalib::str(MeV())+" MeV");
         }
         else {
-            result.append(str(keV())+" keV");
+            result.append(gammalib::str(keV())+" keV");
         }
 
         // VERBOSE: append energy and log10 energy
         if (chatter == VERBOSE) {
-            result.append(" (E="+str(m_energy));
+            result.append(" (E="+gammalib::str(m_energy));
             if (m_has_log10) {
-                result.append(", log10(E)="+str(m_elog10)+")");
+                result.append(", log10(E)="+gammalib::str(m_elog10)+")");
             }
             else {
                 result.append(", no log10(E) value)");

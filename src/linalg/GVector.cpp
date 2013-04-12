@@ -566,7 +566,7 @@ std::string GVector::print(const GChatter& chatter) const
 
         // Put all elements in stream
         for (int i = 0; i < m_num; ++i) {
-            result += str((*this)[i]);
+            result += gammalib::str((*this)[i]);
             if (i != m_num-1) {
                 result += ", ";
             }

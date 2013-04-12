@@ -582,7 +582,7 @@ std::string GFitsTableByteCol::ascii_format(void) const
     format.append("I4");
 
     // Set width
-    //format.append(str(m_width));
+    //format.append(gammalib::str(m_width));
 
     // Return format
     return format;
@@ -598,7 +598,7 @@ std::string GFitsTableByteCol::binary_format(void) const
     std::string format;
 
     // Set number of elements
-    format.append(str(m_number));
+    format.append(gammalib::str(m_number));
 
     // Set type code
     format.append("B");

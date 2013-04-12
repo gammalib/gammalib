@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GIntegral.cpp - Integration class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -377,13 +377,16 @@ std::string GIntegral::print(const GChatter& chatter) const
         result.append("=== GIntegral ===");
 
         // Append information
-        result.append("\n"+parformat("Relative precision")+str(eps()));
-        result.append("\n"+parformat("Max. number of iterations")+str(max_iter()));
+        result.append("\n"+gammalib::parformat("Relative precision"));
+        result.append(gammalib::str(eps()));
+        result.append("\n"+gammalib::parformat("Max. number of iterations"));
+        result.append(gammalib::str(max_iter()));
         if (silent()) {
-            result.append("\n"+parformat("Warnings")+"suppressed");
+            result.append("\n"+gammalib::parformat("Warnings")+"suppressed");
         }
         else {
-            result.append("\n"+parformat("Warnings")+"in standard output");
+            result.append("\n"+gammalib::parformat("Warnings"));
+            result.append("in standard output");
         }
 
     } // endif: chatter was not silent

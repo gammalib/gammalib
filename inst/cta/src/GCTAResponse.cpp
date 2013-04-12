@@ -359,7 +359,7 @@ double GCTAResponse::irf(const GEvent&       event,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(irf) || isinfinite(irf)) {
+    if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
         std::cout << "*** ERROR: GCTAResponse::irf:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (irf=" << irf;
@@ -448,7 +448,7 @@ double GCTAResponse::npred(const GPhoton&      photon,
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: GCTAResponse::npred:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -814,9 +814,9 @@ std::string GCTAResponse::print(const GChatter& chatter) const
         result.append("=== GCTAResponse ===");
 
         // Append response information
-        result.append("\n"+parformat("Calibration database")+m_caldb);
-        result.append("\n"+parformat("Response name")+m_rspname);
-        result.append("\n"+parformat("RMF file name")+m_rmffile);
+        result.append("\n"+gammalib::parformat("Calibration database")+m_caldb);
+        result.append("\n"+gammalib::parformat("Response name")+m_rspname);
+        result.append("\n"+gammalib::parformat("RMF file name")+m_rmffile);
 
         // Append effective area information
         if (m_aeff != NULL) {
@@ -832,11 +832,12 @@ std::string GCTAResponse::print(const GChatter& chatter) const
         if (chatter >= EXPLICIT) {
             if (!m_npred_names.empty()) {
                 for (int i = 0; i < m_npred_names.size(); ++i) {
-                    result.append("\n"+parformat("Npred cache "+str(i)));
+                    result.append("\n"+gammalib::parformat("Npred cache " +
+                                  gammalib::str(i)));
                     result.append(m_npred_names[i]+", ");
                     result.append(m_npred_energies[i].print()+", ");
                     result.append(m_npred_times[i].print()+" = ");
-                    result.append(str(m_npred_values[i]));
+                    result.append(gammalib::str(m_npred_values[i]));
                 }
             }
         } // endif: chatter was explicit
@@ -966,7 +967,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
     double denom  = std::sin(lambda) * std::sin(zeta);
     if (denom != 0.0) {
         double arg = (std::cos(eta) - std::cos(lambda) * std::cos(zeta))/denom;
-        omega0     = arccos(arg);
+        omega0     = gammalib::arccos(arg);
     }
 
     // Get log10(E/TeV) of true and measured photon energies
@@ -1021,7 +1022,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(irf) || isinfinite(irf)) {
+        if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
             std::cout << "*** ERROR: GCTAResponse::irf_radial:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (irf=" << irf;
@@ -1150,7 +1151,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     double denom  = std::sin(lambda) * std::sin(zeta);
     if (denom != 0.0) {
         double arg = (std::cos(eta) - std::cos(lambda) * std::cos(zeta))/denom;
-        omega0     = arccos(arg);
+        omega0     = gammalib::arccos(arg);
     }
 
     // Get log10(E/TeV) of true and measured photon energies
@@ -1203,7 +1204,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
 
         // Compile option: Check for NaN/Inf
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(irf) || isinfinite(irf)) {
+        if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
             std::cout << "*** ERROR: GCTAResponse::irf_elliptical:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (irf=" << irf;
@@ -1384,7 +1385,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (isnotanumber(irf) || isinfinite(irf)) {
+            if (gammalib::isnotanumber(irf) || gammalib::isinfinite(irf)) {
                 std::cout << "*** ERROR: GCTAResponse::irf_diffuse:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (irf=" << irf;
@@ -1581,7 +1582,7 @@ double GCTAResponse::npred_radial(const GSource& source,
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: GCTAResponse::npred_radial:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -1760,7 +1761,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
-    if (isnotanumber(npred) || isinfinite(npred)) {
+    if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
         std::cout << "*** ERROR: GCTAResponse::npred_elliptical:";
         std::cout << " NaN/Inf encountered";
         std::cout << " (npred=" << npred;
@@ -1956,7 +1957,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)
-        if (isnotanumber(npred) || isinfinite(npred)) {
+        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
             std::cout << "*** ERROR: GCTAResponse::npred_diffuse:";
             std::cout << " NaN/Inf encountered";
             std::cout << " (npred=" << npred;
@@ -2197,7 +2198,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
-            if (isnotanumber(value) || isinfinite(value)) {
+            if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
                 std::cout << "*** ERROR: GCTAResponse::npsf:";
                 std::cout << " NaN/Inf encountered";
                 std::cout << " (value=" << value;

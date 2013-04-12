@@ -209,9 +209,9 @@ std::string GMWLDatum::print(const GChatter& chatter) const
         if (m_eng_err.MeV() > 0.0) {
             result.append(" +/- "+m_eng_err.print());
         }
-        result.append(": "+str(m_flux));
+        result.append(": "+gammalib::str(m_flux));
         if (m_flux_err > 0.0) {
-            result.append(" +/- "+str(m_flux_err));
+            result.append(" +/- "+gammalib::str(m_flux_err));
         }
 
     } // endif: chatter was not silent

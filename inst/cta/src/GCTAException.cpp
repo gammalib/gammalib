@@ -39,7 +39,7 @@ const char* GCTAExceptionHandler::what() const throw()
     std::string message = "*** ERROR in " + m_origin + ": " + m_message;
 
     // Return message as C character array
-    return tochar(message);
+    return gammalib::tochar(message);
 }
 
 
@@ -405,8 +405,10 @@ GCTAException::bad_rsp_table_dim::bad_rsp_table_dim(std::string origin,
     m_origin = origin;
 
     // Set message
-    m_message = "Response table dimension "+str(found)+
-                " is smaller than the expected dimension "+str(expected)+
+    m_message = "Response table dimension "+
+                gammalib::str(found)+
+                " is smaller than the expected dimension "+
+                gammalib::str(expected)+
                 ".";
     if (message.length() > 0) {
         m_message += " "+message;

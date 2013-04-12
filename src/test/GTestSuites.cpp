@@ -253,7 +253,7 @@ bool GTestSuites::run(void)
 {
     // Set header
     std::string text  = "* " + name() + " *";
-    std::string frame = fill("*", text.length());
+    std::string frame = gammalib::fill("*", text.length());
     
     // Log name of test suites
     std::cout << std::endl;
@@ -426,11 +426,15 @@ std::string GTestSuites::print(const GChatter& chatter) const
         result.append("=== GTestSuites ===");
 
         // Append information
-        result.append("\n"+parformat("Name")+m_name);
-        result.append("\n"+parformat("Number of test suites")+str(size()));
-        result.append("\n"+parformat("Number of tests")+str(tests()));
-        result.append("\n"+parformat("Number of errors")+str(errors()));
-        result.append("\n"+parformat("Number of failures")+str(failures()));
+        result.append("\n"+gammalib::parformat("Name")+m_name);
+        result.append("\n"+gammalib::parformat("Number of test suites"));
+        result.append(gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Number of tests"));
+        result.append(gammalib::str(tests()));
+        result.append("\n"+gammalib::parformat("Number of errors"));
+        result.append(gammalib::str(errors()));
+        result.append("\n"+gammalib::parformat("Number of failures"));
+        result.append(gammalib::str(failures()));
 
         // Append test suites
         for (int i = 0; i < size(); ++i) {
@@ -536,16 +540,16 @@ void GTestSuites::write(GXml& xml) const
 
         // Set attributes
         element_testsuite->attribute("disabled","");  // not used
-        element_testsuite->attribute("errors",str(testsuite->errors()));
-        element_testsuite->attribute("failures",str(testsuite->failures()));
+        element_testsuite->attribute("errors",gammalib::str(testsuite->errors()));
+        element_testsuite->attribute("failures",gammalib::str(testsuite->failures()));
         element_testsuite->attribute("hostname","");  // not used
-        element_testsuite->attribute("id",str(i));
+        element_testsuite->attribute("id",gammalib::str(i));
         element_testsuite->attribute("name",testsuite->name()); 
         element_testsuite->attribute("package","");  // not used
         element_testsuite->attribute("skipped","");  // not used
-        element_testsuite->attribute("tests",str(testsuite->size()));
-        element_testsuite->attribute("time",str(testsuite->duration()));
-        element_testsuite->attribute("timestamp",str(testsuite->timestamp()));
+        element_testsuite->attribute("tests",gammalib::str(testsuite->size()));
+        element_testsuite->attribute("time",gammalib::str(testsuite->duration()));
+        element_testsuite->attribute("timestamp",gammalib::str(testsuite->timestamp()));
 
         // Loop over all test cases in the test suite
         for (int j = 0; j < testsuite->size(); ++j) {
@@ -561,7 +565,7 @@ void GTestSuites::write(GXml& xml) const
             element_testcase->attribute("classname",name());
             element_testcase->attribute("name",testcase.name());
             element_testcase->attribute("status","");  // not used
-            element_testcase->attribute("time",str(testcase.duration()));
+            element_testcase->attribute("time",gammalib::str(testcase.duration()));
 
             // If a failure or error occured then append the message to the
             // XML element.
