@@ -9,7 +9,7 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = GIntegral.cpp \
           GDerivative.cpp \
           GFunction.cpp \
-          GNumerics.cpp \
+          GMath.cpp \
           GException_numerics.cpp
 
 # Build libtool library
