@@ -340,7 +340,7 @@ void gammalib::sincosd(const double& angle, double *s, double *c)
 /***********************************************************************//**
  * @brief Computes logarithm of gamma function
  *
- * @param[in] x Argument.
+ * @param[in] arg Argument.
  * @return Logarithm of gamma function.
  ***************************************************************************/
 double gammalib::gammln(const double& arg) {
