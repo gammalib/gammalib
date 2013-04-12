@@ -105,7 +105,7 @@ class GTestEventAtom : public GEventAtom {
         std::string         print(const GChatter& chatter = NORMAL) const{
             std::string result("== GTestEventAtom == \n");
             result.append("Direction : "+m_dir.print()+"\n");
-            result.append("Time : "+str(m_time.secs())+"\n");
+            result.append("Time : "+gammalib::str(m_time.secs())+"\n");
             result.append("Energy : "+m_energy.print()+"\n");
             return result;
         }

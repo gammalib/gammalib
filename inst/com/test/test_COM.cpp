@@ -423,86 +423,86 @@ void TestGCOMObservation::test_event_cube(void)
     GCOMEventCube cube3(cube2);
     test_value(cube2.size(), cube3.size(), "Test copy constructor.",
                "Different cube size after using the"
-               " copy constructor (before="+str(cube2.size())+
-               " after="+str(cube3.size())+")");
+               " copy constructor (before="+gammalib::str(cube2.size())+
+               " after="+gammalib::str(cube3.size())+")");
     test_value(cube2.number(), cube3.number(), "Test copy constructor.",
                "Different number of events after using the"
-               " copy constructor (before="+str(cube2.number())+
-               " after="+str(cube3.number())+").");
+               " copy constructor (before="+gammalib::str(cube2.number())+
+               " after="+gammalib::str(cube3.number())+").");
 
     // Event cube assignment operator
     GCOMEventCube cube4 = cube2;
     test_value(cube2.size(), cube4.size(), "Test assignment operator.",
                "Different cube size after using the"
-               " assignment operator (before="+str(cube2.size())+
-               " after="+str(cube4.size())+")");
+               " assignment operator (before="+gammalib::str(cube2.size())+
+               " after="+gammalib::str(cube4.size())+")");
     test_value(cube2.number(), cube4.number(), "Test assignment operator.",
                "Different number of events after using the"
-               " assignment operator (before="+str(cube2.number())+
-               " after="+str(cube4.number())+").");
+               " assignment operator (before="+gammalib::str(cube2.number())+
+               " after="+gammalib::str(cube4.number())+").");
         
     // clear method
     cube4.clear();
     test_value(cube4.size(), 0, "Test clear method.",
                "Expected event cube with size 0 after"
-               " clear but found size "+str(cube4.size())+".");
+               " clear but found size "+gammalib::str(cube4.size())+".");
     test_value(cube4.number(), 0, "Test clear method.",
                "Expected 0 events in cube after"
-               " clear but found "+str(cube4.size())+" events.");
+               " clear but found "+gammalib::str(cube4.size())+" events.");
 
     // clone method
     GCOMEventCube* cube5 = cube2.clone();
     test_value(cube2.size(), cube5->size(), "Test clone() method.",
                "Different cube size after cloning"
-               " (before="+str(cube2.size())+
-               " after="+str(cube5->size())+")");
+               " (before="+gammalib::str(cube2.size())+
+               " after="+gammalib::str(cube5->size())+")");
     test_value(cube2.number(), cube5->number(), "Test clone() method.",
                "Different number of events after cloning"
-               " (before="+str(cube2.number())+
-               " after="+str(cube5->number())+").");
+               " (before="+gammalib::str(cube2.number())+
+               " after="+gammalib::str(cube5->number())+").");
 
     // size method
     test_value(cube2.size(), 140600, "Test size() method.",
                "Expected cube dimension 140600, found "+
-               str(cube2.size())+".");
+               gammalib::str(cube2.size())+".");
 
     // dim method
     test_value(cube2.dim(), 3, "Test dim() method.",
                "Expected 3 cube dimensions, found "+
-               str(cube2.dim())+".");
+               gammalib::str(cube2.dim())+".");
 
     // naxis method
     test_value(cube2.naxis(0), 76, "Test naxis(0) method.",
                "Expected Chi axis dimension 76, found "+
-               str(cube2.naxis(0))+".");
+               gammalib::str(cube2.naxis(0))+".");
     test_value(cube2.naxis(1), 74, "Test naxis(1) method.",
                "Expected Chi axis dimension 74, found "+
-               str(cube2.naxis(1))+".");
+               gammalib::str(cube2.naxis(1))+".");
     test_value(cube2.naxis(2), 25, "Test naxis(2) method.",
                "Expected Chi axis dimension 25, found "+
-               str(cube2.naxis(2))+".");
+               gammalib::str(cube2.naxis(2))+".");
 
     // nchi, npsi, nphi methods
     test_value(cube2.nchi(), 76, "Test nchi() method.",
                "Expected Chi axis dimension 76, found "+
-               str(cube2.nchi())+".");
+               gammalib::str(cube2.nchi())+".");
     test_value(cube2.npsi(), 74, "Test npsi() method.",
                "Expected Chi axis dimension 74, found "+
-               str(cube2.npsi())+".");
+               gammalib::str(cube2.npsi())+".");
     test_value(cube2.nphi(), 25, "Test nphi() method.",
                "Expected Chi axis dimension 25, found "+
-               str(cube2.nphi())+".");
+               gammalib::str(cube2.nphi())+".");
 
     // npix method
     int npix = cube2.nchi() * cube2.npsi();
     test_value(cube2.npix(), npix, "Test npix() method.",
-               "Expected "+str(npix)+" pixels in (Chi,Psi) plane, found "+
-               str(cube2.npix())+".");
+               "Expected "+gammalib::str(npix)+" pixels in (Chi,Psi) plane, found "+
+               gammalib::str(cube2.npix())+".");
 
     // number method
     test_value(cube2.number(), 316141, "Test number() method.",
                "Expected 316141 events in cube, found "+
-               str(cube2.number())+".");
+               gammalib::str(cube2.number())+".");
 
     // event access
     double sum = 0.0;
@@ -510,9 +510,9 @@ void TestGCOMObservation::test_event_cube(void)
         sum += cube2[i]->counts();
     }
     test_value(cube2.number(), int(sum+0.5), "Test event access.",
-               "Expected "+str(cube2.number())+
+               "Expected "+gammalib::str(cube2.number())+
                " events in cube, found "+
-               str(int(sum+0.5))+" by summing over all elements.");
+               gammalib::str(int(sum+0.5))+" by summing over all elements.");
 
     // Return
     return;

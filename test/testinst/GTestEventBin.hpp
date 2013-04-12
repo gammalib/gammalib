@@ -114,7 +114,7 @@ public:
         std::string result;
 
         // Append number of counts
-        result.append(str(counts()));
+        result.append(gammalib::str(counts()));
 
         // Return result
         return result;

@@ -714,7 +714,7 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
 
         // Create an observation
         GTestObservation ob;
-        ob.id(str(i));
+        ob.id(gammalib::str(i));
 
         // Add events to the observation
         ob.events(events);

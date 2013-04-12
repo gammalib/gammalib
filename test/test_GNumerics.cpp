@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.cpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,13 +71,13 @@ void TestGNumerics::test_romberg_integration(void)
     Gauss     integrand(m_sigma);
     GIntegral integral(&integrand);
     double    result = integral.romb(-10.0*m_sigma, 10.0*m_sigma);
-    test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+str(result)+")");
+    test_value(result,1.0,1.0e-6,"","Gaussian integral is not 1.0 (integral="+gammalib::str(result)+")");
 
     result = integral.romb(-m_sigma, m_sigma);
-    test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+str((result-0.68268948130801355))+")");
+    test_value(result,0.68268948130801355,1.0e-6,"","Gaussian integral is not 0.682689 (difference="+gammalib::str((result-0.68268948130801355))+")");
 
     result = integral.romb(0.0, m_sigma);
-    test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+str((result-0.3413447460687748))+")");
+    test_value(result,0.3413447460687748,1.0e-6,"","Gaussian integral is not 0.341345 (difference="+gammalib::str((result-0.3413447460687748))+")");
 }
 
 

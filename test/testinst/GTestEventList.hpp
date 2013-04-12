@@ -133,7 +133,7 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const{
         std::string result;
         result.append("=== GTestEventList ===");
-        result.append("\n"+parformat("Number of events")+str(number()));
+        result.append("\n"+gammalib::parformat("Number of events")+gammalib::str(number()));
         return result;
     }
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  test_GFits.cpp  -  test FITS classes                   *
+ *                   test_GFits.cpp - test FITS classes                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,21 +38,21 @@
 #define TEST_1D_ACCESS(NX) \
     for (int ix = 0, i = 0; ix < NX; ++ix, ++i) { \
         test_value(image1(ix), pixels[i], 1e-10, \
-                   "Test pixel access operator for pixel "+str(i)); \
+                   "Test pixel access operator for pixel "+gammalib::str(i)); \
         test_value(image1.at(ix), pixels[i], 1e-10, \
-                   "Test at() method for pixel "+str(i)); \
+                   "Test at() method for pixel "+gammalib::str(i)); \
         test_value(image1.pixel(ix), pixels[i], 1e-10, \
-                   "Test pixel() method for pixel "+str(i)); \
+                   "Test pixel() method for pixel "+gammalib::str(i)); \
     }
 #define TEST_2D_ACCESS(NX,NY) \
     for (int iy = 0, i = 0; iy < NY; ++iy) { \
         for (int ix = 0; ix < NX; ++ix, ++i) { \
             test_value(image2(ix,iy), pixels[i], 1e-10, \
-                       "Test pixel access operator for pixel "+str(i)); \
+                       "Test pixel access operator for pixel "+gammalib::str(i)); \
             test_value(image2.at(ix,iy), pixels[i], 1e-10, \
-                       "Test at() method for pixel "+str(i)); \
+                       "Test at() method for pixel "+gammalib::str(i)); \
             test_value(image2.pixel(ix,iy), pixels[i], 1e-10, \
-                       "Test pixel() method for pixel "+str(i)); \
+                       "Test pixel() method for pixel "+gammalib::str(i)); \
         } \
     }
 #define TEST_3D_ACCESS(NX,NY,NZ) \
@@ -60,11 +60,11 @@
         for (int iy = 0; iy < NY; ++iy) { \
             for (int ix = 0; ix < NX; ++ix, ++i) { \
                 test_value(image3(ix,iy,iz), pixels[i], 1e-10, \
-                           "Test pixel access operator for pixel "+str(i)); \
+                           "Test pixel access operator for pixel "+gammalib::str(i)); \
                 test_value(image3.at(ix,iy,iz), pixels[i], 1e-10, \
-                           "Test at() method for pixel "+str(i)); \
+                           "Test at() method for pixel "+gammalib::str(i)); \
                 test_value(image3.pixel(ix,iy,iz), pixels[i], 1e-10, \
-                           "Test pixel() method for pixel "+str(i)); \
+                           "Test pixel() method for pixel "+gammalib::str(i)); \
             } \
         } \
     }
@@ -74,11 +74,11 @@
             for (int iy = 0; iy < NY; ++iy) { \
                 for (int ix = 0; ix < NX; ++ix, ++i) { \
                     test_value(image4(ix,iy,iz, it), pixels[i], 1e-10, \
-                               "Test pixel access operator for pixel "+str(i)); \
+                               "Test pixel access operator for pixel "+gammalib::str(i)); \
                     test_value(image4.at(ix,iy,iz, it), pixels[i], 1e-10, \
-                               "Test at() method for pixel "+str(i)); \
+                               "Test at() method for pixel "+gammalib::str(i)); \
                     test_value(image4.pixel(ix,iy,iz, it), pixels[i], 1e-10, \
-                               "Test pixel() method for pixel "+str(i)); \
+                               "Test pixel() method for pixel "+gammalib::str(i)); \
                 } \
             } \
         } \
@@ -89,7 +89,7 @@
             for (int iy = 0; iy < NY; ++iy) { \
                 for (int ix = 0; ix < NX; ++ix, ++i) { \
                     test_value(ptr->pixel(ix,iy,iz, it), pixels[i], 1e-10, \
-                               "Test pixel() method for pixel "+str(i)); \
+                               "Test pixel() method for pixel "+gammalib::str(i)); \
                 } \
             } \
         } \
@@ -101,14 +101,14 @@
     for (int i = 0; i < nrows; ++i) { \
         double val = (double(i)*3.57+1.29); \
         test_value(col1(i), val, 1e-6, \
-                   "Test access operator row "+str(i)); \
+                   "Test access operator row "+gammalib::str(i)); \
         test_value(col1.real(i), val, 1e-6, \
-                   "Test real() method for row "+str(i)); \
+                   "Test real() method for row "+gammalib::str(i)); \
         test_value(col1.integer(i), int(val), 1e-6, \
-                   "Test integer() method for row "+str(i)); \
-        test_assert((col1.string(i) == str(val)), \
-                    "Test string() method for row "+str(i), \
-                    col1.string(i)+" is not "+str(val)); \
+                   "Test integer() method for row "+gammalib::str(i)); \
+        test_assert((col1.string(i) == gammalib::str(val)), \
+                    "Test string() method for row "+gammalib::str(i), \
+                    col1.string(i)+" is not "+gammalib::str(val)); \
     }
 #define TEST_TABLE1_INT \
     for (int i = 0; i < nrows; ++i) { \
@@ -117,17 +117,17 @@
     for (int i = 0; i < nrows; ++i) { \
         int val = i*3+1; \
         test_assert((col1(i) == val), \
-                    "Test access operator row "+str(i), \
-                    str(col1(i))+" is not "+str(val)); \
+                    "Test access operator row "+gammalib::str(i), \
+                    gammalib::str(col1(i))+" is not "+gammalib::str(val)); \
         test_assert((col1.real(i) == double(val)), \
-                    "Test real() method for row "+str(i), \
-                    str(col1.real(i))+" is not "+str(double(val))); \
+                    "Test real() method for row "+gammalib::str(i), \
+                    gammalib::str(col1.real(i))+" is not "+gammalib::str(double(val))); \
         test_assert((col1.integer(i) == val), \
-                    "Test integer() method for row "+str(i), \
-                    str(col1.integer(i))+" is not "+str(val)); \
-        test_assert((col1.string(i) == str(val)), \
-                    "Test string() method for row "+str(i), \
-                    col1.string(i)+" is not "+str(val)); \
+                    "Test integer() method for row "+gammalib::str(i), \
+                    gammalib::str(col1.integer(i))+" is not "+gammalib::str(val)); \
+        test_assert((col1.string(i) == gammalib::str(val)), \
+                    "Test string() method for row "+gammalib::str(i), \
+                    col1.string(i)+" is not "+gammalib::str(val)); \
     }
 #define TEST_TABLE1_BOOL \
     for (int i = 0; i < nrows; ++i) { \
@@ -137,33 +137,33 @@
         int         ival = (i % 2); \
         std::string sval = (i % 2) ? "T" : "F"; \
         test_assert((col1(i) == ival), \
-                    "Test access operator row "+str(i), \
-                    str(col1(i))+" is not "+str(ival)); \
+                    "Test access operator row "+gammalib::str(i), \
+                    gammalib::str(col1(i))+" is not "+gammalib::str(ival)); \
         test_assert((col1.real(i) == double(ival)), \
-                    "Test real() method for row "+str(i), \
-                    str(col1.real(i))+" is not "+str(double(ival))); \
+                    "Test real() method for row "+gammalib::str(i), \
+                    gammalib::str(col1.real(i))+" is not "+gammalib::str(double(ival))); \
         test_assert((col1.integer(i) == int(ival)), \
-                    "Test integer() method for row "+str(i), \
-                    str(col1.integer(i))+" is not "+str(int(ival))); \
-        test_assert((col1.string(i) == str(ival) || col1.string(i) == sval), \
-                    "Test string() method for row "+str(i), \
-                    col1.string(i)+" is not "+str(ival)+" or "+sval); \
+                    "Test integer() method for row "+gammalib::str(i), \
+                    gammalib::str(col1.integer(i))+" is not "+gammalib::str(int(ival))); \
+        test_assert((col1.string(i) == gammalib::str(ival) || col1.string(i) == sval), \
+                    "Test string() method for row "+gammalib::str(i), \
+                    col1.string(i)+" is not "+gammalib::str(ival)+" or "+sval); \
     }
 #define TEST_TABLE1_STRING \
     for (int i = 0; i < nrows; ++i) { \
-        col1(i) = str(double(i)*3.57+1.29); \
+        col1(i) = gammalib::str(double(i)*3.57+1.29); \
     } \
     for (int i = 0; i < nrows; ++i) { \
         double val = (double(i)*3.57+1.29); \
-        test_value(todouble(col1(i)), val, 1e-6, \
-                   "Test access operator row "+str(i)); \
+        test_value(gammalib::todouble(col1(i)), val, 1e-6, \
+                   "Test access operator row "+gammalib::str(i)); \
         test_value(col1.real(i), val, 1e-6, \
-                   "Test real() method for row "+str(i)); \
+                   "Test real() method for row "+gammalib::str(i)); \
         test_value(col1.integer(i), int(val), 1e-6, \
-                   "Test integer() method for row "+str(i)); \
-        test_assert((col1.string(i) == str(val)), \
-                    "Test string() method for row "+str(i), \
-                    col1.string(i)+" is not "+str(val)); \
+                   "Test integer() method for row "+gammalib::str(i)); \
+        test_assert((col1.string(i) == gammalib::str(val)), \
+                    "Test string() method for row "+gammalib::str(i), \
+                    col1.string(i)+" is not "+gammalib::str(val)); \
     }
 #define TEST_TABLE2 \
     for (int i = 0; i < nrows; ++i) { \
@@ -175,14 +175,14 @@
         for (int j = 0; j < nvec; ++j) { \
             double val = double(i)*2.3 + double(j)*11.7 + 0.95; \
             test_value(col2(i,j), val, 1e-6, \
-                       "Test access operator row "+str(i)+" and element "+str(j)); \
+                       "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
             test_value(col2.real(i,j), val, 1e-6, \
-                       "Test real() method for row "+str(i)+" and element "+str(j)); \
+                       "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
             test_value(col2.integer(i,j), int(val), 1e-6, \
-                       "Test integer() method for row "+str(i)+" and element "+str(j)); \
-            test_assert((col2.string(i,j) == str(val)), \
-                        "Test string() method for row "+str(i)+" and element "+str(j), \
-                        col2.string(i,j)+" is not "+str(val)); \
+                       "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
+            test_assert((col2.string(i,j) == gammalib::str(val)), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col2.string(i,j)+" is not "+gammalib::str(val)); \
         } \
     }
 #define TEST_TABLE2_INT \
@@ -195,17 +195,17 @@
         for (int j = 0; j < nvec; ++j) { \
             int val = i + j*11; \
             test_assert((col2(i,j) == val), \
-                        "Test access operator row "+str(i)+" and element "+str(j), \
-                        str(col2(i,j))+" is not "+str(val)); \
+                        "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col2(i,j))+" is not "+gammalib::str(val)); \
             test_assert((col2.real(i,j) == double(val)), \
-                        "Test real() method for row "+str(i)+" and element "+str(j), \
-                        str(col2.real(i,j))+" is not "+str(double(val))); \
+                        "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col2.real(i,j))+" is not "+gammalib::str(double(val))); \
             test_assert((col2.integer(i,j) == val), \
-                        "Test integer() method for row "+str(i)+" and element "+str(j), \
-                        str(col2.integer(i,j))+" is not "+str(val)); \
-            test_assert((col2.string(i,j) == str(val)), \
-                        "Test string() method for row "+str(i)+" and element "+str(j), \
-                        col2.string(i,j)+" is not "+str(val)); \
+                        "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col2.integer(i,j))+" is not "+gammalib::str(val)); \
+            test_assert((col2.string(i,j) == gammalib::str(val)), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col2.string(i,j)+" is not "+gammalib::str(val)); \
         } \
     }
 #define TEST_TABLE2_BOOL \
@@ -219,37 +219,37 @@
             int         ival = ((i % 2) * (j % 2)); \
             std::string sval = ((i % 2) * (j % 2)) ? "T" : "F"; \
             test_assert((col2(i,j) == ival), \
-                        "Test access operator row "+str(i)+" and element "+str(j), \
-                        str(col2(i,j))+" is not "+str(ival)); \
+                        "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col2(i,j))+" is not "+gammalib::str(ival)); \
             test_assert((col2.real(i,j) == double(ival)), \
-                        "Test real() method for row "+str(i)+" and element "+str(j), \
-                        str(col2.real(i,j))+" is not "+str(double(ival))); \
+                        "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col2.real(i,j))+" is not "+gammalib::str(double(ival))); \
             test_assert((col2.integer(i,j) == int(ival)), \
-                        "Test integer() method for row "+str(i)+" and element "+str(j), \
-                        str(col2.integer(i,j))+" is not "+str(int(ival))); \
-            test_assert((col2.string(i,j) == str(ival) || col2.string(i,j) == sval), \
-                        "Test string() method for row "+str(i)+" and element "+str(j), \
-                        col2.string(i,j)+" is not "+str(ival)+" or "+sval); \
+                        "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col2.integer(i,j))+" is not "+gammalib::str(int(ival))); \
+            test_assert((col2.string(i,j) == gammalib::str(ival) || col2.string(i,j) == sval), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col2.string(i,j)+" is not "+gammalib::str(ival)+" or "+sval); \
         } \
     }
 #define TEST_TABLE2_STRING \
     for (int i = 0; i < nrows; ++i) { \
         for (int j = 0; j < nvec; ++j) { \
-            col2(i,j) = str(double(i)*2.3 + double(j)*11.7 + 0.95); \
+            col2(i,j) = gammalib::str(double(i)*2.3 + double(j)*11.7 + 0.95); \
         } \
     } \
     for (int i = 0; i < nrows; ++i) { \
         for (int j = 0; j < nvec; ++j) { \
             double val = double(i)*2.3 + double(j)*11.7 + 0.95; \
-            test_value(todouble(col2(i,j)), val, 1e-6, \
-                       "Test access operator row "+str(i)+" and element "+str(j)); \
+            test_value(gammalib::todouble(col2(i,j)), val, 1e-6, \
+                       "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
             test_value(col2.real(i,j), val, 1e-6, \
-                       "Test real() method for row "+str(i)+" and element "+str(j)); \
+                       "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
             test_value(col2.integer(i,j), int(val), 1e-6, \
-                       "Test integer() method for row "+str(i)+" and element "+str(j)); \
-            test_assert((col2.string(i,j) == str(val)), \
-                        "Test string() method for row "+str(i)+" and element "+str(j), \
-                        col2.string(i,j)+" is not "+str(val)); \
+                       "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
+            test_assert((col2.string(i,j) == gammalib::str(val)), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col2.string(i,j)+" is not "+gammalib::str(val)); \
         } \
     }
 #define TEST_WRITE_TABLES \

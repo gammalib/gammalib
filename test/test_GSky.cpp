@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  test_GSky.cpp  -  test GSky classes                    *
+ *                   test_GSky.cpp - test GSky classes                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -288,7 +288,7 @@ void TestGSky::test_GWcslib(void)
             try {
                 double tol = 0.0;
                 if ((tol = wcs_forth_back_pixel(cel, nx, ny, crpix1, crpix2)) > 1.0e-10) {
-                    throw exception_failure("CEL forth-back transformation tolerance 1.0e-10 exceeded: "+str(tol));
+                    throw exception_failure("CEL forth-back transformation tolerance 1.0e-10 exceeded: "+gammalib::str(tol));
                 }
 
                 test_try_success(); 
@@ -302,7 +302,7 @@ void TestGSky::test_GWcslib(void)
             try {
                 double tol = 0.0;
                 if ((tol = wcs_forth_back_pixel(gal, nx, ny, crpix1, crpix2)) > 1.0e-10) {
-                    throw exception_failure("GAL forth-back transformation tolerance 1.0e-10 exceeded: "+str(tol));
+                    throw exception_failure("GAL forth-back transformation tolerance 1.0e-10 exceeded: "+gammalib::str(tol));
                 }
 
                 test_try_success();
@@ -316,7 +316,7 @@ void TestGSky::test_GWcslib(void)
             try {
                 double tol = 0.0;
                 if ((tol = wcs_copy(cel, nx, ny, crpix1, crpix2)) > 1.0e-4) {
-                    throw exception_failure("CEL copy tolerance 1.0e-4 exceeded: "+str(tol));
+                    throw exception_failure("CEL copy tolerance 1.0e-4 exceeded: "+gammalib::str(tol));
                 }
 
                 test_try_success();
@@ -330,7 +330,7 @@ void TestGSky::test_GWcslib(void)
             try {
                 double tol = 0.0;
                 if ((tol = wcs_copy(gal, nx, ny, crpix1, crpix2)) > 1.0e-4) {
-                    throw exception_failure("GAL copy tolerance 1.0e-4 exceeded: "+str(tol));
+                    throw exception_failure("GAL copy tolerance 1.0e-4 exceeded: "+gammalib::str(tol));
                 }
 
                 test_try_success();
@@ -608,7 +608,7 @@ void TestGSky::test_GSkymap_wcs_construct(void)
                 GSkyDir   dir_back = map1.xy2dir(pixel);
                 double    dist     = dir.dist_deg(dir_back);
                 if (dist > eps) {
-                    throw exception_failure("Sky direction differs: dir="+dir.print()+" pixel="+pixel.print()+" dir_back"+ dir_back.print()+" dist="+str(dist)+" deg");
+                    throw exception_failure("Sky direction differs: dir="+dir.print()+" pixel="+pixel.print()+" dir_back"+ dir_back.print()+" dist="+gammalib::str(dist)+" deg");
                 }
             }
         }

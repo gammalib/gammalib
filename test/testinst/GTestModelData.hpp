@@ -212,7 +212,7 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const { 
         std::string result;
         
-        result.append(parformat("Number of temporal par's")+str(m_modelTps->size()));
+        result.append(gammalib::parformat("Number of temporal par's")+gammalib::str(m_modelTps->size()));
         for (int i = 0; i < m_modelTps->size(); ++i) {
             result.append("\n"+(((*m_modelTps)[i]).print()));
         }

@@ -136,8 +136,8 @@ public:
 
         // Append header
         result.append("=== GTestEventCube ===");
-        result.append("\n"+parformat("Number of events")+str(number()));
-        result.append("\n"+parformat("Number of elements")+str(size()));
+        result.append("\n"+gammalib::parformat("Number of events")+gammalib::str(number()));
+        result.append("\n"+gammalib::parformat("Number of elements")+gammalib::str(size()));
 
         // Return result
         return result;

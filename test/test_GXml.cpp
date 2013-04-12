@@ -1,5 +1,5 @@
 /***************************************************************************
- *                test_GXml.hpp  -   Test xml module                       *
+ *                   test_GXml.hpp - Test xml module                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -309,7 +309,8 @@ void TestGXml::test_GXml_access(void)
     xml.load(m_xml_file);
     test_assert(xml.size() == 3,
                 "Test if xml.children()==3",
-                "Unexpected number of children in document "+str(xml.size()));
+                "Unexpected number of children in document "+
+                gammalib::str(xml.size()));
 
     // Test node access
     for (int i = 0; i < xml.size(); ++i) {
@@ -317,7 +318,8 @@ void TestGXml::test_GXml_access(void)
     }
     test_assert(xml.elements() == 1,
                 "Test if xml.elements()==1",
-                "Unexpected number of child elements in document "+str(xml.elements()));
+                "Unexpected number of child elements in document "+
+                gammalib::str(xml.elements()));
 
     // Test node access
     for (int i = 0; i < xml.elements(); ++i) {
@@ -325,7 +327,8 @@ void TestGXml::test_GXml_access(void)
     }
     test_assert(xml.elements("source_library") == 1,
                 "Test if the source_library = 1",
-                "Unexpected number of child elements in document "+str(xml.elements("source_library")));
+                "Unexpected number of child elements in document "+
+                gammalib::str(xml.elements("source_library")));
 
     // Test element access
     for (int i = 0; i < xml.elements("source_library"); ++i) {

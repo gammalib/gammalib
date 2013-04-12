@@ -121,12 +121,12 @@ public:
         
         // Append header
         result.append("=== GTestObservation ===");
-        result.append("\n"+parformat("Instrument Name")+m_instrument);
+        result.append("\n"+gammalib::parformat("Instrument Name")+m_instrument);
         
         GTestEventList* list = dynamic_cast<GTestEventList*>(m_events);
         if(list!=NULL){
-            result.append("\n"+parformat("Number of events")+str(list->number()));
-            result.append("\n"+parformat("GTI")+list->gti().print());
+            result.append("\n"+gammalib::parformat("Number of events")+gammalib::str(list->number()));
+            result.append("\n"+gammalib::parformat("GTI")+list->gti().print());
         }
         
         return result;
