@@ -110,9 +110,6 @@ public:
  * @brief GMatrixSparse class extension
  ***************************************************************************/
 %extend GMatrixSparse {
-    char *__str__() {
-        return tochar(self->print());
-    }
     double __getitem__(int GTuple[2]) {
         return (*self)(GTuple[0], GTuple[1]);
     }

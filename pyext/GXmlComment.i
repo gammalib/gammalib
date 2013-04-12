@@ -59,9 +59,6 @@ public:
  * @brief GXmlComment class extension
  ***************************************************************************/
 %extend GXmlComment {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GXmlComment copy() {
         return (*self);
     }

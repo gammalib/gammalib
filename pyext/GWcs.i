@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GWcs.i  -  World Coordinate System virtual base class          *
+ *           GWcs.i - World Coordinate System virtual base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,9 +69,6 @@ public:
  * @brief GWcs class extension
  ***************************************************************************/
 %extend GWcs {
-    char *__str__() {
-        return tochar(self->print());
-    }
     bool __is__(const GWcs &a) {
             return (*self) == a;
     }

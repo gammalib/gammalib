@@ -62,9 +62,6 @@ public:
  * @brief GXmlElement class extension
  ***************************************************************************/
 %extend GXmlElement {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GXmlElement copy() {
         return (*self);
     }

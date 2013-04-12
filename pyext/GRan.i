@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GRan.i - Random number generator class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,9 +64,6 @@ public:
  * @brief GRan class extension
  ***************************************************************************/
 %extend GRan {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GRan copy() {
         return (*self);
     }

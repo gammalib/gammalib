@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GFitsHeader.i  - FITS header handling class SWIG file         *
+ *                      GFitsHeader.i - FITS header class                  *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2011 by Juergen Knoedlseder                       *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GFitsHeader.i
- * @brief FITS header class Python interface definition
- * @author J. Knoedlseder
+ * @brief FITS header class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -75,9 +75,6 @@ public:
  * @brief GFitsHeader class SWIG extension
  ***************************************************************************/
 %extend GFitsHeader {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GFitsHeader copy() {
         return (*self);
     }

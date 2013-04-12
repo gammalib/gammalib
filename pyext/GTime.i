@@ -1,7 +1,7 @@
 /***************************************************************************
- *                          GTime.i  -  Time class                         *
+ *                           GTime.i - Time class                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTime.i
- * @brief Time class python interface definition
+ * @brief Time class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -69,9 +69,6 @@ public:
  * @brief GTime class extension
  ***************************************************************************/
 %extend GTime {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GTime __add__(const GTime& time) const {
         return ((*self) + time);
     }

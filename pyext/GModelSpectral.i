@@ -35,7 +35,7 @@
  *
  * @brief Abstract spectral model class
  ***************************************************************************/
-class GModelSpectral {
+class GModelSpectral : public GBase {
 
 public:
     // Constructors and destructors
@@ -70,9 +70,6 @@ public:
  * @brief GModelSpectral class extension
  ***************************************************************************/
 %extend GModelSpectral {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GModelPar& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];

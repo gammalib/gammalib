@@ -78,7 +78,4 @@ public:
  * @brief GCTAPsfPerfTable class extension
  ***************************************************************************/
 %extend GCTAPsfPerfTable {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

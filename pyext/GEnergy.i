@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GEnergy.i - Energy class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,9 +80,6 @@ public:
  * @brief GEnergy class extension
  ***************************************************************************/
 %extend GEnergy {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GEnergy __add__(const GEnergy& eng) const {
         return ((*self) + eng);
     }

@@ -49,8 +49,6 @@ public:
     virtual void  close(void) = 0;
     virtual int   getchar(void) = 0;
     virtual void  putchar(const int& character) = 0;
-    //virtual void  scanf(const char* format, ...) = 0;
-    //virtual void  printf(const char* format, ...) = 0;
 };
 
 
@@ -58,9 +56,6 @@ public:
  * @brief GUrl class extension
  ***************************************************************************/
 %extend GUrl {
-    char *__str__() {
-        return tochar(self->print());
-    }
     char* read(const int& nbyte) {
         char* buffer  = new char[nbyte+1];
         int   nread   = self->read(buffer, nbyte);

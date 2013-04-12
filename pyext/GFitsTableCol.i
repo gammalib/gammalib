@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GFitsTableCol.i  - FITS table column abstract base class        *
+ *         GFitsTableCol.i - FITS abstract table column base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GFitsTableCol.i
- * @brief FITS table column abstract Python base class definition
- * @author J. Knodlseder
+ * @brief FITS abstract table column base class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -104,9 +104,6 @@ public:
  * @todo Add range checking for type casting
  ***************************************************************************/
 %extend GFitsTableCol {
-    char *__str__() {
-        return tochar(self->print());
-    }
     
     // String setting
     void __setitem__(int GFitsTableColInx[], std::string value) {

@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GNodeArray.i  -  Array of nodes class SWIG definition          *
+ *                    GNodeArray.i - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,9 +68,6 @@ public:
  * @brief GNodeArray class extension
  ***************************************************************************/
 %extend GNodeArray {
-    char *__str__() {
-        return tochar(self->print());
-    }
     double __getitem__(const int& index) {
         if (index >= 0 && index < self->size())
             return (*self)[index];

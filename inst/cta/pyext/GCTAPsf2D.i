@@ -78,7 +78,4 @@ public:
  * @brief GCTAPsf2D class extension
  ***************************************************************************/
 %extend GCTAPsf2D {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

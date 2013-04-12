@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GEvent.i  -  Abstract event class python I/F              *
+ *                      GEvent.i - Abstract event class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEvent.i
- * @brief GEvent class python interface
+ * @brief Abstract event base class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -89,7 +89,4 @@ public:
  * @brief GEvent class extension
  ***************************************************************************/
 %extend GEvent {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

@@ -71,9 +71,6 @@ public:
  * @brief GVector class extension
  ***************************************************************************/
 %extend GVector {
-    char *__str__() {
-        return tochar(self->print());
-    }
     double __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];

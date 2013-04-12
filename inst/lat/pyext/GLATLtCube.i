@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATLtCube.i  -  Fermi/LAT lifetime cube                *
+ *               GLATLtCube.i - Fermi/LAT lifetime cube class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATLtCube.i
- * @brief Fermi/LAT lifetime cube Python interface definition
- * @author J. Knoedlseder
+ * @brief Fermi/LAT lifetime cube interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -65,9 +65,6 @@ public:
  * @brief GLATLtCube class extension
  ***************************************************************************/
 %extend GLATLtCube {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GLATLtCube copy() {
         return (*self);
     }

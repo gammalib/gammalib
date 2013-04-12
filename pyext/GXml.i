@@ -92,9 +92,6 @@ public:
  * @brief GXml class extension
  ***************************************************************************/
 %extend GXml {
-    char *__str__() {
-        return tochar(self->print(NORMAL, 0));
-    }
     GXmlNode* __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];

@@ -72,9 +72,6 @@ public:
  * @brief GSkyDir class extension
  ***************************************************************************/
 %extend GSkyDir {
-    char *__str__() {
-        return tochar(self->print());
-    }
     bool __eq__(const GSkyDir& dir) const {
         return ((*self) == dir);
     }

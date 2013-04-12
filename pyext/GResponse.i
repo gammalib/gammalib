@@ -87,7 +87,4 @@ public:
  * @brief GResponse class extension
  ***************************************************************************/
 %extend GResponse {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

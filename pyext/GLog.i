@@ -94,24 +94,24 @@ public:
         (*self) << value;
     }
     void parformat(const std::string& arg) {
-        (*self) << parformat(arg);
+        (*self) << gammalib::parformat(arg);
     }
     void toupper(const std::string& arg) {
-        (*self) << toupper(arg);
+        (*self) << gammalib::toupper(arg);
     }
     void tolower(const std::string& arg) {
-        (*self) << tolower(arg);
+        (*self) << gammalib::tolower(arg);
     }
     void fill(const std::string& arg, const int& n) {
-        (*self) << fill(arg, n);
+        (*self) << gammalib::fill(arg, n);
     }
     void left(const std::string& arg, const int& n) {
-        (*self) << left(arg, n);
+        (*self) << gammalib::left(arg, n);
     }
     void right(const std::string& arg, const int& n) {
-        (*self) << right(arg, n);
+        (*self) << gammalib::right(arg, n);
     }
     void center(const std::string& arg, const int& n) {
-        (*self) << center(arg, n);
+        (*self) << gammalib::center(arg, n);
     }
 }

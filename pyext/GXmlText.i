@@ -59,9 +59,6 @@ public:
  * @brief GXmlText class extension
  ***************************************************************************/
 %extend GXmlText {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GXmlText copy() {
         return (*self);
     }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAModelRadialPolynom.i  -  Radial Polynom CTA model class       *
+ *          GCTAModelRadialPolynom.i - Radial Polynom model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialPolynom.i
- * @brief Radial Polynom model class Python interface definition
+ * @brief Radial Polynom model class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -66,7 +66,4 @@ public:
  * @brief GCTAModelRadialPolynom class extension
  ***************************************************************************/
 %extend GCTAModelRadialPolynom {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

@@ -58,7 +58,4 @@ public:
  * @brief GXmlAttribute class extension
  ***************************************************************************/
 %extend GXmlAttribute {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

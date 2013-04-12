@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GLATAeff.i  -  Fermi/LAT effective area                 *
+ *                 GLATAeff.i - Fermi/LAT effective area class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -74,9 +74,6 @@ public:
  * @brief GLATAeff class extension
  ***************************************************************************/
 %extend GLATAeff {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GLATAeff copy() {
         return (*self);
     }

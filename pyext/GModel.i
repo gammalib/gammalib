@@ -78,9 +78,6 @@ public:
  * @brief GModel class extension
  ***************************************************************************/
 %extend GModel {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GModelPar& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];

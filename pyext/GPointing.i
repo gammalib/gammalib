@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GPointing.i  -  Abstract pointing class                 *
+ *                  GPointing.i - Abstract pointing class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,7 +54,4 @@ public:
  * @brief GPointing class extension
  ***************************************************************************/
 %extend GPointing {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

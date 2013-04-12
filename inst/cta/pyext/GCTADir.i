@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GCTADir.i  -  CTA direction class                    *
+ *                     GCTADir.i - CTA direction class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GCTADir.i
- * @brief CTA camera direction class Python interface definition
- * @author J. Knodlseder
+ * @brief CTA camera direction class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -63,9 +63,6 @@ public:
  * @brief GCTADir class extension
  ***************************************************************************/
 %extend GCTADir {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GCTADir copy() {
         return (*self);
     }

@@ -84,7 +84,4 @@ public:
  * @brief GCTAPsfVector class extension
  ***************************************************************************/
 %extend GCTAPsfVector {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

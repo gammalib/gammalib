@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GSkyPixel.i  -  2D sky pixel index class SWIG definition        *
+ *                 GSkyPixel.i - 2D sky pixel index class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,9 +58,6 @@ public:
  * @brief GSkyPixel class extension
  ***************************************************************************/
 %extend GSkyPixel {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GSkyPixel copy() {
         return (*self);
     }

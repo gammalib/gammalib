@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GFitsImage.i  - FITS image abstract base class SWIG interface      *
+ *                GFitsImage.i - FITS abstract image base class            *
  * ----------------------------------------------------------------------- *
- *  copyright : (C) 2008-2012 by Juergen Knoedlseder                       *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -131,7 +131,4 @@ public:
  * @brief GFitsImage class extension
  ***************************************************************************/
 %extend GFitsImage {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

@@ -67,9 +67,6 @@ public:
  * @brief GCTAAeff2D class extension
  ***************************************************************************/
 %extend GCTAAeff2D {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GCTAAeff2D copy() {
         return (*self);
     }

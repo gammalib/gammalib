@@ -35,7 +35,7 @@
  *
  * @brief Abstract temporal model base class
  ***************************************************************************/
-class GModelTemporal {
+class GModelTemporal : public GBase {
 
 public:
     // Constructors and destructors
@@ -64,9 +64,6 @@ public:
  * @brief GModelTemporal class extension
  ***************************************************************************/
 %extend GModelTemporal {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GModelPar& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];

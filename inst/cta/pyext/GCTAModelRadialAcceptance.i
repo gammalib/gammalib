@@ -1,7 +1,7 @@
 /***************************************************************************
- * GCTAModelRadialAcceptance.i  -  Radial acceptance model class python I/F*
+ *       GCTAModelRadialAcceptance.i - Radial acceptance model class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialAcceptance.i
- * @brief Radial acceptance model class Python interface definition
+ * @brief Radial acceptance model class interface definition
  * @author Juergen Knoedlseder
  */
 %{

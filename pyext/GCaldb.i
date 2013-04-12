@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCaldb.i  -  Calibration database class                 *
+ *                  GCaldb.i - Calibration database class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -59,7 +59,7 @@ public:
  ***************************************************************************/
 %extend GCaldb {
     char *__str__() {
-        return tochar(self->print());
+        return gammalib::tochar(self->print());
     }
     GCaldb copy() {
         return (*self);

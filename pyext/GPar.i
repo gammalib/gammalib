@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GPar.i - Application parameter class SWIG file            *
+ *                   GPar.i - Application parameter class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GPar.i
- * @brief Application parameter class SWIG file.
+ * @brief Application parameter class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -83,7 +83,7 @@ public:
  ***************************************************************************/
 %extend GPar {
     char *__str__() {
-        return tochar(self->print());
+        return gammalib::tochar(self->print());
     }
     GPar copy() {
         return (*self);

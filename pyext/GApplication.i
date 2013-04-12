@@ -80,7 +80,7 @@ public:
  ***************************************************************************/
 %extend GApplication {
     char *__str__() {
-        return tochar(self->print());
+        return gammalib::tochar(self->print());
     }
     GPar& __getitem__(const std::string& name) {
         return (*self)[name];

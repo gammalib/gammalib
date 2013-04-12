@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GCTAAeff.i - CTA effective area base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -63,7 +63,4 @@ public:
  * @brief GCTAAeff class extension
  ***************************************************************************/
 %extend GCTAAeff {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

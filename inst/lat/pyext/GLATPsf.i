@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GLATPsf.i  -  Fermi/LAT point spread function              *
+ *             GLATPsf.i - Fermi/LAT point spread function class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATPsf.i
  * @brief Fermi/LAT point spread function class definition
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -74,9 +74,6 @@ public:
  * @brief GLATPsf class extension
  ***************************************************************************/
 %extend GLATPsf {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GLATPsf copy() {
         return (*self);
     }

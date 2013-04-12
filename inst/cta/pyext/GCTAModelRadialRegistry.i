@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAModelRadialRegistry.i - CTA Radial model registry class       *
+ *         GCTAModelRadialRegistry.i - Radial model registry class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadialRegistry.i
- * @brief CTA radial model registry class definition
+ * @brief Radial model registry class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -55,7 +55,4 @@ public:
  * @brief GCTAModelRadialRegistry class extension
  ***************************************************************************/
 %extend GCTAModelRadialRegistry {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

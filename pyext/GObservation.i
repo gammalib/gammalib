@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GObservation.i  -  Abstract observation abstract base class       *
+ *             GObservation.i - Abstract observation base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GObservation.i
- * @brief Abstract observation base class Python interface definition
+ * @brief Abstract observation base class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -96,7 +96,4 @@ public:
  * @brief GObservation class extension
  ***************************************************************************/
 %extend GObservation {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

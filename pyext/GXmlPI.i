@@ -59,9 +59,6 @@ public:
  * @brief GXmlPI class extension
  ***************************************************************************/
 %extend GXmlPI {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GXmlPI copy() {
         return (*self);
     }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GSkymap.i  -  Sky map class SWIG definition              *
+ *                         GSkymap.i - Sky map class                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -154,9 +154,6 @@ public:
  * GSkyDir
  ***************************************************************************/
 %extend GSkymap {
-    char *__str__() {
-        return tochar(self->print());
-    }
     double __getitem__(int GSkymapInx[]) {
         if (GSkymapInx[0] == 1) {
             return (*self)(GSkymapInx[1]);

@@ -74,9 +74,6 @@ public:
  * @brief GCTAAeffArf class extension
  ***************************************************************************/
 %extend GCTAAeffArf {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GCTAAeffArf copy() {
         return (*self);
     }

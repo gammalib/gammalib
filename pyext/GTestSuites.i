@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GTestSuites.i - Test suites class Python interface             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 Jean-Baptiste Cayrou                                *
+ *  copyright (C) 2012-2013 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -66,9 +66,6 @@ public:
  * @brief GTestSuites class extension
  ***************************************************************************/
 %extend GTestSuites {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GTestSuite& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];

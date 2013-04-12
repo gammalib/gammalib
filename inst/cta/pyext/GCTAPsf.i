@@ -77,7 +77,4 @@ public:
  * @brief GCTAPsf class extension
  ***************************************************************************/
 %extend GCTAPsf {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

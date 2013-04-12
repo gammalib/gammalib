@@ -59,9 +59,6 @@ public:
  * @brief GPhotons class extension
  ***************************************************************************/
 %extend GPhotons {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GPhoton& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];

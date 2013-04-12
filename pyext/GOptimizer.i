@@ -57,7 +57,4 @@ public:
  * @brief GOptimizer class extension
  ***************************************************************************/
 %extend GOptimizer {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

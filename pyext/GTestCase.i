@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GTestCase.i - Test case class Python interface             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 Jean-Baptiste Cayrou                                *
+ *  copyright (C) 2012-2013 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -72,9 +72,6 @@ public:
  * @brief GTestCase class extension
  ***************************************************************************/
 %extend GTestCase {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GTestCase copy() {
         return (*self);
     }

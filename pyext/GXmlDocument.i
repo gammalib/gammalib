@@ -62,9 +62,6 @@ public:
  * @brief GXmlDocument class extension
  ***************************************************************************/
 %extend GXmlDocument {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GXmlDocument copy() {
         return (*self);
     }

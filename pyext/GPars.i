@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GPars.i - Application parameters Python interface            *
+ *                GPars.i - Application parameter container                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -64,7 +64,7 @@ public:
  ***************************************************************************/
 %extend GPars {
     char *__str__() {
-        return tochar(self->print());
+        return gammalib::tochar(self->print());
     }
     GPar& __getitem__(const int& index) {
         if (index >= 0 && index < self->size())

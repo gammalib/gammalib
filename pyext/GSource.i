@@ -64,9 +64,6 @@ public:
  * @brief GSource class extension
  ***************************************************************************/
 %extend GSource {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GSource copy() {
         return (*self);
     }

@@ -107,7 +107,7 @@ public:
  ***************************************************************************/
 %extend GXmlNode {
     char *__str__() {
-        return tochar(self->print(NORMAL, 0));
+        return gammalib::tochar(self->print(NORMAL, 0));
     }
     GXmlNode* __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {

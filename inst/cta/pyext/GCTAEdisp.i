@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GCTAEdisp.i - CTA energy dispersion base class           *
+ *                 GCTAEdisp.i - Energy dispersion base class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEdisp.i
- * @brief CTA energy dispersion base class definition
+ * @brief Energy dispersion base class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -65,7 +65,4 @@ public:
  * @brief GCTAEdisp class extension
  ***************************************************************************/
 %extend GCTAEdisp {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

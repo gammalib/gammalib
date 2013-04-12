@@ -1,7 +1,7 @@
 /***************************************************************************
  *              GCsv.i - Column separated values table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCsv.hpp
  * @brief Column separated values table class Python bindings
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -107,9 +107,6 @@ public:
  * @brief GCsv class extension
  ***************************************************************************/
 %extend GCsv {
-    char *__str__() {
-        return tochar(self->print());
-    }
     std::string __getitem__(int GCsvInx[]) {
         return (*self)(GCsvInx[0], GCsvInx[1]);
     }

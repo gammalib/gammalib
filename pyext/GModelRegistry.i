@@ -55,7 +55,4 @@ public:
  * @brief GModelRegistry class extension
  ***************************************************************************/
 %extend GModelRegistry {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

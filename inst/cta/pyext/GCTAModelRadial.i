@@ -1,7 +1,7 @@
 /***************************************************************************
- * GCTAModelRadial.i  -  Radial model abstract base class python interface *
+ *           GCTAModelRadial.i - Abstract radial model base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GCTAModelRadial.i
- * @brief Abstract radial acceptance model class Python interface.
- * @author J. Knodlseder
+ * @brief Abstract radial model class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -63,9 +63,6 @@ public:
  * @brief GCTAModelRadial class extension
  ***************************************************************************/
 %extend GCTAModelRadial {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GModelPar& __getitem__(const int& index) {
         if (index >= 0 && index < self->size())
             return (*self)[index];

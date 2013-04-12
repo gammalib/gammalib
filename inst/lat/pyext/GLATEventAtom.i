@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GLATEventAtom.i  -  Fermi/LAT event atom class             *
+ *               GLATEventAtom.i - Fermi/LAT event atom class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -55,9 +55,6 @@ public:
  * @brief GLATEventAtom class extension
  ***************************************************************************/
 %extend GLATEventAtom {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GLATEventAtom copy() {
         return (*self);
     }

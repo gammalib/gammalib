@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GTimeReference.i - Time reference class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -80,9 +80,6 @@ public:
  * @brief GTimeReference class extension
  ***************************************************************************/
 %extend GTimeReference {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GTimeReference copy() {
         return (*self);
     }

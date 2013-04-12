@@ -105,9 +105,6 @@ public:
  * @brief GModelPar class extension
  ***************************************************************************/
 %extend GModelPar {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GModelPar copy() {
         return (*self);
     }

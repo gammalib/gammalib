@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GCTAAeffPerfTable.i - CTA performance table effective area class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -69,9 +69,6 @@ public:
  * @brief GCTAAeffPerfTable class extension
  ***************************************************************************/
 %extend GCTAAeffPerfTable {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GCTAAeffPerfTable copy() {
         return (*self);
     }

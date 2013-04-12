@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAModelRadialProfile.i  -  Radial Profile CTA model class       *
+ *          GCTAModelRadialProfile.i - Radial Profile model class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,7 +70,4 @@ public:
  * @brief GCTAModelRadialProfile class extension
  ***************************************************************************/
 %extend GCTAModelRadialProfile {
-    char *__str__() {
-        return tochar(self->print());
-    }
 };

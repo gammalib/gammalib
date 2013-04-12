@@ -1,7 +1,7 @@
 /***************************************************************************
  *                         GPhoton.i - Photon class                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -65,9 +65,6 @@ public:
  * @brief GPhoton class extension
  ***************************************************************************/
 %extend GPhoton {
-    char *__str__() {
-        return tochar(self->print());
-    }
     bool __eq__(const GPhoton& ph) const {
         return ((*self) == ph);
     }

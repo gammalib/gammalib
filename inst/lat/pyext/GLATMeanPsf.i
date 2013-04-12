@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GLATMeanPsf.hpp  -  Fermi/LAT mean PSF                 *
+ *                  GLATMeanPsf.hpp - Fermi/LAT mean PSF class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GLATMeanPsf.hpp
- * @brief Fermi LAT mean PSF Python interface definition
- * @author J. Knodlseder
+ * @brief Fermi/LAT mean PSF interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -75,9 +75,6 @@ public:
  * @brief GLATMeanPsf class extension
  ***************************************************************************/
 %extend GLATMeanPsf {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GLATMeanPsf copy() {
         return (*self);
     }
