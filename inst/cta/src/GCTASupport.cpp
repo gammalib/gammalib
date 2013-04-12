@@ -84,17 +84,20 @@ double gammalib::cta_roi_arclength(const double& rad,     const double& dist,
         // ... otherwise we have to handle the general case
         else {
             double d = roi - dist;
-            if (-rad >= d)
+            if (-rad >= d) {
                 arclength = 0.0;
-            else if (rad <= d)
+            }
+            else if (rad <= d) {
                 arclength = gammalib::twopi;
+            }
             else {
                 double cosrad = std::cos(rad);
                 double sinrad = std::sin(rad);
                 double cosang = (cosroi - cosdist*cosrad) / (sindist*sinrad);
-                arclength     = 2.0 * gammalib::arccos(cosang);
+                arclength     = 2.0 * gammalib::acos(cosang);
                 #if G_CHECK_FOR_NAN
-                if (std::isnan(arclength)) {
+                if (gammalib::isinfinite(arclength) ||
+                    gammalib::isnotanumber(arclength)) {
                     std::cout << "cta_roi_arclength: NaN occured";
                     std::cout << " rad=" << rad;
                     std::cout << " sinrad=" << sinrad;

@@ -968,7 +968,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
     double denom  = std::sin(lambda) * std::sin(zeta);
     if (denom != 0.0) {
         double arg = (std::cos(eta) - std::cos(lambda) * std::cos(zeta))/denom;
-        omega0     = gammalib::arccos(arg);
+        omega0     = gammalib::acos(arg);
     }
 
     // Get log10(E/TeV) of true and measured photon energies
@@ -1152,7 +1152,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     double denom  = std::sin(lambda) * std::sin(zeta);
     if (denom != 0.0) {
         double arg = (std::cos(eta) - std::cos(lambda) * std::cos(zeta))/denom;
-        omega0     = gammalib::arccos(arg);
+        omega0     = gammalib::acos(arg);
     }
 
     // Get log10(E/TeV) of true and measured photon energies

@@ -552,7 +552,7 @@ double GSkyDir::dist(const GSkyDir& dir) const
     }
 
     // Compute distance (use argument save GTools function)
-    double dist = gammalib::arccos(cosdis);
+    double dist = gammalib::acos(cosdis);
 
     // Return distance
     return dist;
