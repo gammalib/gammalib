@@ -1052,8 +1052,12 @@ double GCTAModelRadialAcceptance::roi_kern::eval(double offset)
     if (offset > 0.0) {
 
         // Get arclength for given radius in radians.
-        double phi = cta_roi_arclength(offset, m_dist, m_cosdist, m_sindist,
-                                       m_roi, m_cosroi);
+        double phi = gammalib::cta_roi_arclength(offset,
+                                                 m_dist,
+                                                 m_cosdist,
+                                                 m_sindist,
+                                                 m_roi,
+                                                 m_cosroi);
 
         // Get kernel value if phi > 0
         if (phi > 0.0) {

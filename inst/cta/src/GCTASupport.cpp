@@ -55,9 +55,9 @@
  * of 'roi' and 'psf' should be calculated by the client and be passed to
  * the method.
  ***************************************************************************/
-double cta_roi_arclength(const double& rad,     const double& dist,
-                         const double& cosdist, const double& sindist,
-                         const double& roi,     const double& cosroi)
+double gammalib::cta_roi_arclength(const double& rad,     const double& dist,
+                                   const double& cosdist, const double& sindist,
+                                   const double& roi,     const double& cosroi)
 {
     // Declare arclength
     double arclength;
