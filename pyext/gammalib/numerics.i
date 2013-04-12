@@ -48,3 +48,4 @@
 %include "GDerivative.i"
 %include "GFunction.i"
 %include "GIntegral.i"
+%include "GMath.i"
