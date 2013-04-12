@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <cmath>
-#include "GTools.hpp"
+#include "GMath.hpp"
 #include "GModelPar.hpp"
 #include "GXmlElement.hpp"
 #include "GCTAModelRadial.hpp"
