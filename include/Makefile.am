@@ -20,7 +20,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GIntegral.hpp \
                      GDerivative.hpp \
                      GFunction.hpp \
-                     GNumerics.hpp \
+                     GMath.hpp \
                      GFits.hpp \
                      GFitsHDU.hpp \
                      GFitsHeader.hpp \

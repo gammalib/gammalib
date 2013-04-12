@@ -60,7 +60,7 @@
 #include "GIntegral.hpp"
 #include "GDerivative.hpp"
 #include "GFunction.hpp"
-#include "GNumerics.hpp"
+#include "GMath.hpp"
 
 /* __ FITS module ________________________________________________________ */
 #include "GFits.hpp"
