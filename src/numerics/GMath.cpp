@@ -25,6 +25,10 @@
  */
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <cstdlib>
 #include <cmath>
 #include "GMath.hpp"
 #include "GTools.hpp"
@@ -98,7 +102,7 @@ double gammalib::cosd(const double& angle)
 {
     // Check for rounding errors
     if (fmod(angle, 90.0) == 0.0) {
-        int i = std::abs((int)std::floor(angle/90.0 + 0.5))%4;
+        int i = std::abs((int)std::floor(angle/90.0 + 0.5)) % 4;
         switch (i) {
         case 0:
             return 1.0;
@@ -307,7 +311,7 @@ void gammalib::sincosd(const double& angle, double *s, double *c)
 {
     // Check for rounding errors
     if (fmod(angle, 90.0) == 0.0) {
-        int i = std::abs((int)std::floor(angle/90.0 + 0.5))%4;
+        int i = std::abs((int)std::floor(angle/90.0 + 0.5)) % 4;
         switch (i) {
         case 0:
             *s = 0.0;
