@@ -319,7 +319,7 @@ double GRan::poisson(const double& lambda)
             m_oldm = lambda;
             m_sq   = std::sqrt(2.0*lambda);
             m_alxm = std::log(lambda);
-            m_g    = lambda * m_alxm - gammln(lambda+1.0);
+            m_g    = lambda * m_alxm - gammalib::gammln(lambda+1.0);
         }
         do {
             double y;
@@ -328,7 +328,8 @@ double GRan::poisson(const double& lambda)
                 em = m_sq * y + lambda;
             } while (em < 0.0);
             em = floor(em);
-            t  = 0.9*(1.0+y*y) * std::exp(em*m_alxm - gammln(em+1.0)-m_g);
+            t  = 0.9*(1.0+y*y) *
+                 std::exp(em*m_alxm - gammalib::gammln(em+1.0)-m_g);
         } while (uniform() > t);
     }
     
