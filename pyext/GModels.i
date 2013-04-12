@@ -59,28 +59,27 @@ public:
     virtual ~GModels(void);
  
     // Methods
-    void          clear(void);
-    GModels*      clone(void) const;
-    GModel*       at(const int& index);
-    const GModel* at(const int& index) const;
-    int           size(void) const;
-    bool          isempty(void) const;
-    GModel*       set(const int& index, const GModel& model);
-    GModel*       set(const std::string& name, const GModel& model);
-    GModel*       append(const GModel& model);
-    GModel*       insert(const int& index, const GModel& model);
-    GModel*       insert(const std::string& name, const GModel& model);
-    void          remove(const int& index);
-    void          remove(const std::string& name);
-    void          reserve(const int& num);
-    void          extend(const GModels& models);
-    bool          contains(const std::string& name) const;
-    void          load(const std::string& filename);
-    void          save(const std::string& filename) const;
-    void          read(const GXml& xml);
-    void          write(GXml& xml) const;
-    double        eval(const GEvent& event, const GObservation& obs) const;
-    double        eval_gradients(const GEvent& event, const GObservation& obs) const;
+    void     clear(void);
+    GModels* clone(void) const;
+    GModel*  at(const int& index);
+    int      size(void) const;
+    bool     isempty(void) const;
+    GModel*  set(const int& index, const GModel& model);
+    GModel*  set(const std::string& name, const GModel& model);
+    GModel*  append(const GModel& model);
+    GModel*  insert(const int& index, const GModel& model);
+    GModel*  insert(const std::string& name, const GModel& model);
+    void     remove(const int& index);
+    void     remove(const std::string& name);
+    void     reserve(const int& num);
+    void     extend(const GModels& models);
+    bool     contains(const std::string& name) const;
+    void     load(const std::string& filename);
+    void     save(const std::string& filename) const;
+    void     read(const GXml& xml);
+    void     write(GXml& xml) const;
+    double   eval(const GEvent& event, const GObservation& obs) const;
+    double   eval_gradients(const GEvent& event, const GObservation& obs) const;
 };
 
 
@@ -88,9 +87,6 @@ public:
  * @brief GModels class extension
  ***************************************************************************/
 %extend GModels {
-    char *__str__() {
-        return tochar(self->print());
-    }
     GModel* __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
