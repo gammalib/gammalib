@@ -539,7 +539,7 @@ double gammalib::todouble(const std::string& arg)
 std::string gammalib::toupper(const std::string& arg)
 {
     std::string s = arg;
-    std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) toupper);
+    std::transform(s.begin(), s.end(), s.begin(), ::toupper);
     return s;
 }
 
@@ -552,7 +552,7 @@ std::string gammalib::toupper(const std::string& arg)
 std::string gammalib::tolower(const std::string& arg)
 {
     std::string s = arg;
-    std::transform(s.begin(), s.end(), s.begin(), (int(*)(int)) tolower);
+    std::transform(s.begin(), s.end(), s.begin(), ::tolower);
     return s;
 }
 
