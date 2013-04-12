@@ -30,6 +30,7 @@
 #endif
 #include <cmath>
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GException.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GCTAException.hpp"

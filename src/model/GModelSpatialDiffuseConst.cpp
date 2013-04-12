@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GModelSpatialDiffuseConst.hpp"
 #include "GModelSpatialRegistry.hpp"
 

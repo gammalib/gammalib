@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GLATMeanPsf.cpp - Fermi-LAT mean PSF                   *
+ *                  GLATMeanPsf.cpp - Fermi/LAT mean PSF                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATMeanPsf.cpp
- * @brief Fermi-LAT mean PSF class implementation
+ * @brief Fermi/LAT mean PSF class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,12 +30,13 @@
 #endif
 #include <cmath>
 #include "GLATMeanPsf.hpp"
+#include "GTools.hpp"
+#include "GMath.hpp"
 #include "GLATAeff.hpp"
 #include "GLATPsf.hpp"
 #include "GLATObservation.hpp"
 #include "GLATEventCube.hpp"
 #include "GLATException.hpp"
-#include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_SET                  "GLATMeanPsf::set(GSkyDir&, GLATObservation&)"

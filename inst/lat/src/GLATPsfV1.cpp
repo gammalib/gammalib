@@ -30,7 +30,7 @@
 #endif
 #include "GLATPsfV1.hpp"
 #include "GLATException.hpp"
-#include "GTools.hpp"
+#include "GMath.hpp"
 #include "GFitsBinTable.hpp"
 #include "GFitsTableFloatCol.hpp"
 #include "GIntegral.hpp"

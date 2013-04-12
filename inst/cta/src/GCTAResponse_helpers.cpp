@@ -32,6 +32,7 @@
 #include "GCTAResponse_helpers.hpp"
 #include "GCTASupport.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GIntegral.hpp"
 #include "GVector.hpp"
 

@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAAeffArf.hpp"

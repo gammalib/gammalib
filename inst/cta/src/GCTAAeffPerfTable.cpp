@@ -30,6 +30,7 @@
 #endif
 #include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GFitsTable.hpp"
 #include "GCTAAeffPerfTable.hpp"
 #include "GCTAException.hpp"

@@ -30,6 +30,7 @@
 #endif
 #include <cmath>
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAPsfVector.hpp"

@@ -29,7 +29,7 @@
 #include <config.h>
 #endif
 #include "GException.hpp"
-#include "GTools.hpp"
+#include "GMath.hpp"
 #include "GWcsAZP.hpp"
 #include "GWcsRegistry.hpp"
 

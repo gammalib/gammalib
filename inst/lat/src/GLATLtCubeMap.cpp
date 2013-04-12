@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GLATLtCubeMap.cpp - Fermi-LAT livetime cube map             *
+ *             GLATLtCubeMap.cpp - Fermi/LAT livetime cube map             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATLtCubeMap.cpp
- * @brief Fermi-LAT livetime cube map class implementation
+ * @brief Fermi/LAT livetime cube map class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,6 +30,7 @@
 #endif
 #include "GLATLtCubeMap.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COSTHETA                            "GLATLtCubeMap::costheta(int&)"

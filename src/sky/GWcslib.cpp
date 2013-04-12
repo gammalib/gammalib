@@ -32,6 +32,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GWcslib.hpp"
 
 /* __ Method name definitions ____________________________________________ */

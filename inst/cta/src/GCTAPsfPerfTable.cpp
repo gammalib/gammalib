@@ -31,6 +31,7 @@
 #include <cstdio>             // std::fopen, std::fgets, and std::fclose
 #include <cmath>
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GCTAPsfPerfTable.hpp"
 #include "GCTAException.hpp"
 

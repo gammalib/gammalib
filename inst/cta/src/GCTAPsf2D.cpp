@@ -30,6 +30,7 @@
 #endif
 #include <cmath>
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GCTAPsf2D.hpp"
 #include "GCTAException.hpp"
 

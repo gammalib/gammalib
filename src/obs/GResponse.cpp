@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GResponse.cpp - Response abstract base class             *
+ *                GResponse.cpp - Abstract response base class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -37,6 +37,7 @@
 #include "GSkyDir.hpp"
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GModelSpatialPointSource.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialElliptical.hpp"

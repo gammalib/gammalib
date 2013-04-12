@@ -30,6 +30,7 @@
 #endif
 #include <cmath>
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GCTADir.hpp"
 
 /* __ Method name definitions ____________________________________________ */

@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GModelRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
 #include "GModelTemporalRegistry.hpp"

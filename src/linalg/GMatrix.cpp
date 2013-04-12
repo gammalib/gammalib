@@ -31,6 +31,7 @@
 #include <cmath>
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GVector.hpp"
 #include "GMatrix.hpp"
 #include "GMatrixSparse.hpp"

@@ -30,6 +30,7 @@
 #endif
 #include <string>
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GFits.hpp"
 #include "GCaldb.hpp"
 #include "GCOMResponse.hpp"

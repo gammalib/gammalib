@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GLATInstDir.cpp - Fermi-LAT instrument direction class         *
+ *          GLATInstDir.cpp - Fermi/LAT instrument direction class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATInstDir.cpp
- * @brief Instrument direction class implementation
+ * @brief Fermi/LAT instrument direction class implementation
  * @author Juergen Knodlseder
  */
 
@@ -30,6 +30,7 @@
 #endif
 #include "GLATInstDir.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
