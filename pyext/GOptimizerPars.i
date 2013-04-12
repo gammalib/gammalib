@@ -43,18 +43,17 @@ public:
     virtual ~GOptimizerPars(void);
 
     // Pure virtual base class methods
-    virtual void             clear(void) = 0;
-    virtual GOptimizerPars*  clone(void) const = 0;
-    virtual int              size(void) const = 0;
-    virtual bool             isempty(void) const = 0;
-    virtual void             remove(const int& index) = 0;
-    virtual void             reserve(const int& num) = 0;
+    virtual void            clear(void) = 0;
+    virtual GOptimizerPars* clone(void) const = 0;
+    virtual int             size(void) const = 0;
+    virtual bool            isempty(void) const = 0;
+    virtual void            remove(const int& index) = 0;
+    virtual void            reserve(const int& num) = 0;
 
     // Methods
-    virtual int              npars(void) const;
-    virtual int              nfree(void) const;
-    virtual GModelPar&       par(const int& index);
-    virtual const GModelPar& par(const int& index) const;
+    virtual int             npars(void) const;
+    virtual int             nfree(void) const;
+    virtual GModelPar&      par(const int& index);
 };
 
 
