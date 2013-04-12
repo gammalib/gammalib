@@ -158,8 +158,9 @@ void TestGCTAResponse::test_response_psf(void)
         double sum   = 0.0;
         for (int i = 0; i < steps; ++i) {
             r   += dr;
-            sum += rsp.psf(r*deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
-                   twopi * std::sin(r*deg2rad) * dr*deg2rad;
+            sum += rsp.psf(r * gammalib::deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
+                   gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
+                   gammalib::deg2rad;
         }
         test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
     }

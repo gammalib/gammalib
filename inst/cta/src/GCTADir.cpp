@@ -235,7 +235,7 @@ void GCTADir::dir(const GCTAInstDir& dir, const GCTAPointing& pnt)
 double GCTADir::theta_deg(void) const
 {
     // Return value
-    return (m_theta*rad2deg);
+    return (m_theta*gammalib::rad2deg);
 }
 
 
@@ -245,7 +245,7 @@ double GCTADir::theta_deg(void) const
 double GCTADir::phi_deg(void) const
 {
     // Return value
-    return (m_phi*rad2deg);
+    return (m_phi*gammalib::rad2deg);
 }
 
 

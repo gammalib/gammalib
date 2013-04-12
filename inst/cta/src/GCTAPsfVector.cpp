@@ -282,7 +282,7 @@ void GCTAPsfVector::read(const GFitsTable* hdu)
     m_sigma.clear();
 
     // Set conversion factor from 68% containment radius to 1 sigma
-    const double conv = 0.6624305 * deg2rad;
+    const double conv = 0.6624305 * gammalib::deg2rad;
 
     // Get pointers to table columns
     const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
@@ -538,7 +538,7 @@ void GCTAPsfVector::update(const double& logE) const
 
         // Derive width=-0.5/(sigma*sigma) and scale=1/(twopi*sigma*sigma)
         double sigma2 = m_par_sigma * m_par_sigma;
-        m_par_scale   =  1.0 / (twopi * sigma2);
+        m_par_scale   =  1.0 / (gammalib::twopi * sigma2);
         m_par_width   = -0.5 / sigma2;
 
     }

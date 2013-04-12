@@ -484,10 +484,11 @@ void GCOMResponse::read_iaq(const GFitsImage* hdu)
 
         // Convert IAQ matrix from probability per Phigeo bin into a
         // probability per steradian
-        double omega0 = fourpi * std::sin(0.5 * m_phigeo_bin_size * deg2rad);
+        double omega0 = gammalib::fourpi *
+                        std::sin(0.5 * m_phigeo_bin_size * gammalib::deg2rad);
         for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
             double phigeo = iphigeo * m_phigeo_bin_size + m_phigeo_min;
-            double omega  = omega0 * std::sin(phigeo * deg2rad);
+            double omega  = omega0 * std::sin(phigeo * gammalib::deg2rad);
             for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
                 m_iaq[iphigeo+iphibar*m_phigeo_bins] /= omega;
             }

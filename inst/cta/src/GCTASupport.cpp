@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCTASupport.cpp  -  CTA support functions               *
+ *                  GCTASupport.cpp - CTA support functions                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GCTASupport.cpp
  * @brief Implementation of support function used by CTA classes
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -64,8 +64,8 @@ double cta_roi_arclength(const double& rad,     const double& dist,
 
     // Handle special case that circle centre matches ROI centre
     if (dist == 0.0) {
-        if (rad > roi) arclength = 0.0;   // Circle outside ROI
-        else           arclength = twopi; // Circle inside ROI
+        if (rad > roi) arclength = 0.0;             // Circle outside ROI
+        else           arclength = gammalib::twopi; // Circle inside ROI
     }
 
     // ... otherwise circle and ROI centres are not identical
@@ -76,8 +76,8 @@ double cta_roi_arclength(const double& rad,     const double& dist,
         // falls within the ROI it has a formal arclength of 2pi.
         //
         if (rad == 0.0) {
-            if (dist > roi) arclength = 0.0;   // Circle centre outside ROI
-            else            arclength = twopi; // Circle centre inside ROI
+            if (dist > roi) arclength = 0.0;             // Circle centre outside ROI
+            else            arclength = gammalib::twopi; // Circle centre inside ROI
         }
 
         // ... otherwise we have to handle the general case
@@ -86,7 +86,7 @@ double cta_roi_arclength(const double& rad,     const double& dist,
             if (-rad >= d)
                 arclength = 0.0;
             else if (rad <= d)
-                arclength = twopi;
+                arclength = gammalib::twopi;
             else {
                 double cosrad = std::cos(rad);
                 double sinrad = std::sin(rad);

@@ -1,5 +1,5 @@
 /***************************************************************************
- *                     GSkyDir.hpp - Sky direction class                   *
+ *                     GSkyDir.cpp - Sky direction class                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -208,8 +208,8 @@ void GSkyDir::radec_deg(const double& ra, const double& dec)
     #endif
 
     // Set direction
-    m_ra  = ra  * deg2rad;
-    m_dec = dec * deg2rad;
+    m_ra  = ra  * gammalib::deg2rad;
+    m_dec = dec * gammalib::deg2rad;
 
     // Return
     return;
@@ -262,8 +262,8 @@ void GSkyDir::lb_deg(const double& l, const double& b)
     #endif
 
     // Set direction
-    m_l = l * deg2rad;
-    m_b = b * deg2rad;
+    m_l = l * gammalib::deg2rad;
+    m_b = b * gammalib::deg2rad;
 
     // Return
     return;
@@ -330,13 +330,13 @@ void GSkyDir::rotate_deg(const double& phi, const double& theta)
 
     // Set up rotation matrix to rotate from native coordinates to
     // celestial coordinates
-    ry.eulery(m_dec*rad2deg - 90.0);
-    rz.eulerz(-m_ra*rad2deg);
+    ry.eulery(m_dec * gammalib::rad2deg - 90.0);
+    rz.eulerz(-m_ra * gammalib::rad2deg);
     rot = transpose(ry * rz);
 
     // Set up native coordinate vector
-    double phi_rad   = phi   * deg2rad;
-    double theta_rad = theta * deg2rad;
+    double phi_rad   = phi   * gammalib::deg2rad;
+    double theta_rad = theta * gammalib::deg2rad;
     double cos_phi   = std::cos(phi_rad);
     double sin_phi   = std::sin(phi_rad);
     double cos_theta = std::cos(theta_rad);
@@ -369,7 +369,7 @@ double GSkyDir::l_deg(void) const
     }
 
     // Return galactic longitude
-    return m_l * rad2deg;
+    return m_l * gammalib::rad2deg;
 }
 
 
@@ -386,7 +386,7 @@ double GSkyDir::b_deg(void) const
     }
 
     // Return galactic latitude
-    return m_b * rad2deg;
+    return m_b * gammalib::rad2deg;
 }
 
 
@@ -403,7 +403,7 @@ double GSkyDir::ra_deg(void) const
     }
 
     // Return Right Ascension
-    return m_ra * rad2deg;
+    return m_ra * gammalib::rad2deg;
 }
 
 
@@ -420,7 +420,7 @@ double GSkyDir::dec_deg(void) const
     }
 
     // Return Declination
-    return m_dec * rad2deg;
+    return m_dec * gammalib::rad2deg;
 }
 
 
@@ -569,7 +569,7 @@ double GSkyDir::dist(const GSkyDir& dir) const
 double GSkyDir::dist_deg(const GSkyDir& dir) const
 {
     // Return distance in degrees
-    return (dist(dir) * rad2deg);
+    return (dist(dir) * gammalib::rad2deg);
 }
 
 
@@ -685,7 +685,7 @@ double GSkyDir::posang(const GSkyDir& dir) const
 double GSkyDir::posang_deg(const GSkyDir& dir) const
 {
     // Return position angle in degrees
-    return (posang(dir) * rad2deg);
+    return (posang(dir) * gammalib::rad2deg);
 }
 
 
@@ -705,10 +705,12 @@ std::string GSkyDir::print(const GChatter& chatter) const
 
         // Put coordinates in string
         if (m_has_lb) {
-            result = "(l,b)=("+str(m_l*rad2deg)+","+str(m_b*rad2deg)+")";
+            result = "(l,b)=("+str(m_l*gammalib::rad2deg) + "," +
+                     str(m_b*gammalib::rad2deg)+")";
         }
         else if (m_has_radec) {
-            result = "(RA,Dec)=("+str(m_ra*rad2deg)+","+str(m_dec*rad2deg)+")";
+            result = "(RA,Dec)=("+str(m_ra*gammalib::rad2deg) + "," +
+                     str(m_dec*gammalib::rad2deg)+")";
         }
         else {
             result = "(RA,Dec)=(not initialised)";
@@ -866,7 +868,7 @@ void GSkyDir::euler(const int& type, const double& xin, const double &yin,
 
     //
     *yout = std::asin(b);
-    *xout = modulo((a+psi[type] + fourpi), twopi);
+    *xout = modulo((a+psi[type] + gammalib::fourpi), gammalib::twopi);
 
     // Return
     return;

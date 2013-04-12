@@ -520,7 +520,7 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
 
             // Simulate offset from photon arrival direction
             double delta = psf()->mc(ran, srcLogEng, theta, phi, zenith, azimuth) *
-                           rad2deg;
+                           gammalib::rad2deg;
             double alpha = 360.0 * ran.uniform();
 
             // Rotate sky direction by offset
@@ -1521,7 +1521,7 @@ double GCTAResponse::npred_radial(const GSource& source,
     double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
     // Extract ROI radius (radians)
-    double roi_radius = events->roi().radius() * deg2rad;
+    double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
     // Compute distance between ROI and model centre (radians)
     double roi_model_distance = events->roi().centre().dist(centre);
@@ -1700,7 +1700,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
     double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
     // Extract ROI radius (radians)
-    double roi_radius = events->roi().radius() * deg2rad;
+    double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
     // Compute distance between ROI and model centre (radians)
     double roi_model_distance = events->roi().centre().dist(centre);
@@ -1904,7 +1904,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
         double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
         // Extract ROI radius (radians)
-        double roi_radius = events->roi().radius() * deg2rad;
+        double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
         // Compute the ROI radius plus maximum PSF radius (radians). Any photon
         // coming from beyond this radius will not make it in the dataspace and
@@ -2148,7 +2148,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
     double phi = 0.0; //TODO: Implement phi dependence
 
     // Extract relevant parameters from arguments
-    double roi_radius       = roi.radius() * deg2rad;
+    double roi_radius       = roi.radius() * gammalib::deg2rad;
     double roi_psf_distance = roi.centre().dist(srcDir);
     double rmax             = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 

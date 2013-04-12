@@ -463,7 +463,7 @@ double GLATLtCubeMap::phi(const int& index) const
     #endif
 
     // Set phi value
-    double phi = (index+0.5) / m_num_phi * pi / 4.0;
+    double phi = (index+0.5) / m_num_phi * gammalib::pi / 4.0;
 
     // Return phi
     return phi;

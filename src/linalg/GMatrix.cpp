@@ -968,8 +968,9 @@ void GMatrix::eulerx(const double& angle)
     alloc_members(3,3);
 
     // Compute angles
-    double cosangle = std::cos(angle * deg2rad);
-    double sinangle = std::sin(angle * deg2rad);
+    double arg      = angle * gammalib::deg2rad;
+    double cosangle = std::cos(arg);
+    double sinangle = std::sin(arg);
 
     // Set matrix elements
     (*this)(0,0) =       1.0;
@@ -1004,8 +1005,9 @@ void GMatrix::eulery(const double& angle)
     alloc_members(3,3);
 
     // Compute angles
-    double cosangle = std::cos(angle * deg2rad);
-    double sinangle = std::sin(angle * deg2rad);
+    double arg      = angle * gammalib::deg2rad;
+    double cosangle = std::cos(arg);
+    double sinangle = std::sin(arg);
 
     // Set matrix elements
     (*this)(0,0) =  cosangle;
@@ -1040,8 +1042,9 @@ void GMatrix::eulerz(const double& angle)
     alloc_members(3,3);
 
     // Compute angles
-    double cosangle = std::cos(angle * deg2rad);
-    double sinangle = std::sin(angle * deg2rad);
+    double arg      = angle * gammalib::deg2rad;
+    double cosangle = std::cos(arg);
+    double sinangle = std::sin(arg);
 
     // Set matrix elements
     (*this)(0,0) =  cosangle;

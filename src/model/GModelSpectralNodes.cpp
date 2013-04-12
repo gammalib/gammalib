@@ -491,7 +491,7 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
                     plaw_energy_flux(e_min,
                                      e_max, 
                                      m_epivot[inx_emin],
-                                     m_gamma[inx_emin]) * MeV2erg;
+                                     m_gamma[inx_emin]) * gammalib::MeV2erg;
         }
 
         // ... otherwise integrate over the nodes where emin and emax
@@ -508,7 +508,7 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
                     plaw_energy_flux(e_min,
                                      m_lin_energies[i_start],
                                      m_epivot[inx_emin],
-                                     m_gamma[inx_emin]) * MeV2erg;
+                                     m_gamma[inx_emin]) * gammalib::MeV2erg;
 
             // Integrate over all nodes between
             for (int i = i_start; i < inx_emax; ++i) {
@@ -520,7 +520,7 @@ double GModelSpectralNodes::eflux(const GEnergy& emin, const GEnergy& emax) cons
                      plaw_energy_flux(m_lin_energies[inx_emax],
                                       e_max,
                                       m_epivot[inx_emax],
-                                      m_gamma[inx_emax]) * MeV2erg;
+                                      m_gamma[inx_emax]) * gammalib::MeV2erg;
         
         } // endelse: emin and emax not between same nodes
     
@@ -1420,7 +1420,7 @@ void GModelSpectralNodes::set_flux_cache(void) const
         double eflux = prefactor*plaw_energy_flux(emin, emax, epivot, gamma);
 
         // Convert energy flux from MeV/cm2/s to erg/cm2/s
-        eflux *= MeV2erg;
+        eflux *= gammalib::MeV2erg;
         
         // Push back values on pre-computation cache
         m_prefactor.push_back(prefactor);
@@ -1511,7 +1511,7 @@ void GModelSpectralNodes::update_flux_cache(void) const
             double eflux = prefactor*plaw_energy_flux(emin, emax, epivot, gamma);
 
             // Convert energy flux from MeV/cm2/s to erg/cm2/s
-            eflux *= MeV2erg;
+            eflux *= gammalib::MeV2erg;
         
             // Store values on pre-computation cache
             m_prefactor[i] = prefactor;

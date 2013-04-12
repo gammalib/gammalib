@@ -406,7 +406,7 @@ GSkyDir GModelSpatialRadialShell::mc(const GEnergy& energy,
 
     // Rotate pointing direction by offset and azimuth angle
     GSkyDir sky_dir = dir();
-    sky_dir.rotate_deg(phi, theta*rad2deg);
+    sky_dir.rotate_deg(phi, theta * gammalib::rad2deg);
 
     // Return sky direction
     return sky_dir;
@@ -421,7 +421,7 @@ GSkyDir GModelSpatialRadialShell::mc(const GEnergy& energy,
 double GModelSpatialRadialShell::theta_max(void) const
 {
     // Return value
-    return ((radius()+width())*deg2rad);
+    return ((radius()+width()) * gammalib::deg2rad);
 }
 
 
@@ -753,8 +753,8 @@ void GModelSpatialRadialShell::free_members(void)
 void GModelSpatialRadialShell::update() const
 {
     // Set constants
-    const double c1 = twopi / 3.0;
-    const double c2 = 1.0 / (2.0 * sqrt_two);
+    const double c1 = gammalib::twopi / 3.0;
+    const double c2 = 1.0 / (2.0 * gammalib::sqrt_two);
 
     // Update if radius or width have changed
     if (m_last_radius != radius() || m_last_width != width()) {
@@ -764,8 +764,8 @@ void GModelSpatialRadialShell::update() const
         m_last_width  = width();
         
         // Perform precomputations
-        m_theta_in   = radius() * deg2rad;
-        m_theta_out  = (radius() + width()) * deg2rad;
+        m_theta_in   = radius() * gammalib::deg2rad;
+        m_theta_out  = (radius() + width()) * gammalib::deg2rad;
         if (m_small_angle) {
             m_x_in       = m_theta_in  * m_theta_in;
             m_x_out      = m_theta_out * m_theta_out;
@@ -778,7 +778,7 @@ void GModelSpatialRadialShell::update() const
             double term1         = (f1(m_theta_out) - f1(m_theta_in)) * c2;
             double term2         = f2(m_theta_out);
             double term3         = f2(m_theta_in);
-            double denom         = twopi * (term1 + term2 - term3);
+            double denom         = gammalib::twopi * (term1 + term2 - term3);
             m_norm               = (denom > 0.0) ? 1.0 / denom : 0.0;
             m_x_in               = sin_theta_in*sin_theta_in;
             m_x_out              = sin_theta_out * sin_theta_out;
@@ -835,8 +835,8 @@ double GModelSpatialRadialShell::f2(double x)
 {
     // Compute value
     double t1 = (1.0 + std::cos(2.0*x)) / 4.0;
-    double t2 = sqrt_two * std::cos(x);
-    double t3 = sqrt_two + f1(x);
+    double t2 = gammalib::sqrt_two * std::cos(x);
+    double t3 = gammalib::sqrt_two + f1(x);
     double f2 = t1 * std::log(t2 / t3);
 
     // Return value

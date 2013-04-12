@@ -324,7 +324,7 @@ double GRan::poisson(const double& lambda)
         do {
             double y;
             do {
-                y  = std::tan(pi * uniform());
+                y  = std::tan(gammalib::pi * uniform());
                 em = m_sq * y + lambda;
             } while (em < 0.0);
             em = floor(em);

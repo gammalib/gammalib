@@ -2899,7 +2899,7 @@ double GWcslib::cosd(const double& angle) const
     }
 
     // Return cosine
-    return std::cos(angle*deg2rad);
+    return std::cos(angle * gammalib::deg2rad);
 }
 
 
@@ -2928,7 +2928,7 @@ double GWcslib::sind(const double& angle) const
     }
 
     // Return sine
-    return std::sin(angle*deg2rad);
+    return std::sin(angle * gammalib::deg2rad);
 }
 
 
@@ -2954,7 +2954,7 @@ double GWcslib::tand(const double& angle) const
     }
 
     // Return tangens
-    return std::tan(angle*deg2rad);
+    return std::tan(angle * gammalib::deg2rad);
 }
 
 
@@ -2986,7 +2986,7 @@ double GWcslib::acosd(const double& value) const
     }
 
     // Return arc cosine
-    return std::acos(value)*rad2deg;
+    return std::acos(value) * gammalib::rad2deg;
 }
 
 
@@ -3018,7 +3018,7 @@ double GWcslib::asind(const double& value) const
     }
 
     // Return arc sine
-    return std::asin(value)*rad2deg;
+    return std::asin(value) * gammalib::rad2deg;
 }
 
 
@@ -3043,7 +3043,7 @@ double GWcslib::atand(const double& value) const
     }
 
     // Return arc sine
-    return std::atan(value)*rad2deg;
+    return std::atan(value) * gammalib::rad2deg;
 }
 
 
@@ -3076,7 +3076,7 @@ double GWcslib::atan2d(const double& y, const double& x) const
     }
 
     // Return arc sine
-    return std::atan2(y,x)*rad2deg;
+    return std::atan2(y,x) * gammalib::rad2deg;
 }
 
 
@@ -3116,16 +3116,9 @@ void GWcslib::sincosd(const double& angle, double *s, double *c) const
     }
   
     // Compute sine and cosine
-    *s = std::sin(angle*deg2rad);
-    *c = std::cos(angle*deg2rad);
+    *s = std::sin(angle * gammalib::deg2rad);
+    *c = std::cos(angle * gammalib::deg2rad);
     
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

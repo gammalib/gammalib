@@ -292,7 +292,7 @@ void GWcsTAN::prj_set(void) const
     
     // Precompute 
     if (m_r0 == 0.0)
-        m_r0 = rad2deg;
+        m_r0 = gammalib::rad2deg;
     
     // Compute fiducial offset
     prj_off(0.0, 90.0);

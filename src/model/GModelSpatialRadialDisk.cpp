@@ -318,8 +318,9 @@ GSkyDir GModelSpatialRadialDisk::mc(const GEnergy& energy,
                                     GRan&          ran) const
 {
     // Simulate offset from photon arrival direction
-    double cosrad = std::cos(radius()*deg2rad);
-    double theta  = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) * rad2deg;
+    double cosrad = std::cos(radius() * gammalib::deg2rad);
+    double theta  = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) *
+                    gammalib::rad2deg;
     double phi    = 360.0 * ran.uniform();
 
     // Rotate sky direction by offset
@@ -339,7 +340,7 @@ GSkyDir GModelSpatialRadialDisk::mc(const GEnergy& energy,
 double GModelSpatialRadialDisk::theta_max(void) const
 {
     // Return value
-    return (radius()*deg2rad);
+    return (radius() * gammalib::deg2rad);
 }
 
 
@@ -607,10 +608,10 @@ void GModelSpatialRadialDisk::update() const
         m_last_radius = radius();
 
         // Compute disk radius in radians
-        m_radius_rad = radius() * deg2rad;
+        m_radius_rad = radius() * gammalib::deg2rad;
 
         // Perform precomputations
-        double denom = twopi * (1 - std::cos(m_radius_rad));
+        double denom = gammalib::twopi * (1 - std::cos(m_radius_rad));
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required

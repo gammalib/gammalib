@@ -122,7 +122,7 @@ GWcsHPX::GWcsHPX(const int& nside, const std::string& order,
     m_num_pixels = 12 * m_npface;
     m_fact2      = 4.0 / m_num_pixels;
     m_fact1      = 2 * m_nside * m_fact2;
-    m_omega      = fourpi / m_num_pixels;
+    m_omega      = gammalib::fourpi / m_num_pixels;
     m_order      = nside2order(m_nside);
 
     // Return
@@ -298,7 +298,7 @@ void GWcsHPX::read(const GFitsHDU* hdu)
     m_num_pixels = 12 * m_npface;
     m_fact2      = 4.0 / m_num_pixels;
     m_fact1      = 2 * m_nside * m_fact2;
-    m_omega      = fourpi / m_num_pixels;
+    m_omega      = gammalib::fourpi / m_num_pixels;
     m_order      = nside2order(m_nside);
 
     // Return
@@ -402,10 +402,10 @@ GSkyDir GWcsHPX::pix2dir(const int& pix) const
     // Store coordinate system dependent result
     switch (m_coordsys) {
     case 0:
-        result.radec(phi, pihalf-theta);
+        result.radec(phi, gammalib::pihalf - theta);
         break;
     case 1:
-        result.lb(phi, pihalf-theta);
+        result.lb(phi, gammalib::pihalf - theta);
         break;
     default:
         break;
@@ -431,11 +431,11 @@ int GWcsHPX::dir2pix(const GSkyDir& dir) const
     // Compute coordinate system dependent (z,phi)
     switch (m_coordsys) {
     case 0:
-        z   = cos(pihalf-dir.dec());
+        z   = cos(gammalib::pihalf - dir.dec());
         phi = dir.ra();
         break;
     case 1:
-        z   = cos(pihalf-dir.b());
+        z   = cos(gammalib::pihalf - dir.b());
         phi = dir.l();
         break;
     default:
@@ -573,12 +573,15 @@ void GWcsHPX::ordering(const std::string& ordering)
     std::string uordering = toupper(ordering);
 
     // Set pixel ordering
-    if (uordering == "RING")
+    if (uordering == "RING") {
         m_ordering = 0;
-    else if (uordering == "NESTED" || uordering == "NEST")
+    }
+    else if (uordering == "NESTED" || uordering == "NEST") {
         m_ordering = 1;
-    else
+    }
+    else {
         throw GException::wcs_hpx_bad_ordering(G_ORDERING_SET, ordering);
+    }
 
     // Return
     return;
@@ -801,7 +804,7 @@ void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi) const
         int iring = int(0.5*(1+isqrt(1+2*ipix))); // counted from North pole
         int iphi  = (ipix+1) - 2*iring*(iring-1);
         *theta    = acos(1.0 - (iring*iring) * m_fact2);
-        *phi      = (iphi - 0.5) * pi/(2.0*iring);
+        *phi      = (iphi - 0.5) * gammalib::pi/(2.0*iring);
     }
 
     // Handle Equatorial region
@@ -811,8 +814,8 @@ void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi) const
         int    iphi  = ip%(4*m_nside) + 1;
         double fodd  = ((iring+m_nside)&1) ? 1 : 0.5;
         int    nl2   = 2*m_nside;
-        *theta       = acos((nl2 - iring) * m_fact1);
-        *phi         = (iphi - fodd) * pi/nl2;
+        *theta       = std::acos((nl2 - iring) * m_fact1);
+        *phi         = (iphi - fodd) * gammalib::pi/nl2;
     }
 
     // Handle South Polar cap
@@ -820,8 +823,8 @@ void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi) const
         int ip    = m_num_pixels - ipix;
         int iring = int(0.5*(1+isqrt(2*ip-1)));    // Counted from South pole
         int iphi  = 4*iring + 1 - (ip - 2*iring*(iring-1));
-        *theta    = acos(-1.0 + (iring*iring) * m_fact2);
-        *phi      = (iphi - 0.5) * pi/(2.*iring);
+        *theta    = std::acos(-1.0 + (iring*iring) * m_fact2);
+        *phi      = (iphi - 0.5) * gammalib::pi/(2.*iring);
     }
 
     // Return
@@ -891,7 +894,7 @@ void GWcsHPX::pix2ang_nest(int ipix, double* theta, double* phi) const
 
     // Computes Theta and Phi
     *theta = acos(z);
-    *phi   = (jp - (kshift+1)*0.5) * (pihalf / nr);
+    *phi   = (jp - (kshift+1)*0.5) * (gammalib::pihalf / nr);
 
     // Return
     return;
@@ -911,10 +914,10 @@ int GWcsHPX::ang2pix_z_phi_ring(double z, double phi) const
 
     // Setup
     double za = fabs(z);
-    double tt = modulo(phi,twopi) * inv_pihalf; // in [0,4)
+    double tt = modulo(phi, gammalib::twopi) * gammalib::inv_pihalf; // in [0,4)
 
     // Equatorial region
-    if (za <= twothird) {
+    if (za <= gammalib::twothird) {
         double temp1  = m_nside*(0.5+tt);
         double temp2  = m_nside*z*0.75;
         int    jp     = int(temp1-temp2);           // index of ascending edge line
@@ -929,7 +932,7 @@ int GWcsHPX::ang2pix_z_phi_ring(double z, double phi) const
     // North & South polar caps
     else {
         double tp  = tt - int(tt);
-        double tmp = m_nside * sqrt(3*(1-za));
+        double tmp = m_nside * std::sqrt(3*(1-za));
         int    jp  = int(tp*tmp);       // increasing edge line index
         int    jm  = int((1.0-tp)*tmp); // decreasing edge line index
         int    ir  = jp + jm + 1;       // ring number counted from the closest pole
@@ -961,10 +964,10 @@ int GWcsHPX::ang2pix_z_phi_nest(double z, double phi) const
 
     // Setup
     double za = fabs(z);
-    double tt = modulo(phi,twopi) * inv_pihalf; // in [0,4)
+    double tt = modulo(phi, gammalib::twopi) * gammalib::inv_pihalf; // in [0,4)
 
     // Equatorial region
-    if (za <= twothird) {
+    if (za <= gammalib::twothird) {
         double temp1 = ns_max*(0.5+tt);
         double temp2 = ns_max*z*0.75;
         int    jp    = int(temp1-temp2); // index of  ascending edge line
@@ -985,7 +988,7 @@ int GWcsHPX::ang2pix_z_phi_nest(double z, double phi) const
     else {
         int    ntt = int(tt);
         double tp  = tt-ntt;
-        double tmp = ns_max*sqrt(3*(1-za));
+        double tmp = ns_max * std::sqrt(3*(1-za));
         int    jp  = int(tp*tmp);        // increasing edge line index
         int    jm  = int((1.0-tp)*tmp);  // decreasing edge line index
         if (jp >= ns_max) jp = ns_max-1; // for points too close to the boundary

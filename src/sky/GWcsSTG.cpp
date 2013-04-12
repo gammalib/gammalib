@@ -293,8 +293,9 @@ void GWcsSTG::prj_set(void) const
     m_w.clear();
     
     // Precompute 
-    if (m_r0 == 0.0)
-        m_r0 = rad2deg;
+    if (m_r0 == 0.0) {
+        m_r0 = gammalib::rad2deg;
+    }
     m_w.push_back(2.0 * m_r0);
     m_w.push_back(1.0/m_w[0]);
     

@@ -293,11 +293,11 @@ void GWcsCAR::prj_set(void) const
     
     // Precompute 
     if (m_r0 == 0.0) {
-        m_r0 = rad2deg;
+        m_r0 = gammalib::rad2deg;
         m_w.push_back(1.0);
         m_w.push_back(1.0);
     } else {
-        m_w.push_back(m_r0 * deg2rad);
+        m_w.push_back(m_r0 * gammalib::deg2rad);
         m_w.push_back(1.0/m_w[0]);
     }
     

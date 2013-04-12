@@ -391,7 +391,8 @@ double GCTAModelRadialPolynom::eval_gradients(const double& offset) const
 GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
 {
     // Set constants
-    const double u_max = sin(g_cta_radial_polynom_offset_max * deg2rad);
+    const double u_max = sin(g_cta_radial_polynom_offset_max *
+                             gammalib::deg2rad);
 
     // Debug option: initialise number if samples thrown for one value
     #if defined(G_DEBUG_MC)
@@ -408,7 +409,7 @@ GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
         offset = ran.uniform() * g_cta_radial_polynom_offset_max;
         
         // Compute function value at this offset angle
-        value  = sin(offset * deg2rad) * eval(offset);
+        value  = sin(offset * gammalib::deg2rad) * eval(offset);
         
         // Throw value for rejection method
         u = ran.uniform() * u_max;
@@ -456,7 +457,8 @@ GCTAInstDir GCTAModelRadialPolynom::mc(const GCTAInstDir& dir, GRan& ran) const
 double GCTAModelRadialPolynom::omega(void) const
 {
     // Set constants
-    const double offset_max_rad = g_cta_radial_polynom_offset_max * deg2rad;
+    const double offset_max_rad = g_cta_radial_polynom_offset_max *
+                                  gammalib::deg2rad;
 
     // Allocate integrand
     GCTAModelRadialPolynom::integrand integrand(this);
@@ -465,7 +467,7 @@ double GCTAModelRadialPolynom::omega(void) const
     GIntegral integral(&integrand);
 
     // Perform numerical integration
-    double omega = integral.romb(0.0, offset_max_rad) * twopi;
+    double omega = integral.romb(0.0, offset_max_rad) * gammalib::twopi;
 
     // Return integral
     return omega;

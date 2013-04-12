@@ -295,7 +295,7 @@ double GModelSpatialEllipticalDisk::eval(const double&  theta,
         update();
 
         // Perform computations
-        double diff_angle = posangle - m_posangle.value()*deg2rad;
+        double diff_angle = posangle - m_posangle.value() * gammalib::deg2rad;
         double cosinus    = std::cos(diff_angle);
         double sinus      = std::sin(diff_angle);
         double arg1       = m_semiminor_rad * cosinus;
@@ -381,8 +381,9 @@ GSkyDir GModelSpatialEllipticalDisk::mc(const GEnergy& energy,
 	do {
 
         // Simulate offset from photon arrival direction
-        double cosrad = std::cos(semimajor()*deg2rad);
-        double theta  = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) * rad2deg;
+        double cosrad = std::cos(semimajor() * gammalib::deg2rad);
+        double theta  = std::acos(1.0 - ran.uniform() * (1.0 - cosrad)) *
+                        gammalib::rad2deg;
         double phi    = 360.0 * ran.uniform();
 
         // Rotate sky direction by offset
@@ -408,8 +409,9 @@ GSkyDir GModelSpatialEllipticalDisk::mc(const GEnergy& energy,
 double GModelSpatialEllipticalDisk::theta_max(void) const
 {
     // Set maximum model radius
-    double theta_max = (semimajor() > semiminor()) ?
-                       semimajor()*deg2rad : semiminor()*deg2rad;
+    double theta_max = (semimajor() > semiminor())
+                       ? semimajor() * gammalib::deg2rad
+                       : semiminor() * gammalib::deg2rad;
 
     // Return value
     return theta_max;
@@ -726,12 +728,13 @@ void GModelSpatialEllipticalDisk::update() const
         m_last_semimajor = semimajor();
 
         // Compute axes in radians
-        m_semiminor_rad = semiminor() * deg2rad;
-        m_semimajor_rad = semimajor() * deg2rad;
+        m_semiminor_rad = semiminor() * gammalib::deg2rad;
+        m_semimajor_rad = semimajor() * gammalib::deg2rad;
 
         // Perform precomputations
-        double denom = twopi * std::sqrt((1 - std::cos(m_semiminor_rad)) *
-                                         (1 - std::cos(m_semimajor_rad)));
+        double denom = gammalib::twopi *
+                       std::sqrt((1.0 - std::cos(m_semiminor_rad)) *
+                                 (1.0 - std::cos(m_semimajor_rad)));
         m_norm       = (denom > 0.0) ? 1.0 / denom : 0.0;
 
     } // endif: update required

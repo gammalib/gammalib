@@ -765,7 +765,7 @@ double GMWLSpectrum::conv_flux(const GEnergy& energy, const double& flux,
     if (str_unit == "PH/CM2/S/MEV" || str_unit == "PH/S/CM2/MEV")
         result = flux;
     else if (str_unit == "ERG/CM2/S" || str_unit == "ERG/S/CM2")
-        result = (erg2MeV*flux) / (energy.MeV()*energy.MeV());
+        result = (gammalib::erg2MeV*flux) / (energy.MeV()*energy.MeV());
 
     // ... otherwise throw exception
     else

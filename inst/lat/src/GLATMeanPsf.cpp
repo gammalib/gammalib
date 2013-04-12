@@ -337,7 +337,7 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     std::vector<double> save_costhetamin;
     for (int i = 0; i < rsp->size(); ++i) {
         save_costhetamin.push_back(rsp->aeff(i)->costhetamin());
-        rsp->aeff(i)->costhetamin(cos(m_theta_max*deg2rad));
+        rsp->aeff(i)->costhetamin(cos(m_theta_max*gammalib::deg2rad));
     }
     
     // Allocate room for arrays
@@ -793,8 +793,8 @@ double GLATMeanPsf::integral(const double& offsetmax, const double& logE)
         // If interval is fully contained within offset then simply use
         // tabulated values for integration
         if (m_offset[i+1] <= offsetmax) {
-            double theta_min = m_offset[i]   * deg2rad;
-            double theta_max = m_offset[i+1] * deg2rad;
+            double theta_min = m_offset[i]   * gammalib::deg2rad;
+            double theta_max = m_offset[i+1] * gammalib::deg2rad;
             int_left  += 0.5 * (m_psf[inx_energy_left+i]   * sin(theta_min) +
                                 m_psf[inx_energy_left+i+1] * sin(theta_max)) *
                                (theta_max - theta_min);
@@ -806,8 +806,8 @@ double GLATMeanPsf::integral(const double& offsetmax, const double& logE)
         // ... otherwise interpolate the PSF value for theta_max. We can
         // then exit the loop since we're done with the integration
         else {
-            double theta_min = m_offset[i] * deg2rad;
-            double theta_max = offsetmax   * deg2rad;
+            double theta_min = m_offset[i] * gammalib::deg2rad;
+            double theta_max = offsetmax   * gammalib::deg2rad;
             double psf_left  = m_psf[inx_energy_left+i]    * m_offset.wgt_left() +
                                m_psf[inx_energy_left+i+1]  * m_offset.wgt_right();
             double psf_right = m_psf[inx_energy_right+i]   * m_offset.wgt_left() +
@@ -827,8 +827,8 @@ double GLATMeanPsf::integral(const double& offsetmax, const double& logE)
             std::cout << " i=" << i;
             std::cout << " psf_left=" << psf_left;
             std::cout << " psf_right=" << psf_right;
-            std::cout << " int_left=" << int_left*twopi;
-            std::cout << " int_right=" << int_right*twopi;
+            std::cout << " int_left=" << int_left*gammalib::twopi;
+            std::cout << " int_right=" << int_right*gammalib::twopi;
             #endif
             break;
         }
@@ -836,8 +836,8 @@ double GLATMeanPsf::integral(const double& offsetmax, const double& logE)
     } // endfor: looped over offset angles
 
     // Interpolate now in energy
-    double integral = twopi * (m_energy.wgt_left()  * int_left +
-                               m_energy.wgt_right() * int_right);
+    double integral = gammalib::twopi * (m_energy.wgt_left()  * int_left +
+                                         m_energy.wgt_right() * int_right);
 
     // Debug option: Dump integral computation results
     #if G_DEBUG_INTEGRAL

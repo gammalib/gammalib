@@ -217,7 +217,7 @@ GEnergy* GEnergy::clone(void) const
 double GEnergy::erg(void) const
 {
     // Compute energy
-    double energy = m_energy * MeV2erg;
+    double energy = m_energy * gammalib::MeV2erg;
     
     // Return energy
     return energy; 
@@ -354,7 +354,7 @@ double GEnergy::log10TeV(void) const
 void GEnergy::erg(const double& eng)
 {
     // Set energy
-    m_energy = eng * erg2MeV;
+    m_energy = eng * gammalib::erg2MeV;
 
     // Signals that log10 of energy is not valid
     m_has_log10 = false;

@@ -359,7 +359,7 @@ double GModelSpectralConst::eflux(const GEnergy& emin,
                                         emin.MeV()*emin.MeV());
 
         // Convert from MeV/cm2/s to erg/cm2/s
-        eflux *= MeV2erg;
+        eflux *= gammalib::MeV2erg;
     
     } // endif: integration range was valid
 

@@ -208,7 +208,7 @@ double GLATInstDir::dist(const GLATInstDir& dir) const
 double GLATInstDir::dist_deg(const GLATInstDir& dir) const
 {
     // Return distance in degrees
-    return (dist(dir) * rad2deg);
+    return (dist(dir) * gammalib::rad2deg);
 }
 
 

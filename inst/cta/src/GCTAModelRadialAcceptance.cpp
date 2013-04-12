@@ -457,7 +457,7 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
         }
 
         // Get ROI radius in radians
-        double roi_radius = events->roi().radius() * deg2rad;
+        double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
         // Get distance from ROI centre in radians
         double roi_distance = events->roi().centre().dist(pnt->dir());
@@ -1053,7 +1053,8 @@ double GCTAModelRadialAcceptance::roi_kern::eval(double offset)
 
         // Get kernel value if phi > 0
         if (phi > 0.0) {
-            value = radial->eval(offset*rad2deg) * phi * sin(offset);
+            value = radial->eval(offset*gammalib::rad2deg) * phi *
+                    std::sin(offset);
         }
 
     } // endif: offset was positive

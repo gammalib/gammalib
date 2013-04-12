@@ -514,7 +514,7 @@ const std::string& GTimeReference::timeref(void) const
 double GTimeReference::unitseconds(void) const
 {
     // Set time unit in seconds
-    double unit = (m_unit_sec) ? 1.0 : sec_in_day;
+    double unit = (m_unit_sec) ? 1.0 : gammalib::sec_in_day;
 
     // Return time unit
     return unit;

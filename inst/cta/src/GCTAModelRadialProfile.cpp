@@ -302,7 +302,7 @@ GCTAInstDir GCTAModelRadialProfile::mc(const GCTAInstDir& dir, GRan& ran) const
 {
     // Set constants
     const double offset_max = 10.0;
-    const double u_max      = sin(offset_max * deg2rad);
+    const double u_max      = sin(offset_max * gammalib::deg2rad);
 
     // Debug option: initialise number if samples thrown for one value
     #if defined(G_DEBUG_MC)
@@ -319,7 +319,7 @@ GCTAInstDir GCTAModelRadialProfile::mc(const GCTAInstDir& dir, GRan& ran) const
         offset = ran.uniform() * offset_max;
         
         // Compute function value at this offset angle
-        value  = sin(offset * deg2rad) * eval(offset);
+        value  = sin(offset * gammalib::deg2rad) * eval(offset);
         
         // Throw value for rejection method
         u = ran.uniform() * u_max;
@@ -367,7 +367,7 @@ GCTAInstDir GCTAModelRadialProfile::mc(const GCTAInstDir& dir, GRan& ran) const
 double GCTAModelRadialProfile::omega(void) const
 {
     // Set constants
-    const double offset_max_rad = 10.0 * deg2rad;
+    const double offset_max_rad = 10.0 * gammalib::deg2rad;
 
     // Allocate integrand
     GCTAModelRadialProfile::integrand integrand(this);
@@ -376,7 +376,7 @@ double GCTAModelRadialProfile::omega(void) const
     GIntegral integral(&integrand);
 
     // Perform numerical integration
-    double omega = integral.romb(0.0, offset_max_rad) * twopi;
+    double omega = integral.romb(0.0, offset_max_rad) * gammalib::twopi;
 
     // Return integral
     return omega;

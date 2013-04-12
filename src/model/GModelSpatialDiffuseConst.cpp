@@ -283,7 +283,7 @@ GSkyDir GModelSpatialDiffuseConst::mc(const GEnergy& energy,
                                       GRan&          ran) const
 {
     // Simulate Right Ascension and Declination
-    double ra  = twopi * ran.uniform();
+    double ra  = gammalib::twopi * ran.uniform();
     double dec = std::acos(1.0 - 2.0 * ran.uniform());
 
     // Set sky direction

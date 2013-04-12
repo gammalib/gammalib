@@ -327,7 +327,7 @@ GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
     int    n_samples = 0;
     #endif
     double sigma_max = 4.0 * sqrt(sigma());
-    double u_max     = sin(sigma_max * deg2rad);
+    double u_max     = sin(sigma_max * gammalib::deg2rad);
     double value     = 0.0;
     double u         = 1.0;
     double offset    = 0.0;
@@ -335,7 +335,7 @@ GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
         offset      = ran.uniform() * sigma_max;
         double arg  = offset * offset / sigma();
         double arg2 = arg * arg;
-        value       = sin(offset * deg2rad) * exp(-0.5 * arg2);
+        value       = sin(offset * gammalib::deg2rad) * exp(-0.5 * arg2);
         u           = ran.uniform() * u_max;
         #if defined(G_DEBUG_MC)
         n_samples++;
@@ -377,17 +377,21 @@ GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
 double GCTAModelRadialGauss::omega(void) const
 {
     // Allocate integrand
-    GCTAModelRadialGauss::integrand integrand(sigma()*deg2rad*deg2rad);
+    GCTAModelRadialGauss::integrand integrand(sigma() *
+                                              gammalib::deg2rad * 
+                                              gammalib::deg2rad);
 
     // Allocate intergal
     GIntegral integral(&integrand);
 
     // Set upper integration boundary
-    double offset_max = sqrt(10.0*sigma()) * deg2rad;
-    if (offset_max > pi) offset_max = pi;
+    double offset_max = sqrt(10.0*sigma()) * gammalib::deg2rad;
+    if (offset_max > gammalib::pi) {
+        offset_max = gammalib::pi;
+    }
 
     // Perform numerical integration
-    double omega = integral.romb(0.0, offset_max) * twopi;
+    double omega = integral.romb(0.0, offset_max) * gammalib::twopi;
 
     // Return integral
     return omega;

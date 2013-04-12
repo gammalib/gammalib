@@ -379,7 +379,8 @@ double GModelSpectralPlaw2::eval_gradients(const GEnergy& srcEng,
 
     // Index gradient
     if (m_index.isfree()) {
-        g_index = value * (m_g_norm + ln10*srcEng.log10MeV()) * m_index.scale();
+        g_index = value * (m_g_norm + gammalib::ln10 * srcEng.log10MeV()) *
+                  m_index.scale();
     }
 
     // Set gradients
@@ -520,7 +521,7 @@ double GModelSpectralPlaw2::eflux(const GEnergy& emin,
         }
 
         // Convert from MeV/cm2/s to erg/cm2/s
-        eflux *= MeV2erg;
+        eflux *= gammalib::MeV2erg;
 
     } // endif: integration range was valid
 

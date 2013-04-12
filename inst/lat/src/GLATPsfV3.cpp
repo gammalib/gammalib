@@ -363,7 +363,7 @@ double GLATPsfV3::psf(const double& offset, const double& logE,
         std::vector<double> weight = m_rpsf_bins.weights();
 
         // Compute offset angle in radians
-        double offset_rad = offset * deg2rad;
+        double offset_rad = offset * gammalib::deg2rad;
         
         // Compute PSF values for the four corners
         double psf0 = eval_psf(offset_rad, energy[0], index[0]);
@@ -601,7 +601,7 @@ double GLATPsfV3::integrate_psf(const double& energy, const int& index)
         GIntegral integral(&integrand);
 
         // Integrate radially from 0 to 90 degrees
-        psf = integral.romb(0.0, pihalf) * twopi;
+        psf = integral.romb(0.0, gammalib::pihalf) * gammalib::twopi;
     
     #if defined(G_APPROXIMATE_PSF_INTEGRAL)
     } // endif: exact integral was performed
@@ -610,12 +610,12 @@ double GLATPsfV3::integrate_psf(const double& energy, const int& index)
     else {
 
         // Compute arguments
-        double rc = pihalf / score;
+        double rc = gammalib::pihalf / score;
         double uc = 0.5 * rc * rc;
-        double sc = twopi * score * score;
-        double rt = pihalf / stail;
+        double sc = gammalib::twopi * score * score;
+        double rt = gammalib::pihalf / stail;
         double ut = 0.5 * rt * rt;
-        double st = twopi * stail * stail;
+        double st = gammalib::twopi * stail * stail;
 
         // Evaluate PSF integral (from 0 to 90 degrees)
         psf = ncore * (base_int(uc, gcore) * sc +

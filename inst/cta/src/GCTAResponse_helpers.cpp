@@ -797,7 +797,7 @@ double cta_irf_diffuse_kern_theta::eval(double theta)
             // Integrate over phi
             GIntegral integral(&integrand);
             integral.eps(1.0e-2);
-            irf = integral.romb(0.0, twopi) * psf * sin_theta;
+            irf = integral.romb(0.0, gammalib::twopi) * psf * sin_theta;
 
             // Compile option: Check for NaN/Inf
             #if defined(G_NAN_CHECK)
@@ -966,7 +966,7 @@ double cta_npred_diffuse_kern_theta::eval(double theta)
         // Integrate over phi
         GIntegral integral(&integrand);
         integral.eps(1.0e-4);
-        npred = integral.romb(0.0, twopi) * sin_theta;
+        npred = integral.romb(0.0, gammalib::twopi) * sin_theta;
 
         // Debug: Check for NaN
         #if defined(G_NAN_CHECK)

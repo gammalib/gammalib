@@ -270,9 +270,9 @@ void GCTAPsf2D::load(const std::string& filename)
     m_psf.axis_radians(1);
 
     // Convert sigma parameters to radians
-    m_psf.scale(1, deg2rad);
-    m_psf.scale(3, deg2rad);
-    m_psf.scale(5, deg2rad);
+    m_psf.scale(1, gammalib::deg2rad);
+    m_psf.scale(3, gammalib::deg2rad);
+    m_psf.scale(5, gammalib::deg2rad);
 
     // Close PSF FITS file
     file.close();
@@ -535,7 +535,7 @@ void GCTAPsf2D::update(const double& logE, const double& theta) const
         }
 
         // Compute global normalization parameter
-        double integral = twopi * (sigma1 + sigma2*m_norm2 + sigma3*m_norm3);
+        double integral = gammalib::twopi * (sigma1 + sigma2*m_norm2 + sigma3*m_norm3);
         m_norm = (integral > 0.0) ? 1.0 / integral : 0.0;
 
     }

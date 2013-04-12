@@ -236,7 +236,7 @@ double GCTAInstDir::dist(const GCTAInstDir& dir) const
 double GCTAInstDir::dist_deg(const GCTAInstDir& dir) const
 {
     // Return distance in degrees
-    return (dist(dir) * rad2deg);
+    return (dist(dir) * gammalib::rad2deg);
 }
 
 
@@ -269,7 +269,7 @@ double GCTAInstDir::posang(const GCTAInstDir& dir) const
 double GCTAInstDir::posang_deg(const GCTAInstDir& dir) const
 {
     // Return position angle in degrees
-    return (posang(dir) * rad2deg);
+    return (posang(dir) * gammalib::rad2deg);
 }
 
 

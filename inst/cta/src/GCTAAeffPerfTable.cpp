@@ -185,7 +185,7 @@ double GCTAAeffPerfTable::operator()(const double& logE,
 
     // Optionally add in Gaussian offset angle dependence
     if (m_sigma != 0.0) {
-        double offset = theta * rad2deg;
+        double offset = theta * gammalib::rad2deg;
         double arg    = offset * offset / m_sigma;
         double scale  = exp(-0.5 * arg * arg);
         aeff         *= scale;

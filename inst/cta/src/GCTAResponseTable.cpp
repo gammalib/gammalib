@@ -648,7 +648,8 @@ void GCTAResponseTable::axis_radians(const int& index)
 
     // Compute nodes
     for (int i = 0; i < bins; ++i) {
-        axis_nodes[i] = 0.5*(m_axis_lo[index][i] + m_axis_hi[index][i])*deg2rad;
+        axis_nodes[i] = 0.5*(m_axis_lo[index][i] + m_axis_hi[index][i]) *
+                        gammalib::deg2rad;
     }
 
     // Set node array

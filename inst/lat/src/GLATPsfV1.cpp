@@ -340,7 +340,7 @@ double GLATPsfV1::psf(const double& offset, const double& logE,
         sigma *= scale_factor(energy);
 
         // Compute base function argument
-        double r = deg2rad * offset / sigma;
+        double r = gammalib::deg2rad * offset / sigma;
         double u = 0.5 * r * r;
 
         // Compute normalization of tail
@@ -352,13 +352,13 @@ double GLATPsfV1::psf(const double& offset, const double& logE,
         if (energy < 120.0) {
             GLATPsfV1::base_integrand integrand(ncore, ntail, sigma, gcore, gtail);
             GIntegral integral(&integrand);
-            ncore /= integral.romb(0.0, pihalf) * twopi;
+            ncore /= integral.romb(0.0, gammalib::pihalf) * gammalib::twopi;
         }
         else {
-            double rmax = pihalf / sigma;
+            double rmax = gammalib::pihalf / sigma;
             double umax = 0.5 * rmax * rmax;
             double norm = ncore*base_int(umax, gcore) + ntail*base_int(umax, gtail);
-            ncore /= norm * twopi * sigma * sigma;
+            ncore /= norm * gammalib::twopi * sigma * sigma;
         }
 
         // Re-compute normalization of tail
@@ -371,7 +371,7 @@ double GLATPsfV1::psf(const double& offset, const double& logE,
         #if G_CHECK_PSF_NORM
         GLATPsfV1::base_integrand integrand(ncore, ntail, sigma, gcore, gtail);
         GIntegral integral(&integrand);
-        double sum = integral.romb(0.0, pihalf) * twopi;
+        double sum = integral.romb(0.0, gammalib::pihalf) * gammalib::twopi;
         std::cout << "Energy=" << energy;
         std::cout << " Offset=" << offset;
         std::cout << " cos(theta)=" << ctheta;

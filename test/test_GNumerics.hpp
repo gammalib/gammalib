@@ -1,7 +1,7 @@
 /***************************************************************************
  *                test_GNumerics.hpp  -  test numerics modules             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@ public:
     virtual ~Gauss(void) { return; }
     double eval(double x) {
         double arg = -0.5*x*x/m_sigma/m_sigma;
-        double val = 1.0/std::sqrt(twopi)/m_sigma * std::exp(arg);
+        double val = 1.0/std::sqrt(gammalib::twopi)/m_sigma * std::exp(arg);
         return val;
     }
 protected:

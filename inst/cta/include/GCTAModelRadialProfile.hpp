@@ -98,7 +98,7 @@ protected:
     public:
         integrand(const GCTAModelRadialProfile* model) : m_model(model) { }
         double eval(double x) {
-            return (std::sin(x)*m_model->eval(x*rad2deg));
+            return (std::sin(x)*m_model->eval(x*gammalib::rad2deg));
         }
     private:
         const GCTAModelRadialProfile* m_model;

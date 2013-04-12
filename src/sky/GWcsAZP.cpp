@@ -312,7 +312,7 @@ void GWcsAZP::prj_set(void) const
     // Set undefined parameters
     if (undefined(m_pv[1])) m_pv[1] = 0.0;
     if (undefined(m_pv[2])) m_pv[2] = 0.0;
-    if (m_r0 == 0.0)        m_r0    = rad2deg;
+    if (m_r0 == 0.0)        m_r0    = gammalib::rad2deg;
     
     // Precompute 
     m_w[0] = m_r0*(m_pv[1] + 1.0);

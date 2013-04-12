@@ -233,7 +233,7 @@ GTime* GTime::clone(void) const
 double GTime::jd(void) const
 {
     // Convert time from MET to JD
-    double jd = m_time / sec_in_day + jd_ref;
+    double jd = m_time / gammalib::sec_in_day + jd_ref;
     
     // Return JD
     return jd;
@@ -251,7 +251,7 @@ double GTime::jd(void) const
 double GTime::mjd(void) const
 {
     // Convert time to MJD
-    double mjd = m_time / sec_in_day + mjd_ref;
+    double mjd = m_time / gammalib::sec_in_day + mjd_ref;
     
     // Return MJD
     return mjd;
@@ -278,7 +278,7 @@ double GTime::secs(void) const
 double GTime::days(void) const
 {
     // Return time
-    return m_time / sec_in_day;
+    return m_time / gammalib::sec_in_day;
 }
 
 
@@ -299,7 +299,7 @@ double GTime::convert(const GTimeReference& ref) const
     double time = m_time;
     
     // Compute time offset in seconds
-    double offset = (mjd_ref - ref.mjdref()) * sec_in_day;
+    double offset = (mjd_ref - ref.mjdref()) * gammalib::sec_in_day;
         
     // Add time offset in seconds
     time += offset;
@@ -323,7 +323,7 @@ double GTime::convert(const GTimeReference& ref) const
 void GTime::jd(const double& time)
 {
     // Convert time from JD to native (seconds)
-    m_time = (time - jd_ref) * sec_in_day;
+    m_time = (time - jd_ref) * gammalib::sec_in_day;
     
     // Return
     return;
@@ -338,7 +338,7 @@ void GTime::jd(const double& time)
 void GTime::mjd(const double& time)
 {
     // Convert time from MJD to native (seconds)
-    m_time = (time - mjd_ref) * sec_in_day;
+    m_time = (time - mjd_ref) * gammalib::sec_in_day;
     
     // Return
     return;
@@ -368,7 +368,7 @@ void GTime::secs(const double& seconds)
 void GTime::days(const double& days)
 {
     // Set time
-    m_time = days * sec_in_day;
+    m_time = days * gammalib::sec_in_day;
     
     // Return
     return;
@@ -392,7 +392,7 @@ void GTime::set(const double& time, const GTimeReference& ref)
     m_time = time * ref.unitseconds();
     
     // Compute time offset in seconds
-    double offset = (mjd_ref - ref.mjdref()) * sec_in_day;
+    double offset = (mjd_ref - ref.mjdref()) * gammalib::sec_in_day;
         
     // Subtract time offset in seconds
     m_time -= offset;

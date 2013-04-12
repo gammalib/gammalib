@@ -632,7 +632,7 @@ double GResponse::npred_radial_kern_theta::eval(double theta)
 
     // Integrate over phi
     GIntegral integral(&integrand);
-    npred = integral.romb(0.0, twopi) * sin_theta * model;
+    npred = integral.romb(0.0, gammalib::twopi) * sin_theta * model;
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
@@ -720,7 +720,7 @@ double GResponse::npred_elliptical_kern_theta::eval(double theta)
 
     // Integrate over phi
     GIntegral integral(&integrand);
-    npred = integral.romb(0.0, twopi) * sin_theta;
+    npred = integral.romb(0.0, gammalib::twopi) * sin_theta;
 
     // Debug: Check for NaN
     #if defined(G_NAN_CHECK)
