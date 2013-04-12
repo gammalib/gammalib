@@ -62,7 +62,7 @@
  *
  * which happens to be faster on most systems.
  ***************************************************************************/
-double gammalib::arccos(const double& arg)
+double gammalib::acos(const double& arg)
 {
     // Allocate result
     double arccos;

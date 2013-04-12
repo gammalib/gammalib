@@ -33,7 +33,7 @@
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
-    double arccos(const double& arg);
+    double acos(const double& arg);
     double gammln(const double& arg);
     double modulo(const double& v1, const double& v2);
 }
