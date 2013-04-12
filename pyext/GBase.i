@@ -1,7 +1,7 @@
 /***************************************************************************
  *                       GBase.i - GammaLib base class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -54,4 +54,14 @@ public:
     // Methods
     virtual void   clear(void) = 0;
     virtual GBase* clone(void) const = 0;
+};
+
+
+/***********************************************************************//**
+ * @brief GBase class extension
+ ***************************************************************************/
+%extend GBase {
+    char *__str__() {
+        return gammalib::tochar(self->print());
+    }
 };
