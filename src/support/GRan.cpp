@@ -31,7 +31,7 @@
 #include <cmath>
 #include "GRan.hpp"
 #include "GTools.hpp"
-#include "GNumerics.hpp"
+#include "GMath.hpp"
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
