@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GNumerics.cpp  -  Numerical functions                *
+ *                     GMath.cpp - Mathematical functions                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,14 +19,14 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GNumerics.cpp
- * @brief Numerical function implementations
+ * @file GMath.cpp
+ * @brief Mathematical function implementations
  * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
 #include <cmath>
-#include "GNumerics.hpp"
+#include "GMath.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 
@@ -47,8 +47,9 @@
  * @brief Computes logarithm of gamma function
  *
  * @param[in] x Argument.
+ * @return Logarithm of gamma function.
  ***************************************************************************/
-double gammln(const double& x) {
+double gammalib::gammln(const double& x) {
 
     // Define static constants
     static const double cof[6] = { 76.18009172947146,

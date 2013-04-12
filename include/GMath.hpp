@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    GNumerics.hpp  -  Numerical functions                *
+ *                     GMath.hpp - Mathematical functions                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,21 +19,21 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GNumerics.hpp
- * @brief Numerical function definitions
+ * @file GMath.hpp
+ * @brief Mathematical function definitions
  * @author Juergen Knoedlseder
  */
 
-#ifndef GNUMERICS_HPP
-#define GNUMERICS_HPP
+#ifndef GMATH_HPP
+#define GMATH_HPP
 
 /* __ Includes ___________________________________________________________ */
-
-/* __ Namespaces _________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
 
 /* __ Prototypes _________________________________________________________ */
-double gammln(const double& x);
+namespace gammalib {
+    double gammln(const double& x);
+}
 
-#endif /* GNUMERICS_HPP */
+#endif /* GMATH_HPP */
