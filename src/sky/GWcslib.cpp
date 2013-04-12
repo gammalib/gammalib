@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GWcslib.cpp - Virtual base class for wcslib based WCS        *
+ *          GWcslib.cpp - Virtual base class for wcslib based WCS          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -1628,8 +1628,8 @@ void GWcslib::cel_set(void) const
         double clat0;
         double sthe0;
         double cthe0;
-        sincosd(lat0,     &slat0, &clat0);
-        sincosd(m_theta0, &sthe0, &cthe0);
+        gammalib::sincosd(lat0,     &slat0, &clat0);
+        gammalib::sincosd(m_theta0, &sthe0, &cthe0);
 
         // ...
         double sphip;
@@ -1647,7 +1647,7 @@ void GWcslib::cel_set(void) const
         else {
             
             // Compute sine and cosine of Phi_p - Phi_0
-            sincosd(phip - m_phi0, &sphip, &cphip);
+            gammalib::sincosd(phip - m_phi0, &sphip, &cphip);
 
             // ...
             double x = cthe0 * cphip;
@@ -1692,8 +1692,8 @@ void GWcslib::cel_set(void) const
                         throw GException::wcs_invalid_parameter(G_CEL_SET, message);
                     }
                 }
-                u = atan2d(y,x);
-                v = acosd(slz);
+                u = gammalib::atan2d(y,x);
+                v = gammalib::acosd(slz);
             } // endelse: z != 0
         } // endelse: ...
 
@@ -1741,7 +1741,7 @@ void GWcslib::cel_set(void) const
         } // endif: ...
 
         // ...
-        double z = cosd(latp) * clat0;
+        double z = gammalib::cosd(latp) * clat0;
         if (std::abs(z) < tol) {
         
             // Celestial pole at the fiducial point
@@ -1763,7 +1763,7 @@ void GWcslib::cel_set(void) const
         
         // ...
         else {
-            double x = (sthe0 - sind(latp)*slat0)/z;
+            double x = (sthe0 - gammalib::sind(latp)*slat0)/z;
             double y =  sphip*cthe0/clat0;
             if (x == 0.0 && y == 0.0) {
                 std::string message;
@@ -1771,7 +1771,7 @@ void GWcslib::cel_set(void) const
                 message += +", expected at least that one differs from 0.";
                 throw GException::wcs_invalid_parameter(G_CEL_SET, message);
             }
-            lngp = lng0 - atan2d(y,x);
+            lngp = lng0 - gammalib::atan2d(y,x);
         }
 
         // Make celestial longitude at the pole the same sign as at the
@@ -1802,7 +1802,7 @@ void GWcslib::cel_set(void) const
     m_euler[0] = lngp;
     m_euler[1] = 90.0 - latp;
     m_euler[2] = phip;
-    sincosd(m_euler[1], &m_euler[4], &m_euler[3]);
+    gammalib::sincosd(m_euler[1], &m_euler[4], &m_euler[3]);
     
     // Signal if |latitude| is preserved
     m_isolat = (m_euler[4] == 0.0);
@@ -2074,7 +2074,7 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
             // ...
             double sinthe;
             double costhe;
-            sincosd(*thetap, &sinthe, &costhe);
+            gammalib::sincosd(*thetap, &sinthe, &costhe);
             
             // ...
             double costhe3 = costhe * m_euler[3];
@@ -2089,7 +2089,7 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
                 double dphi = *lngp;
                 double sinphi;
                 double cosphi;
-                sincosd(dphi, &sinphi, &cosphi);
+                gammalib::sincosd(dphi, &sinphi, &cosphi);
 
                 // Compute the celestial longitude
                 double x =  sinthe4 - costhe3*cosphi;
@@ -2097,13 +2097,14 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
                 
                 // Rearrange longitude formula to reduce roundoff errors
                 if (std::abs(x) < tol) {
-                    x = -cosd(*thetap + m_euler[1]) + costhe3*(1.0 - cosphi);
+                    x = -gammalib::cosd(*thetap + m_euler[1]) +
+                        costhe3*(1.0 - cosphi);
                 }
 
                 // Compute longitude shift
                 double dlng;
                 if (x != 0.0 || y != 0.0) {
-                    dlng = atan2d(y, x);
+                    dlng = gammalib::atan2d(y, x);
                 }
                 else {
                     dlng = (m_euler[1] < 90.0) ? dphi + 180.0 : -dphi;
@@ -2143,13 +2144,13 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
                     // Use alternative formulae for greater accuracy
                     double z = sinthe3 + costhe4*cosphi;
                     if (z > 0.99) {
-                        *latp = acosd(sqrt(x*x+y*y));
+                        *latp = gammalib::acosd(sqrt(x*x+y*y));
                     }
                     else if (z < -0.99) {
-                        *latp = -acosd(sqrt(x*x+y*y));
+                        *latp = -gammalib::acosd(sqrt(x*x+y*y));
                     }
                     else {
-                        *latp = asind(z);
+                        *latp = gammalib::asind(z);
                     }
                 } // endelse: general longitude shift
                 
@@ -2291,7 +2292,7 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
             // ...
             double sinlat;
             double coslat;
-            sincosd(*latp, &sinlat, &coslat);
+            gammalib::sincosd(*latp, &sinlat, &coslat);
             double coslat3 = coslat*m_euler[3];
             double coslat4 = coslat*m_euler[4];
             double sinlat3 = sinlat*m_euler[3];
@@ -2304,7 +2305,7 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
                 double dlng = *phip;
                 double sinlng;
                 double coslng;
-                sincosd(dlng, &sinlng, &coslng);
+                gammalib::sincosd(dlng, &sinlng, &coslng);
 
                 // Compute the native longitude
                 double x = sinlat4 - coslat3*coslng;
@@ -2312,13 +2313,14 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
                 
                 // Rearrange formula to reduce roundoff errors
                 if (std::abs(x) < tol) {
-                    x = -cosd(*latp+m_euler[1]) + coslat3*(1.0 - coslng);
+                    x = -gammalib::cosd(*latp+m_euler[1]) +
+                        coslat3*(1.0 - coslng);
                 }
 
                 // Compute Phi shift
                 double dphi;
                 if (x != 0.0 || y != 0.0) {
-                    dphi = atan2d(y, x);
+                    dphi = gammalib::atan2d(y, x);
                 } 
                 else { // Change of origin of longitude
                     if (m_euler[1] < 90.0) {
@@ -2353,13 +2355,13 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
                     // Use alternative formulae for greater accuracy
                     double z = sinlat3 + coslat4*coslng;
                     if (z > 0.99) {
-                        *thetap = acosd(sqrt(x*x+y*y));
+                        *thetap = gammalib::acosd(sqrt(x*x+y*y));
                     }
                     else if (z < -0.99) {
-                        *thetap = -acosd(sqrt(x*x+y*y));
+                        *thetap = -gammalib::acosd(sqrt(x*x+y*y));
                     }
                     else {
-                        *thetap = asind(z);
+                        *thetap = gammalib::asind(z);
                     }
                 }
       
@@ -2871,262 +2873,6 @@ void GWcslib::prj_off(const double& phi0, const double& theta0) const
         m_x0 = x0;
         m_y0 = y0;
     }
-    
-    // Return
-    return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                 Trigonometric methods adapted from wcslib               =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Compute cosine of angle in degrees
- *
- * @param[in] angle Angle in degrees
- *
- * Code adapted from wcstrig.c::cosd().
- ***************************************************************************/
-double GWcslib::cosd(const double& angle) const
-{
-    // Check for rounding errors
-    if (fmod(angle, 90.0) == 0.0) {
-        int i = std::abs((int)std::floor(angle/90.0 + 0.5))%4;
-        switch (i) {
-        case 0:
-            return 1.0;
-        case 1:
-            return 0.0;
-        case 2:
-            return -1.0;
-        case 3:
-            return 0.0;
-        }
-    }
-
-    // Return cosine
-    return std::cos(angle * gammalib::deg2rad);
-}
-
-
-/***********************************************************************//**
- * @brief Compute sine of angle in degrees
- *
- * @param[in] angle Angle in degrees
- *
- * Code adapted from wcstrig.c::sind().
- ***************************************************************************/
-double GWcslib::sind(const double& angle) const
-{
-    // Check for rounding errors
-    if (fmod(angle, 90.0) == 0.0) {
-        int i = std::abs((int)std::floor(angle/90.0 - 0.5))%4;
-        switch (i) {
-        case 0:
-            return 1.0;
-        case 1:
-            return 0.0;
-        case 2:
-            return -1.0;
-        case 3:
-            return 0.0;
-        }
-    }
-
-    // Return sine
-    return std::sin(angle * gammalib::deg2rad);
-}
-
-
-/***********************************************************************//**
- * @brief Compute tangens of angle in degrees
- *
- * @param[in] angle Angle in degrees
- *
- * Code adapted from wcstrig.c::tand().
- ***************************************************************************/
-double GWcslib::tand(const double& angle) const
-{
-    // Check for rounding errors
-    double resid = fmod(angle, 360.0);
-    if (resid == 0.0 || std::abs(resid) == 180.0) {
-        return 0.0;
-    }
-    else if (resid == 45.0 || resid == 225.0) {
-        return 1.0;
-    }
-    else if (resid == -135.0 || resid == -315.0) {
-        return -1.0;
-    }
-
-    // Return tangens
-    return std::tan(angle * gammalib::deg2rad);
-}
-
-
-/***********************************************************************//**
- * @brief Compute arc cosine in degrees
- *
- * @param[in] value Value
- *
- * Code adapted from wcstrig.c::acosd().
- ***************************************************************************/
-double GWcslib::acosd(const double& value) const
-{
-    // Domain tolerance
-    const double wcstrig_tol = 1.0e-10;
-    
-    // Check for rounding errors
-    if (value >= 1.0) {
-        if (value-1.0 <  wcstrig_tol) {
-            return 0.0;
-        }
-    } 
-    else if (value == 0.0) {
-        return 90.0;
-    }
-    else if (value <= -1.0) {
-        if (value+1.0 > -wcstrig_tol) {
-            return 180.0;
-        }
-    }
-
-    // Return arc cosine
-    return std::acos(value) * gammalib::rad2deg;
-}
-
-
-/***********************************************************************//**
- * @brief Compute arc sine in degrees
- *
- * @param[in] value Value
- *
- * Code adapted from wcstrig.c::asind().
- ***************************************************************************/
-double GWcslib::asind(const double& value) const
-{
-    // Domain tolerance
-    const double wcstrig_tol = 1.0e-10;
-    
-    // Check for rounding errors
-    if (value <= -1.0) {
-        if (value+1.0 > -wcstrig_tol) {
-            return -90.0;
-        }
-    } 
-    else if (value == 0.0) {
-        return 0.0;
-    }
-    else if (value >= 1.0) {
-        if (value-1.0 <  wcstrig_tol) {
-            return 90.0;
-        }
-    }
-
-    // Return arc sine
-    return std::asin(value) * gammalib::rad2deg;
-}
-
-
-/***********************************************************************//**
- * @brief Compute arc tangens in degrees
- *
- * @param[in] value Value
- *
- * Code adapted from wcstrig.c::atand().
- ***************************************************************************/
-double GWcslib::atand(const double& value) const
-{
-    // Check for rounding errors
-    if (value == -1.0) {
-        return -45.0;
-    }
-    else if (value == 0.0) {
-        return 0.0;
-    }
-    else if (value == 1.0) {
-        return 45.0;
-    }
-
-    // Return arc sine
-    return std::atan(value) * gammalib::rad2deg;
-}
-
-
-/***********************************************************************//**
- * @brief Compute arc tangens in degrees
- *
- * @param[in] y Nominator
- * @param[in] x Denominator
- *
- * Code adapted from wcstrig.c::atan2d().
- ***************************************************************************/
-double GWcslib::atan2d(const double& y, const double& x) const
-{
-    // Check for rounding errors
-    if (y == 0.0) {
-        if (x >= 0.0) {
-            return 0.0;
-        }
-        else if (x < 0.0) {
-            return 180.0;
-        }
-    }
-    else if (x == 0.0) {
-        if (y > 0.0) {
-            return 90.0;
-        }
-        else if (y < 0.0) {
-            return -90.0;
-        }
-    }
-
-    // Return arc sine
-    return std::atan2(y,x) * gammalib::rad2deg;
-}
-
-
-/***********************************************************************//**
- * @brief Compute sine and cosine of angle in degrees
- *
- * @param[in] angle Angle [degrees].
- * @param[out] s Sine of angle.
- * @param[out] c Cosine of angle.
- *
- * Code adapted from wcstrig.c::sincosd().
- ***************************************************************************/
-void GWcslib::sincosd(const double& angle, double *s, double *c) const
-
-{
-    // Check for rounding errors
-    if (fmod(angle, 90.0) == 0.0) {
-        int i = std::abs((int)std::floor(angle/90.0 + 0.5))%4;
-        switch (i) {
-        case 0:
-            *s = 0.0;
-            *c = 1.0;
-            return;
-        case 1:
-            *s = (angle > 0.0) ? 1.0 : -1.0;
-            *c = 0.0;
-            return;
-        case 2:
-            *s =  0.0;
-            *c = -1.0;
-            return;
-        case 3:
-            *s = (angle > 0.0) ? -1.0 : 1.0;
-            *c = 0.0;
-            return;
-        }
-    }
-  
-    // Compute sine and cosine
-    *s = std::sin(angle * gammalib::deg2rad);
-    *c = std::cos(angle * gammalib::deg2rad);
     
     // Return
     return;

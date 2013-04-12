@@ -320,16 +320,16 @@ void GWcsAZP::prj_set(void) const
         std::string message = "PV(1)=-1 encountered.";
         throw GException::wcs_invalid_parameter(G_PRJ_SET, message);
     }
-    m_w[3] = cosd(m_pv[2]);
+    m_w[3] = gammalib::cosd(m_pv[2]);
     if (m_w[3] == 0.0) {
         std::string message = "cos(PV(2))=0 encountered.";
         throw GException::wcs_invalid_parameter(G_PRJ_SET, message);
     }
     m_w[2] = 1.0/m_w[3];
-    m_w[4] = sind(m_pv[2]);
+    m_w[4] = gammalib::sind(m_pv[2]);
     m_w[1] = m_w[4] / m_w[3];
     if (std::abs(m_pv[1]) > 1.0)
-        m_w[5] = asind(-1.0/m_pv[1]);
+        m_w[5] = gammalib::asind(-1.0/m_pv[1]);
     else
         m_w[5] = -90.0;
     m_w[6] = m_pv[1] * m_w[3];
@@ -432,10 +432,10 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
 
             } 
             else {
-                *phip    = atan2d(xj, -yc);
+                *phip    = gammalib::atan2d(xj, -yc);
                 double s = r / q;
-                double t = s * m_pv[1]/sqrt(s*s + 1.0);
-                s = atan2d(1.0, s);
+                double t = s * m_pv[1]/std::sqrt(s*s + 1.0);
+                s = gammalib::atan2d(1.0, s);
                 if (std::abs(t) > 1.0) {
                     if (std::abs(t) > 1.0+tol) {
                         *thetap    = 0.0;
@@ -447,7 +447,7 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
                     t = (t < 0) ? -90.0 : 90.0;
                 } 
                 else
-                    t = asind(t);
+                    t = gammalib::asind(t);
                 double a = s - t;
                 double b = s + t + 180.0;
                 if (a > 90.0) a -= 360.0;
@@ -526,7 +526,7 @@ void GWcsAZP::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sxy, phip += spt) {
         double sinphi;
         double cosphi;
-        sincosd(*phip, &sinphi, &cosphi);
+        gammalib::sincosd(*phip, &sinphi, &cosphi);
         double* xp = x + rowoff;
         double* yp = y + rowoff;
         for (int itheta = 0; itheta < mtheta; ++itheta) {
@@ -547,7 +547,7 @@ void GWcsAZP::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         // Compute sin(theta) and cos(theta)
         double sinthe;
         double costhe;
-        sincosd(*thetap, &sinthe, &costhe);
+        gammalib::sincosd(*thetap, &sinthe, &costhe);
 
         // ...
         for (int iphi = 0; iphi < mphi; ++iphi, xp += sxy, yp += sxy) {
@@ -583,8 +583,8 @@ void GWcsAZP::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                     else if (m_w[7] > 0.0) {
                         t = m_pv[1] / sqrt(1.0 + s*s);
                         if (std::abs(t) <= 1.0) {
-                            s = atand(-s);
-                            t = asind(t);
+                            s = gammalib::atand(-s);
+                            t = gammalib::asind(t);
                             double a = s - t;
                             double b = s + t + 180.0;
                             if (a > 90.0) a -= 360.0;

@@ -59,14 +59,14 @@ public:
     // Operators
     virtual GWcslib& operator= (const GWcslib& wcs);
 
-    // Pure virtual methods (not implemented)
+    // Pure virtual base class methods
     virtual void        clear(void) = 0;
     virtual GWcslib*    clone(void) const = 0;
     virtual std::string code(void) const = 0;
     virtual std::string name(void) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
     
-    // Implemented virtual methods
+    // Implemented virtual base class methods
     virtual void        read(const GFitsHDU* hdu);
     virtual void        write(GFitsHDU* hdu) const;
     virtual double      omega(const int& pix) const;
@@ -155,16 +155,6 @@ protected:
                          const double* phi, const double* theta,
                          double* x, double* y, int* stat) const = 0;
     
-    // Methods adapted from wcslib::wcstrig.c
-    double cosd(const double& angle) const;
-    double sind(const double& angle) const;
-    double tand(const double& angle) const;
-    double asind(const double& value) const;
-    double acosd(const double& value) const;
-    double atand(const double& value) const;
-    double atan2d(const double& y, const double& x) const;
-    void   sincosd(const double& angle, double *s, double *c) const;
-
     // World Coordinate System parameters
     mutable bool                     m_wcsset;  //!< WCS information is set
     int                              m_naxis;   //!< Number of axes

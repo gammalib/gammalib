@@ -373,7 +373,7 @@ void GWcsMER::prj_x2s(int nx, int ny, int sxy, int spt,
     double*       thetap = theta;
     int*          statp  = stat;
     for (int iy = 0; iy < ny; ++iy, yp += sxy) {
-        double t = 2.0 * atand(std::exp((*yp + m_y0)/m_r0)) - 90.0;
+        double t = 2.0 * gammalib::atand(std::exp((*yp + m_y0)/m_r0)) - 90.0;
         for (int ix = 0; ix < mx; ++ix, thetap += spt) {
             *thetap    = t;
             *(statp++) = 0;
@@ -461,7 +461,7 @@ void GWcsMER::prj_s2x(int nphi, int ntheta, int spt, int sxy,
             status = 3;
             n_invalid++;
         } else {
-            eta = m_r0 * std::log(tand((*thetap+90.0)/2.0)) - m_y0;
+            eta = m_r0 * std::log(gammalib::tand((*thetap+90.0)/2.0)) - m_y0;
         }
         for (int iphi = 0; iphi < mphi; ++iphi, yp += sxy) {
             *yp = eta;

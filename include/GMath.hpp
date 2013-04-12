@@ -54,7 +54,19 @@ namespace gammalib {
 
 /* __ Prototypes _________________________________________________________ */
 namespace gammalib {
+
+    // Trigonometric functions
     double acos(const double& arg);
+    double cosd(const double& angle);
+    double sind(const double& angle);
+    double tand(const double& angle);
+    double asind(const double& value);
+    double acosd(const double& value);
+    double atand(const double& value);
+    double atan2d(const double& y, const double& x);
+    void   sincosd(const double& angle, double *s, double *c);
+
+    // Other functions
     double gammln(const double& arg);
     double modulo(const double& v1, const double& v2);
 }

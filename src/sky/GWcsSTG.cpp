@@ -361,8 +361,9 @@ void GWcsSTG::prj_x2s(int nx, int ny, int sxy, int spt,
     for (int ix = 0; ix < nx; ++ix, rowoff += spt, xp += sxy) {
         double  xj   = *xp + m_x0;
         double* phip = phi + rowoff;
-        for (int iy = 0; iy < my; ++iy, phip += rowlen)
+        for (int iy = 0; iy < my; ++iy, phip += rowlen) {
             *phip = xj;
+        }
     }
 
     // Do y dependence
@@ -375,12 +376,14 @@ void GWcsSTG::prj_x2s(int nx, int ny, int sxy, int spt,
         double yj2 = yj*yj;
         for (int ix = 0; ix < mx; ++ix, phip += spt, thetap += spt) {
             double xj = *phip;
-            double r  = sqrt(xj*xj + yj2);
-            if (r == 0.0)
+            double r  = std::sqrt(xj*xj + yj2);
+            if (r == 0.0) {
                 *phip = 0.0;
-            else
-                *phip = atan2d(xj, -yj);
-            *thetap    = 90.0 - 2.0*atand(r*m_w[1]);
+            }
+            else {
+                *phip = gammalib::atan2d(xj, -yj);
+            }
+            *thetap    = 90.0 - 2.0*gammalib::atand(r*m_w[1]);
             *(statp++) = 0;
         }
     }
@@ -445,7 +448,7 @@ void GWcsSTG::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sxy, phip += spt) {
         double sinphi;
         double cosphi;
-        sincosd(*phip, &sinphi, &cosphi);
+        gammalib::sincosd(*phip, &sinphi, &cosphi);
         double* xp = x + rowoff;
         double* yp = y + rowoff;
         for (int itheta = 0; itheta < mtheta; ++itheta) {
@@ -464,7 +467,7 @@ void GWcsSTG::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     for (int itheta = 0; itheta < ntheta; ++itheta, thetap += spt) {
         
         // Compute sine of Theta
-        double s = 1.0 + sind(*thetap);
+        double s = 1.0 + gammalib::sind(*thetap);
         
         // If 1+sine is zero we cannot proceed. Set all pixels to (0,0) and flag
         // them as being bad
@@ -481,7 +484,7 @@ void GWcsSTG::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         // ... otherwise proceed, but if strict bound checking has been requested
         // then flag all pixels as bad that have negative sin(theta)
         else {
-            double r = m_w[0] * cosd(*thetap)/s;
+            double r = m_w[0] * gammalib::cosd(*thetap)/s;
             for (int iphi = 0; iphi < mphi; ++iphi, xp += sxy, yp += sxy) {
                 *xp        =  r*(*xp) - m_x0;
                 *yp        = -r*(*yp) - m_y0;
@@ -491,8 +494,9 @@ void GWcsSTG::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     }
   
     // Handle status code
-    if (status == 4)
+    if (status == 4) {
         throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
+    }
     
     // Return
     return;

@@ -370,12 +370,12 @@ void GWcsTAN::prj_x2s(int nx, int ny, int sxy, int spt,
         double yj2 = yj*yj;
         for (int ix = 0; ix < mx; ++ix, phip += spt, thetap += spt) {
             double xj = *phip;
-            double r  = sqrt(xj*xj + yj2);
+            double r  = std::sqrt(xj*xj + yj2);
             if (r == 0.0)
                 *phip = 0.0;
             else
-                *phip = atan2d(xj, -yj);
-            *thetap    = atan2d(m_r0, r);
+                *phip = gammalib::atan2d(xj, -yj);
+            *thetap    = gammalib::atan2d(m_r0, r);
             *(statp++) = 0;
         }
     }
@@ -440,7 +440,7 @@ void GWcsTAN::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sxy, phip += spt) {
         double sinphi;
         double cosphi;
-        sincosd(*phip, &sinphi, &cosphi);
+        gammalib::sincosd(*phip, &sinphi, &cosphi);
         double* xp = x + rowoff;
         double* yp = y + rowoff;
         for (int itheta = 0; itheta < mtheta; ++itheta) {
@@ -459,7 +459,7 @@ void GWcsTAN::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     for (int itheta = 0; itheta < ntheta; ++itheta, thetap += spt) {
         
         // Compute sine of Theta
-        double s = sind(*thetap);
+        double s = gammalib::sind(*thetap);
         
         // If sine is zero we cannot proceed. Set all pixels to (0,0) and flag
         // them as being bad
@@ -476,7 +476,7 @@ void GWcsTAN::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         // ... otherwise proceed, but if strict bound checking has been requested
         // then flag all pixels as bad that have negative sin(theta)
         else {
-            double r     = m_r0*cosd(*thetap)/s;
+            double r     = m_r0*gammalib::cosd(*thetap)/s;
             int    istat = 0;
             if (m_bounds && s < 0.0) {
                 istat      = 1;
