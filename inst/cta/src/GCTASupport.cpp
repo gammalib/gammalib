@@ -32,6 +32,7 @@
 #include <iostream>
 #include "GCTASupport.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 
 /* __ Coding definitions _________________________________________________ */
 

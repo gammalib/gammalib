@@ -33,6 +33,7 @@
 #include <string>
 #include "GFits.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GIntegral.hpp"
 #include "GCaldb.hpp"
 #include "GModelSpatialRadial.hpp"
