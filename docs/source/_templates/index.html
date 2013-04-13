@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+{% set title = _('Overview') %}
+{% block body %}
+  <h1>{{ _('GammaLib') }}</h1>
+
+  <p>{%trans%}
+    What is this?
+  {%endtrans%}</p>
+
+  <h2><a class="biglink" href="{{ pathto("contents") }}">{%trans%}Contents{%endtrans%}</a></h2>
+
+
+{% endblock %}
