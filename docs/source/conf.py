@@ -138,7 +138,7 @@ html_last_updated_fmt = '%b %d, %Y'
 html_additional_pages = {'index': 'index.html'}
 
 # If false, no module index is generated.
-#html_domain_indices = True
+html_domain_indices = False
 
 # If false, no index is generated.
 #html_use_index = True
@@ -147,7 +147,7 @@ html_additional_pages = {'index': 'index.html'}
 #html_split_index = False
 
 # If true, links to the reST sources are added to the pages.
-#html_show_sourcelink = True
+html_show_sourcelink = False
 
 # If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
 html_show_sphinx = False

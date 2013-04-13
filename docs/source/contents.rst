@@ -9,3 +9,7 @@ Documentation
 .. toctree::
    :maxdepth: 2
 
+   home
+   installation
+   quickstart
+   documentation
