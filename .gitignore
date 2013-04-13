@@ -1,6 +1,7 @@
 # Folders
 doc/man
 doc/html/doxygen
+docs/build
 depcomp
 pyext/build/
 .libs
@@ -46,6 +47,7 @@ missing
 ltmain.sh
 libtool
 install-sh
+.settings
 .project
 .cproject
 .pydevproject
