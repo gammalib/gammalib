@@ -26,6 +26,7 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GMatrix.hpp"
+#include "GVector.hpp"
 #include "GTools.hpp"
 %}
 
@@ -51,13 +52,9 @@ public:
     GMatrix(const GMatrixSparse& matrix);
     virtual ~GMatrix(void);
 
-    // Implemented pure virtual base class operators
-    virtual GVector       operator*(const GVector& vector) const;
-
     // Other operators
     virtual GMatrix       operator+(const GMatrix& matrix) const;
     virtual GMatrix       operator-(const GMatrix& matrix) const;
-    virtual GMatrix       operator*(const GMatrix& matrix) const;
     virtual GMatrix       operator-(void) const;
     virtual GMatrix&      operator+=(const GMatrix& matrix);
     virtual GMatrix&      operator-=(const GMatrix& matrix);
@@ -103,11 +100,17 @@ public:
     void __setitem__(int GTuple[2], double value) {
         (*self)(GTuple[0], GTuple[1]) = value;
     }
-    GMatrix __mul__(const double &a) {
-        return ((*self) * a);
+    GVector __mul__(const GVector& vector) {
+        return ((*self) * vector);
     }
-    GMatrix __div__(const double &a) {
-        return ((*self) / a);
+    GMatrix __mul__(const GMatrix& matrix) {
+        return ((*self) * matrix);
+    }
+    GMatrix __mul__(const double &scalar) {
+        return ((*self) * scalar);
+    }
+    GMatrix __div__(const double &scalar) {
+        return ((*self) / scalar);
     }
     GMatrix copy() {
         return (*self);
@@ -117,3 +120,11 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GMatrix friends
+ ***************************************************************************/
+GMatrix transpose(const GMatrix& matrix);
+GMatrix invert(const GMatrix& matrix);
+GMatrix abs(const GMatrix& matrix);

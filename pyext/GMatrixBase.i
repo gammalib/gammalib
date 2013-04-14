@@ -41,9 +41,6 @@ public:
     GMatrixBase(const GMatrixBase& matrix);
     virtual ~GMatrixBase(void);
 
-    // Pure virtual operators
-    virtual GVector       operator*(const GVector& vector) const = 0;
-
     // Implemented base class operators
     virtual bool          operator==(const GMatrixBase& matrix) const;
     virtual bool          operator!=(const GMatrixBase& matrix) const;

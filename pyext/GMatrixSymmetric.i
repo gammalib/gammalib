@@ -51,13 +51,9 @@ public:
     GMatrixSymmetric(const GMatrixSymmetric& matrix);
     virtual ~GMatrixSymmetric(void);
 
-    // Implemented pure virtual base class operators
-    virtual GVector           operator*(const GVector& v) const;
-
     // Other operators
     virtual GMatrixSymmetric  operator+(const GMatrixSymmetric& matrix) const;
     virtual GMatrixSymmetric  operator-(const GMatrixSymmetric& matrix) const;
-    virtual GMatrix           operator*(const GMatrixSymmetric& matrix) const;
     virtual GMatrixSymmetric  operator-(void) const;
     virtual GMatrixSymmetric& operator+=(const GMatrixSymmetric& matrix);
     virtual GMatrixSymmetric& operator-=(const GMatrixSymmetric& matrix);
@@ -102,11 +98,17 @@ public:
     void __setitem__(int GTuple[2], double value) {
         (*self)(GTuple[0], GTuple[1]) = value;
     }
-    GMatrixSymmetric __mul__(const double &a) {
-        return (*self) * a;
+    GVector __mul__(const GVector& vector) {
+        return ((*self) * vector);
     }
-    GMatrixSymmetric __div__(const double &a) {
-        return (*self) / a;
+    GMatrixSymmetric __mul__(const GMatrixSymmetric& matrix) {
+        return ((*self) * matrix);
+    }
+    GMatrixSymmetric __mul__(const double &scalar) {
+        return ((*self) * scalar);
+    }
+    GMatrixSymmetric __div__(const double &scalar) {
+        return ((*self) / scalar);
     }
     GMatrixSymmetric copy() {
         return (*self);
@@ -116,3 +118,11 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GMatrixSymmetric friends
+ ***************************************************************************/
+GMatrixSymmetric transpose(const GMatrixSymmetric& matrix);
+GMatrixSymmetric invert(const GMatrixSymmetric& matrix);
+GMatrixSymmetric abs(const GMatrixSymmetric& matrix);

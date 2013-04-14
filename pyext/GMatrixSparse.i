@@ -52,9 +52,6 @@ public:
     GMatrixSparse(const GMatrixSymmetric& matrix);
     virtual ~GMatrixSparse(void);
 
-    // Implemented pure virtual base class operators
-    virtual GVector        operator*(const GVector& vector) const;
-
     // Overloaded virtual base class operators
     virtual bool           operator==(const GMatrixSparse& matrix) const;
     virtual bool           operator!=(const GMatrixSparse& matrix) const;
@@ -62,7 +59,6 @@ public:
     // Other operators
     virtual GMatrixSparse  operator+(const GMatrixSparse& matrix) const;
     virtual GMatrixSparse  operator-(const GMatrixSparse& matrix) const;
-    virtual GMatrixSparse  operator*(const GMatrixSparse& matrix) const;
     virtual GMatrixSparse  operator-(void) const;
     virtual GMatrixSparse& operator+=(const GMatrixSparse& matrix);
     virtual GMatrixSparse& operator-=(const GMatrixSparse& matrix);
@@ -117,11 +113,17 @@ public:
     void __setitem__(int GTuple[2], double value) {
         (*self)(GTuple[0], GTuple[1]) = value;
     }
-    GMatrixSparse __mul__(const double &a) {
-        return (*self) * a;
+    GVector __mul__(const GVector& vector) {
+        return ((*self) * vector);
     }
-    GMatrixSparse __div__(const double &a) {
-        return (*self) / a;
+    GMatrixSparse __mul__(const GMatrixSparse& matrix) {
+        return ((*self) * matrix);
+    }
+    GMatrixSparse __mul__(const double &scalar) {
+        return ((*self) * scalar);
+    }
+    GMatrixSparse __div__(const double &scalar) {
+        return ((*self) / scalar);
     }
     GMatrixSparse copy() {
         return (*self);
@@ -131,3 +133,11 @@ public:
         return (*self);
     }
 };
+
+
+/***********************************************************************//**
+ * @brief GMatrixSparse friends
+ ***************************************************************************/
+GMatrixSparse transpose(const GMatrixSparse& matrix);
+GMatrixSparse invert(const GMatrixSparse& matrix);
+GMatrixSparse abs(const GMatrixSparse& matrix);
