@@ -93,8 +93,8 @@
 /***********************************************************************//**
  * @brief Void matrix constructor
  *
- * This method will allocate a sparse matrix object without any elements.
- * The number of rows and columns of the matrix will be zero.
+ * Constructs empty sparse matrix. The number of rows and columns of the
+ * matrix will be zero.
  *
  * @todo Verify that the class is save against empty matrix objects.
  ***************************************************************************/
@@ -114,15 +114,17 @@ GMatrixSparse::GMatrixSparse(void) : GMatrixBase()
  *
  * @param[in] rows Number of rows [>0].
  * @param[in] columns Number of columns [>0].
- * @param[in] elements Number of allocated elements (default: 0).
+ * @param[in] elements Number of allocated elements (defaults to 0).
  *
  * @exception GException::empty
  *            Specified number of rows or columns is not valid.
  *
- * This method allocates a sparse matrix object with the specified number
- * of rows and columns. The elements parameter allows to specify how much
- * physical memory should be allocated initially. By default, no memory
- * will be allocated.
+ * Constructs sparse matrix of dimension @p rows times @p columns. The
+ * optional @p elements argument specifies the size of the physical
+ * memory that should be allocated. By default, no memory will be allocated
+ * and memory allocation will be performed on-the-fly. If the amount of
+ * required memory is larger than the size specified by @p elements,
+ * additional momeory will be allocated automatically on-the-fly.
  *
  * @todo Is there a real need to throw an empty exception? The class should
  * be able to operate on empty matrices.
@@ -156,8 +158,9 @@ GMatrixSparse::GMatrixSparse(const int& rows,
  *
  * @param[in] matrix Generic matrix (GMatrix).
  *
- * This constructor converts a generic matrix (of type GMatrix) into a
- * sparse matrix. 
+ * Constructs a sparse matrix by using the number of rows and columns of
+ * a generic matrix and by assigning the elements of the generic matrix
+ * to the sparse matrix.
  ***************************************************************************/
 GMatrixSparse::GMatrixSparse(const GMatrix& matrix) : GMatrixBase()
 {
@@ -183,8 +186,9 @@ GMatrixSparse::GMatrixSparse(const GMatrix& matrix) : GMatrixBase()
  *
  * @param[in] matrix Symmetric matrix (GMatrixSymmetric).
  *
- * This constructor converts a symmetric matrix (of type GSymMatrix) into a
- * sparse matrix. 
+ * Constructs a sparse matrix by using the number of rows and columns of
+ * a symmetric matrix and by assigning the elements of the symmetric matrix
+ * to the sparse matrix.
  ***************************************************************************/
 GMatrixSparse::GMatrixSparse(const GMatrixSymmetric& matrix) : GMatrixBase()
 {
@@ -210,7 +214,7 @@ GMatrixSparse::GMatrixSparse(const GMatrixSymmetric& matrix) : GMatrixBase()
  *
  * @param[in] matrix Matrix.
  *
- * This method copies a matrix object.
+ * Constructs matrix by copying an existing matrix.
  ***************************************************************************/
 GMatrixSparse::GMatrixSparse(const GMatrixSparse& matrix) : GMatrixBase(matrix)
 {
