@@ -54,7 +54,6 @@
 #define G_ADD_TO_COLUMN     "GMatrixSymmetric::add_to_column(int&, GVector&)"
 #define G_ADD_TO_COLUMN2     "GMatrixSymmetric::add_to_column(int&, double*,"
                                                                 " int*, int)"
-#define G_INVERT                                "GMatrixSparse::invert(void)"
 #define G_CHOL_DECOMP               "GMatrixSparse::cholesky_decompose(bool)"
 #define G_CHOL_SOLVE         "GMatrixSparse::cholesky_solver(GVector&, bool)"
 #define G_STACK_INIT                  "GMatrixSparse::stack_init(int&, int&)"
@@ -1405,9 +1404,6 @@ void GMatrixSparse::transpose(void)
  ***************************************************************************/
 void GMatrixSparse::invert(void)
 {
-    // Perform Chloesky decomposition
-    cholesky_decompose(true);
-
     // Invert matrix
     cholesky_invert(true);
     
