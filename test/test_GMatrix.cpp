@@ -302,6 +302,15 @@ void TestGMatrix::assign_values(void)
         }
     }
 
+    // Check value assignment
+    const double ref = 37.89;
+    test = ref;
+    for (int i = 0; i < 3; ++i) {
+        for (int k = 0; k < 3; ++k) {
+            test_value(test(i,k), ref, 1.0e-10, "Test matrix element assignment");
+        }
+    }
+
     // Verify range checking
     #ifdef G_RANGE_CHECK
     test_try("Verify range checking");
