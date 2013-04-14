@@ -52,7 +52,7 @@
 #define G_SET_COLUMN2    "GMatrixSymmetric::column(int&, double*, int*, int)"
 #define G_ADD_TO_ROW           "GMatrixSymmetric::add_to_row(int&, GVector&)"
 #define G_ADD_TO_COLUMN     "GMatrixSymmetric::add_to_column(int&, GVector&)"
-#define G_ADD_TO_COLUMN2     "GMatrixSymmetric::add_to_column(int&, double*,"
+#define G_ADD_TO_COLUMN2     "GMatrixSymmetric::add_to_column(int&, double*,"\
                                                                 " int*, int)"
 #define G_CHOL_DECOMP               "GMatrixSparse::cholesky_decompose(bool)"
 #define G_CHOL_SOLVE         "GMatrixSparse::cholesky_solver(GVector&, bool)"
