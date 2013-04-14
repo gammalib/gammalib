@@ -545,7 +545,7 @@ void TestGMatrixSparse::assign_values(void)
                 reference(i,col) += wrk_data[inx];
                 inx++;
             }
-            sparse.add_to_column(wrk_data, wrk_row, inx, col);
+            sparse.add_to_column(col, wrk_data, wrk_row, inx);
         }
         sparse.stack_destroy();
         test_assert((sparse == reference),
@@ -567,7 +567,7 @@ void TestGMatrixSparse::assign_values(void)
                 wrk_row[inx]  = i;
                 inx++;
             }
-            sparse.add_to_column(wrk_data, wrk_row, inx, col);
+            sparse.add_to_column(col, wrk_data, wrk_row, inx);
         }
         sparse.stack_destroy();
         test_assert((sparse == reference),
@@ -589,7 +589,7 @@ void TestGMatrixSparse::assign_values(void)
                 wrk_row[inx]  = i;
                 inx++;
             }
-            sparse.add_to_column(wrk_data, wrk_row, inx, col);
+            sparse.add_to_column(col, wrk_data, wrk_row, inx);
         }
         sparse.stack_destroy();
         test_assert((sparse == reference),
@@ -610,7 +610,7 @@ void TestGMatrixSparse::assign_values(void)
                 wrk_row[inx]  = i;
                 inx++;
             }
-            sparse.add_to_column(wrk_data, wrk_row, inx, col);
+            sparse.add_to_column(col, wrk_data, wrk_row, inx);
         }
         sparse.stack_destroy();
         test_assert((sparse == reference),
