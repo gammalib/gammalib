@@ -52,7 +52,6 @@ public:
     virtual void          clear(void) = 0;
     virtual GMatrixBase*  clone(void) const = 0;
     virtual double&       at(const int& row, const int& column) = 0;
-    virtual const double& at(const int& row, const int& column) const = 0;
     virtual GVector       row(const int& row) const = 0;
     virtual void          row(const int& row, const GVector& vector) = 0;
     virtual GVector       column(const int& column) const = 0;

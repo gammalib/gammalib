@@ -74,7 +74,6 @@ public:
     virtual void           clear(void);
     virtual GMatrixSparse* clone(void) const;
     virtual double&        at(const int& row, const int& column);
-    virtual const double&  at(const int& row, const int& column) const;
     virtual GVector        row(const int& row) const;
     virtual void           row(const int& row, const GVector& vector);
     virtual GVector        column(const int& column) const;
