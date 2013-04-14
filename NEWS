@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-April, 12th, 2013
+April, 14th, 2013
 
 
 1. Introduction
@@ -23,10 +23,20 @@ GBase
   chattiness is set to NORMAL.
 
 GEbounds
-  The number argument in the setlin and setlon methods has been moved
+  The number argument in the setlin() and setlon() methods has been moved
   from the last position to the first position in the argument list.
-  The emin, emax, emean and elogmean methods now take a const integer
-  reference as argument instead of an integer value.
+  The emin(), emax(), emean() and elogmean() methods now take a const
+  integer reference as argument instead of an integer value.
+
+GMatrixBase
+GMatrix
+GMatrixSparse (formerly GSparseMatrix)
+GMatrixSymmetric (formerly GSymMatrix)
+  Renamed cols() method to columns(), renamed insert_row() and
+  extract_row() to row(), renamed insert_col() and extract_col()
+  to column(), renamed add_col() to add_to_column(), reorder
+  arguments of GMatrixSparse::column() and GMatrixSparse::add_to_column()
+  methods.
 
 GModelPar
   The "real_" prefix has been stripped from the methods operating on
@@ -128,7 +138,19 @@ None
 
 7. Linear algebra module
 ------------------------
-None
+The matrix classes have be renamed as follows:
+GMatrixBase
+ |
+ +-- GMatrix - generic matrix handling
+ +-- GMatrixSparse - sparse matrix handling
+ +-- GMatrixSymmetric - symmetric matrix handling
+
+The access operator does not provide argument checking anymore, at()
+methods have been added for matrix element access including argument
+checking.
+
+A value assignment operator has been added to assign a specific value
+to all matrix arguments.
 
 
 8. Model module
