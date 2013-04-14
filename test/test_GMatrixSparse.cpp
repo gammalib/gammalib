@@ -421,7 +421,7 @@ void TestGMatrixSparse::assign_values(void)
     #ifdef G_RANGE_CHECK
     test_try("Verify range checking");
     try {
-        test(3,3) = 1.0;
+        test.at(3,3) = 1.0;
         test_try_failure("Expected GException::out_of_range exception.");
     }
     catch (GException::out_of_range &e) {
