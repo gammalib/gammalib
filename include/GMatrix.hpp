@@ -41,11 +41,39 @@ class GMatrixSparse;
  *
  * @brief Generic matrix class defintion
  *
- * This class implements a generic matrix class. This class is a
- * non-spezialized representation of a matrix, and all other matrix storage
- * classes can be converted into that class.
+ * This class implements a generic matrix. The class is a non-spezialized
+ * representation of a matrix, and all other matrix storage classes can be
+ * converted into that class.
  *
- * The matrix stores the elements column-wise.
+ * For a description of the common matrix methods, please refer to the
+ * GMatrixBase class.
+ *
+ * Matrix allocation is done using the constructors
+ *
+ *     GMatrix matrix(rows, columns);
+ *     GMatrix matrix(matrix);
+ *     GMatrix matrix(sparsematrix);
+ *     GMatrix matrix(symmetricmatrix);
+ *
+ * where @p rows and @p columns specify the number of rows and columns of
+ * the matrix. Storage conversion constructors exist that allow allocating
+ * a generic matrix by copying from a sparse matrix of type GMatrixSparse
+ * and a symmetrix matrix of type GMatrixSymmetric.
+ *
+ * To support using the GMatrix for coordinate transformations, methods
+ * are available to compute matrices for the three Euler angles:
+ *
+ *     matrix.eulerx(angle);
+ *     matrix.eulery(angle);
+ *     matrix.eulerz(angle);
+ *
+ * Methods are also available to extract the lower or the upper triangle of
+ * a matrix:
+ *
+ *     matrix.extract_lower_triangle();
+ *     matrix.extract_upper_triangle();
+ *
+ * Matrix elements are stored column-wise by the class.
  ***************************************************************************/
 class GMatrix : public GMatrixBase {
 
@@ -65,6 +93,7 @@ public:
 
     // Other operators
     virtual GMatrix&      operator=(const GMatrix& matrix);
+    virtual GMatrix&      operator=(const double& value);
     virtual GMatrix       operator+(const GMatrix& matrix) const;
     virtual GMatrix       operator-(const GMatrix& matrix) const;
     virtual GMatrix       operator*(const GMatrix& matrix) const;
@@ -76,23 +105,25 @@ public:
     virtual GMatrix&      operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
-    virtual void        clear(void);
-    virtual GMatrix*    clone(void) const;
-    virtual GVector     row(const int& row) const;
-    virtual void        row(const int& row, const GVector& vector);
-    virtual GVector     column(const int& column) const;
-    virtual void        column(const int& column, const GVector& vector);
-    virtual void        add_to_row(const int& row, const GVector& vector);
-    virtual void        add_to_column(const int& column, const GVector& vector);
-    virtual void        transpose(void);
-    virtual void        invert(void);
-    virtual void        negate(void);
-    virtual void        abs(void);
-    virtual double      fill(void) const;
-    virtual double      min(void) const;
-    virtual double      max(void) const;
-    virtual double      sum(void) const;
-    virtual std::string print(const GChatter& chatter = NORMAL) const;
+    virtual void          clear(void);
+    virtual GMatrix*      clone(void) const;
+    virtual double&       at(const int& row, const int& column);
+    virtual const double& at(const int& row, const int& column) const;
+    virtual GVector       row(const int& row) const;
+    virtual void          row(const int& row, const GVector& vector);
+    virtual GVector       column(const int& column) const;
+    virtual void          column(const int& column, const GVector& vector);
+    virtual void          add_to_row(const int& row, const GVector& vector);
+    virtual void          add_to_column(const int& column, const GVector& vector);
+    virtual void          transpose(void);
+    virtual void          invert(void);
+    virtual void          negate(void);
+    virtual void          abs(void);
+    virtual double        fill(void) const;
+    virtual double        min(void) const;
+    virtual double        max(void) const;
+    virtual double        sum(void) const;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     virtual GMatrix extract_lower_triangle(void) const;
@@ -108,6 +139,38 @@ private:
     void free_members(void);
     void alloc_members(const int& rows, const int& columns);
 };
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element
+ *
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Reference to matrix element.
+ *
+ * Returns a reference to the matrix element at @p row and @p column.
+ ***************************************************************************/
+inline
+double& GMatrix::operator()(const int& row, const int& column)
+{
+    return (m_data[m_colstart[column]+row]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element (const version)
+ *
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Const reference to matrix element.
+ *
+ * Returns a const reference to the matrix element at @p row and @p column.
+ ***************************************************************************/
+inline
+const double& GMatrix::operator()(const int& row, const int& column) const
+{
+    return (m_data[m_colstart[column]+row]);
+}
 
 
 /***********************************************************************//**
@@ -202,6 +265,9 @@ GMatrix& GMatrix::operator/=(const double& scalar)
  * @brief Negate matrix elements
  *
  * @return Matrix with negated elements.
+ *
+ * Returns a matrix where each element has been replaced by its negative
+ * element.
  ***************************************************************************/
 inline
 GMatrix GMatrix::operator-(void) const
@@ -216,6 +282,8 @@ GMatrix GMatrix::operator-(void) const
  * @brief Return minimum matrix element
  *
  * @return Minimum element in matrix.
+ *
+ * Returns the smallest element in the matrix.
  ***************************************************************************/
 inline
 double GMatrix::min(void) const
@@ -228,6 +296,8 @@ double GMatrix::min(void) const
  * @brief Return maximum matrix element
  *
  * @return Maximum element in matrix.
+ *
+ * Returns the largest element in the matrix.
  ***************************************************************************/
 inline
 double GMatrix::max(void) const
@@ -240,6 +310,8 @@ double GMatrix::max(void) const
  * @brief Return matrix element sum
  *
  * @return Sum of all matrix elements.
+ *
+ * Returns the sum of all matrix elements.
  ***************************************************************************/
 inline
 double GMatrix::sum(void) const
@@ -254,6 +326,8 @@ double GMatrix::sum(void) const
  * @param[in] matrix Matrix.
  * @param[in] scalar Scalar.
  * @return Matrix divided by @p scalar.
+ *
+ * Returns a matrix where each element has been multiplied by a @p scalar.
  ***************************************************************************/
 inline
 GMatrix operator*(const GMatrix& matrix, const double& scalar)
@@ -270,6 +344,8 @@ GMatrix operator*(const GMatrix& matrix, const double& scalar)
  * @param[in] scalar Scalar.
  * @param[in] matrix Matrix.
  * @return Matrix divided by @p scalar.
+ *
+ * Returns a matrix where each element has been multiplied by a @p scalar.
  ***************************************************************************/
 inline
 GMatrix operator*(const double& scalar, const GMatrix& matrix)
@@ -286,6 +362,8 @@ GMatrix operator*(const double& scalar, const GMatrix& matrix)
  * @param[in] matrix Matrix.
  * @param[in] scalar Scalar.
  * @return Matrix divided by @p scalar.
+ *
+ * Returns a matrix where each element has been divided by a @p scalar.
  ***************************************************************************/
 inline 
 GMatrix operator/(const GMatrix& matrix, const double& scalar)
@@ -301,6 +379,8 @@ GMatrix operator/(const GMatrix& matrix, const double& scalar)
  *
  * @param[in] matrix Matrix.
  * @return Transpose of matrix.
+ *
+ * Returns the transpose of a matrix.
  ***************************************************************************/
 inline
 GMatrix transpose(const GMatrix& matrix)
@@ -316,6 +396,8 @@ GMatrix transpose(const GMatrix& matrix)
  *
  * @param[in] matrix Matrix.
  * @return Inverse of matrix.
+ *
+ * Returns the inverse of a matrix.
  ***************************************************************************/
 inline
 GMatrix invert(const GMatrix& matrix)
@@ -332,6 +414,9 @@ GMatrix invert(const GMatrix& matrix)
  * @param[in] matrix Matrix.
  * @return Matrix with elements being the absolute elements of the input
  *         matrix.
+ *
+ * Return a matrix where each elements has been replaced by its absolute
+ * value.
  ***************************************************************************/
 inline
 GMatrix abs(const GMatrix& matrix)

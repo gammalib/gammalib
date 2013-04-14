@@ -67,6 +67,7 @@ public:
     // Implemented pure virtual base class methods
     virtual void              clear(void);
     virtual GMatrixSymmetric* clone(void) const;
+    virtual double&           at(const int& row, const int& column);
     virtual GVector           row(const int& row) const;
     virtual void              row(const int& row, const GVector& vector);
     virtual GVector           column(const int& column) const;
@@ -108,6 +109,10 @@ public:
         return (*self) / a;
     }
     GMatrixSymmetric copy() {
+        return (*self);
+    }
+    GMatrixSymmetric set(const double& value) {
+        (*self) = value;
         return (*self);
     }
 };

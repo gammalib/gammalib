@@ -40,18 +40,17 @@
 #define G_CONSTRUCTOR        "GMatrixSymmetric::GMatrixSymmetric(int&, int&)"
 #define G_MATRIX               "GMatrixSymmetric::GMatrixSymmetric(GMatrix&)"
 #define G_SPARSEMATRIX   "GMatrixSymmetric::GMatrixSymmetric(GSparseMatrix&)"
-#define G_ACCESS                     "GMatrixSymmetric::operator(int&, int&)"
 #define G_OP_ADD            "GMatrixSymmetric::operator+=(GMatrixSymmetric&)"
 #define G_OP_SUB            "GMatrixSymmetric::operator-=(GMatrixSymmetric&)"
 #define G_OP_MUL_VEC                  "GMatrixSymmetric::operator*(GVector&)"
 #define G_OP_MAT_MUL        "GMatrixSymmetric::operator*=(GMatrixSymmetric&)"
+#define G_AT                               "GMatrixSymmetric::at(int&, int&)"
 #define G_EXTRACT_ROW                           "GMatrixSymmetric::row(int&)"
 #define G_SET_ROW                     "GMatrixSymmetric::row(int&, GVector&)"
 #define G_EXTRACT_COLUMN                     "GMatrixSymmetric::column(int&)"
 #define G_SET_COLUMN               "GMatrixSymmetric::column(int&, GVector&)"
 #define G_ADD_TO_ROW           "GMatrixSymmetric::add_to_row(int&, GVector&)"
 #define G_ADD_TO_COLUMN     "GMatrixSymmetric::add_to_column(int&, GVector&)"
-#define G_INVERT                                 "GMatrixSymmetric::invert()"
 #define G_CHOL_DECOMP            "GMatrixSymmetric::cholesky_decompose(int&)"
 #define G_CHOL_SOLVE      "GMatrixSymmetric::cholesky_solver(GVector&, int&)"
 #define G_CHOL_INVERT               "GMatrixSymmetric::cholesky_invert(int&)"
@@ -229,9 +228,12 @@ GMatrixSymmetric::~GMatrixSymmetric(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Assignment operator
+ * @brief Matrix assignment operator
  *
  * @param[in] matrix Matrix.
+ * @return Matrix.
+ *
+ * Assigns the content of another matrix to the actual matrix instance.
  ***************************************************************************/
 GMatrixSymmetric& GMatrixSymmetric::operator=(const GMatrixSymmetric& matrix)
 {
@@ -260,23 +262,35 @@ GMatrixSymmetric& GMatrixSymmetric::operator=(const GMatrixSymmetric& matrix)
 
 
 /***********************************************************************//**
- * @brief Access operator
+ * @brief Value assignment operator
+ *
+ * @param[in] value Value.
+ * @return Matrix.
+ *
+ * Assigns the specified @p value to all elements of the matrix.
+ ***************************************************************************/
+GMatrixSymmetric& GMatrixSymmetric::operator=(const double& value)
+{
+    // Assign value
+    double* ptr = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *ptr++ = value;
+    }
+
+    // Return this object
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element
  *
  * @param[in] row Matrix row [0,...,rows()-1].
  * @param[in] column Matrix column [0,...,columns()-1].
- *
- * @exception GException::out_of_range
- *            Row or column index out of range.
+ * @return Reference to matrix element.
  ***************************************************************************/
 double& GMatrixSymmetric::operator()(const int& row, const int& column)
 {
-    // Compile option: perform range check
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
-    }
-    #endif
-
     // Get element index
     int inx = (row >= column) ? m_colstart[column]+(row-column)
                               : m_colstart[row]+(column-row);
@@ -287,23 +301,15 @@ double& GMatrixSymmetric::operator()(const int& row, const int& column)
 
 
 /***********************************************************************//**
- * @brief Access operator (const version)
+ * @brief Return reference to matrix element (const version)
  *
  * @param[in] row Matrix row [0,...,rows()-1].
  * @param[in] column Matrix column [0,...,columns()-1].
- *
- * @exception GException::out_of_range
- *            Row or column index out of range.
+ * @return Reference to matrix element.
  ***************************************************************************/
 const double& GMatrixSymmetric::operator()(const int& row,
                                            const int& column) const
 {
-    // Compile option: perform range check
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols)
-        throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
-    #endif
-
     // Get element index
     int inx = (row >= column) ? m_colstart[column]+(row-column)
                               : m_colstart[row]+(column-row);
@@ -444,6 +450,58 @@ GMatrixSymmetric* GMatrixSymmetric::clone(void) const
 {
     // Clone matrix
     return new GMatrixSymmetric(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element
+ *
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Reference to matrix element.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ ***************************************************************************/
+double& GMatrixSymmetric::at(const int& row, const int& column)
+{
+    // Raise exception if row or column index is out of range
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    }
+
+    // Get element index
+    int inx = (row >= column) ? m_colstart[column]+(row-column)
+                              : m_colstart[row]+(column-row);
+
+    // Return element
+    return m_data[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element (const version)
+ *
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Reference to matrix element.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ ***************************************************************************/
+const double& GMatrixSymmetric::at(const int& row, const int& column) const
+{
+    // Raise exception if row or column index is out of range
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    }
+
+    // Get element index
+    int inx = (row >= column) ? m_colstart[column]+(row-column)
+                              : m_colstart[row]+(column-row);
+
+    // Return element
+    return m_data[inx];
 }
 
 
@@ -631,15 +689,15 @@ void GMatrixSymmetric::add_to_column(const int& column, const GVector& vector)
 /***********************************************************************//**
  * @brief Invert matrix
  *
- * @exception GException::feature_not_implemented
- *            Feature not yet implemented.
+ * Inverts the matrix using the Cholesky decomposition. This does not work
+ * on any kind of matrix.
  *
- * @todo Needs to be implemented.
+ * @todo Specify in documentation for which kind of matrix the method works.
  ***************************************************************************/
 void GMatrixSymmetric::invert(void)
 {
-    // Throw exception
-    throw GException::feature_not_implemented(G_INVERT);
+    // Invert matrix
+    cholesky_invert(true);
     
     // Return
     return;

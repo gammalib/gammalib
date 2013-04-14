@@ -41,9 +41,31 @@ class GMatrixSparse;
  *
  * @brief Symmetric matrix class interface defintion
  *
- * This class implements a symmetric matrix class. Only one triangle of the
- * matrix is physically stored, reducing the memory requirements and
- * imposing strict matrix symmetry.
+ * This class implements a symmetric matrix. The class stores only a triangle
+ * physically, imposing thus strict matrix symmetry.
+ *
+ * For a description of the common matrix methods, please refer to the
+ * GMatrixBase class.
+ *
+ * Matrix allocation is done using the constructors
+ *
+ *     GMatrixSymmetric symmetricmatrix(rows, columns);
+ *     GMatrixSymmetric symmetricmatrix(matrix);
+ *     GMatrixSymmetric symmetricmatrix(sparsematrix);
+ *     GMatrixSymmetric symmetricmatrix(symmetricmatrix);
+ *
+ * where @p rows and @p columns specify the number of rows and columns of
+ * the matrix. Storage conversion constructors exist that allow allocating
+ * a symmetric matrix by copying from a sparse matrix of type GMatrixSparse
+ * and a general matrix of type GMatrix. Exceptions will be thrown in case
+ * that the matrix from which the object should be allocated is not
+ * symmetric.
+ *
+ * Methods are available to extract the lower or the upper triangle of the
+ * matrix:
+ *
+ *     matrix.extract_lower_triangle();
+ *     matrix.extract_upper_triangle();
  ***************************************************************************/
 class GMatrixSymmetric : public GMatrixBase {
 
@@ -63,6 +85,7 @@ public:
 
     // Other operators
     virtual GMatrixSymmetric& operator=(const GMatrixSymmetric& matrix);
+    virtual GMatrixSymmetric& operator=(const double& value);
     virtual GMatrixSymmetric  operator+(const GMatrixSymmetric& matrix) const;
     virtual GMatrixSymmetric  operator-(const GMatrixSymmetric& matrix) const;
     virtual GMatrix           operator*(const GMatrixSymmetric& matrix) const;
@@ -75,6 +98,8 @@ public:
     // Implemented pure virtual base class methods
     virtual void              clear(void);
     virtual GMatrixSymmetric* clone(void) const;
+    virtual double&           at(const int& row, const int& column);
+    virtual const double&     at(const int& row, const int& column) const;
     virtual GVector           row(const int& row) const;
     virtual void              row(const int& row, const GVector& vector);
     virtual GVector           column(const int& column) const;
@@ -130,6 +155,8 @@ void GMatrixSymmetric::transpose(void)
  * @brief Return minimum matrix element
  *
  * @return Minimum matrix element
+ *
+ * Returns the smallest element in the matrix.
  ***************************************************************************/
 inline
 double GMatrixSymmetric::min(void) const
@@ -142,6 +169,8 @@ double GMatrixSymmetric::min(void) const
  * @brief Return maximum matrix element
  *
  * @return Maximum matrix element
+ *
+ * Returns the largest element in the matrix.
  ***************************************************************************/
 inline
 double GMatrixSymmetric::max(void) const
@@ -224,6 +253,8 @@ GMatrixSymmetric& GMatrixSymmetric::operator/=(const double& scalar)
  * @brief Negate matrix elements
  *
  * @return Matrix with negated elements.
+ *
+ * Returns a matrix where each element is replaced by its negative element.
  ***************************************************************************/
 inline
 GMatrixSymmetric GMatrixSymmetric::operator-(void) const
@@ -240,6 +271,8 @@ GMatrixSymmetric GMatrixSymmetric::operator-(void) const
  * @param[in] matrix Matrix.
  * @param[in] scalar Scalar.
  * @return Matrix divided by @p scalar.
+ *
+ * Returns a matrix where each element is multiplied by @p scalar.
  ***************************************************************************/
 inline 
 GMatrixSymmetric operator*(const GMatrixSymmetric& matrix, const double& scalar)
@@ -256,6 +289,8 @@ GMatrixSymmetric operator*(const GMatrixSymmetric& matrix, const double& scalar)
  * @param[in] scalar Scalar.
  * @param[in] matrix Matrix.
  * @return Matrix divided by @p scalar.
+ *
+ * Returns a matrix where each element is multiplied by @p scalar.
  ***************************************************************************/
 inline
 GMatrixSymmetric operator*(const double& scalar, const GMatrixSymmetric& matrix)
@@ -272,6 +307,8 @@ GMatrixSymmetric operator*(const double& scalar, const GMatrixSymmetric& matrix)
  * @param[in] matrix Matrix.
  * @param[in] scalar Scalar.
  * @return Matrix divided by @p scalar.
+ *
+ * Returns a matrix where each element is divided by @p scalar.
  ***************************************************************************/
 inline 
 GMatrixSymmetric operator/(const GMatrixSymmetric& matrix, const double& scalar)
@@ -287,6 +324,9 @@ GMatrixSymmetric operator/(const GMatrixSymmetric& matrix, const double& scalar)
  *
  * @param[in] matrix Matrix.
  * @return Transpose of matrix.
+ *
+ * Returns the transpose of the matrix. This is trivial for a symmetric
+ * matrix, as its transpose is the original matrix.
  ***************************************************************************/
 inline
 GMatrixSymmetric transpose(const GMatrixSymmetric& matrix)
@@ -300,6 +340,8 @@ GMatrixSymmetric transpose(const GMatrixSymmetric& matrix)
  *
  * @param[in] matrix Matrix.
  * @return Inverse of matrix.
+ *
+ * Returns the inverse of the matrix.
  ***************************************************************************/
 inline
 GMatrixSymmetric invert(const GMatrixSymmetric& matrix)
@@ -316,6 +358,8 @@ GMatrixSymmetric invert(const GMatrixSymmetric& matrix)
  * @param[in] matrix Matrix.
  * @return Matrix with elements being the absolute elements of the input
  *         matrix.
+ *
+ * Returns a matrix where each element is replaced by its absolute value.
  ***************************************************************************/
 inline
 GMatrixSymmetric abs(const GMatrixSymmetric& matrix)
@@ -332,6 +376,8 @@ GMatrixSymmetric abs(const GMatrixSymmetric& matrix)
  * @param[in] matrix Matrix.
  * @param[in] compress Use matrix compression (defaults to true).
  * @return Cholesky decomposition of matrix.
+ *
+ * Returns a Cholesky decomposition of a matrix.
  ***************************************************************************/
 inline
 GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix,
@@ -349,6 +395,8 @@ GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix,
  * @param[in] matrix Matrix.
  * @param[in] compress Use matrix compression (defaults to true).
  * @return Inverse of matrix.
+ *
+ * Returns the inverse of the matrix by performing a Cholesky decomposition.
  ***************************************************************************/
 inline
 GMatrixSymmetric cholesky_invert(const GMatrixSymmetric& matrix,

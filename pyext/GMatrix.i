@@ -66,22 +66,23 @@ public:
     virtual GMatrix&      operator/=(const double& scalar);
 
     // Implemented pure virtual base class methods
-    virtual void        clear(void);
-    virtual GMatrix*    clone(void) const;
-    virtual GVector     row(const int& row) const;
-    virtual void        row(const int& row, const GVector& vector);
-    virtual GVector     column(const int& column) const;
-    virtual void        column(const int& column, const GVector& vector);
-    virtual void        add_to_row(const int& row, const GVector& vector);
-    virtual void        add_to_column(const int& column, const GVector& vector);
-    virtual void        transpose(void);
-    virtual void        invert(void);
-    virtual void        negate(void);
-    virtual void        abs(void);
-    virtual double      fill(void) const;
-    virtual double      min(void) const;
-    virtual double      max(void) const;
-    virtual double      sum(void) const;
+    virtual void          clear(void);
+    virtual GMatrix*      clone(void) const;
+    virtual double&       at(const int& row, const int& column);
+    virtual GVector       row(const int& row) const;
+    virtual void          row(const int& row, const GVector& vector);
+    virtual GVector       column(const int& column) const;
+    virtual void          column(const int& column, const GVector& vector);
+    virtual void          add_to_row(const int& row, const GVector& vector);
+    virtual void          add_to_column(const int& column, const GVector& vector);
+    virtual void          transpose(void);
+    virtual void          invert(void);
+    virtual void          negate(void);
+    virtual void          abs(void);
+    virtual double        fill(void) const;
+    virtual double        min(void) const;
+    virtual double        max(void) const;
+    virtual double        sum(void) const;
 
     // Other methods
     virtual GMatrix extract_lower_triangle(void) const;
@@ -103,12 +104,16 @@ public:
         (*self)(GTuple[0], GTuple[1]) = value;
     }
     GMatrix __mul__(const double &a) {
-        return (*self) * a;
+        return ((*self) * a);
     }
     GMatrix __div__(const double &a) {
-        return (*self) / a;
+        return ((*self) / a);
     }
     GMatrix copy() {
+        return (*self);
+    }
+    GMatrix set(const double& value) {
+        (*self) = value;
         return (*self);
     }
 };

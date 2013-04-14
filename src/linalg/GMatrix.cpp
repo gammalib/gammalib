@@ -39,11 +39,11 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCTOR                          "GMatrix::GMatrix(int&, int&)"
-#define G_ACCESS                              "GMatrix::operator(int&, int&)"
 #define G_OP_MUL_VEC                           "GMatrix::operator*(GVector&)"
 #define G_OP_ADD                              "GMatrix::operator+=(GMatrix&)"
 #define G_OP_SUB                              "GMatrix::operator-=(GMatrix&)"
 #define G_OP_MAT_MUL                          "GMatrix::operator*=(GMatrix&)"
+#define G_AT                                        "GMatrix::at(int&, int&)"
 #define G_EXTRACT_ROW                                    "GMatrix::row(int&)"
 #define G_SET_ROW                              "GMatrix::row(int&, GVector&)"
 #define G_EXTRACT_COLUMN                              "GMatrix::column(int&)"
@@ -213,10 +213,12 @@ GMatrix::~GMatrix(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Assignment operator
+ * @brief Matrix assignment operator
  *
  * @param[in] matrix Matrix.
  * @return Matrix.
+ *
+ * Assigns the content of another matrix to the actual matrix instance.
  ***************************************************************************/
 GMatrix& GMatrix::operator=(const GMatrix& matrix)
 {
@@ -245,54 +247,24 @@ GMatrix& GMatrix::operator=(const GMatrix& matrix)
 
 
 /***********************************************************************//**
- * @brief Return reference to matrix element
+ * @brief Value assignment operator
  *
- * @param[in] row Matrix row [0,...,rows()-1].
- * @param[in] column Matrix column [0,...,columns()-1].
+ * @param[in] value Value.
+ * @return Matrix.
  *
- * @exception GException::out_of_range
- *            Row or column index out of range.
- *
- * Returns a reference to the matrix element at @p row and @p column.
+ * Assigns the specified @p value to all elements of the matrix.
  ***************************************************************************/
-double& GMatrix::operator()(const int& row, const int& column)
+GMatrix& GMatrix::operator=(const double& value)
 {
-    // Compile option: perform range check
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
+    // Assign value
+    double* ptr = m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *ptr++ = value;
     }
-    #endif
 
-    // Return element
-    return (m_data[m_colstart[column]+row]);
+    // Return this object
+    return *this;
 }
-
-
-/***********************************************************************//**
- * @brief Return reference to matrix element (const version)
- *
- * @param[in] row Matrix row [0,...,rows()-1].
- * @param[in] column Matrix column [0,...,columns()-1].
- *
- * @exception GException::out_of_range
- *            Row or column index out of range.
- *
- * Returns a const reference to the matrix element at @p row and @p column.
- ***************************************************************************/
-const double& GMatrix::operator()(const int& row, const int& column) const
-{
-    // Compile option: perform range check
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-      throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
-    }
-    #endif
-
-    // Return element
-    return (m_data[m_colstart[column]+row]);
-}
-
 
 
 /***********************************************************************//**
@@ -494,6 +466,57 @@ GMatrix* GMatrix::clone(void) const
     // Clone matrix
     return new GMatrix(*this);
 }
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element
+ *
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Reference to matrix element.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ *
+ * Returns a reference to the matrix element at @p row and @p column.
+ * Verifies the validity of the @p row and @p column argument.
+ ***************************************************************************/
+double& GMatrix::at(const int& row, const int& column)
+{
+    // Raise exception if row or column index is out of range
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    }
+
+    // Return element
+    return (m_data[m_colstart[column]+row]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element (const version)
+ *
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Const reference to matrix element.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ *
+ * Returns a const reference to the matrix element at @p row and @p column.
+ * Verifies the validity of the @p row and @p column argument.
+ ***************************************************************************/
+const double& GMatrix::at(const int& row, const int& column) const
+{
+    // Raise exception if row or column index is out of range
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    }
+
+    // Return element
+    return (m_data[m_colstart[column]+row]);
+}
+
 
 
 /***********************************************************************//**
