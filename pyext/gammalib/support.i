@@ -44,6 +44,7 @@
 
 /* __ Support module _____________________________________________________ */
 %include "GException.i"
+%include "GTools.i"
 %include "GNodeArray.i"
 %include "GCsv.i"
 %include "GRan.i"
