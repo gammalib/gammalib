@@ -38,9 +38,110 @@
  *
  * @brief Abstract matrix base class interface defintion
  *
- * This class is an abstract base class from which all matrix classes will
- * be derived. It defines the common interface for all matrix classes and
- * implements common methods and data members.
+ * This class provides the abstract interface for all matrix classes. A
+ * GammaLib matrix is a two dimensional array of double precision values
+ * that is commonly used for linear algebra computations.
+ *
+ * The matrix classes were designed in a manner so that matrices can be used
+ * in a natural syntax that is comparable to the syntax used for scalar
+ * values. In particular, the following matrix operations are available:
+ *
+ *     assigned_matrix     = matrix;
+ *     assigned_matrix     = value;
+ *     added_matrix        = matrix1 + matrix2;
+ *     added_matrix       += matrix;
+ *     subtracted_matrix   = matrix1 - matrix2;
+ *     subtracted_matrix  -= matrix;
+ *     multiplied_matrix   = matrix1 * matrix2;
+ *     multiplied_matrix  *= matrix;
+ *     scaled_matrix       = matrix * scale;
+ *     scaled_matrix       = scale * matrix;
+ *     scaled_matrix      *= scale;
+ *     divided_matrix      = matrix / factor;
+ *     divided_matrix     /= factor;
+ *     negated_matrix      = -matrix;
+ *
+ * where @p matrix, @p matrix1 and @p matrix2 are matrices, and
+ * @p value, @p scale and @p factor are double precision values. For the
+ * value assignment operator, each matrix element is assigned the specified
+ * value. For the scaling and division operators, every matrix element is
+ * multiplied or divided by the specified value.
+ *
+ * Matrices can also be compared using
+ *
+ *     if (matrix == another_matrix) ...
+ *     if (matrix != another_matrix) ...
+ *
+ * where identify is defined as having the same number of rows and columns
+ * and every element having the same value.
+ *
+ * Matrix elements are accessed using the access operators or the at() methods
+ *
+ *     double element = matrix(row, column);
+ *     double element = matrix.at(row, column);
+ *
+ * the difference being that the access operators do NOT but the at()
+ * methods do perform validity checking of the @p row and @p column
+ * arguments. Access operators and at() methods exist for non-const and
+ * const references.
+ *
+ * For more efficient matrix access, methods operating on matrix rows and
+ * columns are available. The
+ *
+ *     GVector row    = matrix.row(index);
+ *     GVector column = matrix.column(index);
+ *
+ * methods return a row or a column in a GVector object, while the
+ *
+ *     GVector row;
+ *     GVector column;
+ *     ...
+ *     matrix.row(index, row);
+ *     matrix.column(index, column);
+ *
+ * store a row or a column provided by a GVector object into the matrix.
+ * Obviously, the vector needs to be of the same size as the number of rows
+ * or columns available in the matrix. Adding of matrix elements row-by-row
+ * or column-by-column is done using the
+ *
+ *     matrix.add_to_row(index, row);
+ *     matrix.add_to_column(index, column);
+ *
+ * methods.
+ *
+ * Matrix multiplication with a vector is done using
+ *
+ *     GVector vector;
+ *     ...
+ *     GVector product = matrix * vector;
+ *
+ * where the size of @p vector needs to be identical to the number of
+ * columns in the matrix.
+ *
+ * Furthermore, the following methods exist for matrix operations:
+ *
+ *     matrix.transpose();  // Transposes matrix
+ *     matrix.invert();     // Inverts matrix
+ *     matrix.negate();     // Negates all matrix elements
+ *     matrix.abs();        // Sets all matrix elements to their absolute values
+ *
+ * Friend functions are implemented to perform the same operations also in a
+ * more natural syntax that will generate a new matrix
+ *
+ *     transposed_matrix = transpose(matrix);
+ *     inverted_matrix   = invert(matrix);
+ *     negated_matrix    = -matrix;
+ *     absolute_matrix   = abs(matrix);
+ *
+ * The following methods allow to access matrix attributes:
+ *
+ *     matrix.fill();     // Percentage of non-zero elements in matrix [0,1]
+ *     matrix.min();      // Minimum matrix element
+ *     matrix.max();      // Maximum matrix element
+ *     matrix.sum();      // Sum of all matrix elements
+ *     matrix.rows();     // Number of rows in matrix
+ *     matrix.columns();  // Number of columns in matrix
+ *     matrix.size();     // Number of elements in matrix
  ***************************************************************************/
 class GMatrixBase : public GBase {
 
@@ -61,23 +162,25 @@ public:
     virtual bool          operator!=(const GMatrixBase& matrix) const;
 
     // Pure virtual methods
-    virtual void         clear(void) = 0;
-    virtual GMatrixBase* clone(void) const = 0;
-    virtual GVector      row(const int& row) const = 0;
-    virtual void         row(const int& row, const GVector& vector) = 0;
-    virtual GVector      column(const int& column) const = 0;
-    virtual void         column(const int& column, const GVector& vector) = 0;
-    virtual void         add_to_row(const int& row, const GVector& vector) = 0;
-    virtual void         add_to_column(const int& column, const GVector& vector) = 0;
-    virtual void         transpose(void) = 0;
-    virtual void         invert(void) = 0;
-    virtual void         negate(void) = 0;
-    virtual void         abs(void) = 0;
-    virtual double       fill(void) const = 0;
-    virtual double       min(void) const = 0;
-    virtual double       max(void) const = 0;
-    virtual double       sum(void) const = 0;
-    virtual std::string  print(const GChatter& chatter = NORMAL) const = 0;
+    virtual void          clear(void) = 0;
+    virtual GMatrixBase*  clone(void) const = 0;
+    virtual double&       at(const int& row, const int& column) = 0;
+    virtual const double& at(const int& row, const int& column) const = 0;
+    virtual GVector       row(const int& row) const = 0;
+    virtual void          row(const int& row, const GVector& vector) = 0;
+    virtual GVector       column(const int& column) const = 0;
+    virtual void          column(const int& column, const GVector& vector) = 0;
+    virtual void          add_to_row(const int& row, const GVector& vector) = 0;
+    virtual void          add_to_column(const int& column, const GVector& vector) = 0;
+    virtual void          transpose(void) = 0;
+    virtual void          invert(void) = 0;
+    virtual void          negate(void) = 0;
+    virtual void          abs(void) = 0;
+    virtual double        fill(void) const = 0;
+    virtual double        min(void) const = 0;
+    virtual double        max(void) const = 0;
+    virtual double        sum(void) const = 0;
+    virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
 
     // Base class methods
     const int& size(void) const;

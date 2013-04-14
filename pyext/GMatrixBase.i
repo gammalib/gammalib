@@ -42,29 +42,31 @@ public:
     virtual ~GMatrixBase(void);
 
     // Pure virtual operators
-    virtual GVector      operator*(const GVector& vector) const = 0;
+    virtual GVector       operator*(const GVector& vector) const = 0;
 
     // Implemented base class operators
-    virtual bool         operator==(const GMatrixBase& matrix) const;
-    virtual bool         operator!=(const GMatrixBase& matrix) const;
+    virtual bool          operator==(const GMatrixBase& matrix) const;
+    virtual bool          operator!=(const GMatrixBase& matrix) const;
 
     // Pure virtual methods
-    virtual void         clear(void) = 0;
-    virtual GMatrixBase* clone(void) const = 0;
-    virtual GVector      row(const int& row) const = 0;
-    virtual void         row(const int& row, const GVector& vector) = 0;
-    virtual GVector      column(const int& column) const = 0;
-    virtual void         column(const int& column, const GVector& vector) = 0;
-    virtual void         add_to_row(const int& row, const GVector& vector) = 0;
-    virtual void         add_to_column(const int& column, const GVector& vector) = 0;
-    virtual void         transpose(void) = 0;
-    virtual void         invert(void) = 0;
-    virtual void         negate(void) = 0;
-    virtual void         abs(void) = 0;
-    virtual double       fill(void) const = 0;
-    virtual double       min(void) const = 0;
-    virtual double       max(void) const = 0;
-    virtual double       sum(void) const = 0;
+    virtual void          clear(void) = 0;
+    virtual GMatrixBase*  clone(void) const = 0;
+    virtual double&       at(const int& row, const int& column) = 0;
+    virtual const double& at(const int& row, const int& column) const = 0;
+    virtual GVector       row(const int& row) const = 0;
+    virtual void          row(const int& row, const GVector& vector) = 0;
+    virtual GVector       column(const int& column) const = 0;
+    virtual void          column(const int& column, const GVector& vector) = 0;
+    virtual void          add_to_row(const int& row, const GVector& vector) = 0;
+    virtual void          add_to_column(const int& column, const GVector& vector) = 0;
+    virtual void          transpose(void) = 0;
+    virtual void          invert(void) = 0;
+    virtual void          negate(void) = 0;
+    virtual void          abs(void) = 0;
+    virtual double        fill(void) const = 0;
+    virtual double        min(void) const = 0;
+    virtual double        max(void) const = 0;
+    virtual double        sum(void) const = 0;
 
     // Base class methods
     const int& size(void) const;

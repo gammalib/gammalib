@@ -73,6 +73,8 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GMatrixSparse* clone(void) const;
+    virtual double&        at(const int& row, const int& column);
+    virtual const double&  at(const int& row, const int& column) const;
     virtual GVector        row(const int& row) const;
     virtual void           row(const int& row, const GVector& vector);
     virtual GVector        column(const int& column) const;
@@ -89,10 +91,10 @@ public:
     virtual double         sum(void) const;
 
     // Other methods
-    void    add_to_column(const double* values, const int* rows,
-                          int number, const int& column);
-    void    column(const double* values, const int* rows,
-                   int number, const int& column);
+    void    column(const int& column, const double* values,
+                   const int* rows, int number);
+    void    add_to_column(const int& column, const double* values,
+                          const int* rows, int number);
     void    cholesky_decompose(bool compress = true);
     GVector cholesky_solver(const GVector& vector, bool compress = true);
     void    cholesky_invert(bool compress = true);
@@ -123,6 +125,10 @@ public:
         return (*self) / a;
     }
     GMatrixSparse copy() {
+        return (*self);
+    }
+    GMatrixSparse set(const double& value) {
+        (*self) = value;
         return (*self);
     }
 };

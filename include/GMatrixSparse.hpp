@@ -49,16 +49,20 @@ class GSparseNumeric;
  *
  * @brief Sparse matrix class interface defintion
  *
- * This class implements a sparse matrix class. The class only stores
- * non-zero elements, which can considerably reduce the memory requirements
- * for large systems that are sparsly filled.
+ * This class implements a sparse matrix. The class only stores non-zero
+ * elements, which can considerably reduce the memory requirements for large
+ * systems that are sparsely filled. Also the computations will be faster
+ * because only non-zero elements will be used in the operations.
+ *
+ * For a description of the common matrix methods, please refer to the
+ * GMatrixBase class.
  *
  * The class has been inspired from the code CSparse that can be downloaded
- * from http://www.cise.ufl.edu/research/sparse/CSparse/ 
- * CSparse has been written by Timothy A. Davis to accompany his book
- * "Direct Methods for Sparse Linear Systems". In the CSparse code, a sparse
- * matrix is implemented by the structure cs_sparse. The members of this
- * structure map as follows to the member of the GMatrixSparse class:
+ * from http://www.cise.ufl.edu/research/sparse/CSparse/ which has been
+ * written by Timothy A. Davis to accompany his book "Direct Methods for
+ * Sparse Linear Systems". In the CSparse code, a sparse matrix is
+ * implemented by the structure cs_sparse. The members of this
+ * structure map as follows to the members of the GMatrixSparse class:
  *
  * <table border> 
  *  <tr> 
@@ -106,6 +110,76 @@ class GSparseNumeric;
  *  </tr>
  * </table>
  *
+ * Matrix allocation is done using the constructors
+ *
+ *     GMatrixSparse sparsematrix(rows, columns);
+ *     GMatrixSparse sparsematrix(rows, columns, elements);
+ *     GMatrixSparse sparsematrix(matrix);
+ *     GMatrixSparse sparsematrix(sparsematrix);
+ *     GMatrixSparse sparsematrix(symmetricmatrix);
+ *
+ * where @p rows and @p columns specify the number of rows and columns of
+ * the matrix and @p elements is the size of the memory that should be
+ * pre-allocated for matrix storage (optional). Storage conversion
+ * constructors exist that allow allocating a sparse matrix by copying from
+ * a general matrix of type GMatrix and a symmetrix matrix of type
+ * GMatrixSymmetric.
+ *
+ * Because the location of a specific matrix element is not necessarily known
+ * in advance, the class implements a so called pending element for matrix
+ * element setting. A pending element is an element that is scheduled for
+ * insertion in the matrix, but which has not yet been inserted. The matrix
+ * element access operators () and at() return the reference to this pending
+ * element if a memory location for a given row and column does not yet
+ * exist. The protected method fill_pending() is then called before all
+ * operations that are done on the matrix to insert the element before the
+ * operation is executed.
+ *
+ * Another mechanism that has been implemented to speed up the fill of the
+ * sparse matrix is a "fill stack" that is used for insertion or addition
+ * of matrix columns by the
+ *
+ *     matrix.column(index, vector);
+ *     matrix.column(index, values, rows, number);
+ *     matrix.add_to_column(index, vector);
+ *     matrix.add_to_column(index, values, rows, number);
+ *
+ * methods. The fill stack is a buffer that implements a queue for columns
+ * that are to be inserted into the matrix. This is more efficient than
+ * insertion of elements one by one, as every insertion of an element may
+ * require to shift all elements back by one memory location.
+ *
+ * The fill stack is used as follows:
+ *
+ *     matrix.stack_init(size, entries);
+ *     ...
+ *     matrix.column(index, vector); // (or one of the other column methods)
+ *     ...
+ *     matrix.stack_flush();
+ *     ...
+ *     matrix.stack_destroy();
+ *
+ * The stack_init(size, entries) method initialises the fill stack, where
+ * @p size is the size of the allocated memory buffer and @p entries is the
+ * maximum number of entries (i.e. columns) that will be held by the buffer.
+ * If @p size is set to 0 (the default value), a default @p size value of
+ * 512 is used. If @p entries is set to 0 (the default value), the number of
+ * matrix columns is taken as default @p entries value. Note that a too large
+ * number of elements will produce some overhead due to fill stack
+ * management, hence @p entries should not exceeed a value of the order of
+ * 10-100.
+ *
+ * The stack_flush() method flushes the stack, which is mandatory before any
+ * usage of the matrix. Note that the fill stack IS NOT INSERTED AUTOMATICALLY
+ * before any matrix operation, hence manual stack flushing is needed to make
+ * all filled matrix elements available for usage. The stack_destroy() method
+ * will flush the stack and free all stack elements. This method
+ * should be called once no filling is required anymore. If stack_destroy()
+ * is called immediately after filling, no call to stack_flush() is needed as
+ * the stack_destroy() method flushes the stack before destroying it. The
+ * matrix stack is also destroyed by the sparse matrix destructor, hence
+ * manual stack destruction is not mandatory.
+ * 
  * Except for *m_rowinx which is implemented on the level of GMatrixSparse,
  * all other members are implemented by the base class GMatrixBase.
  ***************************************************************************/
@@ -144,6 +218,7 @@ public:
 
     // Other operators
     virtual GMatrixSparse& operator=(const GMatrixSparse& matrix);
+    virtual GMatrixSparse& operator=(const double& value);
     virtual GMatrixSparse  operator+(const GMatrixSparse& matrix) const;
     virtual GMatrixSparse  operator-(const GMatrixSparse& matrix) const;
     virtual GMatrixSparse  operator*(const GMatrixSparse& matrix) const;
@@ -157,6 +232,8 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GMatrixSparse* clone(void) const;
+    virtual double&        at(const int& row, const int& column);
+    virtual const double&  at(const int& row, const int& column) const;
     virtual GVector        row(const int& row) const;
     virtual void           row(const int& row, const GVector& vector);
     virtual GVector        column(const int& column) const;
@@ -174,10 +251,10 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void    column(const double* values, const int* rows,
-                   int number, const int& col);
-    void    add_to_column(const double* values, const int* rows,
-                          int number, const int& col);
+    void    column(const int& column, const double* values,
+                   const int* rows, int number);
+    void    add_to_column(const int& column, const double* values,
+                          const int* rows, int number);
     void    cholesky_decompose(bool compress = true);
     GVector cholesky_solver(const GVector& vector, bool compress = true);
     void    cholesky_invert(bool compress = true);

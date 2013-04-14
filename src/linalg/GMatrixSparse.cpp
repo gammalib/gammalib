@@ -17,19 +17,6 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * This class implements the compressed sparse column format. The          *
- * following arrays are allocated:                                         *
- *                                                                         *
- * m_rows     (n)  Number of rows                                          *
- * m_cols     (m)  Number of columns                                       *
- * m_data     (Ax) Holds all 'elements' non-zero values, in column order   *
- * m_colstart (Ap) Holds the index of the first element of each column     *
- * m_rowinx   (Ai) Holds the row indices for all elements                  *
- *                                                                         *
- * Column 'col' covers therefore [m_colstart[j], ..., m_colstart[j+1]-1]   *
- * Note that 'm_colstart' has m_cols+1 elements.                           *
- *                                                                         *
  ***************************************************************************/
 /**
  * @file GMatrixSparse.cpp
@@ -53,20 +40,20 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCTOR        "GMatrixSparse::GMatrixSparse(int&, int&, int&)"
-#define G_ACCESS                        "GMatrixSparse::operator(int&, int&)"
 #define G_OP_MUL_VEC                     "GMatrixSparse::operator*(GVector&)"
 #define G_OP_ADD                  "GMatrixSparse::operator+=(GMatrixSparse&)"
 #define G_OP_SUB                  "GMatrixSparse::operator-=(GMatrixSparse&)"
 #define G_OP_MAT_MUL              "GMatrixSparse::operator*=(GMatrixSparse&)"
+#define G_AT                                  "GMatrixSparse::at(int&, int&)"
 #define G_EXTRACT_ROW                           "GMatrixSymmetric::row(int&)"
 #define G_SET_ROW                     "GMatrixSymmetric::row(int&, GVector&)"
 #define G_EXTRACT_COLUMN                     "GMatrixSymmetric::column(int&)"
 #define G_SET_COLUMN               "GMatrixSymmetric::column(int&, GVector&)"
-#define G_SET_COLUMN2    "GMatrixSymmetric::column(double*, int*, int, int&)"
+#define G_SET_COLUMN2    "GMatrixSymmetric::column(int&, double*, int*, int)"
 #define G_ADD_TO_ROW           "GMatrixSymmetric::add_to_row(int&, GVector&)"
 #define G_ADD_TO_COLUMN     "GMatrixSymmetric::add_to_column(int&, GVector&)"
-#define G_ADD_TO_COLUMN2     "GMatrixSymmetric::add_to_column(double*, int*,"\
-                                                                " int, int&)"
+#define G_ADD_TO_COLUMN2     "GMatrixSymmetric::add_to_column(int&, double*,"
+                                                                " int*, int)"
 #define G_INVERT                                "GMatrixSparse::invert(void)"
 #define G_CHOL_DECOMP               "GMatrixSparse::cholesky_decompose(bool)"
 #define G_CHOL_SOLVE         "GMatrixSparse::cholesky_solver(GVector&, bool)"
@@ -137,6 +124,9 @@ GMatrixSparse::GMatrixSparse(void) : GMatrixBase()
  * of rows and columns. The elements parameter allows to specify how much
  * physical memory should be allocated initially. By default, no memory
  * will be allocated.
+ *
+ * @todo Is there a real need to throw an empty exception? The class should
+ * be able to operate on empty matrices.
  ***************************************************************************/
 GMatrixSparse::GMatrixSparse(const int& rows,
                              const int& columns,
@@ -257,9 +247,12 @@ GMatrixSparse::~GMatrixSparse(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Assignment operator
+ * @brief Matrix assignment operator
  *
  * @param[in] matrix Matrix.
+ * @return Matrix.
+ *
+ * Assigns the content of another matrix to the actual matrix instance.
  ***************************************************************************/
 GMatrixSparse& GMatrixSparse::operator=(const GMatrixSparse& matrix)
 {
@@ -288,25 +281,65 @@ GMatrixSparse& GMatrixSparse::operator=(const GMatrixSparse& matrix)
 
 
 /***********************************************************************//**
- * @brief Access operator
+ * @brief Value assignment operator
+ *
+ * @param[in] value Value.
+ * @return Matrix.
+ *
+ * Assigns the specified @p value to all elements of the matrix.
+ ***************************************************************************/
+GMatrixSparse& GMatrixSparse::operator=(const double& value)
+{
+    // Fill any pending element to have a non-pending state
+    fill_pending();
+    
+    // If value is 0 then simply reinitialize column start indices
+    if (value == 0) {
+
+        // Initialise column start indices to 0
+        for (int col = 0; col <= m_cols; ++col) {
+            m_colstart[col] = 0;
+        }
+
+    }
+
+    // ... otherwise fill column-wise
+    else {
+
+        // Set column vector
+        GVector column(m_rows);
+        column = value;
+
+        // Column-wise setting
+        for (int col = 0; col < m_cols; ++col) {
+            this->column(col, column);
+        }
+
+    }
+
+    // Return this object
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element
  *
  * @param[in] row Matrix row [0,...,rows()-1].
  * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Reference to matrix element.
  *
- * @exception GException::out_of_range
- *            Row or column index out of range.
+ * Returns the reference to the matrix element at @p row and @p column. If
+ * the matrix element does not yet exist, a reference to the pending element
+ * with a value of 0.0 is returned. 
  ***************************************************************************/
 double& GMatrixSparse::operator()(const int& row, const int& column)
 {
-    // Compile option: perform range check
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-        throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
-    }
-    #endif
+    // Fill pending element. This will set the value of the pending element
+    // to 0.0.
+    fill_pending();
 
     // Get element
-    fill_pending();
     int inx = get_index(row, column);
     double* value;
     if (inx < 0) {
@@ -324,29 +357,24 @@ double& GMatrixSparse::operator()(const int& row, const int& column)
 
 
 /***********************************************************************//**
- * @brief Access operator (const version)
+ * @brief Return reference to matrix element (const version)
  *
  * @param[in] row Matrix row [0,...,rows()-1].
  * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Const reference to matrix element.
  *
- * @exception GException::out_of_range
- *            Row or column index out of range.
- *
- * We need here the zero element to return also a pointer for 0.0 entry that
- * is not stored. Since we have the const version we don't have to care about
- * modification of this zero value.
+ * Returns a const reference to the matrix element at @p row and @p column.
+ * If the matrix element does not yet exist, a reference to the zero element
+ * is returned. If the matrix element corresponds to the pending element,
+ * a reference to the pending element is returned. Otherwise, a reference
+ * to the matrix elements is returned.
  ***************************************************************************/
 const double& GMatrixSparse::operator()(const int& row,
                                         const int& column) const
 {
-    // Compile option: perform range check
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
-      throw GException::out_of_range(G_ACCESS, row, column, m_rows, m_cols);
-    }
-    #endif
-
-    // Get element
+    // Get element. We need here the zero element to return also a pointer
+    // for 0.0 entry that is not stored. Since we have the const version we
+    // don't have to care about modification of this zero value.
     int inx = get_index(row, column);
     double* value;
     if (inx < 0) {
@@ -635,6 +663,50 @@ GMatrixSparse* GMatrixSparse::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return reference to matrix element
+ *
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Reference to matrix element.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ ***************************************************************************/
+double& GMatrixSparse::at(const int& row, const int& column)
+{
+    // Raise exception if row or column index is out of range
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    }
+
+    // Return element
+    return ((*this)(row, column));
+}
+
+
+/***********************************************************************//**
+ * @brief Return reference to matrix element (const version)
+ *
+ * @param[in] row Matrix row [0,...,rows()-1].
+ * @param[in] column Matrix column [0,...,columns()-1].
+ * @return Reference to matrix element.
+ *
+ * @exception GException::out_of_range
+ *            Row or column index out of range.
+ ***************************************************************************/
+const double& GMatrixSparse::at(const int& row, const int& column) const
+{
+    // Raise exception if row or column index is out of range
+    if (row < 0 || row >= m_rows || column < 0 || column >= m_cols) {
+        throw GException::out_of_range(G_AT, row, column, m_rows, m_cols);
+    }
+
+    // Return element
+    return ((*this)(row, column));
+}
+
+
+/***********************************************************************//**
  * @brief Extract row as vector from matrix
  *
  * @param[in] row Row to be extracted (starting from 0).
@@ -888,10 +960,10 @@ void GMatrixSparse::column(const int& column, const GVector& vector)
 /***********************************************************************//**
  * @brief Insert compressed array into matrix column
  *
+ * @param[in] column Column index [0,...,columns()-1].
  * @param[in] values Compressed array.
  * @param[in] rows Row indices of array.
  * @param[in] number Number of elements in array.
- * @param[in] column Column index [0,...,columns()-1].
  *
  * @exception GException::out_of_range
  *            Invalid column index specified.
@@ -904,12 +976,13 @@ void GMatrixSparse::column(const int& column, const GVector& vector)
  * This is the main driver routine to insert data into a matrix. Note that
  * there is another instance of this function that takes a vector.
  ***************************************************************************/
-void GMatrixSparse::column(const double* values, const int* rows, 
-                           int number, const int& column)
+void GMatrixSparse::column(const int& column, const double* values,
+                           const int* rows, int number)
 {
     // Debug header
     #if defined(G_DEBUG_SPARSE_INSERTION)
-    std::cout << "GMatrixSparse::insert_col(v, i, n, " << column << "):" << std::endl;
+    std::cout << "GMatrixSparse::column(";
+    std::cout << column << ", values, rows, " << number << "):" << std::endl;
     std::cout << " Matrix Data : ";
     for (int i = 0; i < m_elements; ++i) {
         std::cout << m_data[i] << " ";
@@ -1166,10 +1239,10 @@ void GMatrixSparse::add_to_column(const int& column, const GVector& vector)
 /***********************************************************************//**
  * @brief Add compressed array into matrix column
  *
+ * @param[in] column Column index [0,...,columns()-1].
  * @param[in] values Compressed array.
  * @param[in] rows Row indices of array.
  * @param[in] number Number of elements in array.
- * @param[in] col Column index (starting from 0).
  *
  * @exception GException::out_of_range
  *            Invalid column index specified.
@@ -1182,12 +1255,13 @@ void GMatrixSparse::add_to_column(const int& column, const GVector& vector)
  * normal and stack-based filled. Note that there is another instance of this
  * method that takes a vector.
  ***************************************************************************/
-void GMatrixSparse::add_to_column(const double* values, const int* rows, 
-                                  int number, const int& col)
+void GMatrixSparse::add_to_column(const int& column, const double* values,
+                                  const int* rows, int number)
 {
     // Debug header
     #if defined(G_DEBUG_SPARSE_ADDITION)
-    std::cout << "GMatrixSparse::add_col(v, i, n, " << col << "):" << std::endl;
+    std::cout << "GMatrixSparse::add_col(";
+    std::cout << column << ", values, rows, " << number << "):" << std::endl;
     std::cout << " Matrix Data : ";
     for (int i = 0; i < m_elements; ++i) {
         std::cout << m_data[i] << " ";
@@ -1216,7 +1290,7 @@ void GMatrixSparse::add_to_column(const double* values, const int* rows,
     // stack_push_column does its own argument verifications, so to avoid
     // double checking we don't do anything before this call ...
     if (m_stack_data != NULL) {
-        number = stack_push_column(values, rows, number, col);
+        number = stack_push_column(values, rows, number, column);
         if (number == 0) {
             return;
         }
@@ -1231,8 +1305,8 @@ void GMatrixSparse::add_to_column(const double* values, const int* rows,
 
         // Raise an exception if the column index is invalid
         #if defined(G_RANGE_CHECK)
-        if (col < 0 || col >= m_cols) {
-            throw GException::out_of_range(G_ADD_TO_COLUMN2, col, 0, m_cols-1);
+        if (column < 0 || column >= m_cols) {
+            throw GException::out_of_range(G_ADD_TO_COLUMN2, column, 0, m_cols-1);
         }
         #endif
 
@@ -1245,8 +1319,8 @@ void GMatrixSparse::add_to_column(const double* values, const int* rows,
     } // endelse: there was no stack
 
     // Get indices of column in matrix
-    int i_start = m_colstart[col];
-    int i_stop  = m_colstart[col+1];
+    int i_start = m_colstart[column];
+    int i_stop  = m_colstart[column+1];
 
     // Case A: the column exists in the matrix, so mix new elements with existing
     // data
@@ -1267,7 +1341,7 @@ void GMatrixSparse::add_to_column(const double* values, const int* rows,
                    wrk_double, wrk_int, &num_mix);
 
         // Insert mixed column
-        this->column(wrk_double, wrk_int, num_mix, col);
+        this->column(column, wrk_double, wrk_int, num_mix);
 
         // Free workspace
         delete [] wrk_int;
@@ -1277,20 +1351,23 @@ void GMatrixSparse::add_to_column(const double* values, const int* rows,
 
     // Case B: the column does not yet exist in the matrix, so just insert it
     else {
-        this->column(values, rows, number, col);
+        this->column(column, values, rows, number);
     }
 
     // Debugging: show sparse matrix after insertion
     #if defined(G_DEBUG_SPARSE_ADDITION)
     std::cout << " Out Data: ";
-    for (int i = 0; i < m_elements; ++i)
+    for (int i = 0; i < m_elements; ++i) {
         std::cout << m_data[i] << " ";
+    }
     std::cout << std::endl << " Out Row : ";
-    for (int i = 0; i < m_elements; ++i)
+    for (int i = 0; i < m_elements; ++i) {
         std::cout << m_rowinx[i] << " ";
+    }
     std::cout << std::endl << " Out Col : ";
-    for (int i = 0; i < m_cols+1; ++i)
+    for (int i = 0; i < m_cols+1; ++i) {
         std::cout << m_colstart[i] << " ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -1321,15 +1398,18 @@ void GMatrixSparse::transpose(void)
 /***********************************************************************//**
  * @brief Invert matrix
  *
- * @exception GException::feature_not_implemented
- *            Feature not yet implemented.
+ * Inverts the matrix using the Cholesky decomposition. This does not work
+ * on any kind of matrix.
  *
- * @todo Needs to be implemented.
+ * @todo Specify in documentation for which kind of matrix the method works.
  ***************************************************************************/
 void GMatrixSparse::invert(void)
 {
-    // Throw exception
-    throw GException::feature_not_implemented(G_INVERT);
+    // Perform Chloesky decomposition
+    cholesky_decompose(true);
+
+    // Invert matrix
+    cholesky_invert(true);
     
     // Return
     return;
