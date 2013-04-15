@@ -68,10 +68,10 @@ def handle_matrix():
             matrix[row,column] = row + column*matrix.rows() + 1.5
     
     # Get matrix attributes
-    matrix_fill        = matrix.fill()         # Will be 1
-    matrix_minimum     = matrix.min()          # Will be 1.5
-    matrix_maximum     = matrix.max()          # Will be 20.5
-    matrix_sum         = matrix.sum()          # Will be 220.0
+    matrix_fill    = matrix.fill()             # Will be 1
+    matrix_minimum = matrix.min()              # Will be 1.5
+    matrix_maximum = matrix.max()              # Will be 20.5
+    matrix_sum     = matrix.sum()              # Will be 220.0
 
     # Dump some information
     print("Attributes of a filled GMatrix:")
@@ -89,13 +89,13 @@ def handle_matrix():
     other_matrix *= 2.0                        # Multiply elements by 2
     other_matrix /= 2.0                        # Divide elements by 2
     neg_matrix    = -matrix                    # Negate matrix
-    abs_matrix    = gammalib.abs(neg_matrix)   # Absolute value of elements
+    abs_matrix    = neg_matrix.abs()           # Absolute value of elements
 
     # And now some more tricky operations
-    transposed    = gammalib.transpose(matrix) # First transpose matrix
+    transposed    = matrix.transpose()         # First transpose matrix
     mult_matrix   = matrix * transposed        # Now we can multiply it
     other_matrix *= transposed                 # Multiply on matrix
-    #inverted      = gammalib.invert(matrix)   # NOT YET IMPLEMENTED
+    #inverted      = matrix.invert()           # NOT YET IMPLEMENTED
     vector        = gammalib.GVector(5)        # Allocate vector
     multiplied    = matrix * vector            # Vector multiplication
 

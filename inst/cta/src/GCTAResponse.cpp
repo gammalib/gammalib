@@ -1360,10 +1360,9 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
             // celestial coordinates
             GMatrix ry;
             GMatrix rz;
-            GMatrix rot;
             ry.eulery(dir->dec_deg() - 90.0);
             rz.eulerz(-dir->ra_deg());
-            rot = transpose(ry * rz);
+            GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
             cta_irf_diffuse_kern_theta integrand(*this,
@@ -1547,10 +1546,9 @@ double GCTAResponse::npred_radial(const GSource& source,
         // given by (rho,omega), into celestial coordinates.
         GMatrix ry;
         GMatrix rz;
-        GMatrix rot;
         ry.eulery(model->dec() - 90.0);
         rz.eulerz(-model->ra());
-        rot = transpose(ry * rz);
+        GMatrix rot = (ry * rz).transpose();
 
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
@@ -1726,10 +1724,9 @@ double GCTAResponse::npred_elliptical(const GSource& source,
         // given by (rho,omega), into celestial coordinates.
         GMatrix ry;
         GMatrix rz;
-        GMatrix rot;
         ry.eulery(model->dec() - 90.0);
         rz.eulerz(-model->ra());
-        rot = transpose(ry * rz);
+        GMatrix rot = (ry * rz).transpose();
 
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
@@ -1920,10 +1917,9 @@ double GCTAResponse::npred_diffuse(const GSource& source,
             // given by (theta,phi), into celestial coordinates.
             GMatrix ry;
             GMatrix rz;
-            GMatrix rot;
             ry.eulery(events->roi().centre().dec_deg() - 90.0);
             rz.eulerz(-events->roi().centre().ra_deg());
-            rot = transpose(ry * rz);
+            GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
             cta_npred_diffuse_kern_theta integrand(*this,

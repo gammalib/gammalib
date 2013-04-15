@@ -37,6 +37,9 @@ GMatrixSymmetric (formerly GSymMatrix)
   to column(), renamed add_col() to add_to_column(), reorder
   arguments of GMatrixSparse::column() and GMatrixSparse::add_to_column()
   methods.
+  The transpose(), inverse() and abs() inplace transformation methods have
+  been replaced by methods that return a matrix. The transpose(),
+  inverse(), abs(), and negate() friend functions have been removed.
 
 GModelPar
   The "real_" prefix has been stripped from the methods operating on

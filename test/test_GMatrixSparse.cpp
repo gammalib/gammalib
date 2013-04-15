@@ -708,7 +708,7 @@ void TestGMatrixSparse::matrix_operations(void)
     }
     
     // Test matrix multiplication
-	GMatrixSparse test3 = m_test * transpose(m_test);
+	GMatrixSparse test3 = m_test * m_test.transpose();
 
     // Check if the result matrix is as expected
     GMatrixSparse ref3(g_rows, g_rows);
@@ -904,19 +904,11 @@ void TestGMatrixSparse::matrix_functions(void)
     }
     test_value(sum, value, 1.0e-20, "Test sum function");
 
-    // Transpose function
-	GMatrixSparse test1 = transpose(m_test);
+    // Transpose method
+	GMatrixSparse test1 = m_test.transpose();
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix_trans(test1, 1.0, 0.0),
                 "Test transpose(GMatrixSparse) function",
-                "Unexpected transposed matrix:\n"+test1.print());
-
-    // Transpose method
-	test1 = m_test;
-	test1.transpose();
-    test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix_trans(test1, 1.0, 0.0), 
-                "Test GMatrixSparse.transpose() method",
                 "Unexpected transposed matrix:\n"+test1.print());
 
     // Convert to general matrix
@@ -1008,11 +1000,7 @@ void TestGMatrixSparse::matrix_cholesky(void)
     }
 
     // Perform Cholesky decomposition
-    GMatrixSparse cd = cholesky_decompose(chol_test);
-
-    // Perform inplace Cholesky decomposition
-    cd = chol_test;
-    cd.cholesky_decompose();
+    GMatrixSparse cd = chol_test.cholesky_decompose();
 
     // Test Cholesky solver (first test)
     GVector e0(5);
@@ -1083,8 +1071,7 @@ void TestGMatrixSparse::matrix_cholesky(void)
 	chol_test_zero(5,5) = 1.0;
 
     // Test compressed Cholesky decomposition
-	GMatrixSparse cd_zero = chol_test_zero;
-	cd_zero.cholesky_decompose();
+	GMatrixSparse cd_zero = chol_test_zero.cholesky_decompose();
 
     // Test compressed Cholesky solver (first test)
 	e0 = GVector(6);
@@ -1155,8 +1142,7 @@ void TestGMatrixSparse::matrix_cholesky(void)
 	chol_test_zero2(5,4) = 1.0;
 
     // Test compressed Cholesky decomposition (unsymmetric case)
-	GMatrixSparse cd_zero2 = chol_test_zero2;
-	cd_zero2.cholesky_decompose();
+	GMatrixSparse cd_zero2 = chol_test_zero2.cholesky_decompose();
 
     // Test compressed Cholesky solver (unsymmetric case)
 	e0 = GVector(5);
@@ -1222,19 +1208,20 @@ void TestGMatrixSparse::matrix_cholesky(void)
 	unit(2,2) = 1.0;
 	unit(3,3) = 1.0;
 	unit(4,4) = 1.0;
-	GMatrixSparse chol_test_inv = chol_test;
-	chol_test_inv.cholesky_invert();
-    GMatrixSparse ci_product   = chol_test * chol_test_inv;
-    GMatrixSparse ci_residuals = ci_product - unit;
-	res = (abs(ci_residuals)).max();
-    test_value(res, 0.0, 1.0e-15, "Test inplace Cholesky inverter");
+	GMatrixSparse chol_test_inv = chol_test.cholesky_invert();
+    GMatrixSparse ci_product    = chol_test * chol_test_inv;
+    GMatrixSparse ci_residuals  = ci_product - unit;
+	res = (ci_residuals.abs()).max();
+    test_value(res, 0.0, 1.0e-15, "Test Cholesky inverter");
             
 	// Test Cholesky inverter
-	chol_test_inv = cholesky_invert(chol_test);
+    /*
+	chol_test_inv = chol_test.cholesky_invert();
     ci_product    = chol_test * chol_test_inv;
     ci_residuals  = ci_product - unit;
-	res           = (abs(ci_residuals)).max();
+	res           = (ci_residuals.abs()).max();
     test_value(res, 0.0, 1.0e-15, "Test Cholesky inverter");
+    */
 
     // Test Cholesky inverter for compressed matrix
     unit = GMatrixSparse(6,6);
@@ -1243,11 +1230,10 @@ void TestGMatrixSparse::matrix_cholesky(void)
     unit(2,2) = 1.0;
     unit(4,4) = 1.0;
     unit(5,5) = 1.0;
-    GMatrixSparse chol_test_zero_inv = chol_test_zero;
-    chol_test_zero_inv.cholesky_invert();
-    GMatrixSparse ciz_product   = chol_test_zero * chol_test_zero_inv;
-    GMatrixSparse ciz_residuals = ciz_product - unit;
-    res = (abs(ciz_residuals)).max();
+    GMatrixSparse chol_test_zero_inv = chol_test_zero.cholesky_invert();
+    GMatrixSparse ciz_product        = chol_test_zero * chol_test_zero_inv;
+    GMatrixSparse ciz_residuals      = ciz_product - unit;
+    res = (ciz_residuals.abs()).max();
     test_value(res, 0.0, 1.0e-15, "Test compressed matrix Cholesky inverter");
 
     // Return

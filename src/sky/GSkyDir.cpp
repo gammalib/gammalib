@@ -327,13 +327,12 @@ void GSkyDir::rotate_deg(const double& phi, const double& theta)
     // Allocate Euler and rotation matrices
     GMatrix ry;
     GMatrix rz;
-    GMatrix rot;
 
     // Set up rotation matrix to rotate from native coordinates to
     // celestial coordinates
     ry.eulery(m_dec * gammalib::rad2deg - 90.0);
     rz.eulerz(-m_ra * gammalib::rad2deg);
-    rot = transpose(ry * rz);
+    GMatrix rot = (ry * rz).transpose();
 
     // Set up native coordinate vector
     double phi_rad   = phi   * gammalib::deg2rad;

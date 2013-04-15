@@ -303,7 +303,7 @@ void GCTAPointing::update(void) const
         Rz.eulerz(-m_dir.ra_deg());
 
         // Compute rotation matrix
-        m_Rback = transpose(Ry * Rz);
+        m_Rback = (Ry * Rz).transpose();
 
         // Signal that we have a valid transformation cache
         m_has_cache = true;

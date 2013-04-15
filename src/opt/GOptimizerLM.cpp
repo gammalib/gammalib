@@ -630,8 +630,9 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // Solve: covar * X = grad. Handle matrix problems
         try {
-            covar->cholesky_decompose(true);
-            *grad = covar->cholesky_solver(*grad);
+            *grad = covar->solve(*grad);
+            //GMatrixSparse decomposition = covar->cholesky_decompose(true);
+            //*grad = decomposition.cholesky_solver(*grad);
         }
         catch (GException::matrix_zero &e) {
             m_status = G_LM_SINGULAR;
@@ -862,11 +863,11 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
 
         // Solve: covar * X = unit
         try {
-            covar->cholesky_decompose(true);
+            GMatrixSparse decomposition = covar->cholesky_decompose(true);
             GVector unit(npars);
             for (int ipar = 0; ipar < npars; ++ipar) {
                 unit[ipar] = 1.0;
-                GVector x  = covar->cholesky_solver(unit, true);
+                GVector x  = decomposition.cholesky_solver(unit, true);
                 if (x[ipar] >= 0.0) {
                     pars.par(ipar).factor_error(sqrt(x[ipar]));
                 }

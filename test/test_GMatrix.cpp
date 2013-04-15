@@ -393,7 +393,7 @@ void TestGMatrix::matrix_operations(void)
     }
     
     // Test matrix multiplication
-	GMatrix test3 = m_test * transpose(m_test);
+	GMatrix test3 = m_test * m_test.transpose();
     
     // Check if the result matrix is as expected
     GMatrix ref3 = test3;
@@ -588,18 +588,10 @@ void TestGMatrix::matrix_functions(void)
     test_value(sum, value, 1.0e-20, "Test sum function");
 
     // Transpose function
-	GMatrix test1 = transpose(m_test);
+	GMatrix test1 = m_test.transpose();
     test_assert(check_matrix(m_test), "Test source matrix");
     test_assert(check_matrix_trans(test1, 1.0, 0.0),
                 "Test transpose(GMatrix) function",
-                "Unexpected transposed matrix:\n"+test1.print());
-
-    // Transpose method
-	test1 = m_test;
-	test1.transpose();
-    test_assert(check_matrix(m_test), "Test source matrix");
-    test_assert(check_matrix_trans(test1, 1.0, 0.0), 
-                "Test GMatrix.transpose() method",
                 "Unexpected transposed matrix:\n"+test1.print());
 
     // Convert to general matrix
@@ -636,7 +628,7 @@ void TestGMatrix::matrix_functions(void)
     }
     
     // Extract lower triangle for square matrix
-    GMatrix test3 = m_test * transpose(m_test);
+    GMatrix test3 = m_test * m_test.transpose();
     GMatrix test4 = test3.extract_lower_triangle();
     test_assert(check_matrix_lt(test4, test3), 
                 "Test GMatrix.extract_lower_triangle() method",

@@ -418,10 +418,9 @@ double GResponse::npred_radial(const GSource& source,
         // by (theta,phi) into celestial coordinates.
         GMatrix ry;
         GMatrix rz;
-        GMatrix rot;
         ry.eulery(spatial->dec() - 90.0);
         rz.eulerz(-spatial->ra());
-        rot = transpose(ry * rz);
+        GMatrix rot = (ry * rz).transpose();
 
         // Set offset angle integration range
         double theta_min = 0.0;
@@ -494,10 +493,9 @@ double GResponse::npred_elliptical(const GSource& source,
         // by (theta,phi) into celestial coordinates.
         GMatrix ry;
         GMatrix rz;
-        GMatrix rot;
         ry.eulery(spatial->dec() - 90.0);
         rz.eulerz(-spatial->ra());
-        rot = transpose(ry * rz);
+        GMatrix rot = (ry * rz).transpose();
 
         // Set offset angle integration range
         double theta_min = 0.0;
