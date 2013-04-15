@@ -80,6 +80,7 @@ public:
     // Other methods
     GMatrix transpose(void) const;
     GMatrix invert(void) const;
+    GVector solve(const GVector& vector) const;
     GMatrix abs(void) const;
     GMatrix extract_lower_triangle(void) const;
     GMatrix extract_upper_triangle(void) const;

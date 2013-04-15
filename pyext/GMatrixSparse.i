@@ -88,6 +88,7 @@ public:
                                 const int* rows, int number);
     GMatrixSparse transpose(void) const;
     GMatrixSparse invert(void) const;
+    GVector       solve(const GVector& vector) const;
     GMatrixSparse abs(void) const;
     GMatrixSparse cholesky_decompose(bool compress = true);
     GVector       cholesky_solver(const GVector& vector, bool compress = true);
