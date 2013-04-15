@@ -12,17 +12,17 @@ It consists of two parts:
    and can be extracted as HTML or PDF with a tool called 
    Doxygen --- http://doxygen.org
 
-To generate the documentation in html format locally use these commands in the
-top-level folder of the GammaLib repository:
+To generate the documentation in html format locally use these commands
+in the top-level folder of the GammaLib repository:
 
-	make docs
+	make doc
 
 or if you only want the Sphinx or Doxygen part use:
 
-	make docs-sphinx
-	make docs-doxygen
+	make sphinx
+	make doxygen
 
 Then point your web browser to
 
-	docs/build/html/index.html
-	docs/build/html/doxygen/index.html
+	doc/html/index.html
+	doc/html/doxygen/index.html
