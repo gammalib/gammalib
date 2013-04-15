@@ -1,7 +1,6 @@
 # Folders
 doc/man
-doc/html/doxygen
-doc/build
+doc/html
 depcomp
 pyext/build/
 .libs
