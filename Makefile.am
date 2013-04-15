@@ -96,6 +96,17 @@ valgrind:
 		echo "valgrind not found in PATH."; \
 	fi
 
+# Add Sphinx rule
+sphinx:
+	@if type sphinx-build >/dev/null 2>&1; then \
+		sphinx-build -b html doc/source doc/build; \
+	else \
+		echo "sphinx-build not found in PATH."; \
+	fi
+
+# Add documentation rule:
+doc: doxygen sphinx
+    
 # Add Doxygen rules
 if DX_COND_doc
 
