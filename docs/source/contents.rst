@@ -13,3 +13,4 @@ Documentation
    installation
    quickstart
    documentation
+   user_manual/index
