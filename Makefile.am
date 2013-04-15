@@ -34,9 +34,13 @@ docdir = ${datadir}/doc/${PACKAGE}
 #EXTRA_DIST = autogen.sh \
 #             gammalib.pc.in
 
-install-data-local: $(HTML_INSTALL_DATA_TARGETS)
+#install-data-local: $(HTML_INSTALL_DATA_TARGETS)
+#
+#uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
 
-uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
+install-data-local: doxygen-install
+
+uninstall-local: doxygen-uninstall
 
 
 #
@@ -99,7 +103,7 @@ valgrind:
 # Add Sphinx rule
 sphinx:
 	@if type sphinx-build >/dev/null 2>&1; then \
-		sphinx-build -b html doc/source doc/build; \
+		sphinx-build -b html doc/source doc/html; \
 	else \
 		echo "sphinx-build not found in PATH."; \
 	fi
@@ -214,8 +218,9 @@ doxygen-uninstall:
 	done
 
 @DX_DOCDIR@/@PACKAGE@.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
-	    rm -rf @DX_DOCDIR@
-	    $(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
+	rm -rf @DX_DOCDIR@
+	mkdir -p $(srcdir)/doc/html/doxygen
+	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 
 DX_CLEANFILES = \
      @DX_DOCDIR@/@PACKAGE@.tag \
@@ -236,9 +241,9 @@ endif #DX_COND_doc
 HTMLDIRS = html html/images
 HTML_INSTALL_DATA_TARGETS = install-data-html
 install-data-html:
-	$(mkinstalldirs) $(DESTDIR)$(docdir)/html/doxygen
-	$(INSTALL_DATA) $(srcdir)/doc/html/doxygen.html $(DESTDIR)$(docdir)/html/doxygen/index.html
-	$(INSTALL_DATA) $(srcdir)/doc/html/gammalib.css $(DESTDIR)$(docdir)/html/doxygen
+	#$(mkinstalldirs) $(DESTDIR)$(docdir)/html/doxygen
+	#$(INSTALL_DATA) $(srcdir)/doc/html/doxygen.html $(DESTDIR)$(docdir)/html/doxygen/index.html
+	#$(INSTALL_DATA) $(srcdir)/doc/html/gammalib.css $(DESTDIR)$(docdir)/html/doxygen
 	@for dir in $(HTMLDIRS) ; do \
 	  $(mkinstalldirs) $(DESTDIR)$(docdir)/$$dir && \
 	  for file in $(srcdir)/doc/$$dir/*.* ; do \
