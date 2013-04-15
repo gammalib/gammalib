@@ -35,10 +35,9 @@ docdir = ${datadir}/doc/${PACKAGE}
 #             gammalib.pc.in
 
 #install-data-local: $(HTML_INSTALL_DATA_TARGETS)
-#
 #uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
 
-install-data-local: doxygen-install
+install-data-local: doxygen-install sphinx-install
 
 uninstall-local: doxygen-uninstall
 
@@ -107,6 +106,15 @@ sphinx:
 	else \
 		echo "sphinx-build not found in PATH."; \
 	fi
+
+# Install Sphinx files
+sphinx-install:
+	for file in $(srcdir)/doc/html/*.* ; do \
+	  echo "$(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/html" ; \
+	  $(INSTALL_DATA) "$$file" $(DESTDIR)$(docdir)/html ; \
+	done
+	cp -r $(srcdir)/doc/html/_sources $(DESTDIR)$(docdir)/html
+	cp -r $(srcdir)/doc/html/_static $(DESTDIR)$(docdir)/html
 
 # Add documentation rule:
 doc: doxygen sphinx
