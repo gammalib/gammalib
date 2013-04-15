@@ -5,13 +5,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Definitions for manual package
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\task}{\mbox{GammaLib}}
-\newcommand{\this}{\mbox{\tt \task}}
-\newcommand{\shorttype}{\mbox{CDC}}
-\newcommand{\doctype}{\mbox{Coding and Design Conventions}}
-\newcommand{\version}{\mbox{draft}}
-\newcommand{\calendar}{\mbox{15 December 2012}}
-\newcommand{\auth}{\mbox{J\"urgen Kn\"odlseder}}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -35,20 +28,20 @@
 \section{Introduction}
 
 This document summarises the coding and design conventions that should be following for
-the \this\ development.
+the GammaLib development.
 
 Respecting uniform and coherent coding and design conventions is crucial for software
 development.
 They improve code readability, ease code development and maintenance, ensure code
 portability, and provide standards for the user interface.
 
-Coding and design conventions were introduced at a very early stage of the \this\ project, and
+Coding and design conventions were introduced at a very early stage of the GammaLib project, and
 are followed as strictly as possible.
-The choices that were made for \this\ were inspired by a large survey of existing C++ coding
+The choices that were made for GammaLib were inspired by a large survey of existing C++ coding
 rules, combined with the experience of the leading code developers.
 Obviously, there is no single best way to code in C++, and the adopted conventions may not
 meet the coding usage of individual developers.
-They should nevertheless be respected strictly, as the \this\ code base is already very large,
+They should nevertheless be respected strictly, as the GammaLib code base is already very large,
 and assuring uniformity and coherence is a primary goal of the project.
 
 
@@ -57,7 +50,7 @@ and assuring uniformity and coherence is a primary goal of the project.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{General coding rules}
 
-This section provides lists of general coding rules for the \this\ development.
+This section provides lists of general coding rules for the GammaLib development.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{C++ rules}
@@ -174,7 +167,7 @@ PEP8 compliance is automatically checked by the continuous integration system.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Coding conventions}
 
-The style summarizes coding conventions for the \this\ development.
+The style summarizes coding conventions for the GammaLib development.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{C++ classes}
@@ -334,7 +327,7 @@ declaration at the end protect the file from multiple inclusions of the header.
 This is a crucial feature needed for proper compilation of the code.
 
 Now all header files are included.
-Standard header files are included using the {\tt < >} brackets, \this\ header files are included
+Standard header files are included using the {\tt < >} brackets, GammaLib header files are included
 using {\tt " "}.
 A 80 character long separator precedes the header inclusion.
 Further 80 character long separators may be added for additional sections, such as
@@ -463,7 +456,7 @@ const double pi = 3.14;
 
 The include section starts with a conditional include of the code configuration header file
 (see section \ref{sec:configure}).
-This makes \this\ compile options available to the source code.
+This makes GammaLib compile options available to the source code.
 
 The include section is followed by the declaration of method names.
 These method names will be used in exceptions (see section \ref{sec:exceptions}).
@@ -489,7 +482,7 @@ For code checked into the repository, all debug options should be commented out.
 
 The Python interface for C++ classes is defined by a so-called SWIG interface file.
 SWIG uses these interface files to build Python wrapper files, which are C files
-that define the interface between \this\ and Python.
+that define the interface between GammaLib and Python.
 The structure of the SWIG interface file follows closely that of the header file, with
 a few exceptions.
 Here an example:
@@ -612,15 +605,15 @@ source code file:
 Note that the {\tt config.h} file should {\bf not be included in header files}, since header files
 are used by the outside world without any knowledge about {\tt config.h}.
 
-One of the most commonly used configuration options used throughout \this\ is related to
+One of the most commonly used configuration options used throughout GammaLib is related to
 range checking.
 Range checks are usually performed when accessing array elements, assuring that no
 elements outside the valid range are accessed.
 Range checking, however, is time consuming, in particular if many elements are
 accessed subsequently.
-\this\ therefore allows to disable range checks.
+GammaLib therefore allows to disable range checks.
 This can be done by specifying {\tt ./configure --disable-range-check} when configuring 
-\this\ for compilation.
+GammaLib for compilation.
 The {\tt --disable-range-check} option undefines {\tt G\_RANGE\_CHECK}, and optional
 range checking is thus achieved by adding for example
 \begin{verbatim}
@@ -656,8 +649,8 @@ Definition & Option & Usage \\
 {\tt HAVE\_PYTHON} & {\tt --enable-python-binding} & Has Python bindings \\
 {\tt PACKAGE} & n.a. & {\tt gammalib} \\
 {\tt PACKAGE\_PREFIX} & n.a. & Installation location (e.g. {\tt /usr/local/gamma}) \\
-{\tt PACKAGE\_STRING} & n.a. & Full name and version of \this\ \\
-{\tt PACKAGE\_VERSION} & n.a. & Version of \this\ (format: x.y.z) \\
+{\tt PACKAGE\_STRING} & n.a. & Full name and version of GammaLib \\
+{\tt PACKAGE\_VERSION} & n.a. & Version of GammaLib (format: x.y.z) \\
 \noalign{\smallskip}
 \hline
 \end{tabular}
@@ -887,7 +880,7 @@ the source of memory leaks.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Method naming conventions}
 
-Uniform {\tt public} method names should be provided throughout \this\ for all classes.
+Uniform {\tt public} method names should be provided throughout GammaLib for all classes.
 Unless the {\tt public} method names are very long (which should be avoided), names
 should not comprise underscores as separators.
 {\tt Public} method names are all lowercase.
@@ -1220,8 +1213,8 @@ GLog& operator<< (GLog& log, const GFits& fits)
 \subsubsection{Exceptions}
 \label{sec:exceptions}
 
-Exceptions are largely used in \this\ to handle the occurrence of unexpected events.
-\this\ exceptions are implement by the {\tt GException} class.
+Exceptions are largely used in GammaLib to handle the occurrence of unexpected events.
+GammaLib exceptions are implement by the {\tt GException} class.
 For each new exception type, a new exception subclass is added.
 
 Each exception returns the method name in which the exception occurs and an exception
@@ -1280,23 +1273,23 @@ Extension & Method & Usage \\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Version control}
 
-\this\ applies a three-number version numbering scheme:
+GammaLib applies a three-number version numbering scheme:
 {\tt major\_revision-minor\_revision-patch}.
 
-A {\tt major\_revision} of {\tt 00} indicates that the \this\ design is not yet frozen.
-At this level, external interfaces of \this\ may change without notification, and no
+A {\tt major\_revision} of {\tt 00} indicates that the GammaLib design is not yet frozen.
+At this level, external interfaces of GammaLib may change without notification, and no
 interface control system is implemented.
 The {\tt minor\_revision} tag will be incremented for each new release, signaling
 that new features have become available.
 The {\tt patch} tag will be incremented after correcting bugs that were reported
 on releases.
 
-Once the \this\ design is frozen, the {\tt major\_revision} number will be incremented 
+Once the GammaLib design is frozen, the {\tt major\_revision} number will be incremented 
 to {\tt 01}.
-From this moment on, external interfaces of \this\ will be under configuration control.
+From this moment on, external interfaces of GammaLib will be under configuration control.
 If existing external interfaces will be modified, the {\tt major\_revision} number will be
 incremented.
-At the same time, the {\tt libtool} version number of the \this\ will also be incremented.
+At the same time, the {\tt libtool} version number of the GammaLib will also be incremented.
 The {\tt minor\_revision} number will be incremented if modifications and extensions
 are backward compatible
 As before, the {\tt patch} number will be incremented after correcting bugs that were 

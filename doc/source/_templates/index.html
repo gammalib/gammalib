@@ -1,0 +1,30 @@
+{% extends "layout.html" %} {% set title = _('Overview') %} {% block
+body %}
+<h1>{{ _('GammaLib') }}</h1>
+
+<h2 style="margin-bottom: 0">{%trans%}About{%endtrans%}</h2>
+
+<p>{%trans%} The GammaLib is a versatile toolbox for the high-level
+	analysis of astronomical gamma-ray data. It is implemented as a C++
+	library that is fully scriptable in the Python scripting language. The
+	library provides core functionalities such as data input and output,
+	interfaces for parameter specifications, and a reporting and logging
+	interface. It implements instruments specific functionalities such as
+	instrument response functions and data formats. Instrument specific
+	functionalities share a common interface to allow for extension of the
+	GammaLib to include new gamma-ray instruments. The GammaLib provides an
+	abstract data analysis framework that enables simultaneous
+	multi-mission analysis. {%endtrans%}</p>
+
+<h2 style="margin-bottom: 0">{%trans%}Documentation{%endtrans%}</h2>
+
+<h2>
+	<a class="biglink" href="{{ pathto("contents") }}">{%trans%}Contents{%endtrans%}</a>
+</h2>
+
+<h2 style="margin-bottom: 0">{%trans%}Links{%endtrans%}</h2>
+
+<ul>
+	<li><a href="https://www.ohloh.net/p/GammaLib">Gammalib on
+			Ohloh</a>{% endblock %}</li>
+</ul>
