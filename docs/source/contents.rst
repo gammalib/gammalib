@@ -12,5 +12,7 @@ Documentation
    home
    installation
    quickstart
-   documentation
    user_manual/index
+   coding/index
+   api
+   
