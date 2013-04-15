@@ -356,6 +356,30 @@ GVector GMatrixSymmetric::operator*(const GVector& vector) const
 
 
 /***********************************************************************//**
+ * @brief Negate matrix elements
+ *
+ * @return Matrix with negated elements.
+ *
+ * Returns a matrix where each element has been replaced by its negative
+ * element.
+ ***************************************************************************/
+GMatrixSymmetric GMatrixSymmetric::operator-(void) const
+{
+    // Copy matrix
+    GMatrixSymmetric matrix = *this;
+
+    // Take the absolute value of all matrix elements
+    double* ptr = matrix.m_data;
+    for (int i = 0; i < matrix.m_elements; ++i, ++ptr) {
+        *ptr = -(*ptr);
+    }
+
+    // Return matrix
+    return matrix;
+}
+
+
+/***********************************************************************//**
  * @brief Unary matrix addition operator
  *
  * @param[in] matrix Matrix.
@@ -687,56 +711,78 @@ void GMatrixSymmetric::add_to_column(const int& column, const GVector& vector)
 
 
 /***********************************************************************//**
- * @brief Invert matrix
+ * @brief Return inverted matrix
  *
- * Inverts the matrix using the Cholesky decomposition. This does not work
- * on any kind of matrix.
+ * @return Inverted matrix.
+ *
+ * Returns inverse of matrix. Inversion is done for the moment using Cholesky
+ * decomposition. This does not work on any kind of matrix.
  *
  * @todo Specify in documentation for which kind of matrix the method works.
  ***************************************************************************/
-void GMatrixSymmetric::invert(void)
+GMatrixSymmetric GMatrixSymmetric::invert(void) const
 {
+    // Allocate result matrix
+    GMatrixSymmetric matrix(m_cols, m_rows);
+
     // Invert matrix
-    cholesky_invert(true);
+    matrix.cholesky_invert(true);
     
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 
 /***********************************************************************//**
- * @brief Negate all matrix elements
+ * @brief Solves linear matrix equation
  *
- * Negates all matrix elements.
+ * @param[in] vector Solution vector.
+ * 
+ * Solves the linear equation
+ *
+ * \f[M \times {\tt solution} = {\tt vector} \f]
+ *
+ * where \f$M\f$ is the matrix, \f${\tt vector}\f$ is the result, and
+ * \f${\tt solution}\f$ is the solution. Solving is done using Cholesky
+ * decomposition. This does not work on any kind of matrix.
+ *
+ * @todo Specify in documentation for which kind of matrix the method works.
  ***************************************************************************/
-void GMatrixSymmetric::negate(void)
+GVector GMatrixSymmetric::solve(const GVector& vector) const
 {
-    // Negate all matrix elements
-    double* ptr = m_data;
-    for (int i = 0; i < m_elements; ++i, ++ptr) {
-        *ptr = -(*ptr);
-    }
-    
-    // Return
-    return;
+    // Get Cholesky decomposition of matrix
+    GMatrixSymmetric decomposition = cholesky_decompose(true);
+
+    // Solve linear equation
+    GVector result = decomposition.cholesky_solver(vector);
+
+    // Return result
+    return result;
 }
 
 
 /***********************************************************************//**
- * @brief Take absolute value of matrix elements
+ * @brief Return absolute of matrix
  *
- * Replaces all elements of the matrix by their absolute values.
+ * @return Absolute of matrix
+ *
+ * Returns matrix where all elements of the matrix have been replaced by
+ * their absolute values.
  ***************************************************************************/
-void GMatrixSymmetric::abs(void)
+GMatrixSymmetric GMatrixSymmetric::abs(void) const
 {
+    // Allocate result matrix
+    GMatrixSymmetric matrix(m_rows, m_cols);
+
     // Take the absolute value of all matrix elements
-    double* ptr = m_data;
-    for (int i = 0; i < m_elements; ++i, ++ptr) {
-        *ptr = std::abs(*ptr);
+    double* src = m_data;
+    double* dst = matrix.m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ = std::abs(*src++);
     }
-    
-    // Return
-    return;
+
+    // Return matrix
+    return matrix;
 }
 
 
@@ -848,60 +894,69 @@ GMatrix GMatrixSymmetric::extract_upper_triangle(void) const
 
 
 /***********************************************************************//**
- * @brief Perform a Cholesky decomposition
+ * @brief Return Cholesky decomposition
  *
- * @param[in] compress Use zero-row/column compression (default: true).
+ * @param[in] compress Use zero-row/column compression (defaults to true).
+ * @return Cholesky decomposition of matrix
  *
  * @exception GException::matrix_not_pos_definite
  *            Matrix is not positive definite.
  * @exception GException::matrix_zero
  *            All matrix elements are zero.
  *
- * Inplace Cholesky decomposition inspired by Numerical Recipes algorithm.
+ * Returns the Cholesky decomposition of a sparse matrix. The decomposition
+ * is stored within a GMatrixSymmetric object.
+ *
+ * The method is inspired by the algorithm found in Numerical Recipes.
  * The decomposition, which is a matrix occupying only the lower triange,
  * is stored in the elements of the symmetric matrix. To visualise the
  * matrix one has to use 'lower_triangle()' to extract the relevant part.
  * Case A operates on a full matrix, Case B operates on a (logically)
  * compressed matrix where zero rows/columns have been removed.
  ***************************************************************************/
-void GMatrixSymmetric::cholesky_decompose(bool compress)
+GMatrixSymmetric GMatrixSymmetric::cholesky_decompose(bool compress) const
 {
+    // Create copy of matrix
+    GMatrixSymmetric matrix = *this;
+
     // Set-up incides of non zero rows if matrix compression is requested
     if (compress) {
-        set_inx();
+        matrix.set_inx();
     }
 
     // Check if zero-row/col compression is needed  
-    int no_zeros = ((compress && (m_num_inx == m_rows)) || !compress);
+    int no_zeros = ((compress && (matrix.m_num_inx == matrix.m_rows)) || !compress);
 
     // Case A: no zero-row/col compression needed
     if (no_zeros) {
 
         // Loop over upper triangle (col >= row)
         double diag = 0.0;
-        for (int row = 0; row < m_rows; ++row) {
-            double* ptr = m_data + m_colstart[row];
-            for (int col = row; col < m_cols; ++col, ++ptr) {
-                double sum = *ptr;                         // sum = M(row,col)
+        for (int row = 0; row < matrix.m_rows; ++row) {
+            double* ptr = matrix.m_data + matrix.m_colstart[row];
+            for (int col = row; col < matrix.m_cols; ++col, ++ptr) {
+                // sum = M(row,col)
+                double sum = *ptr;
                 for (int k = 0; k < row; ++k) {
-                    int offset = m_colstart[k] - k;        // is always positive
-                    sum -= m_data[offset+row] * m_data[offset+col]; // sum -= M(row,k)*M(col,k)
+                    int offset = matrix.m_colstart[k] - k; // is always positive
+                    sum -= matrix.m_data[offset+row] * matrix.m_data[offset+col]; // sum -= M(row,k)*M(col,k)
                 }
                 if (row == col) {
                     if (sum <= 0.0) {
                         throw GException::matrix_not_pos_definite(G_CHOL_DECOMP, row, sum);
                     }
-                    *ptr = sqrt(sum);                      // M(row,row) = sqrt(sum)
+                    *ptr = std::sqrt(sum);  // M(row,row) = sqrt(sum)
                     diag = 1.0/(*ptr);
                 }
-                else
-                    *ptr = sum*diag;                       // M(row,col) = sum/M(row,row)
+                else {
+                    *ptr = sum*diag; // M(row,col) = sum/M(row,row)
+                }
             }
         }
     } // endif: there were no zero rows/cols in matrix
 
     // Case B: zero-row/col compression needed
-    else if (m_num_inx > 0) {
+    else if (matrix.m_num_inx > 0) {
 
         // Allocate loop variables and pointers
         int  row;
@@ -913,25 +968,27 @@ void GMatrixSymmetric::cholesky_decompose(bool compress)
 
         // Loop over upper triangle (col >= row)
         double diag = 0.0;
-        for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
-            double* ptr_0 = m_data + m_colstart[*row_ptr] - *row_ptr;
-            for (col = row, col_ptr = m_inx + row; col < m_num_inx; ++col, ++col_ptr) {
+        for (row = 0, row_ptr = matrix.m_inx; row < matrix.m_num_inx; ++row, ++row_ptr) {
+            double* ptr_0 = matrix.m_data + matrix.m_colstart[*row_ptr] - *row_ptr;
+            for (col = row, col_ptr = matrix.m_inx + row; col < matrix.m_num_inx; ++col, ++col_ptr) {
                 double* ptr = ptr_0 + *col_ptr;
                 double  sum = *ptr;                                  // sum = M(row,col)
-                for (k = 0, k_ptr = m_inx; k < row; ++k, ++k_ptr) {
-                    int offset = m_colstart[*k_ptr] - *k_ptr;        // is always positive
-                    sum -= m_data[offset+*row_ptr] * m_data[offset+*col_ptr];
+                for (k = 0, k_ptr = matrix.m_inx; k < row; ++k, ++k_ptr) {
+                    int offset = matrix.m_colstart[*k_ptr] - *k_ptr;        // is always positive
+                    sum       -= matrix.m_data[offset+*row_ptr] *
+                                 matrix.m_data[offset+*col_ptr];
                                                                      // sum -= M(row,k)*M(col,k)
                 }
                 if (*row_ptr == *col_ptr) {
                     if (sum <= 0.0) {
                         throw GException::matrix_not_pos_definite(G_CHOL_DECOMP, *row_ptr, sum);
                     }
-                    *ptr = sqrt(sum);                                // M(row,row) = sqrt(sum)
+                    *ptr = std::sqrt(sum); // M(row,row) = sqrt(sum)
                     diag = 1.0/(*ptr);
                 }
-                else
-                    *ptr = sum*diag;                                 // M(row,col) = sum/M(row,row)
+                else {
+                    *ptr = sum*diag; // M(row,col) = sum/M(row,row)
+                }
             }
         }
     } // endelse: zero-row/col compression needed
@@ -941,8 +998,8 @@ void GMatrixSymmetric::cholesky_decompose(bool compress)
         throw GException::matrix_zero(G_CHOL_DECOMP);
     }
 
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 
@@ -962,7 +1019,8 @@ void GMatrixSymmetric::cholesky_decompose(bool compress)
  * that is produced by 'cholesky_decompose'. Case A operates on a full
  * matrix, Case B on a zero rows/columns (logically) compressed matrix.
  ***************************************************************************/
-GVector GMatrixSymmetric::cholesky_solver(const GVector& vector, bool compress)
+GVector GMatrixSymmetric::cholesky_solver(const GVector& vector,
+                                          bool compress) const
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
     if (m_rows != vector.size()) {
@@ -1041,60 +1099,72 @@ GVector GMatrixSymmetric::cholesky_solver(const GVector& vector, bool compress)
 
 
 /***********************************************************************//**
- * @brief Cholesky invert
+ * @brief Invert matrix using a Cholesky decomposition
  *
- * @param[in] compress Use zero-row/column compression (default: true).
+ * @param[in] compress Use zero-row/column compression (defaults to true).
+ * @return Inverted matrix.
  *
  * @exception GException::matrix_zero
  *            All matrix elements are zero.
  *
- * Inplace matrix inversion using the Cholesky decomposition. Case A
- * operates on a full matrix while Case B operates on a (logically)
- * compressed matrix where all zero rows/columns are skipped.
+ * Inverts the matrix using a Cholesky decomposition.
+ *
+ * The method distinguish two cases. Case A operates on a full matrix while
+ * Case B operates on a (logically) compressed matrix where all zero
+ * rows/columns are skipped.
  ***************************************************************************/
-void GMatrixSymmetric::cholesky_invert(bool compress)
+GMatrixSymmetric GMatrixSymmetric::cholesky_invert(bool compress) const
 {
     // Generate Cholesky decomposition of matrix
-    this->cholesky_decompose(compress);
+    GMatrixSymmetric matrix = cholesky_decompose(compress);
 
     // Check if zero-row/col compression is needed
-    int no_zeros = ((compress && (m_num_inx == m_rows)) || !compress);
+    int no_zeros = ((compress && (matrix.m_num_inx == matrix.m_rows)) || !compress);
 
     // Case A: no zero-row/col compression needed
     if (no_zeros) {
 
         // Generate inverse of Cholesky decomposition (col>row)
-        for (int row = 0; row < m_rows; ++row) {
-            double* ptr = m_data + m_colstart[row];
-            *ptr        = 1.0/(*ptr);                       // M(row,row) = 1/M(row,row)
-            for (int col = row+1; col < m_cols; ++col) {
+        for (int row = 0; row < matrix.m_rows; ++row) {
+
+            // M(row,row) = 1/M(row,row)
+            double* ptr = matrix.m_data + matrix.m_colstart[row];
+            *ptr        = 1.0/(*ptr);
+
+            for (int col = row+1; col < matrix.m_cols; ++col) {
+
+                // sum -= M(col,k)*M(k,row)
                 double   sum = 0.0;
-                double* ptr1 = m_data + col - row;
+                double* ptr1 = matrix.m_data + col - row;
                 double* ptr2 = ptr;
                 for (int k = row; k < col; ++k) {
-                    sum -= *(ptr1-- + m_colstart[k]) * *ptr2++; // sum -= M(col,k)*M(k,row)
+                    sum -= *(ptr1-- + matrix.m_colstart[k]) * *ptr2++;
                 }
-                *(ptr+col-row) = sum/m_data[m_colstart[col]];   // M(col,row) = sum/M(col,col)
+
+                // M(col,row) = sum/M(col,col)
+                *(ptr+col-row) = sum/matrix.m_data[matrix.m_colstart[col]];
             }
         }
 
         // Matrix multiplication (col>=row)
-        for (int row = 0; row < m_rows; ++row) {
-            double* ptr = m_data + m_colstart[row];
-            for (int col = row; col < m_cols; ++col) {
+        for (int row = 0; row < matrix.m_rows; ++row) {
+            double* ptr = matrix.m_data + matrix.m_colstart[row];
+            for (int col = row; col < matrix.m_cols; ++col) {
+                // sum += M(row,k)*M(k,col)
                 double   sum = 0.0;
                 double* ptr1 = ptr + col - row;
-                double* ptr2 = m_data + m_colstart[col];
-                for (int k = col; k < m_cols; ++k) {
-                    sum += *ptr1++ * *ptr2++;                 // sum += M(row,k)*M(k,col)
+                double* ptr2 = matrix.m_data + matrix.m_colstart[col];
+                for (int k = col; k < matrix.m_cols; ++k) {
+                    sum += *ptr1++ * *ptr2++;
                 }
-                *(ptr+col-row) = sum;                         // M(row,col) = sum
+                // M(row,col) = sum
+                *(ptr+col-row) = sum;
             }
         }
     } // endif: no zero-row/col compression needed
 
     // Case B: zero-row/col compression needed
-    else if (m_num_inx > 0) {
+    else if (matrix.m_num_inx > 0) {
 
         // Allocate loop variables and pointers
         int  row;
@@ -1105,33 +1175,51 @@ void GMatrixSymmetric::cholesky_invert(bool compress)
         int* k_ptr;
 
         // Generate inverse of Cholesky decomposition (col>row)
-        for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
-            double* ptr_diag = m_data + m_colstart[*row_ptr];
+        for (row = 0, row_ptr = matrix.m_inx;
+             row < matrix.m_num_inx; ++row, ++row_ptr) {
+
+            // M(row,row) = 1/M(row,row)
+            double* ptr_diag = matrix.m_data + matrix.m_colstart[*row_ptr];
             double* ptr_2    = ptr_diag - *row_ptr;
-            *ptr_diag = 1.0/(*ptr_diag);                         // M(row,row) = 1/M(row,row)
-            for (col = row+1, col_ptr = m_inx+row+1; col < m_num_inx; ++col, ++col_ptr) {
+            *ptr_diag        = 1.0/(*ptr_diag);
+                                     
+            for (col = row+1, col_ptr = matrix.m_inx+row+1;
+                 col < matrix.m_num_inx; ++col, ++col_ptr) {
+
+                // sum -= M(col,k)*M(k,row)
                 double  sum   = 0.0;
-                double* ptr_1 = m_data + *col_ptr;
-                for (k = row, k_ptr = m_inx+row; k < col; ++k, ++k_ptr) {
-                    sum -= *(ptr_1 + m_colstart[*k_ptr] - *k_ptr) *
-                           *(ptr_2 + *k_ptr);                    // sum -= M(col,k)*M(k,row)
+                double* ptr_1 = matrix.m_data + *col_ptr;
+                for (k = row, k_ptr = matrix.m_inx+row;
+                     k < col; ++k, ++k_ptr) {
+                    sum -= *(ptr_1 + matrix.m_colstart[*k_ptr] - *k_ptr) *
+                           *(ptr_2 + *k_ptr);
                 }
-                *(ptr_2 + *col_ptr) = sum/m_data[m_colstart[*col_ptr]];
-                                                                 // M(col,row) = sum/M(col,col)
+
+                // M(col,row) = sum/M(col,col)
+                *(ptr_2 + *col_ptr) =
+                    sum/matrix.m_data[matrix.m_colstart[*col_ptr]];
             }
         }
 
         // Matrix multiplication (col>=row)
-        for (row = 0, row_ptr = m_inx; row < m_num_inx; ++row, ++row_ptr) {
-            double* ptr_diag = m_data + m_colstart[*row_ptr];
+        for (row = 0, row_ptr = matrix.m_inx;
+             row < matrix.m_num_inx; ++row, ++row_ptr) {
+            double* ptr_diag = matrix.m_data + matrix.m_colstart[*row_ptr];
             double* ptr_1    = ptr_diag - *row_ptr;
-            for (col = row, col_ptr = m_inx+row; col < m_num_inx; ++col, ++col_ptr) {
+
+            for (col = row, col_ptr = matrix.m_inx+row;
+                 col < matrix.m_num_inx; ++col, ++col_ptr) {
+
+                // sum += M(row,k)*M(k,col)
                 double  sum   = 0.0;
-                double* ptr_2 = m_data + m_colstart[*col_ptr] - *col_ptr;
-                for (k = col, k_ptr = m_inx+col; k < m_num_inx; ++k, ++k_ptr) {
-                    sum += *(ptr_1 + *k_ptr) * *(ptr_2 + *k_ptr); // sum += M(row,k)*M(k,col)
+                double* ptr_2 = matrix.m_data + matrix.m_colstart[*col_ptr] - *col_ptr;
+                for (k = col, k_ptr = matrix.m_inx+col;
+                     k < matrix.m_num_inx; ++k, ++k_ptr) {
+                    sum += *(ptr_1 + *k_ptr) * *(ptr_2 + *k_ptr);
                 }
-                *(ptr_1 + *col_ptr) = sum;                        // M(row,col) = sum
+
+                // M(row,col) = sum
+                *(ptr_1 + *col_ptr) = sum;
             }
         }
     } // endelse: zero-row/col compression needed
@@ -1141,8 +1229,8 @@ void GMatrixSymmetric::cholesky_invert(bool compress)
         throw GException::matrix_zero(G_CHOL_INVERT);
     }
 
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 

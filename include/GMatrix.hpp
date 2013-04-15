@@ -34,6 +34,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GMatrixSymmetric;
 class GMatrixSparse;
+class GVector;
 
 
 /***********************************************************************//**
@@ -115,10 +116,6 @@ public:
     virtual void          column(const int& column, const GVector& vector);
     virtual void          add_to_row(const int& row, const GVector& vector);
     virtual void          add_to_column(const int& column, const GVector& vector);
-    virtual void          transpose(void);
-    virtual void          invert(void);
-    virtual void          negate(void);
-    virtual void          abs(void);
     virtual double        fill(void) const;
     virtual double        min(void) const;
     virtual double        max(void) const;
@@ -126,11 +123,16 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    virtual GMatrix extract_lower_triangle(void) const;
-    virtual GMatrix extract_upper_triangle(void) const;
-    virtual void    eulerx(const double& angle);
-    virtual void    eulery(const double& angle);
-    virtual void    eulerz(const double& angle);
+    GMatrix transpose(void) const;
+    GMatrix invert(void) const;
+    GVector solve(const GVector& vector) const;
+    GMatrix negate(void) const;
+    GMatrix abs(void) const;
+    GMatrix extract_lower_triangle(void) const;
+    GMatrix extract_upper_triangle(void) const;
+    void    eulerx(const double& angle);
+    void    eulery(const double& angle);
+    void    eulerz(const double& angle);
 
 private:
     // Private methods
@@ -262,23 +264,6 @@ GMatrix& GMatrix::operator/=(const double& scalar)
 
 
 /***********************************************************************//**
- * @brief Negate matrix elements
- *
- * @return Matrix with negated elements.
- *
- * Returns a matrix where each element has been replaced by its negative
- * element.
- ***************************************************************************/
-inline
-GMatrix GMatrix::operator-(void) const
-{
-    GMatrix result = *this;
-    result.negate();
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Return minimum matrix element
  *
  * @return Minimum element in matrix.
@@ -370,59 +355,6 @@ GMatrix operator/(const GMatrix& matrix, const double& scalar)
 {
     GMatrix result = matrix;
     result /= scalar;
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return transpose of matrix
- *
- * @param[in] matrix Matrix.
- * @return Transpose of matrix.
- *
- * Returns the transpose of a matrix.
- ***************************************************************************/
-inline
-GMatrix transpose(const GMatrix& matrix)
-{
-    GMatrix result = matrix;
-    result.transpose();
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return inverse of matrix
- *
- * @param[in] matrix Matrix.
- * @return Inverse of matrix.
- *
- * Returns the inverse of a matrix.
- ***************************************************************************/
-inline
-GMatrix invert(const GMatrix& matrix)
-{
-    GMatrix result = matrix;
-    result.invert();
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return matrix with absolute values of all elements
- *
- * @param[in] matrix Matrix.
- * @return Matrix with elements being the absolute elements of the input
- *         matrix.
- *
- * Return a matrix where each elements has been replaced by its absolute
- * value.
- ***************************************************************************/
-inline
-GMatrix abs(const GMatrix& matrix)
-{
-    GMatrix result = matrix;
-    result.abs();
     return result;
 }
 

@@ -453,6 +453,30 @@ GVector GMatrixSparse::operator*(const GVector& vector) const
 
 
 /***********************************************************************//**
+ * @brief Negate matrix elements
+ *
+ * @return Matrix with negated elements.
+ ***************************************************************************/
+GMatrixSparse GMatrixSparse::operator-(void) const
+{
+    // Copy matrix
+    GMatrixSparse matrix = *this;
+
+    // Fill pending element
+    matrix.fill_pending();
+
+    // Negate all matrix elements
+    double* ptr = matrix.m_data;
+    for (int i = 0; i < matrix.m_elements; ++i, ++ptr) {
+        *ptr = -(*ptr);
+    }
+    
+    // Return matrix
+    return matrix;
+}
+
+
+/***********************************************************************//**
  * @brief Equalty operator
  *
  * @param[in] matrix Matrix.
@@ -1380,81 +1404,103 @@ void GMatrixSparse::add_to_column(const int& column, const double* values,
 
 
 /***********************************************************************//**
- * @brief Transpose matrix
+ * @brief Return transposed matrix
  *
- * The transpose operation exchanges the number of rows against the number
- * of columns.
+ * @return Transposed matrix.
+ *
+ * Returns transposed matrix of the matrix.
  ***************************************************************************/
-void GMatrixSparse::transpose(void)
+GMatrixSparse GMatrixSparse::transpose(void) const
 {
+    // Copy matrix
+    GMatrixSparse matrix = *this;
+
     // Fill pending element
-    fill_pending();
+    matrix.fill_pending();
     
     // Compute the transpose
-    *this = cs_transpose(*this, 1);
+    matrix = cs_transpose(matrix, 1);
     
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 
 /***********************************************************************//**
- * @brief Invert matrix
+ * @brief Return inverted matrix
  *
- * Inverts the matrix using the Cholesky decomposition. This does not work
- * on any kind of matrix.
+ * @return Inverted matrix.
+ *
+ * Returns inverse of matrix. Inversion is done for the moment using Cholesky
+ * decomposition. This does not work on any kind of matrix.
  *
  * @todo Specify in documentation for which kind of matrix the method works.
  ***************************************************************************/
-void GMatrixSparse::invert(void)
+GMatrixSparse GMatrixSparse::invert(void) const
 {
+    // Allocate result matrix
+    GMatrixSparse matrix(m_cols, m_rows);
+
     // Invert matrix
-    cholesky_invert(true);
+    matrix.cholesky_invert(true);
     
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 
 /***********************************************************************//**
- * @brief Negate all matrix elements
+ * @brief Solves linear matrix equation
  *
- * Negates all matrix elements.
+ * @param[in] vector Solution vector.
+ * 
+ * Solves the linear equation
+ *
+ * \f[M \times {\tt solution} = {\tt vector} \f]
+ *
+ * where \f$M\f$ is the matrix, \f${\tt vector}\f$ is the result, and
+ * \f${\tt solution}\f$ is the solution. Solving is done using Cholesky
+ * decomposition. This does not work on any kind of matrix.
+ *
+ * @todo Specify in documentation for which kind of matrix the method works.
  ***************************************************************************/
-void GMatrixSparse::negate(void)
+GVector GMatrixSparse::solve(const GVector& vector) const
 {
-    // Fill pending element
-    fill_pending();
+    // Get Cholesky decomposition of matrix
+    GMatrixSparse decomposition = cholesky_decompose(true);
 
-    // Negate all matrix elements
-    double* ptr = m_data;
-    for (int i = 0; i < m_elements; ++i, ++ptr) {
-        *ptr = -(*ptr);
-    }
-    
-    // Return
-    return;
+    // Solve linear equation
+    GVector result = decomposition.cholesky_solver(vector);
+
+    // Return result
+    return result;
 }
 
 
 /***********************************************************************//**
- * @brief Take absolute value of matrix elements
+ * @brief Return absolute of matrix
  *
- * Replaces all elements of the matrix by their absolute values.
+ * @return Absolute of matrix
+ *
+ * Returns matrix where all elements of the matrix have been replaced by
+ * their absolute values.
  ***************************************************************************/
-void GMatrixSparse::abs(void)
+GMatrixSparse GMatrixSparse::abs(void) const
 {
+    // Copy matrix
+    GMatrixSparse matrix = *this;
+
     // Fill pending element
-    fill_pending();
+    matrix.fill_pending();
 
     // Take the absolute value of all matrix elements
-    double* ptr = m_data;
-    for (int i = 0; i < m_elements; ++i, ++ptr) {
+    double* ptr = matrix.m_data;
+    for (int i = 0; i < matrix.m_elements; ++i, ++ptr) {
         *ptr = std::abs(*ptr);
     }
-    
-    // Return
-    return;
+
+    // Return matrix
+    return matrix;
 }
 
 
@@ -1561,25 +1607,29 @@ double GMatrixSparse::sum(void) const
 
 
 /***********************************************************************//**
- * @brief Perform a Cholesky decomposition
+ * @brief Return Cholesky decomposition
  *
- * @param[in] compress Use zero-row/column compression (default: true).
+ * @param[in] compress Use zero-row/column compression (defaults to true).
+ * @return Cholesky decomposition of matrix
  *
- * Cholesky decomposition of a sparse matrix. The decomposition is stored
- * within the GMatrixSparse without destroying the original matrix.
+ * Returns the Cholesky decomposition of a sparse matrix. The decomposition
+ * is stored within a GMatrixSparse object.
  ***************************************************************************/
-void GMatrixSparse::cholesky_decompose(bool compress)
+GMatrixSparse GMatrixSparse::cholesky_decompose(bool compress) const
 {
+    // Create copy of matrix
+    GMatrixSparse matrix = *this;
+
     // Save original matrix size
-    int matrix_rows = m_rows;
-    int matrix_cols = m_cols;
+    int matrix_rows = matrix.m_rows;
+    int matrix_cols = matrix.m_cols;
 
     // Delete any existing symbolic and numeric analysis object and reset
     // pointers
-    if (m_symbolic != NULL) delete m_symbolic;
-    if (m_numeric  != NULL) delete m_numeric;
-    m_symbolic = NULL;
-    m_numeric  = NULL;
+    if (matrix.m_symbolic != NULL) delete matrix.m_symbolic;
+    if (matrix.m_numeric  != NULL) delete matrix.m_numeric;
+    matrix.m_symbolic = NULL;
+    matrix.m_numeric  = NULL;
 
     // Allocate symbolic analysis object
     GSparseSymbolic* symbolic = new GSparseSymbolic();
@@ -1590,42 +1640,42 @@ void GMatrixSparse::cholesky_decompose(bool compress)
     GSparseNumeric numeric;
 
     // Fill pending element into matrix
-    fill_pending();
+    matrix.fill_pending();
 
     // Remove rows and columns containing only zeros if matrix compression
     // has been selected
     if (compress) {
-        remove_zero_row_col();
+        matrix.remove_zero_row_col();
     }
 
     // Ordering an symbolic analysis of matrix. This sets up an array 'pinv'
     // which contains the fill-in reducing permutations
-    symbolic->cholesky_symbolic_analysis(1, *this);
+    symbolic->cholesky_symbolic_analysis(1, matrix);
 
     // Store symbolic pointer in sparse matrix object
-    m_symbolic = symbolic;
+    matrix.m_symbolic = symbolic;
 
     // Perform numeric Cholesky decomposition
-    numeric.cholesky_numeric_analysis(*this, *symbolic);
+    numeric.cholesky_numeric_analysis(matrix, *symbolic);
 
     // Copy L matrix into this object
-    free_elements(0, m_elements);
-    alloc_elements(0, numeric.m_L->m_elements);
-    for (int i = 0; i < m_elements; ++i) {
-        m_data[i]   = numeric.m_L->m_data[i];
-        m_rowinx[i] = numeric.m_L->m_rowinx[i];
+    matrix.free_elements(0, matrix.m_elements);
+    matrix.alloc_elements(0, numeric.m_L->m_elements);
+    for (int i = 0; i < matrix.m_elements; ++i) {
+        matrix.m_data[i]   = numeric.m_L->m_data[i];
+        matrix.m_rowinx[i] = numeric.m_L->m_rowinx[i];
     }
-    for (int col = 0; col <= m_cols; ++col) {
-        m_colstart[col] = numeric.m_L->m_colstart[col];
+    for (int col = 0; col <= matrix.m_cols; ++col) {
+        matrix.m_colstart[col] = numeric.m_L->m_colstart[col];
     }
 
     // Insert zero rows and columns if they have been removed previously.
     if (compress) {
-        insert_zero_row_col(matrix_rows, matrix_cols);
+        matrix.insert_zero_row_col(matrix_rows, matrix_cols);
     }
 
-  // Return
-  return;
+    // Return matrix
+    return matrix;
 }
 
 
@@ -1644,7 +1694,8 @@ void GMatrixSparse::cholesky_decompose(bool compress)
  * This function is to be applied on a GMatrixSparse matrix for which a
  * Choleksy factorization has been produced using 'cholesky_decompose'.
  ***************************************************************************/
-GVector GMatrixSparse::cholesky_solver(const GVector& vector, bool compress)
+GVector GMatrixSparse::cholesky_solver(const GVector& vector,
+                                       bool compress) const
 {
     // Dump header
     #if defined(G_DEBUG_SPARSE_COMPRESSION)
@@ -1862,22 +1913,20 @@ GVector GMatrixSparse::cholesky_solver(const GVector& vector, bool compress)
 
 
 /***********************************************************************//**
- * @brief Cholesky invert
+ * @brief Invert matrix using a Cholesky decomposition
  *
- * @param[in] compress Use zero-row/column compression (default: true).
+ * @param[in] compress Use zero-row/column compression (defaults to true).
+ * @return Inverted matrix.
  *
- * @exception GException::matrix_zero
- *            All matrix elements are zero.
- *
- * Inplace matrix inversion using the Cholesky decomposition.
+ * Inverts the matrix using a Cholesky decomposition.
  ***************************************************************************/
-void GMatrixSparse::cholesky_invert(bool compress)
+GMatrixSparse GMatrixSparse::cholesky_invert(bool compress) const
 {
     // Generate Cholesky decomposition of matrix
-    cholesky_decompose(compress);
+    GMatrixSparse decomposition = cholesky_decompose(compress);
 
     // Allocate result matrix and unit vector
-    GMatrixSparse result(m_rows, m_cols);
+    GMatrixSparse matrix(m_rows, m_cols);
     GVector       unit(m_rows);
 
     // Column-wise solving of the problem
@@ -1887,27 +1936,25 @@ void GMatrixSparse::cholesky_invert(bool compress)
         unit[col] = 1.0;
 
         // Solve for column
-        GVector x = cholesky_solver(unit, compress);
+        GVector x = decomposition.cholesky_solver(unit, compress);
 
         // Insert column in matrix
-        result.column(col, x);
+        matrix.column(col, x);
 
         // Clear unit vector for next round
         unit[col] = 0.0;
 
     }
 
-    // Assign result
-    *this = result;
-
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 
 /***********************************************************************//**
  * @brief Print matrix
  *
+ * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing matrix information
  ***************************************************************************/
 std::string GMatrixSparse::print(const GChatter& chatter) const

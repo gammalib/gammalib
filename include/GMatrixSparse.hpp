@@ -40,6 +40,7 @@
 class GMatrix;
 class GMatrixSymmetric;
 class GMatrixSparse;
+class GVector;
 class GSparseSymbolic;
 class GSparseNumeric;
 
@@ -240,10 +241,6 @@ public:
     virtual void           column(const int& column, const GVector& vector);
     virtual void           add_to_row(const int& row, const GVector& vector);
     virtual void           add_to_column(const int& column, const GVector& vector);
-    virtual void           transpose(void);
-    virtual void           invert(void);
-    virtual void           negate(void);
-    virtual void           abs(void);
     virtual double         fill(void) const;
     virtual double         min(void) const;
     virtual double         max(void) const;
@@ -251,20 +248,24 @@ public:
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void    column(const int& column, const double* values,
-                   const int* rows, int number);
-    void    add_to_column(const int& column, const double* values,
-                          const int* rows, int number);
-    void    cholesky_decompose(bool compress = true);
-    GVector cholesky_solver(const GVector& vector, bool compress = true);
-    void    cholesky_invert(bool compress = true);
-    void    set_mem_block(const int& block);
-    void    stack_init(const int& size = 0, const int& entries = 0);
-    int     stack_push_column(const GVector& vector, const int& col);
-    int     stack_push_column(const double* values, const int* rows,
-                              const int& number, const int& col);
-    void    stack_flush(void);
-    void    stack_destroy(void);
+    void          column(const int& column, const double* values,
+                         const int* rows, int number);
+    void          add_to_column(const int& column, const double* values,
+                                const int* rows, int number);
+    GMatrixSparse transpose(void) const;
+    GMatrixSparse invert(void) const;
+    GVector       solve(const GVector& vector) const;
+    GMatrixSparse abs(void) const;
+    GMatrixSparse cholesky_decompose(bool compress = true) const;
+    GVector       cholesky_solver(const GVector& vector, bool compress = true) const;
+    GMatrixSparse cholesky_invert(bool compress = true) const;
+    void          set_mem_block(const int& block);
+    void          stack_init(const int& size = 0, const int& entries = 0);
+    int           stack_push_column(const GVector& vector, const int& col);
+    int           stack_push_column(const double* values, const int* rows,
+                                    const int& number, const int& col);
+    void          stack_flush(void);
+    void          stack_destroy(void);
 
 private:
     // Private methods
@@ -416,20 +417,6 @@ GMatrixSparse& GMatrixSparse::operator/=(const double& scalar)
 
 
 /***********************************************************************//**
- * @brief Negate matrix elements
- *
- * @return Matrix with negated elements.
- ***************************************************************************/
-inline
-GMatrixSparse GMatrixSparse::operator-(void) const
-{
-    GMatrixSparse result = *this;
-    result.negate();
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Multiply matrix by scalar
  *
  * @param[in] matrix Matrix.
@@ -476,86 +463,6 @@ GMatrixSparse operator/(const GMatrixSparse& matrix, const double& scalar)
     GMatrixSparse result = matrix;
     //result.fill_pending();
     result /= scalar;
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return transpose of matrix
- *
- * @param[in] matrix Matrix.
- * @return Transpose of matrix.
- ***************************************************************************/
-inline
-GMatrixSparse transpose(const GMatrixSparse& matrix)
-{
-    GMatrixSparse result = matrix;
-    result.transpose();
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return inverse of matrix
- *
- * @param[in] matrix Matrix.
- * @return Inverse of matrix.
- ***************************************************************************/
-inline
-GMatrixSparse invert(const GMatrixSparse& matrix)
-{
-    GMatrixSparse result = matrix;
-    result.invert();
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return matrix with absolute values of all elements
- *
- * @param[in] matrix Matrix.
- * @return Matrix with elements being the absolute elements of the input
- *         matrix.
- ***************************************************************************/
-inline
-GMatrixSparse abs(const GMatrixSparse& matrix)
-{
-    GMatrixSparse result = matrix;
-    result.abs();
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return Cholesky decomposition of matrix
- *
- * @param[in] matrix Matrix.
- * @param[in] compress Use matrix compression (defaults to true).
- * @return Cholesky decomposition of matrix.
- ***************************************************************************/
-inline
-GMatrixSparse cholesky_decompose(const GMatrixSparse& matrix,
-                                 bool compress = true)
-{
-    GMatrixSparse result = matrix;
-    result.cholesky_decompose(compress);
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return inverse matrix using Cholesky decomposition
- *
- * @param[in] matrix Matrix.
- * @param[in] compress Use matrix compression (defaults to true).
- * @return Inverse of matrix.
- ***************************************************************************/
-inline
-GMatrixSparse cholesky_invert(const GMatrixSparse& matrix,
-                              bool compress = true)
-{
-    GMatrixSparse result = matrix;
-    result.cholesky_invert(compress);
     return result;
 }
 

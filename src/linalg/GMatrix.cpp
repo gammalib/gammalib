@@ -51,6 +51,7 @@
 #define G_ADD_TO_ROW                    "GMatrix::add_to_row(int&, GVector&)"
 #define G_ADD_TO_COLUMN              "GMatrix::add_to_column(int&, GVector&)"
 #define G_INVERT                                          "GMatrix::invert()"
+#define G_SOLVE                                    "GMatrix::solve(GVector&)"
 #define G_EXTRACT_LOWER                   "GMatrix::extract_lower_triangle()"
 #define G_EXTRACT_UPPER                   "GMatrix::extract_upper_triangle()"
 
@@ -301,6 +302,30 @@ GVector GMatrix::operator*(const GVector& vector) const
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Negate matrix elements
+ *
+ * @return Matrix with negated elements.
+ *
+ * Returns a matrix where each element has been replaced by its negative
+ * element.
+ ***************************************************************************/
+GMatrix GMatrix::operator-(void) const
+{
+    // Copy matrix
+    GMatrix matrix = *this;
+
+    // Take the absolute value of all matrix elements
+    double* ptr = matrix.m_data;
+    for (int i = 0; i < matrix.m_elements; ++i, ++ptr) {
+        *ptr = -(*ptr);
+    }
+
+    // Return matrix
+    return matrix;
 }
 
 
@@ -773,98 +798,106 @@ void GMatrix::add_to_column(const int& column, const GVector& vector)
 
 
 /***********************************************************************//**
- * @brief Transpose matrix
+ * @brief Return transposed matrix
  *
- * The transpose operation exchanges the number of rows against the number
- * of columns. For a square matrix the exchange is done inplace. Otherwise
- * a copy of the matrix is made.
+ * @return Transposed matrix.
+ *
+ * Returns transposed matrix of the matrix.
  ***************************************************************************/
-void GMatrix::transpose(void)
+GMatrix GMatrix::transpose(void) const
 {
-    // Case A: Matrix is square then simply swap the elements
-    if (m_rows == m_cols) {
-        double  swap;
-        double* ptr_dst;
-        double* ptr_src;
-        for (int row = 0; row < m_rows; ++row) {
-            for (int col = row; col < m_cols; ++col) {
-                ptr_dst  = m_data + m_cols*row + col;
-                ptr_src  = m_data + m_rows*col + row;
-                swap     = *ptr_dst;
-                *ptr_dst = *ptr_src;
-                *ptr_src = swap;
-            }
+    // Allocate result matrix
+    GMatrix matrix(m_cols, m_rows);
+
+    // Transpose matrix
+    for (int row = 0; row < m_rows; ++row) {
+        for (int col = 0; col < m_cols; ++col) {
+            matrix(col, row) = (*this)(row, col);
         }
     }
 
-    // Case B: Non-rectangular transpose. No code optimization has been
-    // done so far.
-    else {
-        GMatrix result(m_cols, m_rows);
-        for (int row = 0; row < m_rows; ++row) {
-            for (int col = 0; col < m_cols; ++col) {
-                result(col, row) = (*this)(row, col);
-            }
-        }
-        *this = result;
-    }
-
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 
 /***********************************************************************//**
- * @brief Invert matrix
+ * @brief Return inverted matrix
+ *
+ * @return Inverted matrix.
  *
  * @exception GException::feature_not_implemented
  *            Feature not yet implemented.
  *
+ * Returns inverse of matrix.
+ *
  * @todo Needs to be implemented.
  ***************************************************************************/
-void GMatrix::invert(void)
+GMatrix GMatrix::invert(void) const
 {
+    // Allocate result matrix
+    GMatrix matrix(m_cols, m_rows);
+
     // Throw exception
     throw GException::feature_not_implemented(G_INVERT);
 
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 
 /***********************************************************************//**
- * @brief Negate all matrix elements
+ * @brief Solves linear matrix equation
  *
- * Negates all matrix elements.
+ * @param[in] vector Solution vector.
+ * 
+ * @exception GException::feature_not_implemented
+ *            Feature not yet implemented.
+ *
+ * Solves the linear equation
+ *
+ * \f[M \times {\tt solution} = {\tt vector} \f]
+ *
+ * where \f$M\f$ is the matrix, \f${\tt vector}\f$ is the result, and
+ * \f${\tt solution}\f$ is the solution.
+ *
+ * @todo Needs to be implemented.
  ***************************************************************************/
-void GMatrix::negate(void)
+GVector GMatrix::solve(const GVector& vector) const
 {
-    // Negate all matrix elements
-    double* ptr = m_data;
-    for (int i = 0; i < m_elements; ++i, ++ptr) {
-        *ptr = -(*ptr);
-    }
+    // Allocate result vector
+    GVector result;
 
-    // Return
-    return;
+    // Throw exception
+    throw GException::feature_not_implemented(G_SOLVE);
+
+    // Return vector
+    return result;
 }
 
 
 /***********************************************************************//**
- * @brief Take absolute value of matrix elements
+ * @brief Return absolute of matrix
  *
- * Replaces all elements of the matrix by their absolute values.
+ * @return Absolute of matrix
+ *
+ * Returns matrix where all elements of the matrix have been replaced by
+ * their absolute values.
  ***************************************************************************/
-void GMatrix::abs(void)
+GMatrix GMatrix::abs(void) const
 {
+    // Allocate result matrix
+    GMatrix matrix(m_rows, m_cols);
+
     // Take the absolute value of all matrix elements
-    double* ptr = m_data;
-    for (int i = 0; i < m_elements; ++i, ++ptr) {
-        *ptr = std::abs(*ptr);
+    double* src = m_data;
+    double* dst = matrix.m_data;
+    for (int i = 0; i < m_elements; ++i) {
+        *dst++ = std::abs(*src++);
     }
 
-    // Return
-    return;
+    // Return matrix
+    return matrix;
 }
 
 

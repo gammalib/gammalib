@@ -76,30 +76,29 @@ public:
     virtual void           column(const int& column, const GVector& vector);
     virtual void           add_to_row(const int& row, const GVector& vector);
     virtual void           add_to_column(const int& column, const GVector& vector);
-    virtual void           transpose(void);
-    virtual void           invert(void);
-    virtual void           negate(void);
-    virtual void           abs(void);
     virtual double         fill(void) const;
     virtual double         min(void) const;
     virtual double         max(void) const;
     virtual double         sum(void) const;
 
     // Other methods
-    void    column(const int& column, const double* values,
-                   const int* rows, int number);
-    void    add_to_column(const int& column, const double* values,
-                          const int* rows, int number);
-    void    cholesky_decompose(bool compress = true);
-    GVector cholesky_solver(const GVector& vector, bool compress = true);
-    void    cholesky_invert(bool compress = true);
-    void    set_mem_block(const int& block);
-    void    stack_init(const int& size = 0, const int& entries = 0);
-    int     stack_push_column(const GVector& vector, const int& col);
-    int     stack_push_column(const double* values, const int* rows,
-                              const int& number, const int& col);
-    void    stack_flush(void);
-    void    stack_destroy(void);
+    void          column(const int& column, const double* values,
+                         const int* rows, int number);
+    void          add_to_column(const int& column, const double* values,
+                                const int* rows, int number);
+    GMatrixSparse transpose(void) const;
+    GMatrixSparse invert(void) const;
+    GMatrixSparse abs(void) const;
+    GMatrixSparse cholesky_decompose(bool compress = true);
+    GVector       cholesky_solver(const GVector& vector, bool compress = true);
+    GMatrixSparse cholesky_invert(bool compress = true);
+    void          set_mem_block(const int& block);
+    void          stack_init(const int& size = 0, const int& entries = 0);
+    int           stack_push_column(const GVector& vector, const int& col);
+    int           stack_push_column(const double* values, const int* rows,
+                                    const int& number, const int& col);
+    void          stack_flush(void);
+    void          stack_destroy(void);
 };
 
 
@@ -133,11 +132,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GMatrixSparse friends
- ***************************************************************************/
-GMatrixSparse transpose(const GMatrixSparse& matrix);
-GMatrixSparse invert(const GMatrixSparse& matrix);
-GMatrixSparse abs(const GMatrixSparse& matrix);

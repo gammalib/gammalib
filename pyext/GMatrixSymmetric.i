@@ -70,21 +70,21 @@ public:
     virtual void              column(const int& column, const GVector& vector);
     virtual void              add_to_row(const int& row, const GVector& vector);
     virtual void              add_to_column(const int& column, const GVector& vector);
-    virtual void              transpose(void);
-    virtual void              invert(void);
-    virtual void              negate(void);
-    virtual void              abs(void);
     virtual double            fill(void) const;
     virtual double            min(void) const;
     virtual double            max(void) const;
     virtual double            sum(void) const;
 
     // Other methods
-    virtual GMatrix extract_lower_triangle(void) const;
-    virtual GMatrix extract_upper_triangle(void) const;
-    virtual void    cholesky_decompose(bool compress = true);
-    virtual GVector cholesky_solver(const GVector& vector, bool compress = true);
-    virtual void    cholesky_invert(bool compress = true);
+    GMatrixSymmetric transpose(void) const;
+    GMatrixSymmetric invert(void) const;
+    GVector          solve(const GVector& vector) const;
+    GMatrixSymmetric abs(void) const;
+    GMatrix          extract_lower_triangle(void) const;
+    GMatrix          extract_upper_triangle(void) const;
+    GMatrixSymmetric cholesky_decompose(bool compress = true) const;
+    GVector          cholesky_solver(const GVector& vector, bool compress = true) const;
+    GMatrixSymmetric cholesky_invert(bool compress = true) const;
 };
 
 
@@ -118,11 +118,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GMatrixSymmetric friends
- ***************************************************************************/
-GMatrixSymmetric transpose(const GMatrixSymmetric& matrix);
-GMatrixSymmetric invert(const GMatrixSymmetric& matrix);
-GMatrixSymmetric abs(const GMatrixSymmetric& matrix);

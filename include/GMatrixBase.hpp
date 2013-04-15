@@ -118,20 +118,12 @@
  * where the size of @p vector needs to be identical to the number of
  * columns in the matrix.
  *
- * Furthermore, the following methods exist for matrix operations:
+ * Furthermore, the following methods exist for matrix transformations:
  *
- *     matrix.transpose();  // Transposes matrix
- *     matrix.invert();     // Inverts matrix
- *     matrix.negate();     // Negates all matrix elements
- *     matrix.abs();        // Sets all matrix elements to their absolute values
- *
- * Friend functions are implemented to perform the same operations also in a
- * more natural syntax that will generate a new matrix
- *
- *     transposed_matrix = transpose(matrix);
- *     inverted_matrix   = invert(matrix);
- *     negated_matrix    = -matrix;
- *     absolute_matrix   = abs(matrix);
+ *     new_matrix = matrix.transpose();    // Transposes matrix
+ *     new_matrix = matrix.invert();       // Inverts matrix
+ *     new_vector = matrix.solve(vector);  // Solves linear matrix equation
+ *     new_matrix = matrix.abs();          // Returns matrix with all elements replaced by their absolute values
  *
  * The following methods allow to access matrix attributes:
  *
@@ -172,10 +164,6 @@ public:
     virtual void          column(const int& column, const GVector& vector) = 0;
     virtual void          add_to_row(const int& row, const GVector& vector) = 0;
     virtual void          add_to_column(const int& column, const GVector& vector) = 0;
-    virtual void          transpose(void) = 0;
-    virtual void          invert(void) = 0;
-    virtual void          negate(void) = 0;
-    virtual void          abs(void) = 0;
     virtual double        fill(void) const = 0;
     virtual double        min(void) const = 0;
     virtual double        max(void) const = 0;

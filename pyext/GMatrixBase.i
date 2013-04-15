@@ -55,10 +55,6 @@ public:
     virtual void          column(const int& column, const GVector& vector) = 0;
     virtual void          add_to_row(const int& row, const GVector& vector) = 0;
     virtual void          add_to_column(const int& column, const GVector& vector) = 0;
-    virtual void          transpose(void) = 0;
-    virtual void          invert(void) = 0;
-    virtual void          negate(void) = 0;
-    virtual void          abs(void) = 0;
     virtual double        fill(void) const = 0;
     virtual double        min(void) const = 0;
     virtual double        max(void) const = 0;

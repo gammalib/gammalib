@@ -72,21 +72,20 @@ public:
     virtual void          column(const int& column, const GVector& vector);
     virtual void          add_to_row(const int& row, const GVector& vector);
     virtual void          add_to_column(const int& column, const GVector& vector);
-    virtual void          transpose(void);
-    virtual void          invert(void);
-    virtual void          negate(void);
-    virtual void          abs(void);
     virtual double        fill(void) const;
     virtual double        min(void) const;
     virtual double        max(void) const;
     virtual double        sum(void) const;
 
     // Other methods
-    virtual GMatrix extract_lower_triangle(void) const;
-    virtual GMatrix extract_upper_triangle(void) const;
-    virtual void    eulerx(const double& angle);
-    virtual void    eulery(const double& angle);
-    virtual void    eulerz(const double& angle);
+    GMatrix transpose(void) const;
+    GMatrix invert(void) const;
+    GMatrix abs(void) const;
+    GMatrix extract_lower_triangle(void) const;
+    GMatrix extract_upper_triangle(void) const;
+    void    eulerx(const double& angle);
+    void    eulery(const double& angle);
+    void    eulerz(const double& angle);
 };
 
 
@@ -120,11 +119,3 @@ public:
         return (*self);
     }
 };
-
-
-/***********************************************************************//**
- * @brief GMatrix friends
- ***************************************************************************/
-GMatrix transpose(const GMatrix& matrix);
-GMatrix invert(const GMatrix& matrix);
-GMatrix abs(const GMatrix& matrix);

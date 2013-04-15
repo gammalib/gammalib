@@ -34,6 +34,7 @@
 /* __ Forward declarations _______________________________________________ */
 class GMatrix;
 class GMatrixSparse;
+class GVector;
 
 
 /***********************************************************************//**
@@ -106,10 +107,6 @@ public:
     virtual void              column(const int& column, const GVector& vector);
     virtual void              add_to_row(const int& row, const GVector& vector);
     virtual void              add_to_column(const int& column, const GVector& vector);
-    virtual void              transpose(void);
-    virtual void              invert(void);
-    virtual void              negate(void);
-    virtual void              abs(void);
     virtual double            fill(void) const;
     virtual double            min(void) const;
     virtual double            max(void) const;
@@ -117,11 +114,15 @@ public:
     virtual std::string       print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    virtual GMatrix extract_lower_triangle(void) const;
-    virtual GMatrix extract_upper_triangle(void) const;
-    virtual void    cholesky_decompose(bool compress = true);
-    virtual GVector cholesky_solver(const GVector& vector, bool compress = true);
-    virtual void    cholesky_invert(bool compress = true);
+    GMatrixSymmetric transpose(void) const;
+    GMatrixSymmetric invert(void) const;
+    GVector          solve(const GVector& vector) const;
+    GMatrixSymmetric abs(void) const;
+    GMatrix          extract_lower_triangle(void) const;
+    GMatrix          extract_upper_triangle(void) const;
+    GMatrixSymmetric cholesky_decompose(bool compress = true) const;
+    GVector          cholesky_solver(const GVector& vector, bool compress = true) const;
+    GMatrixSymmetric cholesky_invert(bool compress = true) const;
 
 private:
     // Private methods
@@ -138,16 +139,18 @@ private:
 
 
 /***********************************************************************//**
- * @brief Transpose matrix
+ * @brief Return transposed matrix
  *
- * Transpose matrix. As the transposed matrix of a symmetric matrix is
- * identical to the original matrix, this method simply returns without
- * taking any action.
+ * @return Transposed matrix.
+ *
+ * Returns transposed matrix of the matrix. As the transposed matrix of a
+ * symmetric matrix is identical to the original matrix, this method simply
+ * returns the actual matrix.
  ***************************************************************************/
 inline
-void GMatrixSymmetric::transpose(void)
+GMatrixSymmetric GMatrixSymmetric::transpose(void) const
 {
-    return;
+    return (*this);
 }
 
 
@@ -250,22 +253,6 @@ GMatrixSymmetric& GMatrixSymmetric::operator/=(const double& scalar)
 
 
 /***********************************************************************//**
- * @brief Negate matrix elements
- *
- * @return Matrix with negated elements.
- *
- * Returns a matrix where each element is replaced by its negative element.
- ***************************************************************************/
-inline
-GMatrixSymmetric GMatrixSymmetric::operator-(void) const
-{
-    GMatrixSymmetric result = *this;
-    result.negate();
-    return result;
-}
-
-
-/***********************************************************************//**
  * @brief Multiply matrix by scalar
  *
  * @param[in] matrix Matrix.
@@ -315,95 +302,6 @@ GMatrixSymmetric operator/(const GMatrixSymmetric& matrix, const double& scalar)
 {
     GMatrixSymmetric result = matrix;
     result /= scalar;
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return transpose of matrix
- *
- * @param[in] matrix Matrix.
- * @return Transpose of matrix.
- *
- * Returns the transpose of the matrix. This is trivial for a symmetric
- * matrix, as its transpose is the original matrix.
- ***************************************************************************/
-inline
-GMatrixSymmetric transpose(const GMatrixSymmetric& matrix)
-{
-    return matrix;
-}
-
-
-/***********************************************************************//**
- * @brief Return inverse of matrix
- *
- * @param[in] matrix Matrix.
- * @return Inverse of matrix.
- *
- * Returns the inverse of the matrix.
- ***************************************************************************/
-inline
-GMatrixSymmetric invert(const GMatrixSymmetric& matrix)
-{
-    GMatrixSymmetric result = matrix;
-    result.invert();
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return matrix with absolute values of all elements
- *
- * @param[in] matrix Matrix.
- * @return Matrix with elements being the absolute elements of the input
- *         matrix.
- *
- * Returns a matrix where each element is replaced by its absolute value.
- ***************************************************************************/
-inline
-GMatrixSymmetric abs(const GMatrixSymmetric& matrix)
-{
-    GMatrixSymmetric result = matrix;
-    result.abs();
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return Cholesky decomposition of matrix
- *
- * @param[in] matrix Matrix.
- * @param[in] compress Use matrix compression (defaults to true).
- * @return Cholesky decomposition of matrix.
- *
- * Returns a Cholesky decomposition of a matrix.
- ***************************************************************************/
-inline
-GMatrixSymmetric cholesky_decompose(const GMatrixSymmetric& matrix,
-                                    bool compress = true)
-{
-    GMatrixSymmetric result = matrix;
-    result.cholesky_decompose(compress);
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Return inverse matrix using Cholesky decomposition
- *
- * @param[in] matrix Matrix.
- * @param[in] compress Use matrix compression (defaults to true).
- * @return Inverse of matrix.
- *
- * Returns the inverse of the matrix by performing a Cholesky decomposition.
- ***************************************************************************/
-inline
-GMatrixSymmetric cholesky_invert(const GMatrixSymmetric& matrix,
-                                 bool compress = true)
-{
-    GMatrixSymmetric result = matrix;
-    result.cholesky_invert(compress);
     return result;
 }
 
