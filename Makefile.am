@@ -109,12 +109,15 @@ sphinx:
 
 # Install Sphinx files
 sphinx-install:
-	for file in $(srcdir)/doc/html/*.* ; do \
-	  echo "$(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/html" ; \
-	  $(INSTALL_DATA) "$$file" $(DESTDIR)$(docdir)/html ; \
-	done
-	cp -r $(srcdir)/doc/html/_sources $(DESTDIR)$(docdir)/html
-	cp -r $(srcdir)/doc/html/_static $(DESTDIR)$(docdir)/html
+	@if test -f $(srcdir)/doc/html/index.html ; then \
+	    $(mkinstalldirs) $(DESTDIR)$(docdir)/html && \
+	    for file in $(srcdir)/doc/html/*.* ; do \
+	        echo "$(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/html" ; \
+	        $(INSTALL_DATA) "$$file" $(DESTDIR)$(docdir)/html ; \
+	    done ; \
+	    cp -r $(srcdir)/doc/html/_sources $(DESTDIR)$(docdir)/html/ ; \
+	    cp -r $(srcdir)/doc/html/_static $(DESTDIR)$(docdir)/html/ ; \
+	fi
 
 # Add documentation rule:
 doc: doxygen sphinx
@@ -212,11 +215,13 @@ DOCDIRS = html/doxygen man/man3
 doxygen-install:
 	$(mkinstalldirs) $(DESTDIR)$(docdir)
 	@for dir in $(DOCDIRS) ; do \
-	  $(mkinstalldirs) $(DESTDIR)$(docdir)/$$dir && \
-	  for file in $(srcdir)/doc/$$dir/*.* ; do \
-	    echo "$(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/$$dir" ; \
-	    $(INSTALL_DATA) "$$file" $(DESTDIR)$(docdir)/$$dir ; \
-	  done ; \
+        if test -e $(srcdir)/doc/$$dir ; then \
+            $(mkinstalldirs) $(DESTDIR)$(docdir)/$$dir && \
+            for file in $(srcdir)/doc/$$dir/*.* ; do \
+                echo "$(INSTALL_DATA) $$file $(DESTDIR)$(docdir)/$$dir" ; \
+                $(INSTALL_DATA) "$$file" $(DESTDIR)$(docdir)/$$dir ; \
+            done ; \
+        fi ; \
 	done
 
 # Uninstall Doxygen files
@@ -227,7 +232,7 @@ doxygen-uninstall:
 
 @DX_DOCDIR@/@PACKAGE@.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
 	rm -rf @DX_DOCDIR@
-	mkdir -p $(srcdir)/doc/html/doxygen
+	$(MKDIR_P) $(srcdir)/doc/html/doxygen
 	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 
 DX_CLEANFILES = \
