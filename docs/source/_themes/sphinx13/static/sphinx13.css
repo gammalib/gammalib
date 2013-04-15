@@ -394,3 +394,19 @@ div.viewcode-block:target {
     border-top: 1px solid #ac9;
     border-bottom: 1px solid #ac9;
 }
+
+div.banner_part {
+	display: inline-block;
+}
+
+#banner_text1 {
+  	font-size: 30px;
+  	font-weight: 400;
+	color: #ffffff;
+}
+
+#banner_text2 {
+	font-size: 15px;
+	font-weight: 200;
+    color: #ffffff;
+}
