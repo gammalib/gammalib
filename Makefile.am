@@ -241,9 +241,9 @@ endif #DX_COND_doc
 HTMLDIRS = html html/images
 HTML_INSTALL_DATA_TARGETS = install-data-html
 install-data-html:
-	#$(mkinstalldirs) $(DESTDIR)$(docdir)/html/doxygen
-	#$(INSTALL_DATA) $(srcdir)/doc/html/doxygen.html $(DESTDIR)$(docdir)/html/doxygen/index.html
-	#$(INSTALL_DATA) $(srcdir)/doc/html/gammalib.css $(DESTDIR)$(docdir)/html/doxygen
+	$(mkinstalldirs) $(DESTDIR)$(docdir)/html/doxygen
+	$(INSTALL_DATA) $(srcdir)/doc/html/doxygen.html $(DESTDIR)$(docdir)/html/doxygen/index.html
+	$(INSTALL_DATA) $(srcdir)/doc/html/gammalib.css $(DESTDIR)$(docdir)/html/doxygen
 	@for dir in $(HTMLDIRS) ; do \
 	  $(mkinstalldirs) $(DESTDIR)$(docdir)/$$dir && \
 	  for file in $(srcdir)/doc/$$dir/*.* ; do \
