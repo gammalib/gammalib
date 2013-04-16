@@ -1,0 +1,1 @@
+.. _sec_sky:Sky maps and sky coordinates (sky)----------------------------------
