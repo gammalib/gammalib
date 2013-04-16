@@ -51,15 +51,14 @@ Now let's append a model to this container. For this, type::
     Model type ................: "SkyDirFunction" * "PowerLaw" * "Constant"
     Number of parameters ......: 6
     Number of spatial par's ...: 2
-     RA .......................: 83.6331 deg (fixed,scale=1)
-     DEC ......................: 22.0145 deg (fixed,scale=1)
+     RA .......................: 83.6331 deg (fixed,scale=1)
+     DEC ......................: 22.0145 deg (fixed,scale=1)
     Number of spectral par's ..: 3
-     Prefactor ................: 1 +/- 0 [0,infty[ ph/cm2/s/MeV
-    (free,scale=1,gradient)
-     Index ....................: -2 +/- 0 [-10,10] (free,scale=1,gradient)
-     PivotEnergy ..............: 100 MeV (fixed,scale=1,gradient)
+     Prefactor ................: 1 +/- 0 [0,infty[ ph/cm2/s/MeV (free,scale=1,gradient)
+     Index ....................: -2 +/- 0 [-10,10] (free,scale=1,gradient)
+     PivotEnergy ..............: 100 MeV (fixed,scale=1,gradient)
     Number of temporal par's ..: 1
-     Constant .................: 1 (relative value)
+     Constant .................: 1 (relative value)
     (fixed,scale=1,gradient)
     >>>
 
@@ -111,9 +110,9 @@ and you can load it from an XML file in memory using::
 The last print command is to convince yourself that the models have been
 loaded properly.
 
-Much more is still to come. Please be a little bit patient, I'm working
+Much more is still to come. Please be a little bit patient, we're working
 on it. In the meantime you may check the `Doxygen
-documentation <doxygen.html>`_ to see what classes and methods are
+documentation <doxygen/index.html>`_ to see what classes and methods are
 available.
 
 Getting Help
