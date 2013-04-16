@@ -29,8 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include <iostream>
-#include "GLog.hpp"
+#include "GBase.hpp"
 
 
 /***********************************************************************//**
@@ -38,11 +37,7 @@
  *
  * @brief [brief descriptor] interface defintion
  ***************************************************************************/
-class GClass {
-
-    // I/O friends
-    friend std::ostream& operator<< (std::ostream& os, const GClass& c);
-    friend GLog&         operator<< (GLog& log, const GClass& c);
+class GClass : public GBase {
 
 public:
     // Constructors and destructors
