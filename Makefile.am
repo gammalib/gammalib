@@ -37,9 +37,9 @@ docdir = ${datadir}/doc/${PACKAGE}
 #install-data-local: $(HTML_INSTALL_DATA_TARGETS)
 #uninstall-local: $(HTML_UNINSTALL_DATA_TARGETS)
 
-install-data-local: doxygen-install sphinx-install
+install-data-local: $(DOXYGEN_INSTALL_DATA_TARGETS) sphinx-install
 
-uninstall-local: doxygen-uninstall
+uninstall-local: $(DOXYGEN_UNINSTALL_DATA_TARGETS)
 
 
 #
@@ -212,6 +212,7 @@ doxygen: doxygen-run $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
 # Install Doxygen files
 DOCDIRS = html/doxygen man/man3
+DOXYGEN_INSTALL_DATA_TARGETS = doxygen-install
 doxygen-install:
 	$(mkinstalldirs) $(DESTDIR)$(docdir)
 	@for dir in $(DOCDIRS) ; do \
@@ -225,6 +226,7 @@ doxygen-install:
 	done
 
 # Uninstall Doxygen files
+DOXYGEN_UNINSTALL_DATA_TARGETS = doxygen-uninstall
 doxygen-uninstall:
 	for dir in $(DOCDIRS) ; do \
 	  rm -f -r $(DESTDIR)$(docdir)/$$dir ; \
