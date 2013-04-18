@@ -43,6 +43,7 @@ namespace gammalib {
     std::string              strip_chars(const std::string& arg,
                                          const std::string& chars);
     std::string              expand_env(const std::string& arg);
+/*
     std::string              str(const unsigned short int& value);
     std::string              str(const unsigned int& value);
     std::string              str(const unsigned long int& value);
@@ -64,6 +65,7 @@ namespace gammalib {
     unsigned long long       toulonglong(const std::string& arg);
     float                    tofloat(const std::string& arg);
     double                   todouble(const std::string& arg);
+*/
     std::string              toupper(const std::string& s);
     std::string              tolower(const std::string& s);
     std::vector<std::string> split(const std::string& s, const std::string& sep);
