@@ -1,7 +1,7 @@
 /***************************************************************************
- *                    opt module  -  Python bindings                       *
+ *                       opt.i - Optimization module                       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,11 +21,17 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall opt.i                                           *
  ***************************************************************************/
+/**
+ * @file opt.i
+ * @brief Optimization module
+ * @author Juergen Knoedlseder
+ */
 %module opt
 %feature("autodoc", "1");
 
 /* __ Headers needed for compilation _____________________________________ */
 %{
+#include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
 %}

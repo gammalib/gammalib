@@ -1,5 +1,5 @@
 /***************************************************************************
- *                      base module - Python bindings                      *
+ *                          base.i - Base module                           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -31,6 +31,7 @@
 
 /* __ Headers needed for compilation _____________________________________ */
 %{
+#include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
 %}

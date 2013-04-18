@@ -1,5 +1,5 @@
 /***************************************************************************
- *                     obs module - Python bindings                        *
+ *                       obs.i - Observation module                        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -31,6 +31,7 @@
 
 /* __ Headers needed for compilation _____________________________________ */
 %{
+#include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
 %}

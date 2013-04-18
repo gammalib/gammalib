@@ -1,7 +1,7 @@
 /***************************************************************************
- *                     fits module  -  Python bindings                     *
+ *                          fits.i - FITS module                           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -31,6 +31,7 @@
 
 /* __ Headers needed for compilation _____________________________________ */
 %{
+#include <stddef.h>
 #include "GException.hpp"
 #include "GTools.hpp"
 %}
