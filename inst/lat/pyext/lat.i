@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  lat - Fermi/LAT support python bindings                *
+ *                       lat.i - Fermi/LAT module                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,8 +21,20 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall lat.i                                           *
  ***************************************************************************/
+/**
+ * @file lat.i
+ * @brief Fermi/LAT module 
+ * @author Juergen Knoedlseder
+ */
 %module lat
 %feature("autodoc", "1");
+
+/* __ Headers needed for compilation _____________________________________ */
+%{
+#include <stddef.h>
+#include "GException.hpp"
+#include "GTools.hpp"
+%}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i

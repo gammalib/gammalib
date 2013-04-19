@@ -1,7 +1,7 @@
 /***************************************************************************
- *            mwl  -  Multi-wavelength support python bindings             *
+ *                     mwl.i - Multi-wavelength module                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,8 +21,20 @@
  * Usage:                                                                  *
  * swig -c++ -python -Wall mwl.i                                           *
  ***************************************************************************/
+/**
+ * @file mwl.i
+ * @brief Multi-wavelength module 
+ * @author Juergen Knoedlseder
+ */
 %module mwl
 %feature("autodoc", "1");
+
+/* __ Headers needed for compilation _____________________________________ */
+%{
+#include <stddef.h>
+#include "GException.hpp"
+#include "GTools.hpp"
+%}
 
 /* __ Include standard typemaps for vectors and strings __________________ */
 %include stl.i
