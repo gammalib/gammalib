@@ -234,7 +234,7 @@ doxygen-uninstall:
 
 @DX_DOCDIR@/@PACKAGE@.tag: $(DX_CONFIG) $(pkginclude_HEADERS)
 	rm -rf @DX_DOCDIR@
-	$(MKDIR_P) $(srcdir)/doc/html/doxygen
+	$(mkinstalldirs) $(srcdir)/doc/html/doxygen
 	$(DX_ENV) $(DX_DOXYGEN) $(srcdir)/$(DX_CONFIG)
 
 DX_CLEANFILES = \
