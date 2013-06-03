@@ -624,6 +624,8 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
         // Change sign if index is defined Fermi-like
         else if(par->attribute("name") == "alpha") {
         	m_index.read(*par);
+        	m_index.min(-m_index.max());
+        	m_index.max(-m_index.min());
         	m_index.value(-m_index.value());
         	npar[1]++;
         }
@@ -637,6 +639,8 @@ void GModelSpectralLogParabola::read(const GXmlElement& xml)
         // Change sign if curvature is defined Fermi-like
         else if(par->attribute("name") == "beta") {
         	m_curvature.read(*par);
+        	m_curvature.min(-m_curvature.max());
+        	m_curvature.max(-m_curvature.min());
         	m_curvature.value(-m_curvature.value());
         	npar[2]++;
         }
