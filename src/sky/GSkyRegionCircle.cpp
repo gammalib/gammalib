@@ -373,7 +373,7 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
 		double ang_dist = m_centre.dist_deg(regcirc->centre());
 
 		// Check if the distance is smaller than the sum of both radii
-		if (ang_dist < (m_radius + regcirc->radius()))
+		if (ang_dist <= (m_radius + regcirc->radius()))
 		{
 			// Set overlap to true
 			overlap = true;
