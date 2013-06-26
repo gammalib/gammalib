@@ -50,6 +50,8 @@
 %include "GSkyDir.i"
 %include "GSkyPixel.i"
 %include "GSkymap.i"
+%include "GSkyRegion.i"
+%include "GSkyRegionCircle.i"
 %include "GWcs.i"
 %include "GWcsRegistry.i"
 %include "GWcslib.i"
