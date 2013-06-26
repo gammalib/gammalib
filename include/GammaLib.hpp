@@ -137,6 +137,8 @@
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
 #include "GSkymap.hpp"
+#include "GSkyRegion.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GWcs.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcslib.hpp"
