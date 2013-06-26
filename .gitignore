@@ -82,6 +82,7 @@ test/test_GSky
 test/test_GSupport
 test/test_GVector
 test/test_GXml
+test/test_GXspec
 test/test_GVO
 test/test_LAT
 test/test_MWL
