@@ -1239,6 +1239,7 @@ AC_CONFIG_FILES([Makefile
                  src/fits/Makefile
                  src/xml/Makefile
                  src/vo/Makefile
+                 src/xspec/Makefile
                  src/sky/Makefile
                  src/opt/Makefile
                  src/obs/Makefile
