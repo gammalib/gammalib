@@ -61,6 +61,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GXmlAttribute.hpp \
                      GXmlPI.hpp \
                      GVOClient.hpp \
+                     GPha.hpp \
                      GApplication.hpp \
                      GLog.hpp \
                      GPars.hpp \

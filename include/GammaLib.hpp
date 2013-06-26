@@ -107,6 +107,9 @@
 /* __ VO module __________________________________________________________ */
 #include "GVOClient.hpp"
 
+/* __ XSPEC module _______________________________________________________ */
+#include "GPha.hpp"
+
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
 #include "GLog.hpp"
