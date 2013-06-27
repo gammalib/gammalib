@@ -361,13 +361,13 @@ void GPha::load(const std::string& filename)
 void GPha::save(const std::string& filename, const bool& clobber) const
 {
     // Open FITS file
-    GFits fits(filename, true);
+    GFits fits;
 
     // Write PHA into file
     write(fits);
 
     // Close FITS file
-    fits.save(clobber);
+    fits.saveto(filename, clobber);
 
     // Return
     return;

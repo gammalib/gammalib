@@ -281,13 +281,13 @@ void GArf::load(const std::string& filename)
 void GArf::save(const std::string& filename, const bool& clobber) const
 {
     // Open FITS file
-    GFits fits(filename, true);
+    GFits fits;
 
     // Write ARF into file
     write(fits);
 
     // Close FITS file
-    fits.save(clobber);
+    fits.saveto(filename, clobber);
 
     // Return
     return;
