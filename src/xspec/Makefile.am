@@ -6,7 +6,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Define sources for this directory
-sources = GPha.cpp
+sources = GArf.cpp \
+          GPha.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libxspec.la
