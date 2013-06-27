@@ -1,7 +1,7 @@
 /***************************************************************************
  *         GSkyRegion.hpp - Abstract virtual sky region base class         *
  * ----------------------------------------------------------------------- *
- *             copyright (C) 2009-2013 by Pierrick Martin                  *
+ * copyright (C) 2013 by Pierrick Martin                                   *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -37,21 +37,21 @@ class GSkyPixel;
 class GSkyDir;
 
 /***********************************************************************//**
-* @class GSkyRegion
-*
-* @brief Abstract interface for the sky region class
-*
-* This class provides an abstract interface for a sky region. The sky region 
-* is defined by an array of parameters names and values specific to the 
-* derived class where the region type or shape is implemented. 
-* 
-* Accessible information elements are:
-* - Type of the region (circle, rectangle,...)
-* - Solid angle subtended by the region
-* 
-* The object can be initialised from a string in the DS9 region file format,
-* and return its description as a string in the DS9 region file format. The 
-* input/ouput to/from files is handled in the container class GSkyRegions.
+ * @class GSkyRegion
+ *
+ * @brief Abstract interface for the sky region class
+ *
+ * This class provides an abstract interface for a sky region. The sky region 
+ * is defined by an array of parameters names and values specific to the 
+ * derived class where the region type or shape is implemented. 
+ * 
+ * Accessible information elements are:
+ * - Type of the region (circle, rectangle,...)
+ * - Solid angle subtended by the region
+ * 
+ * The object can be initialised from a string in the DS9 region file format,
+ * and return its description as a string in the DS9 region file format. The 
+ * input/ouput to/from files is handled in the container class GSkyRegions.
  ***************************************************************************/
 class GSkyRegion : public GBase {
 
@@ -62,47 +62,48 @@ public:
     virtual ~GSkyRegion(void);
 
     // Operators
-    virtual GSkyRegion&    operator=(const GSkyRegion& region);
+    virtual GSkyRegion& operator=(const GSkyRegion& region);
 	
     // Pure virtual methods
-    virtual void         clear(void) = 0;
-    virtual GSkyRegion*  clone(void) const = 0;
-    virtual void         read(const std::string& regstring) = 0;
-    virtual std::string  write() const = 0;
-    virtual std::string  print(const GChatter& chatter = NORMAL) const = 0;	
-	virtual bool         contains(const GSkyDir& dir) const = 0;
-    virtual bool         overlaps(const GSkyRegion& reg) const = 0;
-	virtual bool         contains(const GSkyRegion& reg) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GSkyRegion* clone(void) const = 0;
+    virtual void        read(const std::string& regstring) = 0;
+    virtual std::string write(void) const = 0;
+    virtual bool        contains(const GSkyDir& dir) const = 0;
+    virtual bool        overlaps(const GSkyRegion& reg) const = 0;
+    virtual bool        contains(const GSkyRegion& reg) const = 0;
+    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;	
 	
     // Implemented methods
-	std::string         type(void) const;
+    std::string         type(void) const;
     std::string         name(void) const;
-	double              solidangle(void) const;
+    double              solidangle(void) const;
 
 protected:
     // Protected methods
-    void                init_members(void);
-    void                copy_members(const GSkyRegion& region);
-    void                free_members(void);
+    void init_members(void);
+    void copy_members(const GSkyRegion& region);
+    void free_members(void);
 
     // Protected members
-    std::string                  m_type;         //!< Type of the region (circle, rectangle,...)
-	std::string                  m_name;         //!< Name of the region
-	double                       m_solid;        //!< Solid angle subtended by the region
+    std::string m_type;    //!< Type of the region (circle, rectangle,...)
+    std::string m_name;    //!< Name of the region
+    double      m_solid;   //!< Solid angle subtended by the region
 };
 
+
 /***********************************************************************//**
-* @brief Return region name
-*
-* @return region name
-*
-* Returns the region name.
-***************************************************************************/
- inline
- std::string GSkyRegion::name(void) const
- {
-	 return (m_name);
- }
+ * @brief Return region name
+ *
+ * @return region name
+ *
+ * Returns the region name.
+ ***************************************************************************/
+inline
+std::string GSkyRegion::name(void) const
+{
+    return (m_name);
+}
 
 /***********************************************************************//**
  * @brief Return region type
@@ -118,16 +119,16 @@ std::string GSkyRegion::type(void) const
 }
 
 /***********************************************************************//**
-* @brief Return solid angle
-*
-* @return Solid angle
-*
-* Returns the solid angle subtended by the region (in sr).
-***************************************************************************/
- inline
- double GSkyRegion::solidangle(void) const
- {
-	 return (m_solid);
- }
+ * @brief Return solid angle
+ *
+ * @return Solid angle
+ *
+ * Returns the solid angle subtended by the region (in sr).
+ ***************************************************************************/
+inline
+double GSkyRegion::solidangle(void) const
+{
+    return (m_solid);
+}
   
 #endif /* GSKYREGION_HPP */

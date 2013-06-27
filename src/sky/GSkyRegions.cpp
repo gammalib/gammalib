@@ -1,7 +1,7 @@
 /***************************************************************************
- *                   GSkyRegions.cpp - Sky region container class          *
+ *                 GSkyRegions.cpp - Sky region container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Pierrick Martin                             *
+ *  copyright (C) 2013 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
 * @file GSkyRegions.cpp
 * @brief Sky regions container class definition
-* @author Pierrick martin
+* @author Pierrick Martin
 */
 
 /* __ Includes ___________________________________________________________ */
@@ -37,8 +37,7 @@
 
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                              "GSkyRegions::operator[](int&)"
-#define G_ACCESS2                      "GSkyRegions::operator[](std::string&)"
+#define G_ACCESS                       "GSkyRegions::operator[](std::string&)"
 #define G_AT                                           "GSkyRegions::at(int&)"
 #define G_SET1                           "GSkyRegions::set(int&, GSkyRegion&)"
 #define G_SET2                   "GSkyRegions::set(std::string&, GSkyRegion&)"
@@ -48,8 +47,8 @@
 #define G_REMOVE1                                  "GSkyRegions::remove(int&)"
 #define G_REMOVE2                          "GSkyRegions::remove(std::string&)"
 #define G_EXTEND                           "GSkyRegions::extend(GSkyRegions&)"
-#define G_LOAD                          "void GSkyRegions::load(std::string&)"
-#define G_SAVE                          "void GSkyRegions::save(std::string&)"
+#define G_LOAD                               "GSkyRegions::load(std::string&)"
+#define G_SAVE                               "GSkyRegions::save(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -140,7 +139,7 @@ GSkyRegions::~GSkyRegions(void)
  * @param[in] regions region container.
  * @return region container.
  ***************************************************************************/
-GSkyRegions& GSkyRegions::operator= (const GSkyRegions& regions)
+GSkyRegions& GSkyRegions::operator=(const GSkyRegions& regions)
 {
     // Execute only if object is not identical
     if (this != &regions) {
@@ -179,7 +178,7 @@ GSkyRegion* GSkyRegions::operator[](const std::string& name)
     // Throw exception if region name was not found
     if (index == -1) {
 		std::string msg ="Region with name \""+name+"\" not found in container.";
-        throw GException::invalid_argument(G_ACCESS2, msg);
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return pointer
@@ -205,7 +204,7 @@ const GSkyRegion* GSkyRegions::operator[](const std::string& name) const
     // Throw exception if region name was not found
     if (index == -1) {
 		std::string msg ="Region with name \""+name+"\" not found in container.";
-        throw GException::invalid_argument(G_ACCESS2, msg);		
+        throw GException::invalid_argument(G_ACCESS, msg);		
     }
 
     // Return pointer
@@ -651,9 +650,11 @@ bool GSkyRegions::contains(const std::string& name) const
  *
  * @param[in] filename DS9 region filename.
  *
+ * @exception GException::file_open_error
+ *            File could not be opened.
+ *
  * Loads all regions from a DS9 region file. See the read() method for more
  * information about the expected structure of the XML file.
-
  ***************************************************************************/
 void GSkyRegions::load(const std::string& filename)
 {
@@ -683,31 +684,35 @@ void GSkyRegions::load(const std::string& filename)
 			
 			// If region is a circle
 			if (std::string::npos != fileline.find("circle")) {
+
 				// Create instance of GSkyRegion object
 				GSkyRegionCircle region;				
+
 				// If coordinate system and region defined on the same line
 				if ((std::string::npos != fileline.find("fk5")) ||
 					(std::string::npos != fileline.find("galactic"))) {
 					region.read(fileline);
 					append(region);
+				}
+                
 				// else, prepend the coordinate system
-				} else {
+                else {
 				    std::string newfileline=coordsys;
 					newfileline.append("; ");
 					newfileline.append(fileline);
 					region.read(newfileline);
 					append(region);
 				}
-				// Free object (the append method made a deep copy)
-				delete &region;
 			} 
 		}
 		
         // Close file
-		ds9file.close();
-	
+        ds9file.close();
+
+	} 
+
 	// File could not be opened
-	} else {
+    else {
         throw GException::file_open_error(G_LOAD, filename);
     }
 		
@@ -720,6 +725,9 @@ void GSkyRegions::load(const std::string& filename)
  * @brief Save regions into DS9 region file
  *
  * @param[in] filename DS9 region filename.
+ *
+ * @exception GException::file_open_error
+ *            File could not be opened.
  *
  * Saves all regions in the container into a DS9 region file.
  ***************************************************************************/
@@ -748,8 +756,10 @@ void GSkyRegions::save(const std::string& filename) const
 		// Close file
 		ds9file.close();
     
+	} 
+
 	// File could not be opened
-	} else {
+    else {
         throw GException::file_open_error(G_SAVE, filename);
     }	
 		

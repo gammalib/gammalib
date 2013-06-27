@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegions.hpp - Sky region container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Pierrick martin                             *
+ *  copyright (C) 2013 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GSkyRegions.hpp
  * @brief Sky regions container class definition
- * @author Pierrick martin
+ * @author Pierrick Martin
  */
 
 #ifndef GSKYREGIONS_HPP
@@ -35,19 +35,19 @@
 #include "GException.hpp"
 
 /***********************************************************************//**
-* @class GSkyRegions
-*
-* @brief Sky region container class
-*
-* This container class collects sky regions objects derived from the
-* GSkyRegion abstract class. These can be accessed from the access 
-* operator[] or through the at() method with index checking. Access to 
-* the region can be done from index or name, so the name of each region 
-* in the container has to be unique.
-*
-* The object can be initialised from a DS9 region file, and has load and 
-* save methods from/to a DS9 region file.
-*
+ * @class GSkyRegions
+ *
+ * @brief Sky region container class
+ *
+ * This container class collects sky regions objects derived from the
+ * GSkyRegion abstract class. These can be accessed from the access 
+ * operator[] or through the at() method with index checking. Access to 
+ * the region can be done from index or name, so the name of each region 
+ * in the container has to be unique.
+ *
+ * The object can be initialised from a DS9 region file, and has load and 
+ * save methods from/to a DS9 region file.
+ *
  ***************************************************************************/
 class GSkyRegions : public GBase {
 
@@ -55,7 +55,7 @@ public:
     // Constructors and destructors
     GSkyRegions(void);
     GSkyRegions(const GSkyRegions& regions);
-	explicit GSkyRegions(const std::string& filename);
+    explicit GSkyRegions(const std::string& filename);
     virtual ~GSkyRegions(void);
 
     // Operators
@@ -88,10 +88,10 @@ public:
 
 protected:
     // Protected methods
-    void          init_members(void);
-    void          copy_members(const GSkyRegions& regions);
-    void          free_members(void);
-    int           get_index(const std::string& name) const;
+    void init_members(void);
+    void copy_members(const GSkyRegions& regions);
+    void free_members(void);
+    int  get_index(const std::string& name) const;
 
     // Protected members
     std::vector<GSkyRegion*> m_regions;  //!< List of regions

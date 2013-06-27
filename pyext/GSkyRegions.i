@@ -1,7 +1,7 @@
 /***************************************************************************
  *                  GSkyRegions.i - Sky region container class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Pierrick martin                             *
+ *  copyright (C) 2013 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GSkyRegions.i
  * @brief Sky regions container class SWIG file
- * @author Pierrick martin
+ * @author Pierrick Martin
  */
 
 %{
@@ -31,13 +31,11 @@
 %}
 
 /***********************************************************************//**
-* @class GSkyRegions
-*
-* @brief Sky region container class
-*
+ * @class GSkyRegions
+ *
+ * @brief Sky region container class
  ***************************************************************************/
 class GSkyRegions : public GBase {
-
 public:
     // Constructors and destructors
     GSkyRegions(void);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GSkyRegion.i - Sky region class                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Michael Mayer                               *
+ *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,9 +35,7 @@
  *
  * @brief GSkyRegion base abstract class
  ***************************************************************************/
-
 class GSkyRegion : public GBase {
-
 public:
     // Constructors and destructors
     GSkyRegion(void);
@@ -45,17 +43,21 @@ public:
     virtual ~GSkyRegion(void);
 	
     // Pure virtual methods
-    virtual void         clear(void) = 0;
-    virtual GSkyRegion*  clone(void) const = 0;
-    virtual void         read(const std::string regstring) = 0;
-    virtual std::string  write() const = 0;
-	virtual bool         contains(const GSkyDir& dir) const = 0;
-    virtual bool         overlaps(const GSkyRegion& reg) const = 0;
-	virtual bool         contains(const GSkyRegion& reg) const = 0;
+    virtual void        clear(void) = 0;
+    virtual GSkyRegion* clone(void) const = 0;
+    virtual void        read(const std::string regstring) = 0;
+    virtual std::string write(void) const = 0;
+	virtual bool        contains(const GSkyDir& dir) const = 0;
+    virtual bool        overlaps(const GSkyRegion& reg) const = 0;
+	virtual bool        contains(const GSkyRegion& reg) const = 0;
 	
     // Implemented methods
 	std::string         type(void) const;
     std::string         name(void) const;
 	double              solidangle(void) const;  
-
 };
+
+
+/***********************************************************************//**
+ * @brief GSkyRegion class extension
+ ***************************************************************************/

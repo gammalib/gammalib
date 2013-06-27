@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GSkyRegion.cpp - Abstract virtual sky region base class        *
+ *          GSkyRegion.cpp - Abstract virtual sky region base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Pierrick Martin                             *
+ *  copyright (C) 2013 by Pierrick Martin                                  *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -138,7 +138,7 @@ void GSkyRegion::init_members(void)
     // Initialise members
     m_type.clear();
 	m_name.clear();
-    m_solid=0.0;
+    m_solid = 0.0;
 
     // Return
     return;
@@ -153,9 +153,9 @@ void GSkyRegion::init_members(void)
 void GSkyRegion::copy_members(const GSkyRegion& region)
 {
     // Copy members
-    m_type        = region.m_type;
-	m_name        = region.m_name;
-    m_solid       = region.m_solid;
+    m_type  = region.m_type;
+	m_name  = region.m_name;
+    m_solid = region.m_solid;
 
     // Return
     return;

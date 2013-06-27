@@ -1,7 +1,7 @@
 /***************************************************************************
  *                      GSkyRegionCircle.i - Sky region class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Michael Mayer                               *
+ *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,9 +35,7 @@
  *
  * @brief GSkyRegionCircle dervied sky region class
  ***************************************************************************/
-
 class GSkyRegionCircle : public GSkyRegion {
-
 public:
     // Constructors and destructors
 	GSkyRegionCircle(void);
@@ -48,17 +46,26 @@ public:
     virtual ~GSkyRegionCircle(void);
 
      // Implemented methods
-    void         				clear(void);
-    GSkyRegionCircle*  			clone(void) const;
-    GSkyDir 					centre(void) const;
-    double 						radius(void) const;
-    void 						radius(const double& radius);
-    void 						centre(const GSkyDir& centre);
-    void 						centre(const double& ra,const double& dec);
-    void         				read(const std::string line);
-    std::string  				write() const;
-    bool         				contains(const GSkyDir& dir) const;
-	bool         				contains(const GSkyRegion& reg) const;
-	bool         				overlaps(const GSkyRegion& reg) const;
+    void              clear(void);
+    GSkyRegionCircle* clone(void) const;
+    GSkyDir           centre(void) const;
+    double            radius(void) const;
+    void              radius(const double& radius);
+    void              centre(const GSkyDir& centre);
+    void              centre(const double& ra,const double& dec);
+    void              read(const std::string line);
+    std::string       write(void) const;
+    bool              contains(const GSkyDir& dir) const;
+	bool              contains(const GSkyRegion& reg) const;
+	bool              overlaps(const GSkyRegion& reg) const;
+};
 
+
+/***********************************************************************//**
+ * @brief GSkyRegionCircle class extension
+ ***************************************************************************/
+%extend GSkyRegionCircle {
+    GSkyRegionCircle copy() {
+        return (*self);
+    }
 };
