@@ -31,6 +31,7 @@
 #endif
 #include "GBase.hpp"
 #include "GSkyRegion.hpp"
+#include "GSkyRegions.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                              "GSkyRegions::operator[](int&)"
@@ -162,7 +163,7 @@ GSkyRegions& GSkyRegions::operator= (const GSkyRegions& regions)
  *
  * @param[in] name region name.
  *
- * @exception GException::region_not_found
+ * @exception GException::invalid_argument
  *            region with specified name not found in container.
  *
  * Returns a pointer to the region with the specified @p name.
@@ -174,7 +175,8 @@ GSkyRegion* GSkyRegions::operator[](const std::string& name)
 
     // Throw exception if region name was not found
     if (index == -1) {
-        throw GException::region_not_found(G_ACCESS2, name);
+		std::string msg ="Region with name \""+name+"\" not found in container.";
+        throw GException::invalid_argument(G_ACCESS2, msg);
     }
 
     // Return pointer
@@ -187,7 +189,7 @@ GSkyRegion* GSkyRegions::operator[](const std::string& name)
  *
  * @param[in] name region name.
  *
- * @exception GException::region_not_found
+ * @exception GException::invalid_argument
  *            region with specified name not found in container.
  *
  * Returns a const pointer to the region with the specified @p name.
@@ -199,7 +201,8 @@ const GSkyRegion* GSkyRegions::operator[](const std::string& name) const
 
     // Throw exception if region name was not found
     if (index == -1) {
-        throw GException::region_not_found(G_ACCESS2, name);
+		std::string msg ="Region with name \""+name+"\" not found in container.";
+        throw GException::invalid_argument(G_ACCESS2, msg);		
     }
 
     // Return pointer
@@ -320,7 +323,7 @@ GSkyRegion* GSkyRegions::set(const int& index, const GSkyRegion& region)
             " the same name exists already at index "+gammalib::str(inx)+
             " in the container.\n"
 			"Every region in the region container needs a unique name.";
-        throw GException::invalid_value(G_SET1, msg);
+        throw GException::invalid_value(G_SET1, msg);		
     }
 
     // Delete any existing region
@@ -341,7 +344,7 @@ GSkyRegion* GSkyRegions::set(const int& index, const GSkyRegion& region)
  * @param[in] region region pointer.
  * @return Pointer to deep copy of region.
  *
- * @exception GException::region_not_found
+ * @exception GException::invalid_argument
  *            region with specified name not found in container.
  * @exception GException::invalid_value
  *            Name of region exists already in container.
@@ -355,7 +358,7 @@ GSkyRegion* GSkyRegions::set(const std::string& name, const GSkyRegion& region)
 
     // Throw exception if parameter name was not found
     if (index == -1) {
-        throw GException::region_not_found(G_SET2, name);
+        throw GException::invalid_argument(G_SET2, name);
     }
 
     // Check if a region with specified name does not yet exist
@@ -478,7 +481,7 @@ GSkyRegion* GSkyRegions::insert(const int& index, const GSkyRegion& region)
  * @param[in] region region.
  * @return Pointer to deep copy of region.
  *
- * @exception GException::region_not_found
+ * @exception GException::invalid_argument
  *            region with specified name not found in container.
  * @exception GException::invalid_value
  *            Name of region exists already in container.
@@ -493,7 +496,7 @@ GSkyRegion* GSkyRegions::insert(const std::string& name, const GSkyRegion& regio
 
     // Throw exception if parameter name was not found
     if (index == -1) {
-        throw GException::region_not_found(G_INSERT2, name);
+        throw GException::invalid_argument(G_INSERT2, name);
     }
 
     // Check if a region with specified name does not yet exist
@@ -551,7 +554,7 @@ void GSkyRegions::remove(const int& index)
  *
  * @param[in] name region name.
  *
- * @exception GException::region_not_found
+ * @exception GException::invalid_argument
  *            region with specified name not found in container.
  *
  * Remove region of specified @p name from container.
@@ -561,9 +564,9 @@ void GSkyRegions::remove(const std::string& name)
     // Get parameter index
     int index = get_index(name);
 
-    // Throw exception if parameter name was not found
+    // Throw exception if region name was not found
     if (index == -1) {
-        throw GException::region_not_found(G_REMOVE2, name);
+        throw GException::invalid_argument(G_REMOVE2, name);
     }
 
     // Erase region component from container
@@ -723,11 +726,11 @@ void GSkyRegions::save(const std::string& filename) const
 	if (ds9file.is_open()) {
     
 		// Write global definition
-		std::string fileline="# Region file format: DS9 version 4.1\n
-                                global color=green dashlist=8 3 width=1 
-                                font=\"helvetica 10 normal\" select=1 
-                                highlite=1 dash=0 fixed=0 edit=1 move=1 
-                                delete=1 include=1 source=1\n";
+		std::string fileline="# Region file format: DS9 version 4.1\n"+
+                                "global color=green dashlist=8 3 width=1"+ 
+                                "font=\"helvetica 10 normal\" select=1"+
+                                "highlite=1 dash=0 fixed=0 edit=1 move=1"+ 
+                                "delete=1 include=1 source=1\n";
 		ds9file << fileline;
 		
 		// Loop over regions in container
