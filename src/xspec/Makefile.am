@@ -7,7 +7,8 @@ INCLUDES = -I$(top_srcdir)/include \
 
 # Define sources for this directory
 sources = GArf.cpp \
-          GPha.cpp
+          GPha.cpp \
+          GRmf.cpp
 
 # Build libtool library
 noinst_LTLIBRARIES = libxspec.la
