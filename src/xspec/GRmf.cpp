@@ -519,7 +519,7 @@ std::string GRmf::print(const GChatter& chatter) const
         // Append energy boundary information
         result.append("\n"+gammalib::parformat("Number of true energy bins"));
         result.append(gammalib::str(m_ebds_true.size()));
-        result.append("\n"+gammalib::parformat("Number of measured energy bins"));
+        result.append("\n"+gammalib::parformat("Number of measured bins"));
         result.append(gammalib::str(m_ebds_measured.size()));
         result.append("\n"+gammalib::parformat("True energy range"));
         result.append(m_ebds_true.emin().print());
