@@ -353,3 +353,28 @@ GException::wcs_invalid_phi_theta::wcs_invalid_phi_theta(std::string origin,
     return;
 }
 
+
+/***********************************************************************//**
+* @brief Sky region not found
+*
+* @param[in] origin Method that throws the error.
+* @param[in] name Sky region name.
+* @param[in] message Optional error message.
+***************************************************************************/
+ GException::region_not_found::region_not_found(std::string origin,
+											  std::string name,
+											  std::string message)
+ {
+	 // Set origin
+	 m_origin  = origin;
+	 
+	 // Set message
+	 m_message = "Sky region \""+name+"\" not found in container.";
+	 if (message.length() > 0)
+		 m_message += " "+message;
+	 
+	 // Return
+	 return;
+ }
+ 
+
