@@ -56,14 +56,6 @@ public:
     // Implemented methods
 	std::string         type(void) const;
     std::string         name(void) const;
-	double              solidangle(void) const;
-
-protected:
-    // Protected methods
-    void                init_members(void);
-    void                copy_members(const GSkyRegion& region);
-    void                free_members(void);
-    
-    
+	double              solidangle(void) const;  
 
 };

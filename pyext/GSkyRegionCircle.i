@@ -61,12 +61,4 @@ public:
 	bool         				contains(const GSkyRegion& reg) const;
 	bool         				overlaps(const GSkyRegion& reg) const;
 
-
-protected:
-    // Protected methods
-    void                init_members(void);
-    void                copy_members(const GSkyRegionCircle& region);
-    void                free_members(void);
-	void                compute_solid(void);
-
 };
