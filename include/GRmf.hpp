@@ -130,7 +130,7 @@ const double& GRmf::operator()(const int& itrue, const int& imeasured) const
 inline
 int GRmf::size(void) const
 {
-    return (m_matrix.size());
+    return (m_matrix.rows()*m_matrix.columns());
 }
 
 
