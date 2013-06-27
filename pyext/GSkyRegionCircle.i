@@ -55,7 +55,7 @@ public:
     void 						radius(const double& radius);
     void 						centre(const GSkyDir& centre);
     void 						centre(const double& ra,const double& dec);
-    void         				read(const std::string line) const;
+    void         				read(const std::string line);
     std::string  				write() const;
     bool         				contains(const GSkyDir& dir) const;
 	bool         				contains(const GSkyRegion& reg) const;

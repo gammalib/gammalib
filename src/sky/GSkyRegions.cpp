@@ -31,7 +31,10 @@
 #endif
 #include "GBase.hpp"
 #include "GSkyRegion.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GSkyRegions.hpp"
+#include "GTools.hpp"
+
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS1                              "GSkyRegions::operator[](int&)"
@@ -650,7 +653,7 @@ bool GSkyRegions::contains(const std::string& name) const
  *
  * Loads all regions from a DS9 region file. See the read() method for more
  * information about the expected structure of the XML file.
- * @todo 
+
  ***************************************************************************/
 void GSkyRegions::load(const std::string& filename)
 {
@@ -658,7 +661,8 @@ void GSkyRegions::load(const std::string& filename)
     clear();
 
     // Open file. Throw an exception if opening failed.
-    ifstream ds9file(filename);
+    std::ifstream ds9file;
+    ds9file.open(filename.c_str());
 	if (ds9file.is_open()) {
         
 		// Loop over file lines
@@ -670,7 +674,7 @@ void GSkyRegions::load(const std::string& filename)
 			getline (ds9file,fileline);
 			
 			// If line is a comment then continue
-			if (fileline[0] == "#") continue;
+			if (fileline[0] == '#') continue;
 			
 			// Check for global definition of coordinate system
 			if (std::string::npos != fileline.find("fk5")) {
@@ -678,12 +682,12 @@ void GSkyRegions::load(const std::string& filename)
 			}
 			
 			// If region is a circle
-			if (std::string::npos != fileline.find("circle") {				
+			if (std::string::npos != fileline.find("circle")) {
 				// Create instance of GSkyRegion object
 				GSkyRegionCircle region;				
 				// If coordinate system and region defined on the same line
-				if (std::string::npos != fileline.find("fk5")) ||
-					(std::string::npos != fileline.find("galactic")) {
+				if ((std::string::npos != fileline.find("fk5")) ||
+					(std::string::npos != fileline.find("galactic"))) {
 					region.read(fileline);
 					append(region);
 				// else, prepend the coordinate system
@@ -695,7 +699,7 @@ void GSkyRegions::load(const std::string& filename)
 					append(region);
 				}
 				// Free object (the append method made a deep copy)
-				delete region;
+				delete &region;
 			} 
 		}
 		
@@ -722,15 +726,18 @@ void GSkyRegions::load(const std::string& filename)
 void GSkyRegions::save(const std::string& filename) const
 {
     // Open file. Throw an exception if opening failed.
-    ofstream ds9file(filename);
-	if (ds9file.is_open()) {
+    std::ofstream ds9file;
+    ds9file.open(filename.c_str());
+
+    if (ds9file.is_open()) {
     
 		// Write global definition
-		std::string fileline="# Region file format: DS9 version 4.1\n"+
-                                "global color=green dashlist=8 3 width=1"+ 
-                                "font=\"helvetica 10 normal\" select=1"+
-                                "highlite=1 dash=0 fixed=0 edit=1 move=1"+ 
-                                "delete=1 include=1 source=1\n";
+		std::string fileline;
+		fileline.append("# Region file format: DS9 version 4.1\n");
+		fileline.append("global color=green dashlist=8 3 width=1");
+//		fileline.append("font=\"helvetica 10 normal\" select=1");
+//                                "highlite=1 dash=0 fixed=0 edit=1 move=1"+
+//                                "delete=1 include=1 source=1\n";
 		ds9file << fileline;
 		
 		// Loop over regions in container

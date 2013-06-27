@@ -32,7 +32,7 @@
 #include <vector>
 #include "GBase.hpp"
 #include "GSkyRegion.hpp"
-
+#include "GException.hpp"
 
 /***********************************************************************//**
 * @class GSkyRegions

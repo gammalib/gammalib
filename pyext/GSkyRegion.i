@@ -47,7 +47,7 @@ public:
     // Pure virtual methods
     virtual void         clear(void) = 0;
     virtual GSkyRegion*  clone(void) const = 0;
-    virtual void         read(const std::string regstring) const = 0;
+    virtual void         read(const std::string regstring) = 0;
     virtual std::string  write() const = 0;
 	virtual bool         contains(const GSkyDir& dir) const = 0;
     virtual bool         overlaps(const GSkyRegion& reg) const = 0;

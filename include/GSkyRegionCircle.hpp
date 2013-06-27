@@ -131,6 +131,7 @@ GSkyDir GSkyRegionCircle::centre(void) const
  *
  * @param[in] dir Center of region.
  ***************************************************************************/
+inline
 void GSkyRegionCircle::centre(const GSkyDir& dir)
 {
     // Set centre
@@ -147,6 +148,7 @@ void GSkyRegionCircle::centre(const GSkyDir& dir)
  * @param[in] ra Right ascension value.
  * @param[in] dec declination value.
  ***************************************************************************/
+inline
 void GSkyRegionCircle::centre(const double& ra, const double& dec)
 {
     // Set centre values
