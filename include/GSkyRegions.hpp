@@ -33,6 +33,7 @@
 #include "GBase.hpp"
 #include "GSkyRegion.hpp"
 #include "GException.hpp"
+#include "GSkyDir.hpp"
 
 /***********************************************************************//**
  * @class GSkyRegions
@@ -85,7 +86,9 @@ public:
     void              load(const std::string& filename);
     void              save(const std::string& filename) const;
     std::string       print(const GChatter& chatter = NORMAL) const;
-
+	bool              contains(const GSkyDir& dir) const;
+    bool              overlaps(const GSkyRegion& reg) const;
+	
 protected:
     // Protected methods
     void init_members(void);

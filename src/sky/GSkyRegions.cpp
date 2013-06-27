@@ -35,7 +35,6 @@
 #include "GSkyRegions.hpp"
 #include "GTools.hpp"
 
-
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                       "GSkyRegions::operator[](std::string&)"
 #define G_AT                                           "GSkyRegions::at(int&)"
@@ -802,6 +801,54 @@ std::string GSkyRegions::print(const GChatter& chatter) const
     return result;
 }
 
+
+/***********************************************************************//**
+ * @brief Tells if direction is contained in one of the regions
+ *
+ * @param[in] dir A sky direction
+ * @return True or False
+ *
+ * Tells if direction is contained in one of the regions
+ ***************************************************************************/
+ bool GSkyRegions::contains(const GSkyDir& dir) const
+ {
+	 // Initialise return value
+	 bool dir_is_in = false;
+	 
+	 // Loop over regions
+	 for (int i = 0; i < size(); ++i) {
+		 dir_is_in=m_regions[i]->contains(dir);
+		 if (dir_is_in) break;
+	 }
+	 
+	 // Return result
+	 return dir_is_in;
+ }
+
+ 
+/***********************************************************************//**
+ * @brief Tells if region overlaps one of the regions
+ *
+ * @param[in] reg A sky region
+ * @return True or False
+ *
+ * Tells if region overlaps one of the regions
+ ***************************************************************************/
+  bool GSkyRegions::overlaps(const GSkyRegion& reg) const
+  {
+	  // Initialise return value
+	  bool reg_is_in = false;
+	  
+	  // Loop over regions
+	  for (int i = 0; i < size(); ++i) {
+		  reg_is_in=m_regions[i]->overlaps(reg);
+		  if (reg_is_in) break;
+	  }
+	  
+	  // Return result
+	  return reg_is_in;
+  }
+  
 
 /*==========================================================================
  =                                                                         =
