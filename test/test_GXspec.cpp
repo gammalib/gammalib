@@ -212,8 +212,8 @@ void TestGXspec::test_GArf(void)
         test_value(arf2.at(i), 0.0);
         test_value(arf2[i], 0.0);
     }
-    std::cout << arf << std::endl;
-    std::cout << arf2 << std::endl;
+    //std::cout << arf << std::endl;
+    //std::cout << arf2 << std::endl;
 
     // Return
     return;
