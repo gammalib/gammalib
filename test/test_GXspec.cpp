@@ -42,6 +42,7 @@ void TestGXspec::set(void)
 
     // Append tests
     append(static_cast<pfunction>(&TestGXspec::test_GPha), "Test GPha class");
+    append(static_cast<pfunction>(&TestGXspec::test_GArf), "Test GArf class");
 
     // Return
     return; 
@@ -134,6 +135,85 @@ void TestGXspec::test_GPha(void)
     }
     //std::cout << pha << std::endl;
     //std::cout << pha2 << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GArf class
+ **************************************************************************/
+void TestGXspec::test_GArf(void)
+{
+    // Test void constructor
+    test_try("GArf void constructor");
+    try {
+        GArf arf;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test energy boundary constructor
+    test_try("GArf energy boundary constructor");
+    try {
+        GEbounds ebds(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
+        GArf     arf(ebds);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test filling and accessing
+    GEbounds ebds(9, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"));
+    GArf     arf(ebds);
+    for (int i = 0; i < 9; i += 2) {
+        arf[i] = 1.0;
+    }
+    for (int i = 0; i < 9; i += 2) {
+        test_value(arf.at(i), 1.0);
+        test_value(arf[i], 1.0);
+    }
+    for (int i = 1; i < 9; i += 2) {
+        test_value(arf.at(i), 0.0);
+        test_value(arf[i], 0.0);
+    }
+    arf[0] = 5.0;
+    arf[1] = 3.7;
+    test_value(arf[0], 5.0);
+    test_value(arf[1], 3.7);
+
+    // Test saving and loading
+    arf.save("arf.fits", true);
+    arf.load("arf.fits");
+    test_value(arf[0], 5.0, 1.0e-6);
+    test_value(arf[1], 3.7, 1.0e-6);
+    for (int i = 2; i < 9; i += 2) {
+        test_value(arf.at(i), 1.0);
+        test_value(arf[i], 1.0);
+    }
+    for (int i = 3; i < 9; i += 2) {
+        test_value(arf.at(i), 0.0);
+        test_value(arf[i], 0.0);
+    }
+
+    // Test constructing
+    GArf arf2("arf.fits");
+    test_value(arf2[0], 5.0, 1.0e-6);
+    test_value(arf2[1], 3.7, 1.0e-6);
+    for (int i = 2; i < 9; i += 2) {
+        test_value(arf2.at(i), 1.0);
+        test_value(arf2[i], 1.0);
+    }
+    for (int i = 3; i < 9; i += 2) {
+        test_value(arf2.at(i), 0.0);
+        test_value(arf2[i], 0.0);
+    }
+    std::cout << arf << std::endl;
+    std::cout << arf2 << std::endl;
 
     // Return
     return;

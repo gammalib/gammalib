@@ -46,6 +46,7 @@ public:
     // Methods
     virtual void set(void);
     void         test_GPha(void);
+    void         test_GArf(void);
 
 private:
     // Private members
