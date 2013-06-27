@@ -36,7 +36,7 @@
 
 
 /***********************************************************************//**
-* @class GSkyRegionCIRCLE
+* @class GSkyRegionCircle
 *
 * @brief Abstract interface for the circular sky region class
 *
@@ -76,7 +76,7 @@ public:
     void 									centre(const GSkyDir& centre);
     void 									centre(const double& ra,const double& dec);
     std::string  							print(const GChatter& chatter = NORMAL) const;
-    void         							read(const std::string line) const;
+    void         							read(const std::string& line);
     std::string  							write() const;
     bool         							contains(const GSkyDir& dir) const;
 	bool         							contains(const GSkyRegion& reg) const;
@@ -110,8 +110,51 @@ double GSkyRegionCircle::radius(void) const
     return (m_radius);
 }
 
+/***********************************************************************//**
+ * @brief Return region centre
+ *
+ * @return region centre
+ *
+ * Returns the region centre.
+ ***************************************************************************/
+
 inline
 GSkyDir GSkyRegionCircle::centre(void) const
 {
     return (m_centre);
 }
+
+
+
+/***********************************************************************//**
+ * @brief Set centre of region
+ *
+ * @param[in] dir Center of region.
+ ***************************************************************************/
+void GSkyRegionCircle::centre(const GSkyDir& dir)
+{
+    // Set centre
+    m_centre = dir;
+
+    //Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set centre values
+ *
+ * @param[in] ra Right ascension value.
+ * @param[in] dec declination value.
+ ***************************************************************************/
+void GSkyRegionCircle::centre(const double& ra, const double& dec)
+{
+    // Set centre values
+    m_centre.radec_deg(ra,dec);
+
+    //Return
+    return;
+}
+
+
+

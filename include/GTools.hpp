@@ -87,6 +87,7 @@ namespace gammalib {
     bool                     file_exists(const std::string& filename);
     bool                     isinfinite(const double& x);
     bool                     isnotanumber(const double& x);
+    bool 					 contains(std::string str1, std::string str2);
 }
 
 /***********************************************************************//**
