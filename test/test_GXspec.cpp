@@ -43,6 +43,7 @@ void TestGXspec::set(void)
     // Append tests
     append(static_cast<pfunction>(&TestGXspec::test_GPha), "Test GPha class");
     append(static_cast<pfunction>(&TestGXspec::test_GArf), "Test GArf class");
+    append(static_cast<pfunction>(&TestGXspec::test_GRmf), "Test GRmf class");
 
     // Return
     return; 
@@ -214,6 +215,108 @@ void TestGXspec::test_GArf(void)
     }
     //std::cout << arf << std::endl;
     //std::cout << arf2 << std::endl;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GRmf class
+ **************************************************************************/
+void TestGXspec::test_GRmf(void)
+{
+    // Test void constructor
+    test_try("GRmf void constructor");
+    try {
+        GRmf rmf;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test energy boundary constructor
+    test_try("GRmf energy boundary constructor");
+    try {
+        GEbounds ebds(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"));
+        GRmf     rmf(ebds, ebds);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test filling and accessing
+    GEbounds ebds(9, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"));
+    GRmf     rmf(ebds, ebds);
+    for (int i = 0; i < 9; ++i) {
+        for (int k = i; k < i+3 && k < 9; ++k) {
+            rmf(i, k) = 1.0;
+        }
+    }
+    for (int i = 0; i < 9; ++i) {
+        int k = 0;
+        for (; k < i; ++k) {
+            test_value(rmf.at(i,k), 0.0);
+            test_value(rmf(i,k),    0.0);
+        }
+        for (; k < i+3 && k < 9; ++k) {
+            test_value(rmf.at(i,k), 1.0);
+            test_value(rmf(i,k),    1.0);
+        }
+        for (; k < 9; ++k) {
+            test_value(rmf.at(i,k), 0.0);
+            test_value(rmf(i,k),    0.0);
+        }
+    }
+
+    // Test saving and loading
+    rmf.save("rmf.fits", true);
+    rmf.load("rmf.fits");
+    /*
+    for (int i = 0; i < 9; ++i) {
+        for (int k = 0; k < 9; ++k) {
+            std::cout << rmf(i,k) << " ";
+        }
+        std::cout << std::endl;
+    }
+    */
+    for (int i = 0; i < 9; ++i) {
+        int k = 0;
+        for (; k < i; ++k) {
+            test_value(rmf.at(i,k), 0.0);
+            test_value(rmf(i,k),    0.0);
+        }
+        for (; k < i+3 && k < 9; ++k) {
+            test_value(rmf.at(i,k), 1.0);
+            test_value(rmf(i,k),    1.0);
+        }
+        for (; k < 9; ++k) {
+            test_value(rmf.at(i,k), 0.0);
+            test_value(rmf(i,k),    0.0);
+        }
+    }
+
+    // Test constructing
+    GRmf rmf2("rmf.fits");
+    for (int i = 0; i < 9; ++i) {
+        int k = 0;
+        for (; k < i; ++k) {
+            test_value(rmf.at(i,k), 0.0);
+            test_value(rmf(i,k),    0.0);
+        }
+        for (; k < i+3 && k < 9; ++k) {
+            test_value(rmf.at(i,k), 1.0);
+            test_value(rmf(i,k),    1.0);
+        }
+        for (; k < 9; ++k) {
+            test_value(rmf.at(i,k), 0.0);
+            test_value(rmf(i,k),    0.0);
+        }
+    }
+    //std::cout << rmf << std::endl;
+    //std::cout << rmf2 << std::endl;
 
     // Return
     return;
