@@ -108,6 +108,7 @@
 #include "GVOClient.hpp"
 
 /* __ XSPEC module _______________________________________________________ */
+#include "GArf.hpp"
 #include "GPha.hpp"
 
 /* __ Application module _________________________________________________ */
