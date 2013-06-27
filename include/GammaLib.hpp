@@ -110,6 +110,7 @@
 /* __ XSPEC module _______________________________________________________ */
 #include "GArf.hpp"
 #include "GPha.hpp"
+#include "GRmf.hpp"
 
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
