@@ -436,7 +436,7 @@ void GPha::write(GFits& fits) const
 
         // Fill columns
         for (int i = 0; i < length; ++i) {
-            col_chan(i) = i; // Check whether we should start from 0 or 1
+            col_chan(i) = i+1; // Channels start at 1
             col_data(i) = float(m_counts[i]);
         }
 
