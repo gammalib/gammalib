@@ -838,11 +838,11 @@ void TestGSky::test_GSkyRegions_io(void)
 	// Set filenames
 	const std::string filereg_radeczerozero = "data/test_circle_radeczerozero.reg";
 
-	//Test region loading
-	test_try("Test region loading");
+	// Test regions loading
+	test_try("Test regions loading");
 	try {
-		GSkyRegions reg;
-		reg.load(filereg_radeczerozero);
+		GSkyRegions regions;
+		regions.load(filereg_radeczerozero);
 		test_try_success();
 	}
 	catch (std::exception &e) {
@@ -870,11 +870,11 @@ void TestGSky::test_GSkyRegions_io(void)
 //
 //
 
-	// Test region saving
-	test_try("Test region saving");
+	// Test regions saving
+	test_try("Test regions saving");
 	try {
-		GSkyRegions reg;
-		reg.save(filereg_radeczerozero);
+		GSkyRegions regions;
+		regions.save("region.ds9");
 		test_try_success();
 	}
 	catch (std::exception &e) {
