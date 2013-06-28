@@ -708,6 +708,9 @@ void GSkyRegions::load(const std::string& filename)
         // Close file
         ds9file.close();
 
+        // Store filename
+        m_filename = filename;
+
 	} 
 
 	// File could not be opened
@@ -732,10 +735,11 @@ void GSkyRegions::load(const std::string& filename)
  ***************************************************************************/
 void GSkyRegions::save(const std::string& filename) const
 {
-    // Open file. Throw an exception if opening failed.
+    // Open file
     std::ofstream ds9file;
     ds9file.open(filename.c_str());
 
+    // If file opened correctly, then save regions
     if (ds9file.is_open()) {
     
 		// Write global definition
@@ -755,9 +759,12 @@ void GSkyRegions::save(const std::string& filename) const
 		// Close file
 		ds9file.close();
     
+        // Store filename
+        m_filename = filename;
+
 	} 
 
-	// File could not be opened
+	// ... otherwise, if file could not be opened then throw an exception
     else {
         throw GException::file_open_error(G_SAVE, filename);
     }	
@@ -862,6 +869,7 @@ std::string GSkyRegions::print(const GChatter& chatter) const
 void GSkyRegions::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_regions.clear();
 
     // Return
@@ -880,6 +888,9 @@ void GSkyRegions::init_members(void)
  ***************************************************************************/
 void GSkyRegions::copy_members(const GSkyRegions& regions)
 {
+    // Copy members
+    m_filename = regions.m_filename;
+
     // Copy regions
     m_regions.clear();
     for (int i = 0; i < regions.m_regions.size(); ++i) {

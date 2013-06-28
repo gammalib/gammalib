@@ -67,27 +67,28 @@ public:
     const GSkyRegion* operator[](const std::string& name) const;
 
     // Methods
-    void              clear(void);
-    GSkyRegions*      clone(void) const;
-    GSkyRegion*       at(const int& index);
-    const GSkyRegion* at(const int& index) const;
-    int               size(void) const;
-    bool              isempty(void) const;
-    GSkyRegion*       set(const int& index, const GSkyRegion& region);
-    GSkyRegion*       set(const std::string& name, const GSkyRegion& region);
-    GSkyRegion*       append(const GSkyRegion& region);
-    GSkyRegion*       insert(const int& index, const GSkyRegion& region);
-    GSkyRegion*       insert(const std::string& name, const GSkyRegion& region);
-    void              remove(const int& index);
-    void              remove(const std::string& name);
-    void              reserve(const int& num);
-    void              extend(const GSkyRegions& regions);
-    bool              contains(const std::string& name) const;
-    void              load(const std::string& filename);
-    void              save(const std::string& filename) const;
-    std::string       print(const GChatter& chatter = NORMAL) const;
-	bool              contains(const GSkyDir& dir) const;
-    bool              overlaps(const GSkyRegion& reg) const;
+    void               clear(void);
+    GSkyRegions*       clone(void) const;
+    GSkyRegion*        at(const int& index);
+    const GSkyRegion*  at(const int& index) const;
+    int                size(void) const;
+    bool               isempty(void) const;
+    GSkyRegion*        set(const int& index, const GSkyRegion& region);
+    GSkyRegion*        set(const std::string& name, const GSkyRegion& region);
+    GSkyRegion*        append(const GSkyRegion& region);
+    GSkyRegion*        insert(const int& index, const GSkyRegion& region);
+    GSkyRegion*        insert(const std::string& name, const GSkyRegion& region);
+    void               remove(const int& index);
+    void               remove(const std::string& name);
+    void               reserve(const int& num);
+    void               extend(const GSkyRegions& regions);
+    bool               contains(const std::string& name) const;
+	bool               contains(const GSkyDir& dir) const;
+    bool               overlaps(const GSkyRegion& reg) const;
+    void               load(const std::string& filename);
+    void               save(const std::string& filename) const;
+    const std::string& filename(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 	
 protected:
     // Protected methods
@@ -97,7 +98,8 @@ protected:
     int  get_index(const std::string& name) const;
 
     // Protected members
-    std::vector<GSkyRegion*> m_regions;  //!< List of regions
+    mutable std::string      m_filename;   //!< Filename of origin
+    std::vector<GSkyRegion*> m_regions;    //!< List of regions
 };
 
 
@@ -169,6 +171,23 @@ void GSkyRegions::reserve(const int& num)
 {
     m_regions.reserve(num);
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return file name
+ *
+ * @return File name from which the regions have been loaded or into which
+ *         the regions have been saved.
+ *
+ * Returns the file name from which the regions have been loaded or into
+ * which the regions have been saved. The returned string will be empty if
+ * no load() or save() method has been called before.
+ ***************************************************************************/
+inline
+const std::string& GSkyRegions::filename(void) const
+{
+    return (m_filename);
 }
 
 #endif /* GSKYREGIONS_HPP */
