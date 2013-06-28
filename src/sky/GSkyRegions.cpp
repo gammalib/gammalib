@@ -674,7 +674,9 @@ void GSkyRegions::load(const std::string& filename)
 			getline (ds9file,fileline);
 			
 			// If line is a comment then continue
-			if (fileline[0] == '#') continue;
+			if (fileline[0] == '#') {
+                continue;
+            }
 			
 			// Check for global definition of coordinate system
 			if (std::string::npos != fileline.find("fk5")) {

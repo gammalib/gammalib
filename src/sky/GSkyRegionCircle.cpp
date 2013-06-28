@@ -252,9 +252,8 @@ void GSkyRegionCircle::read(const std::string& line)
 
 	// Split the string into 2 parts seperated by #
 	std::vector<std::string> substrings = gammalib::split(line,"#");
-
-	std::string region_def = substrings[0];
-	std::string comment    = substrings[1];
+	std::string region_def = (substrings.size() > 0) ? substrings[0] : "";
+	std::string comment    = (substrings.size() > 1) ? substrings[1] : "";
 
 	// Finding the circle
 	if (region_def.find("circle") == std::string::npos) {
@@ -303,19 +302,19 @@ void GSkyRegionCircle::read(const std::string& line)
 
 	// Throwing exception if radius is less than 0
 	if (m_radius < 0.0) {
-			throw GException::invalid_value(G_READ,
-                  "Radius of a region can't be less than 0");
-		}
+        throw GException::invalid_value(G_READ,
+              "Radius of a region can't be less than 0");
+    }
 
 	// Compute solid angle
 	compute_solid();
 
 	// Check if there is a given name for the region and set it
-	std::vector<std::string>comments =gammalib::split(comment, " ");
+	std::vector<std::string>comments = gammalib::split(comment, " ");
 	for (int i = 0; i < comments.size(); i++) {
-		if (gammalib::contains(comments[i],"text")){
-			std::vector<std::string> attributes = gammalib::split(comments[i],"=");
-			if (attributes.size()<2) {
+		if (gammalib::contains(comments[i], "text")) {
+			std::vector<std::string> attributes = gammalib::split(comments[i], "=");
+			if (attributes.size() < 2) {
 				throw GException::invalid_value(G_READ, 
                       "Invalid number of arguments, type of attribute must"
                       " be key=value");
