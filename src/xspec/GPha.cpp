@@ -347,6 +347,9 @@ void GPha::load(const std::string& filename)
     // Close FITS file
     file.close();
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
 }
@@ -368,6 +371,9 @@ void GPha::save(const std::string& filename, const bool& clobber) const
 
     // Close FITS file
     fits.saveto(filename, clobber);
+
+    // Store filename
+    m_filename = filename;
 
     // Return
     return;
@@ -523,6 +529,7 @@ std::string GPha::print(const GChatter& chatter) const
 void GPha::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_ebounds.clear();
     m_counts.clear();
     m_underflow = 0.0;
@@ -542,6 +549,7 @@ void GPha::init_members(void)
 void GPha::copy_members(const GPha& pha)
 {
     // Copy members
+    m_filename  = pha.m_filename;
     m_ebounds   = pha.m_ebounds;
     m_counts    = pha.m_counts;
     m_underflow = pha.m_underflow;

@@ -102,7 +102,11 @@ void TestGXspec::test_GPha(void)
 
     // Test saving and loading
     pha.save("pha.fits", true);
+    test_assert(pha.filename() == "pha.fits",
+                "Unexpected filename \""+pha.filename()+"\".");
     pha.load("pha.fits");
+    test_assert(pha.filename() == "pha.fits",
+                "Unexpected filename \""+pha.filename()+"\".");
     test_value(pha[0], 5.0, 1.0e-6);
     test_value(pha[1], 3.7, 1.0e-6);
     test_value(pha.counts(),   11.7, 1.0e-6);
@@ -120,6 +124,8 @@ void TestGXspec::test_GPha(void)
 
     // Test constructing
     GPha pha2("pha.fits");
+    test_assert(pha2.filename() == "pha.fits",
+                "Unexpected filename \""+pha2.filename()+"\".");
     test_value(pha2[0], 5.0, 1.0e-6);
     test_value(pha2[1], 3.7, 1.0e-6);
     test_value(pha2.counts(),   11.7, 1.0e-6);
@@ -189,7 +195,11 @@ void TestGXspec::test_GArf(void)
 
     // Test saving and loading
     arf.save("arf.fits", true);
+    test_assert(arf.filename() == "arf.fits",
+                "Unexpected filename \""+arf.filename()+"\".");
     arf.load("arf.fits");
+    test_assert(arf.filename() == "arf.fits",
+                "Unexpected filename \""+arf.filename()+"\".");
     test_value(arf[0], 5.0, 1.0e-6);
     test_value(arf[1], 3.7, 1.0e-6);
     for (int i = 2; i < 9; i += 2) {
@@ -203,6 +213,8 @@ void TestGXspec::test_GArf(void)
 
     // Test constructing
     GArf arf2("arf.fits");
+    test_assert(arf2.filename() == "arf.fits",
+                "Unexpected filename \""+arf2.filename()+"\".");
     test_value(arf2[0], 5.0, 1.0e-6);
     test_value(arf2[1], 3.7, 1.0e-6);
     for (int i = 2; i < 9; i += 2) {
@@ -273,7 +285,11 @@ void TestGXspec::test_GRmf(void)
 
     // Test saving and loading
     rmf.save("rmf.fits", true);
+    test_assert(rmf.filename() == "rmf.fits",
+                "Unexpected filename \""+rmf.filename()+"\".");
     rmf.load("rmf.fits");
+    test_assert(rmf.filename() == "rmf.fits",
+                "Unexpected filename \""+rmf.filename()+"\".");
     /*
     for (int i = 0; i < 9; ++i) {
         for (int k = 0; k < 9; ++k) {
@@ -300,6 +316,8 @@ void TestGXspec::test_GRmf(void)
 
     // Test constructing
     GRmf rmf2("rmf.fits");
+    test_assert(rmf2.filename() == "rmf.fits",
+                "Unexpected filename \""+rmf2.filename()+"\".");
     for (int i = 0; i < 9; ++i) {
         int k = 0;
         for (; k < i; ++k) {

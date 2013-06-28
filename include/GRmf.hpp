@@ -59,20 +59,21 @@ public:
     const double& operator()(const int& itrue, const int& imeasured) const;
 
     // Methods
-    void            clear(void);
-    GRmf*           clone(void) const;
-    int             size(void) const;
-    int             ntrue(void) const;
-    int             nmeasured(void) const;
-    double&         at(const int& itrue, const int& imeasured);
-    const double&   at(const int& itrue, const int& imeasured) const;
-    const GEbounds& etrue(void) const;
-    const GEbounds& emeasured(void) const;
-    void            load(const std::string& filename);
-    void            save(const std::string& filename, const bool& clobber = false) const;
-    void            read(const GFitsTable* hdu);
-    void            write(GFits& fits) const;
-    std::string     print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GRmf*              clone(void) const;
+    int                size(void) const;
+    int                ntrue(void) const;
+    int                nmeasured(void) const;
+    double&            at(const int& itrue, const int& imeasured);
+    const double&      at(const int& itrue, const int& imeasured) const;
+    const GEbounds&    etrue(void) const;
+    const GEbounds&    emeasured(void) const;
+    void               load(const std::string& filename);
+    void               save(const std::string& filename, const bool& clobber = false) const;
+    void               read(const GFitsTable* hdu);
+    void               write(GFits& fits) const;
+    const std::string& filename(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -81,9 +82,10 @@ protected:
     void   free_members(void);
     
     // Protected members
-    GEbounds      m_ebds_true;      //!< True energy boundaries
-    GEbounds      m_ebds_measured;  //!< Measured energy boundaries
-    GMatrixSparse m_matrix;         //!< Sparse redistribution matrix
+    mutable std::string m_filename;      //!< Filename of origin
+    GEbounds            m_ebds_true;     //!< True energy boundaries
+    GEbounds            m_ebds_measured; //!< Measured energy boundaries
+    GMatrixSparse       m_matrix;        //!< Sparse redistribution matrix
     
 };
 
@@ -187,6 +189,23 @@ inline
 const GEbounds& GRmf::emeasured(void) const
 {
     return m_ebds_measured;
+}
+
+
+/***********************************************************************//**
+ * @brief Return file name
+ *
+ * @return File name from which the RMF information has been read or into
+ *         which RMF information has been saved.
+ *
+ * Returns the file name from which the RMF information has been read or into
+ * which RMF information has been saved. The returned string will be empty if
+ * no load() or save() method has been called before.
+ ***************************************************************************/
+inline
+const std::string& GRmf::filename(void) const
+{
+    return (m_filename);
 }
 
 #endif /* GRMF_HPP */

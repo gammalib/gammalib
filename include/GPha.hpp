@@ -57,22 +57,23 @@ public:
     const double& operator[](const int& index) const;
 
     // Methods
-    void            clear(void);
-    GPha*           clone(void) const;
-    int             size(void) const;
-    double&         at(const int& index);
-    const double&   at(const int& index) const;
-    const GEbounds& ebounds(void) const;
-    double          counts(void) const;
-    const double&   underflow(void) const;
-    const double&   overflow(void) const;
-    const double&   outflow(void) const;
-    void            fill(const GEnergy& energy, const double& value = 1.0);
-    void            load(const std::string& filename);
-    void            save(const std::string& filename, const bool& clobber = false) const;
-    void            read(const GFitsTable* hdu);
-    void            write(GFits& fits) const;
-    std::string     print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GPha*              clone(void) const;
+    int                size(void) const;
+    double&            at(const int& index);
+    const double&      at(const int& index) const;
+    const GEbounds&    ebounds(void) const;
+    double             counts(void) const;
+    const double&      underflow(void) const;
+    const double&      overflow(void) const;
+    const double&      outflow(void) const;
+    void               fill(const GEnergy& energy, const double& value = 1.0);
+    void               load(const std::string& filename);
+    void               save(const std::string& filename, const bool& clobber = false) const;
+    void               read(const GFitsTable* hdu);
+    void               write(GFits& fits) const;
+    const std::string& filename(void) const;
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -81,6 +82,7 @@ protected:
     void free_members(void);
     
     // Protected members
+    mutable std::string m_filename;   //!< Filename of origin
     GEbounds            m_ebounds;    //!< Energy boundaries
     std::vector<double> m_counts;     //!< Counts data
     double              m_underflow;  //!< Number of underflowing events
@@ -186,6 +188,23 @@ inline
 const double& GPha::outflow(void) const
 {
     return m_outflow;
+}
+
+
+/***********************************************************************//**
+ * @brief Return file name
+ *
+ * @return File name from which the PHA information has been read or into
+ *         which PHA information has been saved.
+ *
+ * Returns the file name from which the PHA information has been read or into
+ * which PHA information has been saved. The returned string will be empty if
+ * no load() or save() method has been called before.
+ ***************************************************************************/
+inline
+const std::string& GPha::filename(void) const
+{
+    return (m_filename);
 }
 
 #endif /* GPHA_HPP */

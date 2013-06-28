@@ -284,6 +284,9 @@ void GRmf::load(const std::string& filename)
     // Close FITS file
     file.close();
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
 }
@@ -305,6 +308,9 @@ void GRmf::save(const std::string& filename, const bool& clobber) const
 
     // Close FITS file
     fits.saveto(filename, clobber);
+
+    // Store filename
+    m_filename = filename;
 
     // Return
     return;
@@ -549,6 +555,7 @@ std::string GRmf::print(const GChatter& chatter) const
 void GRmf::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_ebds_true.clear();
     m_ebds_measured.clear();
     m_matrix.clear();
@@ -566,6 +573,7 @@ void GRmf::init_members(void)
 void GRmf::copy_members(const GRmf& rmf)
 {
     // Copy members
+    m_filename      = rmf.m_filename;
     m_ebds_true     = rmf.m_ebds_true;
     m_ebds_measured = rmf.m_ebds_measured;
     m_matrix        = rmf.m_matrix;

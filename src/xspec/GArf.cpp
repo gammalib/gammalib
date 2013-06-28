@@ -267,6 +267,9 @@ void GArf::load(const std::string& filename)
     // Close FITS file
     file.close();
 
+    // Store filename
+    m_filename = filename;
+
     // Return
     return;
 }
@@ -288,6 +291,9 @@ void GArf::save(const std::string& filename, const bool& clobber) const
 
     // Close FITS file
     fits.saveto(filename, clobber);
+
+    // Store filename
+    m_filename = filename;
 
     // Return
     return;
@@ -439,6 +445,7 @@ std::string GArf::print(const GChatter& chatter) const
 void GArf::init_members(void)
 {
     // Initialise members
+    m_filename.clear();
     m_ebounds.clear();
     m_specresp.clear();
 
@@ -455,6 +462,7 @@ void GArf::init_members(void)
 void GArf::copy_members(const GArf& arf)
 {
     // Copy members
+    m_filename = arf.m_filename;
     m_ebounds  = arf.m_ebounds;
     m_specresp = arf.m_specresp;
 
