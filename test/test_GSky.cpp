@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GSky.cpp - test GSky classes                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file test_GSky.cpp
  * @brief Testing of sky module.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -41,9 +41,11 @@
 /* __ Debug definitions __________________________________________________ */
 #define G_WCS_FORTH_BACK_PIXEL_DEBUG
 #define G_WCS_COPY_DEBUG
+
+
 /***********************************************************************//**
-* @brief Set parameters and tests
-***************************************************************************/    
+ * @brief Set parameters and tests
+ ***************************************************************************/    
 void TestGSky::set(void){
 
     // Test name
@@ -355,7 +357,7 @@ void TestGSky::test_GWcslib(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_healpix_construct                                        *
+ * @brief GSkymap_healpix_construct
  ***************************************************************************/
 void TestGSky::test_GSkymap_healpix_construct(void)
 {
@@ -501,7 +503,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_healpix_io                                               *
+ * @brief GSkymap_healpix_io
  ***************************************************************************/
 void TestGSky::test_GSkymap_healpix_io(void)
 {
@@ -569,7 +571,7 @@ void TestGSky::test_GSkymap_healpix_io(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_wcs_construct                                            *
+ * @brief GSkymap_wcs_construct
  ***************************************************************************/
 void TestGSky::test_GSkymap_wcs_construct(void)
 {
@@ -628,7 +630,7 @@ void TestGSky::test_GSkymap_wcs_construct(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_wcs_io                                                   *
+ * @brief GSkymap_wcs_io
  ***************************************************************************/
 void TestGSky::test_GSkymap_wcs_io(void)
 {
@@ -702,7 +704,7 @@ void TestGSky::test_GSkymap_wcs_io(void)
 
 
 /***************************************************************************
- *  Test: GSkyRegionCircle_construct                                            *
+ * @brief GSkyRegionCircle_construct
  ***************************************************************************/
 void TestGSky::test_GSkyRegionCircle_construct(void)
 {
@@ -748,26 +750,22 @@ void TestGSky::test_GSkyRegionCircle_construct(void)
 	  test_try_failure(e);
 	}
 
-
-	//check radius assignment
+	// Check radius assignment
 	GSkyRegionCircle refregion(refdir_radeczerozero,refradius);
 	double refradius_check = refregion.radius();
 	test_value(refradius,refradius_check,1.0e-10, "Test radius assignment");
 
-
-
-	//check solid angle assignment
+	// Check solid angle assignment
 	double solidangle_check = refregion.solidangle();
 	double solidangle = 2*gammalib::pi*(1- std::cos(refradius /180 * gammalib::pi));
 	test_value(solidangle_check,solidangle,1.0e-10, "Test solid angle assignment");
-
 
 	//exit test
     return;
 }
 
 /***************************************************************************
- *  Test: GSkyRegions_logic                                                *
+ * @brief GSkyRegions_logic
  ***************************************************************************/
 void TestGSky::test_GSkyRegionCircle_logic(void)
 {
@@ -799,8 +797,6 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
     GSkyDir refdir_rapole = GSkyDir();
     refdir_rapole.radec_deg(359,0);
 
-
-
     GSkyRegionCircle refregion(refdir_radeczerozero,10);
     GSkyDir centre = refregion.centre();
 
@@ -809,7 +805,6 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
     GSkyRegionCircle refregion_raoffset(refdir_raoffset,10);
     GSkyRegionCircle refregion_rapole(refdir_rapole,3);
     GSkyRegionCircle refregion_decpole(refdir_decpole,3);
-
 
     // Test contain dirs
 	test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
@@ -824,24 +819,24 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
 	test_assert(refregion.contains(refdir_rapole), "rapole for containment region");
 	test_assert(refregion_decpole.contains(refdir_ndecpole), "rapole for containment region");
 
-
     // Test overlaps
 	test_assert(refregion.overlaps(refregion_smaller),"test for overlap");
 	test_assert(refregion.overlaps(refregion_larger),"test2 for overlap");
 	test_assert(refregion.overlaps(refregion_raoffset),"test3 for overlap");
 	test_assert(!refregion.overlaps(refregion_decpole),"test4 for overlap");
 
-
-	//exit test
-return;
+	// Exit test
+    return;
 }
 
 
+/***************************************************************************
+ * @brief Test GSkyRegions input and output
+ ***************************************************************************/
 void TestGSky::test_GSkyRegions_io(void)
 {
 	// Set filenames
-	const std::string filereg_radeczerozero = "test_circle_radeczerozero.reg";
-
+	const std::string filereg_radeczerozero = "data/test_circle_radeczerozero.reg";
 
 	//Test region loading
 	test_try("Test region loading");
@@ -875,8 +870,6 @@ void TestGSky::test_GSkyRegions_io(void)
 //
 //
 
-
-
 	// Test region saving
 	test_try("Test region saving");
 	try {
@@ -888,13 +881,13 @@ void TestGSky::test_GSkyRegions_io(void)
 		test_try_failure(e);
 	}
 
-return;
+    // Exit test
+    return;
 }
 
 
-
 /***************************************************************************
- *                            Main test function                           *
+ * @brief Main test function
  ***************************************************************************/
 int main(void)
 {
