@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-April, 14th, 2013
+June, 28th, 2013
 
 
 1. Introduction
@@ -217,6 +217,12 @@ Add a sin() and cos() pre computation cache to speed up repeated
 distance computations using dist() or dist_deg(). Coordinate access
 methods are now declared inline to provide also faster data access.
 
+Classes have been added to support handling of sky regions. The
+GSkyRegion class is the abstract base class of all sky regions. The
+GSkyRegionCircle class implements a circle on the sky. The DS9 region
+format is used for loading and saving region information into a file.
+Regions a gathered in a regions container, which is implement by the
+GSkyRegions class.
 
 13. Support module
 ------------------
@@ -247,29 +253,41 @@ with a SAMP Hub. The method supports SAMP discovery and registering and
 unregistering.
 
 
-16. Test module
+16. Xspec module
+----------------
+A module has been added to provide an interface to the Xspec analysis
+package. Three classes have been implemented that support the Xspec
+file formats: GPha, GArf and GRmf.
+
+
+17. Test module
 ---------------
 None
 
 
-17. Multi-wavelength interface
+18. Multi-wavelength interface
 ------------------------------
 None
 
 
-18. Fermi-LAT interface
+19. Fermi-LAT interface
 ----------------------
 None
 
 
-19. CTA interface
+20. CTA interface
 -----------------
 The computations for diffuse map templates have been optimized by
 introducing a pre computation cache for IRF and Npred values. This
 considerably reduces the computing time for diffuse spatial maps.
 
+Support for on/off analysis has been added. The GCTAOnOffObservation
+class gathers all information that is required for an on/off analysis
+for a given run. The GCTAOnOffObservations container allows to analyse
+several runs in one shot.
 
-20. COMPTEL interface
+
+21. COMPTEL interface
 ---------------------
 None
 

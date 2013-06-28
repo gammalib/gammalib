@@ -1,4 +1,4 @@
-2013-04-13  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2013-06-28  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released
         ========================
@@ -11,6 +11,9 @@
         Make use of GUrl class in XML I/O
         Optimize computations
         Introduce gammalib namespace for constants and functions
+        Add sky region handling
+        Add on/off analysis support for CTA
+        Add xspec interface support
 
 2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
