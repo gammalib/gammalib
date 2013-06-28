@@ -63,6 +63,8 @@
 
 /* __ CTA ________________________________________________________________ */
 %include "GCTAObservation.i"
+%include "GCTAOnOffObservation.i"
+%include "GCTAOnOffObservations.i"
 %include "GCTAEventCube.i"
 %include "GCTAEventList.i"
 %include "GCTAEventBin.i"
