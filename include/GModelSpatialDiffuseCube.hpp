@@ -34,7 +34,7 @@
 #include "GSkyDir.hpp"
 #include "GSkymap.hpp"
 #include "GXmlElement.hpp"
-
+#include "GEbounds.hpp"
 
 /***********************************************************************//**
  * @class GModelSpatialDiffuseCube
@@ -79,12 +79,15 @@ public:
     virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void               load(const std::string& filename);
     double             value(void) const;
     void               value(const double& value);
     const std::string& filename(void) const;
     void               filename(const std::string& filename);
     const GSkymap&     cube(void) const;
     void               cube(const GSkymap& map);
+    const GEbounds& ebounds(void) const;
+    void               ebounds(const GEbounds& bounds);
     bool               isloaded(void) const;
 
 protected:
@@ -92,12 +95,15 @@ protected:
     void init_members(void);
     void copy_members(const GModelSpatialDiffuseCube& model);
     void free_members(void);
+    void prepare_cube(void);
 
     // Protected members
     GModelPar   m_value;      //!< Value
     std::string m_filename;   //!< Name of map cube
     GSkymap     m_cube;       //!< Map cube
+    GEbounds   m_ebounds;  //!< Energy bounds of the maps
     bool        m_loaded;     //!< Signals that map cube has been loaded
+    std::vector<double> m_mc_cache; //!< Monte Carlo cache
 };
 
 
@@ -201,6 +207,35 @@ void GModelSpatialDiffuseCube::cube(const GSkymap& map)
     m_loaded = true;
     return;
 }
+
+/***********************************************************************//**
+ * @brief Get map cube
+ *
+ * @return Map cube.
+ *
+ * Returns the map cube.
+ ***************************************************************************/
+inline
+const GEbounds& GModelSpatialDiffuseCube::ebounds(void) const
+{
+    return (m_ebounds);
+}
+
+
+/***********************************************************************//**
+ * @brief Set map cube
+ *
+ * @param[in] map Sky map.
+ *
+ * Set the map cube of the spatial map cube model.
+ ***************************************************************************/
+inline
+void GModelSpatialDiffuseCube::ebounds(const GEbounds& bounds)
+{
+    m_ebounds   = bounds;
+    return;
+}
+
 
 
 /***********************************************************************//**
