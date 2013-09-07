@@ -45,8 +45,6 @@
  * model for a map cube. A map cube is a set of sky maps for different
  * energies.
  *
- * @todo Loading not yet implemented. Introduce a loading flag to load cube
- *       only when it is required. This avoid unnecessary memory allocation.
  * @todo eval() and eval_gradients() methods not yet implemented.
  ***************************************************************************/
 class GModelSpatialDiffuseCube : public GModelSpatialDiffuse {
@@ -86,8 +84,8 @@ public:
     void               filename(const std::string& filename);
     const GSkymap&     cube(void) const;
     void               cube(const GSkymap& map);
-    const GEbounds& ebounds(void) const;
-    void               ebounds(const GEbounds& bounds);
+    const GEbounds&    ebounds(void) const;
+    void               ebounds(const GEbounds& ebounds);
     bool               isloaded(void) const;
 
 protected:
@@ -98,11 +96,11 @@ protected:
     void prepare_cube(void);
 
     // Protected members
-    GModelPar   m_value;      //!< Value
-    std::string m_filename;   //!< Name of map cube
-    GSkymap     m_cube;       //!< Map cube
-    GEbounds   m_ebounds;  //!< Energy bounds of the maps
-    bool        m_loaded;     //!< Signals that map cube has been loaded
+    GModelPar           m_value;    //!< Value
+    std::string         m_filename; //!< Name of map cube
+    GSkymap             m_cube;     //!< Map cube
+    GEbounds            m_ebounds;  //!< Energy bounds of the maps
+    bool                m_loaded;   //!< Signals that map cube has been loaded
     std::vector<double> m_mc_cache; //!< Monte Carlo cache
 };
 
@@ -209,11 +207,11 @@ void GModelSpatialDiffuseCube::cube(const GSkymap& map)
 }
 
 /***********************************************************************//**
- * @brief Get map cube
+ * @brief Get map cube energy boundaries
  *
- * @return Map cube.
+ * @return Map cube energy boundaries.
  *
- * Returns the map cube.
+ * Returns the map cube energy boundaries.
  ***************************************************************************/
 inline
 const GEbounds& GModelSpatialDiffuseCube::ebounds(void) const
@@ -223,16 +221,16 @@ const GEbounds& GModelSpatialDiffuseCube::ebounds(void) const
 
 
 /***********************************************************************//**
- * @brief Set map cube
+ * @brief Set map cube energy boundaries
  *
- * @param[in] map Sky map.
+ * @param[in] ebounds Energy boundaries.
  *
- * Set the map cube of the spatial map cube model.
+ * Set the map cube energy boundaries.
  ***************************************************************************/
 inline
-void GModelSpatialDiffuseCube::ebounds(const GEbounds& bounds)
+void GModelSpatialDiffuseCube::ebounds(const GEbounds& ebounds)
 {
-    m_ebounds   = bounds;
+    m_ebounds = ebounds;
     return;
 }
 

@@ -546,70 +546,72 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
     // Get the table extension "ENERGIES"
     GFitsTable* energies = file.table("ENERGIES");
 
-    // read only if extension "ENERGIES" exists
+    // Read only if extension "ENERGIES" exists
     if (energies != NULL) {
 
-            // Extract number of energy bins in FITS file
-            int num = energies->integer("NAXIS2");
+        // Extract number of energy bins in FITS file
+        int num = energies->integer("NAXIS2");
 
-            // Check if energy binning is consistent with primary image hdu
-            if (num != m_cube.nmaps() ) {
+        // Check if energy binning is consistent with primary image hdu
+        if (num != m_cube.nmaps() ) {
 
-            	// if inconsistent throw an exception
-            	// ToDo: Excepton has to be adjusted
-            	throw GException::skymap_bad_size(G_LOAD,num,m_cube.nmaps());
+            // if inconsistent throw an exception
+            // ToDo: Excepton has to be adjusted
+            throw GException::skymap_bad_size(G_LOAD,num,m_cube.nmaps());
+        }
+
+        // Check if there are enough energy nodes to construct binning
+        if (num < 2) {
+            // if inconsistent throw an exception
+            // ToDo: Excepton has to be adjusted
+            throw GException::skymap_bad_size(G_LOAD,num,2);
+        }
+
+        // Get the column with the name "Energy"
+        GFitsTableDoubleCol* ptr_energy = (GFitsTableDoubleCol*)&(*energies)["Energy"];
+        ptr_energy->print();
+        
+        // Get the unit of the energies
+        // Default for Fermi Galactic diffuse model
+        std::string unit = "MeV";
+        if (energies->header()->hascard("TUNIT1")) {
+            unit = energies->string("TUNIT1");
+        }
+
+        // Read the energy binning
+        // We construct energy bins from the given bin centers
+        // bin edges will be computed in the logarithimic center
+        // between the nodes
+        for (int i = 0; i < num; ++i) {
+
+            double emin = 0.0;
+            double emax = 0.0;
+            double step = 0.0;
+            // calculate bin width
+            // if first bin, use second bin to calculate stepsize
+            if (i == 0) {
+                step = std::log10((*ptr_energy)(i + 1)) - std::log10((*ptr_energy)(i));
             }
 
-            // Check if there are enough energy nodes to construct binning
-            if (num < 2) {
-            	// if inconsistent throw an exception
-            	// ToDo: Excepton has to be adjusted
-            	throw GException::skymap_bad_size(G_LOAD,num,2);
+            // else use previous bin to get stepsize
+            else {
+                step = std::log10((*ptr_energy)(i)) - std::log10((*ptr_energy)(i - 1));
             }
 
-            // Get the column with the name "Energy"
-            GFitsTableDoubleCol*  ptr_energy      = (GFitsTableDoubleCol*)&(*energies)["Energy"];
-            ptr_energy->print();
-            // Get the unit of the energies
-            // Default for Fermi Galactic diffuse model
-            std::string unit = "MeV";
-            if (energies->header()->hascard("TUNIT1")) {
-            	unit = energies->string("TUNIT1");
-            }
+            // calculate bin minimum and bin maximum
+            emin = std::log10((*ptr_energy)(i)) - step / 2.0;
+            emax = std::log10((*ptr_energy)(i)) + step / 2.0;
 
-            // Read the energy binning
-            // We construct energy bins from the given bin centers
-            // bin edges will be computed in the logarithimic center
-            // between the nodes
-            for (int i = 0; i < num; i++) {
+            // Convert it to a GEnergy without logscale
+            GEnergy bin_min = GEnergy(std::pow(10.0,emin),unit);
+            GEnergy bin_max = GEnergy(std::pow(10.0,emax),unit);
 
-            	double emin = 0.0;
-            	double emax = 0.0;
-            	double step = 0.0;
-            	// calculate bin width
-            	// if first bin, use second bin to calculate stepsize
+            // Append energy bin to Ebounds
+            m_ebounds.append(bin_min,bin_max);
 
-            	if (i == 0) {
-            		step = std::log10((*ptr_energy)(i + 1)) - std::log10((*ptr_energy)(i));
-            	}
+        } // endfor: looped over energy bins
 
-            	// else use previous bin to get stepsize
-            	else {
-            		step = std::log10((*ptr_energy)(i)) - std::log10((*ptr_energy)(i - 1));
-            	}
-
-            	// calculate bin minimum and bin maximum
-            	emin = std::log10((*ptr_energy)(i)) - step / 2.0;
-            	emax = std::log10((*ptr_energy)(i)) + step / 2.0;
-
-            	// Convert it to a GEnergy without logscale
-            	GEnergy bin_min = GEnergy(std::pow(10.0,emin),unit);
-            	GEnergy bin_max = GEnergy(std::pow(10.0,emax),unit);
-
-            	// Append energy bin to Ebounds
-            	m_ebounds.append(bin_min,bin_max);
-            }
-    }
+    } // endif: ENERGIES extension existed
 
     // Prepare cube
     prepare_cube();
@@ -755,7 +757,7 @@ void GModelSpatialDiffuseCube::prepare_cube(void)
         // Make sure that last pixel in the cache is >1
         m_mc_cache[npix] = 1.0001;
 
-        // Dump premaration results
+        // Dump preparation results
         #if defined(G_DEBUG_PREPARE)
         double sum_control = 0.0;
         for (int i = 0; i < nmaps; ++i) {
@@ -766,7 +768,6 @@ void GModelSpatialDiffuseCube::prepare_cube(void)
         		}
         	}
         }
-
         std::cout << "Total flux before normalization: " << sum << std::endl;
         std::cout << "Total flux after normalization : " << sum_control << std::endl;
         #endif

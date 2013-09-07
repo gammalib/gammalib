@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-April, 14th, 2013
+September, 7th, 2013
 
 
 1. Introduction
@@ -191,6 +191,10 @@ GModelSpatialDiffuse
  +- GModelSpatialDiffuseConst - isotropic map
  +- GModelSpatialDiffuseCube - map cube
  +- GModelSpatialDiffuseMap - spatial map
+
+The GModelSpatialDiffuseCube class now reads an optional ENERGIES
+extension so that the energy values for maps in the cube are
+available.
 
 
 9. Numerics module
