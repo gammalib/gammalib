@@ -4,7 +4,7 @@
          <spectrum type="ConstantValue">
             <parameter name="Value" scale="1" value="1" min="0" max="1000" free="1"/>
         </spectrum>
-        <spatialModel type="MapCubeFunction" file="test_file.fits">
+        <spatialModel type="MapCubeFunction" file="data/test_cube.fits">
             <parameter name="Normalization" scale="1" value="1" min="0.1" max="10" free="0"/>
         </spatialModel>
 	</source>
