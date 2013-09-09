@@ -475,6 +475,9 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
               " \"Normalization\" parameter.");
     }
 
+    // Set filename
+    xml.attribute("file", m_filename);
+
     // Return
     return;
 }
