@@ -32,7 +32,7 @@
 #include "GTools.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRegistry.hpp"
-#include "GFITSTableDoubleCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 
 
 /* __ Constants __________________________________________________________ */
