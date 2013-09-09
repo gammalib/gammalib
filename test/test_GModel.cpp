@@ -46,6 +46,7 @@ void TestGModel::set(void)
 
     // Set attributes
     m_map_file                    = "data/cena_lobes_parkes.fits";
+    m_cube_file                   = "data/test_cube.fits";
     m_xml_file                    = "data/crab.xml";
     m_xml_model_point_const       = "data/model_point_const.xml";
     m_xml_model_point_plaw        = "data/model_point_plaw.xml";
@@ -526,7 +527,7 @@ void TestGModel::test_diffuse_cube(void)
         GModelSpatialDiffuseCube model;
         test_assert(model.type() == "MapCubeFunction",
                                     "Model type \"MapCubeFunction\" expected.");
-        test_assert(!model.isloaded(), "Map cube is not yet loaded");
+        test_assert(!model.isloaded(), "Map cube is not yet loaded.");
         test_assert(model.filename() == "", "Model filename \"\" expected.");
         test_try_success();
     }
@@ -537,10 +538,10 @@ void TestGModel::test_diffuse_cube(void)
     // Test filename value constructor
     test_try("Test filename value constructor");
     try {
-        GModelSpatialDiffuseCube model("file.fits", 3.0);
+        GModelSpatialDiffuseCube model(m_cube_file, 3.0);
         test_value(model.value(), 3.0);
-        test_assert(model.filename() == "file.fits", "Expected \"file.fits\"");
-        test_assert(!model.isloaded(), "Map cube is not yet loaded");
+        test_assert(model.filename() == m_cube_file, "Expected \""+m_cube_file+"\"");
+        test_assert(model.isloaded(), "Map cube has not been loaded.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -554,7 +555,7 @@ void TestGModel::test_diffuse_cube(void)
         GModelSpatialDiffuseCube model(map, 3.0);
         test_value(model.value(), 3.0);
         test_assert(model.filename() == "", "Expected \"\"");
-        test_assert(model.isloaded(), "Map cube is loaded");
+        test_assert(model.isloaded(), "Map cube is loaded.");
         //test_assert(model.cube() == map, "Map cube is not the expected one");
         test_try_success();
     }
@@ -572,9 +573,9 @@ void TestGModel::test_diffuse_cube(void)
         test_value(model.size(), 1);
         test_assert(model.type() == "MapCubeFunction", "Expected \"MapCubeFunction\"");
         test_value(model.value(), 1.0);
-        test_assert(!model.isloaded(), "Map cube is not yet loaded");
-        test_assert(model.filename() == "test_file.fits",
-                                        "Model filename \"test_file.fits\" expected.");
+        test_assert(model.isloaded(), "Map cube has not been loaded.");
+        test_assert(model.filename() == m_cube_file,
+                                        "Model filename \""+m_cube_file+"\" expected.");
 
         // Test value method
         model.value(3.9);
@@ -1781,8 +1782,8 @@ void TestGModel::test_spatial_model(void)
     test_xml_model("GModelSpatialRadialShell",    m_xml_model_radial_shell);
     test_xml_model("GModelSpatialEllipticalDisk", m_xml_model_elliptical_disk);
     test_xml_model("GModelSpatialDiffuseConst",   m_xml_model_diffuse_const);
-    test_xml_model("GModelSpatialDiffuseCube",    m_xml_model_diffuse_cube);
     test_xml_model("GModelSpatialDiffuseMap",     m_xml_model_diffuse_map);
+    test_xml_model("GModelSpatialDiffuseCube",    m_xml_model_diffuse_cube);
 
     // Return
     return;

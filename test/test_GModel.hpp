@@ -74,6 +74,7 @@ private:
     
     // Private attributes
     std::string m_map_file;
+    std::string m_cube_file;
     std::string m_xml_file;
     std::string m_xml_model_point_const;
     std::string m_xml_model_point_plaw;
