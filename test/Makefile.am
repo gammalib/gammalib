@@ -175,7 +175,7 @@ test_GObservation_LDADD = $(top_srcdir)/src/libgamma.la
 valgrind:
 	@if type valgrind >/dev/null 2>&1; then \
 		for prog in $(check_PROGRAMS) ; do \
-			valgrind --leak-check=full \
+			$(LIBTOOL) --mode=execute valgrind --leak-check=full \
 			--xml=yes --xml-file=tmp.xml ./$$prog; \
 			sed '/<\/valgrindoutput>/d' tmp.xml > valgrind_$$prog.xml; \
 			echo '</valgrindoutput>' >> valgrind_$$prog.xml; \
