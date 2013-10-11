@@ -42,6 +42,7 @@
 #include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAResponseTable.hpp"
+#include "GCTAModelBackground.hpp"
 #include "GCTAModelRadial.hpp"
 #include "GCTAModelRadialRegistry.hpp"
 #include "GCTAModelRadialGauss.hpp"

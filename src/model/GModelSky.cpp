@@ -869,6 +869,7 @@ GPhotons GModelSky::mc(const double& area,
             } // endfor: looped over photons
 
         } // endif: model was used
+
     } // endif: model was valid
 
     // Return photon list
