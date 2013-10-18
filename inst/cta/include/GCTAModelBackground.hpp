@@ -66,7 +66,7 @@ public:
     // Implemented pure virtual methods
     virtual void                       clear(void);
     virtual GCTAModelBackground* clone(void) const;
-    virtual std::string                type(void) const { return "BackgroundModel"; }
+    virtual std::string                type(void) const { return "CTABackground"; }
     virtual double                     eval(const GEvent& event,
                                             const GObservation& obs) const;
     virtual double                     eval_gradients(const GEvent& event,
@@ -157,7 +157,7 @@ protected:
     GModelSpatial* m_spatial;       //!< spatial model
     GModelSpectral*  m_spectral;     //!< Spectral model
     GModelTemporal*  m_temporal;     //!< Temporal model
-    GMatrix m_rot; //!!< Rotation matrix from instdir to skydir
+    GMatrix m_rot;             //!!< Rotation matrix from model system to skydir
 };
 
 #endif /* GMODELSPATIAL_HPP */

@@ -459,7 +459,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
             throw GException::no_list(G_NPRED);
         }
 
-        //todo we need to think about if we always want to always integrate
+        //todo we need to think about if we always want to integrate
         // starting from the pointing direction or instead take
         // the center of gravity of the model
         // For now we use the pointing position as integration start
@@ -476,6 +476,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
         // Get distance from ROI centre in radians
         double roi_distance = events->roi().centre().dist(pnt->dir());
 
+        // Initialise rotation matrix to transform from model system to celestial system
         GMatrix ry;
         GMatrix rz;
         ry.eulery(events->roi().centre().dec_deg() - 90.0);
@@ -1108,7 +1109,6 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
 
 			// Integrate over phi
 			GIntegral integral(&integrand);
-			integral.eps(1.0e-4);
 			value = integral.romb(omega_min,omega_max) * sin_theta;
 
 			// Debug: Check for NaN

@@ -54,6 +54,25 @@ public:
     void         test_response(void);
 };
 
+/***********************************************************************//**
+ * @class TestGCTAModel
+ *
+ * @brief Test suite for CTA model class testing
+ *
+ * This class defines a unit test suite for the CTA model class.
+ ***************************************************************************/
+class TestGCTAModelBackground : public GTestSuite {
+public:
+    // Constructors and destructors
+	TestGCTAModelBackground(void) : GTestSuite() {}
+    virtual ~TestGCTAModelBackground(void) {}
+
+    // Methods
+    virtual void set(void);
+    void         test_modelbg_npred(void);
+};
+
+
 
 /***********************************************************************//**
  * @class TestGCTAObservation
