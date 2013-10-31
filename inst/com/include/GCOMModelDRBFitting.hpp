@@ -63,7 +63,8 @@ public:
     // Implemented pure virtual methods
     virtual void                 clear(void);
     virtual GCOMModelDRBFitting* clone(void) const;
-    virtual std::string          type(void) const { return "DRBFitting"; }
+    virtual std::string          type(void) const;
+    virtual bool                 isconstant(void) const;
     virtual double               eval(const GEvent& event,
                                       const GObservation& obs) const;
     virtual double               eval_gradients(const GEvent& event,
@@ -94,5 +95,35 @@ protected:
     mutable std::vector<double> m_old_phibars;  //!< Old Phibar values
     mutable GNodeArray          m_nodes;        //!< Phibar node values
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return Model type.
+ *
+ * Returns the type of the model. The type for a DRB fitting model is
+ * "DRBFitting".
+ ***************************************************************************/
+inline
+std::string GCOMModelDRBFitting::type(void) const
+{
+    return ("DRBFitting");
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if model is temporally constant
+ *
+ * @return True if model is temporally constant, false otherwise.
+ *
+ * Signals if the model is temporally constant. By definition, a DRB fitting
+ * model is always temporally constant.
+ ***************************************************************************/
+inline
+bool GCOMModelDRBFitting::isconstant(void) const
+{
+    return (true);
+}
 
 #endif /* GCOMMODELDRBFITTING_HPP */

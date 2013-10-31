@@ -146,6 +146,7 @@ public:
     virtual void        clear(void);
     virtual GModelSky*  clone(void) const;
     virtual std::string type(void) const;
+    virtual bool        isconstant(void) const;
     virtual double      eval(const GEvent& event,
                              const GObservation& obs) const;
     virtual double      eval_gradients(const GEvent& event,
@@ -213,6 +214,21 @@ inline
 std::string GModelSky::type(void) const
 {
     return (m_type);
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if sky model is temporally constant
+ *
+ * @return True if sky model is temporally constant, false otherwise.
+ *
+ * Signals if the sky model is temporally constant. A temporally constant
+ * model is a model that has a temporal component of type "Constant".
+ ***************************************************************************/
+inline
+bool GModelSky::isconstant(void) const
+{
+    return (m_temporal != NULL && m_temporal->type() == "Constant");
 }
 
 

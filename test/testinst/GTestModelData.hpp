@@ -89,6 +89,7 @@ public:
     }
     virtual GTestModelData* clone(void) const { return new GTestModelData(*this); }
     virtual std::string type(void) const {return "=== GTestModelData ===";}
+    virtual bool        isconstant(void) const {return true;}
     virtual double      eval(const GEvent& event,
                              const GObservation& obs) const { 
                                  double result = m_modelTps->eval(event.time());

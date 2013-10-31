@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GModelData.i  -  Abstract virtual data model class python I/F      *
+ *       GModelData.i - Abstract virtual data model class python I/F       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -47,6 +47,7 @@ public:
     virtual void        clear(void) = 0;
     virtual GModelData* clone(void) const = 0;
     virtual std::string type(void) const = 0;
+    virtual bool        isconstant(void) const = 0;
     virtual double      eval(const GEvent& event,
                              const GObservation& obs) const = 0;
     virtual double      eval_gradients(const GEvent& event,
