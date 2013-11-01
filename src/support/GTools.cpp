@@ -824,3 +824,25 @@ bool gammalib::file_exists(const std::string& filename)
     // Return result
     return result;
 }
+
+/***********************************************************************//**
+ * @brief Checks if a substring is in a string .
+ *
+ * @param[in] str string you want to search in.
+ * @param[in] substring string you are looking for in str.
+ *
+ * Checks if substring is contained in str
+ ***************************************************************************/
+bool gammalib::contains(std::string str, std::string substring)
+{
+    // Initialise result
+    bool result = false;
+
+    // checks if substring is in str
+    if (str.find(substring) != std::string::npos){
+    	result = true;
+    }
+
+    // Return result
+    return result;
+}

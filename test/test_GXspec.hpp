@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GSky.hpp  -   test sky class                          *
+ *                 test_GXspec.hpp - Test Xspec module                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2013 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,36 +18,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
+/**
+ * @file test_GXspec.hpp
+ * @brief Definition of unit tests for Xspec module
+ * @author Juergen Knoedlseder 
+ */
 
-#ifndef TEST_GSKY_HPP
-#define TEST_GSKY_HPP
+#ifndef TEST_GXSPEC_HPP
+#define TEST_GXSPEC_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
 
-class TestGSky : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGSky(void) : GTestSuite(){ return; }
-        virtual ~TestGSky(void){ return; }
 
-        // Methods
-        virtual void set(void);
-        void test_GWcslib(void);
-        void test_GSkymap_healpix_construct(void);
-        void test_GSkymap_healpix_io(void);
-        void test_GSkymap_wcs_construct(void);
-        void test_GSkymap_wcs_io(void);
-        void test_GSkyRegions_io(void);
-        void test_GSkyRegionCircle_construct(void);
-        void test_GSkyRegionCircle_logic(void);
+/***********************************************************************//**
+ * @class TestGXspec
+ *
+ * @brief Test suite for Xspec module
+ ***************************************************************************/
+class TestGXspec : public GTestSuite {
 
-    // Private methods
-    private:
-        double wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2);
-        double wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2);
+public:
+    // Constructors and destructors
+    TestGXspec(void) : GTestSuite() {}
+    virtual ~TestGXspec(void) {}
+
+    // Methods
+    virtual void set(void);
+    void         test_GPha(void);
+    void         test_GArf(void);
+    void         test_GRmf(void);
+
+private:
+    // Private members
 };
 
-#endif /* TEST_GSKY_HPP */
+#endif /* TEST_GXSPEC_HPP */

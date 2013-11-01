@@ -1,4 +1,4 @@
-2013-09-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2013-11-01  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released
         ========================
@@ -12,6 +12,9 @@
         Optimize computations
         Introduce gammalib namespace for constants and functions
         GModelSpatialDiffuseCube reads ENERGIES extension
+        Add sky region handling
+        Add on/off analysis support for CTA
+        Add xspec interface support
 
 2012-12-18  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 

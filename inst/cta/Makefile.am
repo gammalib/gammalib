@@ -11,6 +11,8 @@ INCLUDES = -I$(top_srcdir)/include \
 sources = src/GCTASupport.cpp \
           src/GCTAException.cpp \
           src/GCTAObservation.cpp \
+          src/GCTAOnOffObservation.cpp \
+          src/GCTAOnOffObservations.cpp \
           src/GCTAEventList.cpp \
           src/GCTAEventAtom.cpp \
           src/GCTAEventCube.cpp \
@@ -41,6 +43,8 @@ sources = src/GCTASupport.cpp \
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAObservation.hpp \
+                     include/GCTAOnOffObservation.hpp \
+                     include/GCTAOnOffObservations.hpp \
                      include/GCTAEventList.hpp \
                      include/GCTAEventAtom.hpp \
                      include/GCTAEventCube.hpp \

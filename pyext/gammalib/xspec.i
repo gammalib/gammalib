@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GSky.hpp  -   test sky class                          *
+ *                         xspec.i - XSPEC module                          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2013 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -17,37 +17,36 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
+ * ----------------------------------------------------------------------- *
+ * Usage:                                                                  *
+ * swig -c++ -python -Wall xspec.i                                         *
  ***************************************************************************/
+/**
+ * @file xspec.i
+ * @brief XSPEC module
+ * @author Juergen Knoedlseder
+ */
+%module xspec
+%feature("autodoc", "1");
 
-#ifndef TEST_GSKY_HPP
-#define TEST_GSKY_HPP
+/* __ Headers needed for compilation _____________________________________ */
+%{
+#include <stddef.h>
+#include "GException.hpp"
+#include "GTools.hpp"
+%}
 
-/* __ Includes ___________________________________________________________ */
-#include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
+/* __ Include standard typemaps for vectors and strings __________________ */
+%include stl.i
 
-class TestGSky : public GTestSuite
-{
-    public:
-        // Constructors and destructors
-        TestGSky(void) : GTestSuite(){ return; }
-        virtual ~TestGSky(void){ return; }
+/* __ Include interface classes __________________________________________ */
+%import(module="gammalib.base") "GBase.i";
+//%import(module="gammalib.base") "GContainer.i";
 
-        // Methods
-        virtual void set(void);
-        void test_GWcslib(void);
-        void test_GSkymap_healpix_construct(void);
-        void test_GSkymap_healpix_io(void);
-        void test_GSkymap_wcs_construct(void);
-        void test_GSkymap_wcs_io(void);
-        void test_GSkyRegions_io(void);
-        void test_GSkyRegionCircle_construct(void);
-        void test_GSkyRegionCircle_logic(void);
+/* __ Make sure that exceptions are catched ______________________________ */
+%import(module="gammalib.support") "GException.i";
 
-    // Private methods
-    private:
-        double wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2);
-        double wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2);
-};
-
-#endif /* TEST_GSKY_HPP */
+/* __ Application module _________________________________________________ */
+%include "GArf.i"
+%include "GPha.i"
+%include "GRmf.i"

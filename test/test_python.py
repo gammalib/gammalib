@@ -32,6 +32,7 @@ import test_GSky
 import test_GSupport
 import test_GTest
 import test_GXml
+import test_GXspec
 
 # Try importing MWL tests
 try:
@@ -73,17 +74,18 @@ if __name__ == '__main__':
     suites = GTestSuites("Python interface testing")
 
     # Allocate test suites and append them to the container
-    suite1 = test_GApplication.Test()
-    suite2 = test_GFits.Test()
-    suite3 = test_GLinalg.Test()
-    suite4 = test_GModel.Test()
-    suite5 = test_GNumerics.Test()
-    suite6 = test_GObservation.Test()
-    suite7 = test_GOptimizer.Test()
-    suite8 = test_GSky.Test()
-    suite9 = test_GSupport.Test()
+    suite1  = test_GApplication.Test()
+    suite2  = test_GFits.Test()
+    suite3  = test_GLinalg.Test()
+    suite4  = test_GModel.Test()
+    suite5  = test_GNumerics.Test()
+    suite6  = test_GObservation.Test()
+    suite7  = test_GOptimizer.Test()
+    suite8  = test_GSky.Test()
+    suite9  = test_GSupport.Test()
     suite10 = test_GTest.Test()
     suite11 = test_GXml.Test()
+    suite12 = test_GXspec.Test()
 
     # Setup unit tests
     suite1.set()
@@ -97,6 +99,7 @@ if __name__ == '__main__':
     suite9.set()
     suite10.set()
     suite11.set()
+    suite12.set()
 
     # Append tests to container
     suites.append(suite1)
@@ -110,6 +113,7 @@ if __name__ == '__main__':
     suites.append(suite9)
     suites.append(suite10)
     suites.append(suite11)
+    suites.append(suite12)
 
     # Optionally handle MWL suite
     if has_mwl:

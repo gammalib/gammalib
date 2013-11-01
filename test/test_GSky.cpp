@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   test_GSky.cpp - test GSky classes                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file test_GSky.cpp
  * @brief Testing of sky module.
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -41,9 +41,11 @@
 /* __ Debug definitions __________________________________________________ */
 #define G_WCS_FORTH_BACK_PIXEL_DEBUG
 #define G_WCS_COPY_DEBUG
+
+
 /***********************************************************************//**
-* @brief Set parameters and tests
-***************************************************************************/    
+ * @brief Set parameters and tests
+ ***************************************************************************/    
 void TestGSky::set(void){
 
     // Test name
@@ -55,7 +57,9 @@ void TestGSky::set(void){
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
-
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test the GSkyregion class - io");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test the GSkyregionCircle class - constuct");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test the GSkyregionCircle class - logic ");
     return;
 }
 
@@ -353,7 +357,7 @@ void TestGSky::test_GWcslib(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_healpix_construct                                        *
+ * @brief GSkymap_healpix_construct
  ***************************************************************************/
 void TestGSky::test_GSkymap_healpix_construct(void)
 {
@@ -499,7 +503,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_healpix_io                                               *
+ * @brief GSkymap_healpix_io
  ***************************************************************************/
 void TestGSky::test_GSkymap_healpix_io(void)
 {
@@ -567,7 +571,7 @@ void TestGSky::test_GSkymap_healpix_io(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_wcs_construct                                            *
+ * @brief GSkymap_wcs_construct
  ***************************************************************************/
 void TestGSky::test_GSkymap_wcs_construct(void)
 {
@@ -626,7 +630,7 @@ void TestGSky::test_GSkymap_wcs_construct(void)
 
 
 /***************************************************************************
- *  Test: GSkymap_wcs_io                                                   *
+ * @brief GSkymap_wcs_io
  ***************************************************************************/
 void TestGSky::test_GSkymap_wcs_io(void)
 {
@@ -700,7 +704,190 @@ void TestGSky::test_GSkymap_wcs_io(void)
 
 
 /***************************************************************************
- *                            Main test function                           *
+ * @brief GSkyRegionCircle_construct
+ ***************************************************************************/
+void TestGSky::test_GSkyRegionCircle_construct(void)
+{
+	// Define region for comparison
+	GSkyDir refdir_radeczerozero = GSkyDir();
+	refdir_radeczerozero.radec_deg(0,0);
+	double refradius = 10.;
+
+    // Test constructing:
+    test_try("Test constructor");
+    try {
+        GSkyRegionCircle circle(refdir_radeczerozero,refradius);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    //Test constructing with radius 0
+    test_try("Test constructor2");
+    try {
+		GSkyRegionCircle circle(refdir_radeczerozero,-1);
+		test_try_failure();
+	}
+	catch (GException::invalid_argument &e) {
+	  test_try_success();
+	}
+	catch (std::exception &e) {
+	  test_try_failure(e);
+	}
+
+    //Test constructing with radius 0
+    test_try("Test radius assingment after");
+    try {
+		GSkyRegionCircle circle(refdir_radeczerozero,refradius);
+		circle.radius(-1.);
+		test_try_failure();
+	}
+	catch (GException::invalid_argument &e) {
+	  test_try_success();
+	}
+	catch (std::exception &e) {
+	  test_try_failure(e);
+	}
+
+	// Check radius assignment
+	GSkyRegionCircle refregion(refdir_radeczerozero,refradius);
+	double refradius_check = refregion.radius();
+	test_value(refradius,refradius_check,1.0e-10, "Test radius assignment");
+
+	// Check solid angle assignment
+	double solidangle_check = refregion.solidangle();
+	double solidangle = 2*gammalib::pi*(1- std::cos(refradius /180 * gammalib::pi));
+	test_value(solidangle_check,solidangle,1.0e-10, "Test solid angle assignment");
+
+	//exit test
+    return;
+}
+
+/***************************************************************************
+ * @brief GSkyRegions_logic
+ ***************************************************************************/
+void TestGSky::test_GSkyRegionCircle_logic(void)
+{
+
+	// set input files /filenames
+//    const std::string  file1 = "test_GSkyRegionCircle1.reg";
+//    const std::string  file2 = "test_GSkyRegionCircle2.reg";
+
+    //set reference values
+
+    GSkyDir refdir_radeczerozero = GSkyDir();
+    refdir_radeczerozero.radec_deg(0,0);
+
+    GSkyDir refdir_lbzerozero = GSkyDir();
+    refdir_lbzerozero.lb_deg(0,0);
+
+    GSkyDir refdir_outside_refregion = GSkyDir();
+    refdir_outside_refregion.radec_deg(100,80);
+
+    GSkyDir refdir_raoffset = GSkyDir();
+    refdir_raoffset.radec_deg(5,0);
+
+    GSkyDir refdir_decpole = GSkyDir();
+    refdir_decpole.radec_deg(0,89);
+
+    GSkyDir refdir_ndecpole = GSkyDir();
+	refdir_ndecpole.radec_deg(100,89);
+
+    GSkyDir refdir_rapole = GSkyDir();
+    refdir_rapole.radec_deg(359,0);
+
+    GSkyRegionCircle refregion(refdir_radeczerozero,10);
+    GSkyDir centre = refregion.centre();
+
+    GSkyRegionCircle refregion_smaller(refdir_radeczerozero,5);
+    GSkyRegionCircle refregion_larger(refdir_radeczerozero,20);
+    GSkyRegionCircle refregion_raoffset(refdir_raoffset,10);
+    GSkyRegionCircle refregion_rapole(refdir_rapole,3);
+    GSkyRegionCircle refregion_decpole(refdir_decpole,3);
+
+    // Test contain dirs
+	test_assert(refregion.contains(refdir_radeczerozero),"test for containment");
+    test_assert(refregion.contains(centre), "test if center in circle");
+	test_assert(!refregion.contains(refdir_outside_refregion), "test2 for containment");
+
+	// Test contain regions
+	test_assert(refregion.contains(refregion_smaller),"test for containment region");
+	test_assert(!refregion.contains(refregion_larger), "test for containment region2 ");
+	test_assert(refregion.contains(refregion), "test3 for containment region");
+
+	test_assert(refregion.contains(refdir_rapole), "rapole for containment region");
+	test_assert(refregion_decpole.contains(refdir_ndecpole), "rapole for containment region");
+
+    // Test overlaps
+	test_assert(refregion.overlaps(refregion_smaller),"test for overlap");
+	test_assert(refregion.overlaps(refregion_larger),"test2 for overlap");
+	test_assert(refregion.overlaps(refregion_raoffset),"test3 for overlap");
+	test_assert(!refregion.overlaps(refregion_decpole),"test4 for overlap");
+
+	// Exit test
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Test GSkyRegions input and output
+ ***************************************************************************/
+void TestGSky::test_GSkyRegions_io(void)
+{
+	// Set filenames
+	const std::string filereg_radeczerozero = "data/test_circle_radeczerozero.reg";
+
+	// Test regions loading
+	test_try("Test regions loading");
+	try {
+		GSkyRegions regions;
+		regions.load(filereg_radeczerozero);
+		test_try_success();
+	}
+	catch (std::exception &e) {
+		test_try_failure(e);
+	}
+
+//	//check if load does the proper thing
+//    GSkyRegions regs;
+//    GSkyRegion* reg;
+//    GSkyRegionCircle* circ;
+//    GSkyDir dir;
+//    double rad;
+//
+//    regs.load(filereg_radeczerozero);
+//    reg = regs[0];
+//    if (reg->type() == "circle"){
+//    	circ = (GSkyRegionCircle*)reg;
+//        dir = circ->centre();
+//        rad = circ->radius();
+//    }
+//    GSkyDir refdir_radeczerozero = GSkyDir();
+//    refdir_radeczerozero.radec_deg(0,0);
+//
+//    test_value(rad,10,1.0e-10, "Test radius assignment");
+//
+//
+
+	// Test regions saving
+	test_try("Test regions saving");
+	try {
+		GSkyRegions regions;
+		regions.save("region.ds9");
+		test_try_success();
+	}
+	catch (std::exception &e) {
+		test_try_failure(e);
+	}
+
+    // Exit test
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Main test function
  ***************************************************************************/
 int main(void)
 {

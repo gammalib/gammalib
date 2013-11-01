@@ -107,6 +107,11 @@
 /* __ VO module __________________________________________________________ */
 #include "GVOClient.hpp"
 
+/* __ XSPEC module _______________________________________________________ */
+#include "GArf.hpp"
+#include "GPha.hpp"
+#include "GRmf.hpp"
+
 /* __ Application module _________________________________________________ */
 #include "GApplication.hpp"
 #include "GLog.hpp"
@@ -132,6 +137,9 @@
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
 #include "GSkymap.hpp"
+#include "GSkyRegions.hpp"
+#include "GSkyRegion.hpp"
+#include "GSkyRegionCircle.hpp"
 #include "GWcs.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcslib.hpp"

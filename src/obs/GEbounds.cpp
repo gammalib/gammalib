@@ -699,8 +699,14 @@ void GEbounds::write(GFits* file, const std::string& extname) const
  * @param[in] eng Energy.
  * @return Bin index.
  *
- * Returns the energy boundary bin index for a given energy. If the energy
- * falls outside all boundaries, -1 is returned.
+ * Returns the energy boundary bin index for a given energy. By convention,
+ * the limits for an energy bin are defined as
+ *
+ *      min <= energy < max
+ *
+ * i.e. and energy equals to max falls above the largest energy.
+ *
+ * If the energy falls outside all boundaries, -1 is returned.
  ***************************************************************************/
 int GEbounds::index(const GEnergy& eng) const
 {
@@ -709,7 +715,7 @@ int GEbounds::index(const GEnergy& eng) const
 
     // Search all energy boundaries for containment
     for (int i = 0; i < m_num; ++i) {
-        if (eng >= m_min[i] && eng <= m_max[i]) {
+        if (eng >= m_min[i] && eng < m_max[i]) {
             index = i;
             break;
         }

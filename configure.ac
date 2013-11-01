@@ -860,7 +860,8 @@ else
                   pyext/gammalib/sky_wrap.cpp pyext/gammalib/sky.py
                   pyext/gammalib/support_wrap.cpp pyext/gammalib/support.py
                   pyext/gammalib/test_wrap.cpp pyext/gammalib/test.py
-                  pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py],,
+                  pyext/gammalib/xml_wrap.cpp pyext/gammalib/xml.py
+                  pyext/gammalib/xspec_wrap.cpp pyext/gammalib/xspec.py],,
                  [has_wrappers="no"])
 if test "x$with_mwl" = "xyes"; then
   AC_CHECK_FILES([pyext/gammalib/mwl_wrap.cpp pyext/gammalib/mwl.py],,
@@ -1239,6 +1240,7 @@ AC_CONFIG_FILES([Makefile
                  src/fits/Makefile
                  src/xml/Makefile
                  src/vo/Makefile
+                 src/xspec/Makefile
                  src/sky/Makefile
                  src/opt/Makefile
                  src/obs/Makefile
