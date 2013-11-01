@@ -26,7 +26,7 @@
 
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GSkyRegion.hpp"
 %}
 
@@ -35,7 +35,7 @@
  *
  * @brief Sky region container class
  ***************************************************************************/
-class GSkyRegions : public GBase {
+class GSkyRegions : public GContainer {
 public:
     // Constructors and destructors
     GSkyRegions(void);

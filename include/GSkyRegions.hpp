@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include <vector>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GSkyRegion.hpp"
 #include "GException.hpp"
 #include "GSkyDir.hpp"
@@ -50,7 +50,7 @@
  * save methods from/to a DS9 region file.
  *
  ***************************************************************************/
-class GSkyRegions : public GBase {
+class GSkyRegions : public GContainer {
 
 public:
     // Constructors and destructors
