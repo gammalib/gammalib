@@ -723,7 +723,7 @@ void TestGSky::test_GSkyRegionCircle_construct(void)
         test_try_failure(e);
     }
 
-    //Test constructing with radius 0
+    // Test constructing with radius 0
     test_try("Test constructor2");
     try {
 		GSkyRegionCircle circle(refdir_radeczerozero,-1);
@@ -736,11 +736,11 @@ void TestGSky::test_GSkyRegionCircle_construct(void)
 	  test_try_failure(e);
 	}
 
-    //Test constructing with radius 0
-    test_try("Test radius assingment after");
+    // Test constructing with radius 0
+    test_try("Test radius assignment after");
     try {
 		GSkyRegionCircle circle(refdir_radeczerozero,refradius);
-		circle.radius(-1.);
+		circle.radius(-1.0);
 		test_try_failure();
 	}
 	catch (GException::invalid_argument &e) {
