@@ -41,6 +41,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+%import(module="gammalib.base") "GContainer.i";
 %import(module="gammalib.base") "GRegistry.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
@@ -50,6 +51,7 @@
 %include "GSkyDir.i"
 %include "GSkyPixel.i"
 %include "GSkymap.i"
+%include "GSkyRegions.i"
 %include "GSkyRegion.i"
 %include "GSkyRegionCircle.i"
 %include "GWcs.i"
