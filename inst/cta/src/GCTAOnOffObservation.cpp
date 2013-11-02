@@ -394,36 +394,37 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 		// Handle off counts
 		else if (par->attribute("name") == "Pha_off") {
 			par->attribute("file", m_off_spec.filename());
-			npar[0]++;
+			npar[1]++;
 		}
 
 		// Handle on regions
 		else if (par->attribute("name") == "Regions_on") {
 			par->attribute("file", m_on_regions.filename());
-			npar[0]++;
+			npar[2]++;
 		}
 
 		// Handle off regions
 		else if (par->attribute("name") == "Regions_off") {
 			par->attribute("file", m_off_regions.filename());
-			npar[0]++;
+			npar[3]++;
 		}
 
 		// Handle effective area
 		else if (par->attribute("name") == "Arf") {
 			par->attribute("file", m_arf.filename());
-			npar[0]++;
+			npar[4]++;
 		}
 
 		// Handle energy resolution
 		else if (par->attribute("name") == "Rmf") {
 			par->attribute("file", m_rmf.filename());
-			npar[0]++;
+			npar[5]++;
 		}
 	}
+
 	// Verify that all required parameters are present
 	if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 ||
-        npar[3] != 1 || npar[4] != 1 || npar[5] !=1) {
+        npar[3] != 1 || npar[4] != 1 || npar[5] != 1) {
 		throw GException::xml_invalid_parnames(G_WRITE, xml,
 			  "Require \"Pha_on\" or \"Pha_off\" and \"Regions_on\","
               " \"Regions_off\", \"Arf\", and \"Rmf\" parameters.");
