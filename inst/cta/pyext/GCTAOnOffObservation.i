@@ -29,6 +29,29 @@
 %}
 
 
+/* __ Typemaps ___________________________________________________________ */
+/*
+ * The following typemap allows to digest GObservation references for
+ * arguments that require GCTAObservation references. This typemap is needed
+ * to implement automatic type casting.
+ */
+%typemap(in) GCTAObservation& (GObservation *argp = NULL, int res = 0) {
+  res = SWIG_ConvertPtr($input, (void**)&argp, $descriptor(GCTAObservation *), 0 | 0);
+  if (!SWIG_IsOK(res)) {
+    res = SWIG_ConvertPtr($input, (void**)&argp, $descriptor(GObservation *), 0 | 0);
+    if (!SWIG_IsOK(res)) {
+      SWIG_exception_fail(SWIG_ArgError(res), "in method '" "$symname" "', argument "
+                         "$argnum"" of type '" "$type""'");
+    }
+  }
+  $1 = dynamic_cast<$ltype>(argp);
+  if ($1 == NULL) {
+    SWIG_exception_fail(SWIG_ArgError(res), "in method '" "$symname" "', argument "
+                        "$argnum"" not of type '" "$type""'");
+  }
+}
+
+
 /***********************************************************************//**
  * @class GCTAOnOffObservation
  *
@@ -46,18 +69,18 @@ public:
     // Methods
     void                  clear(void);
     GCTAOnOffObservation* clone(void) const;
-    void                  name(const std::string& name) { m_name = name; }
-    void                  instrument(const std::string& instrument) { m_instrument = instrument; }
-    void                  id(const std::string& id) { m_id = id; }
-    void                  off_regions(const GSkyRegions& regions) {m_off_regions = regions;}
-    void                  on_regions(const GSkyRegions& regions) {m_on_regions = regions;}
-    const std::string&    name(void) const { return m_name; }
-    const std::string&    instrument(void) const { return m_instrument; }
-    const std::string&    id(void) const { return m_id; }
-    const GPha&           on_spec(void) const { return m_on_spec; }
-    const GPha&           off_spec(void) const { return m_off_spec; }
-    const GArf&           arf(void) { return m_arf; };
-    const GRmf&           rmf(void) {return m_rmf;}
+    void                  name(const std::string& name);
+    void                  instrument(const std::string& instrument);
+    void                  id(const std::string& id);
+    void                  off_regions(const GSkyRegions& regions);
+    void                  on_regions(const GSkyRegions& regions);
+    const std::string&    name(void) const;
+    const std::string&    instrument(void) const;
+    const std::string&    id(void) const;
+    const GPha&           on_spec(void) const;
+    const GPha&           off_spec(void) const;
+    const GArf&           arf(void);
+    const GRmf&           rmf(void);
     void                  fill(const GCTAObservation& obs);
     void                  compute_response(const GCTAObservation& obs,
                                            const GEbounds& etrue);
