@@ -35,6 +35,9 @@
 #define G_WRITE                   "GCTAOnOffObservation::write(GXmlElement&)"
 #define G_READ                     "GCTAOnOffObservation::read(GXmlElement&)"
 #define G_FILL                 "GCTAOnOffObservation::fill(GCTAObservation&)"
+#define G_COMPUTE_ARF   "GCTAOnOffObservation::compute_arf(GCTAObservation&)"
+#define G_COMPUTE_RMF   "GCTAOnOffObservation::compute_rmf(GCTAObservation&,"\
+                                                                " GEbounds&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -65,7 +68,7 @@ GCTAOnOffObservation::GCTAOnOffObservation(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] obs CTA on-off observation.
+ * @param[in] obs CTA ON/OFF observation.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs)
 { 
@@ -84,8 +87,8 @@ GCTAOnOffObservation::GCTAOnOffObservation(const GCTAOnOffObservation& obs)
  * @brief Parameter constructor
  *
  * @param[in] ereco Reconstructed energy bins.
- * @param[in] on On regions.
- * @param[in] off Off regions.
+ * @param[in] on ON regions.
+ * @param[in] off OFF regions.
  ***************************************************************************/
 GCTAOnOffObservation::GCTAOnOffObservation(const GEbounds&    ereco,
                                            const GSkyRegions& on,
@@ -129,7 +132,10 @@ GCTAOnOffObservation::~GCTAOnOffObservation(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs CTA on-off observation.
+ * @param[in] obs CTA ON/OFF observation.
+ * @return CTA ON/OFF observation.
+ *
+ * Assigns one CTA ON/OFF observation to another ON/OFF observation object.
  ***************************************************************************/
 GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation& obs)
 { 
@@ -161,7 +167,9 @@ GCTAOnOffObservation& GCTAOnOffObservation::operator=(const GCTAOnOffObservation
 /***********************************************************************//**
  * @brief Clear instance
  *
- * This method properly resets the object to an initial state.
+ * Clears the ON/OFF observation. All class members will be set to the
+ * initial state. Any information that was present in the object before will
+ * be lost.
  ***************************************************************************/
 void GCTAOnOffObservation::clear(void)
 {
@@ -178,6 +186,10 @@ void GCTAOnOffObservation::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of ON/OFF observation.
+ *
+ * Returns a pointer to a deep copy of an ON/OFF observation.
  **************************************************************************/
 GCTAOnOffObservation* GCTAOnOffObservation::clone(void) const
 {
@@ -186,9 +198,27 @@ GCTAOnOffObservation* GCTAOnOffObservation::clone(void) const
 
 
 /***********************************************************************//**
- * @brief read observation from an xml element
+ * @brief Read ON/OFFobservation from an xml element
  *
- * @param[in] xml GXmlElement.
+ * @param[in] xml XML element.
+ *
+ * @exception GException::xml_invalid_parnum
+ *            Invalid number of parameters found in XML element.
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Reads information for a CTA ON/OFF observation from an XML element.
+ * The expected format of the XML element is
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="Pha_on"      file="..."/>
+ *       <parameter name="Pha_off"     file="..."/>
+ *       <parameter name="Regions_on"  file="..."/>
+ *       <parameter name="Regions_off" file="..."/>
+ *       <parameter name="Arf"         file="..."/>
+ *       <parameter name="Rmf"         file="..."/>
+ *     </observation>
+ *
  ***************************************************************************/
 void GCTAOnOffObservation::read(const GXmlElement& xml)
 {
@@ -295,10 +325,11 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 	} // endfor: looped over all parameters
 
 	// Verify that all parameters were found
-	if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1 || npar[5] != 1) {
+	if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 ||
+        npar[3] != 1 || npar[4] != 1 || npar[5] != 1) {
 		throw GException::xml_invalid_parnames(G_READ, xml,
 			  "Require \"Pha_on\" or \"Pha_off\" and \"Regions_on\""
-			  ", \"Regions_off\",\"Rmf\" and \"Arf\" parameters.");
+			  ", \"Regions_off\",\"Arf\" and \"Rmf\" parameters.");
 	}
 
 	// Return
@@ -309,7 +340,25 @@ void GCTAOnOffObservation::read(const GXmlElement& xml)
 /***********************************************************************//**
  * @brief write observation to an xml element
  *
- * @param[in] xml GXmlElement.
+ * @param[in] xml XML element.
+ *
+ * @exception GException::xml_invalid_parnum
+ *            Invalid number of parameters found in XML element.
+ * @exception GException::xml_invalid_parnames
+ *            Invalid parameter names found in XML element.
+ *
+ * Writes information for a CTA ON/OFF observation into an XML element. The
+ * expected format of the XML element is
+ *
+ *     <observation name="..." id="..." instrument="...">
+ *       <parameter name="Pha_on"      file="..."/>
+ *       <parameter name="Pha_off"     file="..."/>
+ *       <parameter name="Regions_on"  file="..."/>
+ *       <parameter name="Regions_off" file="..."/>
+ *       <parameter name="Arf"         file="..."/>
+ *       <parameter name="Rmf"         file="..."/>
+ *     </observation>
+ *
  ***************************************************************************/
 void GCTAOnOffObservation::write(GXmlElement& xml) const
 {
@@ -373,10 +422,11 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 		}
 	}
 	// Verify that all required parameters are present
-	if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 || npar[3] != 1 || npar[4] != 1 || npar[5] !=1) {
+	if (npar[0] != 1 || npar[1] != 1 || npar[2] != 1 ||
+        npar[3] != 1 || npar[4] != 1 || npar[5] !=1) {
 		throw GException::xml_invalid_parnames(G_WRITE, xml,
-			  "Require \"Pha_on\" or \"Pha_off\" and \"Regions_on\", \"Regions_off\""
-			  " \"Arf\", \"Rmf\" parameters.");
+			  "Require \"Pha_on\" or \"Pha_off\" and \"Regions_on\","
+              " \"Regions_off\", \"Arf\", and \"Rmf\" parameters.");
 	}
 
 	// Return
@@ -385,7 +435,7 @@ void GCTAOnOffObservation::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
- * @brief Fill events in the on and off spectra
+ * @brief Fill events in the ON and OFF spectra
  *
  * @param[in] obs CTA observation.
  *
@@ -397,8 +447,11 @@ void GCTAOnOffObservation::fill(const GCTAObservation& obs)
     // Get CTA event list pointer
 	const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
 	if (events == NULL) {
-		throw GException::invalid_value(G_FILL,
-              "GCTAObservation must provide an event list");
+        std::string msg =
+            "No event list found in CTA observation \""+obs.name()+"\" "
+            "(ID="+obs.id()+").\n"
+            "ON/OFF observation can only be filled from event list.";
+        throw GException::invalid_value(G_FILL, msg);
 	}
 
     // Loop over all events
@@ -424,9 +477,9 @@ void GCTAOnOffObservation::fill(const GCTAObservation& obs)
 
 
 /***********************************************************************//**
- * @brief Compute response of an on/off observation
+ * @brief Compute response of ON/OFF observation
  *
- * @param[in] obs GCTAObservation.
+ * @param[in] obs CTA observation.
  * @param[in] etrue True energy boundaries.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
@@ -441,9 +494,12 @@ void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
 }
 
 /***********************************************************************//**
- * @brief Compute arf of an on/off observation
+ * @brief Compute ARF of ON/OFF observation
  *
- * @param[in] obs GCTAObservation.
+ * @param[in] obs CTA observation.
+ *
+ * @exception GException::invalid_value
+ *            No CTA response found in observation
  *
  * @todo Implement GCTAResponse::npred usage.
  ***************************************************************************/
@@ -462,8 +518,16 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
     int nreco = ereco.size();
     if (nreco > 0) {
     
-        // Get CTA response pointer
+        // Get CTA response pointer. Throw an exception if no response is
+        // found
         GCTAResponse* response = obs.response();
+        if (response == NULL) {
+            std::string msg =
+                "No response information has been found in CTA observation"
+                " \""+obs.name()+"\" (ID="+obs.id()+").\n"
+                "Response information is needed for ARF computation.";
+            throw GException::invalid_value(G_COMPUTE_ARF, msg);
+        }
 
         // Initialize ARF
         m_arf = GArf(ereco);
@@ -491,10 +555,13 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
 
 
 /***********************************************************************//**
- * @brief compute rmf of an on/off observation
+ * @brief Compute RMF of ON/OFF observation
  *
- * @param[in] obs GCTAObservation.
+ * @param[in] obs CTA observation.
  * @param[in] etrue True energy boundaries.
+ *
+ * @exception GException::invalid_value
+ *            No CTA response found in observation
  ***************************************************************************/
 void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                        const GEbounds&        etrue)
@@ -515,6 +582,13 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
     
         // Get CTA response pointer
         GCTAResponse* response = obs.response();
+        if (response == NULL) {
+            std::string msg =
+                "No response information has been found in CTA observation"
+                " \""+obs.name()+"\" (ID="+obs.id()+").\n"
+                "Response information is needed for RMF computation.";
+            throw GException::invalid_value(G_COMPUTE_RMF, msg);
+        }
 
         // Initialize RMF
         m_rmf = GRmf(etrue, ereco);
@@ -548,7 +622,9 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
 
 
 /***********************************************************************//**
- * @brief Print class information
+ * @brief Print ON/OFF observation information
+ *
+ * @return String containing ON/OFF observation information.
  ***************************************************************************/
 std::string GCTAOnOffObservation::print(const GChatter& chatter) const
 {
