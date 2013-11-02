@@ -20,14 +20,14 @@
  ***************************************************************************/
 /**
  * @file GSkyRegions.i
- * @brief Sky regions container class SWIG file
+ * @brief Sky regions container class interface file
  * @author Pierrick Martin
  */
 
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GContainer.hpp"
-#include "GSkyRegion.hpp"
+#include "GSkyRegions.hpp"
 %}
 
 /***********************************************************************//**
