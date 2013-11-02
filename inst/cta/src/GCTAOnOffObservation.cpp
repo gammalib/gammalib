@@ -466,7 +466,7 @@ void GCTAOnOffObservation::fill(const GCTAObservation& obs)
 		if (m_on_regions.contains(dir)) {
 			m_on_spec.fill(atom->energy());
 		}
-		else if (m_off_regions.contains(dir)) {
+		if (m_off_regions.contains(dir)) {
 			m_off_spec.fill(atom->energy());
 		}
         
