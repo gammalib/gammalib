@@ -65,7 +65,7 @@ test/test_url.dat
 test/*.xml
 test/reports/*.xml
 test/*.trs
-test/region.ds9
+test/region.reg
 examples/python/*.xml
 examples/python/*.html
 
