@@ -80,7 +80,7 @@ void TestGXspec::test_GPha(void)
     GEbounds ebds(9, GEnergy(1.0, "TeV"), GEnergy(10.0, "TeV"), false);
     GPha     pha(ebds);
     for (int i = 0; i < 12; i += 2) {
-        pha.fill(GEnergy(double(i), "TeV"));
+        pha.fill(GEnergy(double(i), "TeV"), 1.0);
     }
     test_value(pha.counts(),    4.0);
     test_value(pha.underflow(), 1.0);
