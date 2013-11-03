@@ -468,7 +468,8 @@ bool GSkyRegionCircle::contains(const GSkyRegion& reg) const
 	if (reg.type() == "Circle") {
 
 		// Create circular region from reg
-		GSkyRegionCircle* regcirc = (GSkyRegionCircle*)reg.clone();
+		const GSkyRegionCircle* regcirc =
+              dynamic_cast<const GSkyRegionCircle*>(&reg);
 
 		// Calculate angular distance between the centers
 		double ang_dist = m_centre.dist_deg(regcirc->centre());
@@ -508,7 +509,8 @@ bool GSkyRegionCircle::overlaps(const GSkyRegion& reg) const
 	if (reg.type() == "Circle") {
 
 		// Create circular region from reg
-		GSkyRegionCircle* regcirc =  (GSkyRegionCircle*)reg.clone();
+		const GSkyRegionCircle* regcirc =
+              dynamic_cast<const GSkyRegionCircle*>(&reg);
 
 		// Calculate angular distance between the centers
 		double ang_dist = m_centre.dist_deg(regcirc->centre());
