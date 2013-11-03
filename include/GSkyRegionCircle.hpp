@@ -38,7 +38,7 @@
 /***********************************************************************//**
  * @class GSkyRegionCircle
  *
- * @brief Abstract interface for the circular sky region class
+ * @brief Interface for the circular sky region class
  *
  * This class provides an implementation for a circular sky region. The sky
  * region is defined by an array of parameters, the meaning of which is
