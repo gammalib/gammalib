@@ -62,6 +62,7 @@ BUILT_SOURCES = gammalib/app_wrap.cpp  gammalib/app.py \
                 gammalib/sky_wrap.cpp gammalib/sky.py \
                 gammalib/support_wrap.cpp gammalib/support.py \
                 gammalib/xml_wrap.cpp gammalib/xml.py \
+                gammalib/xspec_wrap.cpp gammalib/xspec.py \
                 gammalib/test_wrap.cpp gammalib/test.py \
                 $(INST_SWIG_TARGETS)
 

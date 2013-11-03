@@ -16,6 +16,7 @@ SUBDIRS = base \
           fits \
           xml \
           vo \
+          xspec \
           sky \
           opt \
           obs \
@@ -59,6 +60,7 @@ libgamma_la_LIBADD = base/libbase.la \
                      fits/libfits.la \
                      xml/libxml.la \
                      vo/libvo.la \
+                     xspec/libxspec.la \
                      sky/libsky.la \
                      opt/libopt.la \
                      obs/libobs.la \

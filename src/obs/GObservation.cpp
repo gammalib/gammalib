@@ -807,8 +807,7 @@ double GObservation::npred_temp(const GModel& model) const
 
 
     // Case A: If the model is constant then integrate analytically
-    const GModelSky* sky = dynamic_cast<const GModelSky*>(&model);
-    if (sky != NULL && sky->temporal()->type() == "Constant") {
+    if (model.isconstant()) {
 
         // Evaluate model at first start time and multiply by ontime
         double ontime = events()->gti().ontime();

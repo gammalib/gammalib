@@ -66,7 +66,8 @@ public:
     // Implemented pure virtual methods
     virtual void                       clear(void);
     virtual GCTAModelRadialAcceptance* clone(void) const;
-    virtual std::string                type(void) const { return "RadialAcceptance"; }
+    virtual std::string                type(void) const;
+    virtual bool                       isconstant(void) const;
     virtual double                     eval(const GEvent& event,
                                             const GObservation& obs) const;
     virtual double                     eval_gradients(const GEvent& event,
@@ -79,9 +80,9 @@ public:
     virtual std::string                print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    GCTAModelRadial* radial(void)   const { return m_radial; }
-    GModelSpectral*  spectral(void) const { return m_spectral; }
-    GModelTemporal*  temporal(void) const { return m_temporal; }
+    GCTAModelRadial* radial(void)   const;
+    GModelSpectral*  spectral(void) const;
+    GModelTemporal*  temporal(void) const;
 
 protected:
     // Protected methods
@@ -119,5 +120,83 @@ protected:
     GModelSpectral*  m_spectral;     //!< Spectral model
     GModelTemporal*  m_temporal;     //!< Temporal model
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return Model type.
+ *
+ * Returns the type of the model. The type for a radial acceptance model is
+ * "RadialAcceptance".
+ ***************************************************************************/
+inline
+std::string GCTAModelRadialAcceptance::type(void) const
+{
+    return ("RadialAcceptance");
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if model is temporally constant
+ *
+ * @return True if model is temporally constant, false otherwise.
+ *
+ * Signals if the model is temporally constant. A temporally constant model
+ * is a model that has a temporal component of type "Constant".
+ ***************************************************************************/
+inline
+bool GCTAModelRadialAcceptance::isconstant(void) const
+{
+    return (m_temporal != NULL && m_temporal->type() == "Constant");
+}
+
+
+/***********************************************************************//**
+ * @brief Return radial model component
+ *
+ * @return Pointer to radial model component.
+ *
+ * Returns a pointer to the radial model component of the model. The pointer
+ * is of type GCTAModelRadial. Note that a NULL pointer may be returned if
+ * the model has no radial model component.
+ ***************************************************************************/
+inline
+GCTAModelRadial* GCTAModelRadialAcceptance::radial(void) const
+{
+    return (m_radial);
+}
+
+
+/***********************************************************************//**
+ * @brief Return spectral model component
+ *
+ * @return Pointer to spectral model component.
+ *
+ * Returns a pointer to the spectral model component of the model. The
+ * pointer is of type GModelSpectral. Note that a NULL pointer may be
+ * returned if the model has no spectral model component.
+ ***************************************************************************/
+inline
+GModelSpectral* GCTAModelRadialAcceptance::spectral(void) const
+{
+    return (m_spectral);
+}
+
+
+/***********************************************************************//**
+ * @brief Return temporal model component
+ *
+ * @return Pointer to temporal model component.
+ *
+ * Returns a pointer to the temporal model component of the model. The
+ * pointer is of type GModelTemporal. Note that a NULL pointer may be
+ * returned if the model has no temporal model component.
+ ***************************************************************************/
+inline
+GModelTemporal* GCTAModelRadialAcceptance::temporal(void) const
+{
+    return (m_temporal);
+}
 
 #endif /* GCTAMODELRADIALACCEPTANCE_HPP */

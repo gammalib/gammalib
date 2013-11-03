@@ -67,6 +67,7 @@ public:
     virtual void        clear(void) = 0;
     virtual GModelData* clone(void) const = 0;
     virtual std::string type(void) const = 0;
+    virtual bool        isconstant(void) const = 0;
     virtual double      eval(const GEvent& event,
                              const GObservation& obs) const = 0;
     virtual double      eval_gradients(const GEvent& event,

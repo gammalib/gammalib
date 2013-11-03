@@ -40,7 +40,7 @@ class TestGVector : public GTestSuite
 {
     public:
         // Constructors and destructors
-        TestGVector(void) : GTestSuite() { }
+        TestGVector(void) : GTestSuite(), m_num(0) { }
         virtual ~TestGVector(void) { }
 
         // Methods

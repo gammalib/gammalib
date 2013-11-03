@@ -1,7 +1,7 @@
 #############################################################################
 # Disutils setup file for gammalib Python extension module                  #
 # ------------------------------------------------------------------------- #
-# Copyright (C) 2011-2012 Juergen Knoedlseder                               #
+# Copyright (C) 2011-2013 Juergen Knoedlseder                               #
 # ------------------------------------------------------------------------- #
 #                                                                           #
 #  This program is free software: you can redistribute it and/or modify     #
@@ -31,7 +31,7 @@ pkg_name = 'gammalib'
 
 # Define core modules
 core_modules = ['app', 'base', 'fits', 'linalg', 'model', 'numerics', \
-                'obs', 'opt', 'sky', 'support', 'test', 'xml']
+                'obs', 'opt', 'sky', 'support', 'test', 'xml', 'xspec']
 
 # Detect execution mode
 is_build = True

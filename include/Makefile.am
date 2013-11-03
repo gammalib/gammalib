@@ -61,6 +61,9 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GXmlAttribute.hpp \
                      GXmlPI.hpp \
                      GVOClient.hpp \
+                     GPha.hpp \
+                     GArf.hpp \
+                     GRmf.hpp \
                      GApplication.hpp \
                      GLog.hpp \
                      GPars.hpp \
@@ -75,6 +78,9 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GSkyDir.hpp \
                      GSkyPixel.hpp \
                      GSkymap.hpp \
+                     GSkyRegion.hpp \
+                     GSkyRegions.hpp \
+                     GSkyRegionCircle.hpp \
                      GWcs.hpp \
                      GWcsRegistry.hpp \
                      GWcslib.hpp \

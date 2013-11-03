@@ -71,6 +71,7 @@ check_PROGRAMS = test_GSupport \
                  test_GFits \
                  test_GXml \
                  test_GVO \
+                 test_GXspec \
                  test_GApplication \
                  test_GModel \
                  test_GSky \
@@ -92,6 +93,7 @@ TESTS = test_GSupport \
         test_GFits \
         test_GXml \
         test_GVO \
+        test_GXspec \
         test_GApplication \
         test_GModel \
         test_GSky \
@@ -146,6 +148,11 @@ test_GVO_LDFLAGS = @LDFLAGS@
 test_GVO_CPPFLAGS = @CPPFLAGS@
 test_GVO_LDADD = $(top_srcdir)/src/libgamma.la
 #
+test_GXspec_SOURCES = test_GXspec.cpp
+test_GXspec_LDFLAGS = @LDFLAGS@
+test_GXspec_CPPFLAGS = @CPPFLAGS@
+test_GXspec_LDADD = $(top_srcdir)/src/libgamma.la
+#
 test_GApplication_SOURCES = test_GApplication.cpp
 test_GApplication_LDFLAGS = @LDFLAGS@
 test_GApplication_CPPFLAGS = @CPPFLAGS@
@@ -176,7 +183,7 @@ valgrind:
 	@if type valgrind >/dev/null 2>&1; then \
 		for prog in $(check_PROGRAMS) ; do \
 			$(LIBTOOL) --mode=execute valgrind --leak-check=full \
-			--xml=yes --xml-file=tmp.xml ./$$prog; \
+			--xml=yes --xml-file=tmp.xml --show-reachable=yes $PWD/$$prog; \
 			sed '/<\/valgrindoutput>/d' tmp.xml > valgrind_$$prog.xml; \
 			echo '</valgrindoutput>' >> valgrind_$$prog.xml; \
 		done ; \

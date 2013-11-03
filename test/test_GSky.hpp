@@ -40,6 +40,9 @@ class TestGSky : public GTestSuite
         void test_GSkymap_healpix_io(void);
         void test_GSkymap_wcs_construct(void);
         void test_GSkymap_wcs_io(void);
+        void test_GSkyRegions_io(void);
+        void test_GSkyRegionCircle_construct(void);
+        void test_GSkyRegionCircle_logic(void);
 
     // Private methods
     private:

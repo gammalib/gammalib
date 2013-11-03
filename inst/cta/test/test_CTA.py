@@ -1,7 +1,7 @@
 # ==========================================================================
 # This module performs unit tests for the GammaLib CTA module.
 #
-# Copyright (C) 2012 Juergen Knoedlseder
+# Copyright (C) 2012-2013 Juergen Knoedlseder
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ class Test(GPythonTestSuite):
         # Append tests
         self.append(self.test_aeff, "Test CTA effective area classes")
         self.append(self.test_psf, "Test CTA PSF classes")
+        self.append(self.test_onoff, "Test CTA ON/OFF analysis")
 
         # Return
         return
@@ -158,5 +159,62 @@ class Test(GPythonTestSuite):
         self.test_value(psf(0.0, 0.0, 0.01745), 208989.943127, 1.0e-6)
         self.test_value(psf(0.001, 0.0, 0.01745), 108388.810748, 1.0e-6)
 
+        # Return
+        return
+
+
+    # Test ON/OFF analysis
+    def test_onoff(self):
+        """
+        Test ON/OFF analysis.
+        """
+        # Create ON region
+        crab = GSkyDir()
+        crab.radec_deg(83.6331, 22.0145)
+        on = GSkyRegions()
+        on.append(GSkyRegionCircle(crab, 1.0))
+
+        # Create OFF region
+        off = on
+        
+        # Set energy binning
+        etrue = GEbounds(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"))
+        ereco = GEbounds(10, GEnergy(0.1, "TeV"), GEnergy(10.0, "TeV"))
+        
+        # Create ON/OFF observations by filling all events found in
+        # the observation container and computing the response
+        obs    = GObservations("../inst/cta/test/data/obs_unbinned.xml")
+        onoffs = GCTAOnOffObservations()
+        self.test_try("Test ON/OFF observation creation")
+        try:
+            for run in obs:
+                onoff = GCTAOnOffObservation(ereco, on, off)
+                onoff.fill(run)
+                onoff.compute_response(run, etrue)
+                onoffs.append(onoff)
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to create ON/OFF observations.")
+
+        # Save PHA, ARF and RMFs
+        self.test_try("Test ON/OFF observation PHA, ARF and RMF saving")
+        try:
+            for run in onoffs:
+                run.on_spec().save("onoff_pha_on.fits", True)
+                run.off_spec().save("onoff_pha_off.fits", True)
+                run.arf().save("onoff_arf.fits", True)
+                run.rmf().save("onoff_rmf.fits", True)
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to save ON/OFF PHA, ARF and RMFs.")
+
+        # Save ON/OFF observations
+        self.test_try("Test ON/OFF observation saving")
+        try:
+            onoffs.save("onoff.xml")
+            self.test_try_success()
+        except:
+            self.test_try_failure("Unable to save ON/OFF observations.")
+        
         # Return
         return

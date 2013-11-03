@@ -41,6 +41,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
+%import(module="gammalib.base") "GContainer.i";
 %import(module="gammalib.base") "GRegistry.i";
 
 /* __ Make sure that exceptions are catched ______________________________ */
@@ -63,6 +64,8 @@
 
 /* __ CTA ________________________________________________________________ */
 %include "GCTAObservation.i"
+%include "GCTAOnOffObservation.i"
+%include "GCTAOnOffObservations.i"
 %include "GCTAEventCube.i"
 %include "GCTAEventList.i"
 %include "GCTAEventBin.i"
