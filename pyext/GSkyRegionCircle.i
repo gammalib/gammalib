@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GSkyRegionCircle.i
- * @brief Sky region class SWIG file.
+ * @brief Circular sky region class interface definition
  * @author Michael Mayer
  */
 %{
@@ -38,26 +38,28 @@
 class GSkyRegionCircle : public GSkyRegion {
 public:
     // Constructors and destructors
-	GSkyRegionCircle(void);
-	GSkyRegionCircle(const GSkyRegionCircle& circle);
-    explicit GSkyRegionCircle(const std::string &line);
-    GSkyRegionCircle(GSkyDir &centre, const double &radius);
-    // GSkyRegionCircle(const double &ra, const double &dec, const double &radius);
+    GSkyRegionCircle(void);
+    GSkyRegionCircle(GSkyDir& centre, const double& radius);
+    GSkyRegionCircle(const double& ra, const double& dec, const double& radius);
+    explicit GSkyRegionCircle(const std::string& line);
+    GSkyRegionCircle(const GSkyRegionCircle& region);
     virtual ~GSkyRegionCircle(void);
 
      // Implemented methods
     void              clear(void);
     GSkyRegionCircle* clone(void) const;
-    GSkyDir           centre(void) const;
     double            radius(void) const;
     void              radius(const double& radius);
+    GSkyDir           centre(void) const;
     void              centre(const GSkyDir& centre);
     void              centre(const double& ra,const double& dec);
-    void              read(const std::string line);
+    double            ra(void) const;
+    double            dec(void) const;
+    void              read(const std::string& line);
     std::string       write(void) const;
     bool              contains(const GSkyDir& dir) const;
-	bool              contains(const GSkyRegion& reg) const;
-	bool              overlaps(const GSkyRegion& reg) const;
+    bool              contains(const GSkyRegion& reg) const;
+    bool              overlaps(const GSkyRegion& reg) const;
 };
 
 

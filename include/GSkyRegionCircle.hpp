@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GSkyRegionCircle.hpp
- * @brief Abstract sky region base class interface definition
+ * @brief Circular sky region class interface definition
  * @author Michael Mayer
  */
 
@@ -60,10 +60,10 @@ class GSkyRegionCircle : public GSkyRegion {
 public:
     // Constructors and destructors
     GSkyRegionCircle(void);
-    GSkyRegionCircle(const GSkyRegionCircle& circle);
-    explicit GSkyRegionCircle(const std::string &line);
-    GSkyRegionCircle(GSkyDir &centre, const double &radius);
-    // GSkyRegionCircle(const double &ra, const double &dec, const double &radius);
+    GSkyRegionCircle(GSkyDir& centre, const double& radius);
+    GSkyRegionCircle(const double& ra, const double& dec, const double& radius);
+    explicit GSkyRegionCircle(const std::string& line);
+    GSkyRegionCircle(const GSkyRegionCircle& region);
     virtual ~GSkyRegionCircle(void);
 
     // Operators
@@ -72,11 +72,13 @@ public:
     // Implemented methods
     void              clear(void);
     GSkyRegionCircle* clone(void) const;
-    GSkyDir           centre(void) const;
     double            radius(void) const;
     void              radius(const double& radius);
+    GSkyDir           centre(void) const;
     void              centre(const GSkyDir& centre);
     void              centre(const double& ra,const double& dec);
+    double            ra(void) const;
+    double            dec(void) const;
     void              read(const std::string& line);
     std::string       write(void) const;
     bool              contains(const GSkyDir& dir) const;
@@ -89,7 +91,7 @@ protected:
     void init_members(void);
     void copy_members(const GSkyRegionCircle& region);
     void free_members(void);
-    void compute_solid(void);
+    void compute_solid_angle(void);
 
     // Protected members
     GSkyDir	m_centre;   //!< Centre or reference point of the region
@@ -98,11 +100,11 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Return region type
+ * @brief Return circular region radius (in degrees)
  *
- * @return region type
+ * @return Region radius [deg].
  *
- * Returns the region type.
+ * Returns the region radius in degrees.
  ***************************************************************************/
 inline
 double GSkyRegionCircle::radius(void) const
@@ -110,10 +112,11 @@ double GSkyRegionCircle::radius(void) const
     return (m_radius);
 }
 
+
 /***********************************************************************//**
- * @brief Return region centre
+ * @brief Return circular region centre
  *
- * @return region centre
+ * @return Region centre.
  *
  * Returns the region centre.
  ***************************************************************************/
@@ -124,11 +127,12 @@ GSkyDir GSkyRegionCircle::centre(void) const
 }
 
 
-
 /***********************************************************************//**
- * @brief Set centre of region
+ * @brief Set circular region centre
  *
- * @param[in] dir Center of region.
+ * @param[in] dir Region centre.
+ *
+ * Sets the centre of the circular region to the specified sky direction.
  ***************************************************************************/
 inline
 void GSkyRegionCircle::centre(const GSkyDir& dir)
@@ -142,10 +146,13 @@ void GSkyRegionCircle::centre(const GSkyDir& dir)
 
 
 /***********************************************************************//**
- * @brief Set centre values
+ * @brief Set circular region centre Right Ascension and Declincation
  *
- * @param[in] ra Right ascension value.
- * @param[in] dec declination value.
+ * @param[in] ra Right Ascension [deg].
+ * @param[in] dec Declination [deg].
+ *
+ * Sets the centre of the circular region to the specified Right Ascension
+ * and Declination.
  ***************************************************************************/
 inline
 void GSkyRegionCircle::centre(const double& ra, const double& dec)
@@ -157,5 +164,32 @@ void GSkyRegionCircle::centre(const double& ra, const double& dec)
     return;
 }
 
-#endif /* GSKYREGIONCIRCLE_HPP */
 
+/***********************************************************************//**
+ * @brief Return circular region centre Right Ascension
+ *
+ * @return Region centre Right Ascension [deg].
+ *
+ * Returns the region centre Right Ascension in degrees.
+ ***************************************************************************/
+inline
+double GSkyRegionCircle::ra(void) const
+{
+    return (m_centre.ra_deg());
+}
+
+
+/***********************************************************************//**
+ * @brief Return circular region centre Declination
+ *
+ * @return Region centre Declination [deg].
+ *
+ * Returns the region centre Declination in degrees.
+ ***************************************************************************/
+inline
+double GSkyRegionCircle::dec(void) const
+{
+    return (m_centre.dec_deg());
+}
+
+#endif /* GSKYREGIONCIRCLE_HPP */
