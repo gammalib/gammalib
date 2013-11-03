@@ -36,6 +36,7 @@
 class GSkyPixel;
 class GSkyDir;
 
+
 /***********************************************************************//**
  * @class GSkyRegion
  *
@@ -88,14 +89,14 @@ protected:
     // Protected members
     std::string m_type;    //!< Type of the region (circle, rectangle,...)
     std::string m_name;    //!< Name of the region
-    double      m_solid;   //!< Solid angle subtended by the region
+    double      m_solid;   //!< Solid angle subtended by the region (sr)
 };
 
 
 /***********************************************************************//**
  * @brief Return region name
  *
- * @return region name
+ * @return Region name
  *
  * Returns the region name.
  ***************************************************************************/
@@ -105,10 +106,11 @@ std::string GSkyRegion::name(void) const
     return (m_name);
 }
 
+
 /***********************************************************************//**
  * @brief Return region type
  *
- * @return region type
+ * @return Region type
  *
  * Returns the region type.
  ***************************************************************************/
@@ -118,12 +120,13 @@ std::string GSkyRegion::type(void) const
     return (m_type);
 }
 
+
 /***********************************************************************//**
  * @brief Return solid angle
  *
  * @return Solid angle
  *
- * Returns the solid angle subtended by the region (in sr).
+ * Returns the solid angle subtended by the region (in steradian).
  ***************************************************************************/
 inline
 double GSkyRegion::solidangle(void) const
