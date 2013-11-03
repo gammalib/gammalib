@@ -57,9 +57,9 @@ void TestGSky::set(void){
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test the GSkyregion class - io");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test the GSkyregionCircle class - constuct");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test the GSkyregionCircle class - logic ");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic ");
     return;
 }
 
@@ -836,50 +836,54 @@ void TestGSky::test_GSkyRegionCircle_logic(void)
 void TestGSky::test_GSkyRegions_io(void)
 {
 	// Set filenames
-	const std::string filereg_radeczerozero = "data/test_circle_radeczerozero.reg";
+	const std::string filename = "data/test_circle_region.reg";
+
+    // Allocate regions
+    GSkyRegions regions;
 
 	// Test regions loading
 	test_try("Test regions loading");
 	try {
-		GSkyRegions regions;
-		regions.load(filereg_radeczerozero);
+		regions.load(filename);
 		test_try_success();
 	}
 	catch (std::exception &e) {
 		test_try_failure(e);
 	}
 
-//	//check if load does the proper thing
-//    GSkyRegions regs;
-//    GSkyRegion* reg;
-//    GSkyRegionCircle* circ;
-//    GSkyDir dir;
-//    double rad;
-//
-//    regs.load(filereg_radeczerozero);
-//    reg = regs[0];
-//    if (reg->type() == "circle"){
-//    	circ = (GSkyRegionCircle*)reg;
-//        dir = circ->centre();
-//        rad = circ->radius();
-//    }
-//    GSkyDir refdir_radeczerozero = GSkyDir();
-//    refdir_radeczerozero.radec_deg(0,0);
-//
-//    test_value(rad,10,1.0e-10, "Test radius assignment");
-//
-//
+    // Check if region was loaded correctly
+    GSkyRegionCircle* circle = dynamic_cast<GSkyRegionCircle*>(regions[0]);
+    test_assert(circle->type() == "Circle", "Region is not a circle");
+    test_value(circle->radius(), 10.0, 1.0e-10);
+    test_value(circle->ra(), 0.1, 1.0e-10);
+    test_value(circle->dec(), -35.6, 1.0e-10);
 
 	// Test regions saving
 	test_try("Test regions saving");
 	try {
-		GSkyRegions regions;
-		regions.save("region.ds9");
+		regions.save("region.reg");
 		test_try_success();
 	}
 	catch (std::exception &e) {
 		test_try_failure(e);
 	}
+
+	// Test regions reloading
+	test_try("Test regions reloading");
+	try {
+		regions.load("region.reg");
+		test_try_success();
+	}
+	catch (std::exception &e) {
+		test_try_failure(e);
+	}
+
+    // Check if region was loaded correctly
+    circle = dynamic_cast<GSkyRegionCircle*>(regions[0]);
+    test_assert(circle->type() == "Circle", "Region is not a circle");
+    test_value(circle->radius(), 10.0, 1.0e-10);
+    test_value(circle->ra(), 0.1, 1.0e-10);
+    test_value(circle->dec(), -35.6, 1.0e-10);
 
     // Exit test
     return;
