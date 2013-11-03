@@ -750,8 +750,8 @@ void GSkyRegions::save(const std::string& filename) const
 		fileline.append("global color=green dashlist=8 3 width=1");
 //		fileline.append("font=\"helvetica 10 normal\" select=1");
 //                                "highlite=1 dash=0 fixed=0 edit=1 move=1"+
-//                                "delete=1 include=1 source=1\n";
-		ds9file << fileline;
+//                                "delete=1 include=1 source=1";
+		ds9file << fileline << "\n";
 		
 		// Loop over regions in container
 		for (int i = 0; i < size(); ++i) {
