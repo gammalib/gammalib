@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GSkyRegionCircle
  *
- * @brief GSkyRegionCircle dervied sky region class
+ * @brief Interface for the circular sky region class
  ***************************************************************************/
 class GSkyRegionCircle : public GSkyRegion {
 public:
