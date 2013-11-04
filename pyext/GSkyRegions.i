@@ -47,7 +47,6 @@ public:
     void              clear(void);
     GSkyRegions*      clone(void) const;
     GSkyRegion*       at(const int& index);
-    const GSkyRegion* at(const int& index) const;
     int               size(void) const;
     bool              isempty(void) const;
     GSkyRegion*       set(const int& index, const GSkyRegion& region);
