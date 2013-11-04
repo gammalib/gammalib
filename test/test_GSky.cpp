@@ -59,7 +59,7 @@ void TestGSky::set(void){
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic ");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
     return;
 }
 
