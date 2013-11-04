@@ -183,7 +183,7 @@ valgrind:
 	@if type valgrind >/dev/null 2>&1; then \
 		for prog in $(check_PROGRAMS) ; do \
 			$(LIBTOOL) --mode=execute valgrind --leak-check=full \
-			--xml=yes --xml-file=tmp.xml --show-reachable=yes $PWD/$$prog; \
+			--xml=yes --xml-file=tmp.xml --show-reachable=yes $(top_srcdir)/test/$$prog; \
 			sed '/<\/valgrindoutput>/d' tmp.xml > valgrind_$$prog.xml; \
 			echo '</valgrindoutput>' >> valgrind_$$prog.xml; \
 		done ; \
