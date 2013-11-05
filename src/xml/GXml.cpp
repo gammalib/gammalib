@@ -813,9 +813,9 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
         {
             // Create new element node, set it's parent, append it to the
             // current node and make it the current node
-            GXmlElement* element = new GXmlElement(segment);
-            element->parent(*current);
-            (*current)->append(*element);
+            GXmlElement element(segment);
+            element.parent(*current);
+            (*current)->append(element);
             int last = (*current)->size() - 1;
             (*current) = (*(*current))[last];
         }
@@ -842,17 +842,17 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Append empty-element tag
     case MT_ELEMENT_EMPTY:
         {
-            GXmlElement* element = new GXmlElement(segment);
-            element->parent(*current);
-            (*current)->append(*element);
+            GXmlElement element(segment);
+            element.parent(*current);
+            (*current)->append(element);
         }
         break;
 
     // Append comment markup
     case MT_COMMENT:
         {
-            GXmlComment* comment = new GXmlComment(segment);
-            (*current)->append(*comment);
+            GXmlComment comment(segment);
+            (*current)->append(comment);
         }
         break;
 
