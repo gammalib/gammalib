@@ -568,7 +568,7 @@ void GFitsTableStringCol::free_members(void)
 {
     // Free memory
     if (m_data   != NULL) delete [] m_data;
-    if (m_nulval != NULL) delete m_nulval;
+    if (m_nulval != NULL) delete [] m_nulval;
 
     // Mark memory as freed
     m_data   = NULL;
