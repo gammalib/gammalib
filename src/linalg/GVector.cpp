@@ -652,7 +652,7 @@ void GVector::copy_members(const GVector& vector)
 void GVector::free_members(void)
 {
     // Free memory
-    if (m_data != NULL) delete m_data;
+    if (m_data != NULL) delete[] m_data;
 
     // Signal free pointers
     m_data = NULL;
