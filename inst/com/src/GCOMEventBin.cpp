@@ -284,6 +284,10 @@ void GCOMEventBin::init_members(void)
  ***************************************************************************/
 void GCOMEventBin::copy_members(const GCOMEventBin& bin)
 {
+    // First de-allocate existing memory if needed
+    free_members();
+
+
     // Copy members by cloning
     m_alloc  = true;
     m_index  = bin.m_index;
