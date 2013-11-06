@@ -181,14 +181,17 @@ test_GObservation_LDADD = $(top_srcdir)/src/libgamma.la
 # Add Valgrind rule
 valgrind:
 	@if type valgrind >/dev/null 2>&1; then \
+		rm -rf reports ; \
 		cd .. ; \
 		cp -r test/data data ; \
+		mkdir reports ; \
 		for prog in $(check_PROGRAMS) ; do \
 			$(SHELL) $(abs_top_builddir)/libtool --mode=execute valgrind --leak-check=full \
 			--xml=yes --xml-file=tmp.xml --show-reachable=yes test/$$prog; \
 			sed '/<\/valgrindoutput>/d' tmp.xml > test/valgrind_$$prog.xml; \
 			echo '</valgrindoutput>' >> test/valgrind_$$prog.xml; \
 		done ; \
+		mv reports test/reports ; \
 		cd test ; \
 	else \
 		echo "valgrind  not found in PATH."; \
