@@ -3287,28 +3287,28 @@ void GMatrixSparse::mix_column_prepare(const int* src1_row, int src1_num,
     // Initialise indices and row indices of both columns
     int inx_1 = 0;                    // Column 1 element index
     int inx_2 = 0;                    // Column 2 element index
-    int row_1 = src1_row[inx_1];      // Column 1 first row index
-    int row_2 = src2_row[inx_2];      // Column 2 first row index
+    int row_1 = src1_row[inx_1++];    // Column 1 first row index
+    int row_2 = src2_row[inx_2++];    // Column 2 first row index
 
     // Mix elements of both columns while both contain still elements
     while (inx_1 < src1_num && inx_2 < src2_num) {
 
         // Case A: the element exist in both columns
         if (row_1 == row_2) {
-            row_1 = src1_row[++inx_1];
-            row_2 = src2_row[++inx_2];
+            row_1 = src1_row[inx_1++];
+            row_2 = src2_row[inx_2++];
             (*num_mix)++;
         }
 
         // Case B: the element exists only in first column
         else if (row_1 < row_2) {
-            row_1 = src1_row[++inx_1];
+            row_1 = src1_row[inx_1++];
             (*num_1)++;
         }
 
         // Case C: the element exists only in second column
         else {
-            row_2 = src2_row[++inx_2];
+            row_2 = src2_row[inx_2++];
             (*num_2)++;
         }
 
