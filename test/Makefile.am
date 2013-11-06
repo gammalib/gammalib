@@ -184,7 +184,7 @@ valgrind:
 		cd .. ; \
 		cp -r test/data data ; \
 		for prog in $(check_PROGRAMS) ; do \
-			test/$(LIBTOOL) --mode=execute valgrind --leak-check=full \
+			$(SHELL) $(abs_top_builddir)/libtool --mode=execute valgrind --leak-check=full \
 			--xml=yes --xml-file=tmp.xml --show-reachable=yes $(top_srcdir)/test/$$prog; \
 			sed '/<\/valgrindoutput>/d' tmp.xml > test/valgrind_$$prog.xml; \
 			echo '</valgrindoutput>' >> test/valgrind_$$prog.xml; \
