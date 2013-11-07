@@ -45,7 +45,7 @@ endif
 # Optional python bindings
 if WITH_PYTHON
   TEST_PYTHON_SCRIPT = test_python.py
-  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT):$(PYTHONPATH)
+  TEST_PYTHON_ENV    = PYTHONPATH=$(top_builddir)/pyext:$(top_builddir)/pyext/build/gammalib$(TEST_MWL)$(TEST_CTA)$(TEST_LAT)$(TEST_COM):$(PYTHONPATH)
 endif
 
 # Darwin support
@@ -81,7 +81,8 @@ check_PROGRAMS = test_GSupport \
 
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
-                    $(TEST_PYTHON_ENV)
+                    $(TEST_PYTHON_ENV) \
+                    GAMMALIB_SOURCE=$(abs_top_srcdir)
 
 # Tests (these are the tests to be executed)
 TESTS = test_GSupport \
@@ -179,11 +180,12 @@ test_GObservation_CPPFLAGS = @CPPFLAGS@
 test_GObservation_LDADD = $(top_srcdir)/src/libgamma.la
 
 # Add Valgrind rule
+#	
 valgrind:
-	@if type valgrind >/dev/null 2>&1; then \
-		rm -rf reports ; \
+	@export GAMMALIB_SOURCE=$(abs_top_srcdir) ; \
+	if type valgrind >/dev/null 2>&1; then \
 		cd .. ; \
-		cp -r test/data data ; \
+		ln -s test/data data ; \
 		mkdir reports ; \
 		for prog in $(check_PROGRAMS) ; do \
 			$(SHELL) $(abs_top_builddir)/libtool --mode=execute valgrind --leak-check=full \
@@ -191,7 +193,7 @@ valgrind:
 			sed '/<\/valgrindoutput>/d' tmp.xml > test/valgrind_$$prog.xml; \
 			echo '</valgrindoutput>' >> test/valgrind_$$prog.xml; \
 		done ; \
-		mv reports test/reports ; \
+		mv reports/* test/reports/ ; \
 		cd test ; \
 	else \
 		echo "valgrind  not found in PATH."; \

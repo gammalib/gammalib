@@ -1,6 +1,6 @@
 <source_library title="source library">
   <source type="DiffuseSource" name="Extragal_diffuse">
-    <spectrum type="FileFunction" file="../inst/lat/test/data/p7v6/isotrop_2year_P76_source_v0.txt">
+    <spectrum type="FileFunction" file="$(GAMMALIB_SOURCE)/inst/lat/test/data/p7v6/isotrop_2year_P76_source_v0.txt">
       <parameter scale="1.0" name="Normalization" min="0.0" max="1000.0" value="1.0" free="1"/>
     </spectrum>
     <spatialModel type="ConstantValue">
@@ -11,7 +11,7 @@
     <spectrum type="ConstantValue">
       <parameter scale="1.0" name="Value" min="0.0" max="1000.0" value="1.0" free="1"/>
     </spectrum>
-    <spatialModel type="MapCubeFunction" file="../test/data/test_cube.fits">
+    <spatialModel type="MapCubeFunction" file="$(GAMMALIB_SOURCE)/test/data/test_cube.fits">
       <parameter scale="1" name="Normalization" min="0.001" max="1000.0" value="1" free="0"/>
     </spatialModel>
   </source>

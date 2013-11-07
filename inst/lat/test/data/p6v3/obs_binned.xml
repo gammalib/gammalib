@@ -1,8 +1,8 @@
 <observation_list title="observation library">
   <observation name="Crab" id="00001" instrument="LAT">
-    <parameter name="CountsMap" file="../inst/lat/test/data/p6v3/srcmap.fits"/>
-    <parameter name="ExposureMap" file="../inst/lat/test/data/p6v3/binned_expmap.fits"/>
-    <parameter name="LiveTimeCube" file="../inst/lat/test/data/p6v3/ltcube.fits"/>
+    <parameter name="CountsMap"    file="$(GAMMALIB_SOURCE)/inst/lat/test/data/p6v3/srcmap.fits"/>
+    <parameter name="ExposureMap"  file="$(GAMMALIB_SOURCE)/inst/lat/test/data/p6v3/binned_expmap.fits"/>
+    <parameter name="LiveTimeCube" file="$(GAMMALIB_SOURCE)/inst/lat/test/data/p6v3/ltcube.fits"/>
     <parameter name="IRF" value="P6_v3_diff"/>
   </observation>
 </observation_list>

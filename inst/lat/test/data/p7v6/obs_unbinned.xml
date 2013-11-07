@@ -1,8 +1,8 @@
 <observation_list title="observation library">
   <observation name="Crab" id="00001" instrument="LAT">
-    <parameter name="FT1" file="../inst/lat/test/data/p7v6/ft1.fits"/>
-    <parameter name="FT2" file="../inst/lat/test/data/p7v6/ft2.fits"/>
-    <parameter name="LiveTimeCube" file="../inst/lat/test/data/p7v6/ltcube.fits"/>
+    <parameter name="FT1"          file="$(GAMMALIB_SOURCE)/inst/lat/test/data/p7v6/ft1.fits"/>
+    <parameter name="FT2"          file="$(GAMMALIB_SOURCE)/inst/lat/test/data/p7v6/ft2.fits"/>
+    <parameter name="LiveTimeCube" file="$(GAMMALIB_SOURCE)/inst/lat/test/data/p7v6/ltcube.fits"/>
     <parameter name="IRF" value="P7SOURCE_V6"/>
   </observation>
 </observation_list>
