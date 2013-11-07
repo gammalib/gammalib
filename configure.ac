@@ -60,6 +60,7 @@ else
   gammalib_prefix=${prefix}
 fi
 AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${gammalib_prefix}", [Location where library is installed])
+AC_DEFINE_UNQUOTED([PACKAGE_SOURCE], "$(PWD)", [Location where source is installed])
 
 
 #############################################################################

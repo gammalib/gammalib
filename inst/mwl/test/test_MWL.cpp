@@ -38,7 +38,7 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir        = "../inst/mwl/test/data";
+const std::string datadir        = PACKAGE_SOURCE"/inst/mwl/test/data";
 const std::string lat_crab_model = datadir+"/crab.xml";
 const std::string lat_crab_fits  = datadir+"/crab.fits";
 const std::string crab_model     = datadir+"/crab_mwl.xml";

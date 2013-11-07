@@ -40,8 +40,8 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir       = "../inst/cta/test/data";
-const std::string cta_caldb     = "../inst/cta/caldb";
+const std::string datadir       = PACKAGE_SOURCE"/inst/cta/test/data";
+const std::string cta_caldb     = PACKAGE_SOURCE"/inst/cta/caldb";
 const std::string cta_irf       = "kb_E_50h_v3";
 const std::string cta_events    = datadir+"/crab_events.fits.gz";
 const std::string cta_cntmap    = datadir+"/crab_cntmap.fits.gz";

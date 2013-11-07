@@ -21,7 +21,7 @@
 /**
  * @file test_LAT.cpp
  * @brief Testing of LAT classes
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -40,9 +40,9 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string lat_caldb = "../inst/lat/caldb";
-const std::string dirPass6  = "../inst/lat/test/data/p6v3";
-const std::string dirPass7  = "../inst/lat/test/data/p7v6";
+const std::string lat_caldb = PACKAGE_SOURCE"/inst/lat/caldb";
+const std::string dirPass6  = PACKAGE_SOURCE"/inst/lat/test/data/p6v3";
+const std::string dirPass7  = PACKAGE_SOURCE"/inst/lat/test/data/p7v6";
 
 
 /***********************************************************************//**
