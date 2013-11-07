@@ -182,6 +182,7 @@ test_GObservation_LDADD = $(top_srcdir)/src/libgamma.la
 valgrind:
 	@if type valgrind >/dev/null 2>&1; then \
 		cd .. ; \
+		ln -s test/$$prog $$prog ; \
 		for prog in $(check_PROGRAMS) ; do \
 			echo "cd test; ./$$prog; cd .." > test.sh ; chmod u+x test.sh ; \
 			$(SHELL) $(abs_top_builddir)/libtool --mode=execute valgrind --leak-check=full \
