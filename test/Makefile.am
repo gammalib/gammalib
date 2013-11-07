@@ -185,7 +185,7 @@ valgrind:
 		for prog in $(check_PROGRAMS) ; do \
 			echo "cd test; ./$$prog; cd .." > test.sh ; chmod u+x test.sh ; \
 			$(SHELL) $(abs_top_builddir)/libtool --mode=execute valgrind --leak-check=full \
-			--xml=yes --xml-file=tmp.xml --show-reachable=yes ;/test.sh; \
+			--xml=yes --xml-file=tmp.xml --show-reachable=yes ./test.sh; \
 			sed '/<\/valgrindoutput>/d' tmp.xml > test/valgrind_$$prog.xml; \
 			echo '</valgrindoutput>' >> test/valgrind_$$prog.xml; \
 		done ; \
