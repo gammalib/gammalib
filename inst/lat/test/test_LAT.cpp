@@ -248,7 +248,7 @@ void TestGLATLtCube::test_ltcube_p7(void)
 void TestGLATLtCube::test_one_ltcube(const std::string& datadir, const double& reference)
 {
     // Set filenames
-    std::string lat_ltcube = datadir+"/ltcube.fits";
+    std::string lat_ltcube = PACKAGE_SOURCE"/ltcube.fits";
     std::string file1      = "test_lat_ltcube.fits";
     std::string file2      = "test_lat_ltcube_phi.fits";
 
@@ -391,9 +391,9 @@ void TestGLATObservation::test_binned_obs_p7(void)
 void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
 {
     // Set filenames
-    std::string lat_ft1       = datadir+"/ft1.fits";
-    std::string lat_ft2       = datadir+"/ft2.fits";
-    std::string lat_unbin_xml = datadir+"/obs_unbinned.xml";
+    std::string lat_ft1       = PACKAGE_SOURCE"/ft1.fits";
+    std::string lat_ft2       = PACKAGE_SOURCE"/ft2.fits";
+    std::string lat_unbin_xml = PACKAGE_SOURCE"/obs_unbinned.xml";
     std::string file1         = "test_lat_obs_unbinned.xml";
 
     // Declare observations
@@ -466,11 +466,11 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
 void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const std::string& irf)
 {
     // Set filenames
-    std::string lat_cntmap  = datadir+"/cntmap.fits";
-    std::string lat_srcmap  = datadir+"/srcmap.fits";
-    std::string lat_expmap  = datadir+"/binned_expmap.fits";
-    std::string lat_ltcube  = datadir+"/ltcube.fits";
-    std::string lat_bin_xml = datadir+"/obs_binned.xml";
+    std::string lat_cntmap  = PACKAGE_SOURCE"/cntmap.fits";
+    std::string lat_srcmap  = PACKAGE_SOURCE"/srcmap.fits";
+    std::string lat_expmap  = PACKAGE_SOURCE"/binned_expmap.fits";
+    std::string lat_ltcube  = PACKAGE_SOURCE"/ltcube.fits";
+    std::string lat_bin_xml = PACKAGE_SOURCE"/obs_binned.xml";
     std::string file1       = "test_lat_obs_binned.xml";
 
     // Declare observations
@@ -639,10 +639,10 @@ void TestGLATOptimize::test_one_binned_optimizer(const std::string& datadir,
                                                  const double*      fit_results)
 {
     // Set filenames
-    std::string lat_srcmap    = datadir+"/srcmap.fits";
-    std::string lat_expmap    = datadir+"/binned_expmap.fits";
-    std::string lat_ltcube    = datadir+"/ltcube.fits";
-    std::string lat_model_xml = datadir+"/source_model.xml";
+    std::string lat_srcmap    = PACKAGE_SOURCE"/srcmap.fits";
+    std::string lat_expmap    = PACKAGE_SOURCE"/binned_expmap.fits";
+    std::string lat_ltcube    = PACKAGE_SOURCE"/ltcube.fits";
+    std::string lat_model_xml = PACKAGE_SOURCE"/source_model.xml";
 
     // Setup GObservations for optimizing
     GObservations   obs;
@@ -697,7 +697,7 @@ int main(void)
     GTestSuites testsuites("LAT instrument specific class testing");
 
     // Check if data directory exists
-    bool has_data = (access("../inst/lat/test/data", R_OK) == 0);
+    bool has_data = (access(PACKAGE_SOURCE"/inst/lat/test/data", R_OK) == 0);
 
     // Initially assume that we pass all tests
     bool success = true;
