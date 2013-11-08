@@ -33,9 +33,11 @@
 #include "GTools.hpp"
 
 /* __ Static members _____________________________________________________ */
-int                    GModelTemporalRegistry::m_number(0);
-std::string*           GModelTemporalRegistry::m_names(0);
-const GModelTemporal** GModelTemporalRegistry::m_models(0);
+int                                     GModelTemporalRegistry::m_number(0);
+//std::string*           GModelTemporalRegistry::m_names(0);
+//const GModelTemporal** GModelTemporalRegistry::m_models(0);
+GRegistryPointer<std::string>           GModelTemporalRegistry::m_names(0);
+GRegistryPointer<const GModelTemporal*> GModelTemporalRegistry::m_models(0);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAME                           "GModelTemporalRegistry::name(int&)"
@@ -65,8 +67,9 @@ GModelTemporalRegistry::GModelTemporalRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelTemporalRegistry(void): ";
-    for (int i = 0; i < m_number; ++i)
+    for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -106,12 +109,14 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     new_models[m_number] = model;
 
     // Delete old registry
-    if (m_names  != NULL) delete [] m_names;
-    if (m_models != NULL) delete [] m_models;
+    //if (m_names  != NULL) delete [] m_names;
+    //if (m_models != NULL) delete [] m_models;
 
     // Set pointers on new registry
-    m_names  = new_names;
-    m_models = new_models;
+    //m_names  = new_names;
+    //m_models = new_models;
+    m_names.assign(new_names);
+    m_models.assign(new_models);
 
     // Increment number of models in registry
     m_number++;

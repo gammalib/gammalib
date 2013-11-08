@@ -35,6 +35,49 @@
 
 
 /***********************************************************************//**
+ * @class GRegistryPointer
+ *
+ * @brief Smart pointer for registry classes
+ ***************************************************************************/
+template <class T>
+class GRegistryPointer {
+
+public:
+    // Constructors and destructors
+    explicit GRegistryPointer(T* ptr = NULL) : m_ptr(ptr) { }
+    GRegistryPointer(const GRegistryPointer<T>& ptr) : m_ptr(ptr.m_ptr) {}
+    virtual ~GRegistryPointer(void) { free_members(); }
+
+    // Operators
+    GRegistryPointer<T>& operator=(const GRegistryPointer<T>& ptr) {
+        if (this != &ptr) {
+            free_members();
+            m_ptr = ptr.m_ptr;
+        }
+        return *this;
+    }
+    T& operator*() const { return *m_ptr; }
+    T* operator->() const { return m_ptr; }
+    T& operator[](const int& index) const { return m_ptr[index]; }
+
+    // Methods
+    void assign(T* ptr) {
+        free_members();
+        m_ptr = ptr;
+    }
+
+private:
+    // Protected methods
+    void free_members(void) {
+        if (m_ptr != NULL) delete [] m_ptr;
+    }
+
+    // Private members
+    T* m_ptr;  //!< Pointer
+};
+
+
+/***********************************************************************//**
  * @class GRegistry
  *
  * @brief Interface class for registries

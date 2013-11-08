@@ -75,10 +75,12 @@ protected:
     void free_members(void);
 
 private:
-    // Pricate members
+    // Private members
     static int                    m_number;   //!< Number of models in registry
-    static std::string*           m_names;    //!< Model names
-    static const GModelTemporal** m_models;   //!< Pointer to seed models
+    //static std::string*           m_names;    //!< Model names
+    //static const GModelTemporal** m_models;   //!< Pointer to seed models
+    static GRegistryPointer<std::string>           m_names;
+    static GRegistryPointer<const GModelTemporal*> m_models;
 };
 
 
