@@ -34,10 +34,12 @@
 
 /* __ Static members _____________________________________________________ */
 int                                     GModelTemporalRegistry::m_number(0);
-//std::string*           GModelTemporalRegistry::m_names(0);
-//const GModelTemporal** GModelTemporalRegistry::m_models(0);
-GRegistryPointer<std::string>           GModelTemporalRegistry::m_names(0);
-GRegistryPointer<const GModelTemporal*> GModelTemporalRegistry::m_models(0);
+std::string*           GModelTemporalRegistry::m_names(0);
+const GModelTemporal** GModelTemporalRegistry::m_models(0);
+//GRegistryPointer<std::string>           GModelTemporalRegistry::m_names(0);
+//GRegistryPointer<const GModelTemporal*> GModelTemporalRegistry::m_models(0);
+//std::auto_ptr<std::string>           GModelTemporalRegistry::m_names(0);
+//std::auto_ptr<const GModelTemporal*> GModelTemporalRegistry::m_models(0);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAME                           "GModelTemporalRegistry::name(int&)"
@@ -69,6 +71,7 @@ GModelTemporalRegistry::GModelTemporalRegistry(void)
     std::cout << "GModelTemporalRegistry(void): ";
     for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+//        std::cout << "\"" << (m_names.get())[i] << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -102,6 +105,8 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     for (int i = 0; i < m_number; ++i) {
         new_names[i]  = m_names[i];
         new_models[i] = m_models[i];
+//        new_names[i]  = (m_names.get())[i];
+//        new_models[i] = (m_models.get())[i];
     }
 
     // Add new model to registry
@@ -109,14 +114,16 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     new_models[m_number] = model;
 
     // Delete old registry
-    //if (m_names  != NULL) delete [] m_names;
-    //if (m_models != NULL) delete [] m_models;
+    if (m_names  != NULL) delete [] m_names;
+    if (m_models != NULL) delete [] m_models;
 
     // Set pointers on new registry
-    //m_names  = new_names;
-    //m_models = new_models;
-    m_names.assign(new_names);
-    m_models.assign(new_models);
+    m_names  = new_names;
+    m_models = new_models;
+    //m_names.assign(new_names);
+    //m_models.assign(new_models);
+    //m_names.reset(new_names);
+    //m_models.reset(new_models);
 
     // Increment number of models in registry
     m_number++;
@@ -126,6 +133,7 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     std::cout << "GModelTemporalRegistry(const GModelTemporal*): ";
     for (int i = 0; i < m_number; ++i) {
         std::cout << "\"" << m_names[i] << "\" ";
+//        std::cout << "\"" << (m_names.get())[i] << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -223,7 +231,9 @@ GModelTemporal* GModelTemporalRegistry::alloc(const std::string& name) const
     // Search for model in registry
     for (int i = 0; i < m_number; ++i) {
         if (m_names[i] == name) {
+//        if ((m_names.get())[i] == name) {
             model = m_models[i]->clone();
+//            model = (m_models.get())[i]->clone();
             break;
         }
     }    
@@ -253,6 +263,7 @@ std::string GModelTemporalRegistry::name(const int& index) const
 
     // Return name
     return (m_names[index]);
+//    return ((m_names.get())[index]);
 }
 
 
@@ -280,7 +291,9 @@ std::string GModelTemporalRegistry::print(const GChatter& chatter) const
         // Append models
         for (int i = 0; i < m_number; ++i) {
             result.append("\n"+gammalib::parformat(m_names[i]));
+//            result.append("\n"+gammalib::parformat((m_names.get())[i]));
             result.append(m_models[i]->type());
+//            result.append((m_models.get())[i]->type());
         }
 
     } // endif: chatter was not silent
