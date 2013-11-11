@@ -44,8 +44,8 @@ class GRegistryPointer {
 
 public:
     // Constructors and destructors
-    explicit GRegistryPointer(T* ptr = NULL) : m_ptr(ptr) { }
-    GRegistryPointer(const GRegistryPointer<T>& ptr) : m_ptr(ptr.m_ptr) {}
+    GRegistryPointer(void) : m_ptr(0) { }
+    GRegistryPointer(const GRegistryPointer<T>& ptr) : m_ptr(ptr.m_ptr) { }
     virtual ~GRegistryPointer(void) { free_members(); }
 
     // Operators

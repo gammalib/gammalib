@@ -75,14 +75,26 @@ protected:
     void free_members(void);
 
 private:
-    // Private members
-    static int                    m_number;   //!< Number of models in registry
-    static std::string*           m_names;    //!< Model names
-    static const GModelTemporal** m_models;   //!< Pointer to seed models
+    // Private members (the private members have been implement as static
+    // methods to avoid the static initialization order fiasco of static
+    // members; using static methods we follow the "construct on first use
+    // idiom")
+    //static int                    m_number;   //!< Number of models in registry
+    //static std::string*           m_names;    //!< Model names
+    //static const GModelTemporal** m_models;   //!< Pointer to seed models
     //static GRegistryPointer<std::string>           m_names;
-    //static GRegistryPointer<const GModelTemporal*> m_models;
-    //static std::auto_ptr<std::string>           m_names;
-    //static std::auto_ptr<const GModelTemporal*> m_models;
+    static int& number() {
+        static int m_number = 0;
+        return m_number;
+    };
+    static GRegistryPointer<std::string>& names() {
+        static GRegistryPointer<std::string> m_names;
+        return m_names;
+    };
+    static GRegistryPointer<const GModelTemporal*>& models() {
+        static GRegistryPointer<const GModelTemporal*> m_models;
+        return m_models;
+    };
 };
 
 
@@ -96,7 +108,7 @@ private:
 inline
 int GModelTemporalRegistry::size(void) const
 {
-    return m_number;
+    return number();
 }
 
 #endif /* GMODELTEMPORALREGISTRY_HPP */
