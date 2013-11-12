@@ -60,7 +60,7 @@ GModelTemporalRegistry::GModelTemporalRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelTemporalRegistry(void): ";
-    for (int i = 0; i < number(); ++i) {
+    for (int i = 0; i < size(); ++i) {
         std::cout << "\"" << names()[i] << "\" ";
     }
     std::cout << std::endl;
@@ -88,18 +88,18 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     #endif
 
     // Allocate new registry
-    std::string*           new_names  = new std::string[number()+1];
-    const GModelTemporal** new_models = new const GModelTemporal*[number()+1];
+    std::string*           new_names  = new std::string[size()+1];
+    const GModelTemporal** new_models = new const GModelTemporal*[size()+1];
 
     // Save old registry
-    for (int i = 0; i < number(); ++i) {
+    for (int i = 0; i < size(); ++i) {
         new_names[i]  = names()[i];
         new_models[i] = models()[i];
     }
 
     // Add new model to registry
-    new_names[number()]  = model->type();
-    new_models[number()] = model;
+    new_names[size()]  = model->type();
+    new_models[size()] = model;
 
     // Set pointers on new registry
     names().assign(new_names);
@@ -111,7 +111,7 @@ GModelTemporalRegistry::GModelTemporalRegistry(const GModelTemporal* model)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelTemporalRegistry(const GModelTemporal*): ";
-    for (int i = 0; i < number(); ++i) {
+    for (int i = 0; i < size(); ++i) {
         std::cout << "\"" << names()[i] << "\" ";
     }
     std::cout << std::endl;
@@ -165,7 +165,7 @@ GModelTemporalRegistry::~GModelTemporalRegistry(void)
  * @param[in] registry Registry.
  * @return Reference to registry.
  ***************************************************************************/
-GModelTemporalRegistry& GModelTemporalRegistry::operator= (const GModelTemporalRegistry& registry)
+GModelTemporalRegistry& GModelTemporalRegistry::operator=(const GModelTemporalRegistry& registry)
 {
     // Execute only if object is not identical
     if (this != &registry) {
@@ -208,7 +208,7 @@ GModelTemporal* GModelTemporalRegistry::alloc(const std::string& name) const
     GModelTemporal* model = NULL;
 
     // Search for model in registry
-    for (int i = 0; i < number(); ++i) {
+    for (int i = 0; i < size(); ++i) {
         if (names()[i] == name) {
             model = models()[i]->clone();
             break;
@@ -262,12 +262,14 @@ std::string GModelTemporalRegistry::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Number of models"));
-        result.append(gammalib::str(number()));
+        result.append(gammalib::str(size()));
 
-        // Append models
-        for (int i = 0; i < number(); ++i) {
-            result.append("\n"+gammalib::parformat(names()[i]));
-            result.append(models()[i]->type());
+        // NORMAL: Append models
+        if (chatter >= NORMAL) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+gammalib::parformat(names()[i]));
+                result.append(models()[i]->type());
+            }
         }
 
     } // endif: chatter was not silent

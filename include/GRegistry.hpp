@@ -105,7 +105,7 @@ public:
     ///
     /// Destroys class.
     virtual ~GRegistry(void) {}
- 
+
     /// @brief Return number of classes in registry
     ///
     /// Returns the number of classes that have been registered in the

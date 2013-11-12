@@ -79,18 +79,17 @@ private:
     // methods to avoid the static initialization order fiasco of static
     // members; using static methods we follow the "construct on first use
     // idiom")
-    //static int                    m_number;   //!< Number of models in registry
-    //static std::string*           m_names;    //!< Model names
-    //static const GModelTemporal** m_models;   //!< Pointer to seed models
-    //static GRegistryPointer<std::string>           m_names;
+    // Number of models in registry
     static int& number() {
         static int m_number = 0;
         return m_number;
     };
+    // Model names
     static GRegistryPointer<std::string>& names() {
         static GRegistryPointer<std::string> m_names;
         return m_names;
     };
+    // Pointer to seed models
     static GRegistryPointer<const GModelTemporal*>& models() {
         static GRegistryPointer<const GModelTemporal*> m_models;
         return m_models;

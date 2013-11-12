@@ -63,7 +63,7 @@ public:
     GCTAModelRadialRegistry& operator= (const GCTAModelRadialRegistry& registry);
 
     // Methods
-    int              size(void) const { return m_number; }
+    int              size(void) const;
     GCTAModelRadial* alloc(const std::string& name) const;
     std::string      name(const int& index) const;
     std::string      print(const GChatter& chatter = NORMAL) const;
@@ -75,10 +75,39 @@ protected:
     void free_members(void);
 
 private:
-    // Pricate members
-    static int                     m_number;   //!< Number of models in registry
-    static std::string*            m_names;    //!< Model names
-    static const GCTAModelRadial** m_models;   //!< Pointer to seed models
+    // Private members (the private members have been implement as static
+    // methods to avoid the static initialization order fiasco of static
+    // members; using static methods we follow the "construct on first use
+    // idiom")
+    // Number of models in registry
+    static int& number() {
+        static int m_number = 0;
+        return m_number;
+    };
+    // Model names
+    static GRegistryPointer<std::string>& names() {
+        static GRegistryPointer<std::string> m_names;
+        return m_names;
+    };
+    // Pointer to seed models
+    static GRegistryPointer<const GCTAModelRadial*>& models() {
+        static GRegistryPointer<const GCTAModelRadial*> m_models;
+        return m_models;
+    };
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of registered models
+ *
+ * @return Number of registered models.
+ *
+ * Returns the number of registered model.
+ ***************************************************************************/
+inline
+int GCTAModelRadialRegistry::size(void) const
+{
+    return number();
+}
 
 #endif /* GCTAMODELRADIALREGISTRY_HPP */

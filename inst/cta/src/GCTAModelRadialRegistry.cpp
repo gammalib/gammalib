@@ -29,12 +29,8 @@
 #include <config.h>
 #endif
 #include "GCTAModelRadialRegistry.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
-
-/* __ Static members _____________________________________________________ */
-int                     GCTAModelRadialRegistry::m_number(0);
-std::string*            GCTAModelRadialRegistry::m_names(0);
-const GCTAModelRadial** GCTAModelRadialRegistry::m_models(0);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_NAME                          "GCTAModelRadialRegistry::name(int&)"
@@ -64,8 +60,9 @@ GCTAModelRadialRegistry::GCTAModelRadialRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GCTAModelRadialRegistry(void): ";
-    for (int i = 0; i < m_number; ++i)
-        std::cout << "\"" << m_names[i] << "\" ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << names()[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -89,37 +86,33 @@ GCTAModelRadialRegistry::GCTAModelRadialRegistry(const GCTAModelRadial* model)
     std::cout << "GCTAModelRadialRegistry(const GCTAModelRadial*): ";
     std::cout << "add \"" << model->type() << "\" to registry." << std::endl;
     #endif
-    
-    // Allocate new old registry
-    std::string*            new_names  = new std::string[m_number+1];
-    const GCTAModelRadial** new_models = new const GCTAModelRadial*[m_number+1];
+
+    // Allocate new registry
+    std::string*            new_names  = new std::string[size()+1];
+    const GCTAModelRadial** new_models = new const GCTAModelRadial*[size()+1];
 
     // Save old registry
-    for (int i = 0; i < m_number; ++i) {
-        new_names[i]  = m_names[i];
-        new_models[i] = m_models[i];
+    for (int i = 0; i < size(); ++i) {
+        new_names[i]  = names()[i];
+        new_models[i] = models()[i];
     }
 
     // Add new model to registry
-    new_names[m_number]  = model->type();
-    new_models[m_number] = model;
-
-    // Delete old registry
-    if (m_names  != NULL) delete [] m_names;
-    if (m_models != NULL) delete [] m_models;
+    new_names[size()]  = model->type();
+    new_models[size()] = model;
 
     // Set pointers on new registry
-    m_names  = new_names;
-    m_models = new_models;
+    names().assign(new_names);
+    models().assign(new_models);
 
     // Increment number of models in registry
-    m_number++;
+    number()++;
 
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GCTAModelRadialRegistry(const GCTAModelRadial*): ";
-    for (int i = 0; i < m_number; ++i) {
-        std::cout << "\"" << m_names[i] << "\" ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << names()[i] << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -172,7 +165,7 @@ GCTAModelRadialRegistry::~GCTAModelRadialRegistry(void)
  * @param[in] registry Registry.
  * @return Reference to registry.
  ***************************************************************************/
-GCTAModelRadialRegistry& GCTAModelRadialRegistry::operator= (const GCTAModelRadialRegistry& registry)
+GCTAModelRadialRegistry& GCTAModelRadialRegistry::operator=(const GCTAModelRadialRegistry& registry)
 {
     // Execute only if object is not identical
     if (this != &registry) {
@@ -214,12 +207,12 @@ GCTAModelRadial* GCTAModelRadialRegistry::alloc(const std::string& name) const
     GCTAModelRadial* model = NULL;
 
     // Search for model in registry
-    for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == name) {
-            model = m_models[i]->clone();
+    for (int i = 0; i < size(); ++i) {
+        if (names()[i] == name) {
+            model = models()[i]->clone();
             break;
         }
-    }    
+    }
 
     // Return radial model
     return model;
@@ -245,7 +238,7 @@ std::string GCTAModelRadialRegistry::name(const int& index) const
     #endif
 
     // Return name
-    return (m_names[index]);
+    return (names()[index]);
 }
 
 
@@ -267,13 +260,15 @@ std::string GCTAModelRadialRegistry::print(const GChatter& chatter) const
         result.append("=== GCTAModelRadialRegistry ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("Number of models") +
-                      gammalib::str(m_number));
+        result.append("\n"+gammalib::parformat("Number of models"));
+        result.append(gammalib::str(size()));
 
-        // Append models
-        for (int i = 0; i < m_number; ++i) {
-            result.append("\n"+gammalib::parformat(m_names[i]));
-            result.append(m_models[i]->type());
+        // NORMAL: Append models
+        if (chatter >= NORMAL) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+gammalib::parformat(names()[i]));
+                result.append(models()[i]->type());
+            }
         }
 
     } // endif: chatter was not silent

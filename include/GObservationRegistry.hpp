@@ -64,7 +64,7 @@ public:
     GObservationRegistry& operator= (const GObservationRegistry& registry);
 
     // Methods
-    int           size(void) const { return m_number; }
+    int           size(void) const;
     GObservation* alloc(const std::string& name) const;
     std::string   name(const int& index) const;
     std::string   print(const GChatter& chatter = NORMAL) const;
@@ -76,10 +76,39 @@ protected:
     void free_members(void);
 
 private:
-    // Private members
-    static int                  m_number;  //!< Number of observations in registry
-    static std::string*         m_names;   //!< Instrument names
-    static const GObservation** m_obs;     //!< Pointer to seed observations
+    // Private members (the private members have been implement as static
+    // methods to avoid the static initialization order fiasco of static
+    // members; using static methods we follow the "construct on first use
+    // idiom")
+    // Number of models in registry
+    static int& number() {
+        static int m_number = 0;
+        return m_number;
+    };
+    // Model names
+    static GRegistryPointer<std::string>& names() {
+        static GRegistryPointer<std::string> m_names;
+        return m_names;
+    };
+    // Pointer to seed models
+    static GRegistryPointer<const GObservation*>& obs() {
+        static GRegistryPointer<const GObservation*> m_obs;
+        return m_obs;
+    };
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of registered observations
+ *
+ * @return Number of registered observations.
+ *
+ * Returns the number of registered observations.
+ ***************************************************************************/
+inline
+int GObservationRegistry::size(void) const
+{
+    return number();
+}
 
 #endif /* GOBSERVATIONREGISTRY_HPP */
