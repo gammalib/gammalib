@@ -82,7 +82,7 @@ check_PROGRAMS = test_GSupport \
 # Set test environment (needed for linking with cfitsio and readline)
 TESTS_ENVIRONMENT = @RUNSHARED@=$(top_builddir)/src/.libs$(TEST_ENV_DIR):$(@RUNSHARED@) \
                     $(TEST_PYTHON_ENV) \
-                    GAMMALIB_SOURCE=$(abs_top_srcdir)
+                    PACKAGE_SOURCE=$(PACKAGE_SOURCE)
 
 # Tests (these are the tests to be executed)
 TESTS = test_GSupport \
@@ -182,7 +182,7 @@ test_GObservation_LDADD = $(top_srcdir)/src/libgamma.la
 # Add Valgrind rule
 #	
 valgrind:
-	@export GAMMALIB_SOURCE=$(abs_top_srcdir) ; \
+	@export PACKAGE_SOURCE=$(PACKAGE_SOURCE) ; \
 	if type valgrind >/dev/null 2>&1; then \
 		cd .. ; \
 		ln -s test/data data ; \

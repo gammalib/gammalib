@@ -1,6 +1,6 @@
 <observation_list title="observation library">
   <observation name="Crab" id="00001" instrument="CTA">
-    <parameter name="CountsMap"           file="$(GAMMALIB_SOURCE)/inst/cta/test/data/crab_cntmap.fits"/>
+    <parameter name="CountsMap"           file="$(PACKAGE_SOURCE)/inst/cta/test/data/crab_cntmap.fits"/>
     <parameter name="EffectiveArea"       file=""/>
     <parameter name="PointSpreadFunction" file=""/>
     <parameter name="EnergyDispersion"    file=""/>

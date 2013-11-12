@@ -1,8 +1,8 @@
 <observation_list title="observation library">
   <observation name="Crab" id="000001" instrument="CTA">
-    <parameter name="EventList"           file="$(GAMMALIB_SOURCE)/inst/cta/test/data/crab_events.fits"/>
-    <parameter name="EffectiveArea"       file="$(GAMMALIB_SOURCE)/inst/cta/caldb/dummy/bcf/hard/000001/ea_test.fits"/>
-    <parameter name="PointSpreadFunction" file="$(GAMMALIB_SOURCE)/inst/cta/caldb/dummy/bcf/hard/000001/psf_test.fits"/>
-    <parameter name="EnergyDispersion"    file="$(GAMMALIB_SOURCE)/inst/cta/caldb/dummy/bcf/hard/000001/edisp_test.fits"/>
+    <parameter name="EventList"           file="$(PACKAGE_SOURCE)/inst/cta/test/data/crab_events.fits"/>
+    <parameter name="EffectiveArea"       file="$(PACKAGE_SOURCE)/inst/cta/caldb/dummy/bcf/hard/000001/ea_test.fits"/>
+    <parameter name="PointSpreadFunction" file="$(PACKAGE_SOURCE)/inst/cta/caldb/dummy/bcf/hard/000001/psf_test.fits"/>
+    <parameter name="EnergyDispersion"    file="$(PACKAGE_SOURCE)/inst/cta/caldb/dummy/bcf/hard/000001/edisp_test.fits"/>
   </observation>
 </observation_list>
