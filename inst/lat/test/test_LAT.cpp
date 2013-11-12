@@ -439,8 +439,7 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
     // Test XML loading
     test_try("Test XML loading");
     try {
-        std::string caldb = "CALDB="+lat_caldb;
-        putenv((char*)caldb.c_str());
+        setenv("CALDB", lat_caldb.c_str(), 1);
         obs = GObservations(lat_unbin_xml);
         obs.save(file1);
         test_try_success();
@@ -547,8 +546,7 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
     // Test XML loading
     test_try("Test XML loading");
     try {
-        std::string caldb = "CALDB="+lat_caldb;
-        putenv((char*)caldb.c_str());
+        setenv("CALDB", lat_caldb.c_str(), 1);
         obs = GObservations(lat_bin_xml);
         obs.save(file1);
         test_try_success();
