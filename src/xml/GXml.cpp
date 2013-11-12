@@ -898,8 +898,8 @@ void GXml::process_markup(GXmlNode** current, const std::string& segment)
     // Processing tag
     case MT_PROCESSING:
         {
-            GXmlPI* pi = new GXmlPI(segment);
-            (*current)->append(*pi);
+            GXmlPI pi(segment);
+            (*current)->append(pi);
         }
         break;
 
