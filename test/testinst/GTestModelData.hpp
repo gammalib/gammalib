@@ -56,7 +56,7 @@ public:
     }
     explicit GTestModelData(const GXmlElement& xml) : GModelData(xml) {
         init_members();
-        m_modelTps = new GModelTemporalConst();
+        //m_modelTps = new GModelTemporalConst();
         set_pointers();
         return;
     }
@@ -224,16 +224,18 @@ public:
     
 protected:
     // Protected methods
-    void init_members(void){
+    void init_members(void) {
         m_modelTps = new GModelTemporalConst();
     }
     void copy_members(const GTestModelData& model){
-        m_modelTps=model.temporal()->clone();
+        m_modelTps = model.temporal()->clone();
 
         // Set parameter pointers
         set_pointers();
     }
-    void free_members(void){ return; }
+    void free_members(void) {
+        delete m_modelTps;
+    }
         
     void set_pointers(void){
         //Clear parameters list
