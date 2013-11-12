@@ -197,22 +197,23 @@ void TestGCOMResponse::test_pointing(void)
     test_assert(pnt.dir() == sky, "Test dir() method.",
                 "Expected "+sky.print()+", found "+pnt.dir().print());
 
-    // copy constructor
+    // Copy constructor
     GCOMPointing pnt_copy(pnt);
     test_assert(pnt_copy.dir() == sky, "Test copy constructor method.",
                 "Expected "+sky.print()+", found "+pnt_copy.dir().print());
 
-    // assignment operator
+    // Assignment operator
     GCOMPointing pnt_assign = pnt;
     test_assert(pnt_assign.dir() == sky, "Test assignment operator method.",
                 "Expected "+sky.print()+", found "+pnt_assign.dir().print());
 
-    // clone
+    // clone method
     GCOMPointing* pnt_clone = pnt.clone();
     test_assert(pnt_clone->dir() == sky, "Test clone() method.",
                 "Expected "+sky.print()+", found "+pnt_clone->dir().print());
+    delete pnt_clone;
 
-    // clear
+    // clear method
     pnt.clear();
     sky.clear();
     test_assert(pnt.dir() == sky, "Test clear() method.",
@@ -460,6 +461,7 @@ void TestGCOMObservation::test_event_cube(void)
                "Different number of events after cloning"
                " (before="+gammalib::str(cube2.number())+
                " after="+gammalib::str(cube5->number())+").");
+    delete cube5;
 
     // size method
     test_value(cube2.size(), 140600, "Test size() method.",
