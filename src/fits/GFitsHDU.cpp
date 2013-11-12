@@ -651,7 +651,7 @@ void GFitsHDU::copy_members(const GFitsHDU& hdu)
 void GFitsHDU::free_members(void)
 {
     // Free memory
-    if (m_fitsfile != NULL) delete FPTR(m_fitsfile);
+    if (m_fitsfile != NULL) delete m_fitsfile;
 
     // Signal free pointers
     m_fitsfile = NULL;
