@@ -57,7 +57,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GLATPsfV1::GLATPsfV1(void)
+GLATPsfV1::GLATPsfV1(void) : GLATPsfBase()
 {
     // Initialise class members
     init_members();
@@ -72,7 +72,7 @@ GLATPsfV1::GLATPsfV1(void)
  *
  * @param[in] psf Point spread function.
  ***************************************************************************/
-GLATPsfV1::GLATPsfV1(const GLATPsfV1& psf)
+GLATPsfV1::GLATPsfV1(const GLATPsfV1& psf) : GLATPsfBase(psf)
 {
     // Initialise class members
     init_members();
@@ -109,7 +109,7 @@ GLATPsfV1::~GLATPsfV1(void)
  *
  * @param[in] psf Point spread function.
  ***************************************************************************/
-GLATPsfV1& GLATPsfV1::operator= (const GLATPsfV1& psf)
+GLATPsfV1& GLATPsfV1::operator=(const GLATPsfV1& psf)
 {
     // Execute only if object is not identical
     if (this != &psf) {

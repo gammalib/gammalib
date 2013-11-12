@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GLATPsfV3.cpp - Fermi-LAT point spread function version 3        *
+ *        GLATPsfV3.cpp - Fermi/LAT point spread function version 3        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfV3.cpp
- * @brief Fermi-LAT point spread function version 3 class implementation
+ * @brief Fermi/LAT point spread function version 3 class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -58,7 +58,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GLATPsfV3::GLATPsfV3(void)
+GLATPsfV3::GLATPsfV3(void) : GLATPsfBase()
 {
     // Initialise class members
     init_members();
@@ -73,7 +73,7 @@ GLATPsfV3::GLATPsfV3(void)
  *
  * @param[in] psf Point spread function.
  ***************************************************************************/
-GLATPsfV3::GLATPsfV3(const GLATPsfV3& psf)
+GLATPsfV3::GLATPsfV3(const GLATPsfV3& psf) : GLATPsfBase(psf)
 {
     // Initialise class members
     init_members();
@@ -110,7 +110,7 @@ GLATPsfV3::~GLATPsfV3(void)
  *
  * @param[in] psf Point spread function.
  ***************************************************************************/
-GLATPsfV3& GLATPsfV3::operator= (const GLATPsfV3& psf)
+GLATPsfV3& GLATPsfV3::operator=(const GLATPsfV3& psf)
 {
     // Execute only if object is not identical
     if (this != &psf) {
