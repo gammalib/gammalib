@@ -545,6 +545,7 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
 
     // Copy NULL value
     if (column.m_nulval != NULL) {
+        if (m_nulval != NULL) delete [] m_nulval;
         m_nulval = new char[m_width+1];
         std::strncpy(m_nulval, column.m_nulval, m_width);
     }
