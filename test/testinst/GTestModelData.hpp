@@ -165,30 +165,30 @@ public:
         GTestInstDir dir;
         
         // Generate an times list.
-        GTimes times = m_modelTps->mc(rate,tmin, tmax,ran);
+        GTimes times = m_modelTps->mc(rate, tmin, tmax, ran);
 
-        GTestEventBin * bin = new GTestEventBin();
-        bin->time(times[0]);
-        bin->energy(engmin);
-        bin->ewidth(engmax-engmin);
-        bin->dir(dir);
-        bin->ontime(100); // 10 sec per bin
+        GTestEventBin bin;
+        bin.time(times[0]);
+        bin.energy(engmin);
+        bin.ewidth(engmax-engmin);
+        bin.dir(dir);
+        bin.ontime(10); // 10 sec per bin
 
         for (int i = 0; i < times.size(); ++i) {
-            if ((bin->time().secs()+bin->ontime())<times[i].secs()){
+            if ((bin.time().secs() + bin.ontime()) < times[i].secs()) {
 
-                //Add the event to the cube
-                cube->append(*bin);
+                // Add the event to the cube
+                cube->append(bin);
                 
-                bin = new GTestEventBin();
-                bin->time(times[i]);
-                bin->energy(engmin);
-                bin->ewidth(engmax-engmin);
-                bin->dir(dir);
-                bin->ontime(10); // 10 sec per bin
+                bin.counts(0.0);
+                bin.time(times[i]);
+                bin.energy(engmin);
+                bin.ewidth(engmax-engmin);
+                bin.dir(dir);
+                bin.ontime(10); // 10 sec per bin
             }
   
-            bin->counts(bin->counts()+1);
+            bin.counts(bin.counts()+1);
 
         }
         
