@@ -1957,6 +1957,11 @@ void TestGModel::test_models(void)
         models.extend(other_models);
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 2);
+
+        // Free model
+        delete model;
+
+        // Signal success
         test_try_success();
     }
     catch (std::exception &e) {
