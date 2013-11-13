@@ -2655,6 +2655,9 @@ void GMatrixSparse::alloc_members(const int& rows, const int& columns,
     // Continue only if rows and columns are valid
     if (rows > 0 && columns > 0) {
 
+        // Free any existing memory
+        if (m_colstart != NULL) delete [] m_colstart;
+
         // Allocate column start array. This is the only array that we can
         // allocate at this time. The other arrays can only be allocated
         // during filling of the matrix
