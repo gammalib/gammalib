@@ -153,6 +153,7 @@ void TestGCOMResponse::test_inst_dir(void)
     test_assert(dir_clone->dir() == sky, "Test clone() method.",
                 "Expected "+sky.print()+", found "+dir_clone->dir().print());
     test_value(dir_clone->phibar(), 27.2, 1.0e-10, "Test clone() method.");
+    delete dir_clone;
 
     // clear
     dir.clear();
@@ -358,6 +359,7 @@ void TestGCOMObservation::test_event_bin(void)
         // size method
         test_value(bin.size(), 0.0, 1.0e-10, "Test size() method.");
         test_value(bin4->size(), 0.0, 1.0e-10, "Test size() method.");
+        delete bin4;
 
         // dir method
         GCOMInstDir dir = bin.dir();
