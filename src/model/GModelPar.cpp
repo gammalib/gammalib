@@ -869,8 +869,10 @@ std::string GModelPar::print(const GChatter& chatter) const
 void GModelPar::init_members(void)
 {
     // Initialise members
-    m_name.clear();
-    m_unit.clear();
+    //m_name.clear();
+    //m_unit.clear();
+    m_name            = "";
+    m_unit            = "";
     m_factor_value    = 0.0;
     m_factor_error    = 0.0;
     m_factor_gradient = 0.0;
