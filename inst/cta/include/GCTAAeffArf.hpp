@@ -35,6 +35,9 @@
 #include "GFitsTable.hpp"
 #include "GCTAAeff.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GCTAResponse;
+
 
 /***********************************************************************//**
  * @class GCTAAeffArf
@@ -78,6 +81,7 @@ public:
     void          scale(const double& scale) { m_scale=scale; }
     const double& scale(void) const { return m_scale; }
     void          read_arf(const GFitsTable* hdu);
+    void          apply_thetacut(const GCTAResponse& rsp);
     
 private:
     // Methods

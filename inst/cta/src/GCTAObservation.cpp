@@ -501,9 +501,7 @@ void GCTAObservation::read(const GXmlElement& xml)
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response->aeff()));
     if (arf != NULL) {
         if (arf->thetacut() > 0.0) {
-            // TODO
-            // Loop over all energies in ARF vector, determine PSF integral,
-            // and perform correction
+            arf->apply_thetacut(*m_response);
         }
     }
 

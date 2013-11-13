@@ -30,9 +30,12 @@
 #endif
 #include "GTools.hpp"
 #include "GMath.hpp"
+#include "GIntegral.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsTableCol.hpp"
 #include "GCTAAeffArf.hpp"
+#include "GCTAResponse.hpp"
+#include "GCTAResponse_helpers.hpp"
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -43,6 +46,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_APPLY_THETACUT              //!< Debug thetacut application
 
 /* __ Constants __________________________________________________________ */
 
@@ -74,12 +78,12 @@ GCTAAeffArf::GCTAAeffArf(void) : GCTAAeff()
  * Construct instance by loading the effective area information from an
  * ARF FITS file.
  ***************************************************************************/
-GCTAAeffArf::GCTAAeffArf(const std::string& filename) : GCTAAeff()
+GCTAAeffArf::GCTAAeffArf(const std::string&  filename) : GCTAAeff()
 {
     // Initialise class members
     init_members();
 
-    // Load effective area from file
+    // Load ARF
     load(filename);
 
     // Return
@@ -283,6 +287,7 @@ std::string GCTAAeffArf::filename(void) const
  * @brief Read CTA ARF vector
  *
  * @param[in] hdu FITS table pointer.
+ * @param[in] rsp CTA response pointer (optional, defaults to NULL).
  *
  * This method reads a CTA ARF vector from the FITS HDU. Note that the
  * energies are converted to TeV and the effective area is converted to cm2.
@@ -348,52 +353,6 @@ void GCTAAeffArf::read_arf(const GFitsTable* hdu)
         // Initialise scale factor
         double scale = m_scale;
 
-        // Optionally compute scaling factor from thetacut. This is done
-        // by computing the containment fraction for the specified thetacut.
-/*
-        if (m_thetacut > 0.0) {
-
-            // Get PSF parameters for node energy and theta angle
-            //TODO: Implement theta angle computation
-            GCTAPsfPars pars = psf_dummy_sigma(logE, 0.0);
-
-            // Get maximum integration radius
-            double rmax = m_thetacut * deg2rad;
-
-            // Setup integration kernel
-            cta_npsf_kern_rad_azsym integrand(this,
-                                              rmax,
-                                              0.0,
-                                              pars);
-
-            // Setup integration
-            GIntegral integral(&integrand);
-            integral.eps(m_eps);
-
-            // Perform integration
-            double fraction = integral.romb(0.0, rmax);
-
-            // Update scale factor
-            if (fraction > 0.0) {
-                scale /= fraction;
-                #if defined(G_DEBUG_READ_ARF)
-                std::cout << "GCTAAeffArf::read_arf:";
-                std::cout << " e_min=" << e_min;
-                std::cout << " e_max=" << e_max;
-                std::cout << " logE=" << logE;
-                std::cout << " scale=" << scale;
-                std::cout << " fraction=" << fraction;
-                std::cout << std::endl;
-                #endif
-            }
-            else {
-                std::cout << "WARNING: GCTAAeffArf::read_arf:";
-                std::cout << " Non-positive integral occured in";
-                std::cout << " PSF integration in GCTAResponse::read_arf.";
-                std::cout << std::endl;
-            }
-        }
-*/
         // Compute effective area in cm2
         double aeff = specresp->real(i) * c_specresp * scale;
         
@@ -405,6 +364,76 @@ void GCTAAeffArf::read_arf(const GFitsTable* hdu)
     
     // Disable offset angle dependence
     m_sigma = 0.0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Apply thetacut
+ *
+ * @param[in] rsp CTA response.
+ *
+ * Applies thetacut to Aeff values read from a FITS file. Note that this
+ * method should only be called once directly after loading all response
+ * components.
+ ***************************************************************************/
+void GCTAAeffArf::apply_thetacut(const GCTAResponse& rsp)
+{
+    // Continue only if thetacut value has been set
+    if (m_thetacut > 0.0) {
+
+        // Get maximum integration radius
+        double rmax = m_thetacut * gammalib::deg2rad;
+
+        // Loop over Aeff array
+        for (int i = 0; i < m_aeff.size(); ++i) {
+    
+            // Setup integration kernel for on-axis PSF
+            cta_npsf_kern_rad_azsym integrand(rsp,
+                                              rmax,
+                                              0.0,
+                                              m_logE[i],
+                                              0.0,
+                                              0.0,
+                                              0.0,
+                                              0.0);
+
+            // Setup integration
+            GIntegral integral(&integrand);
+            integral.eps(rsp.eps());
+
+            // Perform integration
+            double fraction = integral.romb(0.0, rmax);
+
+            // Set scale factor
+            double scale = 1.0;
+            if (fraction > 0.0) {
+                scale /= fraction;
+                #if defined(G_DEBUG_APPLY_THETACUT)
+                std::cout << "GCTAAeffArf::apply_thetacut:";
+                std::cout << " logE=" << m_logE[i];
+                std::cout << " scale=" << scale;
+                std::cout << " fraction=" << fraction;
+                std::cout << std::endl;
+                #endif
+            }
+            else {
+                std::cout << "WARNING: GCTAAeffArf::apply_thetacut:";
+                std::cout << " Non-positive integral occured in";
+                std::cout << " PSF integration.";
+                std::cout << std::endl;
+            }
+
+            // Apply scaling factor
+            if (scale != 1.0) {
+                m_aeff[i] *= scale;
+            }
+
+        } // endfor: looped over Aeff array
+
+    } // endif: thetacut value was set
 
     // Return
     return;
