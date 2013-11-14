@@ -739,6 +739,8 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
 
     // Optimize
     obs.optimize(opt);
+std::cout << opt << std::endl;
+std::cout << obs << std::endl;
 
     // Get the result
     GModelPar result = (*(obs.models()[0]))[0];
