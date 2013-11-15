@@ -32,8 +32,8 @@
 #include "GTools.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRegistry.hpp"
-#include "GFitsTableDoubleCol.hpp"
-
+#include "GFitsTable.hpp"
+#include "GFitsTableCol.hpp"
 
 /* __ Constants __________________________________________________________ */
 
@@ -44,16 +44,19 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 /* __ Method name definitions ____________________________________________ */
 #define G_EVAL                     "GModelSpatialDiffuseCube::eval(GSkyDir&)"
 #define G_EVAL_GRADIENTS "GModelSpatialDiffuseCube::eval_gradients(GSkyDir&)"
-#define G_MC                            "GModelSpatialDiffuseCube::mc(GRan&)"
+#define G_MC          "GModelSpatialDiffuseCube::mc(GEnergy&, GTime&, GRan&)"
 #define G_READ                 "GModelSpatialDiffuseCube::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
-#define G_LOAD               "GModelSpatialDiffuseCube::load(std::string& filename)"
+#define G_LOAD                 "GModelSpatialDiffuseCube::load(std::string&)"
+#define G_ENERGIES           "GModelSpatialDiffuseCube::energies(std::vector"\
+                                                                "<GEnergy>&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_CACHE                             //!< Dump MC cache values
 
 
 /*==========================================================================
@@ -105,9 +108,8 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GXmlElement& xml) :
  * @param[in] filename File name.
  * @param[in] value Normalization factor (defaults to 1).
  *
- * Constructs map cube model by assigning the normalization @p value and the
- * @p filename of the map cube. Note that the map cube file is not opened,
- * only the filename is stored for use when required.
+ * Constructs map cube model by loading a map cube from @p filename and by
+ * assigning the normalization @p value.
  ***************************************************************************/
 GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const std::string& filename,
                                                    const double&      value) :
@@ -133,14 +135,17 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const std::string& filename,
 /***********************************************************************//**
  * @brief Sky map constructor
  *
- * @param[in] map Sky map.
+ * @param[in] cube Sky map cube.
+ * @param[in] energies Sky map energies.
  * @param[in] value Normalization factor (defaults to 1).
  *
- * Constructs map cube model by assigning the normalisation @p value and by
- * loading a @p map cube from a sky map. The filename will remain blank.
+ * Constructs map cube model by extracting a @p cube from a sky map. The
+ * constructor also assigns the energy values for all maps and sets the
+ * scaling @p value. The filename will remain blank.
  ***************************************************************************/
-GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap& map,
-                                                   const double&  value) :
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap&              cube,
+                                                   const std::vector<GEnergy>& energies,
+                                                   const double&               value) :
                           GModelSpatialDiffuse()
 {
     // Initialise members
@@ -153,7 +158,10 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap& map,
     autoscale();
 
     // Set map cube
-    cube(map);
+    this->cube(cube);
+
+    // Set energies
+    this->energies(energies);
 
     // Return
     return;
@@ -204,7 +212,7 @@ GModelSpatialDiffuseCube::~GModelSpatialDiffuseCube(void)
  * @param[in] model Map cube model.
  * @return Map cube model.
  ***************************************************************************/
-GModelSpatialDiffuseCube& GModelSpatialDiffuseCube::operator= (const GModelSpatialDiffuseCube& model)
+GModelSpatialDiffuseCube& GModelSpatialDiffuseCube::operator=(const GModelSpatialDiffuseCube& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -272,22 +280,30 @@ GModelSpatialDiffuseCube* GModelSpatialDiffuseCube::clone(void) const
  * @param[in] photon Incident photon.
  * @return Model value.
  *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented
- *
- * @todo Implement method.
+ * Computes the spatial diffuse model as function of photon parameters.
  ***************************************************************************/
 double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
 {
-	// Get skymap bin
-	int imap = m_ebounds.index(photon.energy());
+    // Initialise value
+    double value = 0.0;
 
-	// Get skymap intensity
-	double intensity = m_cube(photon.dir(), imap);
+    // Continue only if there is energy information for the map cube
+    if (m_logE.size() > 0) {
 
-	// Return intensity times normalization factor
-	return (intensity * m_value.value());
+        // Compute diffuse model value by interpolation in log10(energy)
+        m_logE.set_value(photon.energy().log10MeV());
+        double intensity = m_logE.wgt_left() *
+                           m_cube(photon.dir(), m_logE.inx_left()) +
+                           m_logE.wgt_right() *
+                           m_cube(photon.dir(), m_logE.inx_right());
 
+        // Set the intensity times the scaling factor as model value
+        value = intensity * m_value.value();
+
+    } // endif: energy information was available
+
+    // Return value
+    return value;
 }
 
 
@@ -297,15 +313,29 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
  * @param[in] photon Incident photon.
  * @return Model value.
  *
- * @todo Implement method.
+ * Computes the spatial diffuse model as function of photon parameters and
+ * sets the value gradient.
  ***************************************************************************/
 double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
 {
-	// Get skymap bin
-	int imap = m_ebounds.index(photon.energy());
+    // Initialise intensity
+    double intensity = 0.0;
 
-	// Get skymap intensity
-	double intensity = m_cube(photon.dir(), imap);
+    // Continue only if there is energy information for the map cube
+    if (m_logE.size() > 0) {
+
+        // Compute diffuse model value by interpolation in log10(energy)
+        m_logE.set_value(photon.energy().log10MeV());
+        intensity = m_logE.wgt_left() *
+                    m_cube(photon.dir(), m_logE.inx_left()) +
+                    m_logE.wgt_right() *
+                    m_cube(photon.dir(), m_logE.inx_right());
+
+
+    } // endif: energy information was available
+
+    // Compute the model value
+    double value = intensity * m_value.value();
 
 	// Compute partial derivatives of the parameter value
 	double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
@@ -313,9 +343,8 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
 	// Set gradient to 0 (circumvent const correctness)
 	const_cast<GModelSpatialDiffuseCube*>(this)->m_value.factor_gradient(g_value);
 
-	// Return intensity times normalization factor
-	return (intensity * m_value.value());
-
+    // Return value
+    return value;
 }
 
 
@@ -327,10 +356,20 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
  * @param[in,out] ran Random number generator.
  * @return Sky direction.
  *
- * @exception GException::feature_not_implemented
- *            Method not yet implemented
+ * @exception GException::invalid_value
+ *            No energy boundaries specified, or energy boundaries do not
+ *            cover the specified @p energy.
  *
- * @todo Implement method.
+ * Returns a random sky direction according to the intensity distribution of
+ * the model sky map and the specified energy. The method makes use of a
+ * cache array that contains the normalised cumulative flux values for each
+ * of the sky maps in the cube. The specified energy is used to select the
+ * appropriate cache array from the cube. Using a uniform random number, the
+ * selected cache array is scanned using a bi-section method to determine
+ * the skymap pixel for which the position should be returned. To avoid
+ * binning problems, the exact position within the pixel is set by a uniform
+ * random number generator (neglecting thus pixel distortions). The
+ * fractional skymap pixel is then converted into a sky direction.
  ***************************************************************************/
 GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
                                      const GTime&   time,
@@ -339,16 +378,82 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
     // Allocate sky direction
     GSkyDir dir;
 
-    // Dump warning that method is not yet implemented
-    throw GException::feature_not_implemented(G_MC);
+    // Determine number of skymap pixels
+    int npix = pixels();
+
+    // Continue only if there are skymap pixels
+    if (npix > 0) {
+
+        // If no energy boundaries are defined, throw an exception
+        if (m_ebounds.size() < 1) {
+            std::string msg = "The energy boundaries of the maps in the cube"
+                              " have not been defined. Maybe the map cube file"
+                              " is missing the \"ENERGIES\" extension which"
+                              " defines the energy of each map in the cube.\n"
+                              "Please provide the energy information."; 
+            throw GException::invalid_value(G_MC, msg);
+        }
+
+        // Determine the map that corresponds best to the specified energy.
+        // This is not 100% clean, as ideally some map interpolation should
+        // be done to the exact energy specified. However, as long as the map
+        // does not change drastically with energy, taking the closest map
+        // seems to be fine.
+        int i = m_ebounds.index(energy);
+        if (i < 0) {
+            if (energy <= m_ebounds.emin()) {
+                i = 0;
+            }
+            else if (energy >= m_ebounds.emax()) {
+                i = m_ebounds.size()-1;
+            }
+            else {
+                std::string msg = "The specified energy "+energy.print()+" does"
+                                  " not fall in any of the energy boundaries of"
+                                  " the map cube.\n"
+                                  "Please make sure that the map cube energies"
+                                  " are properly defined.";
+                throw GException::invalid_value(G_MC, msg);
+            }
+        }
+        
+        // Get uniform random number
+        double u = ran.uniform();
+
+        // Get pixel index according to random number. We use a bi-section
+        // method to find the corresponding skymap pixel
+        int offset = i * (npix+1);
+        int low    = offset;
+        int high   = offset + npix;
+        while ((high - low) > 1) {
+            int mid = (low+high) / 2;
+            if (u < m_mc_cache[mid]) {
+                high = mid;
+            }
+            else if (m_mc_cache[mid] <= u) {
+                low = mid;
+            }
+        }
+
+        // Convert 1D pixel index to 2D pixel index
+        GSkyPixel pixel = m_cube.pix2xy(low-offset);
+
+        // Randomize pixel
+        pixel.x(pixel.x() + ran.uniform() - 0.5);
+        pixel.y(pixel.y() + ran.uniform() - 0.5);
+
+        // Get sky direction
+        dir = m_cube.xy2dir(pixel);
     
+    } // endif: there were pixels in sky map
+
     // Return sky direction
     return dir;
 }
 
 
 /***********************************************************************//**
- * @brief _ model from XML element
+ * @brief Read model from XML element
  *
  * @param[in] xml XML element.
  *
@@ -484,6 +589,162 @@ void GModelSpatialDiffuseCube::write(GXmlElement& xml) const
 
 
 /***********************************************************************//**
+ * @brief Load cube into the model class
+ *
+ * @param[in] filename cube file.
+ *
+ * @exception GException::invalid_value
+ *            Number of maps in cube mismatches number of energy bins.
+ *
+ * Loads cube into the model class.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::load(const std::string& filename)
+{
+    // Initialise skymap
+    m_cube.clear();
+    m_logE.clear();
+
+    // Store filename of cube (for XML writing). Note that we do not
+    // expand any environment variable at this level, so that if we write
+    // back the XML element we write the filepath with the environment
+    // variables
+    m_filename = filename;
+
+    // Load cube
+    m_cube.load(gammalib::expand_env(m_filename));
+
+    // Load the energy binning definition
+    GFits file(gammalib::expand_env(m_filename));
+
+    // Get the table extension "ENERGIES"
+    GFitsTable* energies = file.table("ENERGIES");
+
+    // Read only if extension "ENERGIES" exists
+    if (energies != NULL) {
+
+        // Extract number of energy bins in FITS file
+        int num = energies->integer("NAXIS2");
+
+        // Check if energy binning is consistent with primary image hdu
+        if (num != m_cube.nmaps() ) {
+            std::string msg = "Number of energies in \"ENERGIES\" extension"
+                              " ("+gammalib::str(num)+") does not match the"
+                              " number of maps ("+gammalib::str(m_cube.nmaps())+""
+                              " in the map cube.\n"
+                              "The \"ENERGIES\" extension table shall provide"
+                              " one enegy value for each map in the cube.";
+            throw GException::invalid_value(G_LOAD, msg);
+        }
+
+        // Get the unit of the energies. If no TUNIT1 header keyword is found
+        // then use MeV
+        std::string unit = "MeV";
+        if (energies->header()->hascard("TUNIT1")) {
+            unit = energies->string("TUNIT1");
+        }
+
+        // Get the column with the name "Energy"
+        const GFitsTableCol& col_energy = (*energies)["Energy"];
+
+        // Set log10(energy) nodes, where energy is in units of MeV
+        for (int i = 0; i < num; ++i) {
+            GEnergy energy(col_energy.real(i), unit);
+            m_logE.append(energy.log10MeV());
+        }
+
+    } // endif: ENERGIES extension existed
+
+    // Set energy boundaries
+    set_energy_boundaries();
+
+    // Update Monte Carlo cache
+    update_mc_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energies for map cube
+ *
+ * @param[in] energies Sky map energies.
+ *
+ * @exception GException::invalid_argument
+ *            Specified sky map energies incompatible with map cube.
+ *
+ * Sets the energies for the map cube.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::energies(const std::vector<GEnergy>& energies)
+{
+    // Initialise energies
+    m_logE.clear();
+
+    // Extract number of energies in vector
+    int num = energies.size();
+
+    // Check if energy binning is consistent with number of maps in the cube
+    if (num != m_cube.nmaps() ) {
+        std::string msg = "Number of specified energies ("+gammalib::str(num)+")"
+                          " does not match the number of maps ("
+                          ""+gammalib::str(m_cube.nmaps())+" in the map cube.\n"
+                          "The energies argument shall provide a vector of length"
+                          " "+gammalib::str(m_cube.nmaps())+".";
+        throw GException::invalid_argument(G_ENERGIES, msg);
+    }
+
+    // Set log10(energy) nodes, where energy is in units of MeV
+    for (int i = 0; i < num; ++i) {
+        m_logE.append(energies[i].log10MeV());
+    }
+
+    // Set energy boundaries
+    set_energy_boundaries();
+
+    // Update MC cache
+    update_mc_cache();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns map cube energies
+ *
+ * @return Map cube energies.
+ *
+ * Returns the energies for the map cube in a vector.
+ ***************************************************************************/
+std::vector<GEnergy> GModelSpatialDiffuseCube::energies(void)
+{
+    // Initialise vector of energies
+    std::vector<GEnergy> energies;
+
+    // Get number of map energies
+    int num = m_logE.size();
+
+    // Continue only if there are maps in the cube
+    if (num > 0) {
+
+        // Reserve space for all energies
+        energies.reserve(num);
+
+        // Set log10(energy) nodes, where energy is in units of MeV
+        for (int i = 0; i < num; ++i) {
+            GEnergy energy;
+            energy.log10MeV(m_logE[i]);
+            energies.push_back(energy);
+        }
+
+    } // endif: there were maps in the cube
+
+    // Return energies
+    return energies;
+}
+
+
+/***********************************************************************//**
  * @brief Print map cube information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -508,9 +769,47 @@ std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
             result.append("\n"+m_pars[i]->print(chatter));
         }
 
-        // Append sky map
-        if (m_loaded) {
+        // NORMAL: Append sky map
+        if (chatter >= NORMAL) {
             result.append("\n"+m_cube.print(chatter));
+        }
+
+        // EXPLICIT: Append energy nodes
+        if (chatter >= EXPLICIT) {
+            result.append("\n"+gammalib::parformat("Map energy values"));
+            if (m_logE.size() > 0) {
+                for (int i = 0; i < m_logE.size(); ++i) {
+                    result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
+                    result.append(gammalib::str(std::pow(10.0, m_logE[i])));
+                    result.append(" MeV (log10E=");
+                    result.append(gammalib::str(m_logE[i]));
+                    result.append(")");
+                    if (m_ebounds.size() == m_logE.size()) {
+                        result.append(" [");
+                        result.append(m_ebounds.emin(i).print());
+                        result.append(", ");
+                        result.append(m_ebounds.emax(i).print());
+                        result.append("]");
+                    }
+                }
+            }
+            else {
+                result.append("not specified");
+            }
+        }
+
+        // VERBOSE: Append MC cache
+        if (chatter >= VERBOSE) {
+            result.append("\n"+gammalib::parformat("Map flux"));
+            if (m_spectrum.nodes() > 0) {
+                for (int i = 0; i < m_spectrum.nodes(); ++i) {
+                    result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
+                    result.append(gammalib::str(m_spectrum.intensity(i)));
+                }
+            }
+            else {
+                result.append("not specified");
+            }
         }
 
     } // endif: chatter was not silent
@@ -518,115 +817,6 @@ std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
     // Return result
     return result;
 }
-
-/***********************************************************************//**
- * @brief Load cube into the model class
- *
- * @param[in] filename cube file.
- *
- * Loads cube into the model class. The method calls the protected method
- * prepare_cube() that prepares the cube for usage by the class.
- ***************************************************************************/
-void GModelSpatialDiffuseCube::load(const std::string& filename)
-{
-    // Initialise skymap
-    m_cube.clear();
-    m_ebounds.clear();
-    m_loaded = false;
-
-    // Store filename of cube (for XML writing). Note that we do not
-    // expand any environment variable at this level, so that if we write
-    // back the XML element we write the filepath with the environment
-    // variables
-    m_filename = filename;
-
-    // Load cube
-    m_cube.load(gammalib::expand_env(m_filename));
-
-    // Loading the energy binning definition
-    GFits file(filename);
-
-    // Get the table extension "ENERGIES"
-    GFitsTable* energies = file.table("ENERGIES");
-
-    // Read only if extension "ENERGIES" exists
-    if (energies != NULL) {
-
-        // Extract number of energy bins in FITS file
-        int num = energies->integer("NAXIS2");
-
-        // Check if energy binning is consistent with primary image hdu
-        if (num != m_cube.nmaps() ) {
-
-            // if inconsistent throw an exception
-            // ToDo: Excepton has to be adjusted
-            throw GException::skymap_bad_size(G_LOAD,num,m_cube.nmaps());
-        }
-
-        // Check if there are enough energy nodes to construct binning
-        if (num < 2) {
-            // if inconsistent throw an exception
-            // ToDo: Excepton has to be adjusted
-            throw GException::skymap_bad_size(G_LOAD,num,2);
-        }
-
-        // Get the column with the name "Energy"
-        GFitsTableDoubleCol* ptr_energy = (GFitsTableDoubleCol*)&(*energies)["Energy"];
-        ptr_energy->print();
-        
-        // Get the unit of the energies
-        // Default for Fermi Galactic diffuse model
-        std::string unit = "MeV";
-        if (energies->header()->hascard("TUNIT1")) {
-            unit = energies->string("TUNIT1");
-        }
-
-        // Read the energy binning
-        // We construct energy bins from the given bin centers
-        // bin edges will be computed in the logarithimic center
-        // between the nodes
-        for (int i = 0; i < num; ++i) {
-
-            double emin = 0.0;
-            double emax = 0.0;
-            double step = 0.0;
-            // calculate bin width
-            // if first bin, use second bin to calculate stepsize
-            if (i == 0) {
-                step = std::log10((*ptr_energy)(i + 1)) - std::log10((*ptr_energy)(i));
-            }
-
-            // else use previous bin to get stepsize
-            else {
-                step = std::log10((*ptr_energy)(i)) - std::log10((*ptr_energy)(i - 1));
-            }
-
-            // calculate bin minimum and bin maximum
-            emin = std::log10((*ptr_energy)(i)) - step / 2.0;
-            emax = std::log10((*ptr_energy)(i)) + step / 2.0;
-
-            // Convert it to a GEnergy without logscale
-            GEnergy bin_min = GEnergy(std::pow(10.0,emin),unit);
-            GEnergy bin_max = GEnergy(std::pow(10.0,emax),unit);
-
-            // Append energy bin to Ebounds
-            m_ebounds.append(bin_min,bin_max);
-
-        } // endfor: looped over energy bins
-
-    } // endif: ENERGIES extension existed
-
-    // Prepare cube
-    prepare_cube();
-
-    // Cube is loaded
-    m_loaded = true;
-
-    // Return
-    return;
-}
-
-
 
 
 /*==========================================================================
@@ -657,8 +847,12 @@ void GModelSpatialDiffuseCube::init_members(void)
     // Initialise other members
     m_filename.clear();
     m_cube.clear();
+    m_logE.clear();
     m_ebounds.clear();
-    m_loaded = false;
+    m_spectrum.clear();
+
+    // Initialise MC cache
+    m_mc_cache.clear();
 
     // Return
     return;
@@ -676,8 +870,12 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
     m_value    = model.m_value;
     m_filename = model.m_filename;
     m_cube     = model.m_cube;
-    m_loaded   = model.m_loaded;
-    m_ebounds = model.m_ebounds;
+    m_logE     = model.m_logE;
+    m_ebounds  = model.m_ebounds;
+    m_spectrum = model.m_spectrum;
+
+    // Copy MC cache
+    m_mc_cache = model.m_mc_cache;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -699,81 +897,115 @@ void GModelSpatialDiffuseCube::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Prepare cube after loading
+ * @brief Set energy boundaries
  *
- * Prepares a cube after loading. The cube is normalised so that the total
- * flux of the cube amounts to 1 ph/cm2/s. Negative skymap pixels are set to
- * zero intensity.
- *
- * The method also initialises a cache for Monte Carlo sampling of the
- * cube. This Monte Carlo cache consists of a linear array that maps a
- * value between 0 and 1 into the skymap pixel.
- *
- * Note that if the GSkymap object contains multiple maps, only the first
- * map is used.
+ * Computes energy boundaries from the energy nodes. The boundaries will be
+ * computed as the centre in log10(energy) between the nodes. If only a
+ * single map exists, no boundaries will be computed.
  ***************************************************************************/
-void GModelSpatialDiffuseCube::prepare_cube(void)
+void GModelSpatialDiffuseCube::set_energy_boundaries(void)
+{
+    // Initialise energy boundaries
+    m_ebounds.clear();
+
+    // Determine number of energy bins
+    int num = m_logE.size();
+
+    // Continue only if there are at least two energy nodes
+    if (num > 1) {
+
+        // Loop over all nodes
+        for (int i = 0; i < num; ++i) {
+
+            // Calculate minimum energy
+            double e_min = (i == 0) ? m_logE[i] - 0.5 * (m_logE[i+1] - m_logE[i])
+                                    : m_logE[i] - 0.5 * (m_logE[i] - m_logE[i-1]);
+
+            // Calculate maximum energy
+            double e_max = (i < num-1) ? m_logE[i] + 0.5 * (m_logE[i+1] - m_logE[i])
+                                       : m_logE[i] + 0.5 * (m_logE[i] - m_logE[i-1]);
+
+            // Set energy boundaries
+            GEnergy emin;
+            GEnergy emax;
+            emin.log10MeV(e_min);
+            emax.log10MeV(e_max);
+
+            // Append energy bin to energy boundary arra
+            m_ebounds.append(emin, emax);
+
+        } // endfor: looped over energy nodes
+
+    } // endif: there were at least two energy nodes
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Update Monte Carlo cache
+ *
+ * Initialise the cache for Monte Carlo sampling of the map cube. The Monte
+ * Carlo cache consists of a linear array that maps a value between 0 and 1
+ * into the skymap pixel for all maps in the cube.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::update_mc_cache(void)
 {
     // Initialise cache
     m_mc_cache.clear();
+    m_spectrum.clear();
 
-    // Determine number of cube pixels
-    int npix = m_cube.npix();
-    int nmaps =  m_cube.nmaps();
+    // Determine number of cube pixels and maps
+    int npix  = pixels();
+    int nmaps = maps();
 
-    // Continue only if there are pixels
-    if (npix > 0) {
+    // Continue only if there are pixels and maps
+    if (npix > 0 && nmaps > 0) {
 
         // Reserve space for all pixels in cache
-        m_mc_cache.reserve(npix+1);
+        m_mc_cache.reserve((npix+1)*nmaps);
 
-        // Set first cache value to 0
-        m_mc_cache.push_back(0.0);
-
-        // Initialise cache with cumulative pixel fluxes and compute total
-        // flux in skymap for normalization. Negative pixels are set to
-        // zero intensity in the skymap.
-        double sum = 0.0;
-        for (int i=0;i< nmaps; ++i) {
-        	for (int j = 0; j < npix; ++j) {
-        		double flux = m_cube(j,i) * m_cube.omega(i);
-        		if (flux < 0.0) {
-        		    m_cube(j,i) = 0.0;
-        		    flux     = 0.0;
-        		}
-        		sum += flux;
-        		m_mc_cache.push_back(sum);
-        	}
-        }
-
-        // Normalize skymap and pixel fluxes in the cache so that the values
-        // in the cache run from 0 to 1
-        if (sum > 0.0) {
-        	for (int i = 0; i < nmaps; ++i) {
-        		for (int j = 0; j < npix; ++j) {
-        			m_cube(j, i)      /= sum;
-        			m_mc_cache[i] /= sum;
-        		}
-        	}
-        }
-
-        // Make sure that last pixel in the cache is >1
-        m_mc_cache[npix] = 1.0001;
-
-        // Dump preparation results
-        #if defined(G_DEBUG_PREPARE)
-        double sum_control = 0.0;
+        // Loop over all maps
         for (int i = 0; i < nmaps; ++i) {
-        	for (int j = 0; j < npix; ++j) {
-        		double flux = m_cube(j,i) * m_cube.omega(i);
-        		if (flux >= 0.0) {
-        			sum_control += flux;
+
+            // Compute pixel offset
+            int offset = i * (npix+1);
+
+            // Set first cache value to 0
+            m_mc_cache.push_back(0.0);
+
+            // Initialise cache with cumulative pixel fluxes and compute
+            // total flux in skymap for normalization. Negative pixels are
+            // excluded from the cumulative map.
+            double total_flux = 0.0;
+        	for (int k = 0; k < npix; ++k) {
+        		double flux = m_cube(k,i) * m_cube.omega(k);
+        		if (flux > 0.0) {
+                    total_flux += flux;
+        		}
+        		m_mc_cache.push_back(total_flux); // units: ph/cm2/s/MeV
+        	}
+
+            // Normalize cumulative pixel fluxes so that the values in the
+            // cache run from 0 to 1
+            if (total_flux > 0.0) {
+        		for (int k = 0; k < npix; ++k) {
+        			m_mc_cache[k+offset] /= total_flux;
         		}
         	}
-        }
-        std::cout << "Total flux before normalization: " << sum << std::endl;
-        std::cout << "Total flux after normalization : " << sum_control << std::endl;
-        #endif
+
+            // Make sure that last pixel in the cache is >1
+            m_mc_cache[npix+offset] = 1.0001;
+
+            // Store total flux in node array
+            if (m_logE.size() == nmaps) {
+                GEnergy energy;
+                energy.log10MeV(m_logE[i]);
+                m_spectrum.append(energy, total_flux);
+            }
+
+        } // endfor: looped over all maps
 
         // Dump cache values for debugging
         #if defined(G_DEBUG_CACHE)
@@ -783,7 +1015,7 @@ void GModelSpatialDiffuseCube::prepare_cube(void)
         }
         #endif
 
-    } // endif: there were cube pixels
+    } // endif: there were cube pixels and maps
 
     // Return
     return;
