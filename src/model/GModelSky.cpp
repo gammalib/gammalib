@@ -67,7 +67,7 @@ const GModelRegistry    g_diffusesource_registry(&g_diffusesource_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DUMP_MC 1                                  //!< Dump MC information
+#define G_DUMP_MC 0                                  //!< Dump MC information
 
 
 /*==========================================================================
