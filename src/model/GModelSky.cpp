@@ -33,6 +33,7 @@
 #include "GModelRegistry.hpp"
 #include "GModelSky.hpp"
 #include "GModelSpatialPointSource.hpp"
+#include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRadial.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpectralRegistry.hpp"
@@ -66,7 +67,7 @@ const GModelRegistry    g_diffusesource_registry(&g_diffusesource_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DUMP_MC 0                                 //!< Dump MC information
+#define G_DUMP_MC 1                                  //!< Dump MC information
 
 
 /*==========================================================================
@@ -780,6 +781,9 @@ void GModelSky::write(GXmlElement& xml) const
  * - an energy range [@p emin, @p emax], and
  * - a time interval [@p tmin, @p tmax].
  *
+ * Only photons with parameters in the simulation region will be returned
+ * by the method.
+ *
  * The simulation cone may eventually cover the entire sky (by setting
  * the radius to 180 degrees), yet simulations will be more efficient if
  * only the sky region will be simulated that is actually observed by the
@@ -787,10 +791,7 @@ void GModelSky::write(GXmlElement& xml) const
  *
  * @todo Check overlap of simulation cone for diffuse models to speed up
  *       computations.
- * @todo Implement photon arrival direction simulation for diffuse models
  * @todo Implement unique model ID to assign as Monte Carlo ID
- *
- * @todo THIS METHOD SO FAR ONLY WORKS FOR FACTORIZED SOURCE MODELS!!!!!
  ***************************************************************************/
 GPhotons GModelSky::mc(const double& area,
                        const GSkyDir& dir,  const double&  radius,
@@ -814,7 +815,7 @@ GPhotons GModelSky::mc(const double& area,
         // cone
         bool use_model = true;
         if (ptsrc != NULL) {
-            if (dir.dist(ptsrc->dir()) > radius) {
+            if (dir.dist_deg(ptsrc->dir()) > radius) {
                 use_model = false;
             }
         }
@@ -825,9 +826,47 @@ GPhotons GModelSky::mc(const double& area,
         // Continue only if model overlaps with simulation region
         if (use_model) {
 
+            // Initialise de-allocation flag
+            bool free_spectral = false;
+
+            // Set pointer to spectral model
+            GModelSpectral* spectral = m_spectral;
+
+            // If the spectral model is a diffuse cube then create a node
+            // function spectral model that is the product of the diffuse
+            // cube node function and the spectral model evaluated at the
+            // energies of the node function
+            GModelSpatialDiffuseCube* cube = dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
+            if (cube != NULL) {
+
+                // Allocate node function
+                GModelSpectralNodes* nodes = new GModelSpectralNodes(cube->spectrum());
+
+                // Signal that node function needs to be de-allocated later
+                free_spectral = true;
+
+                // Set the spectral model pointer to the node function
+                spectral = nodes;
+
+                // Compute the node function intensities as the product of
+                // the original intensities multiplied by the spectral model
+                // evaluated at the energies of the node function.
+                //TODO The spectral model may be time dependent, but at this
+                // stage we do not know the times; we thus take the minimum
+                // time, assuming that the spectral model will not change with
+                // time. 
+                for (int i = 0; i < nodes->nodes(); ++i) {
+                    GEnergy energy    = nodes->energy(i);
+                    double  intensity = nodes->intensity(i) *
+                                        m_spectral->eval(energy, tmin);
+                    nodes->intensity(i, intensity);
+                }
+
+            } // endif: spatial model was a diffuse cube
+
             // Compute flux within [emin, emax] in model from spectral
             // component (units: ph/cm2/s)
-            double flux = m_spectral->flux(emin, emax);
+            double flux = spectral->flux(emin, emax);
 
             // Derive expecting counting rate within simulation surface
             // (units: ph/s)
@@ -858,15 +897,20 @@ GPhotons GModelSky::mc(const double& area,
                 photon.time(times[i]);
 
                 // Set photon energy
-                photon.energy(m_spectral->mc(emin, emax, photon.time(), ran));
+                photon.energy(spectral->mc(emin, emax, photon.time(), ran));
 
                 // Set incident photon direction
                 photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
 
                 // Append photon
-                photons.append(photon);
+                if (dir.dist_deg(photon.dir()) <= radius) {
+                    photons.append(photon);
+                }
 
             } // endfor: looped over photons
+
+            // Free spectral model if required
+            if (free_spectral) delete spectral;
 
         } // endif: model was used
     } // endif: model was valid
