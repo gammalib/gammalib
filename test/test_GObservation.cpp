@@ -60,6 +60,7 @@ void TestGObservation::set(void)
     append(static_cast<pfunction>(&TestGObservation::test_time_reference), "Test GTimeReference");
     append(static_cast<pfunction>(&TestGObservation::test_time), "Test GTime");
     append(static_cast<pfunction>(&TestGObservation::test_times), "Test GTimes");
+    append(static_cast<pfunction>(&TestGObservation::test_energies), "Test GEnergies");
     append(static_cast<pfunction>(&TestGObservation::test_photons), "Test GPhotons");
 
     // Return
@@ -340,63 +341,6 @@ void TestGObservation::test_gti(void)
 
 
 /***********************************************************************//**
- * @brief Test GPhotons
- ***************************************************************************/
-void TestGObservation::test_photons(void)
-{
-    // Test void constructor
-    test_try("Void constructor");
-    try {
-        GPhotons photons;
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Manipulate GPhotons starting from an empty object
-    GPhotons photons;
-    test_value(photons.size(), 0, "GPhotons should have zero size.");
-    test_assert(photons.isempty(), "GPhotons should be empty.");
-
-    // Add one photon
-    photons.append(GPhoton());
-    test_value(photons.size(), 1, "GPhotons should have 1 photon.");
-    test_assert(!photons.isempty(), "GPhotons should not be empty.");
-
-    // Remove photon
-    photons.remove(0);
-    test_value(photons.size(), 0, "GPhotons should have zero size.");
-    test_assert(photons.isempty(), "GPhotons should be empty.");
-
-    // Append two photons
-    photons.append(GPhoton());
-    photons.append(GPhoton());
-    test_value(photons.size(), 2, "GPhotons should have 2 photons.");
-    test_assert(!photons.isempty(), "GPhotons should not be empty.");
-
-    // Clear object
-    photons.clear();
-    test_value(photons.size(), 0, "GPhotons should have zero size.");
-    test_assert(photons.isempty(), "GPhotons should be empty.");
-
-    // Insert two photons
-    photons.insert(0, GPhoton());
-    photons.insert(0, GPhoton());
-    test_value(photons.size(), 2, "GPhotons should have 2 photons.");
-    test_assert(!photons.isempty(), "GPhotons should not be empty.");
-
-    // Extend photons
-    photons.extend(photons);
-    test_value(photons.size(), 4, "GPhotons should have 4 photons.");
-    test_assert(!photons.isempty(), "GPhotons should not be empty.");
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Test GTimeReference
  ***************************************************************************/
 void TestGObservation::test_time_reference(void)
@@ -640,6 +584,120 @@ void TestGObservation::test_times(void)
     times.extend(times);
     test_value(times.size(), 4, "GTimes should have 4 times.");
     test_assert(!times.isempty(), "GTimes should not be empty.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GEnergies
+ ***************************************************************************/
+void TestGObservation::test_energies(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GEnergies energies;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Manipulate GEnergies starting from an empty object
+    GEnergies energies;
+    test_value(energies.size(), 0, "GEnergies should have zero size.");
+    test_assert(energies.isempty(), "GEnergies should be empty.");
+
+    // Add an energy
+    energies.append(GEnergy());
+    test_value(energies.size(), 1, "GEnergies should have 1 energy.");
+    test_assert(!energies.isempty(), "GEnergies should not be empty.");
+
+    // Remove energy
+    energies.remove(0);
+    test_value(energies.size(), 0, "GEnergies should have zero size.");
+    test_assert(energies.isempty(), "GEnergies should be empty.");
+
+    // Append two energies
+    energies.append(GEnergy());
+    energies.append(GEnergy());
+    test_value(energies.size(), 2, "GEnergies should have 2 energies.");
+    test_assert(!energies.isempty(), "GEnergies should not be empty.");
+
+    // Clear object
+    energies.clear();
+    test_value(energies.size(), 0, "GEnergies should have zero size.");
+    test_assert(energies.isempty(), "GEnergies should be empty.");
+
+    // Insert two energies
+    energies.insert(0, GEnergy());
+    energies.insert(0, GEnergy());
+    test_value(energies.size(), 2, "GEnergies should have 2 energies.");
+    test_assert(!energies.isempty(), "GEnergies should not be empty.");
+
+    // Extend energies
+    energies.extend(energies);
+    test_value(energies.size(), 4, "GEnergies should have 4 energies.");
+    test_assert(!energies.isempty(), "GEnergies should not be empty.");
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GPhotons
+ ***************************************************************************/
+void TestGObservation::test_photons(void)
+{
+    // Test void constructor
+    test_try("Void constructor");
+    try {
+        GPhotons photons;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Manipulate GPhotons starting from an empty object
+    GPhotons photons;
+    test_value(photons.size(), 0, "GPhotons should have zero size.");
+    test_assert(photons.isempty(), "GPhotons should be empty.");
+
+    // Add one photon
+    photons.append(GPhoton());
+    test_value(photons.size(), 1, "GPhotons should have 1 photon.");
+    test_assert(!photons.isempty(), "GPhotons should not be empty.");
+
+    // Remove photon
+    photons.remove(0);
+    test_value(photons.size(), 0, "GPhotons should have zero size.");
+    test_assert(photons.isempty(), "GPhotons should be empty.");
+
+    // Append two photons
+    photons.append(GPhoton());
+    photons.append(GPhoton());
+    test_value(photons.size(), 2, "GPhotons should have 2 photons.");
+    test_assert(!photons.isempty(), "GPhotons should not be empty.");
+
+    // Clear object
+    photons.clear();
+    test_value(photons.size(), 0, "GPhotons should have zero size.");
+    test_assert(photons.isempty(), "GPhotons should be empty.");
+
+    // Insert two photons
+    photons.insert(0, GPhoton());
+    photons.insert(0, GPhoton());
+    test_value(photons.size(), 2, "GPhotons should have 2 photons.");
+    test_assert(!photons.isempty(), "GPhotons should not be empty.");
+
+    // Extend photons
+    photons.extend(photons);
+    test_value(photons.size(), 4, "GPhotons should have 4 photons.");
+    test_assert(!photons.isempty(), "GPhotons should not be empty.");
 
     // Return
     return;

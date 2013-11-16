@@ -49,8 +49,9 @@
 
 /* __ Observation handling _______________________________________________ */
 %include "GEnergy.i"
-%include "GTimes.i"
+%include "GEnergies.i"
 %include "GTime.i"
+%include "GTimes.i"
 %include "GTimeReference.i"
 %include "GEbounds.i"
 %include "GGti.i"

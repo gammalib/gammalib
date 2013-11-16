@@ -91,6 +91,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsSTG.hpp \
                      GWcsHPX.hpp \
                      GEnergy.hpp \
+                     GEnergies.hpp \
                      GTime.hpp \
                      GTimes.hpp \
                      GTimeReference.hpp \

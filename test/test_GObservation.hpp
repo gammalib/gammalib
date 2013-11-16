@@ -51,6 +51,7 @@ public:
     void         test_time_reference(void);
     void         test_time(void);
     void         test_times(void);
+    void         test_energies(void);
 };
 
 
