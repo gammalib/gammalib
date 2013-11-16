@@ -69,6 +69,27 @@ GEnergies::GEnergies(void)
 
 
 /***********************************************************************//**
+ * @brief Load constructor
+ *
+ * @param[in] filename FITS filename.
+ * @param[in] extname Energies extension name (defaults to "ENERGIES")
+ *
+ * Constructs energy container by loading energies from FITS file.
+ ***************************************************************************/
+GEnergies::GEnergies(const std::string& filename, const std::string& extname)
+{
+    // Initialise members
+    init_members();
+
+    // Load energies
+    load(filename, extname);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param energies Energy container.

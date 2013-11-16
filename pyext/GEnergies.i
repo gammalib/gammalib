@@ -41,6 +41,8 @@ class GEnergies : public GContainer {
 public:
     // Constructors and destructors
     GEnergies(void);
+    GEnergies(const std::string& filename,
+              const std::string& extname = "ENERGIES");
     GEnergies(const GEnergies& energies);
     virtual ~GEnergies(void);
  

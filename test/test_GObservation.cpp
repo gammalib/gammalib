@@ -666,6 +666,19 @@ void TestGObservation::test_energies(void)
         test_value(energies[i].MeV(), double(i));
     }
 
+    // Test load constructor
+    test_try("Load constructor");
+    try {
+        GEnergies energies2("test_energies.fits");
+        for (int i = 0; i < 4; ++i) {
+            test_value(energies[i].MeV(), double(i));
+        }
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Return
     return;
 }
