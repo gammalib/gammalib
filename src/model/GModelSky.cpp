@@ -839,28 +839,23 @@ GPhotons GModelSky::mc(const double& area,
             GModelSpatialDiffuseCube* cube = dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
             if (cube != NULL) {
 
-                // Allocate node function
-                GModelSpectralNodes* nodes = new GModelSpectralNodes(cube->spectrum());
+                // Set MC cone
+                cube->set_mc_cone(dir, radius);
 
+                // Allocate node function to replace the spectral component
+                GModelSpectralNodes* nodes = new GModelSpectralNodes(cube->spectrum());
+                for (int i = 0; i < nodes->nodes(); ++i) {
+                    GEnergy energy    = nodes->energy(i);
+                    double  intensity = nodes->intensity(i);
+                    double  norm      = m_spectral->eval(energy, tmin);
+                    nodes->intensity(i, norm*intensity);
+                }
+                
                 // Signal that node function needs to be de-allocated later
                 free_spectral = true;
 
                 // Set the spectral model pointer to the node function
                 spectral = nodes;
-
-                // Compute the node function intensities as the product of
-                // the original intensities multiplied by the spectral model
-                // evaluated at the energies of the node function.
-                //TODO The spectral model may be time dependent, but at this
-                // stage we do not know the times; we thus take the minimum
-                // time, assuming that the spectral model will not change with
-                // time. 
-                for (int i = 0; i < nodes->nodes(); ++i) {
-                    GEnergy energy    = nodes->energy(i);
-                    double  intensity = nodes->intensity(i) *
-                                        m_spectral->eval(energy, tmin);
-                    nodes->intensity(i, intensity);
-                }
 
             } // endif: spatial model was a diffuse cube
 
