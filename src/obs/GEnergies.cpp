@@ -31,14 +31,16 @@
 #include "GTools.hpp"
 #include "GException.hpp"
 #include "GEnergies.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
+#include "GFitsBinTable.hpp"
+#include "GFitsTableCol.hpp"
+#include "GFitsTableDoubleCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                                            "GEnergies::at(int&)"
-
-
-#define G_OP_ACCESS                                "GEnergies::operator[](int&)"
-#define G_INSERT                               "GEnergies::insert(int&, GEnergy&)"
-#define G_REMOVE                                       "GEnergies::remove(int&)"
+#define G_INSERT                          "GEnergies::insert(int&, GEnergy&)"
+#define G_REMOVE                                    "GEnergies::remove(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -319,6 +321,151 @@ void GEnergies::extend(const GEnergies& energies)
 
     } // endif: energy container was not empty
     
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load energies from FITS file
+ *
+ * @param[in] filename FITS filename.
+ * @param[in] extname Energies extension name (defaults to "ENERGIES")
+ *
+ * Loads the energies from FITS file.
+ ***************************************************************************/
+void GEnergies::load(const std::string& filename, const std::string& extname)
+{
+    // Allocate FITS file
+    GFits file;
+
+    // Open FITS file
+    file.open(filename);
+
+    // Get energies HDU
+    GFitsTable* hdu = file.table(extname);
+
+    // Read energies from HDU
+    read(hdu);
+
+    // Close FITS file
+    file.close();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save energies to FITS file
+ *
+ * @param[in] filename FITS filename.
+ * @param[in] clobber Overwrite any existing energies extension?
+ * @param[in] extname Energies extension name (defaults to "ENERGIES")
+ *
+ * Saves energies into extension @p extname of a FITS file. If the file does
+ * not exist it is created. If the file exists the energies are appended as
+ * extension. If another energies extension exists already it is overwritten
+ * if @p clobber=true.
+ ***************************************************************************/
+void GEnergies::save(const std::string& filename, bool clobber,
+                     const std::string& extname) const
+{
+    // Allocate FITS file
+    GFits file;
+
+    // Write energies to FITS file
+    write(&file, extname);
+
+    // Save to file
+    file.saveto(filename, clobber);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Read energies from FITS table
+ *
+ * @param[in] hdu Pointer to FITS table.
+ *
+ * Reads the energies from a FITS table.
+ ***************************************************************************/
+void GEnergies::read(const GFitsTable* hdu)
+{
+    // Free members
+    free_members();
+
+    // Initialise attributes
+    init_members();
+
+    // Continue only if HDU is valid
+    if (hdu != NULL) {
+
+        // Extract number of energy bins in FITS file
+        int num = hdu->integer("NAXIS2");
+
+        // Continue only if there are energy bins
+        if (num > 0) {
+
+            // Get the unit of the energies. If no TUNIT1 header keyword is
+            // found then use MeV
+            std::string unit = "MeV";
+            if (hdu->hascard("TUNIT1")) {
+                unit = hdu->string("TUNIT1");
+            }
+
+            // Get the column with the name "Energy"
+            const GFitsTableCol& col_energy = (*hdu)["Energy"];
+
+            // Set energies
+            for (int i = 0; i < num; ++i) {
+                append(GEnergy(col_energy.real(i), unit));
+            }
+
+        } // endif: there were energy bins
+
+    } // endif: the HDU was valid
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Write energies into FITS object
+ *
+ * @param[in] file Pointer to FITS file.
+ * @param[in] extname Energy extension name (defaults to "ENERGIES")
+ *
+ * Writes energies into FITS object.
+ ***************************************************************************/
+void GEnergies::write(GFits* file, const std::string& extname) const
+{
+    // Set number of energies
+    int num = m_energies.size();
+
+    // Create Energy column
+    GFitsTableDoubleCol col_energy = GFitsTableDoubleCol("Energy", num);
+
+    // Fill energy column in units of MeV
+    for (int i = 0; i < num; ++i) {
+        col_energy(i) = (*this)[i].MeV();
+    }
+    col_energy.unit("MeV");
+
+    // Create energies table
+    GFitsBinTable* table = new GFitsBinTable(num);
+    table->append_column(col_energy);
+    table->extname(extname);
+
+    // Write to FITS file
+    file->append(*table);
+
+    // Free table
+    delete table;
+
     // Return
     return;
 }

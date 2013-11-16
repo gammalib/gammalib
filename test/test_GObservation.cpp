@@ -642,6 +642,30 @@ void TestGObservation::test_energies(void)
     test_value(energies.size(), 4, "GEnergies should have 4 energies.");
     test_assert(!energies.isempty(), "GEnergies should not be empty.");
 
+    // Create 4 energies
+    energies.clear();
+    for (int i = 0; i < 4; ++i) {
+        energies.append(GEnergy(double(i), "MeV"));
+    }
+    for (int i = 0; i < 4; ++i) {
+        test_value(energies[i].MeV(), double(i));
+    }
+
+    // Save and reload energies
+    test_try("Saving and loading");
+    try {
+        energies.save("test_energies.fits", true);
+        energies.clear();
+        energies.load("test_energies.fits");
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+    for (int i = 0; i < 4; ++i) {
+        test_value(energies[i].MeV(), double(i));
+    }
+
     // Return
     return;
 }

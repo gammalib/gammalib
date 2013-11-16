@@ -32,6 +32,8 @@
 #include <vector>
 #include "GContainer.hpp"
 #include "GEnergy.hpp"
+#include "GFits.hpp"
+#include "GFitsTable.hpp"
 
 
 /***********************************************************************//**
@@ -67,6 +69,13 @@ public:
     void           remove(const int& index);
     void           reserve(const int& num);
     void           extend(const GEnergies& energies);
+    void           load(const std::string& filename,
+                        const std::string& extname = "ENERGIES");
+    void           save(const std::string& filename, bool clobber,
+                        const std::string& extname = "ENERGIES") const;
+    void           read(const GFitsTable* hdu);
+    void           write(GFits* file,
+                         const std::string& extname = "ENERGIES") const;
     std::string    print(const GChatter& chatter = NORMAL) const;
   
 protected:
