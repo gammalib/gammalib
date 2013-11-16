@@ -527,7 +527,6 @@ void TestGModel::test_diffuse_cube(void)
         GModelSpatialDiffuseCube model;
         test_assert(model.type() == "MapCubeFunction",
                                     "Model type \"MapCubeFunction\" expected.");
-        test_assert(!model.isloaded(), "Map cube is not yet loaded.");
         test_assert(model.filename() == "", "Model filename \"\" expected.");
         test_try_success();
     }
@@ -541,7 +540,6 @@ void TestGModel::test_diffuse_cube(void)
         GModelSpatialDiffuseCube model(m_cube_file, 3.0);
         test_value(model.value(), 3.0);
         test_assert(model.filename() == m_cube_file, "Expected \""+m_cube_file+"\"");
-        test_assert(model.isloaded(), "Map cube has not been loaded.");
         test_try_success();
     }
     catch (std::exception &e) {
@@ -552,10 +550,13 @@ void TestGModel::test_diffuse_cube(void)
     test_try("Test skymap value constructor");
     try {
         GSkymap map("HPX", "GAL", 16, "RING", 10);
-        GModelSpatialDiffuseCube model(map, 3.0);
+        std::vector<GEnergy> energies;
+        for (int i = 0; i < 10; ++i) {
+            energies.push_back(GEnergy(double(i+1.0), "MeV"));
+        }
+        GModelSpatialDiffuseCube model(map, energies, 3.0);
         test_value(model.value(), 3.0);
         test_assert(model.filename() == "", "Expected \"\"");
-        test_assert(model.isloaded(), "Map cube is loaded.");
         //test_assert(model.cube() == map, "Map cube is not the expected one");
         test_try_success();
     }
@@ -573,7 +574,6 @@ void TestGModel::test_diffuse_cube(void)
         test_value(model.size(), 1);
         test_assert(model.type() == "MapCubeFunction", "Expected \"MapCubeFunction\"");
         test_value(model.value(), 1.0);
-        test_assert(model.isloaded(), "Map cube has not been loaded.");
         test_assert(model.filename() == m_cube_file,
                                         "Model filename \""+m_cube_file+"\" expected.");
 
@@ -647,7 +647,7 @@ void TestGModel::test_diffuse_map(void)
     test_try("Test skymap value constructor");
     try {
         GSkymap map("HPX", "GAL", 16, "RING", 10);
-        GModelSpatialDiffuseCube model(map, 3.0);
+        GModelSpatialDiffuseMap model(map, 3.0);
         test_value(model.value(), 3.0);
         test_assert(model.filename() == "", "Expected \"\"");
         test_try_success();
