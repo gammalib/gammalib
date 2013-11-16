@@ -49,8 +49,7 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 #define G_READ                 "GModelSpatialDiffuseCube::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
 #define G_LOAD                 "GModelSpatialDiffuseCube::load(std::string&)"
-#define G_ENERGIES           "GModelSpatialDiffuseCube::energies(std::vector"\
-                                                                "<GEnergy>&)"
+#define G_ENERGIES           "GModelSpatialDiffuseCube::energies(GEnergies&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -144,9 +143,9 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const std::string& filename,
  * constructor also assigns the energy values for all maps and sets the
  * scaling @p value. The filename will remain blank.
  ***************************************************************************/
-GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap&              cube,
-                                                   const std::vector<GEnergy>& energies,
-                                                   const double&               value) :
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap&   cube,
+                                                   const GEnergies& energies,
+                                                   const double&    value) :
                           GModelSpatialDiffuse()
 {
     // Initialise members
@@ -676,7 +675,7 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
  *
  * Sets the energies for the map cube.
  ***************************************************************************/
-void GModelSpatialDiffuseCube::energies(const std::vector<GEnergy>& energies)
+void GModelSpatialDiffuseCube::energies(const GEnergies& energies)
 {
     // Initialise energies
     m_logE.clear();
@@ -717,10 +716,10 @@ void GModelSpatialDiffuseCube::energies(const std::vector<GEnergy>& energies)
  *
  * Returns the energies for the map cube in a vector.
  ***************************************************************************/
-std::vector<GEnergy> GModelSpatialDiffuseCube::energies(void)
+GEnergies GModelSpatialDiffuseCube::energies(void)
 {
-    // Initialise vector of energies
-    std::vector<GEnergy> energies;
+    // Initialise energies container
+    GEnergies energies;
 
     // Get number of map energies
     int num = m_logE.size();
@@ -735,7 +734,7 @@ std::vector<GEnergy> GModelSpatialDiffuseCube::energies(void)
         for (int i = 0; i < num; ++i) {
             GEnergy energy;
             energy.log10MeV(m_logE[i]);
-            energies.push_back(energy);
+            energies.append(energy);
         }
 
     } // endif: there were maps in the cube
