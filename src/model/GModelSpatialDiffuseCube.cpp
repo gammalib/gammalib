@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
+#include "GMath.hpp"
 #include "GModelSpatialDiffuseCube.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GFitsTable.hpp"
@@ -783,34 +784,38 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             // total flux in skymap for normalization. Negative pixels are
             // excluded from the cumulative map.
             double flux_centre = 0.0;
-            double flux_corner = 0.0;
+            double flux_circle = 0.0;
         	for (int k = 0; k < npix; ++k) {
-                GSkyPixel pixel    = m_cube.pix2xy(k);
-                double    d_centre = centre.dist_deg(m_cube.pix2dir(k));
-                double    d_ul     = centre.dist_deg(m_cube.xy2dir(GSkyPixel(pixel.x()-0.5,pixel.y()-0.5)));
-                double    d_ur     = centre.dist_deg(m_cube.xy2dir(GSkyPixel(pixel.x()+0.5,pixel.y()-0.5)));
-                double    d_ll     = centre.dist_deg(m_cube.xy2dir(GSkyPixel(pixel.x()-0.5,pixel.y()+0.5)));
-                double    d_lr     = centre.dist_deg(m_cube.xy2dir(GSkyPixel(pixel.x()+0.5,pixel.y()+0.5)));
-                if (d_centre <= radius) {
+
+                // Derive effective pixel radius from half opening angle
+                // that corresponds to the pixel's solid angle
+                double pixel_radius =
+                       std::acos(1.0 - m_cube.omega(k)/gammalib::twopi) *
+                       gammalib::rad2deg * 1.5;
+
+                // Add up flux. First we check if the pixel is within the
+                // safety radius (simulation cone + effective pixel radius),
+                // then we check if the pixels is within the simulation cone
+                double distance = centre.dist_deg(m_cube.pix2dir(k));
+                if (distance <= radius+pixel_radius) {
                     double flux = m_cube(k,i) * m_cube.omega(k);
                     if (flux > 0.0) {
-                        flux_centre += flux;
+                        flux_circle += flux;
+                        if (distance <= radius) {
+                            flux_centre += flux;
+                        }
                     }
                 }
-                if (d_ul <= radius || d_ur <= radius || d_ll <= radius || d_lr <= radius) {
-                    double flux = m_cube(k,i) * m_cube.omega(k);
-                    if (flux > 0.0) {
-                        flux_corner += flux;
-                    }
-                }
-        		m_mc_cache.push_back(flux_corner); // units: ph/cm2/s/MeV
+
+                // Push back flux derived using safety radius
+        		m_mc_cache.push_back(flux_circle); // units: ph/cm2/s/MeV
         	}
 
             // Normalize cumulative pixel fluxes so that the values in the
             // cache run from 0 to 1
-            if (flux_corner > 0.0) {
+            if (flux_circle > 0.0) {
         		for (int k = 0; k < npix; ++k) {
-        			m_mc_cache[k+offset] /= flux_corner;
+        			m_mc_cache[k+offset] /= flux_circle;
         		}
         	}
 
