@@ -745,6 +745,103 @@ std::vector<GEnergy> GModelSpatialDiffuseCube::energies(void)
 
 
 /***********************************************************************//**
+ * @brief Set Monte Carlo simulation cone
+ *
+ * @param[in] centre Simulation cone centre.
+ * @param[in] radius Simulation cone radius (degrees).
+ *
+ * Sets the simulation cone centre and radius that defines the directions
+ * that will be simulated using the mc() method.
+ ***************************************************************************/
+void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
+                                           const double&  radius)
+{
+    // Initialise cache
+    m_mc_cache.clear();
+    m_mc_spectrum.clear();
+
+    // Determine number of cube pixels and maps
+    int npix  = pixels();
+    int nmaps = maps();
+
+    // Continue only if there are pixels and maps
+    if (npix > 0 && nmaps > 0) {
+
+        // Reserve space for all pixels in cache
+        m_mc_cache.reserve((npix+1)*nmaps);
+
+        // Loop over all maps
+        for (int i = 0; i < nmaps; ++i) {
+
+            // Compute pixel offset
+            int offset = i * (npix+1);
+
+            // Set first cache value to 0
+            m_mc_cache.push_back(0.0);
+
+            // Initialise cache with cumulative pixel fluxes and compute
+            // total flux in skymap for normalization. Negative pixels are
+            // excluded from the cumulative map.
+            double flux_centre = 0.0;
+            double flux_corner = 0.0;
+        	for (int k = 0; k < npix; ++k) {
+                GSkyPixel pixel    = m_cube.pix2xy(k);
+                double    d_centre = centre.dist_deg(m_cube.pix2dir(k));
+                double    d_ul     = centre.dist_deg(m_cube.xy2dir(GSkyPixel(pixel.x()-0.5,pixel.y()-0.5)));
+                double    d_ur     = centre.dist_deg(m_cube.xy2dir(GSkyPixel(pixel.x()+0.5,pixel.y()-0.5)));
+                double    d_ll     = centre.dist_deg(m_cube.xy2dir(GSkyPixel(pixel.x()-0.5,pixel.y()+0.5)));
+                double    d_lr     = centre.dist_deg(m_cube.xy2dir(GSkyPixel(pixel.x()+0.5,pixel.y()+0.5)));
+                if (d_centre <= radius) {
+                    double flux = m_cube(k,i) * m_cube.omega(k);
+                    if (flux > 0.0) {
+                        flux_centre += flux;
+                    }
+                }
+                if (d_ul <= radius || d_ur <= radius || d_ll <= radius || d_lr <= radius) {
+                    double flux = m_cube(k,i) * m_cube.omega(k);
+                    if (flux > 0.0) {
+                        flux_corner += flux;
+                    }
+                }
+        		m_mc_cache.push_back(flux_corner); // units: ph/cm2/s/MeV
+        	}
+
+            // Normalize cumulative pixel fluxes so that the values in the
+            // cache run from 0 to 1
+            if (flux_corner > 0.0) {
+        		for (int k = 0; k < npix; ++k) {
+        			m_mc_cache[k+offset] /= flux_corner;
+        		}
+        	}
+
+            // Make sure that last pixel in the cache is >1
+            m_mc_cache[npix+offset] = 1.0001;
+
+            // Store centre flux in node array
+            if (m_logE.size() == nmaps) {
+                GEnergy energy;
+                energy.log10MeV(m_logE[i]);
+                m_mc_spectrum.append(energy, flux_centre);
+            }
+
+        } // endfor: looped over all maps
+
+        // Dump cache values for debugging
+        #if defined(G_DEBUG_CACHE)
+        for (int i = 0; i < m_mc_cache.size(); ++i) {
+            std::cout << "i=" << i;
+            std::cout << " c=" << m_mc_cache[i] << std::endl;
+        }
+        #endif
+
+    } // endif: there were cube pixels and maps
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Print map cube information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -801,10 +898,10 @@ std::string GModelSpatialDiffuseCube::print(const GChatter& chatter) const
         // VERBOSE: Append MC cache
         if (chatter >= VERBOSE) {
             result.append("\n"+gammalib::parformat("Map flux"));
-            if (m_spectrum.nodes() > 0) {
-                for (int i = 0; i < m_spectrum.nodes(); ++i) {
+            if (m_mc_spectrum.nodes() > 0) {
+                for (int i = 0; i < m_mc_spectrum.nodes(); ++i) {
                     result.append("\n"+gammalib::parformat("  Map "+gammalib::str(i+1)));
-                    result.append(gammalib::str(m_spectrum.intensity(i)));
+                    result.append(gammalib::str(m_mc_spectrum.intensity(i)));
                 }
             }
             else {
@@ -849,10 +946,10 @@ void GModelSpatialDiffuseCube::init_members(void)
     m_cube.clear();
     m_logE.clear();
     m_ebounds.clear();
-    m_spectrum.clear();
 
     // Initialise MC cache
     m_mc_cache.clear();
+    m_mc_spectrum.clear();
 
     // Return
     return;
@@ -872,10 +969,10 @@ void GModelSpatialDiffuseCube::copy_members(const GModelSpatialDiffuseCube& mode
     m_cube     = model.m_cube;
     m_logE     = model.m_logE;
     m_ebounds  = model.m_ebounds;
-    m_spectrum = model.m_spectrum;
 
     // Copy MC cache
-    m_mc_cache = model.m_mc_cache;
+    m_mc_cache    = model.m_mc_cache;
+    m_mc_spectrum = model.m_mc_spectrum;
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -952,70 +1049,12 @@ void GModelSpatialDiffuseCube::set_energy_boundaries(void)
  ***************************************************************************/
 void GModelSpatialDiffuseCube::update_mc_cache(void)
 {
-    // Initialise cache
-    m_mc_cache.clear();
-    m_spectrum.clear();
-
-    // Determine number of cube pixels and maps
-    int npix  = pixels();
-    int nmaps = maps();
-
-    // Continue only if there are pixels and maps
-    if (npix > 0 && nmaps > 0) {
-
-        // Reserve space for all pixels in cache
-        m_mc_cache.reserve((npix+1)*nmaps);
-
-        // Loop over all maps
-        for (int i = 0; i < nmaps; ++i) {
-
-            // Compute pixel offset
-            int offset = i * (npix+1);
-
-            // Set first cache value to 0
-            m_mc_cache.push_back(0.0);
-
-            // Initialise cache with cumulative pixel fluxes and compute
-            // total flux in skymap for normalization. Negative pixels are
-            // excluded from the cumulative map.
-            double total_flux = 0.0;
-        	for (int k = 0; k < npix; ++k) {
-        		double flux = m_cube(k,i) * m_cube.omega(k);
-        		if (flux > 0.0) {
-                    total_flux += flux;
-        		}
-        		m_mc_cache.push_back(total_flux); // units: ph/cm2/s/MeV
-        	}
-
-            // Normalize cumulative pixel fluxes so that the values in the
-            // cache run from 0 to 1
-            if (total_flux > 0.0) {
-        		for (int k = 0; k < npix; ++k) {
-        			m_mc_cache[k+offset] /= total_flux;
-        		}
-        	}
-
-            // Make sure that last pixel in the cache is >1
-            m_mc_cache[npix+offset] = 1.0001;
-
-            // Store total flux in node array
-            if (m_logE.size() == nmaps) {
-                GEnergy energy;
-                energy.log10MeV(m_logE[i]);
-                m_spectrum.append(energy, total_flux);
-            }
-
-        } // endfor: looped over all maps
-
-        // Dump cache values for debugging
-        #if defined(G_DEBUG_CACHE)
-        for (int i = 0; i < m_mc_cache.size(); ++i) {
-            std::cout << "i=" << i;
-            std::cout << " c=" << m_mc_cache[i] << std::endl;
-        }
-        #endif
-
-    } // endif: there were cube pixels and maps
+    // Set centre and radius to all sky
+    GSkyDir centre;
+    double  radius = 360.0;
+    
+    // Compute cache
+    set_mc_cone(centre, radius);
 
     // Return
     return;

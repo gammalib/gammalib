@@ -73,6 +73,8 @@ public:
     std::vector<GEnergy>       energies(void);
     void                       energies(const std::vector<GEnergy>& energies);
     const GModelSpectralNodes& spectrum(void) const;
+    void                       set_mc_cone(const GSkyDir& centre,
+                                           const double&  radius);
 };
 
 

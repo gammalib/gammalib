@@ -93,6 +93,8 @@ public:
     std::vector<GEnergy>       energies(void);
     void                       energies(const std::vector<GEnergy>& energies);
     const GModelSpectralNodes& spectrum(void) const;
+    void                       set_mc_cone(const GSkyDir& centre,
+                                           const double&  radius);
 
 protected:
     // Protected methods
@@ -108,8 +110,10 @@ protected:
     GSkymap             m_cube;        //!< Map cube
     GNodeArray          m_logE;        //!< Log10(energy) values of the maps
     GEbounds            m_ebounds;     //!< Energy bounds of the maps
-    GModelSpectralNodes m_spectrum;    //!< Map cube spectrum
     std::vector<double> m_mc_cache;    //!< Monte Carlo cache
+    GModelSpectralNodes m_mc_spectrum; //!< Map cube spectrum
+    GSkyDir             m_mc_cone_dir; //!< Monte Carlo simulation cone centre
+    double              m_mc_cone_rad; //!< Monte Carlo simulation cone radius
 };
 
 
@@ -253,7 +257,7 @@ void GModelSpatialDiffuseCube::cube(const GSkymap& cube)
 inline
 const GModelSpectralNodes& GModelSpatialDiffuseCube::spectrum(void) const
 {
-    return (m_spectrum);
+    return (m_mc_spectrum);
 }
 
 #endif /* GMODELSPATIALDIFFUSECUBE_HPP */
