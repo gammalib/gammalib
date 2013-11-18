@@ -44,6 +44,7 @@
 #define G_EMAX                                         "GEbounds::emax(int&)"
 #define G_EMEAN                                       "GEbounds::emean(int&)"
 #define G_ELOGMEAN                                 "GEbounds::elogmean(int&)"
+#define G_EWIDTH                                     "GEbounds::ewidth(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -833,6 +834,31 @@ GEnergy GEbounds::elogmean(const int& index) const
     // Return
     return elogmean;
 }
+
+
+/***********************************************************************//**
+ * @brief Returns energy interval width
+ *
+ * @param[in] index Energy interval index (0,...,size()-1).
+ * @return Energy interval width.
+ *
+ * @exception GException::out_of_range
+ *            Specified index is out of range.
+ ***************************************************************************/
+GEnergy GEbounds::ewidth(const int& index) const
+{
+    #if defined(G_RANGE_CHECK)
+    // If index is outside boundary then throw an error
+    if (index < 0 || index >= m_num) {
+        throw GException::out_of_range(G_EWIDTH, index, 0, m_num-1);
+    }
+    #endif
+
+    // Return
+    return (m_max[index]-m_min[index]);
+}
+
+
 
 
 /***********************************************************************//**

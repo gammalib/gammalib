@@ -42,8 +42,9 @@ public:
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
     explicit GModelSpatialDiffuseCube(const std::string& filename,
                                       const double&      value = 1.0);
-    explicit GModelSpatialDiffuseCube(const GSkymap& map,
-                                      const double&  value = 1.0);
+    explicit GModelSpatialDiffuseCube(const GSkymap&   map,
+                                      const GEnergies& energies,
+                                      const double&    value = 1.0);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
     virtual ~GModelSpatialDiffuseCube(void);
 
@@ -60,16 +61,20 @@ public:
     virtual void                      write(GXmlElement& xml) const;
 
     // Other methods
-    double             value(void) const;
-    void               value(const double& value);
-    const std::string& filename(void) const;
-    void               filename(const std::string& filename);
-    void               load(const std::string filename);
-    const GSkymap&     cube(void) const;
-    void               cube(const GSkymap& map);
-    const GEbounds&    ebounds(void) const;
-    void               ebounds(const GEbounds& bounds);
-    bool               isloaded(void) const;
+    int                        maps(void) const;
+    int                        pixels(void) const;
+    void                       load(const std::string& filename);
+    double                     value(void) const;
+    void                       value(const double& value);
+    const std::string&         filename(void) const;
+    void                       filename(const std::string& filename);
+    const GSkymap&             cube(void) const;
+    void                       cube(const GSkymap& cube);
+    GEnergies                  energies(void);
+    void                       energies(const GEnergies& energies);
+    const GModelSpectralNodes& spectrum(void) const;
+    void                       set_mc_cone(const GSkyDir& centre,
+                                           const double&  radius);
 };
 
 

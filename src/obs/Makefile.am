@@ -6,7 +6,8 @@ INCLUDES = -I$(top_srcdir)/include \
            -I$(top_srcdir)/src/support
 
 # Define sources for this directory
-sources = GEnergy.cpp \
+sources = GEnergies.cpp \
+          GEnergy.cpp \
           GTimes.cpp \
           GTime.cpp \
           GTimeReference.cpp \

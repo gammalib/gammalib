@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GammaLib.hpp  -  Gamma-Ray Astronomy Library Header file        *
+ *          GammaLib.hpp - Gamma-Ray Astronomy Library Header file         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -152,6 +152,7 @@
 
 /* __ Observation handling _______________________________________________ */
 #include "GEnergy.hpp"
+#include "GEnergies.hpp"
 #include "GTime.hpp"
 #include "GTimes.hpp"
 #include "GTimeReference.hpp"

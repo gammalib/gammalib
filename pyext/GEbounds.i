@@ -72,6 +72,7 @@ public:
     GEnergy     emax(const int& index) const;
     GEnergy     emean(const int& index) const;
     GEnergy     elogmean(const int& index) const;
+    GEnergy     ewidth(const int& index) const;
     bool        contains(const GEnergy& eng) const;
 };
 
