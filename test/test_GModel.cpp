@@ -550,9 +550,9 @@ void TestGModel::test_diffuse_cube(void)
     test_try("Test skymap value constructor");
     try {
         GSkymap map("HPX", "GAL", 16, "RING", 10);
-        GEnergies energies;
+        std::vector<GEnergy> energies;
         for (int i = 0; i < 10; ++i) {
-            energies.append(GEnergy(double(i+1.0), "MeV"));
+            energies.push_back(GEnergy(double(i+1.0), "MeV"));
         }
         GModelSpatialDiffuseCube model(map, energies, 3.0);
         test_value(model.value(), 3.0);
