@@ -1,1 +1,1 @@
-.. _sec_mwl:Multi-wavelength interface (mwl)--------------------------------
+.. _sec_mwl:Multi-wavelength interface--------------------------

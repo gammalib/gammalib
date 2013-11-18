@@ -1,1 +1,1 @@
-.. _sec_lat:*Fermi*-LAT interface (lat)---------------------------
+.. _sec_lat:*Fermi*-LAT interface---------------------

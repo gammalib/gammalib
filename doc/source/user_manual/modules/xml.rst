@@ -1,1 +1,1 @@
-.. _sec_xml:XML file interface (xml)------------------------
+.. _sec_xml:XML file interface------------------

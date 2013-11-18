@@ -1,1 +1,1 @@
-.. _sec_com:COMPTEL interface (com)-----------------------
+.. _sec_com:COMPTEL interface-----------------

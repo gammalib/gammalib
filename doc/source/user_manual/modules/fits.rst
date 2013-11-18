@@ -1,1 +1,1 @@
-.. _sec_fits:FITS file interface (fits)--------------------------
+.. _sec_fits:FITS file interface-------------------

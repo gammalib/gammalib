@@ -1,1 +1,1 @@
-.. _sec_linalg:Linear algebra (linalg)-----------------------
+.. _sec_linalg:Linear algebra--------------

@@ -1,1 +1,1 @@
-.. _sec_app:Creation of ftools applications (app)-------------------------------------
+.. _sec_app:Creation of ftools applications-------------------------------

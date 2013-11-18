@@ -1,1 +1,1 @@
-.. _sec_numerics:Numerical methods (numerics)----------------------------
+.. _sec_numerics:Numerical methods-----------------

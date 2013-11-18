@@ -1,1 +1,1 @@
-.. _sec_opt:Optimizers (opt)----------------
+.. _sec_opt:Optimizers----------
