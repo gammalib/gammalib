@@ -1,12 +1,12 @@
 #! /usr/bin/env python
 # ==========================================================================
-# This script tests the simulation of diffuse map cubes.
+# This script tests the photon simulation using GCTAModelBackground.
 #
 # If matplotlib is installed, the simulation results will be displayed.
 #
 # --------------------------------------------------------------------------
 #
-# Copyright (C) 2013 Juergen Knoedlseder
+# Copyright (C) 2013 Michael Mayer
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,10 +40,10 @@ def simulate(observation,filename):
     ran = GRan()
 
     # Build GCTAModelBackground with a diffuse cube    
-    spat = GModelSpatialDiffuseCube(filename)
+    spat  = GModelSpatialDiffuseCube(filename)
     pivot = GEnergy(1.0,"TeV")
-    spec = GModelSpectralPlaw(1.0,0.0,pivot)
-    bck = GCTAModelBackground(spat,spec)
+    spec  = GModelSpectralPlaw(1.0,0.0,pivot)
+    bck   = GCTAModelBackground(spat,spec)
     bck.instruments("CTA")
 
     # Simulate photons
@@ -89,12 +89,10 @@ def show_photons(photons, mod,e_min,e_max,skydir,area,duration,ebins=30):#, e_mi
         error = [sqrt(c) for c in counts]
         #print counts
         #print error
-        # Get model values
-       
+
+        # Get model values       
         model  = []
         t      = GTime()
-        
-        #update mc_cache  
         mod.set_mc_cone(skydir, radius)
         for i in range(ebds.size()):
             eng    = ebds.elogmean(i)
@@ -124,18 +122,19 @@ def show_photons(photons, mod,e_min,e_max,skydir,area,duration,ebins=30):#, e_mi
             ra.append(photon.dir().ra_deg())
             dec.append(photon.dir().dec_deg())
 
-        # Make scatter plot
-        #plt.scatter(ra, dec, marker=".")
-        x = skydir.ra_deg()
-        y = skydir.dec_deg()
-        
-        xmin = x - sqrt(0.45) * radius
-        xmax = x + sqrt(0.45) * radius
-        ymin = y - sqrt(0.45) * radius
-        ymax = y + sqrt(0.45) * radius
-        
-        plt.hist2d(ra,dec,bins=50,range=[[xmin,xmax],[ymin,ymax]])
-
+        # Make 2D histogram (or scatter plot in case that the 2D histogram
+        # is not available)
+        if hasattr(plt, 'hist2d'):
+            x    = skydir.ra_deg()
+            y    = skydir.dec_deg()
+            xmin = x - sqrt(0.45) * radius
+            xmax = x + sqrt(0.45) * radius
+            ymin = y - sqrt(0.45) * radius
+            ymax = y + sqrt(0.45) * radius
+            plt.hist2d(ra,dec,bins=50,range=[[xmin,xmax],[ymin,ymax]])
+        else:
+            plt.scatter(ra, dec, marker=".")
+ 
         # Set axes
         plt.xlabel("Right Ascension (deg)")
         plt.ylabel("Declination (deg)")
@@ -166,7 +165,8 @@ if __name__ == '__main__':
     print("* Simulate photons *")
     print("********************")
 
-    cube_filename = os.environ["GAMMALIB"]+"/test/data/test_cube.fits"
+    #cube_filename = os.environ["GAMMALIB"]+"/test/data/test_cube.fits"
+    cube_filename = "../../../test/data/test_cube.fits"
     duration = 180.0
     radius = 2.0
     skydir = GSkyDir()
@@ -196,27 +196,27 @@ if __name__ == '__main__':
     ebds = GEbounds()
     ebds.append(emin,emax)
     
-    #Create event list with Ebounds, ROI and GTI
+    # Create event list with Ebounds, ROI and GTI
     ev = GCTAEventList()
     ev.roi(roi)
     ev.gti(gti)    
     ev.ebounds(ebds)
     
-    #Create Pointing
+    # Create Pointing
     pnt = GCTAPointing()
     pnt.dir(skydir)
     
-    #Set observation parameters
+    # Set observation parameters
     obs.ontime(gti.ontime())
     obs.livetime(gti.ontime())
     obs.deadc(1.0)
     obs.events(ev)
     obs.pointing(pnt)
         
-    # simulate     
-    photons,mod = simulate(obs,cube_filename)
+    # Simulate     
+    photons,mod = simulate(obs, cube_filename)
     
-    #Calculate surface area
+    # Calculate surface area
     area = 4.0 * pi * (1.0-cos(radius/180.0*pi))
  
     # Show photons
