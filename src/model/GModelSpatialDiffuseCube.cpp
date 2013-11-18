@@ -300,6 +300,11 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
         // Set the intensity times the scaling factor as model value
         value = intensity * m_value.value();
 
+        // Make sure that value is not negative
+        if (value < 0.0) {
+            value = 0.0;
+        }
+
     } // endif: energy information was available
 
     // Return value
@@ -339,6 +344,12 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
 
 	// Compute partial derivatives of the parameter value
 	double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
+
+    // Make sure that value is not negative
+    if (value < 0.0) {
+        value   = 0.0;
+        g_value = 0.0;
+    }
 
 	// Set gradient to 0 (circumvent const correctness)
 	const_cast<GModelSpatialDiffuseCube*>(this)->m_value.factor_gradient(g_value);
