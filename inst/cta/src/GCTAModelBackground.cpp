@@ -40,6 +40,7 @@
 #include "GCTAModelBackground.hpp"
 #include "GModelSpatialRegistry.hpp"
 #include "GModelSpatial.hpp"
+#include "GModelSpatialDiffuseCube.hpp"
 #include "GCTAObservation.hpp"
 #include "GCTAPointing.hpp"
 #include "GCTAInstDir.hpp"
@@ -478,7 +479,6 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 
    } // endif: there were values in the Npred cache
    #endif
-   //std::cout<<"\nCALLING NPRED "<<id<<" ...HAD NPRED: "<<has_npred<<std::endl;
 
    // Continue only if no Npred cache value was found
    if (!has_npred) {
@@ -525,7 +525,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 
 			// Setup integrator
 			GIntegral integral(&integrand);
-			integral.eps(1e-2);
+			integral.eps(1e-3);
 
 			// Setup integration boundaries
 			double rmin = (roi_distance > roi_radius) ? roi_distance-roi_radius : 0.0;
@@ -557,15 +557,12 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 
    } // endif: Npred computation required
 
-    //if(obsEng.TeV()>0.795&& obsEng.TeV()<1.1){std::cout<<"NPRED SPATIAL = "<<npred<<std::endl;}
-
 	// Multiply in spectral and temporal components
 	npred *= spectral()->eval(obsEng, obsTime);
 	npred *= temporal()->eval(obsTime);
-	//std::cout<<npred<<" ohne deadc ";
+
 	// Apply deadtime correction
 	npred *= obs.deadc(obsTime);
-	//std::cout<<npred<<std::endl;
 
     // Return Npred
     return npred;
@@ -607,20 +604,57 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
             throw GCTAException::no_pointing(G_MC);
         }
 
+        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+		if (events == NULL) {
+			throw GException::no_events(G_MC);
+		}
+
         // Convert CTA pointing direction in instrument system
         GCTAInstDir pnt_dir(pnt->dir());
 
         // Loop over all energy boundaries
         for (int ieng = 0; ieng < obs.events()->ebounds().size(); ++ieng) {
 
-            // Compute the on-axis background rate in model within the
-            // energy boundaries from spectral component (units: cts/s/sr)
-            double flux = spectral()->flux(obs.events()->ebounds().emin(ieng),
-                                           obs.events()->ebounds().emax(ieng));
+            // Initialise de-allocation flag
+		   bool free_spectral = false;
 
-            // Compute solid angle used for normalization
-            // todo Find a way to calculate the solid angle of the model
-            double area = 1.0;
+		   // Set pointer to spectral model
+		   GModelSpectral* spectral = m_spectral;
+
+		   // If the spectral model is a diffuse cube then create a node
+		   // function spectral model that is the product of the diffuse
+		   // cube node function and the spectral model evaluated at the
+		   // energies of the node function
+		   GModelSpatialDiffuseCube* cube = dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
+		   if (cube != NULL) {
+
+			   // Set MC cone
+			   cube->set_mc_cone(pnt->dir(), events->roi().radius());
+
+			   // Allocate node function to replace the spectral component
+			   GModelSpectralNodes* nodes = new GModelSpectralNodes(cube->spectrum());
+			   for (int i = 0; i < nodes->nodes(); ++i) {
+				   GEnergy energy    = nodes->energy(i);
+				   double  intensity = nodes->intensity(i);
+				   double  norm      = m_spectral->eval(energy, events->tstart());
+				   nodes->intensity(i, norm*intensity);
+			   }
+
+			   // Signal that node function needs to be de-allocated later
+			   free_spectral = true;
+
+			   // Set the spectral model pointer to the node function
+			   spectral = nodes;
+
+		   } // endif: spatial model was a diffuse cube
+
+            // Compute the field of view background rate in model within the
+            // energy boundaries from spectral component (units: cts/s/sr)
+            double flux = spectral->flux(events->ebounds().emin(ieng),
+                                           events->ebounds().emax(ieng));
+
+            // Compute solid angle of the FoV used for normalization
+            double area = gammalib::fourpi * (1.0 - std::cos( events->roi().radius()*gammalib::deg2rad ) );
 
             // Derive expecting rate (units: cts/s). Note that the time here
             // is good time. Deadtime correction will be done later.
@@ -635,12 +669,12 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
             #endif
 
             // Loop over all good time intervals
-            for (int itime = 0; itime < obs.events()->gti().size(); ++itime) {
+            for (int itime = 0; itime < events->gti().size(); ++itime) {
 
                 // Get event arrival times from temporal model
                 GTimes times = m_temporal->mc(rate,
-                                              obs.events()->gti().tstart(itime),
-                                              obs.events()->gti().tstop(itime),
+                                              events->gti().tstart(itime),
+                                              events->gti().tstop(itime),
                                               ran);
 
                 // Get number of events
@@ -665,14 +699,14 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
 
 
                     // Set event energy
-                    GEnergy energy = spectral()->mc(obs.events()->ebounds().emin(ieng),
+                    GEnergy energy = spectral->mc(obs.events()->ebounds().emin(ieng),
                                                     obs.events()->ebounds().emax(ieng),
                                                     times[i],
                                                     ran);
 
                     // Set event direction
                     GSkyDir dir = spatial()->mc(energy,times[i], ran);
-                    GCTAInstDir cta_dir(dir);// = spatial()->mc(energy,times[i], ran);
+                    GCTAInstDir cta_dir(dir);
 
                     // Allocate event
                     GCTAEventAtom event;
@@ -688,6 +722,9 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
                 } // endfor: looped over all events
 
             } // endfor: looped over all GTIs
+
+            // Free spectral model if required
+            if (free_spectral) delete spectral;
 
         } // endfor: looped over all energy boundaries
 
@@ -1184,9 +1221,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
 
 			// Integrate over phi
 			GIntegral integral(&integrand);
-	        integral.eps(1e-2);
-	        //std::cout<<omega_min<<" "<<omega_max<<std::endl;
-	        //value = integral.romb(0.0,gammalib::twopi) * sin_theta;
+	        integral.eps(1e-3);
 			value = integral.romb(omega_min,omega_max) * sin_theta;
 
 			// Debug: Check for NaN

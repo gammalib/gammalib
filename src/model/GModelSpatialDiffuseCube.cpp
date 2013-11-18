@@ -826,7 +826,11 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             if (m_logE.size() == nmaps) {
                 GEnergy energy;
                 energy.log10MeV(m_logE[i]);
-                m_mc_spectrum.append(energy, flux_centre);
+
+                // Only append new node if flux > 0
+                if (flux_centre>0.0) {
+                	m_mc_spectrum.append(energy, flux_centre);
+                }
             }
 
         } // endfor: looped over all maps

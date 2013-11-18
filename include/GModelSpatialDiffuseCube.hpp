@@ -38,7 +38,6 @@
 #include "GNodeArray.hpp"
 #include "GXmlElement.hpp"
 #include "GEbounds.hpp"
-#include "GEnergies.hpp"
 
 
 /***********************************************************************//**
@@ -59,9 +58,9 @@ public:
     explicit GModelSpatialDiffuseCube(const GXmlElement& xml);
     explicit GModelSpatialDiffuseCube(const std::string& filename,
                                       const double&      value = 1.0);
-    explicit GModelSpatialDiffuseCube(const GSkymap&   cube,
-                                      const GEnergies& energies,
-                                      const double&    value = 1.0);
+    explicit GModelSpatialDiffuseCube(const GSkymap&              cube,
+                                      const std::vector<GEnergy>& energies,
+                                      const double&               value = 1.0);
     GModelSpatialDiffuseCube(const GModelSpatialDiffuseCube& model);
     virtual ~GModelSpatialDiffuseCube(void);
 
@@ -91,8 +90,8 @@ public:
     void                       filename(const std::string& filename);
     const GSkymap&             cube(void) const;
     void                       cube(const GSkymap& cube);
-    GEnergies                  energies(void);
-    void                       energies(const GEnergies& energies);
+    std::vector<GEnergy>       energies(void);
+    void                       energies(const std::vector<GEnergy>& energies);
     const GModelSpectralNodes& spectrum(void) const;
     void                       set_mc_cone(const GSkyDir& centre,
                                            const double&  radius);
