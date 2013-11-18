@@ -87,23 +87,26 @@ public:
         return;
     }
     virtual GTestModelData* clone(void) const { return new GTestModelData(*this); }
-    virtual std::string type(void) const {return "=== GTestModelData ===";}
-    virtual bool        isconstant(void) const {return true;}
-    virtual double      eval(const GEvent& event,
-                             const GObservation& obs) const { 
-                                 double result = m_modelTps->eval(event.time());
-                                 return result;
-                             }
-    virtual double      eval_gradients(const GEvent& event,
-                                       const GObservation& obs) const {
-                                           double result = m_modelTps->eval_gradients(event.time());
-                                           return result;
-                                       }
-    virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
-                              const GObservation& obs) const {
-                                  double result = m_pars[0]->value();
-                                  return result;
-                              }
+    virtual std::string     type(void) const {return "=== GTestModelData ===";}
+    virtual bool            isconstant(void) const {return true;}
+    virtual double          eval(const GEvent& event,
+                                 const GObservation& obs) const { 
+                                double result = m_modelTps->eval(event.time());
+                                return result;
+                            }
+    virtual double          eval_gradients(const GEvent& event,
+                                           const GObservation& obs) const {
+                                double result = m_modelTps->eval_gradients(event.time());
+                                return result;
+                            }
+    virtual double          npred(const GEnergy& obsEng, const GTime& obsTime,
+                                  const GObservation& obs) const {
+                                double result = m_pars[0]->value();
+                                return result;
+                            }
+    virtual GTestEventList* mc(const GObservation& obs, GRan& ran) const {
+                                return NULL;
+                            }
 
    // Generate an EventList, rate is the number of event per second. Events have a time between tmin and tmax.
    virtual GTestEventList* generateList(const double &rate, const GTime &tmin, const GTime &tmax, GRan &ran)

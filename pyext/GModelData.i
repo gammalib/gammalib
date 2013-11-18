@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GModelData.i - Abstract virtual data model class python I/F       *
+ *             GModelData.i - Abstract virtual data model class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -54,6 +54,7 @@ public:
                                        const GObservation& obs) const = 0;
     virtual double      npred(const GEnergy& obsEng, const GTime& obsTime,
                               const GObservation& obs) const = 0;
+    virtual GEvents*    mc(const GObservation& obs, GRan& ran) const = 0;
     virtual void        read(const GXmlElement& xml) = 0;
     virtual void        write(GXmlElement& xml) const = 0;
 };
