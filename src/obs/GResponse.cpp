@@ -192,9 +192,6 @@ double GResponse::irf(const GEvent&       event,
         irf = irf_diffuse(event, source, obs);
     }
 
-    // Apply deadtime correction
-    irf *= obs.deadc(source.time());
-
     // Return IRF value
     return irf;
 }
@@ -344,9 +341,6 @@ double GResponse::npred(const GSource& source, const GObservation& obs) const
     else if (dynamic_cast<const GModelSpatialDiffuse*>(source.model()) != NULL) {
         npred = npred_diffuse(source, obs);
     }
-
-    // Apply deadtime correction
-    npred *= obs.deadc(source.time());
 
     // Return response value
     return npred;

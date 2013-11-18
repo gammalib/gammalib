@@ -356,7 +356,7 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     double npred = obs.npred(models, NULL);
 
     // Test Npred
-    test_value(npred, ref, 1.0e-5, "Diffuse Npred computation");
+    test_value(npred, ref*1600.0/1800.0, 1.0e-5, "Diffuse Npred computation");
 
     // Return
     return;

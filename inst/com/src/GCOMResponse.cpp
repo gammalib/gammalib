@@ -266,7 +266,8 @@ double GCOMResponse::irf(const GEvent&       event,
     const GCOMInstDir& obsDir = bin->dir();
 
     // Extract photon parameters
-    const GSkyDir& srcDir = photon.dir();
+    const GSkyDir& srcDir  = photon.dir();
+    const GTime&   srcTime = photon.time();
 
     // Compute angle between true photon arrival direction and scatter
     // direction (Chi,Psi)
@@ -313,6 +314,9 @@ double GCOMResponse::irf(const GEvent&       event,
 
     // Compute IRF value
     double irf = iaq * drg * drx / ontime;
+
+    // Apply deadtime correction
+    irf *= obs.deadc(srcTime);
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)

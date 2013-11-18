@@ -306,8 +306,9 @@ double GCTAResponse::irf(const GEvent&       event,
     const GEnergy& obsEng = event.energy();
 
     // Get photon attributes
-    const GSkyDir& srcDir = photon.dir();
-    const GEnergy& srcEng = photon.energy();
+    const GSkyDir& srcDir  = photon.dir();
+    const GEnergy& srcEng  = photon.energy();
+    const GTime&   srcTime = photon.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -337,7 +338,7 @@ double GCTAResponse::irf(const GEvent&       event,
         irf = aeff(theta, phi, zenith, azimuth, srcLogEng);
 
         // Multiply-in PSF
-        if (irf > 0) {
+        if (irf > 0.0) {
 
             // Get PSF component
             irf *= psf(delta, theta, phi, zenith, azimuth, srcLogEng);
@@ -352,6 +353,9 @@ double GCTAResponse::irf(const GEvent&       event,
                 irf *= edisp(obsLogEng, theta, phi, zenith, azimuth, srcLogEng);
 
             } // endif: energy dispersion was available and PSF was non-zero
+
+            // Apply deadtime correction
+            irf *= obs.deadc(srcTime);
 
         } // endif: Aeff was non-zero
 
@@ -443,6 +447,9 @@ double GCTAResponse::npred(const GPhoton&      photon,
             npred *= nedisp(srcDir, srcEng, srcTime, *pnt, events->ebounds());
 
         } // endif: had energy dispersion
+
+        // Apply deadtime correction
+        npred *= obs.deadc(srcTime);
 
     } // endif: had non-zero effective area
 
@@ -1038,6 +1045,10 @@ double GCTAResponse::irf_radial(const GEvent&       event,
             std::cout << std::endl;
         }
         #endif
+
+        // Apply deadtime correction
+        irf *= obs.deadc(srcTime);
+
     }
 
     // Compile option: Show integration results
@@ -1220,6 +1231,9 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
             std::cout << std::endl;
         }
         #endif
+
+        // Apply deadtime correction
+        irf *= obs.deadc(srcTime);
     }
 
     // Compile option: Show integration results
@@ -1400,6 +1414,9 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
             #endif
         }
 
+        // Apply deadtime correction
+        irf *= obs.deadc(srcTime);
+
         // Put IRF value in cache
         #if defined(G_USE_IRF_CACHE)
         if (list != NULL && atom != NULL) {
@@ -1509,8 +1526,9 @@ double GCTAResponse::npred_radial(const GSource& source,
     }
 
     // Get source attributes
-    const GSkyDir& centre = model->dir();
-    const GEnergy& srcEng = source.energy();
+    const GSkyDir& centre  = model->dir();
+    const GEnergy& srcEng  = source.energy();
+    const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -1573,6 +1591,9 @@ double GCTAResponse::npred_radial(const GSource& source,
         // Integrate over theta
         GIntegral integral(&integrand);
         npred = integral.romb(rho_min, rho_max);
+
+        // Apply deadtime correction
+        npred *= obs.deadc(srcTime);
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_RADIAL)
@@ -1689,6 +1710,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
     // Get source attributes
     const GSkyDir& centre = model->dir();
     const GEnergy& srcEng = source.energy();
+    const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt->zenith();
@@ -1751,6 +1773,9 @@ double GCTAResponse::npred_elliptical(const GSource& source,
         // Integrate over theta
         GIntegral integral(&integrand);
         npred = integral.romb(rho_min, rho_max);
+
+        // Apply deadtime correction
+        npred *= obs.deadc(srcTime);
 
         // Compile option: Show integration results
         #if defined(G_DEBUG_NPRED_ELLIPTICAL)
@@ -1891,7 +1916,8 @@ double GCTAResponse::npred_diffuse(const GSource& source,
         }
 
         // Get source attributes
-        const GEnergy& srcEng = source.energy();
+        const GEnergy& srcEng  = source.energy();
+        const GTime&   srcTime = source.time();
 
         // Get pointing direction zenith angle and azimuth [radians]
         double zenith  = pnt->zenith();
@@ -1938,6 +1964,9 @@ double GCTAResponse::npred_diffuse(const GSource& source,
             GIntegral integral(&integrand);
             integral.eps(1.0e-4);
             npred = integral.romb(0.0, roi_psf_radius);
+
+            // Apply deadtime correction
+            npred *= obs.deadc(srcTime);
 
             // Compile option: Show integration results
             #if defined(G_DEBUG_NPRED_DIFFUSE)
