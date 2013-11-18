@@ -758,7 +758,7 @@ void GCTAModelBackground::read(const GXmlElement& xml)
     m_spectral = xml_spectral(*spec);
 
     // Optionally get temporal model
-    if (xml.elements("temporalModel") {
+    if (xml.elements("temporalModel")) {
         temp       = xml.element("temporalModel", 0);
         m_temporal = xml_temporal(*temp);
     }
