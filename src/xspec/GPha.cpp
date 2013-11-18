@@ -37,6 +37,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_AT                                                 "GPha::at(int&)"
+#define G_READ                                      "GPha::read(GFitsTable*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -104,6 +105,24 @@ GPha::GPha(const GEbounds& ebds)
 
 
 /***********************************************************************//**
+ * @brief Energy bins constructor
+ *
+ * @param[in] bins Number of energy bins.
+ ***************************************************************************/
+GPha::GPha(const int& bins)
+{
+    // Initialise members
+    init_members();
+
+    // Initialize spectrum
+    m_counts.assign(bins, 0.0);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] pha Pulse Height Analyzer spectrum.
@@ -146,7 +165,7 @@ GPha::~GPha(void)
  * @param[in] pha Pulse Height Analyzer spectrum.
  * @return Pulse Height Analyzer spectrum.
  ***************************************************************************/
-GPha& GPha::operator= (const GPha& pha)
+GPha& GPha::operator=(const GPha& pha)
 {
     // Execute only if object is not identical
     if (this != &pha) {
@@ -180,8 +199,10 @@ GPha& GPha::operator= (const GPha& pha)
  ***************************************************************************/
 void GPha::clear(void)
 {
-    // Free memory and initialise members
+    // Free memory
     free_members();
+
+    // Initialise members
     init_members();
 
     // Return
@@ -191,6 +212,7 @@ void GPha::clear(void)
 
 /***********************************************************************//**
  * @brief Clone object
+ *
  * @return Pulse Height Analyzer spectrum.
  ***************************************************************************/
 GPha* GPha::clone(void) const
@@ -242,28 +264,6 @@ const double& GPha::at(const int& index) const
     // Return reference
     return (m_counts[index]);
 }
-
-
-/***********************************************************************//**
- * @brief Return index for a given energy
- *
- * Returns the number of counts in the spectrum.
- ***************************************************************************/
-/*
-int GPha::index(const GEnergy& energy) const
-{
-    // Initialise counts
-    double counts = 0.0;
-    
-    // Compute content
-    for (int i = 0; i < m_counts.size(); ++i) {
-        counts += m_counts[i];
-    }
-
-    // Return counts
-    return counts;
-}
-*/
 
 
 /***********************************************************************//**
@@ -326,6 +326,9 @@ void GPha::fill(const GEnergy& energy, const double& value)
  * @brief Load Pulse Height Analyzer spectrum
  *
  * @param[in] filename File name.
+ *
+ * Loads the Pulse Height Analyzer spectrum from a FITS file. If an EBOUNDS
+ * extension is given, the energy boundaries information is also loaded
  ***************************************************************************/
 void GPha::load(const std::string& filename)
 {
@@ -335,14 +338,17 @@ void GPha::load(const std::string& filename)
     // Open FITS file
     GFits file(filename);
 
-    // Read energy boundaries
-    m_ebounds.load(filename);
-
     // Get PHA table
-    GFitsTable* table = file.table("SPECTRUM");
+    GFitsTable* pha = file.table("SPECTRUM");
+
+    // Get EBOUNDS table (NULL if the table does not exist)
+    GFitsTable* ebounds = (file.hashdu("EBOUNDS")) ? file.table("EBOUNDS") : NULL;
 
     // Read PHA data
-    read(table);
+    read(pha);
+
+    // Read EBOUNDS data (will do nothing if table has not been found)
+    m_ebounds.read(ebounds);
 
     // Close FITS file
     file.close();
@@ -384,27 +390,40 @@ void GPha::save(const std::string& filename, const bool& clobber) const
  * @brief Read Pulse Height Analyzer spectrum
  *
  * @param[in] hdu PHA FITS table.
+ *
+ * @exception GException::invalid_value
+ *            Mismatch between PHA file and energy boundaries.
  ***************************************************************************/
 void GPha::read(const GFitsTable* hdu)
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
-        // Set expected column length
-        int length = m_ebounds.size();
+        // Get data column
+        const GFitsTableCol& col_data = (*hdu)["COUNTS"];
+
+        // Extract number of channels in FITS file
+        int length = hdu->integer("NAXIS2");
+
+        // Check whether column length is okay
+        if (m_ebounds.size() > 0) {
+            if (m_ebounds.size() != length) {
+                std::string msg = "Number of channels in PHA file ("
+                                  ""+gammalib::str(length)+") mismatches the"
+                                  " number of energy boundaries ("
+                                  ""+gammalib::str(m_ebounds.size())+") that"
+                                  " are defined in the GPha instance.\n"
+                                  "Please define the correct energy boundaries.";
+                throw GException::invalid_value(G_READ, msg);
+            }
+        }
 
         // Initialize spectrum
         m_counts.assign(length, 0.0);
 
-        // Get pointer to data column
-        const GFitsTableCol* col_data = &(*hdu)["COUNTS"];
-
-        // Check whether column length is okay
-        //TODO
-
         // Copy data
         for (int i = 0; i < length; ++i) {
-            m_counts[i] = col_data->real(i);
+            m_counts[i] = col_data.real(i);
         }
 
     } // endif: HDU was valid
@@ -465,8 +484,10 @@ void GPha::write(GFits& fits) const
         // Free binary table
         delete hdu;
 
-        // Append energy boundaries
-        m_ebounds.write(&fits);
+        // Optionally append energy boundaries
+        if (m_ebounds.size() > 0) {
+            m_ebounds.write(&fits);
+        }
 
     } // endif: there were data to write
 
@@ -494,11 +515,16 @@ std::string GPha::print(const GChatter& chatter) const
 
         // Append energy boundary information
         result.append("\n"+gammalib::parformat("Number of bins"));
-        result.append(gammalib::str(m_ebounds.size()));
+        result.append(gammalib::str(size()));
         result.append("\n"+gammalib::parformat("Energy range"));
-        result.append(m_ebounds.emin().print());
-        result.append(" - ");
-        result.append(m_ebounds.emax().print());
+        if (m_ebounds.size() > 0) {
+            result.append(m_ebounds.emin().print());
+            result.append(" - ");
+            result.append(m_ebounds.emax().print());
+        }
+        else {
+            result.append("not specified");
+        }
 
         // Append content information
         result.append("\n"+gammalib::parformat("Total number of counts"));
@@ -550,11 +576,11 @@ void GPha::copy_members(const GPha& pha)
 {
     // Copy members
     m_filename  = pha.m_filename;
-    m_ebounds   = pha.m_ebounds;
     m_counts    = pha.m_counts;
     m_underflow = pha.m_underflow;
     m_overflow  = pha.m_overflow;
     m_outflow   = pha.m_outflow;
+    m_ebounds   = pha.m_ebounds;
 
     // Return
     return;

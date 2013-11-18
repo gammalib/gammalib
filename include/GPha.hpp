@@ -40,6 +40,16 @@
  * @class GPha
  *
  * @brief Pulse Height Analyzer class
+ *
+ * This class implements a Pulse Height Analyzer (PHA) spectrum that is used
+ * as data container for an XSPEC analysis. A PHA spectrum is a vector that
+ * provides the number of measured counts as function of the channel number.
+ *
+ * As an extension to the PHA format, the GPha class may also store the
+ * energy boundaries for all PHA channels. If defined, the energy boundaries
+ * will be written as a EBOUNDS extension to the same file where the PHA
+ * spectrum resides. Upon loading, GPha will also load the energy boundaries
+ * from an EBOUNDS extension if they are present.
  ***************************************************************************/
 class GPha : public GBase {
 
@@ -48,6 +58,7 @@ public:
     GPha(void);
     explicit GPha(const std::string& filename);
     explicit GPha(const GEbounds& ebds);
+    explicit GPha(const int& bins);
     GPha(const GPha& pha);
     virtual ~GPha(void);
 
@@ -83,11 +94,11 @@ protected:
     
     // Protected members
     mutable std::string m_filename;   //!< Filename of origin
-    GEbounds            m_ebounds;    //!< Energy boundaries
     std::vector<double> m_counts;     //!< Counts data
     double              m_underflow;  //!< Number of underflowing events
     double              m_overflow;   //!< Number of overflowing events
     double              m_outflow;    //!< Number of outflowing events
+    GEbounds            m_ebounds;    //!< Energy boundaries
 };
 
 

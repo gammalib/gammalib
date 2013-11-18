@@ -41,6 +41,7 @@ public:
     GPha(void);
     explicit GPha(const std::string& filename);
     explicit GPha(const GEbounds& ebds);
+    explicit GPha(const int& bins);
     GPha(const GPha& pha);
     virtual ~GPha(void);
 
