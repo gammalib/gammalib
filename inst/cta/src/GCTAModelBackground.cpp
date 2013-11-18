@@ -52,20 +52,18 @@
 
 /* __ Globals ____________________________________________________________ */
 const GCTAModelBackground g_cta_model_background_seed;
-const GModelRegistry            g_cta_model_background_registry(&g_cta_model_background_seed);
+const GModelRegistry      g_cta_model_background_registry(&g_cta_model_background_seed);
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                "GCTAModelBackground::operator() (int)"
-#define G_EVAL                     "GCTAModelBackground::eval(GEvent&,"\
+#define G_EVAL            "GCTAModelBackground::eval(GEvent&, GObservation&)"
+#define G_EVAL_GRADIENTS       "GCTAModelBackground::eval_gradients(GEvent&,"\
                                                             " GObservation&)"
-#define G_EVAL_GRADIENTS "GCTAModelBackground::eval_gradients(GEvent&,"\
+#define G_NPRED                "GCTAModelBackground::npred(GEnergy&, GTime&,"\
                                                             " GObservation&)"
-#define G_NPRED          "GCTAModelBackground::npred(GEnergy&, GTime&,"\
-                                                            " GObservation&)"
-#define G_MC            "GCTAModelBackground::mc(GObservation&, GRan&)"
-#define G_XML_SPATIAL    "GCTAModelBackground::xml_spatial(GXmlElement&)"
-#define G_XML_SPECTRAL "GCTAModelBackground::xml_spectral(GXmlElement&)"
-#define G_XML_TEMPORAL "GCTAModelBackground::xml_temporal(GXmlElement&)"
+#define G_MC                  "GCTAModelBackground::mc(GObservation&, GRan&)"
+#define G_XML_SPATIAL        "GCTAModelBackground::xml_spatial(GXmlElement&)"
+#define G_XML_SPECTRAL      "GCTAModelBackground::xml_spectral(GXmlElement&)"
+#define G_XML_TEMPORAL      "GCTAModelBackground::xml_temporal(GXmlElement&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -73,7 +71,7 @@ const GModelRegistry            g_cta_model_background_registry(&g_cta_model_bac
 #define G_USE_NPRED_CACHE      //!< Use Npred cache in npred_diffuse method
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_NPRED                         //!< Debug npred_diffuse method
+//#define G_DEBUG_NPRED                       //!< Debug npred_diffuse method
 //#define G_DUMP_MC                                  //!< Dump MC information
 
 
@@ -103,13 +101,12 @@ GCTAModelBackground::GCTAModelBackground(void) : GModelData()
  *
  * @param[in] xml XML element.
  *
- * Constructs a CTA background model from the information that is
- * found in a XML element. Please refer to the method
- * GCTAModelBackground::read
- * to learn more about the information that is expected in the XML element.
+ * Constructs a CTA background model from the information that is found in a
+ * XML element. Please refer to the method GCTAModelBackground::read to learn
+ * more about the information that is expected in the XML element.
  ***************************************************************************/
 GCTAModelBackground::GCTAModelBackground(const GXmlElement& xml) :
-                                                     GModelData(xml)
+                     GModelData(xml)
 {
     // Initialise members
     init_members();
@@ -136,9 +133,9 @@ GCTAModelBackground::GCTAModelBackground(const GXmlElement& xml) :
  * Please refer to the classes GModelSpatial and GModelSpectral to learn
  * more about the definition of the spatial and spectral components.
  ***************************************************************************/
-GCTAModelBackground::GCTAModelBackground(const GModelSpatial& spatial,
-                                                     const GModelSpectral&  spectral)
-                                                               : GModelData()
+GCTAModelBackground::GCTAModelBackground(const GModelSpatial&  spatial,
+                                         const GModelSpectral& spectral) :
+                     GModelData()
 {
     // Initialise members
     init_members();
@@ -147,7 +144,7 @@ GCTAModelBackground::GCTAModelBackground(const GModelSpatial& spatial,
     GModelTemporalConst temporal;
 
     // Clone model components
-    m_spatial   = spatial.clone();
+    m_spatial  = spatial.clone();
     m_spectral = spectral.clone();
     m_temporal = temporal.clone();
 
@@ -169,7 +166,7 @@ GCTAModelBackground::GCTAModelBackground(const GModelSpatial& spatial,
  * can be destroyed after the copy without any loss of information.
  ***************************************************************************/
 GCTAModelBackground::GCTAModelBackground(const GCTAModelBackground& model) :
-                                                     GModelData(model)
+                     GModelData(model)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -216,7 +213,7 @@ GCTAModelBackground::~GCTAModelBackground(void)
  * original object can be destroyed after the assignment without any loss of
  * information.
  ***************************************************************************/
-GCTAModelBackground& GCTAModelBackground::operator= (const GCTAModelBackground& model)
+GCTAModelBackground& GCTAModelBackground::operator=(const GCTAModelBackground& model)
 {
     // Execute only if object is not identical
     if (this != &model) {
@@ -303,7 +300,7 @@ GCTAModelBackground* GCTAModelBackground::clone(void) const
  *       sky exposure as function of offset angle).
  ***************************************************************************/
 double GCTAModelBackground::eval(const GEvent& event,
-                                       const GObservation& obs) const
+                                 const GObservation& obs) const
 {
     // Extract CTA pointing direction
     GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
@@ -319,10 +316,10 @@ double GCTAModelBackground::eval(const GEvent& event,
     // We need the GPhoton to evaluate the spatial model.
     // For the background, GEvent and GPhoton are identical
     // since the IRFs are not folded in
-    GPhoton photon(cta_dir->dir(), event.energy(),event.time());
+    GPhoton photon(cta_dir->dir(), event.energy(), event.time());
 
     // Evaluate function and gradients
-    double spat  = (spatial()   != NULL)
+    double spat = (spatial() != NULL)
                   ? spatial()->eval(photon) : 1.0;
     double spec = (spectral() != NULL)
                   ? spectral()->eval(event.energy(), event.time()) : 1.0;
@@ -384,7 +381,7 @@ double GCTAModelBackground::eval_gradients(const GEvent& event,
     GPhoton photon = GPhoton(cta_dir->dir(), event.energy(),event.time());
 
     // Evaluate function and gradients
-    double spat  = (spatial()   != NULL)
+    double spat = (spatial() != NULL)
                   ? spatial()->eval_gradients(photon) : 1.0;
     double spec = (spectral() != NULL)
                   ? spectral()->eval_gradients(event.energy(), event.time()) : 1.0;
@@ -447,21 +444,21 @@ double GCTAModelBackground::eval_gradients(const GEvent& event,
  * the normalization of the model is a real rate (counts/exposure time).
  ***************************************************************************/
 double GCTAModelBackground::npred(const GEnergy&      obsEng,
-                                        const GTime&        obsTime,
-                                        const GObservation& obs) const
+                                  const GTime&        obsTime,
+                                  const GObservation& obs) const
 {
     // Initialise result
     double npred = 0.0;
     bool   has_npred = false;
 
-   // Build unique identifier
-   std::string id = obs.instrument() + "::" + obs.id();
-   //
-   // Check if Npred value is already in cache
-   #if defined(G_USE_NPRED_CACHE)
-   if (!m_npred_names.empty()) {
+    // Build unique identifier
+    std::string id = obs.instrument() + "::" + obs.id();
 
-		// Search for unique identifier, and if found, recover Npred value
+    // Check if Npred value is already in cache
+    #if defined(G_USE_NPRED_CACHE)
+    if (!m_npred_names.empty()) {
+
+        // Search for unique identifier, and if found, recover Npred value
 		// and break
 		for (int i = 0; i < m_npred_names.size(); ++i) {
 			if (m_npred_names[i] == id &&
@@ -477,16 +474,16 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 			}
 		}
 
-   } // endif: there were values in the Npred cache
-   #endif
+    } // endif: there were values in the Npred cache
+    #endif
 
-   // Continue only if no Npred cache value was found
-   if (!has_npred) {
+    // Continue only if no Npred cache value was found
+    if (!has_npred) {
 
-	   // Evaluate only if model is valid
-	   if (valid_model()) {
+        // Evaluate only if model is valid
+        if (valid_model()) {
 
-			// Get pointer on CTA events list
+            // Get pointer on CTA events list
 			const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
 			if (events == NULL) {
 				throw GException::no_list(G_NPRED);
@@ -553,9 +550,9 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 	        }
 	        #endif
 
-		} // endif: model was valid
+        } // endif: model was valid
 
-   } // endif: Npred computation required
+    } // endif: Npred computation required
 
 	// Multiply in spectral and temporal components
 	npred *= spectral()->eval(obsEng, obsTime);
@@ -589,8 +586,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
  * taking into account temporal deadtime variations. For this purpose, the
  * method makes use of the time dependent GObservation::deadc method.
  ***************************************************************************/
-GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
-                                             GRan& ran) const
+GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
 {
     // Initialise new event list
     GCTAEventList* list = new GCTAEventList;
@@ -616,17 +612,17 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
         for (int ieng = 0; ieng < obs.events()->ebounds().size(); ++ieng) {
 
             // Initialise de-allocation flag
-		   bool free_spectral = false;
+            bool free_spectral = false;
 
-		   // Set pointer to spectral model
-		   GModelSpectral* spectral = m_spectral;
+            // Set pointer to spectral model
+            GModelSpectral* spectral = m_spectral;
 
-		   // If the spectral model is a diffuse cube then create a node
-		   // function spectral model that is the product of the diffuse
-		   // cube node function and the spectral model evaluated at the
-		   // energies of the node function
-		   GModelSpatialDiffuseCube* cube = dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
-		   if (cube != NULL) {
+            // If the spectral model is a diffuse cube then create a node
+            // function spectral model that is the product of the diffuse
+            // cube node function and the spectral model evaluated at the
+            // energies of the node function
+            GModelSpatialDiffuseCube* cube = dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
+            if (cube != NULL) {
 
 			   // Set MC cone
 			   cube->set_mc_cone(pnt->dir(), events->roi().radius());
@@ -646,7 +642,7 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
 			   // Set the spectral model pointer to the node function
 			   spectral = nodes;
 
-		   } // endif: spatial model was a diffuse cube
+            } // endif: spatial model was a diffuse cube
 
             // Compute the field of view background rate in model within the
             // energy boundaries from spectral component (units: cts/s/sr)
@@ -696,13 +692,11 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs,
                         }
                     }
 
-
-
                     // Set event energy
                     GEnergy energy = spectral->mc(obs.events()->ebounds().emin(ieng),
-                                                    obs.events()->ebounds().emax(ieng),
-                                                    times[i],
-                                                    ran);
+                                                  obs.events()->ebounds().emax(ieng),
+                                                  times[i],
+                                                  ran);
 
                     // Set event direction
                     GSkyDir dir = spatial()->mc(energy,times[i], ran);
@@ -751,24 +745,24 @@ void GCTAModelBackground::read(const GXmlElement& xml)
     clear();
 
     // Initialise XML elements
-    const GXmlElement* spat  = NULL;
+    const GXmlElement* spat = NULL;
     const GXmlElement* spec = NULL;
     const GXmlElement* temp = NULL;
 
     // Get pointers on spectrum and radial model
-    spat  = xml.element("spatialModel", 0);
+    spat = xml.element("spatialModel", 0);
     spec = xml.element("spectrum", 0);
 
     // Clone radial and spectral models
-    m_spatial   = xml_spatial(*spat);
+    m_spatial  = xml_spatial(*spat);
     m_spectral = xml_spectral(*spec);
 
     // Optionally get temporal model
-    try {
-        temp = xml.element("lightcurve", 0);
+    if (xml.elements("temporalModel") {
+        temp       = xml.element("temporalModel", 0);
         m_temporal = xml_temporal(*temp);
     }
-    catch (GException::xml_name_not_found &e) {
+    else {
         GModelTemporalConst temporal;
         m_temporal = temporal.clone();
     }
@@ -841,7 +835,7 @@ void GCTAModelBackground::write(GXmlElement& xml) const
     // Write temporal model
     if (temporal()) {
         if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
-            GXmlElement* temp = src->element("lightcurve", 0);
+            GXmlElement* temp = src->element("temporalModel", 0);
             temporal()->write(*temp);
         }
     }
@@ -869,7 +863,7 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
         result.append("=== GCTAModelBackground ===");
 
         // Determine number of parameters per type
-        int n_radial   = (spatial()   != NULL) ? spatial()->size()   : 0;
+        int n_radial   = (spatial()  != NULL) ? spatial()->size()  : 0;
         int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
         int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
 
@@ -934,7 +928,7 @@ std::string GCTAModelBackground::print(const GChatter& chatter) const
 void GCTAModelBackground::init_members(void)
 {
     // Initialise members
-    m_spatial   = NULL;
+    m_spatial  = NULL;
     m_spectral = NULL;
     m_temporal = NULL;
 
@@ -965,7 +959,7 @@ void GCTAModelBackground::copy_members(const GCTAModelBackground& model)
     m_npred_values   = model.m_npred_values;
 
     // Clone radial, spectral and temporal model components
-    m_spatial   = (model.m_spatial   != NULL) ? model.m_spatial->clone()   : NULL;
+    m_spatial  = (model.m_spatial  != NULL) ? model.m_spatial->clone()  : NULL;
     m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
     m_temporal = (model.m_temporal != NULL) ? model.m_temporal->clone() : NULL;
 
@@ -990,12 +984,12 @@ void GCTAModelBackground::free_members(void)
 	m_npred_values.clear();
 
     // Free memory
-    if (m_spatial   != NULL) delete m_spatial;
+    if (m_spatial  != NULL) delete m_spatial;
     if (m_spectral != NULL) delete m_spectral;
     if (m_temporal != NULL) delete m_temporal;
 
     // Signal free pointers
-    m_spatial   = NULL;
+    m_spatial  = NULL;
     m_spectral = NULL;
     m_temporal = NULL;
 
@@ -1016,7 +1010,7 @@ void GCTAModelBackground::set_pointers(void)
     m_pars.clear();
 
     // Determine the number of parameters
-    int n_radial   = (spatial()   != NULL) ? spatial()->size()   : 0;
+    int n_radial   = (spatial()  != NULL) ? spatial()->size()  : 0;
     int n_spectral = (spectral() != NULL) ? spectral()->size() : 0;
     int n_temporal = (temporal() != NULL) ? temporal()->size() : 0;
     int n_pars     = n_radial + n_spectral + n_temporal;
@@ -1055,7 +1049,7 @@ void GCTAModelBackground::set_pointers(void)
 bool GCTAModelBackground::valid_model(void) const
 {
     // Set result
-    bool result = ((spatial()   != NULL) &&
+    bool result = ((spatial()  != NULL) &&
                    (spectral() != NULL) &&
                    (temporal() != NULL));
 
@@ -1196,28 +1190,27 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
 
         // Compute sine of offset angle
         double sin_theta = std::sin(theta);
-
-        double domega = 0.5 * gammalib::cta_roi_arclength(theta,
-                                                              m_dist,
-                                                              m_cosdist,
-                                                              m_sindist,
-                                                              m_roi,
-                                                              m_cosroi);
+        double domega    = 0.5 * gammalib::cta_roi_arclength(theta,
+                                                             m_dist,
+                                                             m_cosdist,
+                                                             m_sindist,
+                                                             m_roi,
+                                                             m_cosroi);
 
         // Continue only if arc length is positive
-	   if (domega > 0.0) {
+        if (domega > 0.0) {
 
 		   // Compute phi integration range
 		   double omega_min = m_omega0 - domega;
 		   double omega_max = m_omega0 + domega;
 
 			// Setup phi integration kernel
-		   GCTAModelBackground::npred_roi_kern_phi integrand(m_model,
-												 m_obsEng,
-												 m_obsTime,
-												 m_rot,
-												 theta,
-												 sin_theta);
+            GCTAModelBackground::npred_roi_kern_phi integrand(m_model,
+												              m_obsEng,
+												              m_obsTime,
+												              m_rot,
+												              theta,
+												              sin_theta);
 
 			// Integrate over phi
 			GIntegral integral(&integrand);
@@ -1236,7 +1229,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
 			}
 			#endif
 
-	   } // endif: arc length was positive
+        } // endif: arc length was positive
 
     } // endif: offset angle was positive
 
@@ -1299,10 +1292,3 @@ double GCTAModelBackground::npred_roi_kern_phi::eval(double phi)
     // Return Npred
     return value;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
