@@ -54,7 +54,7 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-
+#define G_DEBUG_PREPARE
 
 /*==========================================================================
  =                                                                         =
@@ -279,8 +279,21 @@ GModelSpatialDiffuseCube* GModelSpatialDiffuseCube::clone(void) const
  ***************************************************************************/
 double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
 {
-	// Get skymap bin
-	int imap = m_ebounds.index(photon.energy());
+	// Initialise skymap bin
+	int imap = -1;
+
+	// Get skymap bin. If energy outside bounds, use the closest bin
+	if( photon.energy() < m_ebounds.emin() ) {
+		imap = 0;
+	} //endif: energy was below emin
+
+	else if(photon.energy() > m_ebounds.emax()) {
+		imap = m_ebounds.size()-1;
+	} // endif: energy was above emax
+
+	else {
+		imap = m_ebounds.index(photon.energy());
+	} // endif: found skymap bin
 
 	// Get skymap intensity
 	double intensity = m_cube(photon.dir(), imap);
@@ -301,8 +314,21 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
  ***************************************************************************/
 double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
 {
-	// Get skymap bin
-	int imap = m_ebounds.index(photon.energy());
+	// Initialise skymap bin
+	int imap = -1;
+
+	// Get skymap bin. If energy outside bounds, use the closest bin
+	if( photon.energy() < m_ebounds.emin() ) {
+		imap = 0;
+	} //endif: energy was below emin
+
+	else if(photon.energy() > m_ebounds.emax()) {
+		imap = m_ebounds.size()-1;
+	} // endif: energy was abvoe emax
+
+	else {
+		imap = m_ebounds.index(photon.energy());
+	} // endif: found skymap bin
 
 	// Get skymap intensity
 	double intensity = m_cube(photon.dir(), imap);
@@ -572,7 +598,7 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
 
         // Get the column with the name "Energy"
         GFitsTableDoubleCol* ptr_energy = (GFitsTableDoubleCol*)&(*energies)["Energy"];
-        ptr_energy->print();
+        //ptr_energy->print();
         
         // Get the unit of the energies
         // Default for Fermi Galactic diffuse model
@@ -617,7 +643,7 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
     } // endif: ENERGIES extension existed
 
     // Prepare cube
-    prepare_cube();
+    //prepare_cube();
 
     // Cube is loaded
     m_loaded = true;

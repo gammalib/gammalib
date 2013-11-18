@@ -69,8 +69,10 @@ const GModelRegistry            g_cta_model_background_registry(&g_cta_model_bac
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_USE_NPRED_CACHE      //!< Use Npred cache in npred_diffuse method
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_NPRED                         //!< Debug npred_diffuse method
 //#define G_DUMP_MC                                  //!< Dump MC information
 
 
@@ -449,67 +451,123 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 {
     // Initialise result
     double npred = 0.0;
+    bool   has_npred = false;
 
-    // Evaluate only if model is valid
-    if (valid_model()) {
+   // Build unique identifier
+   std::string id = obs.instrument() + "::" + obs.id();
+   //
+   // Check if Npred value is already in cache
+   #if defined(G_USE_NPRED_CACHE)
+   if (!m_npred_names.empty()) {
 
-        // Get pointer on CTA events list
-        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-        if (events == NULL) {
-            throw GException::no_list(G_NPRED);
-        }
+		// Search for unique identifier, and if found, recover Npred value
+		// and break
+		for (int i = 0; i < m_npred_names.size(); ++i) {
+			if (m_npred_names[i] == id &&
+				m_npred_energies[i] == obsEng) {
+				npred = m_npred_values[i];
+				has_npred = true;
+				#if defined(G_DEBUG_NPRED)
+				std::cout << "GCTAModelBackground::npred:";
+				std::cout << " cache=" << i;
+				std::cout << " npred=" << npred << std::endl;
+				#endif
+				break;
+			}
+		}
 
-        //todo we need to think about if we always want to integrate
-        // starting from the pointing direction or instead take
-        // the center of gravity of the model
-        // For now we use the pointing position as integration start
+   } // endif: there were values in the Npred cache
+   #endif
+   //std::cout<<"\nCALLING NPRED "<<id<<" ...HAD NPRED: "<<has_npred<<std::endl;
 
-        // Get CTA pointing direction
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
-        if (pnt == NULL) {
-            throw GCTAException::no_pointing(G_NPRED);
-        }
+   // Continue only if no Npred cache value was found
+   if (!has_npred) {
 
-        // Get ROI radius in radians
-        double roi_radius = events->roi().radius() * gammalib::deg2rad;
+	   // Evaluate only if model is valid
+	   if (valid_model()) {
 
-        // Get distance from ROI centre in radians
-        double roi_distance = events->roi().centre().dist(pnt->dir());
+			// Get pointer on CTA events list
+			const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+			if (events == NULL) {
+				throw GException::no_list(G_NPRED);
+			}
 
-        // Initialise rotation matrix to transform from model system to celestial system
-        GMatrix ry;
-        GMatrix rz;
-        ry.eulery(events->roi().centre().dec_deg() - 90.0);
-        rz.eulerz(-events->roi().centre().ra_deg());
-        GMatrix rot = (ry * rz).transpose();
+			//todo we need to think about if we always want to integrate
+			// starting from the pointing direction or instead take
+			// the center of gravity of the model
+			// For now we use the pointing position as integration start
 
-        // Compute position angle of ROI centre with respect to model
-		// centre (radians)
-		double omega0 = pnt->dir().posang(events->roi().centre().dir());
+			// Get CTA pointing direction
+			GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+			if (pnt == NULL) {
+				throw GCTAException::no_pointing(G_NPRED);
+			}
 
-        // Setup integration function
-        GCTAModelBackground::npred_roi_kern_theta integrand(spatial(), obsEng,obsTime,rot, roi_radius, roi_distance,omega0);
+			// Get ROI radius in radians
+			double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
-        // Setup integrator
-        GIntegral integral(&integrand);
+			// Get distance from ROI centre in radians
+			double roi_distance = events->roi().centre().dist(pnt->dir());
 
-        // Setup integration boundaries
-        double rmin = (roi_distance > roi_radius) ? roi_distance-roi_radius : 0.0;
-        double rmax = roi_radius + roi_distance;
+			// Initialise rotation matrix to transform from model system to celestial system
+			GMatrix ry;
+			GMatrix rz;
+			ry.eulery(events->roi().centre().dec_deg() - 90.0);
+			rz.eulerz(-events->roi().centre().ra_deg());
+			GMatrix rot = (ry * rz).transpose();
 
-        // Spatially integrate radial component
-        npred = integral.romb(rmin, rmax);
+			// Compute position angle of ROI centre with respect to model
+			// centre (radians)
+			double omega0 = pnt->dir().posang(events->roi().centre().dir());
 
-        // Multiply in spectral and temporal components
-        npred *= spectral()->eval(obsEng, obsTime);
-        npred *= temporal()->eval(obsTime);
+			// Setup integration function
+			GCTAModelBackground::npred_roi_kern_theta integrand(spatial(), obsEng,obsTime,rot, roi_radius, roi_distance,omega0);
 
-        // Apply deadtime correction
-        npred *= obs.deadc(obsTime);
+			// Setup integrator
+			GIntegral integral(&integrand);
+			integral.eps(1e-2);
 
-    } // endif: model was valid
+			// Setup integration boundaries
+			double rmin = (roi_distance > roi_radius) ? roi_distance-roi_radius : 0.0;
+			double rmax = roi_radius + roi_distance;
 
-    // Return
+			// Spatially integrate radial component
+			npred = integral.romb(rmin, rmax);
+
+	        // Store result in Npred cache
+	        #if defined(G_USE_NPRED_CACHE)
+	        m_npred_names.push_back(id);
+	        m_npred_energies.push_back(obsEng);
+	        m_npred_times.push_back(obsTime);
+	        m_npred_values.push_back(npred);
+	        #endif
+
+	        // Debug: Check for NaN
+	        #if defined(G_NAN_CHECK)
+	        if (gammalib::isnotanumber(npred) || gammalib::isinfinite(npred)) {
+	            std::cout << "*** ERROR: GCTAModelBackground::npred:";
+	            std::cout << " NaN/Inf encountered";
+	            std::cout << " (npred=" << npred;
+	            std::cout << ", roi_radius=" << roi_radius;
+	            std::cout << ")" << std::endl;
+	        }
+	        #endif
+
+		} // endif: model was valid
+
+   } // endif: Npred computation required
+
+    //if(obsEng.TeV()>0.795&& obsEng.TeV()<1.1){std::cout<<"NPRED SPATIAL = "<<npred<<std::endl;}
+
+	// Multiply in spectral and temporal components
+	npred *= spectral()->eval(obsEng, obsTime);
+	npred *= temporal()->eval(obsTime);
+	//std::cout<<npred<<" ohne deadc ";
+	// Apply deadtime correction
+	npred *= obs.deadc(obsTime);
+	//std::cout<<npred<<std::endl;
+
+    // Return Npred
     return npred;
 }
 
@@ -737,7 +795,7 @@ void GCTAModelBackground::write(GXmlElement& xml) const
         spectral()->write(*spec);
     }
 
-    // Write radial model
+    // Write spatial model
     if (spatial()) {
         GXmlElement* spat = src->element("spatialModel", 0);
         spatial()->write(*spat);
@@ -843,6 +901,12 @@ void GCTAModelBackground::init_members(void)
     m_spectral = NULL;
     m_temporal = NULL;
 
+    // Initialise Npred cache
+    m_npred_names.clear();
+    m_npred_energies.clear();
+    m_npred_times.clear();
+    m_npred_values.clear();
+
     // Return
     return;
 }
@@ -857,6 +921,12 @@ void GCTAModelBackground::init_members(void)
  ***************************************************************************/
 void GCTAModelBackground::copy_members(const GCTAModelBackground& model)
 {
+    // Copy cache
+    m_npred_names    = model.m_npred_names;
+    m_npred_energies = model.m_npred_energies;
+    m_npred_times    = model.m_npred_times;
+    m_npred_values   = model.m_npred_values;
+
     // Clone radial, spectral and temporal model components
     m_spatial   = (model.m_spatial   != NULL) ? model.m_spatial->clone()   : NULL;
     m_spectral = (model.m_spectral != NULL) ? model.m_spectral->clone() : NULL;
@@ -877,6 +947,11 @@ void GCTAModelBackground::copy_members(const GCTAModelBackground& model)
  ***************************************************************************/
 void GCTAModelBackground::free_members(void)
 {
+	m_npred_names.clear();
+	m_npred_energies.clear();
+	m_npred_times.clear();
+	m_npred_values.clear();
+
     // Free memory
     if (m_spatial   != NULL) delete m_spatial;
     if (m_spectral != NULL) delete m_spectral;
@@ -1109,6 +1184,9 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
 
 			// Integrate over phi
 			GIntegral integral(&integrand);
+	        integral.eps(1e-2);
+	        //std::cout<<omega_min<<" "<<omega_max<<std::endl;
+	        //value = integral.romb(0.0,gammalib::twopi) * sin_theta;
 			value = integral.romb(omega_min,omega_max) * sin_theta;
 
 			// Debug: Check for NaN

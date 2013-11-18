@@ -67,6 +67,7 @@ public:
     virtual void                       clear(void);
     virtual GCTAModelBackground* clone(void) const;
     virtual std::string                type(void) const { return "CTABackground"; }
+    virtual bool        isconstant(void) const;
     virtual double                     eval(const GEvent& event,
                                             const GObservation& obs) const;
     virtual double                     eval_gradients(const GEvent& event,
@@ -158,6 +159,27 @@ protected:
     GModelSpectral*  m_spectral;     //!< Spectral model
     GModelTemporal*  m_temporal;     //!< Temporal model
     GMatrix m_rot;             //!!< Rotation matrix from model system to skydir
+
+    // Npred cache
+   mutable std::vector<std::string> m_npred_names;    //!< Model names
+   mutable std::vector<GEnergy>     m_npred_energies; //!< Model energy
+   mutable std::vector<GTime>       m_npred_times;    //!< Model time
+   mutable std::vector<double>      m_npred_values;   //!< Model values
+
 };
 
 #endif /* GMODELSPATIAL_HPP */
+
+/***********************************************************************//**
+ * @brief Signals if sky model is temporally constant
+ *
+ * @return True if sky model is temporally constant, false otherwise.
+ *
+ * Signals if the sky model is temporally constant. A temporally constant
+ * model is a model that has a temporal component of type "Constant".
+ ***************************************************************************/
+inline
+bool GCTAModelBackground::isconstant(void) const
+{
+    return (m_temporal != NULL && m_temporal->type() == "Constant");
+}
