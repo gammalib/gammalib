@@ -602,10 +602,10 @@ void GCTAResponse::load(const std::string& irfname)
     // Load point spread function
     load_psf(filename);
 
-    // Apply theta cut
+    // Remove theta cut
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
     if (arf != NULL) {
-        arf->apply_thetacut(*this);
+        arf->remove_thetacut(*this);
     }
 
     // Store response name

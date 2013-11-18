@@ -497,11 +497,11 @@ void GCTAObservation::read(const GXmlElement& xml)
               ", \"PointSpreadFunction\" and \"EnergyDispersion\" parameters.");
     }
 
-    // If we have an ARF then apply effective area correction if necessary
+    // If we have an ARF then remove thetacut if necessary
     GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response->aeff()));
     if (arf != NULL) {
         if (arf->thetacut() > 0.0) {
-            arf->apply_thetacut(*m_response);
+            arf->remove_thetacut(*m_response);
         }
     }
 

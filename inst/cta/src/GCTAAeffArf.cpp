@@ -371,15 +371,15 @@ void GCTAAeffArf::read_arf(const GFitsTable* hdu)
 
 
 /***********************************************************************//**
- * @brief Apply thetacut
+ * @brief Remove thetacut
  *
  * @param[in] rsp CTA response.
  *
- * Applies thetacut to Aeff values read from a FITS file. Note that this
+ * Removes thetacut from Aeff values read from a FITS file. Note that this
  * method should only be called once directly after loading all response
  * components.
  ***************************************************************************/
-void GCTAAeffArf::apply_thetacut(const GCTAResponse& rsp)
+void GCTAAeffArf::remove_thetacut(const GCTAResponse& rsp)
 {
     // Continue only if thetacut value has been set
     if (m_thetacut > 0.0) {
