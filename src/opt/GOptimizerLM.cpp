@@ -419,6 +419,11 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
 
     } // endif: there were free parameters to fit
 
+    // ... otherwise just execute final step
+    else {
+        errors(fct, pars);
+    }
+
     // Return
     return;
 }
