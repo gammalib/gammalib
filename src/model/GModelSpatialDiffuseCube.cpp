@@ -49,8 +49,7 @@ const GModelSpatialRegistry    g_spatial_cube_registry(&g_spatial_cube_seed);
 #define G_READ                 "GModelSpatialDiffuseCube::read(GXmlElement&)"
 #define G_WRITE               "GModelSpatialDiffuseCube::write(GXmlElement&)"
 #define G_LOAD                 "GModelSpatialDiffuseCube::load(std::string&)"
-#define G_ENERGIES           "GModelSpatialDiffuseCube::energies(std::vector"\
-                                                                "<GEnergy>&)"
+#define G_ENERGIES           "GModelSpatialDiffuseCube::energies(GEnergies&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -144,9 +143,9 @@ GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const std::string& filename,
  * constructor also assigns the energy values for all maps and sets the
  * scaling @p value. The filename will remain blank.
  ***************************************************************************/
-GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap&              cube,
-                                                   const std::vector<GEnergy>& energies,
-                                                   const double&               value) :
+GModelSpatialDiffuseCube::GModelSpatialDiffuseCube(const GSkymap&   cube,
+                                                   const GEnergies& energies,
+                                                   const double&    value) :
                           GModelSpatialDiffuse()
 {
     // Initialise members
@@ -612,48 +611,29 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
     m_filename = filename;
 
     // Load cube
-    m_cube.load(gammalib::expand_env(m_filename));
+    m_cube.load(m_filename);
 
-    // Load the energy binning definition
-    GFits file(gammalib::expand_env(m_filename));
+    // Load energies
+    GEnergies energies(m_filename);
 
-    // Get the table extension "ENERGIES"
-    GFitsTable* energies = file.table("ENERGIES");
+    // Extract number of energy bins
+    int num = energies.size();
 
-    // Read only if extension "ENERGIES" exists
-    if (energies != NULL) {
+    // Check if energy binning is consistent with primary image hdu
+    if (num != m_cube.nmaps() ) {
+        std::string msg = "Number of energies in \"ENERGIES\" extension"
+                          " ("+gammalib::str(num)+") does not match the"
+                          " number of maps ("+gammalib::str(m_cube.nmaps())+""
+                          " in the map cube.\n"
+                          "The \"ENERGIES\" extension table shall provide"
+                          " one enegy value for each map in the cube.";
+        throw GException::invalid_value(G_LOAD, msg);
+    }
 
-        // Extract number of energy bins in FITS file
-        int num = energies->integer("NAXIS2");
-
-        // Check if energy binning is consistent with primary image hdu
-        if (num != m_cube.nmaps() ) {
-            std::string msg = "Number of energies in \"ENERGIES\" extension"
-                              " ("+gammalib::str(num)+") does not match the"
-                              " number of maps ("+gammalib::str(m_cube.nmaps())+""
-                              " in the map cube.\n"
-                              "The \"ENERGIES\" extension table shall provide"
-                              " one enegy value for each map in the cube.";
-            throw GException::invalid_value(G_LOAD, msg);
-        }
-
-        // Get the unit of the energies. If no TUNIT1 header keyword is found
-        // then use MeV
-        std::string unit = "MeV";
-        if (energies->header()->hascard("TUNIT1")) {
-            unit = energies->string("TUNIT1");
-        }
-
-        // Get the column with the name "Energy"
-        const GFitsTableCol& col_energy = (*energies)["Energy"];
-
-        // Set log10(energy) nodes, where energy is in units of MeV
-        for (int i = 0; i < num; ++i) {
-            GEnergy energy(col_energy.real(i), unit);
-            m_logE.append(energy.log10MeV());
-        }
-
-    } // endif: ENERGIES extension existed
+    // Set log10(energy) nodes, where energy is in units of MeV
+    for (int i = 0; i < num; ++i) {
+        m_logE.append(energies[i].log10MeV());
+    }
 
     // Set energy boundaries
     set_energy_boundaries();
@@ -676,7 +656,7 @@ void GModelSpatialDiffuseCube::load(const std::string& filename)
  *
  * Sets the energies for the map cube.
  ***************************************************************************/
-void GModelSpatialDiffuseCube::energies(const std::vector<GEnergy>& energies)
+void GModelSpatialDiffuseCube::energies(const GEnergies& energies)
 {
     // Initialise energies
     m_logE.clear();
@@ -717,10 +697,10 @@ void GModelSpatialDiffuseCube::energies(const std::vector<GEnergy>& energies)
  *
  * Returns the energies for the map cube in a vector.
  ***************************************************************************/
-std::vector<GEnergy> GModelSpatialDiffuseCube::energies(void)
+GEnergies GModelSpatialDiffuseCube::energies(void)
 {
-    // Initialise vector of energies
-    std::vector<GEnergy> energies;
+    // Initialise energies container
+    GEnergies energies;
 
     // Get number of map energies
     int num = m_logE.size();
@@ -735,7 +715,7 @@ std::vector<GEnergy> GModelSpatialDiffuseCube::energies(void)
         for (int i = 0; i < num; ++i) {
             GEnergy energy;
             energy.log10MeV(m_logE[i]);
-            energies.push_back(energy);
+            energies.append(energy);
         }
 
     } // endif: there were maps in the cube
@@ -826,11 +806,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             if (m_logE.size() == nmaps) {
                 GEnergy energy;
                 energy.log10MeV(m_logE[i]);
-
-                // Only append new node if flux > 0
-                if (flux_centre>0.0) {
-                	m_mc_spectrum.append(energy, flux_centre);
-                }
+                m_mc_spectrum.append(energy, flux_centre);
             }
 
         } // endfor: looped over all maps
