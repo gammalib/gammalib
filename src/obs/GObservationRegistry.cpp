@@ -1,7 +1,7 @@
 /***************************************************************************
  *          GObservationRegistry.cpp - Observation registry class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -29,15 +29,11 @@
 #include <config.h>
 #endif
 #include "GObservationRegistry.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
 
-/* __ Static members _____________________________________________________ */
-int                  GObservationRegistry::m_number(0);
-std::string*         GObservationRegistry::m_names(0);
-const GObservation** GObservationRegistry::m_obs(0);
-
 /* __ Method name definitions ____________________________________________ */
-#define G_INSTRUMENT                 "GObservationRegistry::instrument(int&)"
+#define G_NAME                             "GObservationRegistry::name(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -64,8 +60,8 @@ GObservationRegistry::GObservationRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GObservationRegistry(void): ";
-    for (int i = 0; i < m_number; ++i) {
-        std::cout << "\"" << m_names[i] << "\" ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << names()[i] << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -90,37 +86,33 @@ GObservationRegistry::GObservationRegistry(const GObservation* obs)
     std::cout << "GObservationRegistry(const GObservation*): ";
     std::cout << "add \"" << obs->instrument() << "\" to registry." << std::endl;
     #endif
-    
+
     // Allocate new registry
-    std::string*         new_names = new std::string[m_number+1];
-    const GObservation** new_obs   = new const GObservation*[m_number+1];
+    std::string*         new_names = new std::string[size()+1];
+    const GObservation** new_obs   = new const GObservation*[size()+1];
 
     // Save old registry
-    for (int i = 0; i < m_number; ++i) {
-        new_names[i] = m_names[i];
-        new_obs[i]   = m_obs[i];
+    for (int i = 0; i < size(); ++i) {
+        new_names[i] = names()[i];
+        new_obs[i]   = this->obs()[i];
     }
 
     // Add new observation to registry
-    new_names[m_number] = obs->instrument();
-    new_obs[m_number]   = obs;
-
-    // Delete old registry
-    if (m_names != NULL) delete [] m_names;
-    if (m_obs   != NULL) delete [] m_obs;
+    new_names[size()] = obs->instrument();
+    new_obs[size()]   = obs;
 
     // Set pointers on new registry
-    m_names = new_names;
-    m_obs   = new_obs;
+    names().assign(new_names);
+    this->obs().assign(new_obs);
 
     // Increment number of observations in registry
-    m_number++;
+    number()++;
 
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GObservationRegistry(const GObservation*): ";
-    for (int i = 0; i < m_number; ++i) {
-        std::cout << "\"" << m_names[i] << "\" ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << names()[i] << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -216,12 +208,12 @@ GObservation* GObservationRegistry::alloc(const std::string& name) const
     GObservation* obs = NULL;
 
     // Search for observation in registry
-    for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == name) {
-            obs = m_obs[i]->clone();
+    for (int i = 0; i < size(); ++i) {
+        if (names()[i] == name) {
+            obs = this->obs()[i]->clone();
             break;
         }
-    }    
+    }
 
     // Return observation
     return obs;
@@ -242,12 +234,12 @@ std::string GObservationRegistry::name(const int& index) const
     // Compile option: raise exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_INSTRUMENT, index, 0, size()-1);
+        throw GException::out_of_range(G_NAME, index, 0, size()-1);
     }
     #endif
 
     // Return name
-    return (m_names[index]);
+    return (names()[index]);
 }
 
 
@@ -270,13 +262,13 @@ std::string GObservationRegistry::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Number of observations"));
-        result.append(gammalib::str(m_number));
+        result.append(gammalib::str(size()));
 
         // NORMAL: Append observations
         if (chatter >= NORMAL) {
-            for (int i = 0; i < m_number; ++i) {
-                result.append("\n"+gammalib::parformat(m_names[i]));
-                result.append(m_obs[i]->instrument());
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+gammalib::parformat(names()[i]));
+                result.append(this->obs()[i]->instrument());
             }
         }
 
@@ -285,6 +277,7 @@ std::string GObservationRegistry::print(const GChatter& chatter) const
     // Return result
     return result;
 }
+
 
 /*==========================================================================
  =                                                                         =

@@ -1367,6 +1367,11 @@ void GMatrixSymmetric::alloc_members(const int& rows, const int& columns)
     // Continue only if number of elements is positive
     if (elements > 0) {
 
+        // Free any existing memory
+        if (m_data     != NULL) delete [] m_data;
+        if (m_colstart != NULL) delete [] m_colstart;
+        if (m_inx      != NULL) delete [] m_inx;
+
         // Allocate matrix array and column start index array.
         m_data     = new double[elements];
         m_colstart = new int[columns+1];

@@ -634,22 +634,27 @@ void GLATEventCube::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] cube GLATEventCube members which should be copied.
+ * @param[in] cube Fermi/LAT event cube.
  ***************************************************************************/
 void GLATEventCube::copy_members(const GLATEventCube& cube)
 {
-    // Copy LAT specific attributes
+    // Copy Fermi/LAT specific attributes
     m_bin          = cube.m_bin;
     m_map          = cube.m_map;
     m_time         = cube.m_time;
     m_ontime       = cube.m_ontime;
-    m_srcmap       = cube.m_srcmap;
-    m_srcmap_names = cube.m_srcmap_names;
     m_enodes       = cube.m_enodes;
     m_dirs         = cube.m_dirs;
     m_omega        = cube.m_omega;
     m_energies     = cube.m_energies;
     m_ewidth       = cube.m_ewidth;
+
+    // Clone source maps and copy source map names
+    m_srcmap.clear();
+    for (int i = 0; i < cube.m_srcmap.size(); ++i) {
+        m_srcmap.push_back(cube.m_srcmap[i]->clone());
+    }
+    m_srcmap_names = cube.m_srcmap_names;
 
     // Return
     return;
@@ -661,19 +666,27 @@ void GLATEventCube::copy_members(const GLATEventCube& cube)
  ***************************************************************************/
 void GLATEventCube::free_members(void)
 {
+    // Release source maps
+    for (int i = 0; i < m_srcmap.size(); ++i) {
+        if (m_srcmap[i] != NULL) delete m_srcmap[i];
+        m_srcmap[i] = NULL;
+    }
+    m_srcmap.clear();
+    m_srcmap_names.clear();
+
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Read LAT counts map from HDU.
+ * @brief Read Fermi/LAT counts map from HDU.
  *
  * @param[in] hdu Pointer to image HDU.
  *
- * This method reads a LAT counts map from a FITS image. The counts map is
- * stored in a GSkymap object, and a pointer is set up to access the pixels
- * individually. Recall that skymap pixels are stored in the order
+ * This method reads a Fermi/LAT counts map from a FITS image. The counts map
+ * is stored in a GSkymap object, and a pointer is set up to access the
+ * pixels individually. Recall that skymap pixels are stored in the order
  * (ix,iy,ebin).
  ***************************************************************************/
 void GLATEventCube::read_cntmap(const GFitsImage* hdu)

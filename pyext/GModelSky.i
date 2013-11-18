@@ -159,7 +159,6 @@ public:
                               const GObservation& obs) const;
     virtual void        read(const GXmlElement& xml);
     virtual void        write(GXmlElement& xml) const;
-    virtual std::string print(void) const;
 
     // Other methods
     GModelSpatial*      spatial(void) const;

@@ -465,8 +465,6 @@ void TestGFits::test_image_byte(void)
     std::string filename = "test_image_byte.fits";
     remove(filename.c_str());
 
-    // Set number of pixels
-
     // Create pixel array
     unsigned char* pixels = new unsigned char[16];
     for (int i = 0; i < 16; ++i) {
@@ -504,6 +502,9 @@ void TestGFits::test_image_byte(void)
     
     // Test 4D pixel access
     TEST_4D_ACCESS_IO(2,2,2,2)
+
+    // Free pixels
+    delete [] pixels;
 
     // Return
     return;
@@ -557,6 +558,9 @@ void TestGFits::test_image_ushort(void)
     
     // Test 4D pixel access
     TEST_4D_ACCESS_IO(2,2,2,2)
+
+    // Free pixels
+    delete [] pixels;
     
     // Return
     return;
@@ -610,6 +614,9 @@ void TestGFits::test_image_short(void)
     // Test 4D pixel access
     TEST_4D_ACCESS_IO(2,2,2,2)
 
+    // Free pixels
+    delete [] pixels;
+
     // Return
     return;
 }
@@ -661,6 +668,9 @@ void TestGFits::test_image_ulong(void)
     
     // Test 4D pixel access
     TEST_4D_ACCESS_IO(2,2,2,2)
+
+    // Free pixels
+    delete [] pixels;
 
     // Return
     return;
@@ -714,6 +724,9 @@ void TestGFits::test_image_long(void)
     // Test 4D pixel access
     TEST_4D_ACCESS_IO(2,2,2,2)
 
+    // Free pixels
+    delete [] pixels;
+
     // Return
     return;
 }
@@ -766,6 +779,9 @@ void TestGFits::test_image_longlong(void)
     // Test 4D pixel access
     TEST_4D_ACCESS_IO(2,2,2,2)
 
+    // Free pixels
+    delete [] pixels;
+
     // Return
     return;
 }
@@ -816,6 +832,9 @@ void TestGFits::test_image_float(void)
     
     // Test 4D pixel access
     TEST_4D_ACCESS_IO(2,2,2,2)
+
+    // Free pixels
+    delete [] pixels;
 
     // Return
     return;
@@ -868,6 +887,9 @@ void TestGFits::test_image_double(void)
     
     // Test 4D pixel access
     TEST_4D_ACCESS_IO(2,2,2,2)
+
+    // Free pixels
+    delete [] pixels;
 
     // Return
     return;

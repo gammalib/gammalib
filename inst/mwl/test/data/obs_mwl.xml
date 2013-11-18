@@ -1,14 +1,14 @@
 <observation_list title="observation library">
   <observation name="Crab" id="00001" instrument="MWL">
     <parameter name="Instrument" value="COMPTEL"/>
-    <parameter name="Data" file="../inst/mwl/test/data/crab_mwl.fits" extname="COMPTEL"/>
+    <parameter name="Data" file="$(PACKAGE_SOURCE)/inst/mwl/test/data/crab_mwl.fits" extname="COMPTEL"/>
   </observation>
   <observation name="Crab" id="00002" instrument="MWL">
     <parameter name="Instrument" value="LAT"/>
-    <parameter name="Data" file="../inst/mwl/test/data/crab_mwl.fits" extname="LAT"/>
+    <parameter name="Data" file="$(PACKAGE_SOURCE)/inst/mwl/test/data/crab_mwl.fits" extname="LAT"/>
   </observation>
   <observation name="Crab" id="00003" instrument="MWL">
     <parameter name="Instrument" value="HESS"/>
-    <parameter name="Data" file="../inst/mwl/test/data/crab_mwl.fits" extname="HESS"/>
+    <parameter name="Data" file="$(PACKAGE_SOURCE)/inst/mwl/test/data/crab_mwl.fits" extname="HESS"/>
   </observation>
 </observation_list>

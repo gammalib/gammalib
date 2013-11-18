@@ -21,7 +21,7 @@
 /**
  * @file test_LAT.cpp
  * @brief Testing of LAT classes
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -40,9 +40,9 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string lat_caldb = "../inst/lat/caldb";
-const std::string dirPass6  = "../inst/lat/test/data/p6v3";
-const std::string dirPass7  = "../inst/lat/test/data/p7v6";
+const std::string lat_caldb = PACKAGE_SOURCE"/inst/lat/caldb";
+const std::string dirPass6  = PACKAGE_SOURCE"/inst/lat/test/data/p6v3";
+const std::string dirPass7  = PACKAGE_SOURCE"/inst/lat/test/data/p7v6";
 
 
 /***********************************************************************//**
@@ -439,8 +439,7 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
     // Test XML loading
     test_try("Test XML loading");
     try {
-        std::string caldb = "CALDB="+lat_caldb;
-        putenv((char*)caldb.c_str());
+        setenv("CALDB", lat_caldb.c_str(), 1);
         obs = GObservations(lat_unbin_xml);
         obs.save(file1);
         test_try_success();
@@ -547,8 +546,7 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
     // Test XML loading
     test_try("Test XML loading");
     try {
-        std::string caldb = "CALDB="+lat_caldb;
-        putenv((char*)caldb.c_str());
+        setenv("CALDB", lat_caldb.c_str(), 1);
         obs = GObservations(lat_bin_xml);
         obs.save(file1);
         test_try_success();
@@ -697,7 +695,7 @@ int main(void)
     GTestSuites testsuites("LAT instrument specific class testing");
 
     // Check if data directory exists
-    bool has_data = (access("../inst/lat/test/data", R_OK) == 0);
+    bool has_data = (access(PACKAGE_SOURCE"/inst/lat/test/data", R_OK) == 0);
 
     // Initially assume that we pass all tests
     bool success = true;

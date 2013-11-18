@@ -1957,6 +1957,11 @@ void TestGModel::test_models(void)
         models.extend(other_models);
         test_assert(!models.isempty(), "Model container is empty.");
         test_value(models.size(), 2);
+
+        // Free model
+        delete model;
+
+        // Signal success
         test_try_success();
     }
     catch (std::exception &e) {
@@ -2101,8 +2106,7 @@ void TestGModel::test_model_registry(void)
         int num = registry.size();
         for (int i = 0; i < num; ++i) {
             GModelSpectral* ptr = registry.alloc(registry.name(i));
-            test_assert(ptr != NULL, "Model pointer for \""+ \
-                                     registry.name(i)+"\" is NULL");
+            test_assert(ptr != NULL, "Model pointer for \""+registry.name(i)+"\" is NULL");
             if (ptr != NULL) {
             
                 // Test model type

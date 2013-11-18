@@ -46,7 +46,6 @@ public:
     void                        clear(void);
     GCTAOnOffObservations*      clone(void) const;
     GCTAOnOffObservation*       at(const int& index);
-    const GCTAOnOffObservation* at(const int& index) const;
     int                         size(void) const;
     bool                        isempty(void) const;
     GCTAOnOffObservation*       set(const int& index, const GCTAOnOffObservation& obs);

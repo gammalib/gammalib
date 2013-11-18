@@ -36,15 +36,12 @@ class GTestObservation : public GObservation {
 
 public:
     // Constructors and destructors
-    GTestObservation(void) : GObservation(){ 
+    GTestObservation(void) : GObservation() { 
         init_members();
         return;
-    }
-    
-    GTestObservation(const GTestObservation& obs) : GObservation(obs){
-        init_members();
+    }    
+    GTestObservation(const GTestObservation& obs) : GObservation(obs) {
         copy_members(obs);
-
         return;
     }
     
@@ -54,105 +51,80 @@ public:
     }
 
     // Operators
-    virtual GTestObservation& operator= (const GTestObservation& obs){
-        
-        // Execute only if object is not identical
+    virtual GTestObservation& operator=(const GTestObservation& obs) {
         if (this != &obs) {
-
-            // Copy base class members
             this->GObservation::operator=(obs);
-
-             // Free members
             free_members();
-
-            // Initialise members
-            init_members();
-
-            // Copy members
             copy_members(obs);
-
-        } // endif: object was not identical
-
-        // Return this object
+        }
         return *this;
     }
 
-    // Implement pure virtual methods
-    
-    virtual void clear(void){
+    // Implement pure virtual methods    
+    virtual void clear(void) {
         free_members();
         this->GObservation::free_members();
-
-        // Initialise members
         this->GObservation::init_members();
         init_members();
-        
         return;
     }
-    virtual GTestObservation* clone(void) const{ return new GTestObservation(*this);}
-    virtual void              response(const GResponse& rsp){
-        // Get pointer on Test response
+    virtual GTestObservation* clone(void) const {
+        return new GTestObservation(*this);
+    }
+    virtual void response(const GResponse& rsp) {
         const GTestResponse* testrsp = dynamic_cast<const GTestResponse*>(&rsp);
         if (testrsp == NULL) {
             throw;
         }
-
-         // Delete old response function
         if (m_response != NULL) delete m_response;
-
-        // Clone response function
         m_response = testrsp->clone();
-
-        // Return
         return;
     }
-    virtual GTestResponse*    response(void) const{return m_response;}
-    virtual GTestPointing*    pointing(void) const{ return m_pointing;}
-    virtual std::string      instrument(void) const { return m_instrument; }
-    virtual double           ontime(void) const { return m_ontime; }
-    virtual double           livetime(void) const { return m_ontime; }
-    virtual double           deadc(const GTime& time) const { return 1.0; }
-    virtual void             read(const GXmlElement& xml){ return; }
-    virtual void             write(GXmlElement& xml) const{ return; }
-    void ontime(const double& ontime) { m_ontime=ontime; }
-    virtual std::string      print(const GChatter& chatter = NORMAL) const{
-       // Initialise result string
+    virtual GTestResponse* response(void) const{return m_response;}
+    virtual GTestPointing* pointing(void) const{ return m_pointing;}
+    virtual std::string    instrument(void) const { return m_instrument; }
+    virtual double         ontime(void) const { return m_ontime; }
+    virtual double         livetime(void) const { return m_ontime; }
+    virtual double         deadc(const GTime& time) const { return 1.0; }
+    virtual void           read(const GXmlElement& xml){ return; }
+    virtual void           write(GXmlElement& xml) const{ return; }
+    virtual void           ontime(const double& ontime) { m_ontime=ontime; }
+    virtual std::string    print(const GChatter& chatter = NORMAL) const {
         std::string result;
-        
-        // Append header
         result.append("=== GTestObservation ===");
         result.append("\n"+gammalib::parformat("Instrument Name")+m_instrument);
-        
         GTestEventList* list = dynamic_cast<GTestEventList*>(m_events);
-        if(list!=NULL){
+        if(list != NULL) {
             result.append("\n"+gammalib::parformat("Number of events")+gammalib::str(list->number()));
             result.append("\n"+gammalib::parformat("GTI")+list->gti().print());
         }
-        
         return result;
     }
-
 
 protected:
     // Protected methods
     void init_members(void){
-        m_instrument="Test Instrument";
-        m_response = new GTestResponse();
-        m_pointing = new GTestPointing();
-        m_ontime = 0.0;
+        m_instrument = "Test Instrument";
+        m_response   = new GTestResponse();
+        m_pointing   = new GTestPointing();
+        m_ontime     = 0.0;
         return;
     }
     void copy_members(const GTestObservation& obs){
-        m_ontime=obs.m_ontime;
-        m_response = new GTestResponse(*obs.m_response);
-        m_pointing = new GTestPointing(*obs.m_pointing);
         m_instrument = obs.m_instrument;
+        m_response   = new GTestResponse(*obs.m_response);
+        m_pointing   = new GTestPointing(*obs.m_pointing);
+        m_ontime     = obs.m_ontime;
         return;    
     }
-    void free_members(void){ return; }
+    void free_members(void) {
+        delete m_response;
+        delete m_pointing;
+        return;
+    }
 
     // Protected members
-    std::string   m_instrument;   //!< Instrument name
+    std::string    m_instrument;   //!< Instrument name
     GTestResponse* m_response;     //!< Pointer to response functions
     GTestPointing* m_pointing;     //!< Pointer to pointing direction
     double         m_ontime;       //!< ontime

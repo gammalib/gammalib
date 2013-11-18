@@ -29,13 +29,8 @@
 #include <config.h>
 #endif
 #include "GWcsRegistry.hpp"
+#include "GException.hpp"
 #include "GTools.hpp"
-
-/* __ Static members _____________________________________________________ */
-int          GWcsRegistry::m_number(0);
-std::string* GWcsRegistry::m_codes(0);
-std::string* GWcsRegistry::m_names(0);
-const GWcs** GWcsRegistry::m_prjs(0);
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CODE                                     "GWcsRegistry::code(int&)"
@@ -66,8 +61,9 @@ GWcsRegistry::GWcsRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GWcsRegistry(void): ";
-    for (int i = 0; i < m_number; ++i)
-        std::cout << "\"" << m_codes[i] << "\" ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << codes()[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -91,42 +87,37 @@ GWcsRegistry::GWcsRegistry(const GWcs* prj)
     std::cout << "GWcsRegistry(const GWcs*): ";
     std::cout << "add \"" << prj->code() << "\" to registry." << std::endl;
     #endif
-    
-    // Allocate new old registry
-    std::string* new_codes = new std::string[m_number+1];
-    std::string* new_names = new std::string[m_number+1];
-    const GWcs** new_prjs  = new const GWcs*[m_number+1];
+
+    // Allocate new registry
+    std::string* new_codes        = new std::string[size()+1];
+    std::string* new_names        = new std::string[size()+1];
+    const GWcs** new_projections  = new const GWcs*[size()+1];
 
     // Save old registry
-    for (int i = 0; i < m_number; ++i) {
-        new_codes[i] = m_codes[i];
-        new_names[i] = m_names[i];
-        new_prjs[i]  = m_prjs[i];
+    for (int i = 0; i < size(); ++i) {
+        new_codes[i]       = codes()[i];
+        new_names[i]       = names()[i];
+        new_projections[i] = projections()[i];
     }
 
-    // Add new model to registry
-    new_codes[m_number] = prj->code();
-    new_names[m_number] = prj->name();
-    new_prjs[m_number]  = prj;
-
-    // Delete old registry
-    if (m_codes != NULL) delete [] m_codes;
-    if (m_names != NULL) delete [] m_names;
-    if (m_prjs  != NULL) delete [] m_prjs;
+    // Add new projection to registry
+    new_codes[size()]       = prj->code();
+    new_names[size()]       = prj->name();
+    new_projections[size()] = prj;
 
     // Set pointers on new registry
-    m_codes = new_codes;
-    m_names = new_names;
-    m_prjs  = new_prjs;
+    codes().assign(new_codes);
+    names().assign(new_names);
+    projections().assign(new_projections);
 
     // Increment number of projections in registry
-    m_number++;
+    number()++;
 
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GWcsRegistry(const GWcs*): ";
-    for (int i = 0; i < m_number; ++i) {
-        std::cout << "\"" << m_codes[i] << "\" ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << codes()[i] << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -179,7 +170,7 @@ GWcsRegistry::~GWcsRegistry(void)
  * @param[in] registry Registry.
  * @return Reference to registry.
  ***************************************************************************/
-GWcsRegistry& GWcsRegistry::operator= (const GWcsRegistry& registry)
+GWcsRegistry& GWcsRegistry::operator=(const GWcsRegistry& registry)
 {
     // Execute only if object is not identical
     if (this != &registry) {
@@ -218,18 +209,18 @@ GWcsRegistry& GWcsRegistry::operator= (const GWcsRegistry& registry)
 GWcs* GWcsRegistry::alloc(const std::string& code) const
 {
     // Initialise projection
-    GWcs* prj = NULL;
+    GWcs* projection = NULL;
 
     // Search for projection in registry
-    for (int i = 0; i < m_number; ++i) {
-        if (m_codes[i] == code) {
-            prj = m_prjs[i]->clone();
+    for (int i = 0; i < size(); ++i) {
+        if (codes()[i] == code) {
+            projection = projections()[i]->clone();
             break;
         }
-    }    
+    }
 
     // Return projection
-    return prj;
+    return projection;
 }
 
 
@@ -252,7 +243,7 @@ std::string GWcsRegistry::code(const int& index) const
     #endif
 
     // Return code
-    return (m_codes[index]);
+    return (codes()[index]);
 }
 
 
@@ -275,7 +266,7 @@ std::string GWcsRegistry::name(const int& index) const
     #endif
 
     // Return name
-    return (m_names[index]);
+    return (names()[index]);
 }
 
 
@@ -292,11 +283,11 @@ std::string GWcsRegistry::list(void) const
     std::string result;
 
     // Append projections
-    for (int i = 0; i < m_number; ++i) {
+    for (int i = 0; i < size(); ++i) {
         if (i > 0) {
             result.append("/");
         }
-        result.append(m_codes[i]);
+        result.append(codes()[i]);
     }
 
     // Return result
@@ -322,12 +313,14 @@ std::string GWcsRegistry::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Number of projections"));
-        result.append(gammalib::str(m_number));
+        result.append(gammalib::str(size()));
 
-        // Append projections
-        for (int i = 0; i < m_number; ++i) {
-            result.append("\n"+gammalib::parformat(m_codes[i]));
-            result.append(m_names[i]);
+        // NORMAL: Append projections
+        if (chatter >= NORMAL) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+gammalib::parformat(codes()[i]));
+                result.append(names()[i]);
+            }
         }
 
     } // endif: chatter was not silent

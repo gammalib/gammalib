@@ -2655,6 +2655,9 @@ void GMatrixSparse::alloc_members(const int& rows, const int& columns,
     // Continue only if rows and columns are valid
     if (rows > 0 && columns > 0) {
 
+        // Free any existing memory
+        if (m_colstart != NULL) delete [] m_colstart;
+
         // Allocate column start array. This is the only array that we can
         // allocate at this time. The other arrays can only be allocated
         // during filling of the matrix
@@ -3287,28 +3290,28 @@ void GMatrixSparse::mix_column_prepare(const int* src1_row, int src1_num,
     // Initialise indices and row indices of both columns
     int inx_1 = 0;                    // Column 1 element index
     int inx_2 = 0;                    // Column 2 element index
-    int row_1 = src1_row[inx_1];      // Column 1 first row index
-    int row_2 = src2_row[inx_2];      // Column 2 first row index
+    int row_1 = src1_row[inx_1++];    // Column 1 first row index
+    int row_2 = src2_row[inx_2++];    // Column 2 first row index
 
     // Mix elements of both columns while both contain still elements
     while (inx_1 < src1_num && inx_2 < src2_num) {
 
         // Case A: the element exist in both columns
         if (row_1 == row_2) {
-            row_1 = src1_row[++inx_1];
-            row_2 = src2_row[++inx_2];
+            row_1 = src1_row[inx_1++];
+            row_2 = src2_row[inx_2++];
             (*num_mix)++;
         }
 
         // Case B: the element exists only in first column
         else if (row_1 < row_2) {
-            row_1 = src1_row[++inx_1];
+            row_1 = src1_row[inx_1++];
             (*num_1)++;
         }
 
         // Case C: the element exists only in second column
         else {
-            row_2 = src2_row[++inx_2];
+            row_2 = src2_row[inx_2++];
             (*num_2)++;
         }
 
@@ -3365,26 +3368,34 @@ void GMatrixSparse::mix_column(const double* src1_data, const int* src1_row,
 
         // Case A: the element exists in both columns, so we add up the values
         if (row_1 == row_2) {
-            dst_data[inx] = src1_data[inx_1] + src2_data[inx_2];
+            dst_data[inx] = src1_data[inx_1++] + src2_data[inx_2++];
             dst_row[inx]  = row_1;
-            row_1         = src1_row[++inx_1];
-            row_2         = src2_row[++inx_2];
+            if (inx_1 < src1_num) {
+                row_1 = src1_row[inx_1];
+            }
+            if (inx_2 < src2_num) {
+                row_2 = src2_row[inx_2];
+            }
         }
 
         // Case B: the element exists only in first column, so we copy the element
         // from the first column
         else if (row_1 < row_2) {
-            dst_data[inx] = src1_data[inx_1];
+            dst_data[inx] = src1_data[inx_1++];
             dst_row[inx]  = row_1;
-            row_1         = src1_row[++inx_1];
+            if (inx_1 < src1_num) {
+                row_1 = src1_row[inx_1];
+            }
         }
 
         // Case C: the element exists only in second column, so we copy the element
         // from the second column
         else {
-            dst_data[inx] = src2_data[inx_2];
+            dst_data[inx] = src2_data[inx_2++];
             dst_row[inx]  = row_2;
-            row_2         = src2_row[++inx_2];
+            if (inx_2 < src2_num) {
+                row_2 = src2_row[inx_2];
+            }
         }
 
         // Update the destination index since we added a element

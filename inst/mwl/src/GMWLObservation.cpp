@@ -620,13 +620,17 @@ void GMWLObservation::init_members(void)
  ***************************************************************************/
 void GMWLObservation::copy_members(const GMWLObservation& obs)
 {
+    // Free memory
+    if (m_response != NULL) delete m_response;
+    if (m_pointing != NULL) delete m_pointing;
+    
     // Copy members
     m_instrument = obs.m_instrument;
     m_filename   = obs.m_filename;
     m_extno      = obs.m_extno;
     m_extname    = obs.m_extname;
-    if (obs.m_response != NULL) m_response = obs.m_response->clone();
-    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
+    m_response   = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
+    m_pointing   = (obs.m_pointing != NULL) ? obs.m_pointing->clone() : NULL;
 
     // Return
     return;

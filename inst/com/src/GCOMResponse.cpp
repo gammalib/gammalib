@@ -276,17 +276,29 @@ double GCOMResponse::irf(const GEvent&       event,
     int iphibar = int(obsDir.phibar() / m_phibar_bin_size);
 
     // Extract IAQ value by linear inter/extrapolation in Phigeo
-    double phirat  = phigeo / m_phigeo_bin_size; // 0.5 at bin centre
-    int    iphigeo = int(phirat);                // index into which Phigeo falls
-    double eps     = phirat - iphigeo - 0.5;     // 0.0 at bin centre
-    double iaq     = 0.0;
-    if (iphigeo < m_phigeo_bins) {
-        int i = iphibar * m_phigeo_bins + iphigeo;
-        if (eps < 0.0 && iphigeo > 0) { // interpolate towards left
-            iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
-        }
-        else {                          // interpolate towards right
-            iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
+    double iaq = 0.0;
+    if (iphibar < m_phibar_bins) {
+        double phirat  = phigeo / m_phigeo_bin_size; // 0.5 at bin centre
+        int    iphigeo = int(phirat);                // index into which Phigeo falls
+        double eps     = phirat - iphigeo - 0.5;     // 0.0 at bin centre
+        if (iphigeo < m_phigeo_bins) {
+            int i = iphibar * m_phigeo_bins + iphigeo;
+            if (eps < 0.0) { // interpolate towards left
+                if (iphigeo > 0) {
+                    iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
+                }
+                else {
+                    iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
+                }
+            }
+            else {           // interpolate towards right
+                if (iphigeo < m_phigeo_bins-1) {
+                    iaq = (1.0 - eps) * m_iaq[i] + eps * m_iaq[i+1];
+                }
+                else {
+                    iaq = (1.0 + eps) * m_iaq[i] - eps * m_iaq[i-1];
+                }
+            }
         }
     }
 

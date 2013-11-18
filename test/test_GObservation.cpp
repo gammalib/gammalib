@@ -720,6 +720,10 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
         ob.events(events);
         ob.ontime(tmax.secs()-tmin.secs());
         obs.append(ob);
+
+        // Delete events pointer
+        delete events;
+        
     }
 
     // Add the model to the observation

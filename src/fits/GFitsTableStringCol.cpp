@@ -545,6 +545,7 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
 
     // Copy NULL value
     if (column.m_nulval != NULL) {
+        if (m_nulval != NULL) delete [] m_nulval;
         m_nulval = new char[m_width+1];
         std::strncpy(m_nulval, column.m_nulval, m_width);
     }
@@ -568,7 +569,7 @@ void GFitsTableStringCol::free_members(void)
 {
     // Free memory
     if (m_data   != NULL) delete [] m_data;
-    if (m_nulval != NULL) delete m_nulval;
+    if (m_nulval != NULL) delete [] m_nulval;
 
     // Mark memory as freed
     m_data   = NULL;

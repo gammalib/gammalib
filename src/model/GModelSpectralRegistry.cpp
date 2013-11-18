@@ -32,11 +32,6 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 
-/* __ Static members _____________________________________________________ */
-int                    GModelSpectralRegistry::m_number(0);
-std::string*           GModelSpectralRegistry::m_names(0);
-const GModelSpectral** GModelSpectralRegistry::m_models(0);
-
 /* __ Method name definitions ____________________________________________ */
 #define G_NAME                           "GModelSpectralRegistry::name(int&)"
 
@@ -65,8 +60,9 @@ GModelSpectralRegistry::GModelSpectralRegistry(void)
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelSpectralRegistry(void): ";
-    for (int i = 0; i < m_number; ++i)
-        std::cout << "\"" << m_names[i] << "\" ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << names()[i] << "\" ";
+    }
     std::cout << std::endl;
     #endif
 
@@ -90,37 +86,33 @@ GModelSpectralRegistry::GModelSpectralRegistry(const GModelSpectral* model)
     std::cout << "GModelSpectralRegistry(const GModelSpatial*): ";
     std::cout << "add \"" << model->type() << "\" to registry." << std::endl;
     #endif
-    
-    // Allocate new old registry
-    std::string*           new_names  = new std::string[m_number+1];
-    const GModelSpectral** new_models = new const GModelSpectral*[m_number+1];
+
+    // Allocate new registry
+    std::string*           new_names  = new std::string[size()+1];
+    const GModelSpectral** new_models = new const GModelSpectral*[size()+1];
 
     // Save old registry
-    for (int i = 0; i < m_number; ++i) {
-        new_names[i]  = m_names[i];
-        new_models[i] = m_models[i];
+    for (int i = 0; i < size(); ++i) {
+        new_names[i]  = names()[i];
+        new_models[i] = models()[i];
     }
 
     // Add new model to registry
-    new_names[m_number]  = model->type();
-    new_models[m_number] = model;
-
-    // Delete old registry
-    if (m_names  != NULL) delete [] m_names;
-    if (m_models != NULL) delete [] m_models;
+    new_names[size()]  = model->type();
+    new_models[size()] = model;
 
     // Set pointers on new registry
-    m_names  = new_names;
-    m_models = new_models;
+    names().assign(new_names);
+    models().assign(new_models);
 
     // Increment number of models in registry
-    m_number++;
+    number()++;
 
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
     std::cout << "GModelSpectralRegistry(const GModelSpatial*): ";
-    for (int i = 0; i < m_number; ++i) {
-        std::cout << "\"" << m_names[i] << "\" ";
+    for (int i = 0; i < size(); ++i) {
+        std::cout << "\"" << names()[i] << "\" ";
     }
     std::cout << std::endl;
     #endif
@@ -216,12 +208,12 @@ GModelSpectral* GModelSpectralRegistry::alloc(const std::string& name) const
     GModelSpectral* model = NULL;
 
     // Search for model in registry
-    for (int i = 0; i < m_number; ++i) {
-        if (m_names[i] == name) {
-            model = m_models[i]->clone();
+    for (int i = 0; i < size(); ++i) {
+        if (names()[i] == name) {
+            model = models()[i]->clone();
             break;
         }
-    }    
+    }
 
     // Return spectral model
     return model;
@@ -247,7 +239,7 @@ std::string GModelSpectralRegistry::name(const int& index) const
     #endif
 
     // Return name
-    return (m_names[index]);
+    return (names()[index]);
 }
 
 
@@ -268,12 +260,14 @@ std::string GModelSpectralRegistry::print(const GChatter& chatter) const
         // Append header
         result.append("=== GModelSpectralRegistry ===");
         result.append("\n"+gammalib::parformat("Number of models"));
-        result.append(gammalib::str(m_number));
+        result.append(gammalib::str(size()));
 
-        // Append models
-        for (int i = 0; i < m_number; ++i) {
-            result.append("\n"+gammalib::parformat(m_names[i]));
-            result.append(m_models[i]->type());
+        // NORMAL: Append models
+        if (chatter >= NORMAL) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+gammalib::parformat(names()[i]));
+                result.append(models()[i]->type());
+            }
         }
 
     } // endif: chatter was not silent

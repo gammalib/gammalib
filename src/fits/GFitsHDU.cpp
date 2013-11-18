@@ -611,8 +611,12 @@ std::string GFitsHDU::typecode(int type) const
  ***************************************************************************/
 void GFitsHDU::init_members(void)
 {
-    // Allocate and initialise FITS file pointer
-    m_fitsfile = new __fitsfile;
+    // Allocate FITS file pointer. As the pointer is of type void the C-style
+    // memory allocation function malloc is used as this function does not
+    // deal with types but always returns a void pointer
+    m_fitsfile = malloc(sizeof(__fitsfile));
+
+    // Initialise FITS file pointer
     FPTR(m_fitsfile)->HDUposition = 0;
     FPTR(m_fitsfile)->Fptr        = NULL;
 
@@ -650,8 +654,9 @@ void GFitsHDU::copy_members(const GFitsHDU& hdu)
  ***************************************************************************/
 void GFitsHDU::free_members(void)
 {
-    // Free memory
-    if (m_fitsfile != NULL) delete FPTR(m_fitsfile);
+    // Free memory. Note that the malloc function was used for allocation,
+    // hence the free function needs to be called for freeing.
+    if (m_fitsfile != NULL) free(m_fitsfile);
 
     // Signal free pointers
     m_fitsfile = NULL;

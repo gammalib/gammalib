@@ -82,7 +82,6 @@
 #define G_USE_NPRED_CACHE      //!< Use Npred cache in npred_diffuse method
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_READ_ARF                         //!< Debug read_arf method
 //#define G_DEBUG_IRF_RADIAL                     //!< Debug irf_radial method
 //#define G_DEBUG_IRF_DIFFUSE                   //!< Debug irf_diffuse method
 //#define G_DEBUG_IRF_ELLIPTICAL             //!< Debug irf_elliptical method
@@ -595,6 +594,12 @@ void GCTAResponse::load(const std::string& irfname)
 
     // Load point spread function
     load_psf(filename);
+
+    // Apply theta cut
+    GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_aeff));
+    if (arf != NULL) {
+        arf->apply_thetacut(*this);
+    }
 
     // Store response name
     m_rspname = irfname;

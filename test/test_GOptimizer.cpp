@@ -106,6 +106,10 @@ void TestGOptimizer::test_optimizer(const int& mode)
         ob.events(events);
         ob.ontime(tmax.secs()-tmin.secs());
         obs.append(ob);
+
+        // Free events
+        delete events;
+
     }
 
     // Add the model to the observation

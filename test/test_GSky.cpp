@@ -59,7 +59,7 @@ void TestGSky::set(void){
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic ");
+    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
     return;
 }
 
@@ -227,6 +227,9 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
         } // endfor: y pixels
     } // endfor: x pixels
 
+    // Delete copy
+    delete cpy;
+
     // Return
     return ((dist_max > angle_max) ? dist_max : angle_max);
 }
@@ -280,7 +283,6 @@ void TestGSky::test_GWcslib(void)
             try {
                 cel->set("CEL", crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
                 gal->set("GAL", crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
-
                 test_try_success();
             }
             catch (std::exception &e) {
@@ -294,7 +296,6 @@ void TestGSky::test_GWcslib(void)
                 if ((tol = wcs_forth_back_pixel(cel, nx, ny, crpix1, crpix2)) > 1.0e-10) {
                     throw exception_failure("CEL forth-back transformation tolerance 1.0e-10 exceeded: "+gammalib::str(tol));
                 }
-
                 test_try_success(); 
             }
             catch (std::exception &e) {
@@ -308,7 +309,6 @@ void TestGSky::test_GWcslib(void)
                 if ((tol = wcs_forth_back_pixel(gal, nx, ny, crpix1, crpix2)) > 1.0e-10) {
                     throw exception_failure("GAL forth-back transformation tolerance 1.0e-10 exceeded: "+gammalib::str(tol));
                 }
-
                 test_try_success();
             }
             catch (std::exception &e) {
@@ -322,7 +322,6 @@ void TestGSky::test_GWcslib(void)
                 if ((tol = wcs_copy(cel, nx, ny, crpix1, crpix2)) > 1.0e-4) {
                     throw exception_failure("CEL copy tolerance 1.0e-4 exceeded: "+gammalib::str(tol));
                 }
-
                 test_try_success();
             }
             catch (std::exception &e) {
@@ -336,13 +335,17 @@ void TestGSky::test_GWcslib(void)
                 if ((tol = wcs_copy(gal, nx, ny, crpix1, crpix2)) > 1.0e-4) {
                     throw exception_failure("GAL copy tolerance 1.0e-4 exceeded: "+gammalib::str(tol));
                 }
-
                 test_try_success();
             }
             catch (std::exception &e) {
                 test_try_failure(e);
             }
 
+            // Free memory
+            delete cel;
+            delete gal;
+
+            // Signal success
             test_try_success();
         }
         catch (std::exception &e) {

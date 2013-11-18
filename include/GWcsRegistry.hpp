@@ -63,7 +63,7 @@ public:
     GWcsRegistry& operator= (const GWcsRegistry& registry);
 
     // Methods
-    int         size(void) const { return m_number; }
+    int         size(void) const;
     GWcs*       alloc(const std::string& code) const;
     std::string code(const int& index) const;
     std::string name(const int& index) const;
@@ -77,11 +77,44 @@ protected:
     void free_members(void);
 
 private:
-    // Pricate members
-    static int          m_number;   //!< Number of projections in registry
-    static std::string* m_codes;    //!< Projection codes
-    static std::string* m_names;    //!< Projection names
-    static const GWcs** m_prjs;     //!< Pointer to seed projections
+    // Private members (the private members have been implement as static
+    // methods to avoid the static initialization order fiasco of static
+    // members; using static methods we follow the "construct on first use
+    // idiom")
+    // Number of projections in registry
+    static int& number() {
+        static int m_number = 0;
+        return m_number;
+    };
+    // Projection codes
+    static GRegistryPointer<std::string>& codes() {
+        static GRegistryPointer<std::string> m_codes;
+        return m_codes;
+    };
+    // Projection names
+    static GRegistryPointer<std::string>& names() {
+        static GRegistryPointer<std::string> m_names;
+        return m_names;
+    };
+    // Pointer to seed projections
+    static GRegistryPointer<const GWcs*>& projections() {
+        static GRegistryPointer<const GWcs*> m_projections;
+        return m_projections;
+    };
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of registered models
+ *
+ * @return Number of registered models.
+ *
+ * Returns the number of registered model.
+ ***************************************************************************/
+inline
+int GWcsRegistry::size(void) const
+{
+    return number();
+}
 
 #endif /* GWCSREGISTRY_HPP */

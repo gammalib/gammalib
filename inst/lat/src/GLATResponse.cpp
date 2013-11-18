@@ -783,10 +783,30 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
     m_hasfront   = rsp.m_hasfront;
     m_hasback    = rsp.m_hasback;
     m_force_mean = rsp.m_force_mean;
-    m_aeff       = rsp.m_aeff;
-    m_psf        = rsp.m_psf;
-    m_edisp      = rsp.m_edisp;
-    m_ptsrc      = rsp.m_ptsrc;
+
+    // Clone Aeff
+    m_aeff.clear();
+    for (int i = 0; i < rsp.m_aeff.size(); ++i) {
+        m_aeff.push_back(rsp.m_aeff[i]->clone());
+    }
+    
+    // Clone Psf
+    m_psf.clear();
+    for (int i = 0; i < rsp.m_psf.size(); ++i) {
+        m_psf.push_back(rsp.m_psf[i]->clone());
+    }
+
+    // Clone Edisp
+    m_edisp.clear();
+    for (int i = 0; i < rsp.m_edisp.size(); ++i) {
+        m_edisp.push_back(rsp.m_edisp[i]->clone());
+    }
+
+    // Clone point sources
+    m_ptsrc.clear();
+    for (int i = 0; i < rsp.m_ptsrc.size(); ++i) {
+        m_ptsrc.push_back(rsp.m_ptsrc[i]->clone());
+    }
 
     // Return
     return;
@@ -798,6 +818,34 @@ void GLATResponse::copy_members(const GLATResponse& rsp)
  ***************************************************************************/
 void GLATResponse::free_members(void)
 {
+    // Free Aeff memory
+    for (int i = 0; i < m_aeff.size(); ++i) {
+        if (m_aeff[i] != NULL) delete m_aeff[i];
+        m_aeff[i] = NULL;
+    }
+    m_aeff.clear();
+
+    // Free Psf memory
+    for (int i = 0; i < m_psf.size(); ++i) {
+        if (m_psf[i] != NULL) delete m_psf[i];
+        m_psf[i] = NULL;
+    }
+    m_psf.clear();
+
+    // Free Edisp memory
+    for (int i = 0; i < m_edisp.size(); ++i) {
+        if (m_edisp[i] != NULL) delete m_edisp[i];
+        m_edisp[i] = NULL;
+    }
+    m_edisp.clear();
+
+    // Free point source memory
+    for (int i = 0; i < m_ptsrc.size(); ++i) {
+        if (m_ptsrc[i] != NULL) delete m_ptsrc[i];
+        m_ptsrc[i] = NULL;
+    }
+    m_ptsrc.clear();
+
     // Return
     return;
 }

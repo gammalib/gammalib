@@ -63,6 +63,14 @@ AC_DEFINE_UNQUOTED([PACKAGE_PREFIX], "${gammalib_prefix}", [Location where libra
 
 
 #############################################################################
+# Determine source directory for unit testing                               #
+#############################################################################
+PACKAGE_SOURCE=`pwd`
+AC_DEFINE_UNQUOTED([PACKAGE_SOURCE], "${PACKAGE_SOURCE}", [Location where source is installed])
+AC_SUBST(PACKAGE_SOURCE)
+
+
+#############################################################################
 # Check for programs that are required by automake                          #
 #############################################################################
 AC_PROG_MAKE_SET

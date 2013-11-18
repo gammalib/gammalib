@@ -75,10 +75,25 @@ protected:
     void free_members(void);
 
 private:
-    // Pricate members
-    static int                    m_number;   //!< Number of models in registry
-    static std::string*           m_names;    //!< Model names
-    static const GModelSpectral** m_models;   //!< Pointer to seed models
+    // Private members (the private members have been implement as static
+    // methods to avoid the static initialization order fiasco of static
+    // members; using static methods we follow the "construct on first use
+    // idiom")
+    // Number of models in registry
+    static int& number() {
+        static int m_number = 0;
+        return m_number;
+    };
+    // Model names
+    static GRegistryPointer<std::string>& names() {
+        static GRegistryPointer<std::string> m_names;
+        return m_names;
+    };
+    // Pointer to seed models
+    static GRegistryPointer<const GModelSpectral*>& models() {
+        static GRegistryPointer<const GModelSpectral*> m_models;
+        return m_models;
+    };
 };
 
 
@@ -92,7 +107,7 @@ private:
 inline
 int GModelSpectralRegistry::size(void) const
 {
-    return m_number;
+    return number();
 }
 
 #endif /* GMODELSPECTRALREGISTRY_HPP */

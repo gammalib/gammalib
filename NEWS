@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-1 November 2013
+12 November 2013
 
 
 1. Introduction
@@ -109,7 +109,11 @@ constants and functions have been moved to a new model named GMath.
 
 3. Configuration
 -----------------
-None
+Added the environment variable PACKAGE_SOURCE that is also available in
+config.h and that points to the source directory from which GammaLib is
+installed. This allows providing absolute paths for unit testing, a need
+for the special valgrind rule in case that Sonar is used for quality
+checking.
 
 
 4. Application module
@@ -132,6 +136,9 @@ from GContainer:
 
 Appropriate methods have been implemented in these classes to handle
 containers. They are not detailed here.
+
+Add smart pointer template class GRegistryPointer to the GRegistry header
+file that avoids memory leaks on exit of GammaLib.
 
 
 6. FITS I/O Interface
@@ -196,6 +203,12 @@ The GModelSpatialDiffuseCube class now reads an optional ENERGIES
 extension so that the energy values for maps in the cube are
 available.
 
+Model registries now use static functions instead of static members
+for registry information handling. This circumvents the ill defined
+initialization problem of static variables and allow using of the
+GRegistryPointer smart pointer, removing memory leaks on exit of
+GammaLib.
+
 
 9. Numerics module
 ------------------
@@ -208,6 +221,12 @@ from GTools and GWcslib have been moved into this file.
 Add energy constructor to GEnergy that allows one-line construction of
 an object by specifying an energy value and unit. Possible unit strings
 are erg(s), keV, MeV, GeV, and TeV (case insensitive).
+
+Observation registries now use static functions instead of static members
+for registry information handling. This circumvents the ill defined
+initialization problem of static variables and allow using of the
+GRegistryPointer smart pointer, removing memory leaks on exit of
+GammaLib.
 
 
 11. Optimization module
@@ -227,6 +246,13 @@ GSkyRegionCircle class implements a circle on the sky. The DS9 region
 format is used for loading and saving region information into a file.
 Regions a gathered in a regions container, which is implement by the
 GSkyRegions class.
+
+The WCS registry now use static functions instead of static members
+for registry information handling. This circumvents the ill defined
+initialization problem of static variables and allow using of the
+GRegistryPointer smart pointer, removing memory leaks on exit of
+GammaLib.
+
 
 13. Support module
 ------------------
@@ -289,6 +315,12 @@ Support for on/off analysis has been added. The GCTAOnOffObservation
 class gathers all information that is required for an on/off analysis
 for a given run. The GCTAOnOffObservations container allows to analyse
 several runs in one shot.
+
+The radial model registry now use static functions instead of static
+members for registry information handling. This circumvents the ill
+defined initialization problem of static variables and allow using of
+the GRegistryPointer smart pointer, removing memory leaks on exit of
+GammaLib.
 
 
 21. COMPTEL interface

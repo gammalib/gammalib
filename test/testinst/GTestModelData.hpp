@@ -56,13 +56,12 @@ public:
     }
     explicit GTestModelData(const GXmlElement& xml) : GModelData(xml) {
         init_members();
-        m_modelTps = new GModelTemporalConst();
         set_pointers();
         return;
     }
-        GTestModelData(const GTestModelData& model) : GModelData(model) { 
-        init_members();
+    GTestModelData(const GTestModelData& model) : GModelData(model) { 
         copy_members(model);
+        set_pointers();
         return;        
     }
     virtual ~GTestModelData(void) {
@@ -75,8 +74,8 @@ public:
         if (this != &model) {
             this->GModelData::operator=(model);
             free_members();
-            init_members();
             copy_members(model);
+            set_pointers();
         }
         return *this;
     }
@@ -166,30 +165,30 @@ public:
         GTestInstDir dir;
         
         // Generate an times list.
-        GTimes times = m_modelTps->mc(rate,tmin, tmax,ran);
+        GTimes times = m_modelTps->mc(rate, tmin, tmax, ran);
 
-        GTestEventBin * bin = new GTestEventBin();
-        bin->time(times[0]);
-        bin->energy(engmin);
-        bin->ewidth(engmax-engmin);
-        bin->dir(dir);
-        bin->ontime(100); // 10 sec per bin
+        GTestEventBin bin;
+        bin.time(times[0]);
+        bin.energy(engmin);
+        bin.ewidth(engmax-engmin);
+        bin.dir(dir);
+        bin.ontime(10); // 10 sec per bin
 
         for (int i = 0; i < times.size(); ++i) {
-            if ((bin->time().secs()+bin->ontime())<times[i].secs()){
+            if ((bin.time().secs() + bin.ontime()) < times[i].secs()) {
 
-                //Add the event to the cube
-                cube->append(*bin);
+                // Add the event to the cube
+                cube->append(bin);
                 
-                bin = new GTestEventBin();
-                bin->time(times[i]);
-                bin->energy(engmin);
-                bin->ewidth(engmax-engmin);
-                bin->dir(dir);
-                bin->ontime(10); // 10 sec per bin
+                bin.counts(0.0);
+                bin.time(times[i]);
+                bin.energy(engmin);
+                bin.ewidth(engmax-engmin);
+                bin.dir(dir);
+                bin.ontime(10); // 10 sec per bin
             }
   
-            bin->counts(bin->counts()+1);
+            bin.counts(bin.counts()+1);
 
         }
         
@@ -224,30 +223,25 @@ public:
     
 protected:
     // Protected methods
-    void init_members(void){
+    void init_members(void) {
         m_modelTps = new GModelTemporalConst();
     }
     void copy_members(const GTestModelData& model){
-        m_modelTps=model.temporal()->clone();
-
-        // Set parameter pointers
-        set_pointers();
+        m_modelTps = model.temporal()->clone();
     }
-    void free_members(void){ return; }
-        
+    void free_members(void) {
+        delete m_modelTps;
+    }
     void set_pointers(void){
-        //Clear parameters list
         m_pars.clear();
-        
-            for(int i=0;i<m_modelTps->size();i++){
-                (*m_modelTps)[i].free(); // Set free
-                m_pars.push_back(&((*m_modelTps)[i]));
-
-             }
+        for(int i = 0; i < m_modelTps->size(); ++i) {
+            (*m_modelTps)[i].free(); // Set free
+            m_pars.push_back(&((*m_modelTps)[i]));
+        }
     }
-    
-    GModelTemporalConst* m_modelTps; //!< Temporal model
 
+    // Protected members
+    GModelTemporalConst* m_modelTps; //!< Temporal model
 };
 
 #endif /* GMODELDATA_HPP */

@@ -241,8 +241,9 @@ void GFits::open(const std::string& filename, bool create)
     m_hdu.clear();
 
     // Don't allow opening if another file is already open
-    if (m_fitsfile != NULL)
+    if (m_fitsfile != NULL) {
         throw GException::fits_already_opened(G_OPEN, m_filename);
+    }
 
     // Expand environment variables
     std::string fname = gammalib::expand_env(filename);
@@ -948,23 +949,22 @@ void GFits::free_members(void)
             __ffdelt(FPTR(m_fitsfile), &new_status);
             throw GException::fits_error(G_FREE_MEM, status);
         }
-        else if (status != 0)
+        else if (status != 0) {
             throw GException::fits_error(G_FREE_MEM, status);
+        }
 
     } // endif: There was an open FITS file
 
-    // Deconnect and free HDUs
+    // Free HDUs
     for (int i = 0; i < m_hdu.size(); ++i) {
         if (m_hdu[i] != NULL) {
-
-            // Deconnect HDUs
-            m_hdu[i]->m_fitsfile = NULL;
-
-            // Free HDUs
             delete m_hdu[i];
             m_hdu[i] = NULL;
         }
     }
+
+    // Clear HDUs
+    m_hdu.clear();
 
     // Return
     return;
