@@ -1,7 +1,7 @@
 /***************************************************************************
- *      GCTAModelBackground.cpp - generic CTA background model class      *
+ *       GCTAModelBackground.cpp - Generic CTA background model class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTABackgroundModel.cpp
- * @brief generic CTA background model class implementation
+ * @brief Generic CTA background model class implementation
  * @author Michael Mayer
  */
 
