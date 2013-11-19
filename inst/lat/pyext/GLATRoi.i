@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GLATRoi.i - Fermi-LAT region of interest class             *
+ *              GLATRoi.i - Fermi/LAT region of interest class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATRoi.i
- * @brief Fermi-LAT regions of interest class interface definition
+ * @brief Fermi/LAT region of interest class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -38,18 +38,20 @@ class GLATRoi : public GRoi {
 public:
     // Constructors and destructors
     GLATRoi(void);
+    GLATRoi(const GLATInstDir& centre, const double& radius);
     GLATRoi(const GLATRoi& roi);
     virtual ~GLATRoi(void);
 
     // Implemented pure virtual base class methods
-    void        clear(void);
-    GLATRoi*    clone(void) const;
+    virtual void        clear(void);
+    virtual GLATRoi*    clone(void) const;
+    virtual bool        contains(const GEvent& event) const;
 
     // Other methods
-    GLATInstDir centre(void) const;
-    double      radius(void) const;
-    void        centre(const GLATInstDir& centre);
-    void        radius(const double& radius);
+    const GLATInstDir&  centre(void) const;
+    const double&       radius(void) const;
+    void                centre(const GLATInstDir& centre);
+    void                radius(const double& radius);
 };
 
 

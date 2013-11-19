@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GLATRoi.hpp - Fermi-LAT region of interest class            *
+ *             GLATRoi.hpp - Fermi/LAT region of interest class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATRoi.hpp
- * @brief Region of interest class definition
+ * @brief Fermi/LAT region of interest class definition
  * @author Juergen Knoedlseder
  */
 
@@ -47,22 +47,24 @@ class GLATRoi : public GRoi {
 public:
     // Constructors and destructors
     GLATRoi(void);
+    GLATRoi(const GLATInstDir& centre, const double& radius);
     GLATRoi(const GLATRoi& roi);
     virtual ~GLATRoi(void);
 
     // Operators
-    GLATRoi& operator= (const GLATRoi& roi);
+    GLATRoi& operator=(const GLATRoi& roi);
 
     // Implemented pure virtual base class methods
-    void        clear(void);
-    GLATRoi*    clone(void) const;
-    std::string print(const GChatter& chatter = NORMAL) const;
+    virtual void        clear(void);
+    virtual GLATRoi*    clone(void) const;
+    virtual bool        contains(const GEvent& event) const;
+    virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    GLATInstDir centre(void) const { return m_centre; }
-    double      radius(void) const { return m_radius; }
-    void        centre(const GLATInstDir& centre) { m_centre=centre; return; }
-    void        radius(const double& radius) { m_radius=radius; return; }
+    const GLATInstDir&  centre(void) const;
+    const double&       radius(void) const;
+    void                centre(const GLATInstDir& centre);
+    void                radius(const double& radius);
 
 protected:
     // Protected methods
@@ -74,5 +76,63 @@ protected:
     GLATInstDir m_centre;   //!< Centre of ROI in instrument coordinates
     double      m_radius;   //!< Radius of ROI in degrees
 };
+
+
+/***********************************************************************//**
+ * @brief Returns region of interest centre
+ *
+ * @return Region of interest centre sky direction.
+ *
+ * Returns the sky direction of the region of interest centre.
+ ***************************************************************************/
+inline
+const GLATInstDir& GLATRoi::centre(void) const
+{
+    return (m_centre);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns radius of region of interest in degrees
+ *
+ * @return Region of interest radius (degrees).
+ *
+ * Returns the radius of the region of interest in degrees.
+ ***************************************************************************/
+inline
+const double& GLATRoi::radius(void) const
+{
+    return (m_radius);
+}
+
+
+/***********************************************************************//**
+ * @brief Set region of interest centre
+ *
+ * @param[in] Region of interest centre sky direction.
+ *
+ * Set the sky direction of the region of interest centre.
+ ***************************************************************************/
+inline
+void GLATRoi::centre(const GLATInstDir& centre)
+{
+    m_centre = centre;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set radius of region of interest
+ *
+ * @param[in] Region of interest radius (degrees).
+ *
+ * Set the radius of the region of interest.
+ ***************************************************************************/
+inline
+void GLATRoi::radius(const double& radius)
+{
+    m_radius = radius;
+    return;
+}
 
 #endif /* GLATROI_HPP */

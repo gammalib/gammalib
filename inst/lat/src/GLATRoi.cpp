@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GLATRoi.cpp - Fermi-LAT region of interest class           *
+ *              GLATRoi.cpp - Fermi/LAT region of interest class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATRoi.cpp
- * @brief Region of interest class interface implementation
+ * @brief Fermi/LAT region of interest class interface implementation
  * @author Juergen Knoedlseder
  */
 
@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GLATRoi.hpp"
+#include "GEvent.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -61,9 +62,29 @@ GLATRoi::GLATRoi(void) : GRoi()
 
 
 /***********************************************************************//**
+ * @brief Region of interest constructor
+ *
+ * @param[in] centre Region of interest centre.
+ * @param[in] radius Radius of region of interest (degrees).
+ ***************************************************************************/
+GLATRoi::GLATRoi(const GLATInstDir& centre, const double& radius) : GRoi()
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    this->centre(centre);
+    this->radius(radius);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] roi Region of interest from which the instance should be built.
+ * @param[in] roi Region of interest.
  ***************************************************************************/
 GLATRoi::GLATRoi(const GLATRoi& roi) : GRoi(roi)
 {
@@ -100,9 +121,10 @@ GLATRoi::~GLATRoi(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] roi Region of interest which should be assigned.
+ * @param[in] roi Region of interest.
+ * @return Region of interest.
  ***************************************************************************/
-GLATRoi& GLATRoi::operator= (const GLATRoi& roi)
+GLATRoi& GLATRoi::operator=(const GLATRoi& roi)
 {
     // Execute only if object is not identical
     if (this != &roi) {
@@ -152,10 +174,38 @@ void GLATRoi::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Pointer to deep copy of region of interest
+ ***************************************************************************/
 GLATRoi* GLATRoi::clone(void) const
 {
     return new GLATRoi(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Check if region of interest contains an event
+ *
+ * @return True if region of interest contains event, false otherwise
+ ***************************************************************************/
+bool GLATRoi::contains(const GEvent& event) const
+{
+    // Initialise flag to non-containment
+    bool contains = false;
+
+    // Get pointer to Fermi/LAT instrument direction
+    const GLATInstDir* dir = dynamic_cast<const GLATInstDir*>(&event.dir());
+
+    // If instrument direction is a Fermi/LAT instrument direction then check
+    // on containment
+    if (dir != NULL) {
+        if (m_centre.dir().dist_deg(dir->dir()) <= m_radius) {
+            contains = true;
+        }
+    }
+
+    // Return containment flag
+    return contains;
 }
 
 
@@ -177,8 +227,10 @@ std::string GLATRoi::print(const GChatter& chatter) const
         result.append("=== GLATRoi ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("ROI centre")+m_centre.print());
-        result.append("\n"+gammalib::parformat("ROI radius")+gammalib::str(m_radius)+" deg");
+        result.append("\n"+gammalib::parformat("ROI centre"));
+        result.append(m_centre.print());
+        result.append("\n"+gammalib::parformat("ROI radius"));
+        result.append(gammalib::str(m_radius)+" deg");
 
     } // endif: chatter was not silent
 
