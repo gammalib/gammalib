@@ -518,7 +518,13 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 			double omega0 = pnt->dir().posang(events->roi().centre().dir());
 
 			// Setup integration function
-			GCTAModelBackground::npred_roi_kern_theta integrand(spatial(), obsEng,obsTime,rot, roi_radius, roi_distance,omega0);
+			GCTAModelBackground::npred_roi_kern_theta integrand(spatial(),
+                                                                obsEng,
+                                                                obsTime,
+                                                                rot,
+                                                                roi_radius,
+                                                                roi_distance,
+                                                                omega0);
 
 			// Setup integrator
 			GIntegral integral(&integrand);
