@@ -61,6 +61,7 @@ public:
     GCTAInstDir copy() {
         return (*self);
     }
+    /*
     GCTAInstDir(GInstDir* dir) {
         GCTAInstDir* ptr = dynamic_cast<GCTAInstDir*>(dir);
         if (ptr != NULL) {
@@ -71,4 +72,5 @@ public:
                                        "GInstDir not of type GCTAInstDir");
         }
     }
+    */
 };

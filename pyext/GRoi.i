@@ -20,13 +20,12 @@
  ***************************************************************************/
 /**
  * @file GRoi.i
- * @brief GRoi class python interface
+ * @brief Region of interest interface class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GRoi.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -51,6 +50,7 @@ public:
     // Pure virtual methods
     virtual void  clear(void) = 0;
     virtual GRoi* clone(void) const = 0;
+    virtual bool  contains(const GEvent& event) const = 0;
 };
 
 

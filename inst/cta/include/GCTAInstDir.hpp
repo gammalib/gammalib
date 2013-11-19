@@ -54,9 +54,9 @@ public:
     GCTAInstDir& operator=(const GCTAInstDir& dir);
 
     // Implemented pure virtual base class methods
-    void         clear(void);
-    GCTAInstDir* clone(void) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;
+    virtual void         clear(void);
+    virtual GCTAInstDir* clone(void) const;
+    virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void           dir(const GSkyDir& dir);

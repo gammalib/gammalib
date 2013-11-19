@@ -44,15 +44,15 @@ public:
     virtual ~GCTARoi(void);
 
     // Implemented pure virtual base class methods
-    void     clear(void);
-    GCTARoi* clone(void) const;
-    bool     contains(const GEvent& event) const;
+    virtual void        clear(void);
+    virtual GCTARoi*    clone(void) const;
+    virtual bool        contains(const GEvent& event) const;
 
     // Other methods
-    const GCTAInstDir& centre(void) const;
-    const double&      radius(void) const;
-    void               centre(const GCTAInstDir& centre);
-    void               radius(const double& radius);
+    const GCTAInstDir&  centre(void) const;
+    const double&       radius(void) const;
+    void                centre(const GCTAInstDir& centre);
+    void                radius(const double& radius);
 };
 
 

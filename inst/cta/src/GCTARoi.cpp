@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTARoi.cpp
- * @brief GCTARoi class interface implementation.
+ * @brief CTA region of interest class interface implementation
  * @author Juergen Knoedlseder
  */
 
@@ -227,9 +227,10 @@ std::string GCTARoi::print(const GChatter& chatter) const
         result.append("=== GCTARoi ===");
 
         // Append information
-        result.append("\n"+gammalib::parformat("ROI centre")+m_centre.print());
-        result.append("\n"+gammalib::parformat("ROI radius") +
-                      gammalib::str(m_radius)+" deg");
+        result.append("\n"+gammalib::parformat("ROI centre"));
+        result.append(m_centre.print());
+        result.append("\n"+gammalib::parformat("ROI radius"));
+        result.append(gammalib::str(m_radius)+" deg");
 
     } // endif: chatter was not silent
 
@@ -282,10 +283,3 @@ void GCTARoi::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
