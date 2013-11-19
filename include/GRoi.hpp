@@ -31,6 +31,9 @@
 #include <string>
 #include "GBase.hpp"
 
+/* __ Forward declarations _______________________________________________ */
+class GEvent;
+
 
 /***********************************************************************//**
  * @class GRoi
@@ -54,11 +57,12 @@ public:
     virtual ~GRoi(void);
 
     // Operators
-    virtual GRoi& operator= (const GRoi& roi);
+    virtual GRoi& operator=(const GRoi& roi);
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
     virtual GRoi*       clone(void) const = 0;
+    virtual bool        contains(const GEvent& event) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
 protected:
