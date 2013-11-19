@@ -55,10 +55,11 @@ def simulate(observation,filename):
     # Return photons
     return photons,spat
 
+
 # ============ #
 # Show photons #
 # ============ #
-def show_photons(photons, mod,e_min,e_max,skydir,area,duration,ebins=30):#, e_min, e_max, area, duration, radius, ebins=30):
+def show_photons(photons, mod, e_min, e_max, skydir, duration, ebins=30):
     """
     Show photons using matplotlib (if available).
     """
@@ -97,8 +98,8 @@ def show_photons(photons, mod,e_min,e_max,skydir,area,duration,ebins=30):#, e_mi
         for i in range(ebds.size()):
             eng    = ebds.elogmean(i)
             ewidth = ebds.ewidth(i)
-            f = mod.spectrum().eval(eng, t) * area * duration * ewidth.MeV()
-            model.append(f)
+            value  = mod.spectrum().eval(eng, t) * duration * ewidth.MeV()
+            model.append(value)
 
         # Plot data
         plt.loglog(energy, counts, 'ro')
@@ -167,18 +168,18 @@ if __name__ == '__main__':
 
     #cube_filename = os.environ["GAMMALIB"]+"/test/data/test_cube.fits"
     cube_filename = "../../../test/data/test_cube.fits"
-    duration = 180.0
-    radius = 2.0
-    skydir = GSkyDir()
+    duration      = 1.0
+    radius        = 2.0
+    e_min         = 0.1
+    e_max         = 100.0
+    skydir        = GSkyDir()
     skydir.radec_deg(84.17263, 22.01444)
-    e_min = 0.1
-    e_max = 100.0
 
     # Create GCTAObservation  
     obs = GCTAObservation()
     
     # Create ROI
-    roi = GCTARoi()
+    roi     = GCTARoi()
     instdir = GCTAInstDir()  
     instdir.dir(skydir)
     roi.centre(instdir)
@@ -186,8 +187,8 @@ if __name__ == '__main__':
     
     # Create GTI
     tstart = GTime(0.)
-    tstop = GTime(duration)
-    gti = GGti()
+    tstop  = GTime(duration)
+    gti    = GGti()
     gti.append(tstart,tstop)
     
     # Create Ebounds
@@ -216,8 +217,5 @@ if __name__ == '__main__':
     # Simulate     
     photons,mod = simulate(obs, cube_filename)
     
-    # Calculate surface area
-    area = 4.0 * pi * (1.0-cos(radius/180.0*pi))
- 
     # Show photons
-    show_photons(photons, mod, e_min, e_max, skydir, area, duration)
+    show_photons(photons, mod, e_min, e_max, skydir, duration)
