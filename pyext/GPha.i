@@ -46,20 +46,21 @@ public:
     virtual ~GPha(void);
 
     // Methods
-    void            clear(void);
-    GPha*           clone(void) const;
-    int             size(void) const;
-    double&         at(const int& index);
-    const GEbounds& ebounds(void) const;
-    double          counts(void) const;
-    const double&   underflow(void) const;
-    const double&   overflow(void) const;
-    const double&   outflow(void) const;
-    void            fill(const GEnergy& energy, const double& value = 1.0);
-    void            load(const std::string& filename);
-    void            save(const std::string& filename, const bool& clobber = false) const;
-    void            read(const GFitsTable* hdu);
-    void            write(GFits& fits) const;
+    void               clear(void);
+    GPha*              clone(void) const;
+    int                size(void) const;
+    double&            at(const int& index);
+    const GEbounds&    ebounds(void) const;
+    double             counts(void) const;
+    const double&      underflow(void) const;
+    const double&      overflow(void) const;
+    const double&      outflow(void) const;
+    void               fill(const GEnergy& energy, const double& value = 1.0);
+    void               load(const std::string& filename);
+    void               save(const std::string& filename, const bool& clobber = false) const;
+    void               read(const GFitsTable* hdu);
+    void               write(GFits& fits) const;
+    const std::string& filename(void) const;
 };
 
 
