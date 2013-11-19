@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 # ==========================================================================
-# This script tests the photon simulation using GCTAModelBackground.
+# This script tests the event simulation using GCTAModelBackground.
 #
 # If matplotlib is installed, the simulation results will be displayed.
 #
@@ -31,7 +31,7 @@ import os
 # ======================== #
 # Simulate CTA observation #
 # ======================== #
-def simulate(observation,filename):
+def simulate(observation, filename):
     """
     Simulate CTA observation.
     """
@@ -46,22 +46,22 @@ def simulate(observation,filename):
     bck   = GCTAModelBackground(spat,spec)
     bck.instruments("CTA")
 
-    # Simulate photons
-    photons = bck.mc(observation, ran)
+    # Simulate events
+    events = bck.mc(observation, ran)
 
-    # Print photons
-    print(str(photons.size()) + " photons simulated.")
+    # Print events
+    print(str(events.size()) + " events simulated.")
      
-    # Return photons
-    return photons,spat
+    # Return events
+    return events, spat
 
 
-# ============ #
-# Show photons #
-# ============ #
-def show_photons(photons, mod, e_min, e_max, skydir, duration, ebins=30):
+# =========== #
+# Show events #
+# =========== #
+def show_events(events, mod, e_min, e_max, skydir, duration, ebins=30):
     """
-    Show photons using matplotlib (if available).
+    Show events using matplotlib (if available).
     """
     # Only proceed if matplotlib is available
     try:
@@ -70,7 +70,7 @@ def show_photons(photons, mod, e_min, e_max, skydir, duration, ebins=30):
 
         # Create figure
         plt.figure(1)
-        plt.title("MC simulated photon spectrum (" + str(e_min) + '-' + str(e_max) + " TeV)")
+        plt.title("MC simulated event spectrum (" + str(e_min) + '-' + str(e_max) + " TeV)")
         
         # Setup energy range covered by data
         ebds = GEbounds(ebins, GEnergy(e_min, "TeV"), GEnergy(e_max, "TeV"))
@@ -82,8 +82,8 @@ def show_photons(photons, mod, e_min, e_max, skydir, duration, ebins=30):
 
         # Fill histogram
         counts = [0.0 for i in range(ebds.size())]
-        for photon in photons:
-            index = ebds.index(photon.energy())
+        for event in events:
+            index = ebds.index(event.energy())
             counts[index] = counts[index] + 1.0
         
         # Create error bars
@@ -110,18 +110,18 @@ def show_photons(photons, mod, e_min, e_max, skydir, duration, ebins=30):
 
         # Set axes
         plt.xlabel("Energy (TeV)")
-        plt.ylabel("Number of incident photons")
+        plt.ylabel("Number of events")
 
         # Create figure
         plt.figure(2)
-        plt.title("MC simulated photon map")
+        plt.title("MC simulated event map")
         
         # Create RA and DEC arrays
         ra  = []
         dec = []
-        for photon in photons:
-            ra.append(photon.dir().ra_deg())
-            dec.append(photon.dir().dec_deg())
+        for event in events:
+            ra.append(event.dir().dir().ra_deg())
+            dec.append(event.dir().dir().dec_deg())
 
         # Make 2D histogram (or scatter plot in case that the 2D histogram
         # is not available)
@@ -158,13 +158,13 @@ def show_photons(photons, mod, e_min, e_max, skydir, duration, ebins=30):
 #==========================#
 if __name__ == '__main__':
     """
-    Simulate photons.
+    Simulate events.
     """
     # Dump header
     print("")
-    print("********************")
-    print("* Simulate photons *")
-    print("********************")
+    print("*******************")
+    print("* Simulate events *")
+    print("*******************")
 
     #cube_filename = os.environ["GAMMALIB"]+"/test/data/test_cube.fits"
     cube_filename = "../../../test/data/test_cube.fits"
@@ -214,8 +214,8 @@ if __name__ == '__main__':
     obs.events(ev)
     obs.pointing(pnt)
         
-    # Simulate     
-    photons,mod = simulate(obs, cube_filename)
+    # Simulate events  
+    events, mod = simulate(obs, cube_filename)
     
-    # Show photons
-    show_photons(photons, mod, e_min, e_max, skydir, duration)
+    # Show events
+    show_events(events, mod, e_min, e_max, skydir, duration)
