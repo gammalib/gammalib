@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATResponse.cpp - Fermi-LAT response class              *
+ *                GLATResponse.cpp - Fermi/LAT response class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.cpp
- * @brief Fermi-LAT response class implementation
+ * @brief Fermi/LAT response class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -277,7 +277,7 @@ double GLATResponse::irf(const GEvent&       event,
     } // endif: created new mean PSF
 
     // Get IRF value
-    double offset = dir->dist_deg(srcDir);
+    double offset = dir->dir().dist_deg(srcDir);
     double irf    = (*m_ptsrc[ipsf])(offset, srcEng.log10MeV());
 
     // Return IRF value
@@ -450,7 +450,7 @@ double GLATResponse::irf(const GLATEventBin& event,
 
         // Get PSF value
         GSkyDir srcDir   = m_ptsrc[ipsf]->dir();
-        double  offset   = event.dir().dist_deg(srcDir);
+        double  offset   = event.dir().dir().dist_deg(srcDir);
         double  mean_psf = (*m_ptsrc[ipsf])(offset, srcEng.log10MeV()) / (event.ontime());
 
         // Debug option: compare mean PSF to diffuse response

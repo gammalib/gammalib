@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATEventList.cpp  -  LAT event list class               *
+ *               GLATEventList.cpp - Fermi/LAT event list class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventList.cpp
- * @brief LAT Event list class implementation
+ * @brief Fermi/LAT event list class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -517,7 +517,7 @@ void GLATEventList::read_events(const GFitsTable& table)
         for (int i = 0; i < num; ++i) {
             event.m_time.set((*ptr_time)(i), m_gti.reference());
             event.m_energy.MeV((*ptr_energy)(i));
-            event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
+            event.m_dir.dir().radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
             event.m_theta               = (*ptr_theta)(i);
             event.m_phi                 = (*ptr_phi)(i);
             event.m_zenith_angle        = (*ptr_zenith)(i);
