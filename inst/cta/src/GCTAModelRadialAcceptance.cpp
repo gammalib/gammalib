@@ -311,7 +311,7 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event,
     const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
 
     // Compute offset angle (in degrees)
-    double offset = cta_dir->dist_deg(pnt->dir());
+    double offset = cta_dir->dir().dist_deg(pnt->dir());
 
     // Evaluate function and gradients
     double rad  = (radial()   != NULL)
@@ -370,7 +370,7 @@ double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
     const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
 
     // Compute offset angle (in degrees)
-    double offset = cta_dir->dist_deg(pnt->dir());
+    double offset = cta_dir->dir().dist_deg(pnt->dir());
 
     // Evaluate function and gradients
     double rad  = (radial()   != NULL)
@@ -461,7 +461,7 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
         double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
         // Get distance from ROI centre in radians
-        double roi_distance = events->roi().centre().dist(pnt->dir());
+        double roi_distance = events->roi().centre().dir().dist(pnt->dir());
 
         // Setup integration function
         GCTAModelRadialAcceptance::roi_kern integrand(radial(), roi_radius, roi_distance);

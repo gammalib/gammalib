@@ -1365,8 +1365,8 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
             // celestial coordinates
             GMatrix ry;
             GMatrix rz;
-            ry.eulery(dir->dec_deg() - 90.0);
-            rz.eulerz(-dir->ra_deg());
+            ry.eulery(dir->dir().dec_deg() - 90.0);
+            rz.eulerz(-dir->dir().ra_deg());
             GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
@@ -1530,7 +1530,7 @@ double GCTAResponse::npred_radial(const GSource& source,
     double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
     // Compute distance between ROI and model centre (radians)
-    double roi_model_distance = events->roi().centre().dist(centre);
+    double roi_model_distance = events->roi().centre().dir().dist(centre);
 
     // Compute the ROI radius plus maximum PSF radius (radians). Any photon
     // coming from beyond this radius will not make it in the dataspace and
@@ -1708,7 +1708,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
     double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
     // Compute distance between ROI and model centre (radians)
-    double roi_model_distance = events->roi().centre().dist(centre);
+    double roi_model_distance = events->roi().centre().dir().dist(centre);
 
     // Compute the ROI radius plus maximum PSF radius (radians). Any photon
     // coming from beyond this radius will not make it in the dataspace and
@@ -1922,8 +1922,8 @@ double GCTAResponse::npred_diffuse(const GSource& source,
             // given by (theta,phi), into celestial coordinates.
             GMatrix ry;
             GMatrix rz;
-            ry.eulery(events->roi().centre().dec_deg() - 90.0);
-            rz.eulerz(-events->roi().centre().ra_deg());
+            ry.eulery(events->roi().centre().dir().dec_deg() - 90.0);
+            rz.eulerz(-events->roi().centre().dir().ra_deg());
             GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
@@ -2152,7 +2152,7 @@ double GCTAResponse::npsf(const GSkyDir&      srcDir,
 
     // Extract relevant parameters from arguments
     double roi_radius       = roi.radius() * gammalib::deg2rad;
-    double roi_psf_distance = roi.centre().dist(srcDir);
+    double roi_psf_distance = roi.centre().dir().dist(srcDir);
     double rmax             = psf_delta_max(theta, phi, zenith, azimuth, srcLogEng);
 
     // If PSF is fully enclosed by the ROI then skip the numerical

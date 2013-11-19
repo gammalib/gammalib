@@ -351,7 +351,7 @@ GCTAInstDir GCTAModelRadialGauss::mc(const GCTAInstDir& dir, GRan& ran) const
 
     // Rotate pointing direction by offset and azimuth angle
     GCTAInstDir mc_dir = dir;
-    mc_dir.rotate_deg(phi, offset);
+    mc_dir.dir().rotate_deg(phi, offset);
 
     // Return MC direction
     return mc_dir;

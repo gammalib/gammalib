@@ -203,7 +203,7 @@ void TestGCTAResponse::test_response_npsf(void)
     GCTAPointing pnt;
     GCTARoi      roi;
     GCTAInstDir  instDir;
-    instDir.radec_deg(0.0, 0.0);
+    instDir.dir().radec_deg(0.0, 0.0);
     roi.centre(instDir);
     roi.radius(2.0);
     srcEng.TeV(0.1);
@@ -332,7 +332,7 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     // Setup ROI centred on Cen A with a radius of 4 deg
     GCTARoi     roi;
     GCTAInstDir instDir;
-    instDir.radec_deg(src_ra, src_dec);
+    instDir.dir().radec_deg(src_ra, src_dec);
     roi.centre(instDir);
     roi.radius(roi_rad);
 
@@ -413,7 +413,7 @@ void TestGCTAModelBackground::test_modelbg_npred(void)
     // Setup ROI centred on the Gaussian mean with a radius of 1sigma
     GCTARoi     roi;
     GCTAInstDir instDir;
-    instDir.radec_deg(src_ra, src_dec);
+    instDir.dir().radec_deg(src_ra, src_dec);
     roi.centre(instDir);
     roi.radius(roi_rad);
 

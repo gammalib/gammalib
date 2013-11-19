@@ -29,6 +29,7 @@
 #include <config.h>
 #endif
 #include "GCTARoi.hpp"
+#include "GEvent.hpp"
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
@@ -54,6 +55,26 @@ GCTARoi::GCTARoi(void) : GRoi()
 {
     // Initialise class members
     init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Region of interest constructor
+ *
+ * @param[in] centre Region of interest centre.
+ * @param[in] radius Radius of region of interest (degrees).
+ ***************************************************************************/
+GCTARoi::GCTARoi(const GCTAInstDir& centre, const double& radius) : GRoi()
+{
+    // Initialise class members
+    init_members();
+
+    // Set members
+    this->centre(centre);
+    this->radius(radius);
 
     // Return
     return;
@@ -101,6 +122,7 @@ GCTARoi::~GCTARoi(void)
  * @brief Assignment operator
  *
  * @param[in] roi Region of interest.
+ * @return Region of interest.
  ***************************************************************************/
 GCTARoi& GCTARoi::operator= (const GCTARoi& roi)
 {
@@ -152,10 +174,38 @@ void GCTARoi::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Pointer to deep copy of region of interest
+ ***************************************************************************/
 GCTARoi* GCTARoi::clone(void) const
 {
     return new GCTARoi(*this);
+}
+
+
+/***********************************************************************//**
+ * @brief Check if region of interest contains an event
+ *
+ * @return True if region of interest contains event, false otherwise
+ ***************************************************************************/
+bool GCTARoi::contains(const GEvent& event) const
+{
+    // Initialise flag to non-containment
+    bool contains = false;
+
+    // Get pointer to CTA instrument direction
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&event.dir());
+
+    // If instrument direction is a CTA instrument direction then check on
+    // containment
+    if (dir != NULL) {
+        if (m_centre.dir().dist_deg(dir->dir()) <= m_radius) {
+            contains = true;
+        }
+    }
+
+    // Return containment flag
+    return contains;
 }
 
 

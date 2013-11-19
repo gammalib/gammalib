@@ -820,7 +820,8 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 
                 // Only append node if flux > 0
                 if (flux_centre > 0.0) {
-                	m_mc_spectrum.append(energy, flux_centre);
+                	//m_mc_spectrum.append(energy, flux_centre);
+                	m_mc_spectrum.append(energy, flux_circle);
                 }
 
             }

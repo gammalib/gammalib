@@ -500,17 +500,20 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 				throw GCTAException::no_pointing(G_NPRED);
 			}
 
+            // Get reference to ROI centre
+            const GSkyDir& roi_centre = events->roi().centre().dir();
+
 			// Get ROI radius in radians
 			double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
 			// Get distance from ROI centre in radians
-			double roi_distance = events->roi().centre().dist(pnt->dir());
+			double roi_distance = roi_centre.dist(pnt->dir());
 
 			// Initialise rotation matrix to transform from model system to celestial system
 			GMatrix ry;
 			GMatrix rz;
-			ry.eulery(events->roi().centre().dec_deg() - 90.0);
-			rz.eulerz(-events->roi().centre().ra_deg());
+			ry.eulery(roi_centre.dec_deg() - 90.0);
+			rz.eulerz(-roi_centre.ra_deg());
 			GMatrix rot = (ry * rz).transpose();
 
 			// Compute position angle of ROI centre with respect to model
@@ -632,8 +635,9 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
                 dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
             if (cube != NULL) {
 
-			   // Set MC cone
-			   cube->set_mc_cone(pnt->dir(), events->roi().radius());
+			   // Set MC simulation cone based on ROI
+			   cube->set_mc_cone(events->roi().centre().dir(),
+                                 events->roi().radius());
 
 			   // Allocate node function to replace the spectral component
 			   GModelSpectralNodes* nodes = new GModelSpectralNodes(cube->spectrum());
@@ -700,19 +704,20 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
                                                   ran);
 
                     // Set event direction
-                    GSkyDir dir = spatial()->mc(energy,times[i], ran);
-                    GCTAInstDir cta_dir(dir);
+                    GSkyDir dir = spatial()->mc(energy, times[i], ran);
 
                     // Allocate event
                     GCTAEventAtom event;
 
                     // Set event attributes
-                    event.dir(cta_dir);
+                    event.dir(GCTAInstDir(dir));
                     event.energy(energy);
                     event.time(times[i]);
 
-                    // Append event to list
-                    list->append(event);
+                    // Append event to list if it falls in ROI
+                    if (events->roi().contains(event)) {
+                        list->append(event);
+                    }
 
                 } // endfor: looped over all events
 

@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventList.cpp
- * @brief CTA event atom container class implementation.
+ * @brief CTA event atom container class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -676,7 +676,7 @@ void GCTAEventList::read_events_v0(const GFitsTable* table)
             for (int i = 0; i < num; ++i) {
                 event.m_index     = i;
                 event.m_time.set((*ptr_time)(i), m_gti.reference());
-                event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
+                event.m_dir.dir().radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
                 event.m_energy.TeV((*ptr_energy)(i));
                 event.m_event_id    = (*ptr_eid)(i);
                 event.m_obs_id      = 0;
@@ -760,7 +760,7 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
             for (int i = 0; i < num; ++i) {
                 event.m_index     = i;
                 event.m_time.set((*ptr_time)(i), m_gti.reference());
-                event.m_dir.radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
+                event.m_dir.dir().radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
                 event.m_energy.TeV((*ptr_energy)(i));
                 event.m_event_id   = (*ptr_eid)(i);
                 event.m_obs_id     = (*ptr_oid)(i);
@@ -1008,7 +1008,7 @@ void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
                         double  dec = gammalib::todouble(args[1]);
                         double  rad = gammalib::todouble(args[2]);
                         GCTAInstDir dir;
-                        dir.radec_deg(ra, dec);
+                        dir.dir().radec_deg(ra, dec);
                         m_roi.centre(dir);
                         m_roi.radius(rad);
                     }
@@ -1089,8 +1089,8 @@ void GCTAEventList::write_events(GFitsBinTable* hdu) const
                 col_live(i)        = 0.0;
                 col_multip(i)      = 0;
                 //col_telmask
-                col_ra(i)          = m_events[i].dir().ra_deg();
-                col_dec(i)         = m_events[i].dir().dec_deg();
+                col_ra(i)          = m_events[i].dir().dir().ra_deg();
+                col_dec(i)         = m_events[i].dir().dir().dec_deg();
                 col_direrr(i)      = m_events[i].m_dir_err;
                 col_detx(i)        = m_events[i].m_detx;
                 col_dety(i)        = m_events[i].m_dety;
@@ -1166,8 +1166,8 @@ void GCTAEventList::write_ds_keys(GFitsHDU* hdu) const
     if (hdu != NULL) {
 
         // Set ROI parameters
-        double ra  = roi().centre().ra_deg();
-        double dec = roi().centre().dec_deg();
+        double ra  = roi().centre().dir().ra_deg();
+        double dec = roi().centre().dir().dec_deg();
         double rad = roi().radius();
 
         // Set energy range parameters
