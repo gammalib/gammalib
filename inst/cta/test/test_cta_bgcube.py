@@ -59,7 +59,7 @@ def simulate(observation, filename):
 # =========== #
 # Show events #
 # =========== #
-def show_events(events, mod, e_min, e_max, skydir, duration, ebins=30):
+def show_events(events, mod, roi_centre, roi_radius, duration, ebins=30):
     """
     Show events using matplotlib (if available).
     """
@@ -68,12 +68,15 @@ def show_events(events, mod, e_min, e_max, skydir, duration, ebins=30):
         # Import matplotlib
         import matplotlib.pyplot as plt
 
+        # Setup energy binning for display
+        ebds = GEbounds(ebins, GEnergy(events.ebounds().emin()),
+                               GEnergy(events.ebounds().emax()))
+
         # Create figure
         plt.figure(1)
-        plt.title("MC simulated event spectrum (" + str(e_min) + '-' + str(e_max) + " TeV)")
-        
-        # Setup energy range covered by data
-        ebds = GEbounds(ebins, GEnergy(e_min, "TeV"), GEnergy(e_max, "TeV"))
+        plt.title("MC simulated event spectrum (" + \
+                  str(events.ebounds().emin()) + '-' + \
+                  str(events.ebounds().emax()) + " TeV)")
 
         # Create energy axis
         energy = []
@@ -94,7 +97,7 @@ def show_events(events, mod, e_min, e_max, skydir, duration, ebins=30):
         # Get model values       
         model  = []
         t      = GTime()
-        mod.set_mc_cone(skydir, radius)
+        mod.set_mc_cone(roi_centre, roi_radius)
         for i in range(ebds.size()):
             eng    = ebds.elogmean(i)
             ewidth = ebds.ewidth(i)
@@ -126,13 +129,17 @@ def show_events(events, mod, e_min, e_max, skydir, duration, ebins=30):
         # Make 2D histogram (or scatter plot in case that the 2D histogram
         # is not available)
         if hasattr(plt, 'hist2d'):
-            x    = skydir.ra_deg()
-            y    = skydir.dec_deg()
-            xmin = x - sqrt(0.45) * radius
-            xmax = x + sqrt(0.45) * radius
-            ymin = y - sqrt(0.45) * radius
-            ymax = y + sqrt(0.45) * radius
-            plt.hist2d(ra,dec,bins=50,range=[[xmin,xmax],[ymin,ymax]])
+            x    = roi_centre.ra_deg()
+            y    = roi_centre.dec_deg()
+            #xmin = x - sqrt(0.45) * roi_radius
+            #xmax = x + sqrt(0.45) * roi_radius
+            #ymin = y - sqrt(0.45) * roi_radius
+            #ymax = y + sqrt(0.45) * roi_radius
+            xmin = x - roi_radius*1.1
+            xmax = x + roi_radius*1.1
+            ymin = y - roi_radius*1.1
+            ymax = y + roi_radius*1.1
+            plt.hist2d(ra, dec, bins=50, range=[[xmin,xmax],[ymin,ymax]])
         else:
             plt.scatter(ra, dec, marker=".")
  
@@ -166,14 +173,18 @@ if __name__ == '__main__':
     print("* Simulate events *")
     print("*******************")
 
+    # Allocate variables
+    roi_centre = GSkyDir()
+    pntdir     = GSkyDir()
+    
     #cube_filename = os.environ["GAMMALIB"]+"/test/data/test_cube.fits"
     cube_filename = "../../../test/data/test_cube.fits"
     duration      = 1.0
-    radius        = 2.0
+    roi_radius    = 1.0
     e_min         = 0.1
     e_max         = 100.0
-    skydir        = GSkyDir()
-    skydir.radec_deg(84.17263, 22.01444)
+    roi_centre.radec_deg(84.17263, 22.01444)
+    pntdir.radec_deg(83.0, 22.5)
 
     # Create GCTAObservation  
     obs = GCTAObservation()
@@ -181,10 +192,10 @@ if __name__ == '__main__':
     # Create ROI
     roi     = GCTARoi()
     instdir = GCTAInstDir()  
-    instdir.dir(skydir)
+    instdir.dir(roi_centre)
     roi.centre(instdir)
-    roi.radius(radius)
-    
+    roi.radius(roi_radius)
+
     # Create GTI
     tstart = GTime(0.)
     tstop  = GTime(duration)
@@ -205,7 +216,7 @@ if __name__ == '__main__':
     
     # Create Pointing
     pnt = GCTAPointing()
-    pnt.dir(skydir)
+    pnt.dir(pntdir)
     
     # Set observation parameters
     obs.ontime(gti.ontime())
@@ -218,4 +229,4 @@ if __name__ == '__main__':
     events, mod = simulate(obs, cube_filename)
     
     # Show events
-    show_events(events, mod, e_min, e_max, skydir, duration)
+    show_events(events, mod, roi_centre, roi_radius, duration)

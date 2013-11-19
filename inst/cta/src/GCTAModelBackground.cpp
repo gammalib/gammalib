@@ -69,6 +69,7 @@ const GModelRegistry      g_cta_model_background_registry(&g_cta_model_backgroun
 
 /* __ Coding definitions _________________________________________________ */
 #define G_USE_NPRED_CACHE      //!< Use Npred cache in npred_diffuse method
+#define G_NPRED_AROUND_ROI        //!< Perform Npred integration around ROI
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_NPRED                       //!< Debug npred_diffuse method
@@ -269,6 +270,8 @@ void GCTAModelBackground::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  *
+ * @return Pointer to deep copy of CTA background model.
+ *
  * Clone a CTA background model. Cloning performs a deep copy of the
  * information, so the original object can be destroyed after cloning without
  * any loss of information.
@@ -284,6 +287,11 @@ GCTAModelBackground* GCTAModelBackground::clone(void) const
  *
  * @param[in] event Observed event.
  * @param[in] obs Observation.
+ * @return Function value.
+ *
+ * @exception GException::invalid_argument
+ *            No CTA pointing found in observation.
+ *            No CTA instrument direction found in event.
  *
  * Evaluates tha CTA background model which is a factorization of a
  * spatial, spectral and temporal model component. This method also applies
@@ -292,12 +300,6 @@ GCTAModelBackground* GCTAModelBackground::clone(void) const
  *
  * @todo Add bookkeeping of last value and evaluate only if argument 
  *       changed
- * @todo Verify that CTA instrument direction pointer is valid, or better,
- *       add an offset method to GCTAPointing. Ideally, we should precompute
- *       all offset angles (for an event cube this may only be done easily
- *       if the pointing has been fixed; otherwise we need a structure
- *       similar to the Fermi/LAT livetime cube that provides the effective
- *       sky exposure as function of offset angle).
  ***************************************************************************/
 double GCTAModelBackground::eval(const GEvent& event,
                                  const GObservation& obs) const
@@ -305,18 +307,23 @@ double GCTAModelBackground::eval(const GEvent& event,
     // Extract CTA pointing direction
     GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
     if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_EVAL);
+        std::string msg = "No CTA pointing found in observation.\n" +
+                          obs.print();
+        throw GException::invalid_argument(G_EVAL, msg);
     }
 
-    // Get instrument direction
-    const GInstDir*    inst_dir = &(event.dir());
-    const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
+    // Extract CTA instrument direction
+    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
+    if (dir == NULL) {
+        std::string msg = "No CTA instrument direction found in event.";
+        throw GException::invalid_argument(G_EVAL, msg);
+    }
 
-    // Create a Photon from the event
+    // Create a Photon from the event.
     // We need the GPhoton to evaluate the spatial model.
     // For the background, GEvent and GPhoton are identical
     // since the IRFs are not folded in
-    GPhoton photon(cta_dir->dir(), event.energy(), event.time());
+    GPhoton photon(dir->dir(), event.energy(), event.time());
 
     // Evaluate function and gradients
     double spat = (spatial() != NULL)
@@ -341,10 +348,12 @@ double GCTAModelBackground::eval(const GEvent& event,
  * @brief Evaluate function and gradients
  *
  * @param[in] event Observed event.
- * @param[in] obs Observation (not used).
+ * @param[in] obs Observation.
+ * @return Function value.
  *
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found in observation
+ * @exception GException::invalid_argument
+ *            No CTA pointing found in observation.
+ *            No CTA instrument direction found in event.
  *
  * Evaluates tha CTA background model and parameter gradients. The CTA
  * background model is a factorization of a spatial, spectral and
@@ -354,31 +363,30 @@ double GCTAModelBackground::eval(const GEvent& event,
  *
  * @todo Add bookkeeping of last value and evaluate only if argument 
  *       changed
- * @todo Verify that CTA instrument direction pointer is valid, or better,
- *       add an offset method to GCTAPointing. Ideally, we should precompute
- *       all offset angles (for an event cube this may only be done easily
- *       if the pointing has been fixed; otherwise we need a structure
- *       similar to the Fermi/LAT livetime cube that provides the effective
- *       sky exposure as function of offset angle).
  ***************************************************************************/
 double GCTAModelBackground::eval_gradients(const GEvent& event,
-                                                 const GObservation& obs) const
+                                           const GObservation& obs) const
 {
     // Extract CTA pointing direction
     GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
     if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_EVAL_GRADIENTS);
+        std::string msg = "No CTA pointing found in observation.\n" +
+                          obs.print();
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
 
-    // Get instrument direction
-    const GInstDir*    inst_dir = &(event.dir());
-    const GCTAInstDir* cta_dir  = dynamic_cast<const GCTAInstDir*>(inst_dir);
+    // Extract CTA instrument direction
+    const GCTAInstDir* dir  = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
+    if (dir == NULL) {
+        std::string msg = "No CTA instrument direction found in event.";
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
+    }
 
     // Create a Photon from the event
     // We need the photon to evaluate the spatial model
     // For the background, GEvent and GPhoton are identical
     // since the IRFs are not folded in
-    GPhoton photon = GPhoton(cta_dir->dir(), event.energy(),event.time());
+    GPhoton photon = GPhoton(dir->dir(), event.energy(),event.time());
 
     // Evaluate function and gradients
     double spat = (spatial() != NULL)
@@ -433,11 +441,11 @@ double GCTAModelBackground::eval_gradients(const GEvent& event,
  * @param[in] obsEng Measured event energy.
  * @param[in] obsTime Measured event time.
  * @param[in] obs Observation.
+ * @return Spatially integrated model.
  *
- * @exception GException::no_list
- *            No valid CTA event list found in observation
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found in observation
+ * @exception GException::invalid_argument
+ *            No CTA event list found in observation.
+ *            No CTA pointing found in observation.
  *
  * Spatially integrates the data model for a given measured event energy and
  * event time. This method also applies a deadtime correction factor, so that
@@ -448,7 +456,7 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
                                   const GObservation& obs) const
 {
     // Initialise result
-    double npred = 0.0;
+    double npred     = 0.0;
     bool   has_npred = false;
 
     // Build unique identifier
@@ -461,9 +469,8 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
         // Search for unique identifier, and if found, recover Npred value
 		// and break
 		for (int i = 0; i < m_npred_names.size(); ++i) {
-			if (m_npred_names[i] == id &&
-				m_npred_energies[i] == obsEng) {
-				npred = m_npred_values[i];
+			if (m_npred_names[i] == id && m_npred_energies[i] == obsEng) {
+				npred     = m_npred_values[i];
 				has_npred = true;
 				#if defined(G_DEBUG_NPRED)
 				std::cout << "GCTAModelBackground::npred:";
@@ -483,22 +490,23 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
         // Evaluate only if model is valid
         if (valid_model()) {
 
-            // Get pointer on CTA events list
+            // Get CTA event list
 			const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
-			if (events == NULL) {
-				throw GException::no_list(G_NPRED);
-			}
+            if (events == NULL) {
+                std::string msg = "No CTA event list found in observation.\n" +
+                                  obs.print();
+                throw GException::invalid_argument(G_NPRED, msg);
+            }
 
-			//todo we need to think about if we always want to integrate
-			// starting from the pointing direction or instead take
-			// the center of gravity of the model
-			// For now we use the pointing position as integration start
-
+            #if !defined(G_NPRED_AROUND_ROI)
 			// Get CTA pointing direction
 			GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
-			if (pnt == NULL) {
-				throw GCTAException::no_pointing(G_NPRED);
-			}
+            if (pnt == NULL) {
+                std::string msg = "No CTA pointing found in observation.\n" +
+                                  obs.print();
+                throw GException::invalid_argument(G_NPRED, msg);
+            }
+            #endif
 
             // Get reference to ROI centre
             const GSkyDir& roi_centre = events->roi().centre().dir();
@@ -507,9 +515,14 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 			double roi_radius = events->roi().radius() * gammalib::deg2rad;
 
 			// Get distance from ROI centre in radians
+            #if defined(G_NPRED_AROUND_ROI)
+			double roi_distance = 0.0;
+            #else
 			double roi_distance = roi_centre.dist(pnt->dir());
+            #endif
 
-			// Initialise rotation matrix to transform from model system to celestial system
+			// Initialise rotation matrix to transform from ROI system to
+            // celestial coordinate system
 			GMatrix ry;
 			GMatrix rz;
 			ry.eulery(roi_centre.dec_deg() - 90.0);
@@ -518,7 +531,11 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 
 			// Compute position angle of ROI centre with respect to model
 			// centre (radians)
+            #if defined(G_NPRED_AROUND_ROI)
+            double omega0 = 0.0;
+            #else
 			double omega0 = pnt->dir().posang(events->roi().centre().dir());
+            #endif
 
 			// Setup integration function
 			GCTAModelBackground::npred_roi_kern_theta integrand(spatial(),
@@ -534,8 +551,13 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
 			integral.eps(1e-3);
 
 			// Setup integration boundaries
+            #if defined(G_NPRED_AROUND_ROI)
+			double rmin = 0.0;
+			double rmax = roi_radius;
+            #else
 			double rmin = (roi_distance > roi_radius) ? roi_distance-roi_radius : 0.0;
 			double rmax = roi_radius + roi_distance;
+            #endif
 
 			// Spatially integrate radial component
 			npred = integral.romb(rmin, rmax);
@@ -580,9 +602,11 @@ double GCTAModelBackground::npred(const GEnergy&      obsEng,
  *
  * @param[in] obs Observation.
  * @param[in] ran Random number generator.
+ * @return Pointer to list of simulated events (needs to be de-allocated by
+ *         client)
  *
- * @exception GCTAException::no_pointing
- *            No CTA pointing found in observation.
+ * @exception GException::invalid_argument
+ *            No CTA event list found in observation.
  *
  * Draws a sample of events from the background model using a Monte
  * Carlo simulation. The pointing information, the energy boundaries and the
@@ -603,23 +627,26 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Extract CTA pointing direction at beginning of observation
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
-        if (pnt == NULL) {
-            throw GCTAException::no_pointing(G_MC);
+        // Extract event list to access the ROI, energy boundaries and GTIs
+        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+        if (events == NULL) {
+            std::string msg = "No CTA event list found in observation.\n" +
+                              obs.print();
+            throw GException::invalid_argument(G_MC, msg);
         }
 
-        const GCTAEventList* events =
-            dynamic_cast<const GCTAEventList*>(obs.events());
-		if (events == NULL) {
-			throw GException::no_events(G_MC);
-		}
+        // Get simulation region
+        const GCTARoi&  roi     = events->roi();
+        const GEbounds& ebounds = events->ebounds();
+        const GGti&     gti     = events->gti();
 
-        // Convert CTA pointing direction in instrument system
-        GCTAInstDir pnt_dir(pnt->dir());
+        // Set simulation region for result event list
+        list->roi(roi);
+        list->ebounds(ebounds);
+        list->gti(gti);
 
         // Loop over all energy boundaries
-        for (int ieng = 0; ieng < obs.events()->ebounds().size(); ++ieng) {
+        for (int ieng = 0; ieng < ebounds.size(); ++ieng) {
 
             // Initialise de-allocation flag
             bool free_spectral = false;
@@ -636,8 +663,7 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
             if (cube != NULL) {
 
 			   // Set MC simulation cone based on ROI
-			   cube->set_mc_cone(events->roi().centre().dir(),
-                                 events->roi().radius());
+			   cube->set_mc_cone(roi.centre().dir(), roi.radius());
 
 			   // Allocate node function to replace the spectral component
 			   GModelSpectralNodes* nodes = new GModelSpectralNodes(cube->spectrum());
@@ -660,8 +686,7 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
             // from spectral component (units: cts/s).
             // Note that the time here is ontime. Deadtime correction will be done
             // later.
-            double rate = spectral->flux(events->ebounds().emin(ieng),
-                                         events->ebounds().emax(ieng));
+            double rate = spectral->flux(ebounds.emin(ieng), ebounds.emax(ieng));
 
             // Debug option: dump rate
             #if defined(G_DUMP_MC)
@@ -670,12 +695,12 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
             #endif
 
             // Loop over all good time intervals
-            for (int itime = 0; itime < events->gti().size(); ++itime) {
+            for (int itime = 0; itime < gti.size(); ++itime) {
 
-                // Get event arrival times from temporal model
+                // Get Monte Carlo event arrival times from temporal model
                 GTimes times = m_temporal->mc(rate,
-                                              events->gti().tstart(itime),
-                                              events->gti().tstop(itime),
+                                              gti.tstart(itime),
+                                              gti.tstop(itime),
                                               ran);
 
                 // Get number of events
@@ -697,13 +722,13 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
                         }
                     }
 
-                    // Set event energy
-                    GEnergy energy = spectral->mc(obs.events()->ebounds().emin(ieng),
-                                                  obs.events()->ebounds().emax(ieng),
+                    // Get Monte Carlo event energy from spectral model
+                    GEnergy energy = spectral->mc(ebounds.emin(ieng),
+                                                  ebounds.emax(ieng),
                                                   times[i],
                                                   ran);
 
-                    // Set event direction
+                    // Get Monte Carlo event direction from spatial model
                     GSkyDir dir = spatial()->mc(energy, times[i], ran);
 
                     // Allocate event
@@ -816,7 +841,8 @@ void GCTAModelBackground::write(GXmlElement& xml) const
     if (src == NULL) {
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
-        if (spatial()   != NULL) src->append(GXmlElement("spatialModel"));
+        if (spatial()  != NULL) src->append(GXmlElement("spatialModel"));
+        if (temporal() != NULL) src->append(GXmlElement("temporalModel"));
     }
 
     // Set model type, name and optionally instruments
@@ -1170,7 +1196,7 @@ GModelTemporal* GCTAModelBackground::xml_temporal(const GXmlElement& temporal) c
 /***********************************************************************//**
  * @brief Kernel for zenith angle Npred integration of background model
  *
- * @param[in] theta offset angle from integration center (pointing direction) (radians).
+ * @param[in] theta Offset angle from ROI center (radians).
  *
  * Computes
  *
@@ -1196,19 +1222,23 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
 
         // Compute sine of offset angle
         double sin_theta = std::sin(theta);
-        double domega    = 0.5 * gammalib::cta_roi_arclength(theta,
-                                                             m_dist,
-                                                             m_cosdist,
-                                                             m_sindist,
-                                                             m_roi,
-                                                             m_cosroi);
+        #if defined(G_NPRED_AROUND_ROI)
+        double dphi = gammalib::pi;
+        #else
+        double dphi = 0.5 * gammalib::cta_roi_arclength(theta,
+                                                        m_dist,
+                                                        m_cosdist,
+                                                        m_sindist,
+                                                        m_roi,
+                                                        m_cosroi);
+        #endif
 
         // Continue only if arc length is positive
-        if (domega > 0.0) {
+        if (dphi > 0.0) {
 
 		   // Compute phi integration range
-		   double omega_min = m_omega0 - domega;
-		   double omega_max = m_omega0 + domega;
+		   double phi_min = m_omega0 - dphi;
+		   double phi_max = m_omega0 + dphi;
 
 			// Setup phi integration kernel
             GCTAModelBackground::npred_roi_kern_phi integrand(m_model,
@@ -1221,7 +1251,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
 			// Integrate over phi
 			GIntegral integral(&integrand);
 	        integral.eps(1e-3);
-			value = integral.romb(omega_min,omega_max) * sin_theta;
+			value = integral.romb(phi_min, phi_max) * sin_theta;
 
 			// Debug: Check for NaN
 			#if defined(G_NAN_CHECK)
@@ -1247,7 +1277,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
 /***********************************************************************//**
  * @brief Kernel for Npred azimuth angle integration of background model
  *
- * @param[in] phi Azimuth angle with respect to ROI centre (radians).
+ * @param[in] phi Azimuth angle around ROI centre (radians).
  *
  * Computes
  *
