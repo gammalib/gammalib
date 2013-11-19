@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GTestRoi.hpp  - Test region of interest class             *
+ *                GTestRoi.hpp - Test region of interest class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,57 +48,38 @@ public:
     }
 
     // Operators
-    GTestRoi& operator= (const GTestRoi& roi){
-        
-            // Execute only if object is not identical
+    GTestRoi& operator=(const GTestRoi& roi){
         if (this != &roi) {
-
-        // Copy base class members
             this->GRoi::operator=(roi);
-
-        // Free members
             free_members();
-
-        // Initialise private members
             init_members();
-
-        // Copy members
             copy_members(roi);
-
-        } // endif: object was not identical
-
-         // Return this object
+        }
         return *this;
     }
 
     // Implemented pure virtual base class methods
-    
-    void clear(void){
-         // Free members
+    virtual void clear(void){
         free_members();
         this->GRoi::free_members();
-
-        // Initialise private members
         this->GRoi::init_members();
         init_members();
-
-        // Return
         return;
     }
-    
-    GTestRoi* clone(void) const{
+    virtual GTestRoi* clone(void) const{
         return new GTestRoi(*this);
     }
-    
-    std::string  print(const GChatter& chatter = NORMAL) const{
+    virtual bool contains(const GEvent& event) const {
+        return true;
+    }
+    virtual std::string  print(const GChatter& chatter = NORMAL) const{
         return "=== GTestRoi ===";
     }
-
 
 protected:
     // Protected methods
     void init_members(void){ return; }
-    void copy_members(const GTestRoi& roi){ return; }
+    void copy_members(const GTestRoi& roi) { return; }
     void free_members(void){ return; }
 
 };
