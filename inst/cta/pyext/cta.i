@@ -84,6 +84,7 @@
 %include "GCTAEdisp.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
+%include "GCTAModelBackground.i"
 %include "GCTAModelRadial.i"
 %include "GCTAModelRadialRegistry.i"
 %include "GCTAModelRadialGauss.i"

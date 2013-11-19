@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTARoi.hpp
- * @brief GCTARoi class definition.
+ * @brief CTA region of interest class interface definition
  * @author Juergen Knoedlseder
  */
 
@@ -31,6 +31,9 @@
 #include <string>
 #include "GRoi.hpp"
 #include "GCTAInstDir.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GEvent;
 
 
 /***********************************************************************//**
@@ -47,22 +50,24 @@ class GCTARoi : public GRoi {
 public:
     // Constructors and destructors
     GCTARoi(void);
+    GCTARoi(const GCTAInstDir& centre, const double& radius);
     GCTARoi(const GCTARoi& roi);
     virtual ~GCTARoi(void);
 
     // Operators
-    GCTARoi& operator= (const GCTARoi& roi);
+    GCTARoi& operator=(const GCTARoi& roi);
 
     // Implemented pure virtual base class methods
-    void         clear(void);
-    GCTARoi*     clone(void) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;
+    void        clear(void);
+    GCTARoi*    clone(void) const;
+    bool        contains(const GEvent& event) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    GCTAInstDir centre(void) const { return m_centre; }
-    double      radius(void) const { return m_radius; }
-    void        centre(const GCTAInstDir& centre) { m_centre=centre; return; }
-    void        radius(const double& radius) { m_radius=radius; return; }
+    const GCTAInstDir& centre(void) const;
+    const double&      radius(void) const;
+    void               centre(const GCTAInstDir& centre);
+    void               radius(const double& radius);
 
 protected:
     // Protected methods
@@ -74,5 +79,63 @@ protected:
     GCTAInstDir m_centre;   //!< Centre of ROI in instrument coordinates
     double      m_radius;   //!< Radius of ROI in degrees
 };
+
+
+/***********************************************************************//**
+ * @brief Returns region of interest centre
+ *
+ * @return Region of interest centre sky direction.
+ *
+ * Returns the sky direction of the region of interest centre.
+ ***************************************************************************/
+inline
+const GCTAInstDir& GCTARoi::centre(void) const
+{
+    return (m_centre);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns radius of region of interest in degrees
+ *
+ * @return Region of interest radius (degrees).
+ *
+ * Returns the radius of the region of interest in degrees.
+ ***************************************************************************/
+inline
+const double& GCTARoi::radius(void) const
+{
+    return (m_radius);
+}
+
+
+/***********************************************************************//**
+ * @brief Set region of interest centre
+ *
+ * @param[in] Region of interest centre sky direction.
+ *
+ * Set the sky direction of the region of interest centre.
+ ***************************************************************************/
+inline
+void GCTARoi::centre(const GCTAInstDir& centre)
+{
+    m_centre = centre;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set radius of region of interest
+ *
+ * @param[in] Region of interest radius (degrees).
+ *
+ * Set the radius of the region of interest.
+ ***************************************************************************/
+inline
+void GCTARoi::radius(const double& radius)
+{
+    m_radius = radius;
+    return;
+}
 
 #endif /* GCTAROI_HPP */

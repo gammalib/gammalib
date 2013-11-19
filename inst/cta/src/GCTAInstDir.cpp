@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GCTAInstDir.cpp  -  CTA instrument direction class           *
+ *             GCTAInstDir.cpp - CTA instrument direction class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAInstDir.cpp
- * @brief GCTAInstDir class implementation.
+ * @brief CTA instrument direction class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -41,6 +41,7 @@
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Prototypes _________________________________________________________ */
+
 
 /*==========================================================================
  =                                                                         =
@@ -84,7 +85,7 @@ GCTAInstDir::GCTAInstDir(const GSkyDir& dir) : GInstDir()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] dir Instrument direction.
+ * @param[in] dir CTA instrument direction.
  ***************************************************************************/
 GCTAInstDir::GCTAInstDir(const GCTAInstDir& dir) : GInstDir(dir)
 {
@@ -121,9 +122,10 @@ GCTAInstDir::~GCTAInstDir(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] dir Instrument direction.
+ * @param[in] dir CTA instrument direction.
+ * @return CTA instrument direction.
  ***************************************************************************/
-GCTAInstDir& GCTAInstDir::operator= (const GCTAInstDir& dir)
+GCTAInstDir& GCTAInstDir::operator=(const GCTAInstDir& dir)
 {
     // Execute only if object is not identical
     if (this != &dir) {
@@ -181,100 +183,6 @@ GCTAInstDir* GCTAInstDir::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Rotate CTA instrument direction by zenith and azimuth angle
- *
- * @param[in] phi Azimuth angle (deg).
- * @param[in] theta Zenith angle (deg).
- *
- * Rotate CTA instrument direction by a zenith and azimuth angle given in
- * the system of the instrument direction and aligned in celestial
- * coordinates.
- * The azimuth angle is counted counter clockwise from celestial north
- * (this is identical to the astronomical definition of a position angle).
- ***************************************************************************/
-void GCTAInstDir::rotate_deg(const double& phi, const double& theta)
-{
-    // Convert instrument direction into sky direction
-    GSkyDir sky = dir();
-
-    // Rotate sky direction
-    sky.rotate_deg(phi, theta);
-
-    // Convert sky direction to instrument direction
-    dir(sky);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Compute angular distance between instrument directions in radians
- *
- * @param[in] dir Instrument direction.
- ***************************************************************************/
-double GCTAInstDir::dist(const GCTAInstDir& dir) const
-{
-    // Assign sky direction from instrument direction
-    GSkyDir sky;
-    double  ra  = dir.ra();
-    double  dec = dir.dec();
-    sky.radec(ra,dec);
-
-    // Compute distance
-    double dist = m_dir.dist(sky);
-
-    // Return distance
-    return dist;
-}
-
-
-/***********************************************************************//**
- * @brief Compute angular distance between instrument directions in degrees
- *
- * @param[in] dir Instrument direction.
- ***************************************************************************/
-double GCTAInstDir::dist_deg(const GCTAInstDir& dir) const
-{
-    // Return distance in degrees
-    return (dist(dir) * gammalib::rad2deg);
-}
-
-
-/***********************************************************************//**
- * @brief Compute position angle between instrument directions in radians
- *
- * @param[in] dir Instrument direction.
- ***************************************************************************/
-double GCTAInstDir::posang(const GCTAInstDir& dir) const
-{
-    // Assign sky direction from instrument direction
-    GSkyDir sky;
-    double  ra  = dir.ra();
-    double  dec = dir.dec();
-    sky.radec(ra,dec);
-
-    // Compute position angle
-    double pa = m_dir.posang(sky);
-
-    // Return position angle
-    return pa;
-}
-
-
-/***********************************************************************//**
- * @brief Compute position angle between instrument directions in degrees
- *
- * @param[in] dir Instrument direction.
- ***************************************************************************/
-double GCTAInstDir::posang_deg(const GCTAInstDir& dir) const
-{
-    // Return position angle in degrees
-    return (posang(dir) * gammalib::rad2deg);
-}
-
-
-/***********************************************************************//**
  * @brief Print instrument direction information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -289,8 +197,8 @@ std::string GCTAInstDir::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append instrument direction
-        result.append("RA="+gammalib::str(ra_deg()) +
-                      ", DEC="+gammalib::str(dec_deg()));
+        result.append("RA="+gammalib::str(m_dir.ra_deg()) +
+                      ", DEC="+gammalib::str(m_dir.dec_deg()));
 
     } // endif: chatter was not silent
 
@@ -321,7 +229,7 @@ void GCTAInstDir::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] dir Instrument direction.
+ * @param[in] dir CTA instrument direction.
  ***************************************************************************/
 void GCTAInstDir::copy_members(const GCTAInstDir& dir)
 {
@@ -341,10 +249,3 @@ void GCTAInstDir::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

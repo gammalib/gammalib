@@ -32,6 +32,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAInstDir.cpp \
           src/GCTARoi.cpp \
           src/GCTAPointing.cpp \
+          src/GCTAModelBackground.cpp \
           src/GCTAModelRadialRegistry.cpp \
           src/GCTAModelRadial.cpp \
           src/GCTAModelRadialGauss.cpp \
@@ -63,6 +64,7 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAPsfVector.hpp \
                      include/GCTAPsf2D.hpp \
                      include/GCTAEdisp.hpp \
+                     include/GCTAModelBackground.hpp \
                      include/GCTAModelRadialRegistry.hpp \
                      include/GCTAModelRadial.hpp \
                      include/GCTAModelRadialGauss.hpp \

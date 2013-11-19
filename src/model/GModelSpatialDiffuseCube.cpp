@@ -300,6 +300,11 @@ double GModelSpatialDiffuseCube::eval(const GPhoton& photon) const
         // Set the intensity times the scaling factor as model value
         value = intensity * m_value.value();
 
+        // Make sure that value is not negative
+        if (value < 0.0) {
+            value = 0.0;
+        }
+
     } // endif: energy information was available
 
     // Return value
@@ -339,6 +344,12 @@ double GModelSpatialDiffuseCube::eval_gradients(const GPhoton& photon) const
 
 	// Compute partial derivatives of the parameter value
 	double g_value = (m_value.isfree()) ? intensity * m_value.scale() : 0.0;
+
+    // Make sure that value is not negative
+    if (value < 0.0) {
+        value   = 0.0;
+        g_value = 0.0;
+    }
 
 	// Set gradient to 0 (circumvent const correctness)
 	const_cast<GModelSpatialDiffuseCube*>(this)->m_value.factor_gradient(g_value);
@@ -763,39 +774,40 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             // Initialise cache with cumulative pixel fluxes and compute
             // total flux in skymap for normalization. Negative pixels are
             // excluded from the cumulative map.
-            double flux_centre = 0.0;
-            double flux_circle = 0.0;
+            double total_flux = 0.0;
         	for (int k = 0; k < npix; ++k) {
 
                 // Derive effective pixel radius from half opening angle
-                // that corresponds to the pixel's solid angle
+                // that corresponds to the pixel's solid angle. For security,
+                // the radius is enhanced by 50%.
                 double pixel_radius =
                        std::acos(1.0 - m_cube.omega(k)/gammalib::twopi) *
                        gammalib::rad2deg * 1.5;
 
-                // Add up flux. First we check if the pixel is within the
-                // safety radius (simulation cone + effective pixel radius),
-                // then we check if the pixels is within the simulation cone
+                // Add up flux with simulation cone radius + effective pixel
+                // radius. The effective pixel radius is added to make sure
+                // that all pixels that overlap with the simulation cone are
+                // taken into account. There is no problem of having even
+                // pixels outside the simulation cone taken into account as
+                // long as the mc() method has an explicit test of whether a
+                // simulated event is contained in the simulation cone.
                 double distance = centre.dist_deg(m_cube.pix2dir(k));
                 if (distance <= radius+pixel_radius) {
                     double flux = m_cube(k,i) * m_cube.omega(k);
                     if (flux > 0.0) {
-                        flux_circle += flux;
-                        if (distance <= radius) {
-                            flux_centre += flux;
-                        }
+                        total_flux += flux;
                     }
                 }
 
-                // Push back flux derived using safety radius
-        		m_mc_cache.push_back(flux_circle); // units: ph/cm2/s/MeV
+                // Push back flux
+        		m_mc_cache.push_back(total_flux); // units: ph/cm2/s/MeV
         	}
 
             // Normalize cumulative pixel fluxes so that the values in the
             // cache run from 0 to 1
-            if (flux_circle > 0.0) {
+            if (total_flux > 0.0) {
         		for (int k = 0; k < npix; ++k) {
-        			m_mc_cache[k+offset] /= flux_circle;
+        			m_mc_cache[k+offset] /= total_flux;
         		}
         	}
 
@@ -806,7 +818,12 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
             if (m_logE.size() == nmaps) {
                 GEnergy energy;
                 energy.log10MeV(m_logE[i]);
-                m_mc_spectrum.append(energy, flux_centre);
+                
+                // Only append node if flux > 0
+                if (total_flux > 0.0) {
+                	m_mc_spectrum.append(energy, total_flux);
+                }
+
             }
 
         } // endfor: looped over all maps
