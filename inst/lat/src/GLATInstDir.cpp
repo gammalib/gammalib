@@ -122,8 +122,9 @@ GLATInstDir::~GLATInstDir(void)
  * @brief Assignment operator
  *
  * @param[in] dir Instrument direction.
+ * @return Instrument direction.
  ***************************************************************************/
-GLATInstDir& GLATInstDir::operator= (const GLATInstDir& dir)
+GLATInstDir& GLATInstDir::operator=(const GLATInstDir& dir)
 {
     // Execute only if object is not identical
     if (this != &dir) {
@@ -173,43 +174,12 @@ void GLATInstDir::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of instrument direction.
  ***************************************************************************/
 GLATInstDir* GLATInstDir::clone(void) const
 {
     return new GLATInstDir(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Compute angular distance between instrument directions in radians
- *
- * @param[in] dir Instrument direction.
- ***************************************************************************/
-double GLATInstDir::dist(const GLATInstDir& dir) const
-{
-    // Assign sky direction from instrument direction
-    GSkyDir sky;
-    double  ra  = dir.ra();
-    double  dec = dir.dec();
-    sky.radec(ra,dec);
-
-    // Compute distance
-    double dist = m_dir.dist(sky);
-
-    // Return distance
-    return dist;
-}
-
-
-/***********************************************************************//**
- * @brief Compute angular distance between instrument directions in degrees
- *
- * @param[in] dir Instrument direction.
- ***************************************************************************/
-double GLATInstDir::dist_deg(const GLATInstDir& dir) const
-{
-    // Return distance in degrees
-    return (dist(dir) * gammalib::rad2deg);
 }
 
 
@@ -228,8 +198,8 @@ std::string GLATInstDir::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append instrument direction
-        result.append("RA="+gammalib::str(ra_deg()) +
-                      ", DEC="+gammalib::str(dec_deg()));
+        result.append("RA="+gammalib::str(dir().ra_deg()) +
+                      ", DEC="+gammalib::str(dir().dec_deg()));
 
     } // endif: chatter was not silent
 
@@ -280,10 +250,3 @@ void GLATInstDir::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

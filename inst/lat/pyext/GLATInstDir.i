@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GLATInstDir.i - Fermi-LAT instrument direction class           *
+ *           GLATInstDir.i - Fermi/LAT instrument direction class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATInstDir.i
- * @brief Fermi-LAT instrument direction class interface definition
+ * @brief Fermi/LAT instrument direction class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -41,27 +41,14 @@ public:
     GLATInstDir(const GLATInstDir& dir);
     virtual ~GLATInstDir(void);
 
-    // Methods
-    void         clear(void);
-    GLATInstDir* clone(void) const;
-    void         skydir(const GSkyDir& dir);
-    void         radec(const double& ra, const double& dec);
-    void         radec_deg(const double& ra, const double& dec);
-    void         lb(const double& l, const double& b);
-    void         lb_deg(const double& l, const double& b);
-    GSkyDir      skydir(void) const;
-    double       l(void) const;
-    double       l_deg(void) const;
-    double       b(void) const;
-    double       b_deg(void) const;
-    double       ra(void) const;
-    double       ra_deg(void) const;
-    double       dec(void) const;
-    double       dec_deg(void) const;
-    double       dist(GSkyDir& dir) const;
-    double       dist_deg(GSkyDir& dir) const;
-    double       dist(GLATInstDir& dir) const;
-    double       dist_deg(GLATInstDir& dir) const;
+    // Implemented pure virtual base class methods
+    virtual void         clear(void);
+    virtual GLATInstDir* clone(void) const;
+
+    // Other methods
+    void           dir(const GSkyDir& dir);
+    GSkyDir&       dir(void);
+    const GSkyDir& dir(void) const;
 };
 
 

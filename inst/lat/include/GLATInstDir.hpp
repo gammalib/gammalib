@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GLATInstDir.hpp - LAT instrument direction class            *
+ *          GLATInstDir.hpp - Fermi/LAT instrument direction class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATInstDir.hpp
- * @brief GLATInstDir class definition.
+ * @brief Fermi/LAT instrument direction class interface definition
  * @author Juergen Knoedlseder
  */
 
@@ -51,32 +51,17 @@ public:
     virtual ~GLATInstDir(void);
 
     // Operators
-    GLATInstDir& operator= (const GLATInstDir& dir);
+    GLATInstDir& operator=(const GLATInstDir& dir);
 
     // Implemented pure virtual base class methods
-    void         clear(void);
-    GLATInstDir* clone(void) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;
+    virtual void         clear(void);
+    virtual GLATInstDir* clone(void) const;
+    virtual std::string  print(const GChatter& chatter = NORMAL) const;
 
-    // Methods
-    void         skydir(const GSkyDir& dir) { m_dir=dir; }
-    void         radec(const double& ra, const double& dec) { m_dir.radec(ra,dec); }
-    void         radec_deg(const double& ra, const double& dec) { m_dir.radec_deg(ra,dec); }
-    void         lb(const double& l, const double& b) { m_dir.lb(l,b); }
-    void         lb_deg(const double& l, const double& b) { m_dir.lb_deg(l,b); }
-    GSkyDir      skydir(void) const { return m_dir; }
-    double       l(void) const { return m_dir.l(); }
-    double       l_deg(void) const { return m_dir.l_deg(); }
-    double       b(void) const { return m_dir.b(); }
-    double       b_deg(void) const { return m_dir.b_deg(); }
-    double       ra(void) const { return m_dir.ra(); }
-    double       ra_deg(void) const { return m_dir.ra_deg(); }
-    double       dec(void) const { return m_dir.dec(); }
-    double       dec_deg(void) const { return m_dir.dec_deg(); }
-    double       dist(const GSkyDir& dir) const { return m_dir.dist(dir); }
-    double       dist_deg(const GSkyDir& dir) const { return m_dir.dist_deg(dir); }
-    double       dist(const GLATInstDir& dir) const;
-    double       dist_deg(const GLATInstDir& dir) const;
+    // Other methods
+    void           dir(const GSkyDir& dir);
+    GSkyDir&       dir(void);
+    const GSkyDir& dir(void) const;
 
 protected:
     // Protected methods
@@ -87,5 +72,48 @@ protected:
     // Data members
     GSkyDir m_dir;  //!< Observed incident direction of event
 };
+
+
+/***********************************************************************//**
+ * @brief Returns reference to sky direction
+ *
+ * @return Reference to sky direction.
+ *
+ * Returns reference to the sky direction.
+ ***************************************************************************/
+inline
+GSkyDir& GLATInstDir::dir(void)
+{
+    return (m_dir);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to sky direction (const version)
+ *
+ * @return Reference to sky direction.
+ *
+ * Returns reference to the sky direction.
+ ***************************************************************************/
+inline
+const GSkyDir& GLATInstDir::dir(void) const
+{
+    return (m_dir);
+}
+
+
+/***********************************************************************//**
+ * @brief Set sky direction
+ *
+ * @param[in] Sky direction.
+ *
+ * Set the sky direction.
+ ***************************************************************************/
+inline
+void GLATInstDir::dir(const GSkyDir& dir)
+{
+    m_dir = dir;
+    return;
+}
 
 #endif /* GLATINSTDIR_HPP */
