@@ -606,7 +606,8 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
             throw GCTAException::no_pointing(G_MC);
         }
 
-        const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(obs.events());
+        const GCTAEventList* events =
+            dynamic_cast<const GCTAEventList*>(obs.events());
 		if (events == NULL) {
 			throw GException::no_events(G_MC);
 		}
@@ -627,7 +628,8 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
             // function spectral model that is the product of the diffuse
             // cube node function and the spectral model evaluated at the
             // energies of the node function
-            GModelSpatialDiffuseCube* cube = dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
+            GModelSpatialDiffuseCube* cube =
+                dynamic_cast<GModelSpatialDiffuseCube*>(m_spatial);
             if (cube != NULL) {
 
 			   // Set MC cone
@@ -650,23 +652,16 @@ GCTAEventList* GCTAModelBackground::mc(const GObservation& obs, GRan& ran) const
 
             } // endif: spatial model was a diffuse cube
 
-            // Compute the field of view background rate in model within the
-            // energy boundaries from spectral component (units: cts/s/sr)
-            double flux = spectral->flux(events->ebounds().emin(ieng),
-                                           events->ebounds().emax(ieng));
-
-            // Compute solid angle of the FoV used for normalization
-            double area = gammalib::fourpi * (1.0 - std::cos( events->roi().radius()*gammalib::deg2rad ) );
-
-            // Derive expecting rate (units: cts/s). Note that the time here
-            // is good time. Deadtime correction will be done later.
-            double rate = flux * area;
+            // Compute the background rate in model within the energy boundaries
+            // from spectral component (units: cts/s).
+            // Note that the time here is ontime. Deadtime correction will be done
+            // later.
+            double rate = spectral->flux(events->ebounds().emin(ieng),
+                                         events->ebounds().emax(ieng));
 
             // Debug option: dump rate
             #if defined(G_DUMP_MC)
             std::cout << "GCTAModelBackground::mc(\"" << name() << "\": ";
-            std::cout << "flux=" << flux << " cts/s/sr, ";
-            std::cout << "area=" << area << " sr, ";
             std::cout << "rate=" << rate << " cts/s)" << std::endl;
             #endif
 
