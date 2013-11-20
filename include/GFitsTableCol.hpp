@@ -94,14 +94,15 @@ public:
     const bool&             isvariable(void) const;
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
+    std::string             tform_binary(void) const;
     std::string             print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
-    void init_members(void);
-    void copy_members(const GFitsTableCol& column);
-    void free_members(void);
-    void connect(void* vptr);
+    void        init_members(void);
+    void        copy_members(const GFitsTableCol& column);
+    void        free_members(void);
+    void        connect(void* vptr);
 
     // Protected pure virtual methods
     virtual void        alloc_data(void) = 0;
@@ -109,7 +110,6 @@ protected:
     virtual void*       ptr_data(const int& index = 0) = 0;
     virtual void*       ptr_nulval(void) = 0;
     virtual std::string ascii_format(void) const = 0;
-    virtual std::string binary_format(void) const = 0;
 
     // Protected virtual methods
     virtual void        save(void);

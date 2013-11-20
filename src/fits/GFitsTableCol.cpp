@@ -230,6 +230,85 @@ int GFitsTableCol::elements(const int& row) const
 
 
 /***********************************************************************//**
+ * @brief Returns TFORM code for binary table column
+ *
+ * Constructs the TFORM code for a binary table column, supporting
+ * fixed-length and variable-length column types.
+ ***************************************************************************/
+std::string GFitsTableCol::tform_binary(void) const
+{
+    // Set type code string
+    std::string typecode = "";
+    switch (std::abs(type())) {
+    case __TBIT:
+        typecode = "X";
+        break;
+    case __TBYTE:
+        typecode = "B";
+        break;
+    case __TLOGICAL:
+        typecode = "L";
+        break;
+    case __TSTRING:
+        // If there are substrings then add width of substring
+        typecode = "A";
+        if (repeat() > width()) {
+            typecode.append(gammalib::str(width()));
+        }
+        break;
+    case __TUSHORT:
+        typecode = "U";
+        break;
+    case __TSHORT:
+        typecode = "I";
+        break;
+    case __TULONG:
+        typecode = "V";
+        break;
+    case __TLONG:
+        typecode = "J";
+        break;
+    case __TFLOAT:
+        typecode = "E";
+        break;
+    case __TLONGLONG:
+        typecode = "K";
+        break;
+    case __TDOUBLE:
+        typecode = "D";
+        break;
+    case __TCOMPLEX:
+        typecode = "C";
+        break;
+    case __TDBLCOMPLEX:
+        typecode = "M";
+        break;
+    default:
+        break;
+    }
+
+    // Build TFORM code
+    std::string tform;
+    if (std::abs(type()) == __TSTRING) {
+        tform.append(gammalib::str(repeat()));
+    }
+    else {
+        tform.append(gammalib::str(number()));
+    }
+    if (isvariable()) {
+        tform.append("P");
+    }
+    tform.append(typecode);
+    if (isvariable() && m_varlen > 0) {
+        tform.append("("+gammalib::str(m_varlen)+")");
+    }
+    
+    // Return TFORM code
+    return tform;
+}
+
+
+/***********************************************************************//**
  * @brief Print column information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -248,11 +327,11 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append formatted column name. Optionally add units
-        if (m_unit.length() > 0) {
-            result.append(gammalib::parformat(m_name+" ("+m_unit+")"));
+        if (unit().length() > 0) {
+            result.append(gammalib::parformat(name()+" ("+unit()+")"));
         }
         else {
-            result.append(gammalib::parformat(m_name));
+            result.append(gammalib::parformat(name()));
         }
 
         // Append column number. This will be "-" if the column does not exist
@@ -273,15 +352,15 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         }
 
         // Append format information
-        result.append("["+binary_format()+","+ascii_format()+"]");
+        result.append("["+tform_binary()+","+ascii_format()+"]");
 
         // Append dimensions (if available)
-        if (!m_dim.empty()) {
+        if (!dim().empty()) {
     
             // Build TDIM string
-            std::string value = "("+gammalib::str(m_dim[0]);
-            for (int k = 1; k < m_dim.size(); ++k) {
-                value += ","+gammalib::str(m_dim[k]);
+            std::string value = "("+gammalib::str(dim()[0]);
+            for (int k = 1; k < dim().size(); ++k) {
+                value += ","+gammalib::str(dim()[k]);
             }
             value += ")";
         
@@ -291,18 +370,24 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
 
         // Append cfitsio information
         if (isvariable()) {
-            result.append(" repeat=" + gammalib::str(m_repeat));
-            result.append(" width="  + gammalib::str(m_width));
-            result.append(" number=" + gammalib::str(m_number));
-            result.append(" length=" + gammalib::str(m_length));
+            result.append(" repeat=" + gammalib::str(repeat()));
+            result.append(" width="  + gammalib::str(width()));
+            result.append(" number=" + gammalib::str(number()));
+            result.append(" length=" + gammalib::str(length()));
             result.append(" size="   + gammalib::str(m_size));
-            result.append(" varlen=" + gammalib::str(m_varlen));
+            result.append(" varlen=");
+            if (m_varlen > 0) {
+                result.append(gammalib::str(m_varlen));
+            }
+            else {
+                result.append("undetermined");
+            }
         }
         else {
-            result.append(" repeat=" + gammalib::str(m_repeat));
-            result.append(" width="  + gammalib::str(m_width));
-            result.append(" number=" + gammalib::str(m_number));
-            result.append(" length=" + gammalib::str(m_length));
+            result.append(" repeat=" + gammalib::str(repeat()));
+            result.append(" width="  + gammalib::str(width()));
+            result.append(" number=" + gammalib::str(number()));
+            result.append(" length=" + gammalib::str(length()));
             result.append(" size="   + gammalib::str(m_size));
         }
 

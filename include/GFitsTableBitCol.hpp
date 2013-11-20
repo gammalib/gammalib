@@ -52,9 +52,9 @@ public:
     virtual ~GFitsTableBitCol(void);
 
     // Operators
-    GFitsTableBitCol& operator= (const GFitsTableBitCol& column);
-    bool&             operator() (const int& row, const int& inx = 0);
-    const bool&       operator() (const int& row, const int& inx = 0) const;
+    GFitsTableBitCol& operator=(const GFitsTableBitCol& column);
+    bool&             operator()(const int& row, const int& inx = 0);
+    const bool&       operator()(const int& row, const int& inx = 0) const;
 
     // Implemented virtual methods
     virtual void              clear(void);
@@ -62,8 +62,8 @@ public:
     virtual std::string       string(const int& row, const int& col = 0) const;
     virtual double            real(const int& row, const int& col = 0) const;
     virtual int               integer(const int& row, const int& col = 0) const;
-    virtual void              insert(const int& rownum, const int& nrows);
-    virtual void              remove(const int& rownum, const int& nrows);
+    virtual void              insert(const int& row, const int& nrows);
+    virtual void              remove(const int& row, const int& nrows);
     
     // Other methods
     unsigned char* data(void) { return m_data; }
@@ -78,7 +78,6 @@ private:
 
     // Implemented pure virtual methods
     virtual std::string       ascii_format(void) const;
-    virtual std::string       binary_format(void) const;
     virtual void              alloc_data(void);
     virtual void              init_data(void);
     virtual void*             ptr_data(const int& index = 0) { return m_data+index; }

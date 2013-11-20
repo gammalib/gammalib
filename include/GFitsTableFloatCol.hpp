@@ -50,9 +50,9 @@ public:
     virtual ~GFitsTableFloatCol(void);
 
     // Operators
-    GFitsTableFloatCol& operator= (const GFitsTableFloatCol& column);
-    float&              operator() (const int& row, const int& inx = 0);
-    const float&        operator() (const int& row, const int& inx = 0) const;
+    GFitsTableFloatCol& operator=(const GFitsTableFloatCol& column);
+    float&              operator()(const int& row, const int& inx = 0);
+    const float&        operator()(const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
     virtual void                clear(void);
@@ -60,8 +60,8 @@ public:
     virtual std::string         string(const int& row, const int& col = 0) const;
     virtual double              real(const int& row, const int& col = 0) const;
     virtual int                 integer(const int& row, const int& col = 0) const;
-    virtual void                insert(const int& rownum, const int& nrows);
-    virtual void                remove(const int& rownum, const int& nrows);
+    virtual void                insert(const int& row, const int& nrows);
+    virtual void                remove(const int& row, const int& nrows);
     
     // Other methods
     float* data(void) { return m_data; }
@@ -74,7 +74,6 @@ private:
     void                copy_members(const GFitsTableFloatCol& column);
     void                free_members(void);
     std::string         ascii_format(void) const;
-    std::string         binary_format(void) const;
     void                alloc_data(void);
     void                release_data(void);
     void                alloc_nulval(const float* value);

@@ -1,7 +1,7 @@
 /***************************************************************************
  *        GFitsTableStringCol.cpp  - FITS table string column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -638,30 +638,6 @@ std::string GFitsTableStringCol::ascii_format(void) const
 
     // Set width
     format.append(gammalib::str(m_width));
-
-    // Return format
-    return format;
-}
-
-
-/***********************************************************************//**
- * @brief Returns format string of binary table
- ***************************************************************************/
-std::string GFitsTableStringCol::binary_format(void) const
-{
-    // Initialize format string
-    std::string format;
-
-    // Set number of elements
-    format.append(gammalib::str(m_repeat));
-
-    // Set type code
-    format.append("A");
-
-    // If there are substrings then add width of substring
-    if (m_repeat > m_width) {
-        format.append(gammalib::str(m_width));
-    }
 
     // Return format
     return format;

@@ -1,7 +1,7 @@
 /***************************************************************************
  *      GFitsTableLongCol.cpp  - FITS table long integer column class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -586,25 +586,6 @@ std::string GFitsTableLongCol::ascii_format(void) const
 
     // Set width
     //format.append(gammalib::str(m_width));
-
-    // Return format
-    return format;
-}
-
-
-/***********************************************************************//**
- * @brief Returns format string of binary table
- ***************************************************************************/
-std::string GFitsTableLongCol::binary_format(void) const
-{
-    // Initialize format string
-    std::string format;
-
-    // Set number of elements
-    format.append(gammalib::str(m_number));
-
-    // Set type code
-    format.append("J");
 
     // Return format
     return format;

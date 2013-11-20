@@ -642,25 +642,6 @@ std::string GFitsTableBitCol::ascii_format(void) const
 
 
 /***********************************************************************//**
- * @brief Returns format string of binary table
- ***************************************************************************/
-std::string GFitsTableBitCol::binary_format(void) const
-{
-    // Initialize format string
-    std::string format;
-
-    // Set number of elements
-    format.append(gammalib::str(m_number));
-
-    // Set type code
-    format.append("X");
-
-    // Return format
-    return format;
-}
-
-
-/***********************************************************************//**
  * @brief Allocates column data
  ***************************************************************************/
 void GFitsTableBitCol::alloc_data(void)

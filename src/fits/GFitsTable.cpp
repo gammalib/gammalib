@@ -1255,9 +1255,9 @@ char* GFitsTable::get_tform(const int& colnum) const
             std::strncpy(ptr, m_columns[colnum]->ascii_format().c_str(), size);
             break;
         case GFitsHDU::HT_BIN_TABLE:
-            size = m_columns[colnum]->binary_format().length();
+            size = m_columns[colnum]->tform_binary().length();
             ptr  = new char[size+1];
-            std::strncpy(ptr, m_columns[colnum]->binary_format().c_str(), size);
+            std::strncpy(ptr, m_columns[colnum]->tform_binary().c_str(), size);
             break;
         default:
             throw GException::fits_unknown_tabtype(G_GET_TFORM, m_type);
