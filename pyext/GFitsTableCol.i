@@ -54,34 +54,48 @@ class GFitsTableCol : public GBase {
 public:
     // Constructors and destructors
     GFitsTableCol(void);
-    explicit GFitsTableCol(const std::string& name, const int& length,
-                           const int& number,       const int& width);
+    GFitsTableCol(const std::string& name,
+                  const int&         length,
+                  const int&         number,
+                  const int&         width,
+                  const bool&        variable = false);
     GFitsTableCol(const GFitsTableCol& column);
     virtual ~GFitsTableCol(void);
 
-    // Pure virtual Methods
-    virtual void           clear(void) = 0;
-    virtual GFitsTableCol* clone(void) const = 0;
-    virtual std::string    string(const int& row, const int& inx = 0) const = 0;
-    virtual double         real(const int& row, const int& inx = 0) const = 0;
-    virtual int            integer(const int& row, const int& inx = 0) const = 0;
-    virtual void           insert(const int& rownum, const int& nrows) = 0;
-    virtual void           remove(const int& rownum, const int& nrows) = 0;
+    // Pure virtual methods
+    virtual void            clear(void) = 0;
+    virtual GFitsTableCol*  clone(void) const = 0;
+    virtual std::string     string(const int& row, const int& inx = 0) const = 0;
+    virtual double          real(const int& row, const int& inx = 0) const = 0;
+    virtual int             integer(const int& row, const int& inx = 0) const = 0;
+    virtual void            insert(const int& row, const int& nrows) = 0;
+    virtual void            remove(const int& row, const int& nrows) = 0;
 
-    // Base class Methods
-    void             name(const std::string& name);
-    void             unit(const std::string& unit);
-    void             dim(const std::vector<int>& dim);
-    std::string      name(void) const;
-    std::string      unit(void) const;
-    std::vector<int> dim(void) const;
-    int              colnum(void) const;
-    int              type(void) const;
-    int              repeat(void) const;
-    int              width(void) const;
-    int              number(void) const;
-    int              length(void) const;
-    int              anynul(void) const;
+    // Other methods
+    void                    name(const std::string& name);
+    const std::string&      name(void) const;
+    void                    unit(const std::string& unit);
+    const std::string&      unit(void) const;
+    void                    dim(const std::vector<int>& dim);
+    const std::vector<int>& dim(void) const;
+    void                    colnum(const int& colnum);
+    const int&              colnum(void) const;
+    void                    type(const int& type);
+    const int&              type(void) const;
+    void                    repeat(const int& repeat);
+    const int&              repeat(void) const;
+    void                    width(const int& width);
+    const int&              width(void) const;
+    void                    number(const int& number);
+    const int&              number(void) const;
+    void                    elements(const int& row, const int& elements);
+    int                     elements(const int& row) const;
+    void                    length(const int& length);
+    const int&              length(void) const;
+    void                    isvariable(const bool& variable);
+    const bool&             isvariable(void) const;
+    void                    anynul(const int& anynul);
+    const int&              anynul(void) const;
 };
 
 

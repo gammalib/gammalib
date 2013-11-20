@@ -81,7 +81,7 @@ private:
     virtual std::string       binary_format(void) const;
     virtual void              alloc_data(void);
     virtual void              init_data(void);
-    virtual void*             ptr_data(void) { return m_data; }
+    virtual void*             ptr_data(const int& index = 0) { return m_data+index; }
     virtual void*             ptr_nulval(void) { return m_nulval; }
 
     // Overloaded virtual methods

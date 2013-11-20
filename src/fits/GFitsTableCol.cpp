@@ -34,9 +34,10 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ELEMENTS                            "GFitsTableCol::elements(int&)"
 #define G_LOAD_COLUMN                          "GFitsTableCol::load_column()"
 #define G_SAVE_COLUMN                          "GFitsTableCol::save_column()"
-#define G_OFFSET                           "GFitsTableCol::offset(int&,int&)"
+#define G_OFFSET                          "GFitsTableCol::offset(int&, int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -52,7 +53,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GFitsTableCol::GFitsTableCol(void)
 {
@@ -65,20 +66,25 @@ GFitsTableCol::GFitsTableCol(void)
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Column constructor
  *
  * @param[in] name Name of column.
- * @param[in] length Length of column.
+ * @param[in] length Length of column (number of rows).
  * @param[in] number Vector size of column.
  * @param[in] width Width of single column element.
+ * @param[in] variable Variable-length flag (defaults to false).
  *
  * Construct column instance from name, length, vector size and column width.
  * The repeat value, required for binary tables, is calculated internally.
+ * The optional parameter @p variable specifies whether the column is a
+ * variable-length (true) or fixed-length (false) column. By default, a
+ * fixed-length column will be allocated.
  ***************************************************************************/
 GFitsTableCol::GFitsTableCol(const std::string& name,
                              const int&         length,
                              const int&         number,
-                             const int&         width)
+                             const int&         width,
+                             const bool&        variable)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -92,6 +98,13 @@ GFitsTableCol::GFitsTableCol(const std::string& name,
     // Calculate repeat value (only used for binary table!)
     m_repeat = m_number * m_width;
 
+    // If column is a variable-length column then initialise row start
+    // array and set variable-length flag
+    if (variable) {
+        m_variable = true;
+        m_rowstart.assign(length+1, 0);
+    }
+
     // Return
     return;
 }
@@ -100,7 +113,7 @@ GFitsTableCol::GFitsTableCol(const std::string& name,
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] column Column from which the class instance should be built
+ * @param[in] column Column.
  ***************************************************************************/
 GFitsTableCol::GFitsTableCol(const GFitsTableCol& column)
 {
@@ -137,9 +150,10 @@ GFitsTableCol::~GFitsTableCol(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] column Column which will be assigned
+ * @param[in] column Column.
+ * @return Column.
  ***************************************************************************/
-GFitsTableCol& GFitsTableCol::operator= (const GFitsTableCol& column)
+GFitsTableCol& GFitsTableCol::operator=(const GFitsTableCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -167,169 +181,51 @@ GFitsTableCol& GFitsTableCol::operator= (const GFitsTableCol& column)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Set column name
+ * @brief Set number of column elements for specific row
  *
- * @param[in] name Column name.
+ * @param[in] row Row index.
+ * @param[in] number Number of elements in @p row.
+ *
+ * Sets the number of elements in column for a specific @p row.
+ *
+ * @todo Implement method.
  ***************************************************************************/
-void GFitsTableCol::name(const std::string& name)
+void GFitsTableCol::elements(const int& row, const int& elements)
 {
-    // Set name
-    m_name = name;
-
     // Return
     return;
 }
 
 
 /***********************************************************************//**
- * @brief Set column unit
+ * @brief Returns number of elements in column for specific row
  *
- * @param[in] unit Column unit.
- ***************************************************************************/
-void GFitsTableCol::unit(const std::string& unit)
-{
-    // Set unit
-    m_unit = unit;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set column dimension
+ * @param[in] row Row index.
+ * @return Number of elements in column at @p row.
  *
- * @param[in] dim Column dimension.
+ * @exception GException::out_of_range
+ *            Row index out of valid range.
  *
- * The column dimension is a integer vector.
- *
- * @todo Implement dimension check.
+ * Returns the number of elements in the column for a specific @p row. For a
+ * fixed-length column the returned number is independent of the row. For a
+ * variable-length column the returned number is then length of the column
+ * for the specified row.
  ***************************************************************************/
-void GFitsTableCol::dim(const std::vector<int>& dim)
+int GFitsTableCol::elements(const int& row) const
 {
-    // Set dimension
-    m_dim = dim;
+    // Check row value
+    #if defined(G_RANGE_CHECK)
+    if (row < 0 || row >= m_length) {
+        throw GException::out_of_range(G_ELEMENTS, row, 0, m_length-1);
+    }
+    #endif
 
-    // Return
-    return;
-}
+    // Get number of elements
+    int number = (m_variable) ? m_rowstart[row+1] - m_rowstart[row]
+                              : m_number; 
 
-
-/***********************************************************************//**
- * @brief Returns column name
- ***************************************************************************/
-std::string GFitsTableCol::name(void) const
-{
-    // Return name
-    return m_name;
-}
-
-
-/***********************************************************************//**
- * @brief Returns column unit
- ***************************************************************************/
-std::string GFitsTableCol::unit(void) const
-{
-    // Return column unit
-    return m_unit;
-}
-
-
-/***********************************************************************//**
- * @brief Returns column dimension
- ***************************************************************************/
-std::vector<int> GFitsTableCol::dim(void) const
-{
-    // Return column dimension
-    return m_dim;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of column in FITS file (starting from 1)
- ***************************************************************************/
-int GFitsTableCol::colnum(void) const
-{
-    // Return column number
-    return m_colnum;
-}
-
-
-/***********************************************************************//**
- * @brief Returns CFITSIO column type
- *
- * Returns one of the following:
- *   1 (TBIT)
- *  11 (TBYTE)
- *  12 (TSBYTE)
- *  14 (TLOGICAL)
- *  16 (TSTRING)
- *  21 (TUSHORT)
- *  21 (TSHORT)
- *  31 (TUINT)
- *  31 (TINT)
- *  41 (TULONG)
- *  41 (TLONG)
- *  42 (TFLOAT)
- *  81 (TLONGLONG)
- *  82 (TDOUBLE)
- *  83 (TCOMPLEX)
- * 163 (TDBLCOMPLEX)
- ***************************************************************************/
-int GFitsTableCol::type(void) const
-{
-    // Return column type
-    return m_type;
-}
-
-
-/***********************************************************************//**
- * @brief Returns column repeat value (only used for binary tables)
- ***************************************************************************/
-int GFitsTableCol::repeat(void) const
-{
-    // Return column repeat value
-    return m_repeat;
-}
-
-
-/***********************************************************************//**
- * @brief Returns width of one element in column
- ***************************************************************************/
-int GFitsTableCol::width(void) const
-{
-    // Return width of one element in column
-    return m_width;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of elements in a column
- ***************************************************************************/
-int GFitsTableCol::number(void) const
-{
-    // Return number of elements in a column
-    return m_number;
-}
-
-
-/***********************************************************************//**
- * @brief Returns column length
- ***************************************************************************/
-int GFitsTableCol::length(void) const
-{
-    // Return column length
-    return m_length;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of NULLs encountered
- ***************************************************************************/
-int GFitsTableCol::anynul(void) const
-{
-    // Return column length
-    return m_anynul;
+    // Return number
+    return number;
 }
 
 
@@ -394,11 +290,21 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         }
 
         // Append cfitsio information
-        result.append(" repeat=" + gammalib::str(m_repeat));
-        result.append(" width="  + gammalib::str(m_width));
-        result.append(" number=" + gammalib::str(m_number));
-        result.append(" length=" + gammalib::str(m_length));
-        result.append(" size="   + gammalib::str(m_size));
+        if (isvariable()) {
+            result.append(" repeat=" + gammalib::str(m_repeat));
+            result.append(" width="  + gammalib::str(m_width));
+            result.append(" number=" + gammalib::str(m_number));
+            result.append(" length=" + gammalib::str(m_length));
+            result.append(" size="   + gammalib::str(m_size));
+            result.append(" varlen=" + gammalib::str(m_varlen));
+        }
+        else {
+            result.append(" repeat=" + gammalib::str(m_repeat));
+            result.append(" width="  + gammalib::str(m_width));
+            result.append(" number=" + gammalib::str(m_number));
+            result.append(" length=" + gammalib::str(m_length));
+            result.append(" size="   + gammalib::str(m_size));
+        }
 
     } // endif: chatter was not silent
 
@@ -452,6 +358,24 @@ void GFitsTableCol::fetch_data(void) const
 
 /***********************************************************************//**
  * @brief Load table column from FITS file
+ ***************************************************************************/
+void GFitsTableCol::load_column(void)
+{
+    // Load variable-length of fixed-length column
+    if (isvariable()) {
+        load_column_variable();
+    }
+    else {
+        load_column_fixed();
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load fixed-length column from FITS file
  *
  * @exception GException::fits_hdu_not_found
  *            Specified HDU not found in FITS file.
@@ -470,7 +394,7 @@ void GFitsTableCol::fetch_data(void) const
  * These methods are implemented by the derived column classes which 
  * implement a specific storage class (i.e. float, double, short, ...).
  ***************************************************************************/
-void GFitsTableCol::load_column(void)
+void GFitsTableCol::load_column_fixed(void)
 {
     // Calculate size of memory
     m_size = m_number * m_length;
@@ -509,11 +433,12 @@ void GFitsTableCol::load_column(void)
                 }
 
                 // Load data
-                status = __ffgcv(FPTR(m_fitsfile), m_type, m_colnum, 1, 1, m_size,
-                                 ptr_nulval(), ptr_data(), &m_anynul, &status);
+                status = __ffgcv(FPTR(m_fitsfile), m_type, m_colnum, 
+                                 1, 1, m_size, ptr_nulval(), ptr_data(),
+                                 &m_anynul, &status);
                 if (status != 0) {
                     throw GException::fits_error(G_LOAD_COLUMN, status,
-                                      "for column \""+m_name+"\".");
+                                    "for column \""+m_name+"\".");
                 }
         
             } // endif: no primary HDU found
@@ -521,6 +446,130 @@ void GFitsTableCol::load_column(void)
         } // endif: there was a FITS file attached
 
     } // endif: column has a positive size
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Load variable-length column from FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ * @exception GException::fits_error
+ *            An error occured while loading column data from FITS file.
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * The method makes use of the virtual methods 
+ * GFitsTableCol::alloc_data,
+ * GFitsTableCol::init_data,
+ * GFitsTableCol::ptr_data, and
+ * GFitsTableCol::ptr_nulval.
+ * These methods are implemented by the derived column classes which 
+ * implement a specific storage class (i.e. float, double, short, ...).
+ ***************************************************************************/
+void GFitsTableCol::load_column_variable(void)
+{
+    // If a FITS file is attached then try loading column data from the
+    // FITS file. This may fail in case that no data has yet been written
+    // to the FITS file. In that case we just skip loading and return
+    // the initalised column ... 
+    if (FPTR(m_fitsfile)->Fptr != NULL) {
+
+        // Move to the HDU
+        int status = 0;
+        status     = __ffmahd(FPTR(m_fitsfile),
+                              (FPTR(m_fitsfile)->HDUposition)+1,
+                              NULL,
+                              &status);
+            
+        // If this failed because:
+        // - the primary HDU was not found (status 252)
+        // - we moved past the file (status 107)
+        // we assume that no data have yet been written to the file and
+        // we skip the loading.
+        if (status != 252 && status != 107) {
+            
+            // Break on any other cfitsio error
+            if (status != 0) {
+                throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
+                                  (FPTR(m_fitsfile)->HDUposition)+1,
+                                  status);
+            }
+
+            // Allocate rowstart array
+            m_rowstart.assign(m_length+1, 0);
+
+            // Determine the column length for each row by looping over
+            // all rows and derive the total memory requirement
+            m_size        = 0;
+            m_varlen      = 0;
+            m_rowstart[0] = 0;
+            for (int row = 0; row < m_length; ++row) {
+
+                // Initialise offset and repeat
+                long offset(0);
+                long repeat(0);
+
+                // Get variable-length of row in repeat
+                status = __ffgdes(FPTR(m_fitsfile),
+                                  m_colnum,
+                                  row+1,
+                                  &repeat,
+                                  &offset,
+                                  &status);
+                if (status != 0) {
+                    throw GException::fits_error(G_LOAD_COLUMN, status,
+                                "for column \""+m_name+"\".");
+                }
+
+                // Store start of next row
+                m_rowstart[row+1] = m_rowstart[row] + repeat;
+                m_size           += repeat;
+                if (repeat > m_varlen) {
+                    m_varlen = repeat;
+                }
+
+            } // endfor: looped over all rows
+
+            // Allocate and initialise fresh memory
+            alloc_data();
+            init_data();
+
+            // Load data for each row
+            for (int row = 0; row < m_length; ++row) {
+
+                // Initialise anynul
+                int anynul(0);
+
+                // Load data
+                status = __ffgcv(FPTR(m_fitsfile),
+                                 std::abs(m_type),
+                                 m_colnum, 
+                                 row+1,
+                                 1,
+                                 elements(row),
+                                 ptr_nulval(),
+                                 ptr_data(m_rowstart[row]),
+                                 &anynul,
+                                 &status);
+                if (status != 0) {
+                    throw GException::fits_error(G_LOAD_COLUMN, status,
+                                        "for column \""+m_name+"\".");
+                }
+
+                // Increment anynul
+                m_anynul += anynul;
+
+            } // endfor: looped over all rows
+
+        } // endif: no primary HDU found
+
+    } // endif: there was a FITS file attached
 
     // Return
     return;
@@ -576,7 +625,7 @@ void GFitsTableCol::save_column(void)
 
 
 /***********************************************************************//**
- * @brief Convert row and vector index into column offset
+ * @brief Compute offset of column element in memory
  *
  * @param[in] row Row of column.
  * @param[in] inx Vector index in column row.
@@ -584,8 +633,9 @@ void GFitsTableCol::save_column(void)
  * @exception GException::out_of_range
  *            Table row or vector index are out of valid range.
  *
- * Converts the row and vector index of a column into a linear offset from
- * the column start.
+ * Computes the offset of a column element in the storage array from the
+ * @p row number and the vector index. The method also supports both
+ * variable-length and fixed-length columns.
  ***************************************************************************/
 int GFitsTableCol::offset(const int& row, const int& inx) const
 {
@@ -598,13 +648,13 @@ int GFitsTableCol::offset(const int& row, const int& inx) const
 
     // Check inx value
     #if defined(G_RANGE_CHECK)
-    if (inx < 0 || inx >= m_number) {
-        throw GException::out_of_range(G_OFFSET, inx, 0, m_number-1);
+    if (inx < 0 || inx >= elements(row)) {
+        throw GException::out_of_range(G_OFFSET, inx, 0, elements(row));
     }
     #endif
 
     // Calculate pixel offset
-    int offset = row * m_number + inx;
+    int offset = (isvariable()) ? m_rowstart[row] + inx : row * m_number + inx;
 
     // Return offset
     return offset;
@@ -631,14 +681,17 @@ void GFitsTableCol::init_members(void)
     m_name.clear();
     m_unit.clear();
     m_dim.clear();
-    m_colnum = 0;
-    m_type   = 0;
-    m_repeat = 0;
-    m_width  = 0;
-    m_number = 0;
-    m_length = 0;
-    m_size   = 0;
-    m_anynul = 0;
+    m_rowstart.clear();
+    m_colnum   = 0;
+    m_type     = 0;
+    m_repeat   = 0;
+    m_width    = 0;
+    m_number   = 0;
+    m_length   = 0;
+    m_variable = false;
+    m_varlen   = 0;
+    m_size     = 0;
+    m_anynul   = 0;
 
     // Return
     return;
@@ -662,6 +715,9 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
     m_width    = column.m_width;
     m_number   = column.m_number;
     m_length   = column.m_length;
+    m_variable = column.m_variable;
+    m_varlen   = column.m_varlen;
+    m_rowstart = column.m_rowstart;
     m_size     = column.m_size;
     m_anynul   = column.m_anynul;
     FPTR_COPY(m_fitsfile, column.m_fitsfile);

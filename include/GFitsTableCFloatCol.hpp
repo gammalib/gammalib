@@ -80,7 +80,7 @@ private:
     void        release_data(void);
     void        alloc_nulval(const GFits::cfloat* value);
     void        init_data(void);
-    void*       ptr_data(void) { return m_data; }
+    void*       ptr_data(const int& index = 0) { return m_data+index; }
     void*       ptr_nulval(void) { return m_nulval; }
 
     // Private data area

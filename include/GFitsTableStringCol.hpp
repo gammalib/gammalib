@@ -83,7 +83,7 @@ private:
     void                 fetch_data(void) const;
     void                 alloc_buffer(void) const;
     void                 free_buffer(void) const;
-    void*                ptr_data(void) { return m_buffer; }
+    void*                ptr_data(const int& index = 0) { return m_buffer+index; }
     void*                ptr_nulval(void) { return m_nulval; }
 
     // Private data area
