@@ -95,6 +95,7 @@ public:
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
     std::string             tform_binary(void) const;
+    bool                    isloaded(void) const;
     std::string             print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -107,17 +108,22 @@ protected:
     // Protected pure virtual methods
     virtual void        alloc_data(void) = 0;
     virtual void        init_data(void) = 0;
+    virtual void        fetch_data(void) const = 0;
+    virtual void        copy_data(const GFitsTableCol& column) = 0;
+    virtual void        release_data(void) = 0;
     virtual void*       ptr_data(const int& index = 0) = 0;
     virtual void*       ptr_nulval(void) = 0;
     virtual std::string ascii_format(void) const = 0;
 
     // Protected virtual methods
     virtual void        save(void);
-    virtual void        fetch_data(void) const;
+    //virtual void        fetch_data(void) const;
     virtual void        load_column(void);
     virtual void        load_column_fixed(void);
     virtual void        load_column_variable(void);
     virtual void        save_column(void);
+    virtual void        save_column_fixed(void);
+    virtual void        save_column_variable(void);
     virtual int         offset(const int& row, const int& inx) const;
 
     // Protected data area

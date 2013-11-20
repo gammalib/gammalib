@@ -96,6 +96,8 @@ public:
     const bool&             isvariable(void) const;
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
+    std::string             tform_binary(void) const;
+    bool                    isloaded(void) const;
 };
 
 

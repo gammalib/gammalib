@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GFitsTableBitCol.hpp  - FITS table bit column class          *
+ *            GFitsTableBitCol.hpp - FITS table bit column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -75,23 +75,23 @@ private:
     void init_members(void);
     void copy_members(const GFitsTableBitCol& column);
     void free_members(void);
+    void alloc_nulval(const unsigned char* value);
+    void get_bit(const int& row, const int& inx);
+    void set_pending(void);
 
-    // Implemented pure virtual methods
-    virtual std::string       ascii_format(void) const;
-    virtual void              alloc_data(void);
-    virtual void              init_data(void);
-    virtual void*             ptr_data(const int& index = 0) { return m_data+index; }
-    virtual void*             ptr_nulval(void) { return m_nulval; }
+    // Implemented virtual base class methods
+    virtual void        alloc_data(void);
+    virtual void        init_data(void);
+    virtual void        fetch_data(void) const;
+    virtual void        copy_data(const GFitsTableCol& column);
+    virtual void        release_data(void);
+    virtual void*       ptr_data(const int& index = 0) { return m_data+index; }
+    virtual void*       ptr_nulval(void) { return m_nulval; }
+    virtual std::string ascii_format(void) const;
 
     // Overloaded virtual methods
     virtual void load_column(void);
     virtual void save_column(void);
-
-    // Other private methods
-    void release_data(void);
-    void alloc_nulval(const unsigned char* value);
-    void get_bit(const int& row, const int& inx);
-    void set_pending(void);
 
     // Private data area
     int            m_bits;           //!< Total number of Bits in column

@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GFitsTableBoolCol.cpp  - FITS table boolean column class        *
+ *          GFitsTableBoolCol.cpp - FITS table boolean column class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -521,8 +521,10 @@ void GFitsTableBoolCol::copy_members(const GFitsTableBoolCol& column)
     }
 
     // Copy attributes
-    m_type = column.m_type;
-    m_size = column.m_size;
+    m_type     = column.m_type;
+    m_size     = column.m_size;
+    m_varlen   = column.m_varlen;
+    m_rowstart = column.m_rowstart;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
@@ -645,6 +647,75 @@ void GFitsTableBoolCol::alloc_data(void)
 
 
 /***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * Refer to GFitsTableCol::load_column for more information.
+ ***************************************************************************/
+void GFitsTableBoolCol::fetch_data(void) const
+{
+    // Calculate size of memory
+    m_size = m_number * m_length;
+
+    // Free old buffer memory
+    free_buffer();
+    //const_cast<GFitsTableBoolCol*>(this)->free_buffer();
+
+    // Allocate buffer memory
+    //const_cast<GFitsTableBoolCol*>(this)->alloc_buffer();
+    alloc_buffer();
+
+    // Save column
+    const_cast<GFitsTableBoolCol*>(this)->load_column();
+
+    // Extract values from buffer
+    for (int i = 0; i < m_size; ++i) {
+        m_data[i] = (bool)m_buffer[i];
+    }
+
+    // Free buffer memory
+    //const_cast<GFitsTableBoolCol*>(this)->free_buffer();
+    free_buffer();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy column data
+ *
+ * @param[in] column Column.
+ *
+ * Copies all data from a column. This method is called from the base class
+ * copy constructor.
+ ***************************************************************************/
+void GFitsTableBoolCol::copy_data(const GFitsTableCol& column)
+{
+    // Type-cast to the correct column type
+    const GFitsTableBoolCol* ptr = static_cast<const GFitsTableBoolCol*>(&column);
+
+    // Copy column data (only if column contains data)
+    if (ptr->m_data != NULL && ptr->m_size > 0) {
+        m_size = ptr->m_size;
+        alloc_data();
+        for (int i = 0; i < ptr->m_size; ++i) {
+            m_data[i] = ptr->m_data[i];
+        }
+    }
+
+    // Copy NULL value
+    alloc_nulval(ptr->m_nulval);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Release column data
  ***************************************************************************/
 void GFitsTableBoolCol::release_data(void)
@@ -701,48 +772,12 @@ void GFitsTableBoolCol::init_data(void)
 
 
 /***********************************************************************//**
- * @brief Fetch column data
- *
- * If a FITS file is attached to the column the data are loaded into memory
- * from the FITS file. If no FITS file is attached, memory is allocated
- * to hold the column data and all cells are set to 0.
- *
- * Refer to GFitsTableCol::load_column for more information.
- ***************************************************************************/
-void GFitsTableBoolCol::fetch_data(void) const
-{
-    // Calculate size of memory
-    m_size = m_number * m_length;
-
-    // Free old buffer memory
-    const_cast<GFitsTableBoolCol*>(this)->free_buffer();
-
-    // Allocate buffer memory
-    const_cast<GFitsTableBoolCol*>(this)->alloc_buffer();
-
-    // Save column
-    const_cast<GFitsTableBoolCol*>(this)->load_column();
-
-    // Extract values from buffer
-    for (int i = 0; i < m_size; ++i) {
-        m_data[i] = (bool)m_buffer[i];
-    }
-
-    // Free buffer memory
-    const_cast<GFitsTableBoolCol*>(this)->free_buffer();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Allocate CFITSIO transfer buffer
  *
  * The CFITSIO transfer buffer allows transparent conversion from the CFITSIO
  * storage format to a vector of bool values.
  ***************************************************************************/
-void GFitsTableBoolCol::alloc_buffer(void)
+void GFitsTableBoolCol::alloc_buffer(void) const
 {
     // Allocate and initialise buffer memory
     if (m_size > 0) {
@@ -762,7 +797,7 @@ void GFitsTableBoolCol::alloc_buffer(void)
  *
  * Release memory that has been allocated for the CFITSIO transfer buffer.
  ***************************************************************************/
-void GFitsTableBoolCol::free_buffer(void)
+void GFitsTableBoolCol::free_buffer(void) const
 {
     // Free buffer
     if (m_buffer != NULL) delete [] m_buffer;
@@ -773,10 +808,3 @@ void GFitsTableBoolCol::free_buffer(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

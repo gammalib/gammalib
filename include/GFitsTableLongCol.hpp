@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GFitsTableLongCol.hpp  - FITS table long column class          *
+ *          GFitsTableLongCol.hpp - FITS table long column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,7 +50,7 @@ public:
     virtual ~GFitsTableLongCol(void);
 
     // Operators
-    GFitsTableLongCol& operator= (const GFitsTableLongCol& column);
+    GFitsTableLongCol& operator=(const GFitsTableLongCol& column);
     long&              operator()(const int& row, const int& inx = 0);
     const long&        operator()(const int& row, const int& inx = 0) const;
 
@@ -70,16 +70,20 @@ public:
 
 private:
     // Private methods
-    void               init_members(void);
-    void               copy_members(const GFitsTableLongCol& column);
-    void               free_members(void);
-    std::string        ascii_format(void) const;
-    void               alloc_data(void);
-    void               release_data(void);
-    void               alloc_nulval(const long* value);
-    void               init_data(void);
-    void*              ptr_data(const int& index = 0) { return m_data+index; }
-    void*              ptr_nulval(void) { return m_nulval; }
+    void init_members(void);
+    void copy_members(const GFitsTableLongCol& column);
+    void free_members(void);
+    void alloc_nulval(const long* value);
+
+    // Implemented virtual base class methods
+    virtual void        alloc_data(void);
+    virtual void        init_data(void);
+    virtual void        fetch_data(void) const;
+    virtual void        copy_data(const GFitsTableCol& column);
+    virtual void        release_data(void);
+    virtual void*       ptr_data(const int& index = 0) { return m_data+index; }
+    virtual void*       ptr_nulval(void) { return m_nulval; }
+    virtual std::string ascii_format(void) const;
 
     // Private data area
     long* m_data;       //!< Data vector

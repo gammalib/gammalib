@@ -1,5 +1,5 @@
 /***************************************************************************
- *  GFitsTableCDoubleCol.cpp  - FITS table double precision complex column *
+ *  GFitsTableCDoubleCol.cpp - FITS table double precision complex column  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -528,8 +528,10 @@ void GFitsTableCDoubleCol::copy_members(const GFitsTableCDoubleCol& column)
     }
 
     // Copy attributes
-    m_type = column.m_type;
-    m_size = column.m_size;
+    m_type     = column.m_type;
+    m_size     = column.m_size;
+    m_varlen   = column.m_varlen;
+    m_rowstart = column.m_rowstart;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
@@ -609,6 +611,49 @@ void GFitsTableCDoubleCol::alloc_data(void)
     if (m_size > 0) {
         m_data = new GFits::cdouble[m_size];
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch column data
+ ***************************************************************************/
+void GFitsTableCDoubleCol::fetch_data(void) const
+{
+    // Save column (circumvent const correctness)
+    const_cast<GFitsTableCDoubleCol*>(this)->load_column();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy column data
+ *
+ * @param[in] column Column.
+ *
+ * Copies all data from a column. This method is called from the base class
+ * copy constructor.
+ ***************************************************************************/
+void GFitsTableCDoubleCol::copy_data(const GFitsTableCol& column)
+{
+    // Type-cast to the correct column type
+    const GFitsTableCDoubleCol* ptr = static_cast<const GFitsTableCDoubleCol*>(&column);
+
+    // Copy column data (only if column contains data)
+    if (ptr->m_data != NULL && ptr->m_size > 0) {
+        m_size = ptr->m_size;
+        alloc_data();
+        for (int i = 0; i < ptr->m_size; ++i) {
+            m_data[i] = ptr->m_data[i];
+        }
+    }
+
+    // Copy NULL value
+    alloc_nulval(ptr->m_nulval);
 
     // Return
     return;

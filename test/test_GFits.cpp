@@ -1394,7 +1394,7 @@ void TestGFits::test_bintable_bit(void)
     catch(std::exception &e) {
         test_try_failure(e);
     }
-    
+
     // Test single column table
     TEST_TABLE1_BOOL;
 

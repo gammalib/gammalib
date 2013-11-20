@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsTableBitCol.cpp  - FITS table Bit column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_CALL_GRAPH                        //!< Dump call graph in console
 
 
 /*==========================================================================
@@ -162,10 +163,10 @@ GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-bool& GFitsTableBitCol::operator() (const int& row, const int& inx)
+bool& GFitsTableBitCol::operator()(const int& row, const int& inx)
 {
     // If data are not available then load them now
-    if (m_data == NULL) fetch_data();
+    if (m_data == NULL) this->fetch_data();
 
     // Set any pending Bit
     set_pending();
@@ -192,7 +193,7 @@ bool& GFitsTableBitCol::operator() (const int& row, const int& inx)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-const bool& GFitsTableBitCol::operator() (const int& row, const int& inx) const
+const bool& GFitsTableBitCol::operator()(const int& row, const int& inx) const
 {
     // Circumvent const correctness
     GFitsTableBitCol* ptr = const_cast<GFitsTableBitCol*>(this);
@@ -537,6 +538,11 @@ void GFitsTableBitCol::nulval(const unsigned char* value)
  ***************************************************************************/
 void GFitsTableBitCol::init_members(void)
 {
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("GFitsTableBitCol::init_members\n");
+    #endif
+
     // Initialise members
     m_type          = __TBIT;
     m_bits          = 0;
@@ -548,6 +554,11 @@ void GFitsTableBitCol::init_members(void)
     m_bit_value     = false;
     m_bit_byte      = 0;
     m_bit_mask      = 0;
+
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("exit GFitsTableBitCol::init_members\n");
+    #endif
 
     // Return
     return;
@@ -561,7 +572,6 @@ void GFitsTableBitCol::init_members(void)
  ***************************************************************************/
 void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
 {
-    // Fetch column data if not yet fetched. The casting circumvents the
     // const correctness
     bool not_loaded = (column.m_data == NULL);
     if (not_loaded) {
@@ -571,6 +581,8 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
     // Copy attributes
     m_type          = column.m_type;
     m_size          = column.m_size;
+    m_varlen        = column.m_varlen;
+    m_rowstart      = column.m_rowstart;
     m_bits          = column.m_bits;
     m_bytes_per_row = column.m_bytes_per_row;
     m_bits_per_row  = column.m_bits_per_row;
@@ -587,9 +599,6 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
     }
 
     // Copy NULL value
-    alloc_nulval(column.m_nulval);
-
-    // Small memory option: release column if it was fetch above
     #if defined(G_SMALL_MEMORY)
     if (not_loaded) {
         const_cast<GFitsTableBitCol*>(&column)->release_data();
@@ -606,6 +615,11 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
  ***************************************************************************/
 void GFitsTableBitCol::free_members(void)
 {
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("GFitsTableBitCol::free_members\n");
+    #endif
+
     // Free memory
     if (m_data   != NULL) delete [] m_data;
     if (m_nulval != NULL) delete m_nulval;
@@ -616,6 +630,11 @@ void GFitsTableBitCol::free_members(void)
 
     // Reset load flag
     m_size = 0;
+
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("exit GFitsTableBitCol::free_members\n");
+    #endif
 
     // Return
     return;
@@ -646,6 +665,11 @@ std::string GFitsTableBitCol::ascii_format(void) const
  ***************************************************************************/
 void GFitsTableBitCol::alloc_data(void)
 {
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("GFitsTableBitCol::alloc_data(%d)\n", m_size);
+    #endif
+
     // Free any existing memory
     if (m_data != NULL) delete [] m_data;
 
@@ -656,6 +680,63 @@ void GFitsTableBitCol::alloc_data(void)
     if (m_size > 0) {
         m_data = new unsigned char[m_size];
     }
+
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("exit GFitsTableBitCol::alloc_data(m_data=%x)\n", m_data);
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * This method fetches column data when needed. It is declared const, so
+ * that const data access methods can be implemented.
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are initialised.
+ *
+ * This method calls GFitsTableCol::load_column to do the job.
+ ***************************************************************************/
+void GFitsTableBitCol::fetch_data(void) const
+{
+    // Save column (circumvent const correctness)
+    const_cast<GFitsTableBitCol*>(this)->load_column();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy column data
+ *
+ * @param[in] column Column.
+ *
+ * Copies all data from a column. This method is called from the base class
+ * copy constructor.
+ ***************************************************************************/
+void GFitsTableBitCol::copy_data(const GFitsTableCol& column)
+{
+    // Type-cast to the correct column type
+    const GFitsTableBitCol* ptr = static_cast<const GFitsTableBitCol*>(&column);
+
+    // Copy column data (only if column contains data)
+    if (ptr->m_data != NULL && ptr->m_size > 0) {
+        m_size = ptr->m_size;
+        alloc_data();
+        for (int i = 0; i < ptr->m_size; ++i) {
+            m_data[i] = ptr->m_data[i];
+        }
+    }
+
+    // Copy NULL value
+    alloc_nulval(ptr->m_nulval);
 
     // Return
     return;

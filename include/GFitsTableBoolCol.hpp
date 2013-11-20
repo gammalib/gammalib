@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GFitsTableBoolCol.hpp  - FITS table boolean column class         *
+ *         GFitsTableBoolCol.hpp - FITS table boolean column class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -73,25 +73,30 @@ public:
 
 private:
     // Private methods
-    void        init_members(void);
-    void        copy_members(const GFitsTableBoolCol& column);
-    void        free_members(void);
-    void        save(void);
-    std::string ascii_format(void) const;
-    void        alloc_data(void);
-    void        release_data(void);
-    void        alloc_nulval(const bool* value);
-    void        init_data(void);
-    void        fetch_data(void) const;
-    void        alloc_buffer(void);
-    void        free_buffer(void);
-    void*       ptr_data(const int& index = 0) { return m_buffer+index; }
-    void*       ptr_nulval(void) { return m_nulval; }
+    void init_members(void);
+    void copy_members(const GFitsTableBoolCol& column);
+    void free_members(void);
+    void alloc_nulval(const bool* value);
+    void alloc_buffer(void) const;
+    void free_buffer(void) const;
+
+    // Implemented virtual base class methods
+    virtual void        alloc_data(void);
+    virtual void        init_data(void);
+    virtual void        fetch_data(void) const;
+    virtual void        copy_data(const GFitsTableCol& column);
+    virtual void        release_data(void);
+    virtual void*       ptr_data(const int& index = 0) { return m_data+index; }
+    virtual void*       ptr_nulval(void) { return m_nulval; }
+    virtual std::string ascii_format(void) const;
+
+    // Overloaded base class methods
+    virtual void        save(void);
 
     // Private data area
-    bool* m_data;       //!< Data area
-    char* m_buffer;     //!< Data area for CFITSIO transfer
-    bool* m_nulval;     //!< NULL value
+    bool*         m_data;     //!< Data area
+    bool*         m_nulval;   //!< NULL value
+    mutable char* m_buffer;   //!< Data area for CFITSIO transfer
 };
 
 #endif /* GFITSTABLEBOOLCOL_HPP */

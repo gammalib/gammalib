@@ -67,7 +67,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_SAVE      //!< Debug data_save() method
+//#define G_DEBUG_SAVE                          //!< Debug data_save() method
 
 
 /*==========================================================================
@@ -848,6 +848,9 @@ void GFitsTable::data_save(void)
     // Debug definition: Dump method entry
     #if defined(G_DEBUG_SAVE)
     std::cout << "GFitsTable::save: entry" << std::endl;
+    for (int i = 0; i < m_cols; ++i) {
+        std::cout << m_columns[i]->print() << std::endl;
+    }
     #endif
 
     // Make sure that column lengths are consistent with table length.
@@ -901,8 +904,9 @@ void GFitsTable::data_save(void)
         // Create FITS table
         status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields, ttype, tform,
                           tunit, NULL, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_DATA_SAVE, status);
+        }
 
         // De-allocate column definition arrays
         if (m_cols > 0) {
@@ -1016,6 +1020,11 @@ void GFitsTable::data_save(void)
             #endif
             
         }
+
+        // Debug option: Show where we are
+        #if defined(G_DEBUG_SAVE)
+        std::cout << "GFitsTable::save: Now update all columns." << std::endl;
+        #endif
         
         // Update all columns. The 'm_colnum' field specifies where in the
         // FITS file the column resides. If 'm_colnum=0' then we have a new
@@ -1049,13 +1058,24 @@ void GFitsTable::data_save(void)
 
                 // Now write column into FITS file (only if length is positive)
                 if (m_columns[i]->length() > 0) {
+                    // Debug option: Show which column we're going to write
+                    #if defined(G_DEBUG_SAVE)
+                    std::cout << "GFitsTable::save: Write column " << i;
+                    std::cout << "." << std::endl;
+                    #endif
                     m_columns[i]->save();
                 }
 
             } // endif: column was valid
         } // endfor: looped over all table columns
 
-        // Delete all unused columns from FITS file. We do this from last to
+        // Debug option: Show where we are
+        #if defined(G_DEBUG_SAVE)
+        std::cout << "GFitsTable::save: Now delete all obsolete columns.";
+        std::cout << std::endl;
+        #endif
+
+        // Delete all obsolete columns from FITS file. We do this from last to
         // first so that the column numbers remain valid. Also note that
         // FITS column counting starts from 1.
         for (int colnum = num_cols; colnum > 0; --colnum) {
@@ -1102,6 +1122,12 @@ void GFitsTable::data_save(void)
         } // endfor: Looped over all FITS columns
 
     } // endelse: FITS table has been updated
+
+    // Debug option: Show where we are
+    #if defined(G_DEBUG_SAVE)
+    std::cout << "GFitsTable::save: Now update the FITS header for all columns.";
+    std::cout << std::endl;
+    #endif
 
     // Now update the header for all columns (unit and TDIM information)
     for (int i = 0; i < m_cols; ++i) {

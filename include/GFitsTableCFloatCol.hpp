@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GFitsTableCFloatCol.hpp  - FITS table single precision complex column  *
+ *   GFitsTableCFloatCol.hpp - FITS table single precision complex column  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -71,16 +71,20 @@ public:
 
 private:
     // Private methods
-    void        init_members(void);
-    void        copy_members(const GFitsTableCFloatCol& column);
-    void        free_members(void);
-    std::string ascii_format(void) const;
-    void        alloc_data(void);
-    void        release_data(void);
-    void        alloc_nulval(const GFits::cfloat* value);
-    void        init_data(void);
-    void*       ptr_data(const int& index = 0) { return m_data+index; }
-    void*       ptr_nulval(void) { return m_nulval; }
+    void init_members(void);
+    void copy_members(const GFitsTableCFloatCol& column);
+    void free_members(void);
+    void alloc_nulval(const GFits::cfloat* value);
+
+    // Implemented virtual base class methods
+    virtual void        alloc_data(void);
+    virtual void        init_data(void);
+    virtual void        fetch_data(void) const;
+    virtual void        copy_data(const GFitsTableCol& column);
+    virtual void        release_data(void);
+    virtual void*       ptr_data(const int& index = 0) { return m_data+index; }
+    virtual void*       ptr_nulval(void) { return m_nulval; }
+    virtual std::string ascii_format(void) const;
 
     // Private data area
     GFits::cfloat* m_data;       //!< Data vector

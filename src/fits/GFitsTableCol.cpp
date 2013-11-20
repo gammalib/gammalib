@@ -44,6 +44,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_CALL_GRAPH                        //!< Dump call graph in console
 
 
 /*==========================================================================
@@ -309,6 +310,21 @@ std::string GFitsTableCol::tform_binary(void) const
 
 
 /***********************************************************************//**
+ * @brief Signals if column has already been loaded
+ *
+ * @return True if column has been loaded, false otherwise.
+ ***************************************************************************/
+bool GFitsTableCol::isloaded(void) const
+{
+    // Circumvent const correctness
+    GFitsTableCol* column = const_cast<GFitsTableCol*>(this);
+
+    // Return flag
+    return (column->ptr_data() != NULL);
+}
+
+
+/***********************************************************************//**
  * @brief Print column information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -431,6 +447,7 @@ void GFitsTableCol::save(void)
  *
  * This method calls GFitsTableCol::load_column to do the job.
  ***************************************************************************/
+/*
 void GFitsTableCol::fetch_data(void) const
 {
     // Save column (circumvent const correctness)
@@ -439,14 +456,18 @@ void GFitsTableCol::fetch_data(void) const
     // Return
     return;
 }
-
+*/
 
 /***********************************************************************//**
  * @brief Load table column from FITS file
+ *
+ * Loads table column from FITS file by calling the load_column_variable()
+ * method for variable-length columns and load_column_fixed() for fixed-
+ * length columns.
  ***************************************************************************/
 void GFitsTableCol::load_column(void)
 {
-    // Load variable-length of fixed-length column
+    // Load variable-length or fixed-length column from FITS file
     if (isvariable()) {
         load_column_variable();
     }
@@ -664,6 +685,28 @@ void GFitsTableCol::load_column_variable(void)
 /***********************************************************************//**
  * @brief Save table column into FITS file
  *
+ * Save table column into FITS file by calling the save_column_variable()
+ * method for variable-length columns and save_column_fixed() for fixed-
+ * length columns.
+ ***************************************************************************/
+void GFitsTableCol::save_column(void)
+{
+    // Save variable-length or fixed-length column into FITS file
+    if (isvariable()) {
+        save_column_variable();
+    }
+    else {
+        save_column_fixed();
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
  * @exception GException::fits_hdu_not_found
  *            Specified HDU not found in FITS file.
  * @exception GException::fits_error
@@ -679,7 +722,7 @@ void GFitsTableCol::load_column_variable(void)
  * These methods are implemented by the derived column classes which 
  * implement a specific storage class (i.e. float, double, short, ...).
  ***************************************************************************/
-void GFitsTableCol::save_column(void)
+void GFitsTableCol::save_column_fixed(void)
 {
     // Continue only if a FITS file is connected and data have been loaded
     if (FPTR(m_fitsfile)->Fptr != NULL && m_colnum > 0 && ptr_data() != NULL) {
@@ -701,6 +744,67 @@ void GFitsTableCol::save_column(void)
         if (status != 0) {
             throw GException::fits_error(G_SAVE_COLUMN, status);
         }
+
+    } // endif: FITS file was connected
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Save table column into FITS file
+ *
+ * @exception GException::fits_hdu_not_found
+ *            Specified HDU not found in FITS file.
+ * @exception GException::fits_error
+ *            Error occured during writing of the column data.
+ *
+ * The table column is only saved if it is linked to a FITS file and if the
+ * data are indeed present in the class instance. This avoids saving of data
+ * that have not been modified.
+ *
+ * The method make use of the virtual methods 
+ *   GFitsTableCol::ptr_data and
+ *   GFitsTableCol::ptr_nulval.
+ * These methods are implemented by the derived column classes which 
+ * implement a specific storage class (i.e. float, double, short, ...).
+ ***************************************************************************/
+void GFitsTableCol::save_column_variable(void)
+{
+    // Continue only if a FITS file is connected and data have been loaded
+    if (FPTR(m_fitsfile)->Fptr != NULL && m_colnum > 0 && ptr_data() != NULL) {
+
+        // Move to the HDU
+        int status = 0;
+        status     = __ffmahd(FPTR(m_fitsfile),
+                              (FPTR(m_fitsfile)->HDUposition)+1, NULL,
+                              &status);
+        if (status != 0) {
+            throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
+                              (FPTR(m_fitsfile)->HDUposition)+1,
+                              status);
+        }
+
+        // Save the column data row-by-row
+        for (int row = 0; row < m_length; ++row) {
+
+            // Save row data
+            status = __ffpcn(FPTR(m_fitsfile),
+                             std::abs(m_type),
+                             m_colnum, 
+                             row+1,
+                             1,
+                             elements(row),
+                             ptr_data(m_rowstart[row]),
+                             ptr_nulval(),
+                             &status);
+            if (status != 0) {
+                throw GException::fits_error(G_SAVE_COLUMN, status,
+                                        "for column \""+m_name+"\".");
+            }
+
+        } // endfor: looped over rows
 
     } // endif: FITS file was connected
 
@@ -757,6 +861,11 @@ int GFitsTableCol::offset(const int& row, const int& inx) const
  ***************************************************************************/
 void GFitsTableCol::init_members(void)
 {
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("GFitsTableCol::init_members\n");
+    #endif
+
     // Allocate FITS file pointer
     m_fitsfile = new __fitsfile;
     FPTR(m_fitsfile)->HDUposition = 0;
@@ -777,6 +886,11 @@ void GFitsTableCol::init_members(void)
     m_varlen   = 0;
     m_size     = 0;
     m_anynul   = 0;
+
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("exit GFitsTableCol::init_members\n");
+    #endif
 
     // Return
     return;
@@ -817,11 +931,21 @@ void GFitsTableCol::copy_members(const GFitsTableCol& column)
  ***************************************************************************/
 void GFitsTableCol::free_members(void)
 {
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("GFitsTableCol::free_members\n");
+    #endif
+
     // Free memory
     if (m_fitsfile != NULL) delete FPTR(m_fitsfile);
 
     // Mark memory as free
     m_fitsfile = NULL;
+
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("exit GFitsTableCol::free_members\n");
+    #endif
 
     // Return
     return;

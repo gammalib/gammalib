@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GFitsTableStringCol.cpp  - FITS table string column class        *
+ *         GFitsTableStringCol.cpp - FITS table string column class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -532,8 +532,10 @@ void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
     }
 
     // Copy attributes
-    m_type = column.m_type;
-    m_size = column.m_size;
+    m_type     = column.m_type;
+    m_size     = column.m_size;
+    m_varlen   = column.m_varlen;
+    m_rowstart = column.m_rowstart;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
@@ -666,6 +668,78 @@ void GFitsTableStringCol::alloc_data(void)
 
 
 /***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are set to 0.
+ *
+ * Refer to GFitsTableCol::load_column for more information.
+ ***************************************************************************/
+void GFitsTableStringCol::fetch_data(void) const
+{
+    // Calculate size of memory
+    m_size = m_number * m_length;
+
+    // Free old buffer memory
+    free_buffer();
+
+    // Allocate buffer memory
+    alloc_buffer();
+
+    // Load column
+    const_cast<GFitsTableStringCol*>(this)->load_column();
+
+    // Extract string from buffer
+    for (int i = 0; i < m_size; ++i) {
+        if (m_buffer[i] != NULL) {
+            m_data[i].assign(m_buffer[i]);
+        }
+    }
+
+    // Free buffer memory
+    free_buffer();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy column data
+ *
+ * @param[in] column Column.
+ *
+ * Copies all data from a column. This method is called from the base class
+ * copy constructor.
+ ***************************************************************************/
+void GFitsTableStringCol::copy_data(const GFitsTableCol& column)
+{
+    // Type-cast to the correct column type
+    const GFitsTableStringCol* ptr = static_cast<const GFitsTableStringCol*>(&column);
+
+    // Copy column data (only if column contains data)
+    if (ptr->m_data != NULL && ptr->m_size > 0) {
+        m_size = ptr->m_size;
+        alloc_data();
+        for (int i = 0; i < ptr->m_size; ++i) {
+            m_data[i] = ptr->m_data[i];
+        }
+    }
+
+    // Copy NULL value
+    if (ptr->m_nulval != NULL) {
+        if (m_nulval != NULL) delete [] m_nulval;
+        m_nulval = new char[m_width+1];
+        std::strncpy(m_nulval, ptr->m_nulval, m_width);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Release column data
  ***************************************************************************/
 void GFitsTableStringCol::release_data(void)
@@ -720,44 +794,6 @@ void GFitsTableStringCol::init_data(void)
             m_data[i].clear();
         }
     }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Fetch column data
- *
- * If a FITS file is attached to the column the data are loaded into memory
- * from the FITS file. If no FITS file is attached, memory is allocated
- * to hold the column data and all cells are set to 0.
- *
- * Refer to GFitsTableCol::load_column for more information.
- ***************************************************************************/
-void GFitsTableStringCol::fetch_data(void) const
-{
-    // Calculate size of memory
-    m_size = m_number * m_length;
-
-    // Free old buffer memory
-    free_buffer();
-
-    // Allocate buffer memory
-    alloc_buffer();
-
-    // Load column
-    const_cast<GFitsTableStringCol*>(this)->load_column();
-
-    // Extract string from buffer
-    for (int i = 0; i < m_size; ++i) {
-        if (m_buffer[i] != NULL) {
-            m_data[i].assign(m_buffer[i]);
-        }
-    }
-
-    // Free buffer memory
-    free_buffer();
 
     // Return
     return;
