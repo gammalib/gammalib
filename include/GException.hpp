@@ -89,6 +89,12 @@ public:
         out_of_range(std::string origin, double value, double min, double max);
         out_of_range(std::string origin, int inx, int elements);
         out_of_range(std::string origin, int row, int col, int rows, int cols);
+        // New methods
+        out_of_range(const std::string& origin,
+                     const std::string& what,
+                     const int&         index,
+                     const int&         elements,
+                     const std::string& message = "");
     };
 
     // FITS error

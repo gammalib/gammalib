@@ -53,7 +53,12 @@ GException::invalid_value::invalid_value(const std::string& origin,
 {
     // Set origin
     m_origin  = origin;
-    m_message = "Invalid value.\n"+message;
+
+    // Set message string
+    m_message = "Invalid value.";
+    if (message.length() > 0) {
+        m_message += ("\n" + message);
+    }
 
     // Return
     return;
@@ -71,7 +76,53 @@ GException::invalid_argument::invalid_argument(const std::string& origin,
 {
     // Set origin
     m_origin  = origin;
-    m_message = "Invalid argument.\n"+message;
+
+    // Set message string
+    m_message = "Invalid argument.";
+    if (message.length() > 0) {
+        m_message += ("\n" + message);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Index is out of range [0,elements-1]
+ *
+ * @param[in] origin Method throwing the exception.
+ * @param[in] what Describes what is out of range.
+ * @param[in] index Index.
+ * @param[in] elements Number of elements.
+ *
+ * The @p what string specifies the index type that is out of range. For
+ * example what="Vector index" will lead to "Vector index <index> is ...".
+ * The first letter in @p what is expected to be a capital letter.
+ ***************************************************************************/
+GException::out_of_range::out_of_range(const std::string& origin,
+                                       const std::string& what,
+                                       const int&         index,
+                                       const int&         elements,
+                                       const std::string& message)
+{
+    // Set origin
+    m_origin = origin;
+
+    // Set message
+    if (elements > 0) {
+        m_message = gammalib::strip_whitespace(what) + " " +
+                    gammalib::str(index) + " is outside the"
+                    " valid range [0," + gammalib::str(elements-1) + "].";
+    }
+    else {
+        m_message = "Invalid access to empty object with " +
+                    gammalib::tolower(gammalib::strip_whitespace(what)) +
+                    " " + gammalib::str(index) + ".";
+    }
+    if (message.length() > 0) {
+        m_message += ("\n" + message);
+    }
 
     // Return
     return;
