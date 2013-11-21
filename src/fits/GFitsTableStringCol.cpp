@@ -515,7 +515,7 @@ void GFitsTableStringCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Table column.
+ * @param[in] column Column.
  *
  * Sets the content of the vector column by copying from another column.
  * If the code is compiled with the small memory option, and if the source
@@ -524,11 +524,10 @@ void GFitsTableStringCol::init_members(void)
  ***************************************************************************/
 void GFitsTableStringCol::copy_members(const GFitsTableStringCol& column)
 {
-    // Fetch column data if not yet fetched. The casting circumvents the
-    // const correctness
-    bool not_loaded = (column.m_data == NULL);
+    // Fetch data if necessary
+    bool not_loaded = (!column.isloaded());
     if (not_loaded) {
-        const_cast<GFitsTableStringCol*>(&column)->fetch_data();
+        column.fetch_data();
     }
 
     // Copy attributes
@@ -699,40 +698,6 @@ void GFitsTableStringCol::fetch_data(void) const
 
     // Free buffer memory
     free_buffer();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy column data
- *
- * @param[in] column Column.
- *
- * Copies all data from a column. This method is called from the base class
- * copy constructor.
- ***************************************************************************/
-void GFitsTableStringCol::copy_data(const GFitsTableCol& column)
-{
-    // Type-cast to the correct column type
-    const GFitsTableStringCol* ptr = static_cast<const GFitsTableStringCol*>(&column);
-
-    // Copy column data (only if column contains data)
-    if (ptr->m_data != NULL && ptr->m_size > 0) {
-        m_size = ptr->m_size;
-        alloc_data();
-        for (int i = 0; i < ptr->m_size; ++i) {
-            m_data[i] = ptr->m_data[i];
-        }
-    }
-
-    // Copy NULL value
-    if (ptr->m_nulval != NULL) {
-        if (m_nulval != NULL) delete [] m_nulval;
-        m_nulval = new char[m_width+1];
-        std::strncpy(m_nulval, ptr->m_nulval, m_width);
-    }
 
     // Return
     return;

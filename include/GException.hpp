@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GException.hpp  -  exception handler                  *
+ *                    GException.hpp - Exception handler                   *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -55,9 +55,10 @@ protected:
 /***********************************************************************//**
  * @class GException
  *
- * @brief Interface for exceptions.
+ * @brief Interface for exceptions
  *
- * This is the object that it thrown in case of an exception.
+ * The exception class is the master class that is thrown in case of
+ * exceptions.
  ***************************************************************************/
 class GException : public GExceptionHandler {
 public:
@@ -81,13 +82,29 @@ public:
                          const std::string& message);
     };
 
+    // Out of range
+    class out_of_range : public GExceptionHandler {
+    public:
+        out_of_range(std::string origin, int inx, int min, int max);
+        out_of_range(std::string origin, double value, double min, double max);
+        out_of_range(std::string origin, int inx, int elements);
+        out_of_range(std::string origin, int row, int col, int rows, int cols);
+    };
+
+    // FITS error
+    class fits_error : public GExceptionHandler {
+    public:
+        fits_error(const std::string& origin,
+		           const int&         status,
+				   const std::string& message = "");
+    };
+
 
     // --- RUNTIME EXCEPTIONS (not testable by client) ---
 
+    //underflow_error
 
-    // --- OLD EXCEPTIONS ---
-
-
+    //overflow_error
 
     // Feature not implemented
     class feature_not_implemented : public GExceptionHandler {
@@ -95,6 +112,11 @@ public:
         feature_not_implemented(std::string origin,
                                 std::string message = "");
     };
+
+    // --- OLD EXCEPTIONS ---
+
+
+
 
     // Invalid type conversion
     class bad_type : public GExceptionHandler {
@@ -161,15 +183,6 @@ public:
         empty(std::string origin);
     };
 
-    // Out of range
-    class out_of_range : public GExceptionHandler {
-    public:
-        out_of_range(std::string origin, int inx, int min, int max);
-        out_of_range(std::string origin, double value, double min, double max);
-        out_of_range(std::string origin, int inx, int elements);
-        out_of_range(std::string origin, int row, int col, int rows, int cols);
-    };
-
     // Vector - Vector mismatch
     class vector_mismatch : public GExceptionHandler {
     public:
@@ -234,12 +247,6 @@ public:
 
 
     // FITS exceptions
-    class fits_error : public GExceptionHandler {
-    public:
-        fits_error(std::string origin,
-		           int         status,
-				   std::string message = "");
-    };
     class fits_open_error : public GExceptionHandler {
     public:
         fits_open_error(std::string origin,

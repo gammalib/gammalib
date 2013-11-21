@@ -509,7 +509,7 @@ void GFitsTableByteCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Column for which members should be copied.
+ * @param[in] column Column.
  *
  * Sets the content of the vector column by copying from another column.
  * If the code is compiled with the small memory option, and if the source
@@ -518,11 +518,10 @@ void GFitsTableByteCol::init_members(void)
  ***************************************************************************/
 void GFitsTableByteCol::copy_members(const GFitsTableByteCol& column)
 {
-    // Fetch column data if not yet fetched. The casting circumvents the
-    // const correctness
-    bool not_loaded = (column.m_data == NULL);
+    // Fetch data if necessary
+    bool not_loaded = (!column.isloaded());
     if (not_loaded) {
-        const_cast<GFitsTableByteCol*>(&column)->fetch_data();
+        column.fetch_data();
     }
 
     // Copy attributes
@@ -617,38 +616,8 @@ void GFitsTableByteCol::alloc_data(void)
  ***************************************************************************/
 void GFitsTableByteCol::fetch_data(void) const
 {
-    // Save column (circumvent const correctness)
+    // Load column (circumvent const correctness)
     const_cast<GFitsTableByteCol*>(this)->load_column();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy column data
- *
- * @param[in] column Column.
- *
- * Copies all data from a column. This method is called from the base class
- * copy constructor.
- ***************************************************************************/
-void GFitsTableByteCol::copy_data(const GFitsTableCol& column)
-{
-    // Type-cast to the correct column type
-    const GFitsTableByteCol* ptr = static_cast<const GFitsTableByteCol*>(&column);
-
-    // Copy column data (only if column contains data)
-    if (ptr->m_data != NULL && ptr->m_size > 0) {
-        m_size = ptr->m_size;
-        alloc_data();
-        for (int i = 0; i < ptr->m_size; ++i) {
-            m_data[i] = ptr->m_data[i];
-        }
-    }
-
-    // Copy NULL value
-    alloc_nulval(ptr->m_nulval);
 
     // Return
     return;

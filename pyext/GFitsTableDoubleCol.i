@@ -1,7 +1,7 @@
 /***************************************************************************
- * GFitsTableDoubleCol.i  - FITS table double column class SWIG definiton  *
+ *    GFitsTableDoubleCol.i - FITS table double precision column class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsTableDoubleCol.i
- * @brief FITS table double column class Python interface definition
+ * @brief FITS table double precision column class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GFitsTableDoubleCol
  *
- * @brief FITS table double column Python interface definition
+ * @brief FITS table double precision column class
  ***************************************************************************/
 class GFitsTableDoubleCol : public GFitsTableCol {
 public:
@@ -49,8 +49,9 @@ public:
     virtual std::string          string(const int& row, const int& col = 0) const;
     virtual double               real(const int& row, const int& col = 0) const;
     virtual int                  integer(const int& row, const int& col = 0) const;
-    virtual void                 insert(const int& rownum, const int& nrows);
-    virtual void                 remove(const int& rownum, const int& nrows);
+    virtual void                 insert(const int& row, const int& nrows);
+    virtual void                 remove(const int& row, const int& nrows);
+    virtual bool                 isloaded(void) const;
     
     // Other methods
     double* data(void);

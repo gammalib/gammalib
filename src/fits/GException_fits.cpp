@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GException_fits.cpp  -  fits exception handlers           *
+ *                GException_fits.cpp - FITS exception handlers            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2006-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -20,6 +20,9 @@
  ***************************************************************************/
 
 /* __ Includes ___________________________________________________________ */
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -32,23 +35,32 @@
  * @param[in] status cfitsio status.
  * @param[in] message Optional error message.
  ***************************************************************************/
-GException::fits_error::fits_error(std::string origin, 
-                                   int         status,
-                                   std::string message)
+GException::fits_error::fits_error(const std::string& origin, 
+                                   const int&         status,
+                                   const std::string& message)
 {
     // Set origin
     m_origin  = origin;
 
+    // Set FITS message
+    char err_text[31];
+    __ffgerr(status, err_text);
+    m_message  = std::string(err_text);
+    m_message += " (status=" + gammalib::str(status) + ").";
+
     // Set message
+    /*
     std::ostringstream s_error;
     char err_text[31];
     __ffgerr(status, err_text);
     s_error << err_text << " (status=" << status << ")";
     m_message = s_error.str();
+    */
 
     // Add optional error message
-    if (message.length() > 0)
+    if (message.length() > 0) {
         m_message += " " + message;
+    }
 
     // Return
     return;

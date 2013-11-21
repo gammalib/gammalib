@@ -63,11 +63,12 @@ public:
     virtual int                  integer(const int& row, const int& col = 0) const;
     virtual void                 insert(const int& row, const int& nrows);
     virtual void                 remove(const int& row, const int& nrows);
+    virtual bool                 isloaded(void) const;
     
     // Other methods
-    GFits::cfloat* data(void) { return m_data; }
+    GFits::cfloat* data(void);
+    GFits::cfloat* nulval(void);
     void           nulval(const GFits::cfloat* value);
-    GFits::cfloat* nulval(void) { return m_nulval; }
 
 private:
     // Private methods
@@ -80,15 +81,74 @@ private:
     virtual void        alloc_data(void);
     virtual void        init_data(void);
     virtual void        fetch_data(void) const;
-    virtual void        copy_data(const GFitsTableCol& column);
     virtual void        release_data(void);
-    virtual void*       ptr_data(const int& index = 0) { return m_data+index; }
-    virtual void*       ptr_nulval(void) { return m_nulval; }
+    virtual void*       ptr_data(const int& index = 0);
+    virtual void*       ptr_nulval(void);
     virtual std::string ascii_format(void) const;
 
     // Private data area
     GFits::cfloat* m_data;       //!< Data vector
     GFits::cfloat* m_nulval;     //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Checks if column has been loaded
+ *
+ * @return True if column has been loaded, false otherwise
+ ***************************************************************************/
+inline
+bool GFitsTableCFloatCol::isloaded(void) const
+{
+    return (m_data != NULL);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to column data
+ *
+ * @return Pointer to column data.
+ ***************************************************************************/
+inline
+GFits::cfloat* GFitsTableCFloatCol::data(void)
+{
+    return m_data;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to nul value
+ *
+ * @return Pointer to nul value.
+ ***************************************************************************/
+inline
+GFits::cfloat* GFitsTableCFloatCol::nulval(void)
+{
+    return m_nulval;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns void pointer to column data
+ *
+ * @return Void pointer to column data.
+ ***************************************************************************/
+inline
+void* GFitsTableCFloatCol::ptr_data(const int& index)
+{
+    return (m_data+index);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns void pointer to nul value
+ *
+ * @return Void pointer to nul value.
+ ***************************************************************************/
+inline
+void* GFitsTableCFloatCol::ptr_nulval(void)
+{
+    return m_nulval;
+}
 
 #endif /* GFITSTABLECFLOATCOL_HPP */

@@ -35,8 +35,10 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ELEMENTS                            "GFitsTableCol::elements(int&)"
-#define G_LOAD_COLUMN                          "GFitsTableCol::load_column()"
-#define G_SAVE_COLUMN                          "GFitsTableCol::save_column()"
+#define G_LOAD_COLUMN_FIXED              "GFitsTableCol::load_column_fixed()"
+#define G_LOAD_COLUMN_VARIABLE        "GFitsTableCol::load_column_variable()"
+#define G_SAVE_COLUMN_FIXED              "GFitsTableCol::save_column_fixed()"
+#define G_SAVE_COLUMN_VARIABLE        "GFitsTableCol::save_column_variable()"
 #define G_OFFSET                          "GFitsTableCol::offset(int&, int&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -310,29 +312,15 @@ std::string GFitsTableCol::tform_binary(void) const
 
 
 /***********************************************************************//**
- * @brief Signals if column has already been loaded
- *
- * @return True if column has been loaded, false otherwise.
- ***************************************************************************/
-bool GFitsTableCol::isloaded(void) const
-{
-    // Circumvent const correctness
-    GFitsTableCol* column = const_cast<GFitsTableCol*>(this);
-
-    // Return flag
-    return (column->ptr_data() != NULL);
-}
-
-
-/***********************************************************************//**
  * @brief Print column information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing column information.
  *
  * @todo Format and cfitsio information is mainly for debugging. This could
- * be vanish in a more stable version of the code, or it could be compiled
- * in conditionally using a debug option.
+ * vanish in a more stable version of the code, or it could be compiled-in
+ * conditionally using a debug option. Alternatively, a higher chatter level
+ * may be required to see this information.
  ***************************************************************************/
 std::string GFitsTableCol::print(const GChatter& chatter) const
 {
@@ -360,11 +348,11 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         }
 
         // Append loading information
-        if (m_size == 0) {
-            result.append("[not loaded] ");
+        if (isloaded()) {
+            result.append("[loaded]     ");
         }
         else {
-            result.append("[loaded]     ");
+            result.append("[not loaded] ");
         }
 
         // Append format information
@@ -434,29 +422,6 @@ void GFitsTableCol::save(void)
     return;
 }
 
-
-/***********************************************************************//**
- * @brief Fetch column data
- *
- * This method fetches column data when needed. It is declared const, so
- * that const data access methods can be implemented.
- *
- * If a FITS file is attached to the column the data are loaded into memory
- * from the FITS file. If no FITS file is attached, memory is allocated
- * to hold the column data and all cells are initialised.
- *
- * This method calls GFitsTableCol::load_column to do the job.
- ***************************************************************************/
-/*
-void GFitsTableCol::fetch_data(void) const
-{
-    // Save column (circumvent const correctness)
-    const_cast<GFitsTableCol*>(this)->load_column();
-
-    // Return
-    return;
-}
-*/
 
 /***********************************************************************//**
  * @brief Load table column from FITS file
@@ -533,7 +498,7 @@ void GFitsTableCol::load_column_fixed(void)
             
                 // Break on any other cfitsio error
                 if (status != 0) {
-                    throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
+                    throw GException::fits_hdu_not_found(G_LOAD_COLUMN_FIXED,
                                   (FPTR(m_fitsfile)->HDUposition)+1,
                                   status);
                 }
@@ -543,8 +508,8 @@ void GFitsTableCol::load_column_fixed(void)
                                  1, 1, m_size, ptr_nulval(), ptr_data(),
                                  &m_anynul, &status);
                 if (status != 0) {
-                    throw GException::fits_error(G_LOAD_COLUMN, status,
-                                    "for column \""+m_name+"\".");
+                    throw GException::fits_error(G_LOAD_COLUMN_FIXED, status,
+                                    "for column '"+m_name+"'.");
                 }
         
             } // endif: no primary HDU found
@@ -602,7 +567,7 @@ void GFitsTableCol::load_column_variable(void)
             
             // Break on any other cfitsio error
             if (status != 0) {
-                throw GException::fits_hdu_not_found(G_LOAD_COLUMN,
+                throw GException::fits_hdu_not_found(G_LOAD_COLUMN_VARIABLE,
                                   (FPTR(m_fitsfile)->HDUposition)+1,
                                   status);
             }
@@ -629,8 +594,11 @@ void GFitsTableCol::load_column_variable(void)
                                   &offset,
                                   &status);
                 if (status != 0) {
-                    throw GException::fits_error(G_LOAD_COLUMN, status,
-                                "for column \""+m_name+"\".");
+                    std::string msg = "Unable to get descriptor of row "+
+                                      gammalib::str(row+1)+" of column '"+
+                                      name()+"' from FITS file.";
+                    throw GException::fits_error(G_LOAD_COLUMN_VARIABLE, status,
+                                                 msg);
                 }
 
                 // Store start of next row
@@ -664,8 +632,10 @@ void GFitsTableCol::load_column_variable(void)
                                  &anynul,
                                  &status);
                 if (status != 0) {
-                    throw GException::fits_error(G_LOAD_COLUMN, status,
-                                        "for column \""+m_name+"\".");
+                    std::string msg = "Unable to load row "+gammalib::str(row+1)+""
+                                      " of column '"+name()+"' from FITS file.";
+                    throw GException::fits_error(G_LOAD_COLUMN_VARIABLE, status,
+                                                 msg);
                 }
 
                 // Increment anynul
@@ -733,7 +703,7 @@ void GFitsTableCol::save_column_fixed(void)
                               (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
         if (status != 0) {
-            throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
+            throw GException::fits_hdu_not_found(G_SAVE_COLUMN_FIXED,
                               (FPTR(m_fitsfile)->HDUposition)+1,
                               status);
         }
@@ -742,7 +712,9 @@ void GFitsTableCol::save_column_fixed(void)
         status = __ffpcn(FPTR(m_fitsfile), m_type, m_colnum, 1, 1,
                          m_size, ptr_data(), ptr_nulval(), &status);
         if (status != 0) {
-            throw GException::fits_error(G_SAVE_COLUMN, status);
+            std::string msg = "Unable to save column '"+name()+"' to"
+                              " FITS file.";
+            throw GException::fits_error(G_SAVE_COLUMN_FIXED, status, msg);
         }
 
     } // endif: FITS file was connected
@@ -781,7 +753,7 @@ void GFitsTableCol::save_column_variable(void)
                               (FPTR(m_fitsfile)->HDUposition)+1, NULL,
                               &status);
         if (status != 0) {
-            throw GException::fits_hdu_not_found(G_SAVE_COLUMN,
+            throw GException::fits_hdu_not_found(G_SAVE_COLUMN_VARIABLE,
                               (FPTR(m_fitsfile)->HDUposition)+1,
                               status);
         }
@@ -800,8 +772,10 @@ void GFitsTableCol::save_column_variable(void)
                              ptr_nulval(),
                              &status);
             if (status != 0) {
-                throw GException::fits_error(G_SAVE_COLUMN, status,
-                                        "for column \""+m_name+"\".");
+                std::string msg = "Unable to save row "+gammalib::str(row+1)+""
+                                  " of column '"+name()+"' to FITS file.";
+                throw GException::fits_error(G_SAVE_COLUMN_VARIABLE, status,
+                                             msg);
             }
 
         } // endfor: looped over rows
@@ -956,6 +930,9 @@ void GFitsTableCol::free_members(void)
  * @brief Connect table column to FITS file
  *
  * @param[in] vptr Column file void pointer.
+ *
+ * A table column is connected to a FITS file when the m_fitsfile holds a
+ * FITS file pointer. In that way, the column knows to which file it belongs.
  ***************************************************************************/
 void GFitsTableCol::connect(void* vptr)
 {

@@ -68,6 +68,7 @@ public:
     virtual int             integer(const int& row, const int& inx = 0) const = 0;
     virtual void            insert(const int& row, const int& nrows) = 0;
     virtual void            remove(const int& row, const int& nrows) = 0;
+    virtual bool            isloaded(void) const = 0;
 
     // Other methods
     void                    name(const std::string& name);
@@ -95,7 +96,6 @@ public:
     void                    anynul(const int& anynul);
     const int&              anynul(void) const;
     std::string             tform_binary(void) const;
-    bool                    isloaded(void) const;
     std::string             print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -109,7 +109,6 @@ protected:
     virtual void        alloc_data(void) = 0;
     virtual void        init_data(void) = 0;
     virtual void        fetch_data(void) const = 0;
-    virtual void        copy_data(const GFitsTableCol& column) = 0;
     virtual void        release_data(void) = 0;
     virtual void*       ptr_data(const int& index = 0) = 0;
     virtual void*       ptr_nulval(void) = 0;
@@ -117,7 +116,6 @@ protected:
 
     // Protected virtual methods
     virtual void        save(void);
-    //virtual void        fetch_data(void) const;
     virtual void        load_column(void);
     virtual void        load_column_fixed(void);
     virtual void        load_column_variable(void);
@@ -307,7 +305,7 @@ void GFitsTableCol::type(const int& type)
  *  83 (TCOMPLEX)
  * 163 (TDBLCOMPLEX)
  *
- * If the type value is negative, the column is a variable length column.
+ * If the type value is negative, the column is a variable-length column.
  ***************************************************************************/
 inline
 const int& GFitsTableCol::type(void) const
@@ -318,9 +316,9 @@ const int& GFitsTableCol::type(void) const
 
 
 /***********************************************************************//**
- * @brief Set repeat
+ * @brief Set repeat value
  *
- * @param[in] repeat Repeat.
+ * @param[in] repeat Repeat value.
  ***************************************************************************/
 inline
 void GFitsTableCol::repeat(const int& repeat)
@@ -345,9 +343,9 @@ const int& GFitsTableCol::repeat(void) const
 
 
 /***********************************************************************//**
- * @brief Set width
+ * @brief Set width value
  *
- * @param[in] width Width.
+ * @param[in] width Width value.
  ***************************************************************************/
 inline
 void GFitsTableCol::width(const int& width)
@@ -406,6 +404,8 @@ const int& GFitsTableCol::number(void) const
  * @brief Set column length (number of rows)
  *
  * @param[in] length Column length.
+ *
+ * Sets the number of rows in one column.
  ***************************************************************************/
 inline
 void GFitsTableCol::length(const int& length)
