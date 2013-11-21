@@ -68,8 +68,8 @@ GFitsTableShortCol::GFitsTableShortCol(void) : GFitsTableCol()
  * @brief Constructor
  *
  * @param[in] name Name of column.
- * @param[in] length Length of column.
- * @param[in] size Vector size of column.
+ * @param[in] length Length of column (number of rows).
+ * @param[in] size Number of elements in column (negative for variable-length).
  ***************************************************************************/
 GFitsTableShortCol::GFitsTableShortCol(const std::string& name,
                                        const int&         length,
@@ -616,6 +616,71 @@ void GFitsTableShortCol::fetch_data(void) const
 {
     // Load column (circumvent const correctness)
     const_cast<GFitsTableShortCol*>(this)->load_column();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Resize column data
+ *
+ * @param[in] index Start index.
+ * @param[in] number Number of elements to add/remove.
+ *
+ * Adds or removes elements from specified index on. Adding is done if
+ * @p number is a positive number, removing if @p number is negative.
+ * Note that the method does not change the validity of the arguments.
+ * This needs to be done by the client.
+ ***************************************************************************/
+void GFitsTableShortCol::resize_data(const int& index, const int& number)
+{
+    // Continue only if number of elements is not zero
+    if (number != 0) {
+
+        // If data are not available then load them now
+        if (m_data == NULL) fetch_data();
+
+        // If elements should be removed then do not allocate new memory
+        // but just move elements forward and change the logical size of
+        // memory. Only if all elements should be removed the memory is
+        // released.
+        if (number < 0) {
+            int    left = index - number;
+            short* dst  = m_data + index;
+            short* src  = m_data + left;
+            int    num  = m_size - left;
+            for (int i = 0; i < num; ++i) {
+                *dst++ = *src++;
+            }
+            m_size += number;
+            if (m_size < 1) {
+                release_data();
+            }
+        }
+
+        // If elements should be added then allocate new memory, copy over
+        // the old data and initialise the new elements
+        else {
+            int left        = m_size - index;
+            m_size         += number;
+            short* new_data = new short[m_size];
+            short* dst      = new_data;
+            short* src      = m_data;
+            for (int i = 0; i < index; ++i) {
+                *dst++ = *src++;
+            }
+            for (int i = 0; i < number; ++i) {
+                *dst++ = 0;
+            }
+            for (int i = 0; i < left; ++i) {
+                *dst++ = *src++;
+            }
+            if (m_data != NULL) delete [] m_data;
+            m_data = new_data;
+        }
+
+    } // endif: number was non-zero
 
     // Return
     return;

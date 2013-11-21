@@ -34,7 +34,8 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ELEMENTS                            "GFitsTableCol::elements(int&)"
+#define G_ELEMENTS1                     "GFitsTableCol::elements(int&, int&)"
+#define G_ELEMENTS2                           "GFitsTableCol::elements(int&)"
 #define G_LOAD_COLUMN_FIXED              "GFitsTableCol::load_column_fixed()"
 #define G_LOAD_COLUMN_VARIABLE        "GFitsTableCol::load_column_variable()"
 #define G_SAVE_COLUMN_FIXED              "GFitsTableCol::save_column_fixed()"
@@ -47,6 +48,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 //#define G_CALL_GRAPH                        //!< Dump call graph in console
+#define G_PRINT_CONTENT                           //!< Print column content
 
 
 /*==========================================================================
@@ -73,40 +75,42 @@ GFitsTableCol::GFitsTableCol(void)
  *
  * @param[in] name Name of column.
  * @param[in] length Length of column (number of rows).
- * @param[in] number Vector size of column.
- * @param[in] width Width of single column element.
- * @param[in] variable Variable-length flag (defaults to false).
+ * @param[in] number Number of elements in column (negative for variable-length).
+ * @param[in] width Width of one column element.
  *
- * Construct column instance from name, length, vector size and column width.
- * The repeat value, required for binary tables, is calculated internally.
- * The optional parameter @p variable specifies whether the column is a
- * variable-length (true) or fixed-length (false) column. By default, a
- * fixed-length column will be allocated.
+ * Construct column instance from @p name, @p length, @p number of elements
+ * and @p width (or size) of one element. If @p number is negative, a
+ * variable-length column will be allocated. The repeat value, which is
+ * required for binary tables, is computed internally by multiplying the
+ * @p number by the @p width.
  ***************************************************************************/
 GFitsTableCol::GFitsTableCol(const std::string& name,
                              const int&         length,
                              const int&         number,
-                             const int&         width,
-                             const bool&        variable)
+                             const int&         width)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Store attributes
-    m_name   = name;
-    m_length = length;
-    m_number = number;
-    m_width  = width;
-
-    // Calculate repeat value (only used for binary table!)
-    m_repeat = m_number * m_width;
-
-    // If column is a variable-length column then initialise row start
-    // array and set variable-length flag
-    if (variable) {
+    if (number >= 0) { // fixed-length column
+        m_name     = name;
+        m_length   = length;
+        m_number   = number;
+        m_width    = width;
+        m_variable = false;
+    }
+    else {             // variable-length column
+        m_name     = name;
+        m_length   = length;
+        m_number   = 1;
+        m_width    = width;
         m_variable = true;
         m_rowstart.assign(length+1, 0);
     }
+
+    // Calculate repeat value (only used for binary table!)
+    m_repeat = m_number * m_width;
 
     // Return
     return;
@@ -189,12 +193,65 @@ GFitsTableCol& GFitsTableCol::operator=(const GFitsTableCol& column)
  * @param[in] row Row index.
  * @param[in] elements Number of elements in @p row.
  *
- * Sets the number of elements in column for a specific @p row.
+ * @exception GException::out_of_range
+ *            Invalid row index specified.
+ * @exception GException::invalid_argument
+ *            Invalid number of elements specified.
  *
- * @todo Implement method.
+ * Sets the number of elements in column for a specific @p row.
  ***************************************************************************/
 void GFitsTableCol::elements(const int& row, const int& elements)
 {
+    // Check row value
+    if (row < 0 || row >= length()) {
+        throw GException::out_of_range(G_ELEMENTS1, "Row index", row, length());
+    }
+
+    // Check that elements is non-negative
+    if (elements < 0) {
+        std::string msg = "Number of elements " + gammalib::str(elements) +
+                          " can not be negative.\nPlease specify a"
+                          " non-negative number of elements.";
+        throw GException::invalid_argument(G_ELEMENTS1, msg);
+    }
+
+    // First handle the case of a variable-length column
+    if (isvariable()) {
+
+        // Determine number of elements to add or to remove
+        int difference = elements - (m_rowstart[row+1] - m_rowstart[row]);
+
+        // If difference is positive, then add elements at the end of
+        // the vector. This is done using resize_data() which will insert
+        // "difference" elements at the index specified as first argument
+        if (difference > 0) {
+            resize_data(m_rowstart[row+1], difference);
+        }
+
+        // ... else if difference is negative then remove elements from
+        // the end of the array. This is done using resize_data() which
+        // will remove "difference" element from the index on specified as
+        // first argument
+        else if (difference < 0) {
+            resize_data(m_rowstart[row+1]+difference, difference);
+        }
+
+        // Update row start indices
+        for (int i = row + 1; i <= length(); ++i) {
+            m_rowstart[i] += difference;
+        }
+
+        // Update maximum column length
+        m_varlen = 0;
+        for (int i = 0; i < length(); ++i) {
+            int len = m_rowstart[row+1] - m_rowstart[row];
+            if (len > m_varlen) {
+                m_varlen = len;
+            }
+        }
+        
+    } // endif: we had a variable-length column
+
     // Return
     return;
 }
@@ -217,11 +274,9 @@ void GFitsTableCol::elements(const int& row, const int& elements)
 int GFitsTableCol::elements(const int& row) const
 {
     // Check row value
-    #if defined(G_RANGE_CHECK)
-    if (row < 0 || row >= m_length) {
-        throw GException::out_of_range(G_ELEMENTS, row, 0, m_length-1);
+    if (row < 0 || row >= length()) {
+        throw GException::out_of_range(G_ELEMENTS2, "Row index", row, length());
     }
-    #endif
 
     // Get number of elements
     int number = (m_variable) ? m_rowstart[row+1] - m_rowstart[row]
@@ -396,6 +451,32 @@ std::string GFitsTableCol::print(const GChatter& chatter) const
         }
 
     } // endif: chatter was not silent
+
+    // Compile option: print content
+    #if defined(G_PRINT_CONTENT)
+    if (chatter != SILENT) {
+
+        // Fetch data if necessary
+        if (!isloaded()) fetch_data();
+
+        // Loop over all rows
+        for (int row = 0; row < length(); ++row) {
+            result.append("\n");
+            if (isvariable()) {
+                result.append("start=");
+                result.append(gammalib::str(m_rowstart[row]));
+                result.append(":");
+            }
+            for (int inx = 0; inx < elements(row); ++inx) {
+                result.append(" "+string(row, inx));
+            }
+        }
+        if (isvariable()) {
+            result.append("\nend=");
+            result.append(gammalib::str(m_rowstart[length()]));
+        }
+    }
+    #endif
 
     // Return result
     return result;

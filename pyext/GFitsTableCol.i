@@ -57,8 +57,7 @@ public:
     GFitsTableCol(const std::string& name,
                   const int&         length,
                   const int&         number,
-                  const int&         width,
-                  const bool&        variable = false);
+                  const int&         width);
     GFitsTableCol(const GFitsTableCol& column);
     virtual ~GFitsTableCol(void);
 

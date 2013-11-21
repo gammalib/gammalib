@@ -208,6 +208,30 @@
                         col2.string(i,j)+" is not "+gammalib::str(val)); \
         } \
     }
+#define TEST_VARTABLE_INT \
+    for (int i = 0; i < nrows; ++i) { \
+        col3.elements(i,i+1); \
+        for (int j = 0; j < i+1; ++j) { \
+            col3(i,j) = i + j*11; \
+        } \
+    } \
+    for (int i = 0; i < nrows; ++i) { \
+        for (int j = 0; j < i+1; ++j) { \
+            int val = i + j*11; \
+            test_assert((col3(i,j) == val), \
+                        "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3(i,j))+" is not "+gammalib::str(val)); \
+            test_assert((col3.real(i,j) == double(val)), \
+                        "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3.real(i,j))+" is not "+gammalib::str(double(val))); \
+            test_assert((col3.integer(i,j) == val), \
+                        "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3.integer(i,j))+" is not "+gammalib::str(val)); \
+            test_assert((col3.string(i,j) == gammalib::str(val)), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col3.string(i,j)+" is not "+gammalib::str(val)); \
+        } \
+    }
 #define TEST_TABLE2_BOOL \
     for (int i = 0; i < nrows; ++i) { \
         for (int j = 0; j < nvec; ++j) { \
@@ -1021,6 +1045,10 @@ void TestGFits::test_bintable_short(void)
     // Test multiple column table
     GFitsTableShortCol col2("SHORT10", nrows, nvec);
     TEST_TABLE2_INT;
+
+    // Test variable-length column table
+    GFitsTableShortCol col3("SHORTVAR", nrows, -1);
+    TEST_VARTABLE_INT;
 
     // Write tables
     TEST_WRITE_TABLES;
