@@ -73,8 +73,8 @@ GFitsTableBoolCol::GFitsTableBoolCol(void) : GFitsTableCol()
  ***************************************************************************/
 GFitsTableBoolCol::GFitsTableBoolCol(const std::string& name,
                                      const int&         length,
-                                     const int&         size)
-                                     : GFitsTableCol(name, length, size, 1)
+                                     const int&         size) :
+                   GFitsTableCol(name, length, size, 1)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -89,8 +89,8 @@ GFitsTableBoolCol::GFitsTableBoolCol(const std::string& name,
  *
  * @param[in] column Table column.
  ***************************************************************************/
-GFitsTableBoolCol::GFitsTableBoolCol(const GFitsTableBoolCol& column) 
-                                     : GFitsTableCol(column)
+GFitsTableBoolCol::GFitsTableBoolCol(const GFitsTableBoolCol& column) :
+                   GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -126,8 +126,9 @@ GFitsTableBoolCol::~GFitsTableBoolCol(void)
  * @brief Assignment operator
  *
  * @param[in] column Table column.
+ * @return Table column.
  ***************************************************************************/
-GFitsTableBoolCol& GFitsTableBoolCol::operator= (const GFitsTableBoolCol& column)
+GFitsTableBoolCol& GFitsTableBoolCol::operator=(const GFitsTableBoolCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -159,7 +160,7 @@ GFitsTableBoolCol& GFitsTableBoolCol::operator= (const GFitsTableBoolCol& column
  *
  * Provides access to data in a column.
  ***************************************************************************/
-bool& GFitsTableBoolCol::operator() (const int& row, const int& inx)
+bool& GFitsTableBoolCol::operator()(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -177,12 +178,10 @@ bool& GFitsTableBoolCol::operator() (const int& row, const int& inx)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-const bool& GFitsTableBoolCol::operator() (const int& row, const int& inx) const
+const bool& GFitsTableBoolCol::operator()(const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) {
-        const_cast<GFitsTableBoolCol*>(this)->fetch_data();
-    }
+    if (m_data == NULL) fetch_data();
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -290,20 +289,20 @@ int GFitsTableBoolCol::integer(const int& row, const int& inx) const
 /***********************************************************************//**
  * @brief Insert rows in column
  *
- * @param[in] rownum Row after which rows should be inserted (0=first row).
+ * @param[in] row Row after which rows should be inserted (0=first row).
  * @param[in] nrows Number of rows to be inserted.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  *
  * This method inserts rows into a FITS table. This implies that the column
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableBoolCol::insert(const int& rownum, const int& nrows)
+void GFitsTableBoolCol::insert(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length) {
-        throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    // Make sure that row is valid
+    if (row < 0 || row > m_length) {
+        throw GException::fits_invalid_row(G_INSERT, row, m_length);
     }
     
     // Continue only if there are rows to be inserted
@@ -334,9 +333,9 @@ void GFitsTableBoolCol::insert(const int& rownum, const int& nrows)
             // Compute the number of elements before the insertion point,
             // the number of elements that get inserted, and the total
             // number of elements after the insertion point
-            int n_before = m_number * rownum;
+            int n_before = m_number * row;
             int n_insert = m_number * nrows;
-            int n_after  = m_number * (m_length - rownum);
+            int n_after  = m_number * (m_length - row);
         
             // Copy and initialise data
             bool* src = m_data;
@@ -370,27 +369,27 @@ void GFitsTableBoolCol::insert(const int& rownum, const int& nrows)
 /***********************************************************************//**
  * @brief Remove rows from column
  *
- * @param[in] rownum Row after which rows should be removed (0=first row).
+ * @param[in] row Row after which rows should be removed (0=first row).
  * @param[in] nrows Number of rows to be removed.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  * @exception GException::fits_invalid_nrows
  *            Invalid number of rows specified.
  *
  * This method removes rows from a FITS table. This implies that the column
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableBoolCol::remove(const int& rownum, const int& nrows)
+void GFitsTableBoolCol::remove(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length) {
-        throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    // Make sure that row is valid
+    if (row < 0 || row >= m_length) {
+        throw GException::fits_invalid_row(G_REMOVE, row, m_length-1);
     }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum) {
-        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    if (nrows < 0 || nrows > m_length-row) {
+        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-row);
     }
     
     // Continue only if there are rows to be removed
@@ -415,9 +414,9 @@ void GFitsTableBoolCol::remove(const int& rownum, const int& nrows)
             // Compute the number of elements before the removal point,
             // the number of elements that get removed, and the total
             // number of elements after the removal point
-            int n_before = m_number * rownum;
+            int n_before = m_number * row;
             int n_remove = m_number * nrows;
-            int n_after  = m_number * (length - rownum);
+            int n_after  = m_number * (length - row);
 
             // Copy data
             bool* src = m_data;
@@ -666,10 +665,8 @@ void GFitsTableBoolCol::fetch_data(void) const
 
     // Free old buffer memory
     free_buffer();
-    //const_cast<GFitsTableBoolCol*>(this)->free_buffer();
 
     // Allocate buffer memory
-    //const_cast<GFitsTableBoolCol*>(this)->alloc_buffer();
     alloc_buffer();
 
     // Save column
@@ -681,7 +678,6 @@ void GFitsTableBoolCol::fetch_data(void) const
     }
 
     // Free buffer memory
-    //const_cast<GFitsTableBoolCol*>(this)->free_buffer();
     free_buffer();
 
     // Return

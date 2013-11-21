@@ -72,8 +72,9 @@ GFitsTableCDoubleCol::GFitsTableCDoubleCol(void) : GFitsTableCol()
  * @param[in] size Vector size of column.
  ***************************************************************************/
 GFitsTableCDoubleCol::GFitsTableCDoubleCol(const std::string& name,
-                                           const int& length, const int& size)
-                                           : GFitsTableCol(name, length, size, 4)
+                                           const int&         length,
+                                           const int&         size) :
+                      GFitsTableCol(name, length, size, 4)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -88,8 +89,8 @@ GFitsTableCDoubleCol::GFitsTableCDoubleCol(const std::string& name,
  *
  * @param[in] column Table column.
  ***************************************************************************/
-GFitsTableCDoubleCol::GFitsTableCDoubleCol(const GFitsTableCDoubleCol& column)
-                                           : GFitsTableCol(column)
+GFitsTableCDoubleCol::GFitsTableCDoubleCol(const GFitsTableCDoubleCol& column) :
+                      GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -125,8 +126,9 @@ GFitsTableCDoubleCol::~GFitsTableCDoubleCol(void)
  * @brief Assignment operator
  *
  * @param[in] column Table column.
+ * @return Table column.
  ***************************************************************************/
-GFitsTableCDoubleCol& GFitsTableCDoubleCol::operator= (const GFitsTableCDoubleCol& column)
+GFitsTableCDoubleCol& GFitsTableCDoubleCol::operator=(const GFitsTableCDoubleCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -158,7 +160,7 @@ GFitsTableCDoubleCol& GFitsTableCDoubleCol::operator= (const GFitsTableCDoubleCo
  *
  * Provides access to data in a column.
  ***************************************************************************/
-GFits::cdouble& GFitsTableCDoubleCol::operator() (const int& row, const int& inx)
+GFits::cdouble& GFitsTableCDoubleCol::operator()(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -176,13 +178,11 @@ GFits::cdouble& GFitsTableCDoubleCol::operator() (const int& row, const int& inx
  *
  * Provides access to data in a column.
  ***************************************************************************/
-const GFits::cdouble& GFitsTableCDoubleCol::operator() (const int& row,
-                                                        const int& inx) const
+const GFits::cdouble& GFitsTableCDoubleCol::operator()(const int& row,
+                                                       const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) {
-        const_cast<GFitsTableCDoubleCol*>(this)->fetch_data();
-    }
+    if (m_data == NULL) fetch_data();
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -291,20 +291,20 @@ int GFitsTableCDoubleCol::integer(const int& row, const int& inx) const
 /***********************************************************************//**
  * @brief Insert rows in column
  *
- * @param[in] rownum Row after which rows should be inserted (0=first row).
+ * @param[in] row Row after which rows should be inserted (0=first row).
  * @param[in] nrows Number of rows to be inserted.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  *
  * This method inserts rows into a FITS table. This implies that all columns
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableCDoubleCol::insert(const int& rownum, const int& nrows)
+void GFitsTableCDoubleCol::insert(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length) {
-        throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    // Make sure that row is valid
+    if (row < 0 || row > m_length) {
+        throw GException::fits_invalid_row(G_INSERT, row, m_length);
     }
     
     // Continue only if there are rows to be inserted
@@ -335,9 +335,9 @@ void GFitsTableCDoubleCol::insert(const int& rownum, const int& nrows)
             // Compute the number of elements before the insertion point,
             // the number of elements that get inserted, and the total
             // number of elements after the insertion point
-            int n_before = m_number * rownum;
+            int n_before = m_number * row;
             int n_insert = m_number * nrows;
-            int n_after  = m_number * (m_length - rownum);
+            int n_after  = m_number * (m_length - row);
         
             // Copy and initialise data
             GFits::cdouble* src = m_data;
@@ -373,27 +373,27 @@ void GFitsTableCDoubleCol::insert(const int& rownum, const int& nrows)
 /***********************************************************************//**
  * @brief Remove rows from column
  *
- * @param[in] rownum Row after which rows should be removed (0=first row).
+ * @param[in] row Row after which rows should be removed (0=first row).
  * @param[in] nrows Number of rows to be removed.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  * @exception GException::fits_invalid_nrows
  *            Invalid number of rows specified.
  *
  * This method removes rows from a FITS table. This implies that the column
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableCDoubleCol::remove(const int& rownum, const int& nrows)
+void GFitsTableCDoubleCol::remove(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length) {
-        throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    // Make sure that row is valid
+    if (row < 0 || row >= m_length) {
+        throw GException::fits_invalid_row(G_REMOVE, row, m_length-1);
     }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum) {
-        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    if (nrows < 0 || nrows > m_length-row) {
+        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-row);
     }
 
     // Continue only if there are rows to be removed
@@ -418,9 +418,9 @@ void GFitsTableCDoubleCol::remove(const int& rownum, const int& nrows)
             // Compute the number of elements before the removal point,
             // the number of elements that get removed, and the total
             // number of elements after the removal point
-            int n_before = m_number * rownum;
+            int n_before = m_number * row;
             int n_remove = m_number * nrows;
-            int n_after  = m_number * (length - rownum);
+            int n_after  = m_number * (length - row);
 
             // Copy data
             GFits::cdouble* src = m_data;
@@ -511,7 +511,7 @@ void GFitsTableCDoubleCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Column.
+ * @param[in] column Table column.
  *
  * Sets the content of the vector column by copying from another column.
  * If the code is compiled with the small memory option, and if the source

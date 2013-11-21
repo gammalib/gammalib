@@ -187,7 +187,7 @@ GFitsTableCol& GFitsTableCol::operator=(const GFitsTableCol& column)
  * @brief Set number of column elements for specific row
  *
  * @param[in] row Row index.
- * @param[in] number Number of elements in @p row.
+ * @param[in] elements Number of elements in @p row.
  *
  * Sets the number of elements in column for a specific @p row.
  *

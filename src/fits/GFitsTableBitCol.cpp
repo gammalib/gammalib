@@ -77,8 +77,8 @@ GFitsTableBitCol::GFitsTableBitCol(void) : GFitsTableCol()
  ***************************************************************************/
 GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
                                    const int&         length,
-                                   const int&         size)
-                                   : GFitsTableCol(name, length, size, 1)
+                                   const int&         size) :
+                  GFitsTableCol(name, length, size, 1)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -93,8 +93,8 @@ GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
  *
  * @param[in] column Table column.
  ***************************************************************************/
-GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column) 
-                                   : GFitsTableCol(column)
+GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column) :
+                  GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -130,8 +130,9 @@ GFitsTableBitCol::~GFitsTableBitCol(void)
  * @brief Assignment operator
  *
  * @param[in] column Table column.
+ * @return Table column.
  ***************************************************************************/
-GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
+GFitsTableBitCol& GFitsTableBitCol::operator=(const GFitsTableBitCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -313,20 +314,20 @@ int GFitsTableBitCol::integer(const int& row, const int& inx) const
 /***********************************************************************//**
  * @brief Insert rows in column
  *
- * @param[in] rownum Row after which rows should be inserted (0=first row).
+ * @param[in] row Row after which rows should be inserted (0=first row).
  * @param[in] nrows Number of rows to be inserted.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  *
  * This method inserts rows into a FITS table. This implies that the column
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
+void GFitsTableBitCol::insert(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length) {
-        throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    // Make sure that row is valid
+    if (row < 0 || row > m_length) {
+        throw GException::fits_invalid_row(G_INSERT, row, m_length);
     }
     
     // Continue only if there are rows to be inserted
@@ -367,9 +368,9 @@ void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
             // Compute the number of elements before the insertion point,
             // the number of elements that get inserted, and the total
             // number of elements after the insertion point
-            int n_before = m_bytes_per_row * rownum;
+            int n_before = m_bytes_per_row * row;
             int n_insert = m_bytes_per_row * nrows;
-            int n_after  = m_bytes_per_row * (m_length - rownum);
+            int n_after  = m_bytes_per_row * (m_length - row);
 
             // Copy and initialise data
             unsigned char* src = m_data;
@@ -403,27 +404,27 @@ void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
 /***********************************************************************//**
  * @brief Remove rows from column
  *
- * @param[in] rownum Row after which rows should be removed (0=first row).
+ * @param[in] row Row after which rows should be removed (0=first row).
  * @param[in] nrows Number of rows to be removed.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  * @exception GException::fits_invalid_nrows
  *            Invalid number of rows specified.
  *
  * This method removes rows from a FITS table. This implies that the column
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableBitCol::remove(const int& rownum, const int& nrows)
+void GFitsTableBitCol::remove(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length) {
-        throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    // Make sure that row is valid
+    if (row < 0 || row >= m_length) {
+        throw GException::fits_invalid_row(G_REMOVE, row, m_length-1);
     }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum) {
-        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    if (nrows < 0 || nrows > m_length-row) {
+        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-row);
     }
     
     // Continue only if there are rows to be removed
@@ -458,9 +459,9 @@ void GFitsTableBitCol::remove(const int& rownum, const int& nrows)
             // Compute the number of elements before the removal point,
             // the number of elements that get removed, and the total
             // number of elements after the removal point
-            int n_before = m_bytes_per_row * rownum;
+            int n_before = m_bytes_per_row * row;
             int n_remove = m_bytes_per_row * nrows;
-            int n_after  = m_bytes_per_row * (length - rownum);
+            int n_after  = m_bytes_per_row * (length - row);
 
             // Copy data
             unsigned char* src = m_data;
@@ -949,10 +950,3 @@ void GFitsTableBitCol::set_pending(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
