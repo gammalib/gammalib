@@ -531,7 +531,8 @@ void GFitsTableBoolCol::copy_members(const GFitsTableBoolCol& column)
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
-        alloc_data();
+        if (m_data != NULL) delete [] m_data;
+        m_data = new bool[m_size];
         for (int i = 0; i < m_size; ++i) {
             m_data[i] = column.m_data[i];
         }
@@ -644,6 +645,10 @@ void GFitsTableBoolCol::alloc_data(void)
         m_data = new bool[m_size];
     }
 
+    // Allocate also buffer
+    free_buffer();
+    alloc_buffer();
+
     // Return
     return;
 }
@@ -660,16 +665,7 @@ void GFitsTableBoolCol::alloc_data(void)
  ***************************************************************************/
 void GFitsTableBoolCol::fetch_data(void) const
 {
-    // Calculate size of memory
-    m_size = m_number * m_length;
-
-    // Free old buffer memory
-    free_buffer();
-
-    // Allocate buffer memory
-    alloc_buffer();
-
-    // Save column
+    // Load column
     const_cast<GFitsTableBoolCol*>(this)->load_column();
 
     // Extract values from buffer
@@ -679,6 +675,73 @@ void GFitsTableBoolCol::fetch_data(void) const
 
     // Free buffer memory
     free_buffer();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Resize column data
+ *
+ * @param[in] index Start index.
+ * @param[in] number Number of elements to add/remove.
+ *
+ * Adds or removes elements from specified index on. Adding is done if
+ * @p number is a positive number, removing if @p number is negative.
+ * Note that the method does not change the validity of the arguments.
+ * This needs to be done by the client.
+ ***************************************************************************/
+void GFitsTableBoolCol::resize_data(const int& index, const int& number)
+{
+    // Continue only if number of elements is not zero
+    if (number != 0) {
+
+        // If data are not available then load them now
+        if (m_data == NULL) fetch_data();
+
+        // If elements should be removed then do not allocate new memory
+        // but just move elements forward and change the logical size of
+        // memory. Only if all elements should be removed the memory is
+        // released.
+        if (number < 0) {
+            if (m_data != NULL) {
+                int    left = index - number;
+                bool*  dst  = m_data + index;
+                bool*  src  = m_data + left;
+                int    num  = m_size - left;
+                for (int i = 0; i < num; ++i) {
+                    *dst++ = *src++;
+                }
+                m_size += number;
+                if (m_size < 1) {
+                    release_data();
+                }
+            }
+        }
+
+        // If elements should be added then allocate new memory, copy over
+        // the old data and initialise the new elements
+        else {
+            int left       = m_size - index;
+            m_size        += number;
+            bool* new_data = new bool[m_size];
+            bool* dst      = new_data;
+            bool* src      = m_data;
+            for (int i = 0; i < index; ++i) {
+                *dst++ = *src++;
+            }
+            for (int i = 0; i < number; ++i) {
+                *dst++ = false;
+            }
+            for (int i = 0; i < left; ++i) {
+                *dst++ = *src++;
+            }
+            if (m_data != NULL) delete [] m_data;
+            m_data = new_data;
+        }
+
+    } // endif: number was non-zero
 
     // Return
     return;

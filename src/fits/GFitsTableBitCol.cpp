@@ -723,6 +723,28 @@ void GFitsTableBitCol::fetch_data(void) const
 
 
 /***********************************************************************//**
+ * @brief Resize column data
+ *
+ * @param[in] index Start index.
+ * @param[in] number Number of elements to add/remove.
+ *
+ * Adds or removes elements from specified index on. Adding is done if
+ * @p number is a positive number, removing if @p number is negative.
+ * Note that the method does not change the validity of the arguments.
+ * This needs to be done by the client.
+ *
+ * @todo Needs to be implemented
+ ***************************************************************************/
+void GFitsTableBitCol::resize_data(const int& index, const int& number)
+{
+    //TODO
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Release column data
  ***************************************************************************/
 void GFitsTableBitCol::release_data(void)

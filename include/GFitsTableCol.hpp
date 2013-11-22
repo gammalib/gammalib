@@ -108,7 +108,7 @@ protected:
     virtual void        alloc_data(void) = 0;
     virtual void        init_data(void) = 0;
     virtual void        fetch_data(void) const = 0;
-    virtual void        resize_data(const int& index, const int& number) {}
+    virtual void        resize_data(const int& index, const int& number) = 0;
     virtual void        release_data(void) = 0;
     virtual void*       ptr_data(const int& index = 0) = 0;
     virtual void*       ptr_nulval(void) = 0;

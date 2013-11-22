@@ -81,6 +81,7 @@ private:
     virtual void        alloc_data(void);
     virtual void        init_data(void);
     virtual void        fetch_data(void) const;
+    virtual void        resize_data(const int& index, const int& number);
     virtual void        release_data(void);
     virtual void*       ptr_data(const int& index = 0);
     virtual void*       ptr_nulval(void);
