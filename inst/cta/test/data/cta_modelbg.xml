@@ -2,14 +2,14 @@
 <source_library title="source library">
   <source name="CTABackgroundModel" type="CTABackground" instrument="CTA">
     <spectrum type="PowerLaw">
-       <parameter name="Prefactor" scale="1e-10" value="1.0"  min="1e-10" max="1e3.0"  free="1"/>
-       <parameter name="Index"     scale="1.0"   value="-2.5" min="-5.0"  max="+5.0"   free="1"/>
-       <parameter name="Scale"     scale="1e6"   value="1.0"  min="0.01"  max="1000.0" free="0"/>
+       <parameter name="Prefactor" scale="1.0"  value="1.0"  min="1e-10" max="1e3.0"  free="1"/>
+       <parameter name="Index"     scale="1.0"  value="-2.5" min="-5.0"  max="+5.0"   free="1"/>
+       <parameter name="Scale"     scale="1e6"  value="1.0"  min="0.01"  max="1000.0" free="0"/>
     </spectrum>
     <spatialModel type="GaussFunction">
-       <parameter name="RA"    scale="1.0" value="83.6221.0" min="0.0" max="360.0" free="0"/>
-       <parameter name="DEC"   scale="1.0" value="22.01"     min="0.0" max="180"   free="0"/>
-       <parameter name="Sigma" scale="1.0" value="1.0"       min="0.0" max="10.0"  free="0"/>
+       <parameter name="RA"    scale="1.0" value="83.6221" min="0.0"   max="360.0" free="0"/>
+       <parameter name="DEC"   scale="1.0" value="22.01"   min="-90.0" max="90.0"  free="0"/>
+       <parameter name="Sigma" scale="1.0" value="1.0"     min="0.0"   max="10.0"  free="0"/>
     </spatialModel>
   </source>
 </source_library>
