@@ -387,9 +387,9 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
  ***************************************************************************/
 void TestGCTAModelBackground::test_modelbg_npred(void)
 {
-
-    // Set reference value
-    const double ref = 1.0-1.0 / std::sqrt(std::exp(1)); // ~0.393469 result of a 2D Gaussian integrated within one sigma
+    // Set reference value (~0.393469 result of a 2D Gaussian integrated 
+    // within one sigma)
+    const double ref = 1.0 - 1.0 / std::sqrt(std::exp(1.0));
 
     // Load models for Npred computation
     GModels models(cta_modbck_xml);
@@ -398,17 +398,17 @@ void TestGCTAModelBackground::test_modelbg_npred(void)
     const GCTAModelBackground* bck = dynamic_cast<const GCTAModelBackground*>(models[0]);
 
     // Get the spectral and spatial components
-    const GModelSpectralPlaw* spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
+    const GModelSpectralPlaw*       spec = dynamic_cast<const GModelSpectralPlaw*>(bck->spectral());
     const GModelSpatialRadialGauss* spat = dynamic_cast<const GModelSpatialRadialGauss*>(bck->spatial());
 
     // Get Integration center for ROI position
-    double src_ra = spat->ra();
+    double src_ra  = spat->ra();
     double src_dec = spat->dec();
-    double sigma = spat->sigma();
-    test_value(sigma,1.0,1e-7,"Input value from cta_modelbck.xml - file");
+    double sigma   = spat->sigma();
+    test_value(sigma, 1.0, 1e-7, "Input value from cta_modelbck.xml - file");
 
     // Set ROI to sigma of Gaussian
-    double roi_rad =   sigma;
+    double roi_rad = sigma;
 
     // Setup ROI centred on the Gaussian mean with a radius of 1sigma
     GCTARoi     roi;
