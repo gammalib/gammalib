@@ -32,6 +32,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdio>
+#include <cstdlib>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
