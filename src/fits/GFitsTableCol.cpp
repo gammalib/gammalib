@@ -28,6 +28,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
+#include <cstdlib>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsTableCol.hpp"
