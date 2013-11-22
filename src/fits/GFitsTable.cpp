@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GFitsTable.cpp  - FITS table base class                 *
+ *                  GFitsTable.cpp - FITS table base class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -692,32 +692,47 @@ void GFitsTable::data_open(void* vptr)
         char value[80];
         sprintf(keyname, "TTYPE%d", i+1);
         status = __ffgkey(FPTR(m_fitsfile), keyname, value, NULL, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_DATA_OPEN, status);
+        }
         value[strlen(value)-1] = '\0';
 
         // Get column definition
         status = __ffgtcl(FPTR(m_fitsfile), i+1, &typecode, &repeat, &width,
                           &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_DATA_OPEN, status);
+        }
 
         // Check for unsigned columns
         unsigned long offset = 0;
         sprintf(keyname, "TZERO%d", i+1);
         status = __ffgky(FPTR(m_fitsfile), __TULONG, keyname, &offset, NULL, &status);
         if (status == 0) {
-            if (typecode == __TSHORT && offset == 32768u)
+            if (typecode == __TSHORT && offset == 32768u) {
                 typecode = __TUSHORT;
-            else if (typecode == __TLONG && offset == 2147483648u)
+            }
+            else if (typecode == -__TSHORT && offset == 32768u) {
+                typecode = -__TUSHORT;
+            }
+            else if (typecode == __TLONG && offset == 2147483648u) {
                 typecode = __TULONG;
-            else if (typecode == __TINT && offset == 2147483648u)
+            }
+            else if (typecode == -__TLONG && offset == 2147483648u) {
+                typecode = -__TULONG;
+            }
+            else if (typecode == __TINT && offset == 2147483648u) {
                 typecode = __TUINT;
+            }
+            else if (typecode == -__TINT && offset == 2147483648u) {
+                typecode = -__TUINT;
+            }
             else {
-                std::ostringstream message;
-                message << ", but column " << value << " has typecode " << typecode
-                        << " and unexpected associated TZERO=" << offset << ".";
-                throw GException::fits_error(G_DATA_OPEN, 0, message.str());
+                std::string msg = "But column '"+std::string(value)+"' has"
+                                  " typecode "+gammalib::str(typecode)+" and"
+                                  " unexpected associated TZERO="+
+                                  gammalib::str(offset)+".";
+                throw GException::fits_error(G_DATA_OPEN, 0, msg);
             }
         }
         else
@@ -732,8 +747,9 @@ void GFitsTable::data_open(void* vptr)
             unit[0] = '\0';
             unit[1] = '\0';
         }
-        else
+        else {
             unit[strlen(unit)-1] = '\0';
+        }
 
         // Get column dimension (optional, leave blank if not found)
         char dim[80];
