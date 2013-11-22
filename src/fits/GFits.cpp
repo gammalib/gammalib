@@ -499,7 +499,7 @@ void GFits::append(const GFitsHDU& hdu)
     // Debug header
     #if DEBUG
     std::cout << "GFits::append(";
-    switch (hdu->exttype()) {
+    switch (hdu.exttype()) {
     case GFitsHDU::HT_IMAGE:
         std::cout << "GFitsImage";
         break;

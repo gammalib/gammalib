@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GFitsTableCDoubleCol.hpp  - FITS table double precision complex column *
+ *  GFitsTableCDoubleCol.hpp - FITS table double precision complex column  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -51,9 +51,9 @@ public:
     virtual ~GFitsTableCDoubleCol(void);
 
     // Operators
-    GFitsTableCDoubleCol& operator= (const GFitsTableCDoubleCol& column);
-    GFits::cdouble&       operator() (const int& row, const int& inx = 0);
-    const GFits::cdouble& operator() (const int& row, const int& inx = 0) const;
+    GFitsTableCDoubleCol& operator=(const GFitsTableCDoubleCol& column);
+    GFits::cdouble&       operator()(const int& row, const int& inx = 0);
+    const GFits::cdouble& operator()(const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
     virtual void                  clear(void);
@@ -61,31 +61,95 @@ public:
     virtual std::string           string(const int& row, const int& col = 0) const;
     virtual double                real(const int& row, const int& col = 0) const;
     virtual int                   integer(const int& row, const int& col = 0) const;
-    virtual void                  insert(const int& rownum, const int& nrows);
-    virtual void                  remove(const int& rownum, const int& nrows);
+    virtual void                  insert(const int& row, const int& nrows);
+    virtual void                  remove(const int& row, const int& nrows);
+    virtual bool                  isloaded(void) const;
     
     // Other methods
-    GFits::cdouble* data(void) { return m_data; }
+    GFits::cdouble* data(void);
+    GFits::cdouble* nulval(void);
     void            nulval(const GFits::cdouble* value);
-    GFits::cdouble* nulval(void) { return m_nulval; }
 
 private:
     // Private methods
-    void        init_members(void);
-    void        copy_members(const GFitsTableCDoubleCol& column);
-    void        free_members(void);
-    std::string ascii_format(void) const;
-    std::string binary_format(void) const;
-    void        alloc_data(void);
-    void        release_data(void);
-    void        alloc_nulval(const GFits::cdouble* value);
-    void        init_data(void);
-    void*       ptr_data(void) { return m_data; }
-    void*       ptr_nulval(void) { return m_nulval; }
+    void init_members(void);
+    void copy_members(const GFitsTableCDoubleCol& column);
+    void free_members(void);
+    void alloc_nulval(const GFits::cdouble* value);
+
+    // Implemented virtual base class methods
+    virtual void        alloc_data(void);
+    virtual void        init_data(void);
+    virtual void        fetch_data(void) const;
+    virtual void        resize_data(const int& index, const int& number);
+    virtual void        release_data(void);
+    virtual void*       ptr_data(const int& index = 0);
+    virtual void*       ptr_nulval(void);
+    virtual std::string ascii_format(void) const;
 
     // Private data area
     GFits::cdouble* m_data;       //!< Data vector
     GFits::cdouble* m_nulval;     //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Checks if column has been loaded
+ *
+ * @return True if column has been loaded, false otherwise
+ ***************************************************************************/
+inline
+bool GFitsTableCDoubleCol::isloaded(void) const
+{
+    return (m_data != NULL);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to column data
+ *
+ * @return Pointer to column data.
+ ***************************************************************************/
+inline
+GFits::cdouble* GFitsTableCDoubleCol::data(void)
+{
+    return m_data;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to nul value
+ *
+ * @return Pointer to nul value.
+ ***************************************************************************/
+inline
+GFits::cdouble* GFitsTableCDoubleCol::nulval(void)
+{
+    return m_nulval;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns void pointer to column data
+ *
+ * @return Void pointer to column data.
+ ***************************************************************************/
+inline
+void* GFitsTableCDoubleCol::ptr_data(const int& index)
+{
+    return (m_data+index);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns void pointer to nul value
+ *
+ * @return Void pointer to nul value.
+ ***************************************************************************/
+inline
+void* GFitsTableCDoubleCol::ptr_nulval(void)
+{
+    return m_nulval;
+}
 
 #endif /* GFITSTABLECDOUBLECOL_HPP */

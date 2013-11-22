@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GFitsTableULongCol.hpp  - FITS table unsigned long column class     *
+ *      GFitsTableULongCol.hpp - FITS table unsigned long column class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,9 +50,9 @@ public:
     virtual ~GFitsTableULongCol(void);
 
     // Operators
-    GFitsTableULongCol&  operator= (const GFitsTableULongCol& column);
-    unsigned long&       operator() (const int& row, const int& inx = 0);
-    const unsigned long& operator() (const int& row, const int& inx = 0) const;
+    GFitsTableULongCol&  operator=(const GFitsTableULongCol& column);
+    unsigned long&       operator()(const int& row, const int& inx = 0);
+    const unsigned long& operator()(const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
     virtual void                clear(void);
@@ -60,31 +60,95 @@ public:
     virtual std::string         string(const int& row, const int& col = 0) const;
     virtual double              real(const int& row, const int& col = 0) const;
     virtual int                 integer(const int& row, const int& col = 0) const;
-    virtual void                insert(const int& rownum, const int& nrows);
-    virtual void                remove(const int& rownum, const int& nrows);
+    virtual void                insert(const int& row, const int& nrows);
+    virtual void                remove(const int& row, const int& nrows);
+    virtual bool                isloaded(void) const;
     
     // Other methods
-    unsigned long* data(void) { return m_data; }
+    unsigned long* data(void);
+    unsigned long* nulval(void);
     void           nulval(const unsigned long* value);
-    unsigned long* nulval(void) { return m_nulval; }
 
 private:
     // Private methods
-    void                init_members(void);
-    void                copy_members(const GFitsTableULongCol& column);
-    void                free_members(void);
-    std::string         ascii_format(void) const;
-    std::string         binary_format(void) const;
-    void                alloc_data(void);
-    void                release_data(void);
-    void                alloc_nulval(const unsigned long* value);
-    void                init_data(void);
-    void*               ptr_data(void) { return m_data; }
-    void*               ptr_nulval(void) { return m_nulval; }
+    void init_members(void);
+    void copy_members(const GFitsTableULongCol& column);
+    void free_members(void);
+    void alloc_nulval(const unsigned long* value);
+
+    // Implemented virtual base class methods
+    virtual void        alloc_data(void);
+    virtual void        init_data(void);
+    virtual void        fetch_data(void) const;
+    virtual void        resize_data(const int& index, const int& number);
+    virtual void        release_data(void);
+    virtual void*       ptr_data(const int& index = 0);
+    virtual void*       ptr_nulval(void);
+    virtual std::string ascii_format(void) const;
 
     // Private data area
     unsigned long* m_data;       //!< Data vector
     unsigned long* m_nulval;     //!< NULL value
 };
+
+
+/***********************************************************************//**
+ * @brief Checks if column has been loaded
+ *
+ * @return True if column has been loaded, false otherwise
+ ***************************************************************************/
+inline
+bool GFitsTableULongCol::isloaded(void) const
+{
+    return (m_data != NULL);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to column data
+ *
+ * @return Pointer to column data.
+ ***************************************************************************/
+inline
+unsigned long* GFitsTableULongCol::data(void)
+{
+    return m_data;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to nul value
+ *
+ * @return Pointer to nul value.
+ ***************************************************************************/
+inline
+unsigned long* GFitsTableULongCol::nulval(void)
+{
+    return m_nulval;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns void pointer to column data
+ *
+ * @return Void pointer to column data.
+ ***************************************************************************/
+inline
+void* GFitsTableULongCol::ptr_data(const int& index)
+{
+    return (m_data+index);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns void pointer to nul value
+ *
+ * @return Void pointer to nul value.
+ ***************************************************************************/
+inline
+void* GFitsTableULongCol::ptr_nulval(void)
+{
+    return m_nulval;
+}
 
 #endif /* GFITSTABLEULONGCOL_HPP */

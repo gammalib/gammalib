@@ -1,7 +1,7 @@
 /***************************************************************************
- * GFitsTableULongCol.i  - FITS table unsigned long column class SWIG def. *
+ *   GFitsTableULongCol.i - FITS table unsigned long integer column class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsTableULongCol.i
- * @brief FITS table unsigned long integer column class Python interface definition
+ * @brief FITS table unsigned long integer column class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GFitsTableULongCol
  *
- * @brief FITS table unsigned long integer column Python interface definition
+ * @brief FITS table unsigned long integer column class
  ***************************************************************************/
 class GFitsTableULongCol : public GFitsTableCol {
 public:
@@ -49,13 +49,14 @@ public:
     virtual std::string         string(const int& row, const int& col = 0) const;
     virtual double              real(const int& row, const int& col = 0) const;
     virtual int                 integer(const int& row, const int& col = 0) const;
-    virtual void                insert(const int& rownum, const int& nrows);
-    virtual void                remove(const int& rownum, const int& nrows);
+    virtual void                insert(const int& row, const int& nrows);
+    virtual void                remove(const int& row, const int& nrows);
+    virtual bool                isloaded(void) const;
     
     // Other methods
     unsigned long* data(void);
-    void           nulval(const unsigned long* value);
     unsigned long* nulval(void);
+    void           nulval(const unsigned long* value);
 };
 
 

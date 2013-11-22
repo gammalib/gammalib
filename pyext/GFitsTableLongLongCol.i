@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GFitsTableLongLongCol.i  - FITS table long long column class SWIG def. *
+ *   GFitsTableLongLongCol.i - FITS table long long integer column class   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsTableLongLongCol.i
- * @brief FITS table long long integer column class Python interface definition
+ * @brief FITS table long long integer column class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GFitsTableLongLongCol
  *
- * @brief FITS table long long integer column Python interface definition
+ * @brief FITS table long long integer column class
  ***************************************************************************/
 class GFitsTableLongLongCol : public GFitsTableCol {
 public:
@@ -49,13 +49,14 @@ public:
     virtual std::string            string(const int& row, const int& col = 0) const;
     virtual double                 real(const int& row, const int& col = 0) const;
     virtual int                    integer(const int& row, const int& col = 0) const;
-    virtual void                   insert(const int& rownum, const int& nrows);
-    virtual void                   remove(const int& rownum, const int& nrows);
+    virtual void                   insert(const int& row, const int& nrows);
+    virtual void                   remove(const int& row, const int& nrows);
+    virtual bool                   isloaded(void) const;
     
     // Other methods
     long long*  data(void);
-    void        nulval(const long long* value);
     long long*  nulval(void);
+    void        nulval(const long long* value);
 };
 
 

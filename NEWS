@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-12 November 2013
+22 November 2013
 
 
 1. Introduction
@@ -143,7 +143,7 @@ file that avoids memory leaks on exit of GammaLib.
 
 6. FITS I/O Interface
 ---------------------
-None
+Variable-length columns are now supported by the FITS classes.
 
 
 7. Linear algebra module

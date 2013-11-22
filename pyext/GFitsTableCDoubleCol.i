@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GFitsTableCDoubleCol.i  - FITS table double precision complex column  *
+ *   GFitsTableCDoubleCol.i - FITS table double precision complex column   *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsTableCDoubleCol.i
- * @brief FITS table double complex column class Python interface definition
+ * @brief FITS table double complex column class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GFitsTableCDoubleCol
  *
- * @brief FITS table double complex column Python interface definition
+ * @brief FITS table double complex column class
  ***************************************************************************/
 class GFitsTableCDoubleCol : public GFitsTableCol {
 public:
@@ -49,13 +49,14 @@ public:
     virtual std::string           string(const int& row, const int& col = 0) const;
     virtual double                real(const int& row, const int& col = 0) const;
     virtual int                   integer(const int& row, const int& col = 0) const;
-    virtual void                  insert(const int& rownum, const int& nrows);
-    virtual void                  remove(const int& rownum, const int& nrows);
+    virtual void                  insert(const int& row, const int& nrows);
+    virtual void                  remove(const int& row, const int& nrows);
+    virtual bool                  isloaded(void) const;
     
     // Other methods
     GFits::cdouble* data(void);
-    void            nulval(const GFits::cdouble* value);
     GFits::cdouble* nulval(void);
+    void            nulval(const GFits::cdouble* value);
 };
 
 

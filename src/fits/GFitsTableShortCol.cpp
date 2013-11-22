@@ -1,7 +1,7 @@
 /***************************************************************************
  *     GFitsTableShortCol.cpp  - FITS table short integer column class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -68,13 +68,13 @@ GFitsTableShortCol::GFitsTableShortCol(void) : GFitsTableCol()
  * @brief Constructor
  *
  * @param[in] name Name of column.
- * @param[in] length Length of column.
- * @param[in] size Vector size of column.
+ * @param[in] length Length of column (number of rows).
+ * @param[in] size Number of elements in column (negative for variable-length).
  ***************************************************************************/
 GFitsTableShortCol::GFitsTableShortCol(const std::string& name,
                                        const int&         length,
-                                       const int&         size)
-                                       : GFitsTableCol(name, length, size, 2)
+                                       const int&         size) :
+                    GFitsTableCol(name, length, size, 2)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -89,8 +89,8 @@ GFitsTableShortCol::GFitsTableShortCol(const std::string& name,
  *
  * @param[in] column Table column.
  ***************************************************************************/
-GFitsTableShortCol::GFitsTableShortCol(const GFitsTableShortCol& column)
-                                       : GFitsTableCol(column)
+GFitsTableShortCol::GFitsTableShortCol(const GFitsTableShortCol& column) :
+                    GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -126,8 +126,9 @@ GFitsTableShortCol::~GFitsTableShortCol(void)
  * @brief Assignment operator
  *
  * @param[in] column Table column.
+ * @return Table column.
  ***************************************************************************/
-GFitsTableShortCol& GFitsTableShortCol::operator= (const GFitsTableShortCol& column)
+GFitsTableShortCol& GFitsTableShortCol::operator=(const GFitsTableShortCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -159,7 +160,7 @@ GFitsTableShortCol& GFitsTableShortCol::operator= (const GFitsTableShortCol& col
  *
  * Provides access to data in a column.
  ***************************************************************************/
-short& GFitsTableShortCol::operator() (const int& row, const int& inx)
+short& GFitsTableShortCol::operator()(const int& row, const int& inx)
 {
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
@@ -177,12 +178,10 @@ short& GFitsTableShortCol::operator() (const int& row, const int& inx)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-const short& GFitsTableShortCol::operator() (const int& row, const int& inx) const
+const short& GFitsTableShortCol::operator()(const int& row, const int& inx) const
 {
     // If data are not available then load them now
-    if (m_data == NULL) {
-        const_cast<GFitsTableShortCol*>(this)->fetch_data();
-    }
+    if (m_data == NULL) fetch_data();
 
     // Return data bin
     return m_data[offset(row, inx)];
@@ -237,12 +236,8 @@ std::string GFitsTableShortCol::string(const int& row, const int& inx) const
     // If data are not available then load them now
     if (m_data == NULL) fetch_data();
 
-    // Convert short into string
-    std::ostringstream s_value;
-    s_value << m_data[offset(row,inx)];
-
     // Return value
-    return s_value.str();
+    return (gammalib::str(m_data[offset(row,inx)]));
 }
 
 
@@ -291,20 +286,20 @@ int GFitsTableShortCol::integer(const int& row, const int& inx) const
 /***********************************************************************//**
  * @brief Insert rows in column
  *
- * @param[in] rownum Row after which rows should be inserted (0=first row).
+ * @param[in] row Row after which rows should be inserted (0=first row).
  * @param[in] nrows Number of rows to be inserted.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  *
  * This method inserts rows into a FITS table. This implies that all columns
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableShortCol::insert(const int& rownum, const int& nrows)
+void GFitsTableShortCol::insert(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length) {
-        throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    // Make sure that row is valid
+    if (row < 0 || row > m_length) {
+        throw GException::fits_invalid_row(G_INSERT, row, m_length);
     }
     
     // Continue only if there are rows to be inserted
@@ -335,9 +330,9 @@ void GFitsTableShortCol::insert(const int& rownum, const int& nrows)
             // Compute the number of elements before the insertion point,
             // the number of elements that get inserted, and the total
             // number of elements after the insertion point
-            int n_before = m_number * rownum;
+            int n_before = m_number * row;
             int n_insert = m_number * nrows;
-            int n_after  = m_number * (m_length - rownum);
+            int n_after  = m_number * (m_length - row);
         
             // Copy and initialise data
             short* src = m_data;
@@ -371,27 +366,27 @@ void GFitsTableShortCol::insert(const int& rownum, const int& nrows)
 /***********************************************************************//**
  * @brief Remove rows from column
  *
- * @param[in] rownum Row after which rows should be removed (0=first row).
+ * @param[in] row Row after which rows should be removed (0=first row).
  * @param[in] nrows Number of rows to be removed.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  * @exception GException::fits_invalid_nrows
  *            Invalid number of rows specified.
  *
  * This method removes rows from a FITS table. This implies that the column
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableShortCol::remove(const int& rownum, const int& nrows)
+void GFitsTableShortCol::remove(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length) {
-        throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    // Make sure that row is valid
+    if (row < 0 || row >= m_length) {
+        throw GException::fits_invalid_row(G_REMOVE, row, m_length-1);
     }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum) {
-        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    if (nrows < 0 || nrows > m_length-row) {
+        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-row);
     }
     
     // Continue only if there are rows to be removed
@@ -416,9 +411,9 @@ void GFitsTableShortCol::remove(const int& rownum, const int& nrows)
             // Compute the number of elements before the removal point,
             // the number of elements that get removed, and the total
             // number of elements after the removal point
-            int n_before = m_number * rownum;
+            int n_before = m_number * row;
             int n_remove = m_number * nrows;
-            int n_after  = m_number * (length - rownum);
+            int n_after  = m_number * (length - row);
 
             // Copy data
             short* src = m_data;
@@ -509,7 +504,7 @@ void GFitsTableShortCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Table column.
+ * @param[in] column Column.
  *
  * Sets the content of the vector column by copying from another column.
  * If the code is compiled with the small memory option, and if the source
@@ -518,16 +513,17 @@ void GFitsTableShortCol::init_members(void)
  ***************************************************************************/
 void GFitsTableShortCol::copy_members(const GFitsTableShortCol& column)
 {
-    // Fetch column data if not yet fetched. The casting circumvents the
-    // const correctness
-    bool not_loaded = (column.m_data == NULL);
+    // Fetch data if necessary
+    bool not_loaded = (!column.isloaded());
     if (not_loaded) {
-        const_cast<GFitsTableShortCol*>(&column)->fetch_data();
+        column.fetch_data();
     }
 
     // Copy attributes
-    m_type = column.m_type;
-    m_size = column.m_size;
+    m_type     = column.m_type;
+    m_size     = column.m_size;
+    m_varlen   = column.m_varlen;
+    m_rowstart = column.m_rowstart;
 
     // Copy column data
     if (column.m_data != NULL && m_size > 0) {
@@ -593,25 +589,6 @@ std::string GFitsTableShortCol::ascii_format(void) const
 
 
 /***********************************************************************//**
- * @brief Returns format string of binary table
- ***************************************************************************/
-std::string GFitsTableShortCol::binary_format(void) const
-{
-    // Initialize format string
-    std::string format;
-
-    // Set number of elements
-    format.append(gammalib::str(m_number));
-
-    // Set type code
-    format.append("I");
-
-    // Return format
-    return format;
-}
-
-
-/***********************************************************************//**
  * @brief Allocates column data
  ***************************************************************************/
 void GFitsTableShortCol::alloc_data(void)
@@ -626,6 +603,84 @@ void GFitsTableShortCol::alloc_data(void)
     if (m_size > 0) {
         m_data = new short[m_size];
     }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch column data
+ ***************************************************************************/
+void GFitsTableShortCol::fetch_data(void) const
+{
+    // Load column (circumvent const correctness)
+    const_cast<GFitsTableShortCol*>(this)->load_column();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Resize column data
+ *
+ * @param[in] index Start index.
+ * @param[in] number Number of elements to add/remove.
+ *
+ * Adds or removes elements from specified index on. Adding is done if
+ * @p number is a positive number, removing if @p number is negative.
+ * Note that the method does not change the validity of the arguments.
+ * This needs to be done by the client.
+ ***************************************************************************/
+void GFitsTableShortCol::resize_data(const int& index, const int& number)
+{
+    // Continue only if number of elements is not zero
+    if (number != 0) {
+
+        // If data are not available then load them now
+        if (m_data == NULL) fetch_data();
+
+        // If elements should be removed then do not allocate new memory
+        // but just move elements forward and change the logical size of
+        // memory. Only if all elements should be removed the memory is
+        // released.
+        if (number < 0) {
+            int    left = index - number;
+            short* dst  = m_data + index;
+            short* src  = m_data + left;
+            int    num  = m_size - left;
+            for (int i = 0; i < num; ++i) {
+                *dst++ = *src++;
+            }
+            m_size += number;
+            if (m_size < 1) {
+                release_data();
+            }
+        }
+
+        // If elements should be added then allocate new memory, copy over
+        // the old data and initialise the new elements
+        else {
+            int left        = m_size - index;
+            m_size         += number;
+            short* new_data = new short[m_size];
+            short* dst      = new_data;
+            short* src      = m_data;
+            for (int i = 0; i < index; ++i) {
+                *dst++ = *src++;
+            }
+            for (int i = 0; i < number; ++i) {
+                *dst++ = 0;
+            }
+            for (int i = 0; i < left; ++i) {
+                *dst++ = *src++;
+            }
+            if (m_data != NULL) delete [] m_data;
+            m_data = new_data;
+        }
+
+    } // endif: number was non-zero
 
     // Return
     return;

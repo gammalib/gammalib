@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GFitsTable.cpp  - FITS table base class                 *
+ *                  GFitsTable.cpp - FITS table base class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -32,6 +32,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdio>
+#include <cstdlib>
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
@@ -67,7 +68,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-//#define G_DEBUG_SAVE      //!< Debug data_save() method
+//#define G_DEBUG_SAVE                          //!< Debug data_save() method
 
 
 /*==========================================================================
@@ -412,7 +413,7 @@ void GFitsTable::insert_column(int colnum, GFitsTableCol& column)
 
     // Reset column number since column does not already exist in FITS
     // file
-    m_columns[colnum]->m_colnum = 0;
+    m_columns[colnum]->colnum(0);
 
     // Return
     return;
@@ -647,9 +648,11 @@ void GFitsTable::data_open(void* vptr)
     // Move to HDU
     int status = 0;
     status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0)
-        throw GException::fits_hdu_not_found(G_DATA_OPEN, (FPTR(vptr)->HDUposition)+1,
+    if (status != 0) {
+        throw GException::fits_hdu_not_found(G_DATA_OPEN,
+                                             (FPTR(vptr)->HDUposition)+1,
                                              status);
+    }
 
     // Save FITS file pointer
     FPTR_COPY(m_fitsfile, vptr);
@@ -657,23 +660,27 @@ void GFitsTable::data_open(void* vptr)
     // Determine number of rows in table
     long nrows  = 0;
     status      = __ffgnrw(FPTR(m_fitsfile), &nrows, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_DATA_OPEN, status);
-    else
+    }
+    else {
         m_rows = (int)nrows;
+    }
 
     // Determine number of columns in table
     status = __ffgncl(FPTR(m_fitsfile), &m_cols, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_DATA_OPEN, status);
+    }
 
     // Allocate and initialise memory for column pointers. Note that this
     // initialisation is needed to allow for a clean free_members() call
     // in case of any exception.
     if (m_columns != NULL) delete [] m_columns;
     m_columns = new GFitsTableCol*[m_cols];
-    for (int i = 0; i < m_cols; ++i)
+    for (int i = 0; i < m_cols; ++i) {
         m_columns[i] = NULL;
+    }
 
     // Get table column information
     int  typecode = 0;
@@ -686,32 +693,47 @@ void GFitsTable::data_open(void* vptr)
         char value[80];
         sprintf(keyname, "TTYPE%d", i+1);
         status = __ffgkey(FPTR(m_fitsfile), keyname, value, NULL, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_DATA_OPEN, status);
+        }
         value[strlen(value)-1] = '\0';
 
         // Get column definition
         status = __ffgtcl(FPTR(m_fitsfile), i+1, &typecode, &repeat, &width,
                           &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_DATA_OPEN, status);
+        }
 
         // Check for unsigned columns
         unsigned long offset = 0;
         sprintf(keyname, "TZERO%d", i+1);
         status = __ffgky(FPTR(m_fitsfile), __TULONG, keyname, &offset, NULL, &status);
         if (status == 0) {
-            if (typecode == __TSHORT && offset == 32768u)
+            if (typecode == __TSHORT && offset == 32768u) {
                 typecode = __TUSHORT;
-            else if (typecode == __TLONG && offset == 2147483648u)
+            }
+            else if (typecode == -__TSHORT && offset == 32768u) {
+                typecode = -__TUSHORT;
+            }
+            else if (typecode == __TLONG && offset == 2147483648u) {
                 typecode = __TULONG;
-            else if (typecode == __TINT && offset == 2147483648u)
+            }
+            else if (typecode == -__TLONG && offset == 2147483648u) {
+                typecode = -__TULONG;
+            }
+            else if (typecode == __TINT && offset == 2147483648u) {
                 typecode = __TUINT;
+            }
+            else if (typecode == -__TINT && offset == 2147483648u) {
+                typecode = -__TUINT;
+            }
             else {
-                std::ostringstream message;
-                message << ", but column " << value << " has typecode " << typecode
-                        << " and unexpected associated TZERO=" << offset << ".";
-                throw GException::fits_error(G_DATA_OPEN, 0, message.str());
+                std::string msg = "But column '"+std::string(value)+"' has"
+                                  " typecode "+gammalib::str(typecode)+" and"
+                                  " unexpected associated TZERO="+
+                                  gammalib::str(offset)+".";
+                throw GException::fits_error(G_DATA_OPEN, 0, msg);
             }
         }
         else
@@ -726,8 +748,9 @@ void GFitsTable::data_open(void* vptr)
             unit[0] = '\0';
             unit[1] = '\0';
         }
-        else
+        else {
             unit[strlen(unit)-1] = '\0';
+        }
 
         // Get column dimension (optional, leave blank if not found)
         char dim[80];
@@ -764,24 +787,25 @@ void GFitsTable::data_open(void* vptr)
         m_columns[i]->name(gammalib::strip_whitespace(&(value[1])));
         m_columns[i]->unit(gammalib::strip_whitespace(&(unit[1])));
         m_columns[i]->dim(vdim);
-        m_columns[i]->m_colnum = i+1;
-        m_columns[i]->m_type   = typecode;
-        m_columns[i]->m_repeat = repeat;
-        m_columns[i]->m_width  = width;
-        m_columns[i]->m_length = m_rows;
+        m_columns[i]->colnum(i+1);
+        m_columns[i]->type(typecode);
+        m_columns[i]->repeat(repeat);
+        m_columns[i]->width(width);
+        m_columns[i]->length(m_rows);
+        m_columns[i]->isvariable(typecode < 0);
         m_columns[i]->connect(FPTR(m_fitsfile));
 
         // Extract column vector size
-        if (m_columns[i]->m_repeat == 1) { // ASCII tables
-            m_columns[i]->m_number = 1;
+        if (m_columns[i]->repeat() == 1) { // ASCII tables
+            m_columns[i]->number(1);
         }
         else {                             // Binary tables
             if (typecode == __TSTRING) {
-                m_columns[i]->m_number = m_columns[i]->m_repeat /
-                                         m_columns[i]->m_width;
+                m_columns[i]->number(m_columns[i]->repeat() /
+                                     m_columns[i]->width());
             }
             else {
-                m_columns[i]->m_number = m_columns[i]->m_repeat;
+                m_columns[i]->number(m_columns[i]->repeat());
             }
         }
         
@@ -795,10 +819,10 @@ void GFitsTable::data_open(void* vptr)
             }
                 
             // Compare with real size
-            if (num != m_columns[i]->m_number) {
+            if (num != m_columns[i]->number()) {
                 throw GException::fits_inconsistent_tdim(G_DATA_OPEN,
                                                          vdim,
-                                                         m_columns[i]->m_number);
+                                                         m_columns[i]->number());
             }
                 
         } // endif: Valid TDIM information was found
@@ -841,6 +865,9 @@ void GFitsTable::data_save(void)
     // Debug definition: Dump method entry
     #if defined(G_DEBUG_SAVE)
     std::cout << "GFitsTable::save: entry" << std::endl;
+    for (int i = 0; i < m_cols; ++i) {
+        std::cout << m_columns[i]->print() << std::endl;
+    }
     #endif
 
     // Make sure that column lengths are consistent with table length.
@@ -894,8 +921,9 @@ void GFitsTable::data_save(void)
         // Create FITS table
         status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields, ttype, tform,
                           tunit, NULL, &status);
-        if (status != 0)
+        if (status != 0) {
             throw GException::fits_error(G_DATA_SAVE, status);
+        }
 
         // De-allocate column definition arrays
         if (m_cols > 0) {
@@ -914,7 +942,7 @@ void GFitsTable::data_save(void)
             for (int i = 0; i < m_cols; ++i) {
                 if (m_columns[i] != NULL) {
                     FPTR_COPY(m_columns[i]->m_fitsfile, m_fitsfile);
-                    m_columns[i]->m_colnum = i+1;
+                    m_columns[i]->colnum(i+1);
                 }
             }
         }
@@ -1009,6 +1037,11 @@ void GFitsTable::data_save(void)
             #endif
             
         }
+
+        // Debug option: Show where we are
+        #if defined(G_DEBUG_SAVE)
+        std::cout << "GFitsTable::save: Now update all columns." << std::endl;
+        #endif
         
         // Update all columns. The 'm_colnum' field specifies where in the
         // FITS file the column resides. If 'm_colnum=0' then we have a new
@@ -1021,7 +1054,7 @@ void GFitsTable::data_save(void)
 
                 // If column has no correspondance than add new column in
                 // FITS table and link column to table.
-                if (m_columns[i]->m_colnum == 0) {
+                if (m_columns[i]->colnum() == 0) {
 
                     // Increment number of columns in FITS file
                     num_cols++;
@@ -1036,19 +1069,30 @@ void GFitsTable::data_save(void)
                     // Connect all column to FITS table by copying over the
                     // FITS file pointer.
                     FPTR_COPY(m_columns[i]->m_fitsfile, m_fitsfile);
-                    m_columns[i]->m_colnum = num_cols;
+                    m_columns[i]->colnum(num_cols);
 
                 } // endif: column appended to FITS file
 
                 // Now write column into FITS file (only if length is positive)
                 if (m_columns[i]->length() > 0) {
+                    // Debug option: Show which column we're going to write
+                    #if defined(G_DEBUG_SAVE)
+                    std::cout << "GFitsTable::save: Write column " << i;
+                    std::cout << "." << std::endl;
+                    #endif
                     m_columns[i]->save();
                 }
 
             } // endif: column was valid
         } // endfor: looped over all table columns
 
-        // Delete all unused columns from FITS file. We do this from last to
+        // Debug option: Show where we are
+        #if defined(G_DEBUG_SAVE)
+        std::cout << "GFitsTable::save: Now delete all obsolete columns.";
+        std::cout << std::endl;
+        #endif
+
+        // Delete all obsolete columns from FITS file. We do this from last to
         // first so that the column numbers remain valid. Also note that
         // FITS column counting starts from 1.
         for (int colnum = num_cols; colnum > 0; --colnum) {
@@ -1096,6 +1140,12 @@ void GFitsTable::data_save(void)
 
     } // endelse: FITS table has been updated
 
+    // Debug option: Show where we are
+    #if defined(G_DEBUG_SAVE)
+    std::cout << "GFitsTable::save: Now update the FITS header for all columns.";
+    std::cout << std::endl;
+    #endif
+
     // Now update the header for all columns (unit and TDIM information)
     for (int i = 0; i < m_cols; ++i) {
 
@@ -1103,7 +1153,7 @@ void GFitsTable::data_save(void)
         if (m_columns[i] != NULL) {
 
             // Get column number
-            int colnum = m_columns[i]->m_colnum;
+            int colnum = m_columns[i]->colnum();
 
             // Update column units if available
             if (m_columns[i]->unit().length() > 0) {
@@ -1207,9 +1257,9 @@ char* GFitsTable::get_ttype(const int& colnum) const
     // Get type only if column exists
     if (m_columns != NULL && colnum >=0 && colnum < m_cols && 
         m_columns[colnum] != NULL) {
-        int size = m_columns[colnum]->m_name.length();
+        int size = m_columns[colnum]->name().length();
         ptr      = new char[size+1];
-        std::strncpy(ptr, m_columns[colnum]->m_name.c_str(), size);
+        std::strncpy(ptr, m_columns[colnum]->name().c_str(), size);
         ptr[size] = '\0';
    }
 
@@ -1248,9 +1298,9 @@ char* GFitsTable::get_tform(const int& colnum) const
             std::strncpy(ptr, m_columns[colnum]->ascii_format().c_str(), size);
             break;
         case GFitsHDU::HT_BIN_TABLE:
-            size = m_columns[colnum]->binary_format().length();
+            size = m_columns[colnum]->tform_binary().length();
             ptr  = new char[size+1];
-            std::strncpy(ptr, m_columns[colnum]->binary_format().c_str(), size);
+            std::strncpy(ptr, m_columns[colnum]->tform_binary().c_str(), size);
             break;
         default:
             throw GException::fits_unknown_tabtype(G_GET_TFORM, m_type);
@@ -1281,9 +1331,9 @@ char* GFitsTable::get_tunit(const int& colnum) const
     // Get type only if column exists
     if (m_columns != NULL && colnum >=0 && colnum < m_cols && 
         m_columns[colnum] != NULL) {
-        int size = m_columns[colnum]->m_unit.length();
+        int size = m_columns[colnum]->unit().length();
         ptr      = new char[size+1];
-        std::strncpy(ptr, m_columns[colnum]->m_unit.c_str(), size);
+        std::strncpy(ptr, m_columns[colnum]->unit().c_str(), size);
         ptr[size] = '\0';
     }
 
@@ -1370,8 +1420,8 @@ void GFitsTable::free_members(void)
  *
  * @param[in] typecode cfitsio type code
  *
- * Allocates a table column depending on the cfitsio type code. If type code
- * is not found then return a NULL pointer.
+ * Allocates a table column depending on the cfitsio type code. If the type
+ * code is not found then return a NULL pointer.
  ***************************************************************************/
 GFitsTableCol* GFitsTable::alloc_column(int typecode) const
 {
@@ -1379,7 +1429,7 @@ GFitsTableCol* GFitsTable::alloc_column(int typecode) const
     GFitsTableCol* ptr = NULL;
 
     // Allocate column
-    switch (typecode) {
+    switch (std::abs(typecode)) {
     case __TBIT:
         ptr = new GFitsTableBitCol;
         break;

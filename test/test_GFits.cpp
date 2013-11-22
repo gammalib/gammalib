@@ -252,6 +252,97 @@
                         col2.string(i,j)+" is not "+gammalib::str(val)); \
         } \
     }
+#define TEST_VARTABLE \
+    for (int i = 0; i < nrows; ++i) { \
+        col3.elements(i,i+1); \
+        for (int j = 0; j < i+1; ++j) { \
+            col3(i,j) = double(i)*2.3 + double(j)*11.7 + 0.95; \
+        } \
+    } \
+    for (int i = 0; i < nrows; ++i) { \
+        for (int j = 0; j < i+1; ++j) { \
+            double val = double(i)*2.3 + double(j)*11.7 + 0.95; \
+            test_value(col3(i,j), val, 1e-6, \
+                       "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
+            test_value(col3.real(i,j), val, 1e-6, \
+                       "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
+            test_value(col3.integer(i,j), int(val), 1e-6, \
+                       "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
+            test_assert((col3.string(i,j) == gammalib::str(val)), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col3.string(i,j)+" is not "+gammalib::str(val)); \
+        } \
+    }
+#define TEST_VARTABLE_INT \
+    for (int i = 0; i < nrows; ++i) { \
+        col3.elements(i,i+1); \
+        for (int j = 0; j < i+1; ++j) { \
+            col3(i,j) = i + j*11; \
+        } \
+    } \
+    for (int i = 0; i < nrows; ++i) { \
+        for (int j = 0; j < i+1; ++j) { \
+            int val = i + j*11; \
+            test_assert((col3(i,j) == val), \
+                        "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3(i,j))+" is not "+gammalib::str(val)); \
+            test_assert((col3.real(i,j) == double(val)), \
+                        "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3.real(i,j))+" is not "+gammalib::str(double(val))); \
+            test_assert((col3.integer(i,j) == val), \
+                        "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3.integer(i,j))+" is not "+gammalib::str(val)); \
+            test_assert((col3.string(i,j) == gammalib::str(val)), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col3.string(i,j)+" is not "+gammalib::str(val)); \
+        } \
+    }
+#define TEST_VARTABLE_BOOL \
+    for (int i = 0; i < nrows; ++i) { \
+        col3.elements(i,i+1); \
+        for (int j = 0; j < i+1; ++j) { \
+            col3(i,j) = (i % 2) * (j % 2); \
+        } \
+    } \
+    for (int i = 0; i < nrows; ++i) { \
+        for (int j = 0; j < i+1; ++j) { \
+            int         ival = ((i % 2) * (j % 2)); \
+            std::string sval = ((i % 2) * (j % 2)) ? "T" : "F"; \
+            test_assert((col3(i,j) == ival), \
+                        "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3(i,j))+" is not "+gammalib::str(ival)); \
+            test_assert((col3.real(i,j) == double(ival)), \
+                        "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3.real(i,j))+" is not "+gammalib::str(double(ival))); \
+            test_assert((col3.integer(i,j) == int(ival)), \
+                        "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        gammalib::str(col3.integer(i,j))+" is not "+gammalib::str(int(ival))); \
+            test_assert((col3.string(i,j) == gammalib::str(ival) || col3.string(i,j) == sval), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col3.string(i,j)+" is not "+gammalib::str(ival)+" or "+sval); \
+        } \
+    }
+#define TEST_VARTABLE_STRING \
+    for (int i = 0; i < nrows; ++i) { \
+        col3.elements(i,i+1); \
+        for (int j = 0; j < i+1; ++j) { \
+            col3(i,j) = gammalib::str(double(i)*2.3 + double(j)*11.7 + 0.95); \
+        } \
+    } \
+    for (int i = 0; i < nrows; ++i) { \
+        for (int j = 0; j < i+1; ++j) { \
+            double val = double(i)*2.3 + double(j)*11.7 + 0.95; \
+            test_value(gammalib::todouble(col3(i,j)), val, 1e-6, \
+                       "Test access operator row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
+            test_value(col3.real(i,j), val, 1e-6, \
+                       "Test real() method for row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
+            test_value(col3.integer(i,j), int(val), 1e-6, \
+                       "Test integer() method for row "+gammalib::str(i)+" and element "+gammalib::str(j)); \
+            test_assert((col3.string(i,j) == gammalib::str(val)), \
+                        "Test string() method for row "+gammalib::str(i)+" and element "+gammalib::str(j), \
+                        col3.string(i,j)+" is not "+gammalib::str(val)); \
+        } \
+    }
 #define TEST_WRITE_TABLES \
     test_try("Write Table"); \
     try { \
@@ -260,6 +351,7 @@
         GFitsBinTable table = GFitsBinTable(nrows); \
         table.append_column(col1); \
         table.insert_column(1, col2); \
+        table.append_column(col3); \
         fits.append(table); \
         fits.save(); \
         fits.close(); \
@@ -921,6 +1013,10 @@ void TestGFits::test_bintable_double(void)
     GFitsTableDoubleCol col2("DOUBLE10", nrows, nvec);
     TEST_TABLE2;
 
+    // Test variable-length column table
+    GFitsTableDoubleCol col3("DOUBLEVAR", nrows, -1);
+    TEST_VARTABLE;
+
     // Write tables
     TEST_WRITE_TABLES;
 
@@ -970,6 +1066,10 @@ void TestGFits::test_bintable_float(void)
     // Test multiple column table
     GFitsTableFloatCol col2("FLOAT10", nrows, nvec);
     TEST_TABLE2;
+
+    // Test variable-length column table
+    GFitsTableFloatCol col3("FLOATVAR", nrows, -1);
+    TEST_VARTABLE;
 
     // Write tables
     TEST_WRITE_TABLES;
@@ -1022,6 +1122,10 @@ void TestGFits::test_bintable_short(void)
     GFitsTableShortCol col2("SHORT10", nrows, nvec);
     TEST_TABLE2_INT;
 
+    // Test variable-length column table
+    GFitsTableShortCol col3("SHORTVAR", nrows, -1);
+    TEST_VARTABLE_INT;
+
     // Write tables
     TEST_WRITE_TABLES;
 
@@ -1072,6 +1176,10 @@ void TestGFits::test_bintable_short(void)
     // Test multiple column table
     GFitsTableUShortCol col2("USHORT10", nrows, nvec);
     TEST_TABLE2_INT;
+
+    // Test variable-length column table
+    GFitsTableUShortCol col3("USHORTVAR", nrows, -1);
+    TEST_VARTABLE_INT;
 
     // Write tables
     TEST_WRITE_TABLES;
@@ -1124,6 +1232,10 @@ void TestGFits::test_bintable_long(void)
     GFitsTableLongCol col2("LONG10", nrows, nvec);
     TEST_TABLE2_INT;
 
+    // Test variable-length column table
+    GFitsTableLongCol col3("LONGVAR", nrows, -1);
+    TEST_VARTABLE_INT;
+
     // Write tables
     TEST_WRITE_TABLES;
 
@@ -1174,6 +1286,10 @@ void TestGFits::test_bintable_longlong(void)
     // Test multiple column table
     GFitsTableLongLongCol col2("LONGLONG10", nrows, nvec);
     TEST_TABLE2_INT;
+
+    // Test variable-length column table
+    GFitsTableLongLongCol col3("LONGLONGVAR", nrows, -1);
+    TEST_VARTABLE_INT;
 
     // Write tables
     TEST_WRITE_TABLES;
@@ -1226,6 +1342,10 @@ void TestGFits::test_bintable_ulong(void)
     GFitsTableULongCol col2("ULONG10", nrows, nvec);
     TEST_TABLE2_INT;
 
+    // Test variable-length column table
+    GFitsTableULongCol col3("ULONGVAR", nrows, -1);
+    TEST_VARTABLE_INT;
+
     // Write tables
     TEST_WRITE_TABLES;
 
@@ -1276,6 +1396,11 @@ void TestGFits::test_bintable_string(void)
     // Test multiple column table
     GFitsTableStringCol col2("STRING10", nrows, 20, nvec);
     TEST_TABLE2_STRING;
+
+    // Test variable-length column table
+    GFitsTableStringCol col3("STRINGVAR", nrows, 1);
+    //GFitsTableStringCol col3("STRINGVAR", nrows, -1);
+    //TEST_VARTABLE_STRING;
 
     // Write tables
     TEST_WRITE_TABLES;
@@ -1328,6 +1453,10 @@ void TestGFits::test_bintable_logical(void)
     GFitsTableBoolCol col2("LOGICAL10", nrows, nvec);
     TEST_TABLE2_BOOL;
 
+    // Test variable-length column table
+    GFitsTableBoolCol col3("LOGICALVAR", nrows, -1);
+    TEST_VARTABLE_BOOL;
+
     // Write tables
     TEST_WRITE_TABLES;
 
@@ -1379,6 +1508,10 @@ void TestGFits::test_bintable_bit(void)
     GFitsTableBitCol col2("BIT10", nrows, nvec);
     TEST_TABLE2_BOOL;
 
+    // Test variable-length column table
+    GFitsTableBitCol col3("BITVAR", nrows, -1);
+    //TEST_VARTABLE_BOOL;
+
     // Write tables
     TEST_WRITE_TABLES;
 
@@ -1394,7 +1527,7 @@ void TestGFits::test_bintable_bit(void)
     catch(std::exception &e) {
         test_try_failure(e);
     }
-    
+
     // Test single column table
     TEST_TABLE1_BOOL;
 

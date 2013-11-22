@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GFitsTableStringCol.hpp  - FITS table string column class        *
+ *         GFitsTableStringCol.hpp - FITS table string column class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -50,9 +50,9 @@ public:
     virtual ~GFitsTableStringCol(void);
 
     // Operators
-    GFitsTableStringCol&  operator= (const GFitsTableStringCol& column);
-    std::string&          operator() (const int& row, const int& inx = 0);
-    const std::string&    operator() (const int& row, const int& inx = 0) const;
+    GFitsTableStringCol&  operator=(const GFitsTableStringCol& column);
+    std::string&          operator()(const int& row, const int& inx = 0);
+    const std::string&    operator()(const int& row, const int& inx = 0) const;
 
     // Implement virtual methods
     virtual void                 clear(void);
@@ -60,36 +60,101 @@ public:
     virtual std::string          string(const int& row, const int& col = 0) const;
     virtual double               real(const int& row, const int& col = 0) const;
     virtual int                  integer(const int& row, const int& col = 0) const;
-    virtual void                 insert(const int& rownum, const int& nrows);
-    virtual void                 remove(const int& rownum, const int& nrows);
+    virtual void                 insert(const int& row, const int& nrows);
+    virtual void                 remove(const int& row, const int& nrows);
+    virtual bool                 isloaded(void) const;
     
     // Other methods
-    std::string* data(void) { return m_data; }
+    std::string* data(void);
+    char*        nulval(void);
     void         nulval(const std::string& value);
-    char*        nulval(void) { return m_nulval; }
 
 private:
     // Private methods
-    void                 init_members(void);
-    void                 copy_members(const GFitsTableStringCol& column);
-    void                 free_members(void);
-    void                 save(void);
-    std::string          ascii_format(void) const;
-    std::string          binary_format(void) const;
-    void                 alloc_data(void);
-    void                 release_data(void);
-    void                 alloc_nulval(const std::string& value);
-    void                 init_data(void);
-    void                 fetch_data(void) const;
-    void                 alloc_buffer(void) const;
-    void                 free_buffer(void) const;
-    void*                ptr_data(void) { return m_buffer; }
-    void*                ptr_nulval(void) { return m_nulval; }
+    void init_members(void);
+    void copy_members(const GFitsTableStringCol& column);
+    void free_members(void);
+    void alloc_nulval(const std::string& value);
+    void alloc_buffer(void) const;
+    void free_buffer(void) const;
+
+    // Implemented virtual base class methods
+    virtual void        alloc_data(void);
+    virtual void        init_data(void);
+    virtual void        fetch_data(void) const;
+    virtual void        resize_data(const int& index, const int& number);
+    virtual void        release_data(void);
+    virtual void*       ptr_data(const int& index = 0);
+    virtual void*       ptr_nulval(void);
+    virtual std::string ascii_format(void) const;
+
+    // Overloaded base class methods
+    virtual void        save(void);
 
     // Private data area
     std::string*    m_data;    //!< Data area
     mutable char**  m_buffer;  //!< Data area for CFITSIO transfer
     char*           m_nulval;  //!< NULL string
 };
+
+
+/***********************************************************************//**
+ * @brief Checks if column has been loaded
+ *
+ * @return True if column has been loaded, false otherwise
+ ***************************************************************************/
+inline
+bool GFitsTableStringCol::isloaded(void) const
+{
+    return (m_data != NULL);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to column data
+ *
+ * @return Pointer to column data.
+ ***************************************************************************/
+inline
+std::string* GFitsTableStringCol::data(void)
+{
+    return m_data;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to nul value
+ *
+ * @return Pointer to nul value.
+ ***************************************************************************/
+inline
+char* GFitsTableStringCol::nulval(void)
+{
+    return m_nulval;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns void pointer to column data
+ *
+ * @return Void pointer to column data.
+ ***************************************************************************/
+inline
+void* GFitsTableStringCol::ptr_data(const int& index)
+{
+    return (m_buffer+index);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns void pointer to nul value
+ *
+ * @return Void pointer to nul value.
+ ***************************************************************************/
+inline
+void* GFitsTableStringCol::ptr_nulval(void)
+{
+    return m_nulval;
+}
 
 #endif /* GFITSTABLESTRINGCOL_HPP */

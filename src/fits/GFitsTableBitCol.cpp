@@ -1,7 +1,7 @@
 /***************************************************************************
  *           GFitsTableBitCol.cpp  - FITS table Bit column class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,6 +46,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_CALL_GRAPH                        //!< Dump call graph in console
 
 
 /*==========================================================================
@@ -76,8 +77,8 @@ GFitsTableBitCol::GFitsTableBitCol(void) : GFitsTableCol()
  ***************************************************************************/
 GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
                                    const int&         length,
-                                   const int&         size)
-                                   : GFitsTableCol(name, length, size, 1)
+                                   const int&         size) :
+                  GFitsTableCol(name, length, size, 1)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -92,8 +93,8 @@ GFitsTableBitCol::GFitsTableBitCol(const std::string& name,
  *
  * @param[in] column Table column.
  ***************************************************************************/
-GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column) 
-                                   : GFitsTableCol(column)
+GFitsTableBitCol::GFitsTableBitCol(const GFitsTableBitCol& column) :
+                  GFitsTableCol(column)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -129,8 +130,9 @@ GFitsTableBitCol::~GFitsTableBitCol(void)
  * @brief Assignment operator
  *
  * @param[in] column Table column.
+ * @return Table column.
  ***************************************************************************/
-GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
+GFitsTableBitCol& GFitsTableBitCol::operator=(const GFitsTableBitCol& column)
 {
     // Execute only if object is not identical
     if (this != &column) {
@@ -162,10 +164,10 @@ GFitsTableBitCol& GFitsTableBitCol::operator= (const GFitsTableBitCol& column)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-bool& GFitsTableBitCol::operator() (const int& row, const int& inx)
+bool& GFitsTableBitCol::operator()(const int& row, const int& inx)
 {
     // If data are not available then load them now
-    if (m_data == NULL) fetch_data();
+    if (m_data == NULL) this->fetch_data();
 
     // Set any pending Bit
     set_pending();
@@ -192,7 +194,7 @@ bool& GFitsTableBitCol::operator() (const int& row, const int& inx)
  *
  * Provides access to data in a column.
  ***************************************************************************/
-const bool& GFitsTableBitCol::operator() (const int& row, const int& inx) const
+const bool& GFitsTableBitCol::operator()(const int& row, const int& inx) const
 {
     // Circumvent const correctness
     GFitsTableBitCol* ptr = const_cast<GFitsTableBitCol*>(this);
@@ -312,20 +314,20 @@ int GFitsTableBitCol::integer(const int& row, const int& inx) const
 /***********************************************************************//**
  * @brief Insert rows in column
  *
- * @param[in] rownum Row after which rows should be inserted (0=first row).
+ * @param[in] row Row after which rows should be inserted (0=first row).
  * @param[in] nrows Number of rows to be inserted.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  *
  * This method inserts rows into a FITS table. This implies that the column
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
+void GFitsTableBitCol::insert(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum > m_length) {
-        throw GException::fits_invalid_row(G_INSERT, rownum, m_length);
+    // Make sure that row is valid
+    if (row < 0 || row > m_length) {
+        throw GException::fits_invalid_row(G_INSERT, row, m_length);
     }
     
     // Continue only if there are rows to be inserted
@@ -366,9 +368,9 @@ void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
             // Compute the number of elements before the insertion point,
             // the number of elements that get inserted, and the total
             // number of elements after the insertion point
-            int n_before = m_bytes_per_row * rownum;
+            int n_before = m_bytes_per_row * row;
             int n_insert = m_bytes_per_row * nrows;
-            int n_after  = m_bytes_per_row * (m_length - rownum);
+            int n_after  = m_bytes_per_row * (m_length - row);
 
             // Copy and initialise data
             unsigned char* src = m_data;
@@ -402,27 +404,27 @@ void GFitsTableBitCol::insert(const int& rownum, const int& nrows)
 /***********************************************************************//**
  * @brief Remove rows from column
  *
- * @param[in] rownum Row after which rows should be removed (0=first row).
+ * @param[in] row Row after which rows should be removed (0=first row).
  * @param[in] nrows Number of rows to be removed.
  *
  * @exception GException::fits_invalid_row
- *            Specified rownum is invalid.
+ *            Specified row is invalid.
  * @exception GException::fits_invalid_nrows
  *            Invalid number of rows specified.
  *
  * This method removes rows from a FITS table. This implies that the column
  * will be loaded into memory.
  ***************************************************************************/
-void GFitsTableBitCol::remove(const int& rownum, const int& nrows)
+void GFitsTableBitCol::remove(const int& row, const int& nrows)
 {
-    // Make sure that rownum is valid
-    if (rownum < 0 || rownum >= m_length) {
-        throw GException::fits_invalid_row(G_REMOVE, rownum, m_length-1);
+    // Make sure that row is valid
+    if (row < 0 || row >= m_length) {
+        throw GException::fits_invalid_row(G_REMOVE, row, m_length-1);
     }
     
     // Make sure that we don't remove beyond the limit
-    if (nrows < 0 || nrows > m_length-rownum) {
-        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-rownum);
+    if (nrows < 0 || nrows > m_length-row) {
+        throw GException::fits_invalid_nrows(G_REMOVE, nrows, m_length-row);
     }
     
     // Continue only if there are rows to be removed
@@ -457,9 +459,9 @@ void GFitsTableBitCol::remove(const int& rownum, const int& nrows)
             // Compute the number of elements before the removal point,
             // the number of elements that get removed, and the total
             // number of elements after the removal point
-            int n_before = m_bytes_per_row * rownum;
+            int n_before = m_bytes_per_row * row;
             int n_remove = m_bytes_per_row * nrows;
-            int n_after  = m_bytes_per_row * (length - rownum);
+            int n_after  = m_bytes_per_row * (length - row);
 
             // Copy data
             unsigned char* src = m_data;
@@ -537,6 +539,11 @@ void GFitsTableBitCol::nulval(const unsigned char* value)
  ***************************************************************************/
 void GFitsTableBitCol::init_members(void)
 {
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("GFitsTableBitCol::init_members\n");
+    #endif
+
     // Initialise members
     m_type          = __TBIT;
     m_bits          = 0;
@@ -549,6 +556,11 @@ void GFitsTableBitCol::init_members(void)
     m_bit_byte      = 0;
     m_bit_mask      = 0;
 
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("exit GFitsTableBitCol::init_members\n");
+    #endif
+
     // Return
     return;
 }
@@ -557,20 +569,26 @@ void GFitsTableBitCol::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] column Column for which members should be copied.
+ * @param[in] column Column.
+ *
+ * Sets the content of the vector column by copying from another column.
+ * If the code is compiled with the small memory option, and if the source
+ * column has not yet been loaded, then we only load the column temporarily
+ * for copying purposes and release it again once copying is finished.
  ***************************************************************************/
 void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
 {
-    // Fetch column data if not yet fetched. The casting circumvents the
-    // const correctness
-    bool not_loaded = (column.m_data == NULL);
+    // Fetch data if necessary
+    bool not_loaded = (!column.isloaded());
     if (not_loaded) {
-        const_cast<GFitsTableBitCol*>(&column)->fetch_data();
+        column.fetch_data();
     }
 
     // Copy attributes
     m_type          = column.m_type;
     m_size          = column.m_size;
+    m_varlen        = column.m_varlen;
+    m_rowstart      = column.m_rowstart;
     m_bits          = column.m_bits;
     m_bytes_per_row = column.m_bytes_per_row;
     m_bits_per_row  = column.m_bits_per_row;
@@ -606,6 +624,11 @@ void GFitsTableBitCol::copy_members(const GFitsTableBitCol& column)
  ***************************************************************************/
 void GFitsTableBitCol::free_members(void)
 {
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("GFitsTableBitCol::free_members\n");
+    #endif
+
     // Free memory
     if (m_data   != NULL) delete [] m_data;
     if (m_nulval != NULL) delete m_nulval;
@@ -616,6 +639,11 @@ void GFitsTableBitCol::free_members(void)
 
     // Reset load flag
     m_size = 0;
+
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("exit GFitsTableBitCol::free_members\n");
+    #endif
 
     // Return
     return;
@@ -642,29 +670,15 @@ std::string GFitsTableBitCol::ascii_format(void) const
 
 
 /***********************************************************************//**
- * @brief Returns format string of binary table
- ***************************************************************************/
-std::string GFitsTableBitCol::binary_format(void) const
-{
-    // Initialize format string
-    std::string format;
-
-    // Set number of elements
-    format.append(gammalib::str(m_number));
-
-    // Set type code
-    format.append("X");
-
-    // Return format
-    return format;
-}
-
-
-/***********************************************************************//**
  * @brief Allocates column data
  ***************************************************************************/
 void GFitsTableBitCol::alloc_data(void)
 {
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("GFitsTableBitCol::alloc_data(%d)\n", m_size);
+    #endif
+
     // Free any existing memory
     if (m_data != NULL) delete [] m_data;
 
@@ -675,6 +689,55 @@ void GFitsTableBitCol::alloc_data(void)
     if (m_size > 0) {
         m_data = new unsigned char[m_size];
     }
+
+    // Optionally print call graph
+    #if defined(G_CALL_GRAPH)
+    printf("exit GFitsTableBitCol::alloc_data(m_data=%x)\n", m_data);
+    #endif
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Fetch column data
+ *
+ * This method fetches column data when needed. It is declared const, so
+ * that const data access methods can be implemented.
+ *
+ * If a FITS file is attached to the column the data are loaded into memory
+ * from the FITS file. If no FITS file is attached, memory is allocated
+ * to hold the column data and all cells are initialised.
+ *
+ * This method calls GFitsTableCol::load_column to do the job.
+ ***************************************************************************/
+void GFitsTableBitCol::fetch_data(void) const
+{
+    // Load column (circumvent const correctness)
+    const_cast<GFitsTableBitCol*>(this)->load_column();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Resize column data
+ *
+ * @param[in] index Start index.
+ * @param[in] number Number of elements to add/remove.
+ *
+ * Adds or removes elements from specified index on. Adding is done if
+ * @p number is a positive number, removing if @p number is negative.
+ * Note that the method does not change the validity of the arguments.
+ * This needs to be done by the client.
+ *
+ * @todo Needs to be implemented
+ ***************************************************************************/
+void GFitsTableBitCol::resize_data(const int& index, const int& number)
+{
+    //TODO
 
     // Return
     return;
@@ -909,10 +972,3 @@ void GFitsTableBitCol::set_pending(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
