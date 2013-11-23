@@ -306,9 +306,9 @@ void GCTAAeffArf::read_arf(const GFitsTable* hdu)
     m_aeff.clear();
 
     // Get pointers to table columns
-    const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
-    const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
-    const GFitsTableCol* specresp  = &(*hdu)["SPECRESP"];
+    const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
+    const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
+    const GFitsTableCol* specresp  = (*hdu)["SPECRESP"];
 
     // Determine unit conversion factors (default: TeV and cm^2)
     std::string u_energy_lo = gammalib::tolower(gammalib::strip_whitespace(energy_lo->unit()));

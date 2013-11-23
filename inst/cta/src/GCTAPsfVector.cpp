@@ -286,17 +286,17 @@ void GCTAPsfVector::read(const GFitsTable* hdu)
     const double conv = 0.6624305 * gammalib::deg2rad;
 
     // Get pointers to table columns
-    const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
-    const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
+    const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
+    const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
 
     // Handle various data formats (H.E.S.S. and MAGIC)
     const GFitsTableCol* r68;
     double               r68_scale = 1.0;
     if (hdu->hascolumn("R68")) {
-        r68 = &(*hdu)["R68"];
+        r68 = (*hdu)["R68"];
     }
     else {
-        r68 = &(*hdu)["ANGRES40"];
+        r68 = (*hdu)["ANGRES40"];
         r68_scale = 1.0 / 0.6624305; // MAGIC PSF is already 1 sigma
     }
 

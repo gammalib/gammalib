@@ -1,5 +1,5 @@
 /***************************************************************************
- *         GLATResponseTable.cpp  -  Fermi/LAT Response table class        *
+ *          GLATResponseTable.cpp - Fermi/LAT Response table class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -184,10 +184,10 @@ void GLATResponseTable::read(const GFitsTable* hdu)
     clear();
 
     // Get pointers to table columns
-    const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
-    const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
-    const GFitsTableCol* ctheta_lo = &(*hdu)["CTHETA_LO"];
-    const GFitsTableCol* ctheta_hi = &(*hdu)["CTHETA_HI"];
+    const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
+    const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
+    const GFitsTableCol* ctheta_lo = (*hdu)["CTHETA_LO"];
+    const GFitsTableCol* ctheta_hi = (*hdu)["CTHETA_HI"];
 
     // Extract number of bins
     m_energy_num = energy_lo->number();
@@ -264,10 +264,10 @@ void GLATResponseTable::write(GFitsTable* hdu) const
     }
 
     // Append columns to boundary table
-    hdu->append_column(col_energy_lo);
-    hdu->append_column(col_energy_hi);
-    hdu->append_column(col_ctheta_lo);
-    hdu->append_column(col_ctheta_hi);
+    hdu->append(col_energy_lo);
+    hdu->append(col_energy_hi);
+    hdu->append(col_ctheta_lo);
+    hdu->append(col_ctheta_hi);
 
     // Return
     return;

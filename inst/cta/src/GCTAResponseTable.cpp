@@ -975,7 +975,7 @@ void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
         for (int i = 0; i < hdu->ncols(); ++i) {
 
             // Get column name
-            std::string colname = (*hdu)[i].name();
+            std::string colname = (*hdu)[i]->name();
 
             // If we search for a "_LO" column, check if we have one. If one
             // is found, change the search mode to 1 and set the expected name
@@ -1108,8 +1108,8 @@ void GCTAResponseTable::read_axes(const GFitsTable* hdu)
         for (int i = 0; i < axes(); ++i) {
 
             // Get pointers to table columns
-            const GFitsTableCol* col_lo = &(*hdu)[m_colname_lo[i]];
-            const GFitsTableCol* col_hi = &(*hdu)[m_colname_hi[i]];
+            const GFitsTableCol* col_lo = (*hdu)[m_colname_lo[i]];
+            const GFitsTableCol* col_hi = (*hdu)[m_colname_hi[i]];
 
             // Extract number of bins. Make sure that both columns have the
             // same number of bins
@@ -1189,7 +1189,7 @@ void GCTAResponseTable::read_pars(const GFitsTable* hdu)
         for (int i = 0; i < size(); ++i) {
 
             // Get pointer to table column
-            const GFitsTableCol* col = &(*hdu)[m_colname_par[i]];
+            const GFitsTableCol* col = (*hdu)[m_colname_par[i]];
 
             // Extract number of bins. Verify that the number of bins
             // corresponds to the expectation.

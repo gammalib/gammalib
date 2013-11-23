@@ -109,7 +109,7 @@ class GFitsTable : public GFitsHDU {
 public:
     // Constructors and destructors
     GFitsTable(void);
-    explicit GFitsTable(int nrows);
+    explicit GFitsTable(const int& nrows);
     GFitsTable(const GFitsTable& table);
     virtual ~GFitsTable(void);
 
@@ -119,14 +119,18 @@ public:
     virtual HDUType     exttype(void) const = 0;
 
     // Implemented Methods
-    void append_column(GFitsTableCol& column);
-    void insert_column(int colnum, GFitsTableCol& column);
-    void append_rows(const int& nrows);
-    void insert_rows(const int& rownum, const int& nrows);
-    void remove_rows(const int& rownum, const int& nrows);
-    bool hascolumn(const std::string& colname) const;
-    int  nrows(void) const;
-    int  ncols(void) const;
+    const int&     size(void) const;
+    GFitsTableCol* set(const int& colnum, const GFitsTableCol& column);
+    GFitsTableCol* set(const std::string& colname, const GFitsTableCol& column);
+    GFitsTableCol* append(const GFitsTableCol& column);
+    GFitsTableCol* insert(int colnum, const GFitsTableCol& column);
+    GFitsTableCol* insert(const std::string& colname, const GFitsTableCol& column);
+    void           append_rows(const int& nrows);
+    void           insert_rows(const int& row, const int& nrows);
+    void           remove_rows(const int& row, const int& nrows);
+    const int&     nrows(void) const;
+    const int&     ncols(void) const;
+    bool           hascolumn(const std::string& colname) const;
 };
 
 
@@ -134,18 +138,18 @@ public:
  * @brief GFitsTable class extension
  ***************************************************************************/
 %extend GFitsTable {
-    GFitsTableCol& __getitem__(const int& colnum) {
+    GFitsTableCol* __getitem__(const int& colnum) {
         return (*self)[colnum];
     }
-    GFitsTableCol& __getitem__(const std::string& colname) {
+    GFitsTableCol* __getitem__(const std::string& colname) {
         return (*self)[colname];
     }
     void __setitem__(const int& colnum, const GFitsTableCol& col) {
-        (*self)[colnum] = col;
+        self->set(colnum, col);
         return;
     }
     void __setitem__(const std::string& colname, const GFitsTableCol& col) {
-        (*self)[colname] = col;
+        self->set(colname, col);
         return;
     }
 };

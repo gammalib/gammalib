@@ -311,9 +311,9 @@ void GArf::read(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Get pointer to data columns
-        const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
-        const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
-        const GFitsTableCol* specresp  = &(*hdu)["SPECRESP"];
+        const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
+        const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
+        const GFitsTableCol* specresp  = (*hdu)["SPECRESP"];
 
         // Determine effective area conversion factor. Internal
         // units are cm^2
@@ -384,9 +384,9 @@ void GArf::write(GFits& fits) const
         hdu->extname("SPECRESP");
 
         // Append columns to table
-        hdu->append_column(energy_lo);
-        hdu->append_column(energy_hi);
-        hdu->append_column(specresp);
+        hdu->append(energy_lo);
+        hdu->append(energy_hi);
+        hdu->append(specresp);
 
         // Append HDU to FITS file
         fits.append(*hdu);

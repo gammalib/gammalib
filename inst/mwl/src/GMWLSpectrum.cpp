@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GMWLSpectrum.cpp  -  Multi-wavelength spectrum class          *
+ *            GMWLSpectrum.cpp -  Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -636,19 +636,19 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
 
     // Extract column pointers
     if (table->ncols() == 2) {
-        c_energy = &(*table)[0];
-        c_flux   = &(*table)[1];
+        c_energy = (*table)[0];
+        c_flux   = (*table)[1];
     }
     else if (table->ncols() == 3) {
-        c_energy   = &(*table)[0];
-        c_flux     = &(*table)[1];
-        c_flux_err = &(*table)[2];
+        c_energy   = (*table)[0];
+        c_flux     = (*table)[1];
+        c_flux_err = (*table)[2];
     }
     else if (table->ncols() > 3) {
-        c_energy     = &(*table)[0];
-        c_energy_err = &(*table)[1];
-        c_flux       = &(*table)[2];
-        c_flux_err   = &(*table)[3];
+        c_energy     = (*table)[0];
+        c_energy_err = (*table)[1];
+        c_flux       = (*table)[2];
+        c_flux_err   = (*table)[3];
     }
     else {
         throw GMWLException::bad_file_format(G_READ_FITS,
@@ -659,14 +659,18 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
     // Read spectral points and add to spectrum
     for (int i = 0; i < table->nrows(); ++i) {
         GMWLDatum datum;
-        if (c_energy     != NULL) 
+        if (c_energy     != NULL) {
             datum.m_eng = conv_energy(c_energy->real(i), c_energy->unit());
-        if (c_energy_err != NULL)
+        }
+        if (c_energy_err != NULL) {
             datum.m_eng_err = conv_energy(c_energy_err->real(i), c_energy->unit());
-        if (c_flux       != NULL)
+        }
+        if (c_flux       != NULL) {
             datum.m_flux = conv_flux(datum.m_eng, c_flux->real(i), c_flux->unit());
-        if (c_flux_err   != NULL)
+        }
+        if (c_flux_err   != NULL) {
             datum.m_flux_err = conv_flux(datum.m_eng, c_flux_err->real(i), c_flux_err->unit());
+        }
         m_data.push_back(datum);
     }
 

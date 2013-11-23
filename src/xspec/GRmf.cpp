@@ -331,12 +331,12 @@ void GRmf::read(const GFitsTable* hdu)
         m_ebds_true.clear();
 
         // Get pointer to data columns
-        const GFitsTableCol* energy_lo = &(*hdu)["ENERG_LO"];
-        const GFitsTableCol* energy_hi = &(*hdu)["ENERG_HI"];
-        const GFitsTableCol* n_grp     = &(*hdu)["N_GRP"];
-        const GFitsTableCol* f_chan    = &(*hdu)["F_CHAN"];
-        const GFitsTableCol* n_chan    = &(*hdu)["N_CHAN"];
-        const GFitsTableCol* matrix    = &(*hdu)["MATRIX"];
+        const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
+        const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
+        const GFitsTableCol* n_grp     = (*hdu)["N_GRP"];
+        const GFitsTableCol* f_chan    = (*hdu)["F_CHAN"];
+        const GFitsTableCol* n_chan    = (*hdu)["N_CHAN"];
+        const GFitsTableCol* matrix    = (*hdu)["MATRIX"];
 
         // Set matrix rows and columns
         int rows    = energy_lo->length();
@@ -482,12 +482,12 @@ void GRmf::write(GFits& fits) const
         hdu->extname("MATRIX");
 
         // Append columns to table
-        hdu->append_column(energy_lo);
-        hdu->append_column(energy_hi);
-        hdu->append_column(n_grp);
-        hdu->append_column(f_chan);
-        hdu->append_column(n_chan);
-        hdu->append_column(matrix);
+        hdu->append(energy_lo);
+        hdu->append(energy_hi);
+        hdu->append(n_grp);
+        hdu->append(f_chan);
+        hdu->append(n_chan);
+        hdu->append(matrix);
 
         // Append HDU to FITS file
         fits.append(*hdu);

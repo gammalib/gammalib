@@ -400,7 +400,7 @@ void GPha::read(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Get data column
-        const GFitsTableCol& col_data = (*hdu)["COUNTS"];
+        const GFitsTableCol* col_data = (*hdu)["COUNTS"];
 
         // Extract number of channels in FITS file
         int length = hdu->integer("NAXIS2");
@@ -423,7 +423,7 @@ void GPha::read(const GFitsTable* hdu)
 
         // Copy data
         for (int i = 0; i < length; ++i) {
-            m_counts[i] = col_data.real(i);
+            m_counts[i] = col_data->real(i);
         }
 
     } // endif: HDU was valid
@@ -469,14 +469,14 @@ void GPha::write(GFits& fits) const
         hdu->extname("SPECTRUM");
 
         // Append columns to table
-        hdu->append_column(col_chan);
-        hdu->append_column(col_data);
-        hdu->append_column(col_stat);
-        hdu->append_column(col_syst);
-        hdu->append_column(col_qual);
-        hdu->append_column(col_grpg);
-        hdu->append_column(col_area);
-        hdu->append_column(col_back);
+        hdu->append(col_chan);
+        hdu->append(col_data);
+        hdu->append(col_stat);
+        hdu->append(col_syst);
+        hdu->append(col_qual);
+        hdu->append(col_grpg);
+        hdu->append(col_area);
+        hdu->append(col_back);
 
         // Append HDU to FITS file
         fits.append(*hdu);

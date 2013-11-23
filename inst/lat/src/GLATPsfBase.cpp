@@ -1,7 +1,7 @@
 /***************************************************************************
- * GLATPsfBase.cpp  -  Fermi/LAT point spread function abstract base class *
+ *  GLATPsfBase.cpp - Fermi/LAT point spread function abstract base class  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATPsfBase.cpp
  * @brief Fermi/LAT point spread function abstract base class implementation
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -199,7 +199,7 @@ void GLATPsfBase::free_members(void)
 void GLATPsfBase::read_scale(const GFitsTable* hdu)
 {
     // Get pointer to column
-    const GFitsTableCol* scale = &(*hdu)["PSFSCALE"];
+    const GFitsTableCol* scale = (*hdu)["PSFSCALE"];
 
     // Get scaling factors
     if (front()) {
@@ -256,7 +256,7 @@ void GLATPsfBase::write_scale(GFits& file) const
     col_scale(0,4) = m_scale_index;
 
     // Append column to table
-    hdu_scale->append_column(col_scale);
+    hdu_scale->append(col_scale);
 
     // Append HDU to FITS file
     file.append(*hdu_scale);

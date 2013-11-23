@@ -214,12 +214,12 @@ void GLATPsfV3::read(const GFitsTable* hdu)
         m_gtail.reserve(size);
 
         // Get pointer to columns
-        const GFitsTableCol* ncore = &(*hdu)["NCORE"];
-        const GFitsTableCol* ntail = &(*hdu)["NTAIL"];
-        const GFitsTableCol* score = &(*hdu)["SCORE"];
-        const GFitsTableCol* stail = &(*hdu)["STAIL"];
-        const GFitsTableCol* gcore = &(*hdu)["GCORE"];
-        const GFitsTableCol* gtail = &(*hdu)["GTAIL"];
+        const GFitsTableCol* ncore = (*hdu)["NCORE"];
+        const GFitsTableCol* ntail = (*hdu)["NTAIL"];
+        const GFitsTableCol* score = (*hdu)["SCORE"];
+        const GFitsTableCol* stail = (*hdu)["STAIL"];
+        const GFitsTableCol* gcore = (*hdu)["GCORE"];
+        const GFitsTableCol* gtail = (*hdu)["GTAIL"];
 
         // Check consistency of columns
         if (ncore->number() != size) {
@@ -314,12 +314,12 @@ void GLATPsfV3::write(GFits& file) const
         }
 
         // Append columns to table
-        hdu_rpsf->append_column(col_ncore);
-        hdu_rpsf->append_column(col_ntail);
-        hdu_rpsf->append_column(col_score);
-        hdu_rpsf->append_column(col_stail);
-        hdu_rpsf->append_column(col_gcore);
-        hdu_rpsf->append_column(col_gtail);
+        hdu_rpsf->append(col_ncore);
+        hdu_rpsf->append(col_ntail);
+        hdu_rpsf->append(col_score);
+        hdu_rpsf->append(col_stail);
+        hdu_rpsf->append(col_gcore);
+        hdu_rpsf->append(col_gtail);
 
         // Append HDU to FITS file
         file.append(*hdu_rpsf);

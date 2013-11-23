@@ -102,6 +102,12 @@ GOptimizer & GOptimizerLM
   The optimization operators have been removed and replaced by the
   optimize method.
 
+GFitsTable
+  The column table operator[] now returns a pointer instead of a
+  reference. Set set() method has been added for column setting.
+  The append_column() and insert_column() methods have been
+  renamed to append() and insert().
+
 All GammaLib constants, defined in GTools.hpp, and functions are now
 put in the gammalib namespace to avoid name clashes. Mathematical
 constants and functions have been moved to a new model named GMath.

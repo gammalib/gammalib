@@ -496,21 +496,21 @@ void GLATEventList::read_events(const GFitsTable& table)
         m_events.reserve(num);
 
         // Get column pointers
-        GFitsTableDoubleCol* ptr_time    = (GFitsTableDoubleCol*)&table["TIME"];
-        GFitsTableFloatCol*  ptr_energy  = (GFitsTableFloatCol*)&table["ENERGY"];
-        GFitsTableFloatCol*  ptr_ra      = (GFitsTableFloatCol*)&table["RA"];
-        GFitsTableFloatCol*  ptr_dec     = (GFitsTableFloatCol*)&table["DEC"];
-        GFitsTableFloatCol*  ptr_theta   = (GFitsTableFloatCol*)&table["THETA"];
-        GFitsTableFloatCol*  ptr_phi     = (GFitsTableFloatCol*)&table["PHI"];
-        GFitsTableFloatCol*  ptr_zenith  = (GFitsTableFloatCol*)&table["ZENITH_ANGLE"];
-        GFitsTableFloatCol*  ptr_azimuth = (GFitsTableFloatCol*)&table["EARTH_AZIMUTH_ANGLE"];
-        GFitsTableLongCol*   ptr_eid     = (GFitsTableLongCol*)&table["EVENT_ID"];
-        GFitsTableLongCol*   ptr_rid     = (GFitsTableLongCol*)&table["RUN_ID"];
-        GFitsTableShortCol*  ptr_recon   = (GFitsTableShortCol*)&table["RECON_VERSION"];
-        GFitsTableShortCol*  ptr_calib   = (GFitsTableShortCol*)&table["CALIB_VERSION"];
-        GFitsTableShortCol*  ptr_class   = (GFitsTableShortCol*)&table["EVENT_CLASS"];
-        GFitsTableShortCol*  ptr_conv    = (GFitsTableShortCol*)&table["CONVERSION_TYPE"];
-        GFitsTableDoubleCol* ptr_ltime   = (GFitsTableDoubleCol*)&table["LIVETIME"];
+        GFitsTableDoubleCol* ptr_time    = (GFitsTableDoubleCol*)table["TIME"];
+        GFitsTableFloatCol*  ptr_energy  = (GFitsTableFloatCol*)table["ENERGY"];
+        GFitsTableFloatCol*  ptr_ra      = (GFitsTableFloatCol*)table["RA"];
+        GFitsTableFloatCol*  ptr_dec     = (GFitsTableFloatCol*)table["DEC"];
+        GFitsTableFloatCol*  ptr_theta   = (GFitsTableFloatCol*)table["THETA"];
+        GFitsTableFloatCol*  ptr_phi     = (GFitsTableFloatCol*)table["PHI"];
+        GFitsTableFloatCol*  ptr_zenith  = (GFitsTableFloatCol*)table["ZENITH_ANGLE"];
+        GFitsTableFloatCol*  ptr_azimuth = (GFitsTableFloatCol*)table["EARTH_AZIMUTH_ANGLE"];
+        GFitsTableLongCol*   ptr_eid     = (GFitsTableLongCol*)table["EVENT_ID"];
+        GFitsTableLongCol*   ptr_rid     = (GFitsTableLongCol*)table["RUN_ID"];
+        GFitsTableShortCol*  ptr_recon   = (GFitsTableShortCol*)table["RECON_VERSION"];
+        GFitsTableShortCol*  ptr_calib   = (GFitsTableShortCol*)table["CALIB_VERSION"];
+        GFitsTableShortCol*  ptr_class   = (GFitsTableShortCol*)table["EVENT_CLASS"];
+        GFitsTableShortCol*  ptr_conv    = (GFitsTableShortCol*)table["CONVERSION_TYPE"];
+        GFitsTableDoubleCol* ptr_ltime   = (GFitsTableDoubleCol*)table["LIVETIME"];
 
         // Copy data from columns into GLATEventAtom objects
         GLATEventAtom event;
@@ -565,7 +565,7 @@ void GLATEventList::read_events(const GFitsTable& table)
 
                 // Get column pointer
                 GFitsTableFloatCol* ptr_dif = 
-                    static_cast<GFitsTableFloatCol*>(const_cast<GFitsTableCol*>(&table[std::string(keyword)]));
+                    static_cast<GFitsTableFloatCol*>(const_cast<GFitsTableCol*>(table[std::string(keyword)]));
 
                 // Copy data from columns into GLATEventAtom objects
                 for (int i = 0; i < num; ++i) {

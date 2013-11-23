@@ -348,10 +348,10 @@
     try { \
         GFits fits; \
         fits.open(filename, true); \
-        GFitsBinTable table = GFitsBinTable(nrows); \
-        table.append_column(col1); \
-        table.insert_column(1, col2); \
-        table.append_column(col3); \
+        GFitsBinTable table(nrows); \
+        table.append(col1); \
+        table.insert(1, col2); \
+        table.append(col3); \
         fits.append(table); \
         fits.save(); \
         fits.close(); \
@@ -498,8 +498,8 @@ void TestGFits::test_create(void)
         first(1)  =  2.0;
         first(2)  =  3.0;
         second(0) = -99.0;
-        table.append_column(first);
-        table.append_column(second);
+        table.append(first);
+        table.append(second);
 
         // Append table to FILE file
         fits.append(table);
@@ -529,8 +529,8 @@ void TestGFits::test_create(void)
         first(1)  =  2.0;
         first(2)  =  3.0;
         second(0) = -99.0;
-        table.append_column(first);
-        table.append_column(second);
+        table.append(first);
+        table.append(second);
 
         // Append table to FILE file
         fits.append(table);
@@ -1024,8 +1024,8 @@ void TestGFits::test_bintable_double(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableDoubleCol&>((*fits.table(1))["DOUBLE"]);
-        col2 = static_cast<GFitsTableDoubleCol&>((*fits.table(1))["DOUBLE10"]);
+        col1 = static_cast<GFitsTableDoubleCol&>(*(*fits.table(1))["DOUBLE"]);
+        col2 = static_cast<GFitsTableDoubleCol&>(*(*fits.table(1))["DOUBLE10"]);
         fits.close();
         test_try_success();
     }
@@ -1078,8 +1078,8 @@ void TestGFits::test_bintable_float(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableFloatCol&>((*fits.table(1))["FLOAT"]);
-        col2 = static_cast<GFitsTableFloatCol&>((*fits.table(1))["FLOAT10"]);
+        col1 = static_cast<GFitsTableFloatCol&>(*(*fits.table(1))["FLOAT"]);
+        col2 = static_cast<GFitsTableFloatCol&>(*(*fits.table(1))["FLOAT10"]);
         fits.close();
         test_try_success();
     }
@@ -1133,8 +1133,8 @@ void TestGFits::test_bintable_short(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableShortCol&>((*fits.table(1))["SHORT"]);
-        col2 = static_cast<GFitsTableShortCol&>((*fits.table(1))["SHORT10"]);
+        col1 = static_cast<GFitsTableShortCol&>(*(*fits.table(1))["SHORT"]);
+        col2 = static_cast<GFitsTableShortCol&>(*(*fits.table(1))["SHORT10"]);
         fits.close();
         test_try_success();
     }
@@ -1188,8 +1188,8 @@ void TestGFits::test_bintable_short(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableUShortCol&>((*fits.table(1))["USHORT"]);
-        col2 = static_cast<GFitsTableUShortCol&>((*fits.table(1))["USHORT10"]);
+        col1 = static_cast<GFitsTableUShortCol&>(*(*fits.table(1))["USHORT"]);
+        col2 = static_cast<GFitsTableUShortCol&>(*(*fits.table(1))["USHORT10"]);
         fits.close();
         test_try_success();
     }
@@ -1243,8 +1243,8 @@ void TestGFits::test_bintable_long(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableLongCol&>((*fits.table(1))["LONG"]);
-        col2 = static_cast<GFitsTableLongCol&>((*fits.table(1))["LONG10"]);
+        col1 = static_cast<GFitsTableLongCol&>(*(*fits.table(1))["LONG"]);
+        col2 = static_cast<GFitsTableLongCol&>(*(*fits.table(1))["LONG10"]);
         fits.close();
         test_try_success();
     }
@@ -1298,8 +1298,8 @@ void TestGFits::test_bintable_longlong(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableLongLongCol&>((*fits.table(1))["LONGLONG"]);
-        col2 = static_cast<GFitsTableLongLongCol&>((*fits.table(1))["LONGLONG10"]);
+        col1 = static_cast<GFitsTableLongLongCol&>(*(*fits.table(1))["LONGLONG"]);
+        col2 = static_cast<GFitsTableLongLongCol&>(*(*fits.table(1))["LONGLONG10"]);
         fits.close();
         test_try_success();
     }
@@ -1353,8 +1353,8 @@ void TestGFits::test_bintable_ulong(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableULongCol&>((*fits.table(1))["ULONG"]);
-        col2 = static_cast<GFitsTableULongCol&>((*fits.table(1))["ULONG10"]);
+        col1 = static_cast<GFitsTableULongCol&>(*(*fits.table(1))["ULONG"]);
+        col2 = static_cast<GFitsTableULongCol&>(*(*fits.table(1))["ULONG10"]);
         fits.close();
         test_try_success();
     }
@@ -1409,8 +1409,8 @@ void TestGFits::test_bintable_string(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableStringCol&>((*fits.table(1))["STRING"]);
-        col2 = static_cast<GFitsTableStringCol&>((*fits.table(1))["STRING10"]);
+        col1 = static_cast<GFitsTableStringCol&>(*(*fits.table(1))["STRING"]);
+        col2 = static_cast<GFitsTableStringCol&>(*(*fits.table(1))["STRING10"]);
         fits.close();
         test_try_success();
     }
@@ -1464,8 +1464,8 @@ void TestGFits::test_bintable_logical(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableBoolCol&>((*fits.table(1))["LOGICAL"]);
-        col2 = static_cast<GFitsTableBoolCol&>((*fits.table(1))["LOGICAL10"]);
+        col1 = static_cast<GFitsTableBoolCol&>(*(*fits.table(1))["LOGICAL"]);
+        col2 = static_cast<GFitsTableBoolCol&>(*(*fits.table(1))["LOGICAL10"]);
         fits.close();
         test_try_success();
     }
@@ -1519,8 +1519,8 @@ void TestGFits::test_bintable_bit(void)
     test_try("Read Tables");
     try {
         GFits fits(filename);
-        col1 = static_cast<GFitsTableBitCol&>((*fits.table(1))["BIT"]);
-        col2 = static_cast<GFitsTableBitCol&>((*fits.table(1))["BIT10"]);
+        col1 = *(static_cast<GFitsTableBitCol*>((*fits.table(1))["BIT"]));
+        col2 = *(static_cast<GFitsTableBitCol*>((*fits.table(1))["BIT10"]));
         fits.close();
         test_try_success();
     }

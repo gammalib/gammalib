@@ -41,23 +41,23 @@
  * is a collection of columns with an identical number of rows. This class
  * provides high level access to table columns.
  *
- * @todo Implement remove_column method
+ * @todo Implement remove() method
  ***************************************************************************/
 class GFitsTable : public GFitsHDU {
 
 public:
     // Constructors and destructors
     GFitsTable(void);
-    explicit GFitsTable(int nrows);
+    explicit GFitsTable(const int& nrows);
     GFitsTable(const GFitsTable& table);
     virtual ~GFitsTable(void);
 
     // Operators
     GFitsTable&          operator=(const GFitsTable& table);
-    GFitsTableCol&       operator[](const int& colnum);
-    const GFitsTableCol& operator[](const int& colnum) const;
-    GFitsTableCol&       operator[](const std::string& colname);
-    const GFitsTableCol& operator[](const std::string& colname) const;
+    GFitsTableCol*       operator[](const int& colnum);
+    const GFitsTableCol* operator[](const int& colnum) const;
+    GFitsTableCol*       operator[](const std::string& colname);
+    const GFitsTableCol* operator[](const std::string& colname) const;
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
@@ -65,15 +65,19 @@ public:
     virtual HDUType     exttype(void) const = 0;
 
     // Implemented Methods
-    void        append_column(GFitsTableCol& column);
-    void        insert_column(int colnum, GFitsTableCol& column);
-    void        append_rows(const int& nrows);
-    void        insert_rows(const int& rownum, const int& nrows);
-    void        remove_rows(const int& rownum, const int& nrows);
-    int         nrows(void) const;
-    int         ncols(void) const;
-    bool        hascolumn(const std::string& colname) const;
-    std::string print(const GChatter& chatter = NORMAL) const;
+    const int&     size(void) const;
+    GFitsTableCol* set(const int& colnum, const GFitsTableCol& column);
+    GFitsTableCol* set(const std::string& colname, const GFitsTableCol& column);
+    GFitsTableCol* append(const GFitsTableCol& column);
+    GFitsTableCol* insert(int colnum, const GFitsTableCol& column);
+    GFitsTableCol* insert(const std::string& colname, const GFitsTableCol& column);
+    void           append_rows(const int& nrows);
+    void           insert_rows(const int& row, const int& nrows);
+    void           remove_rows(const int& row, const int& nrows);
+    const int&     nrows(void) const;
+    const int&     ncols(void) const;
+    bool           hascolumn(const std::string& colname) const;
+    std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -98,6 +102,64 @@ private:
     // Private methods
     GFitsTableCol*  alloc_column(int typecode) const;
     GFitsTableCol*  ptr_column(const std::string& colname) const;
+    int             colnum(const std::string& colname) const;
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of columns in table
+ *
+ * @return Number of columns in table
+ *
+ * Returns the number of columns in table. This method is equivalent to the
+ * ncols() method.
+ ***************************************************************************/
+inline
+const int& GFitsTable::size(void) const
+{
+    return m_cols;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of rows in table
+ *
+ * @return Number of rows in table
+ *
+ * Returns the number of rows in table.
+ ***************************************************************************/
+inline
+const int& GFitsTable::nrows(void) const
+{
+    return m_rows;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of columns in table
+ *
+ * @return Number of columns in table
+ *
+ * Returns the number of columns in table. This method is equivalent to the
+ * size() method.
+ ***************************************************************************/
+inline
+const int& GFitsTable::ncols(void) const
+{
+    return m_cols;
+}
+
+
+/***********************************************************************//**
+ * @brief Append column to the table
+ *
+ * @param[in] column Table column.
+ * @return Pointer to table column that has been appended
+ ***************************************************************************/
+inline
+GFitsTableCol* GFitsTable::append(const GFitsTableCol& column)
+{
+    return (insert(m_cols, column));
+}
 
 #endif /* GFITSTABLE_HPP */

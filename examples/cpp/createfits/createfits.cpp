@@ -57,7 +57,7 @@ int main(void) {
             column(row, index) = row*100.0+index;
         }
     }
-    table.append_column(column);
+    table.append(column);
 
     // Append table to FITS object
     fits.append(table);

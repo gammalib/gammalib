@@ -375,8 +375,8 @@ void GLATEdisp::read_edisp(const GFitsTable* hdu)
         m_ls1.reserve(size);
 
         // Get pointer to columns
-        const GFitsTableCol* norm = &(*hdu)["NORM"];
-        const GFitsTableCol* ls1  = &(*hdu)["LS1"];
+        const GFitsTableCol* norm = (*hdu)["NORM"];
+        const GFitsTableCol* ls1  = (*hdu)["LS1"];
 
         // Check consistency of columns
         if (norm->number() != size)
@@ -432,8 +432,8 @@ void GLATEdisp::write_edisp(GFits& file) const
         }
 
         // Append columns to table
-        hdu_edisp->append_column(col_norm);
-        hdu_edisp->append_column(col_ls1);
+        hdu_edisp->append(col_norm);
+        hdu_edisp->append(col_ls1);
 
         // Append HDU to FITS file
         file.append(*hdu_edisp);

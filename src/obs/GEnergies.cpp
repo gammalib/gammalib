@@ -438,11 +438,11 @@ void GEnergies::read(const GFitsTable* hdu)
             }
 
             // Get the column with the name "Energy"
-            const GFitsTableCol& col_energy = (*hdu)["Energy"];
+            const GFitsTableCol* col_energy = (*hdu)["Energy"];
 
             // Set energies
             for (int i = 0; i < num; ++i) {
-                append(GEnergy(col_energy.real(i), unit));
+                append(GEnergy(col_energy->real(i), unit));
             }
 
         } // endif: there were energy bins
@@ -478,7 +478,7 @@ void GEnergies::write(GFits* file, const std::string& extname) const
 
     // Create energies table
     GFitsBinTable* table = new GFitsBinTable(num);
-    table->append_column(col_energy);
+    table->append(col_energy);
     table->extname(extname);
 
     // Write to FITS file

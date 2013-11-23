@@ -609,7 +609,7 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
             m_aeff.reserve(size);
 
             // Get pointer to effective area column
-            const GFitsTableCol* ptr = &(*hdu)["EFFAREA"];
+            const GFitsTableCol* ptr = (*hdu)["EFFAREA"];
 
             // Check consistency of effective area table
             int num = ptr->number();
@@ -667,7 +667,7 @@ void GLATAeff::read_efficiency(const GFitsTable* hdu)
         m_eff_func2 = NULL;
 
         // Get pointer to efficiency factors column
-        const GFitsTableCol* ptr = &(*hdu)["EFFICIENCY_PARS"];
+        const GFitsTableCol* ptr = (*hdu)["EFFICIENCY_PARS"];
 
         // Allocate vectors to hold the parameters
         std::vector<double> par1;
@@ -735,7 +735,7 @@ void GLATAeff::write_aeff(GFits& file) const
             col_aeff(0,i) = m_aeff[i];
 
         // Append columns to table
-        hdu_aeff->append_column(col_aeff);
+        hdu_aeff->append(col_aeff);
 
         // Append HDU to FITS file
         file.append(*hdu_aeff);

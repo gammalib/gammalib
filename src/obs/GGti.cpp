@@ -606,8 +606,8 @@ void GGti::read(const GFitsTable* hdu)
         m_start = new GTime[m_num];
         m_stop  = new GTime[m_num];
         for (int i = 0; i < m_num; ++i) {
-            m_start[i].set((*hdu)["START"].real(i), m_reference);
-            m_stop[i].set((*hdu)["STOP"].real(i), m_reference);
+            m_start[i].set((*hdu)["START"]->real(i), m_reference);
+            m_stop[i].set((*hdu)["STOP"]->real(i), m_reference);
         }
 
         // Set attributes
@@ -647,8 +647,8 @@ void GGti::write(GFits* file, const std::string& extname) const
 
     // Create GTI table
     GFitsBinTable* table = new GFitsBinTable(m_num);
-    table->append_column(cstart);
-    table->append_column(cstop);
+    table->append(cstart);
+    table->append(cstop);
     table->extname(extname);
 
     // Write time reference

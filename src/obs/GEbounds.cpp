@@ -633,8 +633,8 @@ void GEbounds::read(GFitsTable* hdu)
 
             // Copy information
             for (int i = 0; i < m_num; ++i) {
-                m_min[i].keV((*hdu)["E_MIN"].real(i));
-                m_max[i].keV((*hdu)["E_MAX"].real(i));
+                m_min[i].keV((*hdu)["E_MIN"]->real(i));
+                m_max[i].keV((*hdu)["E_MAX"]->real(i));
             }
 
         } // endif: there were channels to read
@@ -679,8 +679,8 @@ void GEbounds::write(GFits* file, const std::string& extname) const
 
     // Create binary table
     GFitsBinTable* table = new GFitsBinTable(m_num);
-    table->append_column(cemin);
-    table->append_column(cemax);
+    table->append(cemin);
+    table->append(cemax);
     table->extname(extname);
 
     // Write to FITS file
