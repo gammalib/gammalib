@@ -105,7 +105,7 @@ const GSkyDir& GCTAInstDir::dir(void) const
 /***********************************************************************//**
  * @brief Set sky direction
  *
- * @param[in] Sky direction.
+ * @param[in] dir Sky direction.
  *
  * Set the sky direction.
  ***************************************************************************/

@@ -287,7 +287,6 @@ std::string GCTAAeffArf::filename(void) const
  * @brief Read CTA ARF vector
  *
  * @param[in] hdu FITS table pointer.
- * @param[in] rsp CTA response pointer (optional, defaults to NULL).
  *
  * This method reads a CTA ARF vector from the FITS HDU. Note that the
  * energies are converted to TeV and the effective area is converted to cm2.

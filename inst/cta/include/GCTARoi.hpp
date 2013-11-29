@@ -112,7 +112,7 @@ const double& GCTARoi::radius(void) const
 /***********************************************************************//**
  * @brief Set region of interest centre
  *
- * @param[in] Region of interest centre sky direction.
+ * @param[in] centre Region of interest centre sky direction.
  *
  * Set the sky direction of the region of interest centre.
  ***************************************************************************/
@@ -127,7 +127,7 @@ void GCTARoi::centre(const GCTAInstDir& centre)
 /***********************************************************************//**
  * @brief Set radius of region of interest
  *
- * @param[in] Region of interest radius (degrees).
+ * @param[in] radius Region of interest radius (degrees).
  *
  * Set the radius of the region of interest.
  ***************************************************************************/

@@ -463,7 +463,7 @@ const bool& GFitsTableCol::isvariable(void) const
 /***********************************************************************//**
  * @brief Set number of NULLs encountered
  *
- * @param[in] number Number of NULLs encountered.
+ * @param[in] anynul Number of NULLs encountered.
  ***************************************************************************/
 inline
 void GFitsTableCol::anynul(const int& anynul)

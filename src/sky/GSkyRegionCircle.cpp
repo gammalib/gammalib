@@ -137,7 +137,7 @@ GSkyRegionCircle::GSkyRegionCircle(const std::string& line)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] circle Circular sky region.
+ * @param[in] region Circular sky region.
  ***************************************************************************/
 GSkyRegionCircle::GSkyRegionCircle(const GSkyRegionCircle& region)
 {

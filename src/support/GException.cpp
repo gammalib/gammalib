@@ -95,6 +95,7 @@ GException::invalid_argument::invalid_argument(const std::string& origin,
  * @param[in] what Describes what is out of range.
  * @param[in] index Index.
  * @param[in] elements Number of elements.
+ * @param[in] message Optional error message.
  *
  * The @p what string specifies the index type that is out of range. For
  * example what="Vector index" will lead to "Vector index <index> is ...".
