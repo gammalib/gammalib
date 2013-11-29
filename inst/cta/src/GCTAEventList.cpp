@@ -653,48 +653,48 @@ void GCTAEventList::read_events_v0(const GFitsTable* table)
             m_events.reserve(num);
 
             // Get column pointers
-            GFitsTableULongCol*  ptr_eid         = (GFitsTableULongCol*)(*table)["EVENT_ID"];
-            GFitsTableDoubleCol* ptr_time        = (GFitsTableDoubleCol*)(*table)["TIME"];
-            GFitsTableShortCol*  ptr_multip      = (GFitsTableShortCol*)(*table)["MULTIP"];
-            GFitsTableFloatCol*  ptr_ra          = (GFitsTableFloatCol*)(*table)["RA"];
-            GFitsTableFloatCol*  ptr_dec         = (GFitsTableFloatCol*)(*table)["DEC"];
-            GFitsTableFloatCol*  ptr_dir_err     = (GFitsTableFloatCol*)(*table)["DIR_ERR"];
-            GFitsTableFloatCol*  ptr_detx        = (GFitsTableFloatCol*)(*table)["DETX"];
-            GFitsTableFloatCol*  ptr_dety        = (GFitsTableFloatCol*)(*table)["DETY"];
-            GFitsTableFloatCol*  ptr_alt         = (GFitsTableFloatCol*)(*table)["ALT"];
-            GFitsTableFloatCol*  ptr_az          = (GFitsTableFloatCol*)(*table)["AZ"];
-            GFitsTableFloatCol*  ptr_corex       = (GFitsTableFloatCol*)(*table)["COREX"];
-            GFitsTableFloatCol*  ptr_corey       = (GFitsTableFloatCol*)(*table)["COREY"];
-            GFitsTableFloatCol*  ptr_core_err    = (GFitsTableFloatCol*)(*table)["CORE_ERR"];
-            GFitsTableFloatCol*  ptr_xmax        = (GFitsTableFloatCol*)(*table)["XMAX"];
-            GFitsTableFloatCol*  ptr_xmax_err    = (GFitsTableFloatCol*)(*table)["XMAX_ERR"];
-            GFitsTableFloatCol*  ptr_energy      = (GFitsTableFloatCol*)(*table)["ENERGY"];
-            GFitsTableFloatCol*  ptr_energy_err  = (GFitsTableFloatCol*)(*table)["ENERGY_ERR"];
+            const GFitsTableCol* ptr_eid         = (*table)["EVENT_ID"];
+            const GFitsTableCol* ptr_time        = (*table)["TIME"];
+            const GFitsTableCol* ptr_multip      = (*table)["MULTIP"];
+            const GFitsTableCol* ptr_ra          = (*table)["RA"];
+            const GFitsTableCol* ptr_dec         = (*table)["DEC"];
+            const GFitsTableCol* ptr_dir_err     = (*table)["DIR_ERR"];
+            const GFitsTableCol* ptr_detx        = (*table)["DETX"];
+            const GFitsTableCol* ptr_dety        = (*table)["DETY"];
+            const GFitsTableCol* ptr_alt         = (*table)["ALT"];
+            const GFitsTableCol* ptr_az          = (*table)["AZ"];
+            const GFitsTableCol* ptr_corex       = (*table)["COREX"];
+            const GFitsTableCol* ptr_corey       = (*table)["COREY"];
+            const GFitsTableCol* ptr_core_err    = (*table)["CORE_ERR"];
+            const GFitsTableCol* ptr_xmax        = (*table)["XMAX"];
+            const GFitsTableCol* ptr_xmax_err    = (*table)["XMAX_ERR"];
+            const GFitsTableCol* ptr_energy      = (*table)["ENERGY"];
+            const GFitsTableCol* ptr_energy_err  = (*table)["ENERGY_ERR"];
 
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom event;
             for (int i = 0; i < num; ++i) {
                 event.m_index     = i;
-                event.m_time.set((*ptr_time)(i), m_gti.reference());
-                event.m_dir.dir().radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
-                event.m_energy.TeV((*ptr_energy)(i));
-                event.m_event_id    = (*ptr_eid)(i);
+                event.m_time.set(ptr_time->real(i), m_gti.reference());
+                event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
+                event.m_energy.TeV(ptr_energy->real(i));
+                event.m_event_id    = ptr_eid->integer(i);
                 event.m_obs_id      = 0;
-                event.m_multip      = (*ptr_multip)(i);
+                event.m_multip      = ptr_multip->integer(i);
                 event.m_telmask     = 0;
-                event.m_dir_err     = (*ptr_dir_err)(i);
-                event.m_detx        = (*ptr_detx)(i);
-                event.m_dety        = (*ptr_dety)(i);
-                event.m_alt         = (*ptr_alt)(i);
-                event.m_az          = (*ptr_az)(i);
-                event.m_corex       = (*ptr_corex)(i);
-                event.m_corey       = (*ptr_corey)(i);
-                event.m_core_err    = (*ptr_core_err)(i);
-                event.m_xmax        = (*ptr_xmax)(i);
-                event.m_xmax_err    = (*ptr_xmax_err)(i);
+                event.m_dir_err     = ptr_dir_err->real(i);
+                event.m_detx        = ptr_detx->real(i);
+                event.m_dety        = ptr_dety->real(i);
+                event.m_alt         = ptr_alt->real(i);
+                event.m_az          = ptr_az->real(i);
+                event.m_corex       = ptr_corex->real(i);
+                event.m_corey       = ptr_corey->real(i);
+                event.m_core_err    = ptr_core_err->real(i);
+                event.m_xmax        = ptr_xmax->real(i);
+                event.m_xmax_err    = ptr_xmax_err->real(i);
                 event.m_shwidth     = 0.0;
                 event.m_shlength    = 0.0;
-                event.m_energy_err  = (*ptr_energy_err)(i);
+                event.m_energy_err  = ptr_energy_err->real(i);
                 m_events.push_back(event);
             }
 
@@ -734,51 +734,51 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
             m_events.reserve(num);
 
             // Get column pointers
-            GFitsTableULongCol*  ptr_eid         = (GFitsTableULongCol*)(*table)["EVENT_ID"];
-            GFitsTableULongCol*  ptr_oid         = (GFitsTableULongCol*)(*table)["OBS_ID"];
-            GFitsTableDoubleCol* ptr_time        = (GFitsTableDoubleCol*)(*table)["TIME"];
-            GFitsTableShortCol*  ptr_multip      = (GFitsTableShortCol*)(*table)["MULTIP"];
-            GFitsTableFloatCol*  ptr_ra          = (GFitsTableFloatCol*)(*table)["RA"];
-            GFitsTableFloatCol*  ptr_dec         = (GFitsTableFloatCol*)(*table)["DEC"];
-            GFitsTableFloatCol*  ptr_dir_err     = (GFitsTableFloatCol*)(*table)["DIR_ERR"];
-            GFitsTableFloatCol*  ptr_detx        = (GFitsTableFloatCol*)(*table)["DETX"];
-            GFitsTableFloatCol*  ptr_dety        = (GFitsTableFloatCol*)(*table)["DETY"];
-            GFitsTableFloatCol*  ptr_alt         = (GFitsTableFloatCol*)(*table)["ALT"];
-            GFitsTableFloatCol*  ptr_az          = (GFitsTableFloatCol*)(*table)["AZ"];
-            GFitsTableFloatCol*  ptr_corex       = (GFitsTableFloatCol*)(*table)["COREX"];
-            GFitsTableFloatCol*  ptr_corey       = (GFitsTableFloatCol*)(*table)["COREY"];
-            GFitsTableFloatCol*  ptr_core_err    = (GFitsTableFloatCol*)(*table)["CORE_ERR"];
-            GFitsTableFloatCol*  ptr_xmax        = (GFitsTableFloatCol*)(*table)["XMAX"];
-            GFitsTableFloatCol*  ptr_xmax_err    = (GFitsTableFloatCol*)(*table)["XMAX_ERR"];
-            GFitsTableFloatCol*  ptr_shw         = (GFitsTableFloatCol*)(*table)["SHWIDTH"];
-            GFitsTableFloatCol*  ptr_shl         = (GFitsTableFloatCol*)(*table)["SHLENGTH"];
-            GFitsTableFloatCol*  ptr_energy      = (GFitsTableFloatCol*)(*table)["ENERGY"];
-            GFitsTableFloatCol*  ptr_energy_err  = (GFitsTableFloatCol*)(*table)["ENERGY_ERR"];
+            const GFitsTableCol* ptr_eid         = (*table)["EVENT_ID"];
+            const GFitsTableCol* ptr_oid         = (*table)["OBS_ID"];
+            const GFitsTableCol* ptr_time        = (*table)["TIME"];
+            const GFitsTableCol* ptr_multip      = (*table)["MULTIP"];
+            const GFitsTableCol* ptr_ra          = (*table)["RA"];
+            const GFitsTableCol* ptr_dec         = (*table)["DEC"];
+            const GFitsTableCol* ptr_dir_err     = (*table)["DIR_ERR"];
+            const GFitsTableCol* ptr_detx        = (*table)["DETX"];
+            const GFitsTableCol* ptr_dety        = (*table)["DETY"];
+            const GFitsTableCol* ptr_alt         = (*table)["ALT"];
+            const GFitsTableCol* ptr_az          = (*table)["AZ"];
+            const GFitsTableCol* ptr_corex       = (*table)["COREX"];
+            const GFitsTableCol* ptr_corey       = (*table)["COREY"];
+            const GFitsTableCol* ptr_core_err    = (*table)["CORE_ERR"];
+            const GFitsTableCol* ptr_xmax        = (*table)["XMAX"];
+            const GFitsTableCol* ptr_xmax_err    = (*table)["XMAX_ERR"];
+            const GFitsTableCol* ptr_shw         = (*table)["SHWIDTH"];
+            const GFitsTableCol* ptr_shl         = (*table)["SHLENGTH"];
+            const GFitsTableCol* ptr_energy      = (*table)["ENERGY"];
+            const GFitsTableCol* ptr_energy_err  = (*table)["ENERGY_ERR"];
 
             // Copy data from columns into GCTAEventAtom objects
             GCTAEventAtom event;
             for (int i = 0; i < num; ++i) {
                 event.m_index     = i;
-                event.m_time.set((*ptr_time)(i), m_gti.reference());
-                event.m_dir.dir().radec_deg((*ptr_ra)(i), (*ptr_dec)(i));
-                event.m_energy.TeV((*ptr_energy)(i));
-                event.m_event_id   = (*ptr_eid)(i);
-                event.m_obs_id     = (*ptr_oid)(i);
-                event.m_multip     = (*ptr_multip)(i);
-                event.m_telmask    = 0;
-                event.m_dir_err    = (*ptr_dir_err)(i);
-                event.m_detx       = (*ptr_detx)(i);
-                event.m_dety       = (*ptr_dety)(i);
-                event.m_alt        = (*ptr_alt)(i);
-                event.m_az         = (*ptr_az)(i);
-                event.m_corex      = (*ptr_corex)(i);
-                event.m_corey      = (*ptr_corey)(i);
-                event.m_core_err   = (*ptr_core_err)(i);
-                event.m_xmax       = (*ptr_xmax)(i);
-                event.m_xmax_err   = (*ptr_xmax_err)(i);
-                event.m_shwidth    = (*ptr_shw)(i);
-                event.m_shlength   = (*ptr_shl)(i);
-                event.m_energy_err = (*ptr_energy_err)(i);
+                event.m_time.set(ptr_time->real(i), m_gti.reference());
+                event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
+                event.m_energy.TeV(ptr_energy->real(i));
+                event.m_event_id    = ptr_eid->integer(i);
+                event.m_obs_id      = ptr_oid->integer(i);
+                event.m_multip      = ptr_multip->integer(i);
+                event.m_telmask     = 0;
+                event.m_dir_err     = ptr_dir_err->real(i);
+                event.m_detx        = ptr_detx->real(i);
+                event.m_dety        = ptr_dety->real(i);
+                event.m_alt         = ptr_alt->real(i);
+                event.m_az          = ptr_az->real(i);
+                event.m_corex       = ptr_corex->real(i);
+                event.m_corey       = ptr_corey->real(i);
+                event.m_core_err    = ptr_core_err->real(i);
+                event.m_xmax        = ptr_xmax->real(i);
+                event.m_xmax_err    = ptr_xmax_err->real(i);
+                event.m_shwidth     = ptr_shw->real(i);
+                event.m_shlength    = ptr_shl->real(i);
+                event.m_energy_err  = ptr_energy_err->real(i);
                 m_events.push_back(event);
             }
 
@@ -820,37 +820,33 @@ void GCTAEventList::read_events_hillas(const GFitsTable* table)
 
             // HIL_MSW
             if (table->hascolumn("HIL_MSW")) {
-                GFitsTableFloatCol* ptr =
-                     (GFitsTableFloatCol*)(*table)["HIL_MSW"];
+                const GFitsTableCol* ptr = (*table)["HIL_MSW"];
                 for (int i = 0; i < num; ++i) {
-                    m_events[i].m_hil_msw = (*ptr)(i);
+                    m_events[i].m_hil_msw = ptr->real(i);
                 }
             }
 
             // HIL_MSW_ERR
             if (table->hascolumn("HIL_MSW_ERR")) {
-                GFitsTableFloatCol* ptr =
-                     (GFitsTableFloatCol*)(*table)["HIL_MSW_ERR"];
+                const GFitsTableCol* ptr = (*table)["HIL_MSW_ERR"];
                 for (int i = 0; i < num; ++i) {
-                    m_events[i].m_hil_msw_err = (*ptr)(i);
+                    m_events[i].m_hil_msw_err = ptr->real(i);
                 }
             }
 
             // HIL_MSL
             if (table->hascolumn("HIL_MSL")) {
-                GFitsTableFloatCol* ptr =
-                     (GFitsTableFloatCol*)(*table)["HIL_MSL"];
+                const GFitsTableCol* ptr = (*table)["HIL_MSL"];
                 for (int i = 0; i < num; ++i) {
-                    m_events[i].m_hil_msl = (*ptr)(i);
+                    m_events[i].m_hil_msl = ptr->real(i);
                 }
             }
 
             // HIL_MSL_ERR
             if (table->hascolumn("HIL_MSL_ERR")) {
-                GFitsTableFloatCol* ptr =
-                     (GFitsTableFloatCol*)(*table)["HIL_MSL_ERR"];
+                const GFitsTableCol* ptr = (*table)["HIL_MSL_ERR"];
                 for (int i = 0; i < num; ++i) {
-                    m_events[i].m_hil_msl_err = (*ptr)(i);
+                    m_events[i].m_hil_msl_err = ptr->real(i);
                 }
             }
 
