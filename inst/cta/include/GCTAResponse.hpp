@@ -50,7 +50,6 @@
 #include "GCTAPointing.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAEventAtom.hpp"
-#include "GCTADir.hpp"
 #include "GCTAResponseTable.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAPsf.hpp"

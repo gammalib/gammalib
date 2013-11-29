@@ -46,7 +46,6 @@
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
 #include "GCTASupport.hpp"
-#include "GCTADir.hpp"
 #include "GCTAAeff2D.hpp"
 #include "GCTAAeffArf.hpp"
 #include "GCTAAeffPerfTable.hpp"

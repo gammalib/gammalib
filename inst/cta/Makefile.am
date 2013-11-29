@@ -38,8 +38,7 @@ sources = src/GCTASupport.cpp \
           src/GCTAModelRadialGauss.cpp \
           src/GCTAModelRadialPolynom.cpp \
           src/GCTAModelRadialProfile.cpp \
-          src/GCTAModelRadialAcceptance.cpp \
-          src/GCTADir.cpp
+          src/GCTAModelRadialAcceptance.cpp
 
 # Define headers to be installed
 pkginclude_HEADERS = include/GCTAException.hpp \
@@ -71,7 +70,6 @@ pkginclude_HEADERS = include/GCTAException.hpp \
                      include/GCTAModelRadialPolynom.hpp \
                      include/GCTAModelRadialProfile.hpp \
                      include/GCTAModelRadialAcceptance.hpp \
-                     include/GCTADir.hpp \
                      include/GCTALib.hpp
 
 # Calibration files to distribute

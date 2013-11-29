@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GCTALib.hpp  -  CTA Support Header files                 *
+ *                 GCTALib.hpp - CTA Support Header files                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -49,7 +49,6 @@
 #include "GCTAModelRadialPolynom.hpp"
 #include "GCTAModelRadialProfile.hpp"
 #include "GCTAModelRadialAcceptance.hpp"
-#include "GCTADir.hpp"
 
 /* __ CTA specific definitions ___________________________________________ */
 #define G_CTA_MJDREF 51544.5                 //!< Reference of CTA time frame
