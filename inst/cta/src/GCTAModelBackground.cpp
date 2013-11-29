@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTABackgroundModel.cpp
+ * @file GCTAModelBackground.cpp
  * @brief Generic CTA background model class implementation
  * @author Michael Mayer
  */
