@@ -798,7 +798,7 @@ double gammalib::plaw_energy_flux(const double& emin, const double& emax,
 
 
 /***********************************************************************//**
- * @brief Checks if a file exists.
+ * @brief Checks if file exists
  *
  * @param[in] filename File name.
  *
@@ -826,7 +826,7 @@ bool gammalib::file_exists(const std::string& filename)
 }
 
 /***********************************************************************//**
- * @brief Checks if a substring is in a string .
+ * @brief Checks if a substring is in a string
  *
  * @param[in] str string you want to search in.
  * @param[in] substring string you are looking for in str.
@@ -845,4 +845,32 @@ bool gammalib::contains(std::string str, std::string substring)
 
     // Return result
     return result;
+}
+
+
+/***********************************************************************//**
+ * @brief Emits warning
+ *
+ * @param[in] origin Name of method that emits warning.
+ * @param[in] message Warning message.
+ *
+ * Writes a warning to the console.
+ ***************************************************************************/
+void gammalib::warning(const std::string& origin,
+                       const std::string& message)
+{
+    // Compile option: enable/disable warnings
+    #if defined(G_WARNINGS)
+
+    // Set warning message
+    std::string warning = "+++ WARNING in " + origin + ": " + message;
+
+    // Writes warning to the console
+    std::cout << warning << std::endl;
+
+    // End of compile option
+    #endif
+    
+    // Return
+    return;
 }

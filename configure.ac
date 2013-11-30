@@ -89,7 +89,6 @@ AC_CANONICAL_HOST
 # A special kluge was added for Mac OS X >=10.7. As Apple switched to clang #
 # we search from this version on for the clang compiler.                    #
 #############################################################################
-
 # Set default compiler lists
 cxx_list="g++ c++ gpp aCC CC cxx cc++ cl.exe FCC KCC RCC xlC_r xlC clang++"
 cc_list="gcc cc cl.exe clang"
@@ -657,6 +656,24 @@ if test "x$SMALL_MEMORY" = "xyes"; then
 else
   AC_MSG_RESULT(no)
 fi
+
+
+#############################################################################
+# Checks for Warning option (G_WARNINGS)                                    #
+#############################################################################
+AC_MSG_CHECKING(whether to enable console warnings)
+AC_ARG_ENABLE([small_memory],
+              AS_HELP_STRING([--enable-warnings],
+                             [write warnings to console [default=yes]]),
+             [WARNINGS="$enableval"],
+             [WARNINGS="yes"])
+if test "x$WARNINGS" = "xyes"; then
+  AC_DEFINE([G_WARNINGS], [1], [Define if warnings should be written to console])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
 
 #############################################################################
 # Checks for OpenMP checking option (G_OPENMP)                              #

@@ -88,6 +88,8 @@ namespace gammalib {
     bool                     isinfinite(const double& x);
     bool                     isnotanumber(const double& x);
     bool 					 contains(std::string str1, std::string str2);
+    void                     warning(const std::string& origin,
+                                     const std::string& message);
 }
 
 /***********************************************************************//**

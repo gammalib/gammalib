@@ -37,9 +37,9 @@
  *
  * @brief Implements FITS header card interface
  *
- * This class implements FITS header card. Each card consists of a
- * keyname (string), a value (string, floating pointer, integer or logical)
- * and a comment (string). COMMENT or HISTORY cards do not have any value.
+ * This class implements a FITS header card. A header card consists of a
+ * keyname (string), a value (string, floating point, integer or logical)
+ * and a comment (string). COMMENT or HISTORY cards do not have a value.
  *
  * @todo Many more datatypes may exist for a header card.
  ***************************************************************************/
@@ -61,7 +61,7 @@ public:
     virtual ~GFitsHeaderCard(void);
 
     // Operators
-    GFitsHeaderCard& operator= (const GFitsHeaderCard& card);
+    GFitsHeaderCard& operator=(const GFitsHeaderCard& card);
 
     // Methods
     void             clear(void);
@@ -98,7 +98,7 @@ private:
     void copy_dtype(const GFitsHeaderCard& card);
     void free_dtype(void);
     void set_dtype(const std::string& value);
-    void read(void* vptr, int keynum);
+    void read(void* vptr, const int& keynum);
     void read(void* fptr, const std::string& keyname);
     void write(void* fptr);
 
@@ -112,5 +112,81 @@ private:
     std::string m_comment;         //!< Card comment
     bool        m_comment_write;   //!< Signals that comment should be written
 };
+
+
+/***********************************************************************//**
+ * @brief Set unit of header card value
+ *
+ * @param[in] unit Unit of header card.
+ ***************************************************************************/
+inline
+void GFitsHeaderCard::unit(const std::string& unit)
+{
+    m_unit = unit;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set comment of header card
+ *
+ * @param[in] comment Header card comment.
+ ***************************************************************************/
+inline
+void GFitsHeaderCard::comment(const std::string& comment)
+{
+    m_comment = comment;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card keyname
+  ***************************************************************************/
+inline
+std::string GFitsHeaderCard::keyname(void) const
+{
+    return m_keyname;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card value
+  ***************************************************************************/
+inline
+std::string GFitsHeaderCard::value(void) const
+{
+    return m_value;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card decimals
+  ***************************************************************************/
+inline
+int GFitsHeaderCard::decimals(void) const
+{
+    return m_value_decimals;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card value unit
+  ***************************************************************************/
+inline
+std::string GFitsHeaderCard::unit(void) const
+{
+    return m_unit;
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card comment
+  ***************************************************************************/
+inline
+std::string GFitsHeaderCard::comment(void) const
+{
+    return m_comment;
+}
 
 #endif /* GFITSHEADERCARD_HPP */

@@ -1,5 +1,5 @@
 /***************************************************************************
- *       GFitsHeaderCard.cpp  - FITS header card abstract base class       *
+ *              GFitsHeaderCard.cpp - FITS header card class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -36,8 +36,10 @@
 #include "GFitsHeaderCard.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ_NUM                         "GFitsHeaderCard::read(void*,int)"
-#define G_READ_STR                 "GFitsHeaderCard::read(void*,std::string)"
+#define G_COPY_DTYPE          "GFitsHeaderCard::copy_dtype(GFitsHeaderCard&)"
+#define G_FREE_DTYPE                          "GFitsHeaderCard::free_dtype()"
+#define G_READ_NUM                       "GFitsHeaderCard::read(void*, int&)"
+#define G_READ_STR               "GFitsHeaderCard::read(void*, std::string&)"
 #define G_WRITE                               "GFitsHeaderCard::write(void*)"
 
 /* __ Definitions ________________________________________________________ */
@@ -58,11 +60,11 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GFitsHeaderCard::GFitsHeaderCard(void)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Return
@@ -83,7 +85,7 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
                                  const std::string& value,
                                  const std::string& comment)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Set members
@@ -109,7 +111,7 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
                                  const double&      value,
                                  const std::string& comment)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Set members
@@ -135,7 +137,7 @@ GFitsHeaderCard::GFitsHeaderCard(const std::string& keyname,
                                  const int&         value,
                                  const std::string& comment)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Set members
@@ -188,8 +190,9 @@ GFitsHeaderCard::~GFitsHeaderCard(void)
  * @brief Assignment operator
  *
  * @param[in] card Header card.
+ * @return Header card.
  ***************************************************************************/
-GFitsHeaderCard& GFitsHeaderCard::operator= (const GFitsHeaderCard& card)
+GFitsHeaderCard& GFitsHeaderCard::operator=(const GFitsHeaderCard& card)
 {
     // Execute only if object is not identical
     if (this != &card) {
@@ -234,6 +237,8 @@ void GFitsHeaderCard::clear(void)
 
 /***********************************************************************//**
  * @brief Clone object
+ *
+ * @return Pointer to deep copy of header card.
  ***************************************************************************/
 GFitsHeaderCard* GFitsHeaderCard::clone(void) const
 {
@@ -274,10 +279,12 @@ void GFitsHeaderCard::value(const std::string& value)
     m_value = value;
 
     // Attach hyphens to internal string representation if required
-    if (m_value[0] != '\x27')
+    if (m_value[0] != '\x27') {
         m_value = "'" + m_value;
-    if (m_value[m_value.length()-1] != '\x27')
+    }
+    if (m_value[m_value.length()-1] != '\x27') {
         m_value = m_value + "'";
+    }
 
     // Strip hyphens and whitespace from datatype value that is used for
     // keyword writing
@@ -494,86 +501,6 @@ void GFitsHeaderCard::value(const long long& value)
 
 
 /***********************************************************************//**
- * @brief Set unit of header card value
- *
- * @param[in] unit Unit of header card.
- ***************************************************************************/
-void GFitsHeaderCard::unit(const std::string& unit)
-{
-    // Set unit
-    m_unit = unit;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set comment of header card
- *
- * @param[in] comment Header card comment.
- ***************************************************************************/
-void GFitsHeaderCard::comment(const std::string& comment)
-{
-    // Set comment
-    m_comment = comment;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return header card keyname
-  ***************************************************************************/
-std::string GFitsHeaderCard::keyname(void) const
-{
-    // Return
-    return m_keyname;
-}
-
-
-/***********************************************************************//**
- * @brief Return header card value
-  ***************************************************************************/
-std::string GFitsHeaderCard::value(void) const
-{
-    // Return
-    return m_value;
-}
-
-
-/***********************************************************************//**
- * @brief Return header card decimals
-  ***************************************************************************/
-int GFitsHeaderCard::decimals(void) const
-{
-    // Return
-    return m_value_decimals;
-}
-
-
-/***********************************************************************//**
- * @brief Return header card value unit
-  ***************************************************************************/
-std::string GFitsHeaderCard::unit(void) const
-{
-    // Return
-    return m_unit;
-}
-
-
-/***********************************************************************//**
- * @brief Return header card comment
-  ***************************************************************************/
-std::string GFitsHeaderCard::comment(void) const
-{
-    // Return
-    return m_comment;
-}
-
-
-/***********************************************************************//**
  * @brief Return header card value as string
  *
  * Convert header card value into a string.
@@ -588,8 +515,9 @@ std::string GFitsHeaderCard::string(void)
     if (m_value_dtype != NULL) {
         switch (m_dtype) {
         case __TSTRING:
-            if (m_value.length() > 2)
+            if (m_value.length() > 2) {
                 result = gammalib::strip_whitespace(m_value.substr(1, m_value.length() - 2));
+            }
             break;
         default:
             break;
@@ -618,8 +546,9 @@ double GFitsHeaderCard::real(void)
     if (m_value_dtype != NULL) {
         switch (m_dtype) {
         case __TSTRING:
-            if (m_value.length() > 2)
+            if (m_value.length() > 2) {
                 result = gammalib::todouble(m_value.substr(1, m_value.length() - 2));
+            }
             break;
         case __TLOGICAL:
             result = (m_value == "T") ? 1.0 : 0.0;
@@ -652,8 +581,9 @@ int GFitsHeaderCard::integer(void)
     if (m_value_dtype != NULL) {
         switch (m_dtype) {
         case __TSTRING:
-            if (m_value.length() > 2)
+            if (m_value.length() > 2) {
                 result = gammalib::toint(m_value.substr(1, m_value.length() - 2));
+            }
             break;
         case __TLOGICAL:
             result = (m_value == "T") ? 1 : 0;
@@ -700,65 +630,65 @@ std::string GFitsHeaderCard::print(const GChatter& chatter) const
             result.append(" "+m_comment);
         }
 
-    // Attach card type
-    if (m_value_dtype != NULL) {
-        switch (m_dtype) {
-        case __TBIT:
-            result.append(" <bit>");
-            break;
-        case __TBYTE:
-            result.append(" <byte>");
-            break;
-        case __TSBYTE:
-            result.append(" <signed byte>");
-            break;
-        case __TLOGICAL:
-            result.append(" <bool>");
-            break;
-        case __TSTRING:
-            result.append(" <string>");
-            break;
-        case __TUSHORT:
-            result.append(" <unsigned short>");
-            break;
-        case __TSHORT:
-            result.append(" <short>");
-            break;
-        case __TUINT:
-            result.append(" <unsigned int>");
-            break;
-        case __TINT:
-            result.append(" <int>");
-            break;
-        case __TULONG:
-            result.append(" <unsigned long>");
-            break;
-        case __TLONG:
-            result.append(" <long>");
-            break;
-        case __TLONGLONG:
-            result.append(" <long long>");
-            break;
-        case __TFLOAT:
-            result.append(" <float>");
-            break;
-        case __TDOUBLE:
-            result.append(" <double>");
-            break;
-        case __TCOMPLEX:
-            result.append(" <complex>");
-            break;
-        case __TDBLCOMPLEX:
-            result.append(" <double complex>");
-            break;
-        default:
-            result.append(" <unsupported>");
-            break;
+        // Attach card type
+        if (m_value_dtype != NULL) {
+            switch (m_dtype) {
+            case __TBIT:
+                result.append(" <bit>");
+                break;
+            case __TBYTE:
+                result.append(" <byte>");
+                break;
+            case __TSBYTE:
+                result.append(" <signed byte>");
+                break;
+            case __TLOGICAL:
+                result.append(" <bool>");
+                break;
+            case __TSTRING:
+                result.append(" <string>");
+                break;
+            case __TUSHORT:
+                result.append(" <unsigned short>");
+                break;
+            case __TSHORT:
+                result.append(" <short>");
+                break;
+            case __TUINT:
+                result.append(" <unsigned int>");
+                break;
+            case __TINT:
+                result.append(" <int>");
+                break;
+            case __TULONG:
+                result.append(" <unsigned long>");
+                break;
+            case __TLONG:
+                result.append(" <long>");
+                break;
+            case __TLONGLONG:
+                result.append(" <long long>");
+                break;
+            case __TFLOAT:
+                result.append(" <float>");
+                break;
+            case __TDOUBLE:
+                result.append(" <double>");
+                break;
+            case __TCOMPLEX:
+                result.append(" <complex>");
+                break;
+            case __TDBLCOMPLEX:
+                result.append(" <double complex>");
+                break;
+            default:
+                result.append(" <unsupported value "+gammalib::str(m_dtype)+">");
+                break;
+            }
         }
-    }
-    else {
-        result.append(" <non native>");
-    }
+        else {
+            result.append(" <non native>");
+        }
 
     } // endif: chatter was not silent
 
@@ -831,6 +761,10 @@ void GFitsHeaderCard::free_members(void)
 
 /***********************************************************************//**
  * @brief Copy dtype
+ *
+ * @param[in] card Header card.
+ *
+ * Copies the data type of a header card.
  ***************************************************************************/
 void GFitsHeaderCard::copy_dtype(const GFitsHeaderCard& card)
 {
@@ -872,8 +806,9 @@ void GFitsHeaderCard::copy_dtype(const GFitsHeaderCard& card)
             m_value_dtype = new double(*((double*)card.m_value_dtype));
             break;
         default:
-            std::cout << "GFitsHeaderCard::copy_dtype: invalid data type code "
-                      << m_dtype << " encountered." << std::endl;
+            std::string msg = "Invalid data type code "+
+                              gammalib::str(m_dtype)+" encountered.";
+            gammalib::warning(G_COPY_DTYPE, msg);
             break;
         }
     }
@@ -925,8 +860,9 @@ void GFitsHeaderCard::free_dtype(void)
             delete (double*)m_value_dtype;
             break;
         default:
-            std::cout << "GFitsHeaderCard::free_dtype: invalid data type code "
-                      << m_dtype << " encountered." << std::endl;
+            std::string msg = "Invalid data type code "+
+                              gammalib::str(m_dtype)+" encountered.";
+            gammalib::warning(G_FREE_DTYPE, msg);
             break;
         }
     }
@@ -961,10 +897,7 @@ void GFitsHeaderCard::set_dtype(const std::string& value)
         // If value is empty then we either have a COMMENT or HISTORY card or
         // we don't know the type
         if (last < 0) {
-            if (m_keyname == "COMMENT") {
-                continue;
-            }
-            else if (m_keyname == "HISTORY") {
+            if (m_keyname == "COMMENT" || m_keyname == "HISTORY") {
                 continue;
             }
             else {
@@ -1053,22 +986,24 @@ void GFitsHeaderCard::set_dtype(const std::string& value)
  * @param[in] vptr FITS file void pointer.
  * @param[in] keynum Number of the header card.
  ***************************************************************************/
-void GFitsHeaderCard::read(void* vptr, int keynum)
+void GFitsHeaderCard::read(void* vptr, const int& keynum)
 {
     // Move to HDU
     int status = 0;
     status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
                           &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_READ_NUM, status);
+    }
 
     // Read keyword
     char keyname[80];
     char value[80];
     char comment[80];
     status = __ffgkyn(FPTR(vptr), keynum, keyname, value, comment, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_READ_NUM, status);
+    }
 
     // Store result
     m_keyname.assign(keyname);
@@ -1095,8 +1030,9 @@ void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
     int status = 0;
     status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
                           &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_READ_NUM, status);
+    }
 
     // Read keyword
     char value[80];
@@ -1105,10 +1041,12 @@ void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
                       &status);
 
     // Catch error
-    if (status == 202)       // Keyword not found
+    if (status == 202) {      // Keyword not found
         throw GException::fits_key_not_found(G_READ_STR, keyname, status);
-    else if (status != 0)    // Any other error
+    }
+    else if (status != 0) {   // Any other error
         throw GException::fits_error(G_READ_STR, status);
+    }
 
     // Store result
     m_keyname = keyname;
@@ -1136,19 +1074,22 @@ void GFitsHeaderCard::write(void* vptr)
     int status = 0;
     status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
                           &status);
-    if (status != 0)
-        throw GException::fits_error(G_READ_NUM, status);
+    if (status != 0) {
+        throw GException::fits_error(G_WRITE, status);
+    }
 
     // If card is comment then write comment
     if (m_keyname == "COMMENT") {
-        if (m_comment_write)
+        if (m_comment_write) {
             status = __ffpcom(FPTR(vptr), (char*)m_comment.c_str(), &status);
+        }
     }
 
     // If card is history then write history
     else if (m_keyname == "HISTORY") {
-        if (m_comment_write)
+        if (m_comment_write) {
             status = __ffphis(FPTR(vptr), (char*)m_comment.c_str(), &status);
+        }
     }
 
     // If card holds a native data type then write it
@@ -1185,14 +1126,20 @@ void GFitsHeaderCard::write(void* vptr)
 
     // ... capture all other stuff
     else {
-        std::cout << "*** ERROR in GFitsHeaderCard::write: the code should"
-                  << " never arrive at this point. keyname=" << m_keyname
-                  << " " << "dtype=" << m_dtype << std::endl;
+        std::string msg = "The code should never arrive at this point!\n"
+                          "The keyname \""+m_keyname+"\" is neither"
+                          " \"COMMENT\" nor \"HISTRORY\" but it has a"
+                          " NULL data type value and a data type of"
+                          " "+gammalib::str(m_dtype)+".\n"
+                          "Maybe an invalid FITS header card has been"
+                          " encountered in reading a file?";
+        gammalib::warning(G_WRITE, msg);
     }
 
     // Throw exception in case of a FITS error
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_WRITE, status);
+    }
 
     // Return
     return;
