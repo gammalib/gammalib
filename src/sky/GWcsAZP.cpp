@@ -35,10 +35,10 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_PRJ_SET                                        "GWcsAZP::prj_set()"
-#define G_PRJ_X2S "GWcsAZP::prj_x2s(int,int,int,int,double*,double*,double*,"\
-                                                              "double*,int*)"
-#define G_PRJ_S2X "GWcsAZP::prj_s2x(int,int,int,int,double*,double*,double*,"\
-                                                              "double*,int*)"
+#define G_PRJ_X2S    "GWcsAZP::prj_x2s(int, int, int, int, double*, double*,"\
+                                                   " double*, double*, int*)"
+#define G_PRJ_S2X    "GWcsAZP::prj_s2x(int, int, int, int, double*, double*,"\
+                                                   " double*, double*, int*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -141,8 +141,9 @@ GWcsAZP::~GWcsAZP(void)
  * @brief Assignment operator
  *
  * @param[in] wcs World Coordinate System.
+ * @return World Coordinate System.
  ***************************************************************************/
-GWcsAZP& GWcsAZP::operator= (const GWcsAZP& wcs)
+GWcsAZP& GWcsAZP::operator=(const GWcsAZP& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
@@ -196,6 +197,8 @@ void GWcsAZP::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of World Coordinate System.
  ***************************************************************************/
 GWcsAZP* GWcsAZP::clone(void) const
 {
@@ -278,7 +281,7 @@ void GWcsAZP::free_members(void)
  * @brief Setup of projection
  *
  * This method sets up the projection information. The method has been
- * adapted from the wcslib function prj.c::carset.
+ * adapted from the wcslib function prj.c::azpset.
  *
  * @exception GException::wcs_invalid_parameter
  *            PV(1) or PV(2) are invalid.
@@ -328,10 +331,12 @@ void GWcsAZP::prj_set(void) const
     m_w[2] = 1.0/m_w[3];
     m_w[4] = gammalib::sind(m_pv[2]);
     m_w[1] = m_w[4] / m_w[3];
-    if (std::abs(m_pv[1]) > 1.0)
+    if (std::abs(m_pv[1]) > 1.0) {
         m_w[5] = gammalib::asind(-1.0/m_pv[1]);
-    else
+    }
+    else {
         m_w[5] = -90.0;
+    }
     m_w[6] = m_pv[1] * m_w[3];
     m_w[7] = (std::abs(m_w[6]) < 1.0) ? 1.0 : 0.0;
     
@@ -368,7 +373,7 @@ void GWcsAZP::prj_set(void) const
  * Deproject Cartesian (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
- * This method has been adapted from the wcslib function prj.c::carx2s().
+ * This method has been adapted from the wcslib function prj.c::azpx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
  * setup previsouly (as this will be done by the constructor).
@@ -381,8 +386,9 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
     const double tol = 1.0e-13;
 
     // Initialize projection if required
-    if (!m_prjset)
+    if (!m_prjset) {
         prj_set();
+    }
 
     // Set value replication length mx,my
     int mx;
@@ -408,8 +414,9 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
     for (int ix = 0; ix < nx; ++ix, rowoff += spt, xp += sxy) {
         double  xj   = *xp + m_x0;
         double* phip = phi + rowoff;
-        for (int iy = 0; iy < my; ++iy, phip += rowlen)
+        for (int iy = 0; iy < my; ++iy, phip += rowlen) {
             *phip = xj;
+        }
     }
 
     // Do y dependence
@@ -446,8 +453,9 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
                     }
                     t = (t < 0) ? -90.0 : 90.0;
                 } 
-                else
+                else {
                     t = gammalib::asind(t);
+                }
                 double a = s - t;
                 double b = s + t + 180.0;
                 if (a > 90.0) a -= 360.0;
@@ -459,8 +467,9 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
     }
 
     // Handle status code
-    if (status == 3)
+    if (status == 3) {
         throw GException::wcs_invalid_x_y(G_PRJ_X2S, n_invalid);
+    }
 
     // Return
     return;
@@ -489,7 +498,7 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
  * Project native spherical coordinates (phi,theta) to Cartesian (x,y)
  * coordinates in the plane of projection.
  *
- * This method has been adapted from the wcslib function prj.c::cars2x().
+ * This method has been adapted from the wcslib function prj.c::azps2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
  * setup previsouly (as this will be done by the constructor).
@@ -499,8 +508,9 @@ void GWcsAZP::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       double* x, double* y, int* stat) const
 {
     // Initialize projection if required
-    if (!m_prjset)
+    if (!m_prjset) {
         prj_set();
+    }
 
     // Set value replication length mphi,mtheta
     int mphi;
@@ -607,16 +617,10 @@ void GWcsAZP::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     } // endfor: theta
   
     // Handle status code
-    if (status == 4)
+    if (status == 4) {
         throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
+    }
     
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

@@ -28,6 +28,7 @@
 #define GWCSCAR_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GWcslib.hpp"
 
 
@@ -57,8 +58,8 @@ public:
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GWcsCAR*    clone(void) const;
-    virtual std::string code(void) const { return "CAR"; }
-    virtual std::string name(void) const { return "plate carree"; }
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -74,5 +75,33 @@ private:
                  const double* phi, const double* theta,
                  double* x, double* y, int* stat) const;
 };
+
+
+/***********************************************************************//**
+ * @brief Return projection code
+ *
+ * @return Projection code.
+ *
+ * Returns the projection code "CAR".
+ ***************************************************************************/
+inline
+std::string GWcsCAR::code(void) const
+{
+    return "CAR";
+}
+
+
+/***********************************************************************//**
+ * @brief Return projection name
+ *
+ * @return Projection name.
+ *
+ * Returns the projection name.
+ ***************************************************************************/
+inline
+std::string GWcsCAR::name(void) const
+{
+    return "plate carree";
+}
 
 #endif /* GWCSCAR_HPP */

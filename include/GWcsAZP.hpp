@@ -28,6 +28,7 @@
 #define GWCSAZP_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GWcslib.hpp"
 
 
@@ -52,13 +53,13 @@ public:
     virtual ~GWcsAZP(void);
 
     // Operators
-    GWcsAZP& operator= (const GWcsAZP& wcs);
+    GWcsAZP& operator=(const GWcsAZP& wcs);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GWcsAZP*    clone(void) const;
-    virtual std::string code(void) const { return "AZP"; }
-    virtual std::string name(void) const { return "zenithal/azimuthal perspective"; }
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -74,5 +75,33 @@ private:
                  const double* phi, const double* theta,
                  double* x, double* y, int* stat) const;
 };
+
+
+/***********************************************************************//**
+ * @brief Return projection code
+ *
+ * @return Projection code.
+ *
+ * Returns the projection code "AZP".
+ ***************************************************************************/
+inline
+std::string GWcsAZP::code(void) const
+{
+    return "AZP";
+}
+
+
+/***********************************************************************//**
+ * @brief Return projection name
+ *
+ * @return Projection name.
+ *
+ * Returns the projection name.
+ ***************************************************************************/
+inline
+std::string GWcsAZP::name(void) const
+{
+    return "zenithal/azimuthal perspective";
+}
 
 #endif /* GWCSAZP_HPP */

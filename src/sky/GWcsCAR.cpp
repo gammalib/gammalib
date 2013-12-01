@@ -137,7 +137,7 @@ GWcsCAR::~GWcsCAR(void)
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsCAR& GWcsCAR::operator= (const GWcsCAR& wcs)
+GWcsCAR& GWcsCAR::operator=(const GWcsCAR& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
@@ -191,6 +191,8 @@ void GWcsCAR::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
+ *
+ * @return Pointer to deep copy of World Coordinate System.
  ***************************************************************************/
 GWcsCAR* GWcsCAR::clone(void) const
 {
@@ -296,7 +298,8 @@ void GWcsCAR::prj_set(void) const
         m_r0 = gammalib::rad2deg;
         m_w.push_back(1.0);
         m_w.push_back(1.0);
-    } else {
+    } 
+    else {
         m_w.push_back(m_r0 * gammalib::deg2rad);
         m_w.push_back(1.0/m_w[0]);
     }
@@ -340,8 +343,9 @@ void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt,
                       double* phi, double* theta, int* stat) const
 {
     // Initialize projection if required
-    if (!m_prjset)
+    if (!m_prjset) {
         prj_set();
+    }
 
     // Set value replication length mx,my
     int mx;
@@ -363,8 +367,9 @@ void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt,
     for (int ix = 0; ix < nx; ++ix, rowoff += spt, xp += sxy) {
         double  s    = m_w[1] * (*xp + m_x0);
         double* phip = phi + rowoff;
-        for (int iy = 0; iy < my; ++iy, phip += rowlen)
+        for (int iy = 0; iy < my; ++iy, phip += rowlen) {
             *phip = s;
+        }
     }
 
     // Do y dependence
@@ -412,8 +417,9 @@ void GWcsCAR::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       double* x, double* y, int* stat) const
 {
     // Initialize projection if required
-    if (!m_prjset)
+    if (!m_prjset) {
         prj_set();
+    }
 
     // Set value replication length mphi,mtheta
     int mphi;
@@ -435,8 +441,9 @@ void GWcsCAR::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     for (int iphi = 0; iphi < nphi; ++iphi, rowoff += sxy, phip += spt) {
         double  xi = m_w[0] * (*phip) - m_x0;
         double* xp = x + rowoff;
-        for (int itheta = 0; itheta < mtheta; ++itheta, xp += rowlen)
+        for (int itheta = 0; itheta < mtheta; ++itheta, xp += rowlen) {
             *xp = xi;
+        }
     }
 
 
@@ -455,10 +462,3 @@ void GWcsCAR::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
