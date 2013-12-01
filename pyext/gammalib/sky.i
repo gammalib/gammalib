@@ -57,6 +57,7 @@
 %include "GWcs.i"
 %include "GWcsRegistry.i"
 %include "GWcslib.i"
+%include "GWcsAIT.i"
 %include "GWcsAZP.i"
 %include "GWcsCAR.i"
 %include "GWcsTAN.i"

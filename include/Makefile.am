@@ -84,6 +84,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcs.hpp \
                      GWcsRegistry.hpp \
                      GWcslib.hpp \
+                     GWcsAIT.hpp \
                      GWcsAZP.hpp \
                      GWcsCAR.hpp \
                      GWcsTAN.hpp \

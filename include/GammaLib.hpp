@@ -143,6 +143,7 @@
 #include "GWcs.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcslib.hpp"
+#include "GWcsAIT.hpp"
 #include "GWcsAZP.hpp"
 #include "GWcsCAR.hpp"
 #include "GWcsMER.hpp"

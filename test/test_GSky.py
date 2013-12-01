@@ -72,6 +72,7 @@ class Test(GPythonTestSuite):
 
         # Append tests
         self.append(self.test_skymap_healpix, "Test HEALPix map")
+        self.append(self.test_skymap_ait, "Test AIT projection map")
         self.append(self.test_skymap_car, "Test CAR projection map")
         self.append(self.test_skymap_tan, "Test TAN projection map")
         self.append(self.test_skymap_stg, "Test STG projection map")
@@ -180,6 +181,17 @@ class Test(GPythonTestSuite):
 
         # Load again HEALPix skymap
         pixels = GSkymap(file1)
+
+        # Return
+        return
+
+    # Test AIT projection
+    def test_skymap_ait(self):
+        """
+        Test AIT projection.
+        """
+        # Execute generic test
+        self.test_skymap_proj("AIT")
 
         # Return
         return
