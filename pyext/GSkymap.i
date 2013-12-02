@@ -114,7 +114,7 @@ public:
     explicit GSkymap(const std::string& coords,
                      const int&         nside,
                      const std::string& order,
-                     const int          nmaps = 1);
+                     const int&         nmaps = 1);
     explicit GSkymap(const std::string& proj,
                      const std::string& coords,
                      const double&      x,
@@ -123,7 +123,7 @@ public:
                      const double&      dy,
                      const int&         nx,
                      const int&         ny,
-                     const int          nmaps = 1);
+                     const int&         nmaps = 1);
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
 

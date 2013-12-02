@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GRegistry.hpp"
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 
 
 /***********************************************************************//**
@@ -40,9 +40,9 @@
  *
  * The registry class allows the registration of WCS projections that are not
  * necessarily compiled into the GammaLib. It uses the static members
- * m_number, m_codes, m_names, and m_prjs which are allocated globally to keep
- * track of projections that are available throughout all linked libraries. To
- * register a projection it is sufficient to add
+ * m_number, m_codes, m_names, and m_projections which are allocated globally
+ * to keep track of projections that are available throughout all linked
+ * libraries. To register a projection it is sufficient to add
  *
  *     const GWcsXXX      g_wcs_XXX_seed;
  *     const GWcsRegistry g_wcs_XXX_registry(&g_wcs_XXX_seed);
@@ -55,7 +55,7 @@ class GWcsRegistry : public GRegistry {
 public:
     // Constructors and destructors
     GWcsRegistry(void);
-    explicit GWcsRegistry(const GSkyProjection* proj);
+    explicit GWcsRegistry(const GWcs* wcs);
     GWcsRegistry(const GWcsRegistry& registry);
     virtual ~GWcsRegistry(void);
 
@@ -63,12 +63,12 @@ public:
     GWcsRegistry& operator=(const GWcsRegistry& registry);
 
     // Methods
-    int             size(void) const;
-    GSkyProjection* alloc(const std::string& code) const;
-    std::string     code(const int& index) const;
-    std::string     name(const int& index) const;
-    std::string     list(void) const;
-    std::string     print(const GChatter& chatter = NORMAL) const;
+    int         size(void) const;
+    GWcs*       alloc(const std::string& code) const;
+    std::string code(const int& index) const;
+    std::string name(const int& index) const;
+    std::string list(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -97,8 +97,8 @@ private:
         return m_names;
     };
     // Pointer to seed projections
-    static GRegistryPointer<const GSkyProjection*>& projections() {
-        static GRegistryPointer<const GSkyProjection*> m_projections;
+    static GRegistryPointer<const GWcs*>& projections() {
+        static GRegistryPointer<const GWcs*> m_projections;
         return m_projections;
     };
 };

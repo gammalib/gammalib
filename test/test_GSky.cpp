@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   test_GSky.cpp - test GSky classes                     *
+ *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -52,7 +52,7 @@ void TestGSky::set(void){
     name("GSky");
 
     //add tests
-    add_test(static_cast<pfunction>(&TestGSky::test_GWcslib),"Test GWcslib");
+    add_test(static_cast<pfunction>(&TestGSky::test_GWcs),"Test GWcs");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_construct),"Test Healpix GSkymap constructors");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
     add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
@@ -72,7 +72,7 @@ void TestGSky::set(void){
  * @param[in] crpix1 Reference pixel in X
  * @param[in] crpix2 Reference pixel in Y
  ***************************************************************************/
-double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
+double TestGSky::wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2)
 {
     // Initialise maximal distance
     double dist_max = 0.0;
@@ -85,8 +85,9 @@ double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpi
 
         // Skip pixels outside valid range (they are not expected to
         // transform bijectively)
-        if (x < 0 || x >= nx)
+        if (x < 0 || x >= nx) {
             continue;
+        }
 
         // Loop over y pixels
         for (int iy = -ny; iy <= ny; ++iy) {
@@ -128,8 +129,9 @@ double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpi
             #endif
 
             // Store maximum distance
-            if (dist > dist_max)
+            if (dist > dist_max) {
                 dist_max = dist;
+            }
 
         } // endfor: y pixels
     } // endfor: x pixels
@@ -148,10 +150,10 @@ double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpi
  * @param[in] crpix1 Reference pixel in X
  * @param[in] crpix2 Reference pixel in Y
  ***************************************************************************/
-double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
+double TestGSky::wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2)
 {
     // Make a copy using clone
-    GWcslib* cpy = wcs->clone();
+    GWcs* cpy = wcs->clone();
 
     // Initialise maximal angle and distance
     double angle_max = 0.0;
@@ -165,8 +167,9 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
 
         // Skip pixels outside valid range (they are not expected to
         // transform bijectively)
-        if (x < 0 || x >= nx)
+        if (x < 0 || x >= nx) {
             continue;
+        }
 
         // Loop over y pixels
         for (int iy = -ny; iy <= ny; ++iy) {
@@ -176,8 +179,9 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
 
             // Skip pixels outside valid range (they are not expected to
             // transform bijectively)
-            if (y < 0 || y >= ny)
+            if (y < 0 || y >= ny) {
                 continue;
+            }
 
             // Set sky pixel
             GSkyPixel pix_in(x,y);
@@ -186,8 +190,9 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
             GSkyDir dir1 = wcs->xy2dir(pix_in);
             GSkyDir dir2 = cpy->xy2dir(pix_in);
             double angle = dir1.dist_deg(dir2);
-            if (angle > angle_max)
+            if (angle > angle_max) {
                 angle_max = angle;
+            }
 
             // Debug option: Dump discrepancies
             #if defined(G_WCS_COPY_DEBUG)
@@ -206,9 +211,10 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
             // Compute distance
             double dx   = pix_out1.x()-pix_out2.x();
             double dy   = pix_out1.y()-pix_out2.y();
-            double dist = sqrt(dx*dx+dy*dy);
-            if (dist > dist_max)
+            double dist = std::sqrt(dx*dx+dy*dy);
+            if (dist > dist_max) {
                 dist_max = dist;
+            }
 
             // Debug option: Dump discrepancies
             #if defined(G_WCS_COPY_DEBUG)
@@ -236,11 +242,11 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
 
 
 /***********************************************************************//**
- * @brief Test GWcslib projections
+ * @brief Test GWcs projections
  *
- * This function test all non-HealPix projections that have been registered.
+ * This method tests all WCS projections that have been registered.
  ***************************************************************************/
-void TestGSky::test_GWcslib(void)
+void TestGSky::test_GWcs(void)
 {
     // Allocate parameters for testing
     double crval1 = 83.63;
@@ -256,10 +262,7 @@ void TestGSky::test_GWcslib(void)
     GWcsRegistry registry;
     for (int i = 0; i < registry.size(); ++i) {
 
-        // Skip HealPix
-        if (registry.code(i) == "HPX")
-            continue;
-
+        // Set header
         std::string test_class = "GWcs" + registry.code(i);
 
         // Perform tests
@@ -267,8 +270,8 @@ void TestGSky::test_GWcslib(void)
         try {
 
             // Allocate projection CEL and GAL
-            GWcslib *cel = dynamic_cast<GWcslib*>(registry.alloc(registry.code(i)));
-            GWcslib *gal = dynamic_cast<GWcslib*>(registry.alloc(registry.code(i)));
+            GWcs *cel = dynamic_cast<GWcs*>(registry.alloc(registry.code(i)));
+            GWcs *gal = dynamic_cast<GWcs*>(registry.alloc(registry.code(i)));
 
             // Throw an error if allocation failed
             if (cel == NULL || gal == NULL) {

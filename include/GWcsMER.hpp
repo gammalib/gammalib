@@ -28,7 +28,8 @@
 #define GWCSMER_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GWcslib.hpp"
+#include <string>
+#include "GWcs.hpp"
 
 
 /***********************************************************************//**
@@ -39,7 +40,7 @@
  * This class implements Mercator's projection for the World Coordinate
  * System.
  ***************************************************************************/
-class GWcsMER : public GWcslib {
+class GWcsMER : public GWcs {
 
 public:
     // Constructors and destructors

@@ -33,28 +33,29 @@
 #include "GSkymap.hpp"
 #include "GHealpix.hpp"
 #include "GWcsRegistry.hpp"
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 #include "GFits.hpp"
 #include "GFitsTableDoubleCol.hpp"
 #include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCT_HPX     "GSkymap::GSkymap(std::string, std::string, int,"\
-                                                          "std::string, int)"
-#define G_CONSTRUCT_MAP "GSkymap::GSkymap(std::string, std::string, GSkyDir,"\
-                                             "int, int, double, double, int)"
-#define G_OP_ACCESS_1D                         "GSkymap::operator(int&,int&)"
-#define G_OP_ACCESS_2D                   "GSkymap::operator(GSkyPixel&,int&)"
-#define G_OP_VALUE                         "GSkymap::operator(GSkyDir&,int&)"
+#define G_CONSTRUCT_HPX                "GSkymap::GSkymap(std::string&, int&,"\
+                                                       " std::string&, int&)"
+#define G_CONSTRUCT_MAP        "GSkymap::GSkymap(std::string&, std::string&,"\
+                      " double&, double&, double& double&, int&, int&, int&)"
+#define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
+#define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
+#define G_OP_VALUE                        "GSkymap::operator(GSkyDir&, int&)"
 #define G_READ                               "GSkymap::read(const GFitsHDU*)"
-#define G_PIX2DIR                                     "GSkymap::pix2dir(int)"
-#define G_DIR2PIX                                 "GSkymap::dir2pix(GSkyDir)"
-#define G_XY2DIR                                 "GSkymap::xy2dir(GSkyPixel)"
-#define G_DIR2XY                                   "GSkymap::dir2xy(GSkyDir)"
-#define G_OMEGA1                                        "GSkymap::omega(int)"
-#define G_OMEGA2                                  "GSkymap::omega(GSkyPixel)"
-#define G_SET_WCS "GSkymap::set_wcs(std::string,std::string,double,double," \
-                               "double,double,double,double,GMatrix,GVector)"
+#define G_PIX2DIR                                    "GSkymap::pix2dir(int&)"
+#define G_DIR2PIX                                "GSkymap::dir2pix(GSkyDir&)"
+#define G_XY2DIR                                "GSkymap::xy2dir(GSkyPixel&)"
+#define G_DIR2XY                                  "GSkymap::dir2xy(GSkyDir&)"
+#define G_OMEGA1                                       "GSkymap::omega(int&)"
+#define G_OMEGA2                                 "GSkymap::omega(GSkyPixel&)"
+#define G_SET_WCS     "GSkymap::set_wcs(std::string&, std::string&, double&,"\
+                              " double&, double&, double&, double&, double&,"\
+                                                       " GMatrix&, GVector&)"
 #define G_READ_HEALPIX                   "GSkymap::read_healpix(GFitsTable*)"
 #define G_READ_WCS                           "GSkymap::read_wcs(GFitsImage*)"
 #define G_ALLOC_WCS                         "GSkymap::alloc_wcs(GFitsImage*)"
@@ -123,7 +124,7 @@ GSkymap::GSkymap(const std::string& filename)
 GSkymap::GSkymap(const std::string& coords,
                  const int&         nside,
                  const std::string& order,
-                 const int          nmaps)
+                 const int&         nmaps)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -176,7 +177,7 @@ GSkymap::GSkymap(const std::string& wcs,
                  const double&      dy,
                  const int&         nx,
                  const int&         ny,
-                 const int          nmaps)
+                 const int&         nmaps)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -1259,21 +1260,19 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
         GWcsRegistry registry;
         
         // Allocate projection from registry
-        m_proj = registry.alloc(uwcs);
+        GWcs* projection = registry.alloc(uwcs);
+        m_proj           = projection;
 
-        // Cast to World Coordinate system
-        GWcslib* wcs = dynamic_cast<GWcslib*>(m_proj);
-        
         // Signal if projection type is not known
-        if (wcs == NULL) {
+        if (projection == NULL) {
             std::string message = "Projection code not known. "
                                   "Should be one of "+registry.list()+".";
             throw GException::wcs_invalid(G_SET_WCS, uwcs, message);
         }
 
         // Setup WCS
-        wcs->set(coords, crval1, crval2, crpix1, crpix2,
-                 cdelt1, cdelt2);
+        projection->set(coords, crval1, crval2, crpix1, crpix2,
+                        cdelt1, cdelt2);
     
     } // endelse: got projection from registry
 

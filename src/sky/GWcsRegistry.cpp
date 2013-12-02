@@ -75,23 +75,23 @@ GWcsRegistry::GWcsRegistry(void)
 /***********************************************************************//**
  * @brief Projection constructor
  *
- * @param[in] proj World Coordinate Projection
+ * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsRegistry::GWcsRegistry(const GSkyProjection* proj)
+GWcsRegistry::GWcsRegistry(const GWcs* wcs)
 {
     // Initialise private members for clean destruction
     init_members();
 
     // Debug option: Notify new registry
     #if G_DEBUG_REGISTRY
-    std::cout << "GWcsRegistry(const GSkyProjection*): ";
-    std::cout << "add \"" << proj->code() << "\" to registry." << std::endl;
+    std::cout << "GWcsRegistry(const GWcs*): ";
+    std::cout << "add \"" << wcs->code() << "\" to registry." << std::endl;
     #endif
 
     // Allocate new registry
-    std::string* new_codes                  = new std::string[size()+1];
-    std::string* new_names                  = new std::string[size()+1];
-    const GSkyProjection** new_projections  = new const GSkyProjection*[size()+1];
+    std::string* new_codes        = new std::string[size()+1];
+    std::string* new_names        = new std::string[size()+1];
+    const GWcs** new_projections  = new const GWcs*[size()+1];
 
     // Save old registry
     for (int i = 0; i < size(); ++i) {
@@ -101,9 +101,9 @@ GWcsRegistry::GWcsRegistry(const GSkyProjection* proj)
     }
 
     // Add new projection to registry
-    new_codes[size()]       = proj->code();
-    new_names[size()]       = proj->name();
-    new_projections[size()] = proj;
+    new_codes[size()]       = wcs->code();
+    new_names[size()]       = wcs->name();
+    new_projections[size()] = wcs;
 
     // Set pointers on new registry
     codes().assign(new_codes);
@@ -115,7 +115,7 @@ GWcsRegistry::GWcsRegistry(const GSkyProjection* proj)
 
     // Debug option: Show actual registry
     #if G_DEBUG_REGISTRY
-    std::cout << "GWcsRegistry(const GSkyProjection*): ";
+    std::cout << "GWcsRegistry(const GWcs*): ";
     for (int i = 0; i < size(); ++i) {
         std::cout << "\"" << codes()[i] << "\" ";
     }
@@ -198,18 +198,18 @@ GWcsRegistry& GWcsRegistry::operator=(const GWcsRegistry& registry)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate sky projection of given code
+ * @brief Allocate World Coordinate System of given code
  *
  * @param[in] code Sky projection code.
- * @return Pointer to sky projection (NULL if code is not registered).
+ * @return Pointer to World Coordinate System (NULL if code is not registered).
  *
  * Returns a pointer to a sky projection instance of the specified code. If
  * the code has not been found in the registry, a NULL pointer is returned.
  ***************************************************************************/
-GSkyProjection* GWcsRegistry::alloc(const std::string& code) const
+GWcs* GWcsRegistry::alloc(const std::string& code) const
 {
     // Initialise projection
-    GSkyProjection* projection = NULL;
+    GWcs* projection = NULL;
 
     // Search for projection in registry
     for (int i = 0; i < size(); ++i) {

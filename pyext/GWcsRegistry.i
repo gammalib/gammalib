@@ -39,16 +39,16 @@ class GWcsRegistry : public GRegistry {
 public:
     // Constructors and destructors
     GWcsRegistry(void);
-    explicit GWcsRegistry(const GSkyProjection* proj);
+    explicit GWcsRegistry(const GWcs* wcs);
     GWcsRegistry(const GWcsRegistry& registry);
     virtual ~GWcsRegistry(void);
 
     // Methods
-    int             size(void) const;
-    GSkyProjection* alloc(const std::string& code) const;
-    std::string     code(const int& index) const;
-    std::string     name(const int& index) const;
-    std::string     list(void) const;
+    int         size(void) const;
+    GWcs*       alloc(const std::string& code) const;
+    std::string code(const int& index) const;
+    std::string name(const int& index) const;
+    std::string list(void) const;
 };
 
 

@@ -28,7 +28,7 @@
 #define GWCSSTG_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 
 
 /***********************************************************************//**
@@ -39,7 +39,7 @@
  * This class implements the "stereographic" projection for the World
  * Coordinate System.
  ***************************************************************************/
-class GWcsSTG : public GWcslib {
+class GWcsSTG : public GWcs {
 
 public:
     // Constructors and destructors

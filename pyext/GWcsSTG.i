@@ -34,7 +34,7 @@
  *
  * @brief Stereographic (STG) projection class definition
  ***************************************************************************/
-class GWcsSTG : public GWcslib {
+class GWcsSTG : public GWcs {
 public:
     // Constructors and destructors
     GWcsSTG(void);

@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GWcslib.hpp - Virtual base class for wcslib based WCS         *
+ *          GWcs.hpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcslib.hpp
- * @brief Definition of virtual base class for wcslib based WCS
+ * @file GWcs.hpp
+ * @brief Abstract world coordinate system base class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GWCSLIB_HPP
-#define GWCSLIB_HPP
+#ifndef GWCS_HPP
+#define GWCS_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <vector>
@@ -39,29 +39,29 @@
 
 
 /***********************************************************************//**
- * @class GWcslib
+ * @class GWcs
  *
- * @brief Virtual base class for wcslib based World Coordinate System
+ * @brief Abstract world coordinate system base class
  ***************************************************************************/
-class GWcslib : public GSkyProjection {
+class GWcs : public GSkyProjection {
 
 public:
     // Constructors and destructors
-    GWcslib(void);
-    explicit GWcslib(const std::string& coords,
-                     const double& crval1, const double& crval2,
-                     const double& crpix1, const double& crpix2,
-                     const double& cdelt1, const double& cdelt2);
-    explicit GWcslib(const GFitsHDU* hdu);
-    GWcslib(const GWcslib& wcs);
-    virtual ~GWcslib(void);
+    GWcs(void);
+    explicit GWcs(const std::string& coords,
+                  const double& crval1, const double& crval2,
+                  const double& crpix1, const double& crpix2,
+                  const double& cdelt1, const double& cdelt2);
+    explicit GWcs(const GFitsHDU* hdu);
+    GWcs(const GWcs& wcs);
+    virtual ~GWcs(void);
 
     // Operators
-    virtual GWcslib& operator= (const GWcslib& wcs);
+    virtual GWcs& operator= (const GWcs& wcs);
 
     // Pure virtual base class methods
     virtual void        clear(void) = 0;
-    virtual GWcslib*    clone(void) const = 0;
+    virtual GWcs*       clone(void) const = 0;
     virtual std::string code(void) const = 0;
     virtual std::string name(void) const = 0;
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
@@ -86,14 +86,14 @@ public:
     double cdelt(const int& inx) const;
 
 private:
-    // Static constants (set in GWcslib.cpp)
+    // Static constants (set in GWcs.cpp)
     static const int    PVN = 32;
     static const double UNDEFINED;
 
 protected:
     // Protected methods
     void         init_members(void);
-    void         copy_members(const GWcslib& wcs);
+    void         copy_members(const GWcs& wcs);
     void         free_members(void);
     void         set_members(const std::string& coords,
                              const double& crval1, const double& crval2,
@@ -208,4 +208,4 @@ protected:
     //struct spcprm spc
 };
 
-#endif /* GWCSLIB_HPP */
+#endif /* GWCS_HPP */

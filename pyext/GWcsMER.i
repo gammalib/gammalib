@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GWcsTAN.i  -  Gnomonic (TAN) projection class              *
+ *               GWcsMER.i - Mercator's (MER) projection class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2013 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,45 +19,45 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcsTAN.i
- * @brief Gnomonic (TAN) projection class Python interface
- * @author J. Knodlseder
+ * @file GWcsMER.i
+ * @brief Mercator's (MER) projection class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GWcsTAN.hpp"
+#include "GWcsMER.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GWcsTAN
+ * @class GWcsMER
  *
- * @brief Gnomonic (TAN) projection class definition
+ * @brief Mercator's (MER) projection class definition
  ***************************************************************************/
-class GWcsTAN : public GWcs {
+class GWcsMER : public GWcs {
 public:
     // Constructors and destructors
-    GWcsTAN(void);
-    explicit GWcsTAN(const std::string& coords,
+    GWcsMER(void);
+    explicit GWcsMER(const std::string& coords,
                      const double& crval1, const double& crval2,
                      const double& crpix1, const double& crpix2,
                      const double& cdelt1, const double& cdelt2);
-    GWcsTAN(const GWcsTAN& wcs);
-    virtual ~GWcsTAN(void);
+    GWcsMER(const GWcsMER& wcs);
+    virtual ~GWcsMER(void);
 
     // Implemented pure virtual methods
     virtual void        clear(void);
-    virtual GWcsTAN*    clone(void) const;
+    virtual GWcsMER*    clone(void) const;
     virtual std::string code(void) const;
     virtual std::string name(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GWcsTAN class extension
+ * @brief GWcsMER class extension
  ***************************************************************************/
-%extend GWcsTAN {
-    GWcsTAN copy() {
+%extend GWcsMER {
+    GWcsMER copy() {
         return (*self);
     }
 };

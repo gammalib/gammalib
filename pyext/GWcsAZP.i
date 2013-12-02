@@ -34,7 +34,7 @@
  *
  * @brief Zenithal/azimuthal perspective (AZP) projection class definition
  ***************************************************************************/
-class GWcsAZP : public GWcslib {
+class GWcsAZP : public GWcs {
 public:
     // Constructors and destructors
     GWcsAZP(void);

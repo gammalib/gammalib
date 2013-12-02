@@ -34,7 +34,7 @@
  *
  * @brief Aitoff (AIT) projection class definition
  ***************************************************************************/
-class GWcsAIT : public GWcslib {
+class GWcsAIT : public GWcs {
 public:
     // Constructors and destructors
     GWcsAIT(void);

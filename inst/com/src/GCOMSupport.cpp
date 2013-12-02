@@ -29,7 +29,7 @@
 #include <config.h>
 #endif
 #include "GCOMSupport.hpp"
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 #include "GWcsCAR.hpp"
 
 /* __ Coding definitions _________________________________________________ */
@@ -54,10 +54,10 @@
 void com_wcs_mer2car(GSkymap& map)
 {
     // Get WCS poiunter
-    GWcslib* wcs = dynamic_cast<GWcslib*>(map.projection());
+    GWcs* wcs = dynamic_cast<GWcs*>(map.projection());
 
     // Apply kluge only if the skymap is in Mercator's projection
-    if (wcs->code() == "MER") {
+    if (wcs != NULL && wcs->code() == "MER") {
 
         // Extract original WCS definiton
         double crval1 = wcs->crval(0);

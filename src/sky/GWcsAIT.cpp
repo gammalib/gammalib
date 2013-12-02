@@ -64,7 +64,7 @@ const GWcsRegistry g_wcs_ait_registry(&g_wcs_ait_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsAIT::GWcsAIT(void) : GWcslib()
+GWcsAIT::GWcsAIT(void) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -89,7 +89,7 @@ GWcsAIT::GWcsAIT(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2) :
-                 GWcslib(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
+                 GWcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
 
 {
     // Initialise class members
@@ -105,7 +105,7 @@ GWcsAIT::GWcsAIT(const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsAIT::GWcsAIT(const GWcsAIT& wcs) : GWcslib(wcs)
+GWcsAIT::GWcsAIT(const GWcsAIT& wcs) : GWcs(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -149,7 +149,7 @@ GWcsAIT& GWcsAIT::operator=(const GWcsAIT& wcs)
     if (this != &wcs) {
 
         // Copy base class members
-        this->GWcslib::operator=(wcs);
+        this->GWcs::operator=(wcs);
 
         // Free members
         free_members();
@@ -182,12 +182,12 @@ void GWcsAIT::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GWcslib::free_members();
+    this->GWcs::free_members();
     this->GSkyProjection::free_members();
 
     // Initialise members
     this->GSkyProjection::init_members();
-    this->GWcslib::init_members();
+    this->GWcs::init_members();
     init_members();
 
     // Return

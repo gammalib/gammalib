@@ -48,8 +48,9 @@ class GHealpix : public GSkyProjection {
 public:
     // Constructors and destructors
     GHealpix(void);
-    explicit GHealpix(const int& nside, const std::string& ordering = "NESTED",
-                     const std::string& coordsys = "GAL");
+    explicit GHealpix(const int&         nside,
+                      const std::string& ordering = "NESTED",
+                      const std::string& coordsys = "GAL");
     explicit GHealpix(const GFitsHDU* hdu);
     GHealpix(const GHealpix& wcs);
     virtual ~GHealpix(void);
@@ -73,8 +74,8 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int          npix(void) const;
-    int          nside(void) const;
+    const int&   npix(void) const;
+    const int&   nside(void) const;
     std::string  ordering(void) const;
     void         ordering(const std::string& ordering);
 
@@ -84,8 +85,6 @@ private:
     void         copy_members(const GHealpix& wcs);
     void         free_members(void);
     virtual bool compare(const GSkyProjection& proj) const;
-    //void         std2nat(GVector *coord) const { return; }
-    //void         nat2std(GVector *coord) const { return; }
     int          nside2order(int nside);
     void         pix2xy(const int& ipix, int* x, int* y) const;
     int          xy2pix(int x, int y) const;
@@ -94,17 +93,6 @@ private:
     int          ang2pix_z_phi_ring(double z, double phi) const;
     int          ang2pix_z_phi_nest(double z, double phi) const;
     unsigned int isqrt(unsigned int arg) const;
-
-    // NEW VERSION
-    /*
-    void prj_set(void);
-    int  prj_x2s(int nx, int ny, int sxy, int spt, 
-                 const double* x, const double* y,
-                 double* phi, double* theta, int* stat) const;
-    int  prj_s2x(int nphi, int ntheta, int spt, int sxy,
-                 const double* phi, const double* theta,
-                 double* x, double* y, int* stat) const;
-    */
 
     // Private data area
     int      m_nside;        //!< Number of divisions of each base pixel (1-8192)
@@ -144,6 +132,27 @@ inline
 std::string GHealpix::name(void) const
 {
     return "HealPix";
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of pixels
+ ***************************************************************************/
+inline
+const int& GHealpix::npix(void) const
+{
+    // Return number of pixels
+    return m_num_pixels;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of divisions of the side of each base pixel.
+ ***************************************************************************/
+inline
+const int& GHealpix::nside(void) const
+{
+    return m_nside;
 }
 
 #endif /* GHEALPIX_HPP */

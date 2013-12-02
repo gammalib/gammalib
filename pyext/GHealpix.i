@@ -59,8 +59,8 @@ public:
     virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
 
     // Other methods
-    int          npix(void) const;
-    int          nside(void) const;
+    const int&   npix(void) const;
+    const int&   nside(void) const;
     std::string  ordering(void) const;
     void         ordering(const std::string& ordering);
 };

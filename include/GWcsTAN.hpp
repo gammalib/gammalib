@@ -28,7 +28,7 @@
 #define GWCSTAN_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 
 
 /***********************************************************************//**
@@ -39,7 +39,7 @@
  * This class implements the "gnomonic" projection for the World Coordinate
  * System.
  ***************************************************************************/
-class GWcsTAN : public GWcslib {
+class GWcsTAN : public GWcs {
 
 public:
     // Constructors and destructors

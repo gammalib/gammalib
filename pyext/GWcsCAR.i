@@ -34,7 +34,7 @@
  *
  * @brief Plate carree (CAR) projection class definition
  ***************************************************************************/
-class GWcsCAR : public GWcslib {
+class GWcsCAR : public GWcs {
 public:
     // Constructors and destructors
     GWcsCAR(void);

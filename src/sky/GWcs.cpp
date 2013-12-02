@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GWcslib.cpp - Virtual base class for wcslib based WCS          *
+ *          GWcs.cpp - Abstract world coordinate system base class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcslib.cpp
- * @brief Implementation of virtual base class for wcslib based WCS
+ * @file GWcs.cpp
+ * @brief Abstract world coordinate system base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -33,24 +33,24 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                                     "GWcslib::read(GFitsHDU*)"
-#define G_OMEGA                                        "GWcslib::omega(int&)"
-#define G_PIX2DIR                                    "GWcslib::pix2dir(int&)"
-#define G_DIR2PIX                                "GWcslib::dir2pix(GSkyDir&)"
-#define G_CRVAL                                        "GWcslib::crval(int&)"
-#define G_CRPIX                                        "GWcslib::crpix(int&)"
-#define G_CDELT                                        "GWcslib::cdelt(int&)"
-#define G_WCS_SET_CTYPE                            "GWcslib::wcs_set_ctype()"
-#define G_WCS_P2S "GWcslib::wcs_s2p(int,int,double*,double*,double*,double*,"\
-                                                              "double*,int*)"
-#define G_WCS_S2P "GWcslib::wcs_s2p(int,int,double*,double*,double*,double*,"\
-                                                              "double*,int*)"
-#define G_CEL_SET                                        "GWcslib::cel_set()"
-#define G_LIN_MATINV              "GWcslib::lin_matinv(std::vector<double>&,"\
-                                                      "std::vector<double>&)"
+#define G_READ                                        "GWcs::read(GFitsHDU*)"
+#define G_OMEGA                                           "GWcs::omega(int&)"
+#define G_PIX2DIR                                       "GWcs::pix2dir(int&)"
+#define G_DIR2PIX                                   "GWcs::dir2pix(GSkyDir&)"
+#define G_CRVAL                                           "GWcs::crval(int&)"
+#define G_CRPIX                                           "GWcs::crpix(int&)"
+#define G_CDELT                                           "GWcs::cdelt(int&)"
+#define G_WCS_SET_CTYPE                               "GWcs::wcs_set_ctype()"
+#define G_WCS_P2S        "GWcs::wcs_s2p(int, int, double*, double*, double*,"\
+                                                   " double*, double*, int*)"
+#define G_WCS_S2P        "GWcs::wcs_s2p(int, int, double*, double*, double*,"\
+                                                   " double*, double*, int*)"
+#define G_CEL_SET                                           "GWcs::cel_set()"
+#define G_LIN_MATINV                 "GWcs::lin_matinv(std::vector<double>&,"\
+                                                     " std::vector<double>&)"
 
 
 /* __ Macros _____________________________________________________________ */
@@ -65,19 +65,19 @@
 /* __ Local prototypes ___________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const double GWcslib::UNDEFINED = 987654321.0e99;
+const double GWcs::UNDEFINED = 987654321.0e99;
 
 
 /*==========================================================================
  =                                                                         =
- =                     GWcslib constructors/destructors                    =
+ =                         Constructors/destructors                        =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcslib::GWcslib(void) : GSkyProjection()
+GWcs::GWcs(void) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -100,10 +100,10 @@ GWcslib::GWcslib(void) : GSkyProjection()
  *
  * Construct standard WCS sky map from standard definition parameters.
  ***************************************************************************/
-GWcslib::GWcslib(const std::string& coords,
-                 const double& crval1, const double& crval2,
-                 const double& crpix1, const double& crpix2,
-                 const double& cdelt1, const double& cdelt2) : GSkyProjection()
+GWcs::GWcs(const std::string& coords,
+           const double& crval1, const double& crval2,
+           const double& crpix1, const double& crpix2,
+           const double& cdelt1, const double& cdelt2) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -121,7 +121,7 @@ GWcslib::GWcslib(const std::string& coords,
  *
  * @param[in] hdu FITS HDU.
  ***************************************************************************/
-GWcslib::GWcslib(const GFitsHDU* hdu) : GSkyProjection()
+GWcs::GWcs(const GFitsHDU* hdu) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -139,7 +139,7 @@ GWcslib::GWcslib(const GFitsHDU* hdu) : GSkyProjection()
  *
  * @param wcs World Coordinate System.
  ***************************************************************************/
-GWcslib::GWcslib(const GWcslib& wcs) : GSkyProjection(wcs)
+GWcs::GWcs(const GWcs& wcs) : GSkyProjection(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -155,7 +155,7 @@ GWcslib::GWcslib(const GWcslib& wcs) : GSkyProjection(wcs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GWcslib::~GWcslib(void)
+GWcs::~GWcs(void)
 {
     // Free members
     free_members();
@@ -175,8 +175,9 @@ GWcslib::~GWcslib(void)
  * @brief Assignment operator
  *
  * @param[in] wcs World Coordinate System.
+ * @return World Coordinate System.
  ***************************************************************************/
-GWcslib& GWcslib::operator=(const GWcslib& wcs)
+GWcs& GWcs::operator=(const GWcs& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
@@ -216,7 +217,7 @@ GWcslib& GWcslib::operator=(const GWcslib& wcs)
  *
  * This method reads the WCS definition from the FITS header.
  ***************************************************************************/
-void GWcslib::read(const GFitsHDU* hdu)
+void GWcs::read(const GFitsHDU* hdu)
 {
     // Clear object
     clear();
@@ -314,7 +315,7 @@ void GWcslib::read(const GFitsHDU* hdu)
  *
  * This method has been adapted from wcshdr.c::wcshdo().
  ***************************************************************************/
-void GWcslib::write(GFitsHDU* hdu) const
+void GWcs::write(GFitsHDU* hdu) const
 {
     // Continue only if HDU is valid
     if (hdu != NULL) {
@@ -445,7 +446,7 @@ void GWcslib::write(GFitsHDU* hdu) const
  *       use only the first argument, and even carry a usage flag in
  *       GSkyPixel
  ***************************************************************************/
-double GWcslib::omega(const int& pix) const
+double GWcs::omega(const int& pix) const
 {
     // Set error message
     std::string message = "Method not defined for general WCS projection.";
@@ -474,7 +475,7 @@ double GWcslib::omega(const int& pix) const
  * rotated sky maps. Something more intelligent should be implemented in
  * the future.
  ***************************************************************************/
-double GWcslib::omega(const GSkyPixel& pix) const
+double GWcs::omega(const GSkyPixel& pix) const
 {
     // Get the sky directions of the 6 points
     GSkyDir dir1 = xy2dir(GSkyPixel(pix.x()-0.5, pix.y()-0.5));
@@ -508,7 +509,7 @@ double GWcslib::omega(const GSkyPixel& pix) const
  * This method should be overloaded by the appropriate method of the derived
  * class. It thus should never get called.
  ***************************************************************************/
-GSkyDir GWcslib::pix2dir(const int& pix) const
+GSkyDir GWcs::pix2dir(const int& pix) const
 {
     // Set error message
     std::string message = "Method not defined for general WCS projection.";
@@ -535,7 +536,7 @@ GSkyDir GWcslib::pix2dir(const int& pix) const
  * This method should be overloaded by the appropriate method of the derived
  * class. It thus should never get called.
  ***************************************************************************/
-int GWcslib::dir2pix(const GSkyDir& dir) const
+int GWcs::dir2pix(const GSkyDir& dir) const
 {
     // Set error message
     std::string message = "Method not defined for general WCS projection.";
@@ -555,7 +556,7 @@ int GWcslib::dir2pix(const GSkyDir& dir) const
  *
  * Note that pixel indices start from 0.
  ***************************************************************************/
-GSkyDir GWcslib::xy2dir(const GSkyPixel& pix) const
+GSkyDir GWcs::xy2dir(const GSkyPixel& pix) const
 {
     // Allocate memory for transformation
     double pixcrd[2];
@@ -603,7 +604,7 @@ GSkyDir GWcslib::xy2dir(const GSkyPixel& pix) const
  * Note that GSkyPixel indices start from 0 while the WCS pixel reference
  * starts from 1.
  ***************************************************************************/
-GSkyPixel GWcslib::dir2xy(const GSkyDir& dir) const
+GSkyPixel GWcs::dir2xy(const GSkyDir& dir) const
 {
     // Allocate memory for transformation
     double pixcrd[2];
@@ -656,7 +657,7 @@ GSkyPixel GWcslib::dir2xy(const GSkyDir& dir) const
  *
  * This method sets the WCS parameters.
  ***************************************************************************/
-void GWcslib::set(const std::string& coords,
+void GWcs::set(const std::string& coords,
                   const double& crval1, const double& crval2,
                   const double& crpix1, const double& crpix2,
                   const double& cdelt1, const double& cdelt2)
@@ -684,7 +685,7 @@ void GWcslib::set(const std::string& coords,
  * @exception GException::out_of_range
  *            Index is out of valid range.
  ***************************************************************************/
-double GWcslib::crval(const int& inx) const
+double GWcs::crval(const int& inx) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -707,7 +708,7 @@ double GWcslib::crval(const int& inx) const
  * @exception GException::out_of_range
  *            Index is out of valid range.
  ***************************************************************************/
-double GWcslib::crpix(const int& inx) const
+double GWcs::crpix(const int& inx) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -730,7 +731,7 @@ double GWcslib::crpix(const int& inx) const
  * @exception GException::out_of_range
  *            Index is out of valid range.
  ***************************************************************************/
-double GWcslib::cdelt(const int& inx) const
+double GWcs::cdelt(const int& inx) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
@@ -755,7 +756,7 @@ double GWcslib::cdelt(const int& inx) const
  *
  * Code adapted from wcs.c::wcsini().
  ***************************************************************************/
-void GWcslib::init_members(void)
+void GWcs::init_members(void)
 {
     // Initialise World Coordinate System with 0 axes
     wcs_ini(0);
@@ -770,7 +771,7 @@ void GWcslib::init_members(void)
  *
  * @param[in] wcs GWcs instance from which members should be copied
  ***************************************************************************/
-void GWcslib::copy_members(const GWcslib& wcs)
+void GWcs::copy_members(const GWcs& wcs)
 {
     // Copy WCS attributes
     m_wcsset  = wcs.m_wcsset;
@@ -835,7 +836,7 @@ void GWcslib::copy_members(const GWcslib& wcs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GWcslib::free_members(void)
+void GWcs::free_members(void)
 {
     // Return
     return;
@@ -859,7 +860,7 @@ void GWcslib::free_members(void)
  *
  * @todo Implement parameter validity check
  ***************************************************************************/
-void GWcslib::set_members(const std::string& coords,
+void GWcs::set_members(const std::string& coords,
                           const double& crval1, const double& crval2,
                           const double& crpix1, const double& crpix2,
                           const double& cdelt1, const double& cdelt2)
@@ -898,13 +899,13 @@ void GWcslib::set_members(const std::string& coords,
  * does not compare derived quantities as those may not have been initialised
  * in both objects.
  ***************************************************************************/
-bool GWcslib::compare(const GSkyProjection& proj) const
+bool GWcs::compare(const GSkyProjection& proj) const
 {
     // Initialise result
     bool result = false;
     
-    // Continue only we compare to a GWcslib object
-    const GWcslib* ptr = dynamic_cast<const GWcslib*>(&proj);
+    // Continue only we compare to a GWcs object
+    const GWcs* ptr = dynamic_cast<const GWcs*>(&proj);
     if (ptr != NULL) {
     
         // Perform comparion of standard (non derived) parameters
@@ -939,7 +940,7 @@ bool GWcslib::compare(const GSkyProjection& proj) const
  * contrast to the wcslib function, however, this method accepts naxis=0.
  * In this case, all vectors are cleared.
  ***************************************************************************/
-void GWcslib::wcs_ini(int naxis)
+void GWcs::wcs_ini(int naxis)
 {
     // Signal that WCS information has not been set so far. This will be done
     // in wcs_set() upon request
@@ -1031,7 +1032,7 @@ void GWcslib::wcs_ini(int naxis)
  * @todo Non-linear spectral axis present?
  * @todo Tabular axes present?
  ***************************************************************************/
-void GWcslib::wcs_set(void) const
+void GWcs::wcs_set(void) const
 {
     //TODO: Determine axis types from CTYPEia
     
@@ -1090,7 +1091,7 @@ void GWcslib::wcs_set(void) const
  *
  * This method has been inspired by code from wcshdr.c::wcshdo.
  ***************************************************************************/
-void GWcslib::wcs_set_ctype(void) const
+void GWcs::wcs_set_ctype(void) const
 {
     // Check on correct type length
     if (code().length() != 3) {
@@ -1203,7 +1204,7 @@ void GWcslib::wcs_set_ctype(void) const
  * @todo Check for constant x and/or y to speed-up computations
  * @todo Zero the unused world coordinate elements
  ***************************************************************************/
-void GWcslib::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
+void GWcs::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcrd,
                       double* phi, double* theta, double* world, int* stat) const
 {
     // Initialize if required
@@ -1268,7 +1269,7 @@ void GWcslib::wcs_p2s(int ncoord, int nelem, const double* pixcrd, double* imgcr
  * @todo Check for constant x and/or y to speed-up computations
  * @todo Zero the unused world coordinate elements
  ***************************************************************************/
-void GWcslib::wcs_s2p(int ncoord, int nelem, const double* world,
+void GWcs::wcs_s2p(int ncoord, int nelem, const double* world,
                       double* phi, double* theta,  double* imgcrd,
                       double* pixcrd, int* stat) const
 {
@@ -1309,7 +1310,7 @@ void GWcslib::wcs_s2p(int ncoord, int nelem, const double* world,
 /***********************************************************************//**
  * @brief Print WCS information
  ***************************************************************************/
-std::string GWcslib::wcs_print(const GChatter& chatter) const
+std::string GWcs::wcs_print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -1491,7 +1492,7 @@ std::string GWcslib::wcs_print(const GChatter& chatter) const
  * This helper function either prints a double precision value or the
  * word 'UNDEFINED', depending on whether the value is defined or not.
  ***************************************************************************/
-std::string GWcslib::wcs_print_value(const double& value) const
+std::string GWcs::wcs_print_value(const double& value) const
 {
     // Initialise result
     std::string result;
@@ -1520,7 +1521,7 @@ std::string GWcslib::wcs_print_value(const double& value) const
  *
  * Code adapted from cel.c::celini().
  ***************************************************************************/
-void GWcslib::cel_ini(void) const
+void GWcs::cel_ini(void) const
 {
     // Initialise parameters
     m_celset  = false;
@@ -1575,7 +1576,7 @@ void GWcslib::cel_ini(void) const
  * celestial coordinates are coincident. It signals an opportunity to cache
  * intermediate calculations common to all elements in a vector computation.
  ***************************************************************************/
-void GWcslib::cel_set(void) const
+void GWcs::cel_set(void) const
 {
     // Set tolerance
     const double tol = 1.0e-10;
@@ -1845,7 +1846,7 @@ void GWcslib::cel_set(void) const
  * celestial coordinates (lng,lat). The method has been adapted from the
  * wcslib function cel.c::celx2s.
  ***************************************************************************/
-void GWcslib::cel_x2s(int nx, int ny, int sxy, int sll,
+void GWcs::cel_x2s(int nx, int ny, int sxy, int sll,
                       const double* x, const double *y,
                       double* phi, double* theta,
                       double* lng, double* lat, int* stat) const
@@ -1891,7 +1892,7 @@ void GWcslib::cel_x2s(int nx, int ny, int sxy, int sll,
  * celestial coordinates (lng,lat). The method has been adapted from the
  * wcslib function cel.c::celx2s.
  ***************************************************************************/
-void GWcslib::cel_s2x(int nlng, int nlat, int sll, int sxy,
+void GWcs::cel_s2x(int nlng, int nlat, int sll, int sxy,
                       const double* lng, const double* lat,
                       double* phi, double* theta,
                       double* x, double* y, int* stat) const
@@ -1947,7 +1948,7 @@ void GWcslib::cel_s2x(int nlng, int nlat, int sll, int sxy,
  * This method has been adapted from the wcslib function sph.c::sphx2s().
  * The interface follows very closely that of wcslib.
  ***************************************************************************/
-void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
+void GWcs::sph_x2s(int nphi, int ntheta, int spt, int sll,
                    const double* phi, const double* theta,
                    double* lng, double* lat) const
 {
@@ -2183,7 +2184,7 @@ void GWcslib::sph_x2s(int nphi, int ntheta, int spt, int sll,
  * This method has been adapted from the wcslib function sph.c::sphs2x().
  * The interface follows very closely that of wcslib.
  ***************************************************************************/
-void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
+void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
                       const double* lng, const double* lat,
                       double* phi, double* theta) const
 {
@@ -2389,7 +2390,7 @@ void GWcslib::sph_s2x(int nlng, int nlat, int sll, int spt,
  * Code adapted from spc.c::spcini(). The actual version of the code does
  * nothing.
  ***************************************************************************/
-void GWcslib::spc_ini(void)
+void GWcs::spc_ini(void)
 {
    
     // Return
@@ -2408,7 +2409,7 @@ void GWcslib::spc_ini(void)
  *
  * Code adapted from lin.c::linini().
  ***************************************************************************/
-void GWcslib::lin_ini(int naxis)
+void GWcs::lin_ini(int naxis)
 {
     // Initialise parameters
     m_linset = false;
@@ -2458,7 +2459,7 @@ void GWcslib::lin_ini(int naxis)
  * Code adapted from lin.c::linset(). It requires m_pc to be set and to be
  * of size m_naxis*m_naxis.
  ***************************************************************************/
-void GWcslib::lin_set(void) const
+void GWcs::lin_set(void) const
 {
     // Clear transformation matrices
     m_piximg.clear();
@@ -2528,7 +2529,7 @@ void GWcslib::lin_set(void) const
  * computations depending of whether the PC matrix is unity or not, avoiding
  * a matrix multiplication when it is not necessary.
  ***************************************************************************/
-void GWcslib::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcrd) const
+void GWcs::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcrd) const
 {
     // Initialize linear transformations if required
     if (!m_linset) {
@@ -2604,7 +2605,7 @@ void GWcslib::lin_p2x(int ncoord, int nelem, const double* pixcrd, double* imgcr
  * computations depending of whether the PC matrix is unity or not, avoiding
  * a matrix multiplication when it is not necessary.
  ***************************************************************************/
-void GWcslib::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcrd) const
+void GWcs::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcrd) const
 {
     // Initialize linear transformations if required
     if (!m_linset) {
@@ -2675,7 +2676,7 @@ void GWcslib::lin_x2p(int ncoord, int nelem, const double* imgcrd, double* pixcr
  * matrix dimension is assumed to be m_naxis*m_naxis. This method has been
  * adapted from lin.c::matinv().
  ***************************************************************************/
-void GWcslib::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) const
+void GWcs::lin_matinv(const std::vector<double>& mat, std::vector<double>& inv) const
 {
     // Continue only if naxis is valid
     if (m_naxis > 0) {
@@ -2822,7 +2823,7 @@ void GWcslib::lin_matinv(const std::vector<double>& mat, std::vector<double>& in
  *
  * Code adapted from prj.c::prjini().
  ***************************************************************************/
-void GWcslib::prj_ini(void) const
+void GWcs::prj_ini(void) const
 {
     // Initialise parameters
     m_prjset = false;
@@ -2852,7 +2853,7 @@ void GWcslib::prj_ini(void) const
  *
  * Code adapted from prj.c::prjoff().
  ***************************************************************************/
-void GWcslib::prj_off(const double& phi0, const double& theta0) const
+void GWcs::prj_off(const double& phi0, const double& theta0) const
 {
     // Initialise fiducial offsets
     m_x0 = 0.0;

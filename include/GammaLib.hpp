@@ -143,7 +143,7 @@
 #include "GSkyProjection.hpp"
 #include "GHealpix.hpp"
 #include "GWcsRegistry.hpp"
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 #include "GWcsAIT.hpp"
 #include "GWcsAZP.hpp"
 #include "GWcsCAR.hpp"

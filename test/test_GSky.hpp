@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GSky.hpp  -   test sky class                          *
+ *                  test_GSky.hpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,7 +35,7 @@ class TestGSky : public GTestSuite
 
         // Methods
         virtual void set(void);
-        void test_GWcslib(void);
+        void test_GWcs(void);
         void test_GSkymap_healpix_construct(void);
         void test_GSkymap_healpix_io(void);
         void test_GSkymap_wcs_construct(void);
@@ -46,8 +46,8 @@ class TestGSky : public GTestSuite
 
     // Private methods
     private:
-        double wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2);
-        double wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2);
+        double wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2);
+        double wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2);
 };
 
 #endif /* TEST_GSKY_HPP */

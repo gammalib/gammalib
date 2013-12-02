@@ -33,16 +33,15 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GHealpix.hpp"
-//#include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCT           "GHealpix::GHealpix(int,std::string,std::string)"
-#define G_READ                                     "GHealpix::read(GFitsHDU*)"
-#define G_XY2DIR                                "GHealpix::xy2dir(GSkyPixel&)"
-#define G_DIR2XY2                                 "GHealpix::dir2xy(GSkyDir&)"
-#define G_PIX2ANG_RING           "GHealpix::pix2ang_ring(int,double*,double*)"
-#define G_PIX2ANG_NEST           "GHealpix::pix2ang_nest(int,double*,double*)"
-#define G_ORDERING_SET                       "GHealpix::coordsys(std::string)"
+#define G_CONSTRUCT    "GHealpix::GHealpix(int& ,std::string& ,std::string&)"
+#define G_READ                                    "GHealpix::read(GFitsHDU*)"
+#define G_XY2DIR                               "GHealpix::xy2dir(GSkyPixel&)"
+#define G_DIR2XY2                                "GHealpix::dir2xy(GSkyDir&)"
+#define G_PIX2ANG_RING        "GHealpix::pix2ang_ring(int, double*, double*)"
+#define G_PIX2ANG_NEST        "GHealpix::pix2ang_nest(int, double*, double*)"
+#define G_ORDERING_SET                     "GHealpix::ordering(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -63,8 +62,6 @@ static short ctab[0x100];
 static short utab[0x100];
 
 /* __ Globals ____________________________________________________________ */
-//const GHealpix      g_wcs_hpx_seed;
-//const GWcsRegistry g_wcs_hpx_registry(&g_wcs_hpx_seed);
 
 
 /*==========================================================================
@@ -271,8 +268,9 @@ void GHealpix::read(const GFitsHDU* hdu)
     clear();
 
     // Check if we have a healpix representation
-    if (hdu->string("PIXTYPE") != "HEALPIX")
+    if (hdu->string("PIXTYPE") != "HEALPIX") {
         throw GException::wcs(G_READ, "HDU does not contain Healpix data");
+    }
 
     // Get pixel ordering
     std::string order = hdu->string("ORDERING");
@@ -516,26 +514,6 @@ GSkyPixel GHealpix::dir2xy(const GSkyDir& dir) const
     
     // Return
     return result;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of pixels
- ***************************************************************************/
-int GHealpix::npix(void) const
-{
-    // Return number of pixels
-    return m_num_pixels;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of divisions of the side of each base pixel.
- ***************************************************************************/
-int GHealpix::nside(void) const
-{
-    // Return nside
-    return m_nside;
 }
 
 
@@ -1035,47 +1013,3 @@ unsigned int GHealpix::isqrt(unsigned int arg) const
     // Return
     return unsigned(std::sqrt(arg+0.5));
 }
-
-
-/***********************************************************************//**
- * @brief Setup of projection
- *
- * Dummy (only implemented for non HPX classes).
- ***************************************************************************/
-/*
-void GHealpix::prj_set(void)
-{
-    // Return
-    return;
-}
-*/
-
-/***********************************************************************//**
- * @brief Cartesian-to-spherical deprojection
- *
- * Dummy (only implemented for non HPX classes).
- ***************************************************************************/
-/*
-int GHealpix::prj_x2s(int nx, int ny, int sxy, int spt, 
-                     const double* x, const double* y,
-                     double* phi, double* theta, int* stat) const
-{
-    // Return
-    return 0;
-}
-*/
-
-/***********************************************************************//**
- * @brief Generic spherical-to-Cartesian projection
- *
- * Dummy (only implemented for non HPX classes).
- ***************************************************************************/
-/*
-int GHealpix::prj_s2x(int nphi, int ntheta, int spt, int sxy,
-                     const double* phi, const double* theta,
-                     double* x, double* y, int* stat) const
-{
-    // Return
-    return 0;
-}
-*/
