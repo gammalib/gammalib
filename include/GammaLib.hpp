@@ -141,6 +141,7 @@
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
 #include "GSkyProjection.hpp"
+#include "GHealpix.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcslib.hpp"
 #include "GWcsAIT.hpp"
@@ -149,7 +150,6 @@
 #include "GWcsMER.hpp"
 #include "GWcsTAN.hpp"
 #include "GWcsSTG.hpp"
-#include "GWcsHPX.hpp"
 
 /* __ Observation handling _______________________________________________ */
 #include "GEnergy.hpp"

@@ -13,6 +13,7 @@ sources = GSkyDir.cpp \
           GSkyRegion.cpp \
           GSkyRegionCircle.cpp \
           GSkyProjection.cpp \
+          GHealpix.cpp \
           GWcsRegistry.cpp \
           GWcslib.cpp \
           GWcsAIT.cpp \
@@ -21,7 +22,6 @@ sources = GSkyDir.cpp \
           GWcsMER.cpp \
           GWcsTAN.cpp \
           GWcsSTG.cpp \
-          GWcsHPX.cpp \
           GException_sky.cpp
 
 # Build libtool library

@@ -55,6 +55,7 @@
 %include "GSkyRegion.i"
 %include "GSkyRegionCircle.i"
 %include "GSkyProjection.i"
+%include "GHealpix.i"
 %include "GWcsRegistry.i"
 %include "GWcslib.i"
 %include "GWcsAIT.i"
@@ -62,4 +63,3 @@
 %include "GWcsCAR.i"
 %include "GWcsTAN.i"
 %include "GWcsSTG.i"
-%include "GWcsHPX.i"

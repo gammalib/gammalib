@@ -66,13 +66,19 @@ public:
     // Constructors and destructors
     GSkymap(void);
     explicit GSkymap(const std::string& filename);
-    explicit GSkymap(const std::string& proj, const std::string& coords,
-                     const int& nside, const std::string& order,
-                     const int nmaps = 1);
-    explicit GSkymap(const std::string& proj, const std::string& coords,
-                     double const& x, double const& y,
-                     double const& dx, double const& dy,
-                     const int& nx, const int& ny, const int nmaps = 1);
+    explicit GSkymap(const std::string& coords,
+                     const int&         nside,
+                     const std::string& order,
+                     const int          nmaps = 1);
+    explicit GSkymap(const std::string& proj,
+                     const std::string& coords,
+                     const double&      x,
+                     const double&      y,
+                     const double&      dx,
+                     const double&      dy,
+                     const int&         nx,
+                     const int&         ny,
+                     const int          nmaps = 1);
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
 

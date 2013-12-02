@@ -82,6 +82,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GSkyRegions.hpp \
                      GSkyRegionCircle.hpp \
                      GSkyProjection.hpp \
+                     GHealpix.hpp \
                      GWcsRegistry.hpp \
                      GWcslib.hpp \
                      GWcsAIT.hpp \
@@ -90,7 +91,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GWcsTAN.hpp \
                      GWcsMER.hpp \
                      GWcsSTG.hpp \
-                     GWcsHPX.hpp \
                      GEnergy.hpp \
                      GEnergies.hpp \
                      GTime.hpp \

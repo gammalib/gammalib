@@ -157,7 +157,7 @@ class Test(GPythonTestSuite):
             pass
 
         # Create HEALPix skymap
-        pixels = GSkymap("HPX", "GAL", 2, "RING", 2)
+        pixels = GSkymap("GAL", 2, "RING", 2)
         for i in range(pixels.npix()):
             pixels[i] = i + 1.0
             pixels[i, 1] = i + 1.0 + 1000.0

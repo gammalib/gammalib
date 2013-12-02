@@ -31,9 +31,9 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GSkymap.hpp"
+#include "GHealpix.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcslib.hpp"
-#include "GWcsHPX.hpp"
 #include "GFits.hpp"
 #include "GFitsTableDoubleCol.hpp"
 #include "GFitsImageDouble.hpp"
@@ -108,31 +108,25 @@ GSkymap::GSkymap(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Healpix constructor
+ * @brief Healpix sky map constructor
  *
- * @param[in] proj Sky projection (HPX).
  * @param[in] coords Coordinate System (CEL or GAL).
  * @param[in] nside Nside parameter.
  * @param[in] order Pixel ordering (RING or NEST).
  * @param[in] nmaps Number of maps in set (default=1).
  *
- * @exception GException::wcs_invalid
- *            Invalid wcs parameter.
  * @exception GException::skymap_bad_par
  *            Invalid sky map parameter.
+ *
+ * Constructs sky map in Healpix pixelisation.
  ***************************************************************************/
-GSkymap::GSkymap(const std::string& proj, const std::string& coords,
-                 const int& nside, const std::string& order,
-                 const int nmaps)
+GSkymap::GSkymap(const std::string& coords,
+                 const int&         nside,
+                 const std::string& order,
+                 const int          nmaps)
 {
     // Initialise class members for clean destruction
     init_members();
-
-    // Check if proj is HPX
-    if (gammalib::toupper(proj) != "HPX") {
-        throw GException::wcs_invalid(G_CONSTRUCT_HPX, proj,
-                                      "Projection parameter must be \"HPX\".");
-    }
 
     // Check if nmaps parameter is >0
     if (nmaps < 1) {
@@ -140,11 +134,12 @@ GSkymap::GSkymap(const std::string& proj, const std::string& coords,
                                          "nmaps parameter must be >0.");
     }
 
-    // Allocate WCS
-    m_proj = new GWcsHPX(nside, order, coords);
+    // Allocate Healpix projection
+    GHealpix* projection = new GHealpix(nside, order, coords);
+    m_proj               = projection;
 
     // Set number of pixels and number of maps
-    m_num_pixels = static_cast<GWcsHPX*>(m_proj)->npix();
+    m_num_pixels = projection->npix();
     m_num_maps   = nmaps;
 
     // Allocate pixels
@@ -170,11 +165,18 @@ GSkymap::GSkymap(const std::string& proj, const std::string& coords,
  *
  * @exception GException::skymap_bad_par
  *            Invalid sky map parameter.
+ *
+ * Constructs sky map in World Coordinate System projection.
  ***************************************************************************/
-GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
-                 double const& x, double const& y,
-                 double const& dx, double const& dy,
-                 const int& nx, const int& ny, const int nmaps)
+GSkymap::GSkymap(const std::string& wcs,
+                 const std::string& coords,
+                 const double&      x,
+                 const double&      y,
+                 const double&      dx,
+                 const double&      dy,
+                 const int&         nx,
+                 const int&         ny,
+                 const int          nmaps)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -368,7 +370,7 @@ double& GSkymap::operator() (const GSkyPixel& pixel, const int& map)
  *
  * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
-const double& GSkymap::operator() (const GSkyPixel& pixel, const int& map) const
+const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
@@ -1305,13 +1307,13 @@ void GSkymap::read_healpix(const GFitsTable* hdu)
         #endif
 
         // Allocate Healpix projection
-        m_proj = new GWcsHPX;
+        m_proj = new GHealpix;
 
         // Read WCS information from FITS header
         m_proj->read(hdu);
 
         // Set number of pixels based on NSIDE parameter
-        m_num_pixels = static_cast<GWcsHPX*>(m_proj)->npix();
+        m_num_pixels = static_cast<GHealpix*>(m_proj)->npix();
         #if defined(G_READ_HEALPIX_DEBUG)
         std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
         #endif

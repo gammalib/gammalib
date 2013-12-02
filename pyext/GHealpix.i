@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GWcsHPX.i  -  Healpix projection class                 *
+ *                   GHealpix.i - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -19,34 +19,34 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcsHPX.i
- * @brief HealPix projection class Python interface
- * @author J. Knodlseder
+ * @file GHealpix.i
+ * @brief HealPix projection class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GWcsHPX.hpp"
+#include "GHealpix.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GWcsHPX
+ * @class GHealpix
  *
- * @brief HealPix projection class Python interface defintion
+ * @brief HealPix projection class
  ***************************************************************************/
-class GWcsHPX : public GSkyProjection {
+class GHealpix : public GSkyProjection {
 public:
     // Constructors and destructors
-    GWcsHPX(void);
-    explicit GWcsHPX(const int& nside, const std::string& ordering = "NESTED",
-                     const std::string& coordsys = "GAL");
-    explicit GWcsHPX(const GFitsHDU* hdu);
-    GWcsHPX(const GWcsHPX& wcs);
-    virtual ~GWcsHPX(void);
+    GHealpix(void);
+    explicit GHealpix(const int& nside, const std::string& ordering = "NESTED",
+                      const std::string& coordsys = "GAL");
+    explicit GHealpix(const GFitsHDU* hdu);
+    GHealpix(const GHealpix& wcs);
+    virtual ~GHealpix(void);
 
     // Implemented pure virtual methods
     virtual void        clear(void);
-    virtual GWcsHPX*    clone(void) const;
+    virtual GHealpix*   clone(void) const;
     virtual std::string code(void) const;
     virtual std::string name(void) const;
     virtual void        read(const GFitsHDU* hdu);
@@ -58,7 +58,7 @@ public:
     virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
     virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
 
-    // Additional class specific methods
+    // Other methods
     int          npix(void) const;
     int          nside(void) const;
     std::string  ordering(void) const;
@@ -67,10 +67,10 @@ public:
 
 
 /***********************************************************************//**
- * @brief GWcsHPX class extension
+ * @brief GHealpix class extension
  ***************************************************************************/
-%extend GWcsHPX {
-    GWcsHPX copy() {
+%extend GHealpix {
+    GHealpix copy() {
         return (*self);
     }
 };

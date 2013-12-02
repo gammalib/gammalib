@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GWcsHPX.hpp - Healpix projection class                 *
+ *                  GHealpix.hpp - Healpix projection class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcsHPX.hpp
+ * @file GHealpix.hpp
  * @brief HealPix projection class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GWCSHPX_HPP
-#define GWCSHPX_HPP
+#ifndef GHEALPIX_HPP
+#define GHEALPIX_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include "GSkyProjection.hpp"
@@ -35,7 +35,7 @@
 
 
 /***********************************************************************//**
- * @class GWcsHPX
+ * @class GHealpix
  *
  * @brief HealPix projection class interface defintion
  *
@@ -43,25 +43,25 @@
  * the HealPix library (version 2.1). For more information about HEALPix, see
  * http://healpix.jpl.nasa.gov
  ***************************************************************************/
-class GWcsHPX : public GSkyProjection {
+class GHealpix : public GSkyProjection {
 
 public:
     // Constructors and destructors
-    GWcsHPX(void);
-    explicit GWcsHPX(const int& nside, const std::string& ordering = "NESTED",
+    GHealpix(void);
+    explicit GHealpix(const int& nside, const std::string& ordering = "NESTED",
                      const std::string& coordsys = "GAL");
-    explicit GWcsHPX(const GFitsHDU* hdu);
-    GWcsHPX(const GWcsHPX& wcs);
-    virtual ~GWcsHPX(void);
+    explicit GHealpix(const GFitsHDU* hdu);
+    GHealpix(const GHealpix& wcs);
+    virtual ~GHealpix(void);
 
     // Operators
-    GWcsHPX& operator=(const GWcsHPX& wcs);
+    GHealpix& operator=(const GHealpix& wcs);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
-    virtual GWcsHPX*    clone(void) const;
-    virtual std::string code(void) const { return "HPX"; }
-    virtual std::string name(void) const { return "HealPix"; }
+    virtual GHealpix*   clone(void) const;
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
     virtual void        read(const GFitsHDU* hdu);
     virtual void        write(GFitsHDU* hdu) const;
     virtual double      omega(const int& pix) const;
@@ -72,7 +72,7 @@ public:
     virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
-    // Additional class specific methods
+    // Other methods
     int          npix(void) const;
     int          nside(void) const;
     std::string  ordering(void) const;
@@ -81,11 +81,11 @@ public:
 private:
     // Private methods
     void         init_members(void);
-    void         copy_members(const GWcsHPX& wcs);
+    void         copy_members(const GHealpix& wcs);
     void         free_members(void);
     virtual bool compare(const GSkyProjection& proj) const;
-    void         std2nat(GVector *coord) const { return; }
-    void         nat2std(GVector *coord) const { return; }
+    //void         std2nat(GVector *coord) const { return; }
+    //void         nat2std(GVector *coord) const { return; }
     int          nside2order(int nside);
     void         pix2xy(const int& ipix, int* x, int* y) const;
     int          xy2pix(int x, int y) const;
@@ -96,6 +96,7 @@ private:
     unsigned int isqrt(unsigned int arg) const;
 
     // NEW VERSION
+    /*
     void prj_set(void);
     int  prj_x2s(int nx, int ny, int sxy, int spt, 
                  const double* x, const double* y,
@@ -103,6 +104,7 @@ private:
     int  prj_s2x(int nphi, int ntheta, int spt, int sxy,
                  const double* phi, const double* theta,
                  double* x, double* y, int* stat) const;
+    */
 
     // Private data area
     int      m_nside;        //!< Number of divisions of each base pixel (1-8192)
@@ -116,4 +118,32 @@ private:
     double   m_omega;        //!< Solid angle of pixel
 };
 
-#endif /* GWCSHPX_HPP */
+
+/***********************************************************************//**
+ * @brief Return projection code
+ *
+ * @return Projection code.
+ *
+ * Returns the projection code "HPX".
+ ***************************************************************************/
+inline
+std::string GHealpix::code(void) const
+{
+    return "HPX";
+}
+
+
+/***********************************************************************//**
+ * @brief Return projection name
+ *
+ * @return Projection name.
+ *
+ * Returns the projection name.
+ ***************************************************************************/
+inline
+std::string GHealpix::name(void) const
+{
+    return "HealPix";
+}
+
+#endif /* GHEALPIX_HPP */

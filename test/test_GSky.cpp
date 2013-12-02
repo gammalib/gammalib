@@ -378,42 +378,30 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test correct Healpix constructors
     test_try("Test correct Healpix constructors");
     try {
-        GSkymap ring1("HPX", "GAL", 1, "RING", 1);
-        GSkymap ring2("HPX", "GAL", 2, "RING", 1);
-        GSkymap ring4("HPX", "GAL", 4, "RING", 1);
-        GSkymap ring8("HPX", "GAL", 8, "RING", 1);
-        GSkymap ring16("HPX", "GAL", 16, "RING", 1);
-        GSkymap ring32("HPX", "GAL", 32, "RING", 1);
-        GSkymap ring64("HPX", "GAL", 64, "RING", 1);
-        GSkymap ring128("HPX", "GAL", 128, "RING", 1);
-        GSkymap ring256("HPX", "GAL", 256, "RING", 1);
-        GSkymap ring512("HPX", "GAL", 512, "RING", 1);
-/*
-        GSkymap ring1024("HPX", "GAL", 1024, "RING", 1);
-        GSkymap ring2048("HPX", "GAL", 2048, "RING", 1);
-        GSkymap ring4096("HPX", "GAL", 4096, "RING", 1);
-        GSkymap ring8192("HPX", "GAL", 8192, "RING", 1);
-*/
-        GSkymap nest1("HPX", "GAL", 1, "NEST", 1);
-        GSkymap nest2("HPX", "GAL", 2, "NEST", 1);
-        GSkymap nest4("HPX", "GAL", 4, "NEST", 1);
-        GSkymap nest8("HPX", "GAL", 8, "NEST", 1);
-        GSkymap nest16("HPX", "GAL", 16, "NEST", 1);
-        GSkymap nest32("HPX", "GAL", 32, "NEST", 1);
-        GSkymap nest64("HPX", "GAL", 64, "NEST", 1);
-        GSkymap nest128("HPX", "GAL", 128, "NEST", 1);
-        GSkymap nest256("HPX", "GAL", 256, "NEST", 1);
-        GSkymap nest512("HPX", "GAL", 512, "NEST", 1);
-/*
-        GSkymap nest1024("HPX", "GAL", 1024, "NEST", 1);
-        GSkymap nest2048("HPX", "GAL", 2048, "NEST", 1);
-        GSkymap nest4096("HPX", "GAL", 4096, "NEST", 1);
-        GSkymap nest8192("HPX", "GAL", 8192, "NEST", 1);
-*/
-        GSkymap map1("HPX", "CEL", 1, "RING", 1);
-        GSkymap map2("HPX", "CEL", 1, "RING", 2);
-        GSkymap map3("HPX", "EQU", 1, "RING", 1);
-        GSkymap map4("HPX", "EQU", 1, "NESTED", 1);
+        GSkymap ring1("GAL", 1, "RING", 1);
+        GSkymap ring2("GAL", 2, "RING", 1);
+        GSkymap ring4("GAL", 4, "RING", 1);
+        GSkymap ring8("GAL", 8, "RING", 1);
+        GSkymap ring16("GAL", 16, "RING", 1);
+        GSkymap ring32("GAL", 32, "RING", 1);
+        GSkymap ring64("GAL", 64, "RING", 1);
+        GSkymap ring128("GAL", 128, "RING", 1);
+        GSkymap ring256("GAL", 256, "RING", 1);
+        GSkymap ring512("GAL", 512, "RING", 1);
+        GSkymap nest1("GAL", 1, "NEST", 1);
+        GSkymap nest2("GAL", 2, "NEST", 1);
+        GSkymap nest4("GAL", 4, "NEST", 1);
+        GSkymap nest8("GAL", 8, "NEST", 1);
+        GSkymap nest16("GAL", 16, "NEST", 1);
+        GSkymap nest32("GAL", 32, "NEST", 1);
+        GSkymap nest64("GAL", 64, "NEST", 1);
+        GSkymap nest128("GAL", 128, "NEST", 1);
+        GSkymap nest256("GAL", 256, "NEST", 1);
+        GSkymap nest512("GAL", 512, "NEST", 1);
+        GSkymap map1("CEL", 1, "RING", 1);
+        GSkymap map2("CEL", 1, "RING", 2);
+        GSkymap map3("EQU", 1, "RING", 1);
+        GSkymap map4("EQU", 1, "NESTED", 1);
 
         test_try_success();
     }
@@ -424,22 +412,9 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test Healpix copy constructor
     test_try("Test Healpix copy constructor");
     try {
-        GSkymap ring1("HPX", "GAL", 1, "RING", 1);
+        GSkymap ring1("GAL", 1, "RING", 1);
         GSkymap ring2 = ring1;
 
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test invalid wcs in constructor
-    test_try("Test invalid wcs in constructor");
-    try {
-        GSkymap map("CAR", "GAL", 1, "RING", 1);
-        test_try_failure();
-    }
-    catch (GException::wcs_invalid &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -449,7 +424,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid coordsys in constructor
     test_try("Test invalid coordsys in constructor");
     try {
-        GSkymap map("HPX", "HOR", 1, "RING", 1);
+        GSkymap map("HOR", 1, "RING", 1);
         test_try_failure();
     }
     catch (GException::wcs_bad_coords &e) {
@@ -462,7 +437,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid nside in constructor
     test_try("Test invalid nside in constructor");
     try {
-        GSkymap map("HPX", "GAL", 3, "RING", 1);
+        GSkymap map("GAL", 3, "RING", 1);
         test_try_failure();
     }
     catch (GException::wcs_hpx_bad_nside &e) {
@@ -475,7 +450,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid ordering in constructor
     test_try("Test invalid ordering in constructor");
     try {
-        GSkymap map("HPX", "GAL", 2, "SPHERICAL", 1);
+        GSkymap map("GAL", 2, "SPHERICAL", 1);
         test_try_failure();
     }
     catch (GException::wcs_hpx_bad_ordering &e) {
@@ -489,7 +464,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid nmaps in constructor
     test_try("Test invalid nmaps in constructor");
     try {
-        GSkymap map("HPX", "GAL", 2, "NEST", 0);
+        GSkymap map("GAL", 2, "NEST", 0);
         test_try_failure();
     }
     catch (GException::skymap_bad_par &e) {
@@ -512,10 +487,9 @@ void TestGSky::test_GSkymap_healpix_io(void)
 {
     // Set filenames
     const std::string file1 = "test_skymap_hpx_1.fits";
-    //const std::string file2 = "test_skymap_hpx_2.fits";
 
     // Define Healpix map for comparison
-    GSkymap refmap("HPX", "GAL", 4, "RING", 1);
+    GSkymap refmap("GAL", 4, "RING", 1);
 
     // Test Healpix map saving
     test_try("Test Healpix map saving");
