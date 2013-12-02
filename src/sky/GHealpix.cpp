@@ -685,9 +685,9 @@ void GHealpix::free_members(void)
 /***********************************************************************//**
  * @brief Returns true if argument is identical
  *
- * @param[in] wcs Pointer to World Coordinate System
+ * @param[in] proj Sky projection.
  *
- * This method is a helper for the World Coordinate Comparison friends.
+ * This method is a helper for the sky projection friends.
  ***************************************************************************/
 bool GHealpix::compare(const GSkyProjection& proj) const
 {

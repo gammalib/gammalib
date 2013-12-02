@@ -24,30 +24,36 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
 
+
+/***********************************************************************//**
+ * @class TestGSky
+ *
+ * @brief Test suite for sky module
+ ***************************************************************************/
 class TestGSky : public GTestSuite
 {
-    public:
-        // Constructors and destructors
-        TestGSky(void) : GTestSuite(){ return; }
-        virtual ~TestGSky(void){ return; }
+public:
+    // Constructors and destructors
+    TestGSky(void) : GTestSuite() { }
+    virtual ~TestGSky(void) { }
 
-        // Methods
-        virtual void set(void);
-        void test_GWcs(void);
-        void test_GSkymap_healpix_construct(void);
-        void test_GSkymap_healpix_io(void);
-        void test_GSkymap_wcs_construct(void);
-        void test_GSkymap_wcs_io(void);
-        void test_GSkyRegions_io(void);
-        void test_GSkyRegionCircle_construct(void);
-        void test_GSkyRegionCircle_logic(void);
+    // Methods
+    virtual void set(void);
+    void         test_GWcs(void);
+    void         test_GSkyPixel(void);
+    void         test_GSkymap_healpix_construct(void);
+    void         test_GSkymap_healpix_io(void);
+    void         test_GSkymap_wcs_construct(void);
+    void         test_GSkymap_wcs_io(void);
+    void         test_GSkyRegions_io(void);
+    void         test_GSkyRegionCircle_construct(void);
+    void         test_GSkyRegionCircle_logic(void);
 
-    // Private methods
-    private:
-        double wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2);
-        double wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2);
+// Private methods
+private:
+    double wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2);
+    double wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2);
 };
 
 #endif /* TEST_GSKY_HPP */
