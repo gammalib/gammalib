@@ -34,7 +34,7 @@
  *
  * @brief Virtual base class for wcslib based World Coordinate System
  ***************************************************************************/
-class GWcslib : public GWcs {
+class GWcslib : public GSkyProjection {
 public:
     // Constructors and destructors
     GWcslib(void);

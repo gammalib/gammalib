@@ -77,7 +77,7 @@ const double GWcslib::UNDEFINED = 987654321.0e99;
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcslib::GWcslib(void) : GWcs()
+GWcslib::GWcslib(void) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -103,7 +103,7 @@ GWcslib::GWcslib(void) : GWcs()
 GWcslib::GWcslib(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
-                 const double& cdelt1, const double& cdelt2) : GWcs()
+                 const double& cdelt1, const double& cdelt2) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -121,7 +121,7 @@ GWcslib::GWcslib(const std::string& coords,
  *
  * @param[in] hdu FITS HDU.
  ***************************************************************************/
-GWcslib::GWcslib(const GFitsHDU* hdu) : GWcs()
+GWcslib::GWcslib(const GFitsHDU* hdu) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -139,7 +139,7 @@ GWcslib::GWcslib(const GFitsHDU* hdu) : GWcs()
  *
  * @param wcs World Coordinate System.
  ***************************************************************************/
-GWcslib::GWcslib(const GWcslib& wcs) : GWcs(wcs)
+GWcslib::GWcslib(const GWcslib& wcs) : GSkyProjection(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -176,13 +176,13 @@ GWcslib::~GWcslib(void)
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcslib& GWcslib::operator= (const GWcslib& wcs)
+GWcslib& GWcslib::operator=(const GWcslib& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
 
         // Copy base class members
-        this->GWcs::operator=(wcs);
+        this->GSkyProjection::operator=(wcs);
 
         // Free members
         free_members();
@@ -889,21 +889,22 @@ void GWcslib::set_members(const std::string& coords,
 
 
 /***********************************************************************//**
- * @brief Returns true if argument is identical
+ * @brief Compares sky projection
  *
- * @param[in] wcs Pointer to World Coordinate System
+ * @param[in] proj Sky projection.
+ * @return True if @p proj is identical to the actual object.
  *
  * This method is a helper for the World Coordinate Comparison friends. It
  * does not compare derived quantities as those may not have been initialised
  * in both objects.
  ***************************************************************************/
-bool GWcslib::compare(const GWcs& wcs) const
+bool GWcslib::compare(const GSkyProjection& proj) const
 {
     // Initialise result
     bool result = false;
     
     // Continue only we compare to a GWcslib object
-    const GWcslib* ptr = dynamic_cast<const GWcslib*>(&wcs);
+    const GWcslib* ptr = dynamic_cast<const GWcslib*>(&proj);
     if (ptr != NULL) {
     
         // Perform comparion of standard (non derived) parameters

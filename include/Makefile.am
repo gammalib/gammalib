@@ -81,7 +81,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GSkyRegion.hpp \
                      GSkyRegions.hpp \
                      GSkyRegionCircle.hpp \
-                     GWcs.hpp \
+                     GSkyProjection.hpp \
                      GWcsRegistry.hpp \
                      GWcslib.hpp \
                      GWcsAIT.hpp \

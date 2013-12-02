@@ -55,20 +55,20 @@ class GWcsRegistry : public GRegistry {
 public:
     // Constructors and destructors
     GWcsRegistry(void);
-    GWcsRegistry(const GWcs* prj);
+    explicit GWcsRegistry(const GSkyProjection* proj);
     GWcsRegistry(const GWcsRegistry& registry);
     virtual ~GWcsRegistry(void);
 
     // Operators
-    GWcsRegistry& operator= (const GWcsRegistry& registry);
+    GWcsRegistry& operator=(const GWcsRegistry& registry);
 
     // Methods
-    int         size(void) const;
-    GWcs*       alloc(const std::string& code) const;
-    std::string code(const int& index) const;
-    std::string name(const int& index) const;
-    std::string list(void) const;
-    std::string print(const GChatter& chatter = NORMAL) const;
+    int             size(void) const;
+    GSkyProjection* alloc(const std::string& code) const;
+    std::string     code(const int& index) const;
+    std::string     name(const int& index) const;
+    std::string     list(void) const;
+    std::string     print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -97,8 +97,8 @@ private:
         return m_names;
     };
     // Pointer to seed projections
-    static GRegistryPointer<const GWcs*>& projections() {
-        static GRegistryPointer<const GWcs*> m_projections;
+    static GRegistryPointer<const GSkyProjection*>& projections() {
+        static GRegistryPointer<const GSkyProjection*> m_projections;
         return m_projections;
     };
 };

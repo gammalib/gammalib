@@ -179,10 +179,10 @@ void GWcsSTG::clear(void)
     // Free class members (base and derived classes, derived class first)
     free_members();
     this->GWcslib::free_members();
-    this->GWcs::free_members();
+    this->GSkyProjection::free_members();
 
     // Initialise members
-    this->GWcs::init_members();
+    this->GSkyProjection::init_members();
     this->GWcslib::init_members();
     init_members();
 

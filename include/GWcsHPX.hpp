@@ -28,7 +28,7 @@
 #define GWCSHPX_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GWcs.hpp"
+#include "GSkyProjection.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
@@ -43,7 +43,7 @@
  * the HealPix library (version 2.1). For more information about HEALPix, see
  * http://healpix.jpl.nasa.gov
  ***************************************************************************/
-class GWcsHPX : public GWcs {
+class GWcsHPX : public GSkyProjection {
 
 public:
     // Constructors and destructors
@@ -83,7 +83,7 @@ private:
     void         init_members(void);
     void         copy_members(const GWcsHPX& wcs);
     void         free_members(void);
-    virtual bool compare(const GWcs& wcs) const;
+    virtual bool compare(const GSkyProjection& proj) const;
     void         std2nat(GVector *coord) const { return; }
     void         nat2std(GVector *coord) const { return; }
     int          nside2order(int nside);

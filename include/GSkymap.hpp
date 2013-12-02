@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GSkymap.hpp - Class that implements a sky map               *
+ *                       GSkymap.hpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GSkymap.hpp
- * @brief Sky map class definition.
+ * @brief Sky map class definition
  * @author Juergen Knoedlseder
  */
 
@@ -30,9 +30,9 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GBase.hpp"
-#include "GWcs.hpp"
 #include "GSkyDir.hpp"
 #include "GSkyPixel.hpp"
+#include "GSkyProjection.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GFitsBinTable.hpp"
@@ -66,10 +66,10 @@ public:
     // Constructors and destructors
     GSkymap(void);
     explicit GSkymap(const std::string& filename);
-    explicit GSkymap(const std::string& wcs, const std::string& coords,
+    explicit GSkymap(const std::string& proj, const std::string& coords,
                      const int& nside, const std::string& order,
                      const int nmaps = 1);
-    explicit GSkymap(const std::string& wcs, const std::string& coords,
+    explicit GSkymap(const std::string& proj, const std::string& coords,
                      double const& x, double const& y,
                      double const& dx, double const& dy,
                      const int& nx, const int& ny, const int nmaps = 1);
@@ -77,7 +77,7 @@ public:
     virtual ~GSkymap(void);
 
     // Operators
-    GSkymap& operator= (const GSkymap& map);
+    GSkymap& operator=(const GSkymap& map);
 
     // 1D pixel methods
     double&       operator()(const int& pixel, const int& map = 0);
@@ -94,27 +94,27 @@ public:
     double        omega(const GSkyPixel& pix) const;
 
     // Sky direction methods
-    double        operator() (const GSkyDir& dir, const int& map = 0) const;
+    double        operator()(const GSkyDir& dir, const int& map = 0) const;
 
     // Methods
-    void          clear(void);
-    GSkymap*      clone(void) const;
-    void          load(const std::string& filename);
-    void          save(const std::string& filename, bool clobber = false) const;
-    void          read(const GFitsHDU* hdu);
-    void          write(GFits* file) const;
-    int           npix(void) const;
-    int           nx(void) const;
-    int           ny(void) const;
-    int           nmaps(void) const;
-    int           xy2pix(const GSkyPixel& pix) const;
-    GSkyPixel     pix2xy(const int& pix) const;
-    GWcs*         wcs(void) const { return m_wcs; }
-    void          wcs(const GWcs& wcs);
-    double*       pixels(void) const { return m_pixels; }
-    bool          isinmap(const GSkyDir& dir) const;
-    bool          isinmap(const GSkyPixel& pixel) const;
-    std::string   print(const GChatter& chatter = NORMAL) const;
+    void            clear(void);
+    GSkymap*        clone(void) const;
+    void            load(const std::string& filename);
+    void            save(const std::string& filename, bool clobber = false) const;
+    void            read(const GFitsHDU* hdu);
+    void            write(GFits* file) const;
+    int             npix(void) const;
+    int             nx(void) const;
+    int             ny(void) const;
+    int             nmaps(void) const;
+    int             xy2pix(const GSkyPixel& pix) const;
+    GSkyPixel       pix2xy(const int& pix) const;
+    GSkyProjection* projection(void) const { return m_proj; }
+    void            projection(const GSkyProjection& proj);
+    double*         pixels(void) const { return m_pixels; }
+    bool            contains(const GSkyDir& dir) const;
+    bool            contains(const GSkyPixel& pixel) const;
+    std::string     print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods
@@ -134,12 +134,12 @@ private:
     GFitsImageDouble* create_wcs_hdu(void) const;
 
     // Private data area
-    int     m_num_pixels;   //!< Number of pixels (used for pixel allocation)
-    int     m_num_maps;     //!< Number of maps (used for pixel allocation)
-    int     m_num_x;        //!< Number of pixels in x direction (only 2D)
-    int     m_num_y;        //!< Number of pixels in y direction (only 2D)
-    GWcs*   m_wcs;          //!< Pointer to WCS projection
-    double* m_pixels;       //!< Pointer to skymap pixels
+    int             m_num_pixels; //!< Number of pixels (used for pixel allocation)
+    int             m_num_maps;   //!< Number of maps (used for pixel allocation)
+    int             m_num_x;      //!< Number of pixels in x direction (only 2D)
+    int             m_num_y;      //!< Number of pixels in y direction (only 2D)
+    GSkyProjection* m_proj;       //!< Pointer to sky projection
+    double*         m_pixels;     //!< Pointer to skymap pixels
 };
 
 #endif /* GSKYMAP_HPP */

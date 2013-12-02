@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GWcs.hpp - World Coordinate System virtual base class         *
+ *          GSkyProjection.hpp - Abstract sky projection base class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,13 +19,13 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcs.hpp
- * @brief World Coordinate System virtual base class definition
+ * @file GSkyProjection.hpp
+ * @brief Abstract sky projection base class definition
  * @author Juergen Knoedlseder
  */
 
-#ifndef GWCS_HPP
-#define GWCS_HPP
+#ifndef GSKYPROJECTION_HPP
+#define GSKYPROJECTION_HPP
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
@@ -36,39 +36,43 @@
 
 
 /***********************************************************************//**
- * @class GWcs
+ * @class GSkyProjection
  *
- * @brief GWcs virtual base class interface defintion
+ * @brief Abstract sky projection base class
+ *
+ * This class defines an abstract projection from sky coordinates into
+ * pixel coordinates. Sky coordinates are implemented using the GSkyDir
+ * class, pixel coordinates are implemented using the GSkyPixel class.
  ***************************************************************************/
-class GWcs : public GBase {
+class GSkyProjection : public GBase {
 
     // Operator friends
-    friend bool operator== (const GWcs &a, const GWcs &b);
-    friend bool operator!= (const GWcs &a, const GWcs &b);
+    friend bool operator==(const GSkyProjection &a, const GSkyProjection &b);
+    friend bool operator!=(const GSkyProjection &a, const GSkyProjection &b);
 
 public:
     // Constructors and destructors
-    GWcs(void);
-    GWcs(const GWcs& wcs);
-    virtual ~GWcs(void);
+    GSkyProjection(void);
+    GSkyProjection(const GSkyProjection& proj);
+    virtual ~GSkyProjection(void);
 
     // Operators
-    virtual GWcs& operator= (const GWcs& wcs);
+    virtual GSkyProjection& operator=(const GSkyProjection& proj);
 
-    // Pure virtual methods (not implemented)
-    virtual void        clear(void) = 0;
-    virtual GWcs*       clone(void) const = 0;
-    virtual std::string code(void) const = 0;
-    virtual std::string name(void) const = 0;
-    virtual void        read(const GFitsHDU* hdu) = 0;
-    virtual void        write(GFitsHDU* hdu) const = 0;
-    virtual double      omega(const int& pix) const = 0;
-    virtual double      omega(const GSkyPixel& pix) const = 0;
-    virtual GSkyDir     pix2dir(const int& pix) const = 0;
-    virtual int         dir2pix(const GSkyDir& dir) const = 0;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const = 0;
-    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const = 0;
-    virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
+    // Pure virtual methods
+    virtual void            clear(void) = 0;
+    virtual GSkyProjection* clone(void) const = 0;
+    virtual std::string     code(void) const = 0;
+    virtual std::string     name(void) const = 0;
+    virtual void            read(const GFitsHDU* hdu) = 0;
+    virtual void            write(GFitsHDU* hdu) const = 0;
+    virtual double          omega(const int& pix) const = 0;
+    virtual double          omega(const GSkyPixel& pix) const = 0;
+    virtual GSkyDir         pix2dir(const int& pix) const = 0;
+    virtual int             dir2pix(const GSkyDir& dir) const = 0;
+    virtual GSkyDir         xy2dir(const GSkyPixel& pix) const = 0;
+    virtual GSkyPixel       dir2xy(const GSkyDir& dir) const = 0;
+    virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
     virtual std::string coordsys(void) const;
@@ -77,12 +81,12 @@ public:
 protected:
     // Protected methods
     void         init_members(void);
-    void         copy_members(const GWcs& wcs);
+    void         copy_members(const GSkyProjection& proj);
     void         free_members(void);
-    virtual bool compare(const GWcs& wcs) const = 0;
+    virtual bool compare(const GSkyProjection& proj) const = 0;
 
     // Protected members
     int m_coordsys;   //!< 0=celestial, 1=galactic, 2=ecl, 3=hel, 4=sgl
 };
 
-#endif /* GWCS_HPP */
+#endif /* GSKYPROJECTION_HPP */

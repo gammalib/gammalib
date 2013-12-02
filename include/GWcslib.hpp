@@ -31,7 +31,7 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "GWcs.hpp"
+#include "GSkyProjection.hpp"
 #include "GLog.hpp"
 #include "GFitsHDU.hpp"
 #include "GSkyDir.hpp"
@@ -43,7 +43,7 @@
  *
  * @brief Virtual base class for wcslib based World Coordinate System
  ***************************************************************************/
-class GWcslib : public GWcs {
+class GWcslib : public GSkyProjection {
 
 public:
     // Constructors and destructors
@@ -99,7 +99,7 @@ protected:
                              const double& crval1, const double& crval2,
                              const double& crpix1, const double& crpix2,
                              const double& cdelt1, const double& cdelt2);
-    virtual bool compare(const GWcs& wcs) const;
+    virtual bool compare(const GSkyProjection& proj) const;
     bool         undefined(const double& value) const { return (value==UNDEFINED); }
 
     // Methods adapted from wcslib::wcs.c 

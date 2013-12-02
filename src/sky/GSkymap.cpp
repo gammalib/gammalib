@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GSkymap.cpp - Class that implements a sky map              *
+ *                       GSkymap.cpp - Sky map class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -39,10 +39,10 @@
 #include "GFitsImageDouble.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCT_HPX     "GSkymap::GSkymap(std::string,std::string,int," \
-                                                           "std::string,int)"
-#define G_CONSTRUCT_MAP "GSkymap::GSkymap(std::string,std::string,GSkyDir," \
-                                                 "int,int,double,double,int)"
+#define G_CONSTRUCT_HPX     "GSkymap::GSkymap(std::string, std::string, int,"\
+                                                          "std::string, int)"
+#define G_CONSTRUCT_MAP "GSkymap::GSkymap(std::string, std::string, GSkyDir,"\
+                                             "int, int, double, double, int)"
 #define G_OP_ACCESS_1D                         "GSkymap::operator(int&,int&)"
 #define G_OP_ACCESS_2D                   "GSkymap::operator(GSkyPixel&,int&)"
 #define G_OP_VALUE                         "GSkymap::operator(GSkyDir&,int&)"
@@ -110,7 +110,7 @@ GSkymap::GSkymap(const std::string& filename)
 /***********************************************************************//**
  * @brief Healpix constructor
  *
- * @param[in] wcs World Coordinate System (HPX).
+ * @param[in] proj Sky projection (HPX).
  * @param[in] coords Coordinate System (CEL or GAL).
  * @param[in] nside Nside parameter.
  * @param[in] order Pixel ordering (RING or NEST).
@@ -121,17 +121,17 @@ GSkymap::GSkymap(const std::string& filename)
  * @exception GException::skymap_bad_par
  *            Invalid sky map parameter.
  ***************************************************************************/
-GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
+GSkymap::GSkymap(const std::string& proj, const std::string& coords,
                  const int& nside, const std::string& order,
                  const int nmaps)
 {
     // Initialise class members for clean destruction
     init_members();
 
-    // Check if wcs is HPX
-    if (gammalib::toupper(wcs) != "HPX") {
-        throw GException::wcs_invalid(G_CONSTRUCT_HPX, wcs,
-                                      "WCS parameter must be 'HPX'.");
+    // Check if proj is HPX
+    if (gammalib::toupper(proj) != "HPX") {
+        throw GException::wcs_invalid(G_CONSTRUCT_HPX, proj,
+                                      "Projection parameter must be \"HPX\".");
     }
 
     // Check if nmaps parameter is >0
@@ -141,10 +141,10 @@ GSkymap::GSkymap(const std::string& wcs, const std::string& coords,
     }
 
     // Allocate WCS
-    m_wcs = new GWcsHPX(nside, order, coords);
+    m_proj = new GWcsHPX(nside, order, coords);
 
     // Set number of pixels and number of maps
-    m_num_pixels = static_cast<GWcsHPX*>(m_wcs)->npix();
+    m_num_pixels = static_cast<GWcsHPX*>(m_proj)->npix();
     m_num_maps   = nmaps;
 
     // Allocate pixels
@@ -336,7 +336,7 @@ double& GSkymap::operator() (const GSkyPixel& pixel, const int& map)
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
-    if (!isinmap(pixel)) {
+    if (!contains(pixel)) {
         throw GException::out_of_range(G_OP_ACCESS_2D,
                                        int(pixel.x()), int(pixel.y()),
                                        m_num_x-1, m_num_y-1);
@@ -372,7 +372,7 @@ const double& GSkymap::operator() (const GSkyPixel& pixel, const int& map) const
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
-    if (!isinmap(pixel)) {
+    if (!contains(pixel)) {
         throw GException::out_of_range(G_OP_ACCESS_2D,
                                        int(pixel.x()), int(pixel.y()),
                                        m_num_x-1, m_num_y-1);
@@ -419,7 +419,7 @@ double GSkymap::operator() (const GSkyDir& dir, const int& map) const
     GSkyPixel pixel = dir2xy(dir);
 
     // Continue only if pixel is within the map
-    if (isinmap(pixel)) {
+    if (contains(pixel)) {
 
         // Set left indices for interpolation. The left index is comprised
         // between 0 and npixels-2. By definition, the right index is then
@@ -620,13 +620,13 @@ void GSkymap::load(const std::string& filename)
 void GSkymap::save(const std::string& filename, bool clobber) const
 {
     // Continue only if we have data to save
-    if (m_wcs != NULL) {
+    if (m_proj != NULL) {
 
         // Initialise HDU pointer
         GFitsHDU* hdu = NULL;
 
         // Case A: Skymap is Healpix
-        if (m_wcs->code() == "HPX") {
+        if (m_proj->code() == "HPX") {
             hdu = create_healpix_hdu();
         }
 
@@ -707,13 +707,13 @@ void GSkymap::read(const GFitsHDU* hdu)
 void GSkymap::write(GFits* file) const
 {
     // Continue only if we have data to save
-    if (m_wcs != NULL) {
+    if (m_proj != NULL) {
 
         // Initialise HDU pointer
         GFitsHDU* hdu = NULL;
 
         // Case A: Skymap is Healpix
-        if (m_wcs->code() == "HPX") {
+        if (m_proj->code() == "HPX") {
             hdu = create_healpix_hdu();
         }
 
@@ -753,15 +753,15 @@ void GSkymap::write(GFits* file) const
  ***************************************************************************/
 GSkyDir GSkymap::pix2dir(const int& pix) const
 {
-    // Throw error if WCS is not valid
-    if (m_wcs == NULL) {
-        throw GException::wcs(G_PIX2DIR, "No valid WCS found.");
+    // Throw error if sky projection is not valid
+    if (m_proj == NULL) {
+        throw GException::wcs(G_PIX2DIR, "No valid sky projection found.");
     }
 
     // Determine sky direction from pixel. Use 2D version if sky map is
     // 2D, otherwise use 1D version.
-    GSkyDir dir = (m_num_x == 0) ? m_wcs->pix2dir(pix)
-                                 : m_wcs->xy2dir(pix2xy(pix));
+    GSkyDir dir = (m_num_x == 0) ? m_proj->pix2dir(pix)
+                                 : m_proj->xy2dir(pix2xy(pix));
 
     // Return sky direction
     return dir;
@@ -785,13 +785,13 @@ GSkyDir GSkymap::pix2dir(const int& pix) const
 int GSkymap::dir2pix(const GSkyDir& dir) const
 {
     // Throw error if WCS is not valid
-    if (m_wcs == NULL) {
-        throw GException::wcs(G_DIR2PIX, "No valid WCS found.");
+    if (m_proj == NULL) {
+        throw GException::wcs(G_DIR2PIX, "No valid sky projection found.");
     }
 
     // Determine 1D pixel index for a given sky direction
-    int pix = (m_num_x == 0) ? m_wcs->dir2pix(dir)
-                             : xy2pix(m_wcs->dir2xy(dir));
+    int pix = (m_num_x == 0) ? m_proj->dir2pix(dir)
+                             : xy2pix(m_proj->dir2xy(dir));
 
     // Return pixel index
     return pix;
@@ -815,14 +815,14 @@ int GSkymap::dir2pix(const GSkyDir& dir) const
 GSkyDir GSkymap::xy2dir(const GSkyPixel& pix) const
 {
     // Throw error if WCS is not valid
-    if (m_wcs == NULL) {
-        throw GException::wcs(G_XY2DIR, "No valid WCS found.");
+    if (m_proj == NULL) {
+        throw GException::wcs(G_XY2DIR, "No valid sky projection found.");
     }
 
     // Determine sky direction from pixel. Use 2D version if sky map is
     // 2D, otherwise use 1D version.
-    GSkyDir dir = (m_num_x == 0) ? m_wcs->pix2dir(xy2pix(pix))
-                                 : m_wcs->xy2dir(pix);
+    GSkyDir dir = (m_num_x == 0) ? m_proj->pix2dir(xy2pix(pix))
+                                 : m_proj->xy2dir(pix);
 
     // Return sky direction
     return dir;
@@ -846,13 +846,13 @@ GSkyDir GSkymap::xy2dir(const GSkyPixel& pix) const
 GSkyPixel GSkymap::dir2xy(const GSkyDir& dir) const
 {
     // Throw error if WCS is not valid
-    if (m_wcs == NULL) {
-        throw GException::wcs(G_DIR2XY, "No valid WCS found.");
+    if (m_proj == NULL) {
+        throw GException::wcs(G_DIR2XY, "No valid sky projection found.");
     }
 
     // Determine 1D pixel index for a given sky direction
-    GSkyPixel pix = (m_num_x == 0) ? pix2xy(m_wcs->dir2pix(dir))
-                                   : m_wcs->dir2xy(dir);
+    GSkyPixel pix = (m_num_x == 0) ? pix2xy(m_proj->dir2pix(dir))
+                                   : m_proj->dir2xy(dir);
 
     // Return pixel index
     return pix;
@@ -870,14 +870,14 @@ GSkyPixel GSkymap::dir2xy(const GSkyDir& dir) const
 double GSkymap::omega(const int& pix) const
 {
     // Throw error if WCS is not valid
-    if (m_wcs == NULL) {
-        throw GException::wcs(G_OMEGA1, "No valid WCS found.");
+    if (m_proj == NULL) {
+        throw GException::wcs(G_OMEGA1, "No valid sky projection found.");
     }
 
     // Determine solid angle from pixel. Use 2D version if sky map is
     // 2D, otherwise use 1D version.
-    double omega = (m_num_x == 0) ? m_wcs->omega(pix)
-                                  : m_wcs->omega(pix2xy(pix));
+    double omega = (m_num_x == 0) ? m_proj->omega(pix)
+                                  : m_proj->omega(pix2xy(pix));
 
     // Return solid angle
     return omega;
@@ -895,14 +895,14 @@ double GSkymap::omega(const int& pix) const
 double GSkymap::omega(const GSkyPixel& pix) const
 {
     // Throw error if WCS is not valid
-    if (m_wcs == NULL) {
-        throw GException::wcs(G_OMEGA2, "No valid WCS found.");
+    if (m_proj == NULL) {
+        throw GException::wcs(G_OMEGA2, "No valid sky projection found.");
     }
 
     // Determine solid angle from pixel. Use 2D version if sky map is
     // 2D, otherwise use 1D version.
-    double omega = (m_num_x == 0) ? m_wcs->omega(xy2pix(pix))
-                                  : m_wcs->omega(pix);
+    double omega = (m_num_x == 0) ? m_proj->omega(xy2pix(pix))
+                                  : m_proj->omega(pix);
 
     // Return solid angle
     return omega;
@@ -999,21 +999,21 @@ GSkyPixel GSkymap::pix2xy(const int& pix) const
 
 
 /***********************************************************************//**
- * @brief Set WCS skymap
+ * @brief Set sky projection
  *
- * @param[in] wcs World Coordinate System.
+ * @param[in] proj Sky projection.
  *
- * Sets the World Coordinate System of sky map. The method performs a deep
- * copy of the input argument, allowing to destroy the argument after using
- * the method. 
+ * Sets the projection from celestial to pixel coordinates. The method
+ * performs a deep copy of @p proj, allowing to destroy the argument after
+ * using the method. 
  ***************************************************************************/
-void GSkymap::wcs(const GWcs& wcs)
+void GSkymap::projection(const GSkyProjection& proj)
 {
     // Free any existing WCS
-    if (m_wcs != NULL) delete m_wcs;
+    if (m_proj != NULL) delete m_proj;
 
     // Clone input WCS
-    m_wcs = wcs.clone();
+    m_proj = proj.clone();
 
     // Return
     return;
@@ -1030,13 +1030,13 @@ void GSkymap::wcs(const GWcs& wcs)
  * sky direction into 2D pixel indices, and then checks whether the pixel
  * indices fall in the skymap.
  ***************************************************************************/
-bool GSkymap::isinmap(const GSkyDir& dir) const
+bool GSkymap::contains(const GSkyDir& dir) const
 {
     // Convert sky direction into sky pixel
     GSkyPixel pixel = dir2xy(dir);
     
     // Return location flag
-    return (isinmap(pixel));
+    return (contains(pixel));
 }
 
 
@@ -1047,7 +1047,7 @@ bool GSkymap::isinmap(const GSkyDir& dir) const
  *
  * This method checks if the specified sky pixel is within the skymap.
  ***************************************************************************/
-bool GSkymap::isinmap(const GSkyPixel& pixel) const
+bool GSkymap::contains(const GSkyPixel& pixel) const
 {
     // Initialise location flag
     bool inmap = false;
@@ -1085,19 +1085,20 @@ std::string GSkymap::print(const GChatter& chatter) const
         result.append(gammalib::str(m_num_pixels));
         result.append("\n"+gammalib::parformat("Number of maps"));
         result.append(gammalib::str(m_num_maps));
-        if (m_wcs != NULL && m_wcs->code() != "HPX") {
+        if (m_proj != NULL && m_proj->code() != "HPX") {
             result.append("\n"+gammalib::parformat("X axis dimension"));
             result.append(gammalib::str(m_num_x));
             result.append("\n"+gammalib::parformat("Y axis dimension"));
             result.append(gammalib::str(m_num_y));
         }
 
-        // Append WCS information
-        if (m_wcs != NULL) {
-            result.append("\n"+m_wcs->print(chatter));
+        // Append sky projection information
+        if (m_proj != NULL) {
+            result.append("\n"+m_proj->print(chatter));
         }
         else {
-            result.append("\n"+gammalib::parformat("WCS")+"not defined");
+            result.append("\n"+gammalib::parformat("Sky projection"));
+            result.append("not defined");
         }
 
     } // endif: chatter was not silent
@@ -1123,7 +1124,7 @@ void GSkymap::init_members(void)
     m_num_maps   = 0;
     m_num_x      = 0;
     m_num_y      = 0;
-    m_wcs        = NULL;
+    m_proj       = NULL;
     m_pixels     = NULL;
 
     // Return
@@ -1168,8 +1169,8 @@ void GSkymap::copy_members(const GSkymap& map)
     m_num_x      = map.m_num_x;
     m_num_y      = map.m_num_y;
 
-    // Clone WCS if it is valid
-    if (map.m_wcs != NULL) m_wcs = map.m_wcs->clone();
+    // Clone sky projection if it is valid
+    if (map.m_proj != NULL) m_proj = map.m_proj->clone();
 
     // Compute data size
     int size = m_num_pixels * m_num_maps;
@@ -1193,11 +1194,11 @@ void GSkymap::copy_members(const GSkymap& map)
 void GSkymap::free_members(void)
 {
     // Free memory
-    if (m_wcs    != NULL) delete m_wcs;
+    if (m_proj   != NULL) delete m_proj;
     if (m_pixels != NULL) delete [] m_pixels;
 
     // Signal free pointers
-    m_wcs        = NULL;
+    m_proj       = NULL;
     m_pixels     = NULL;
 
     // Reset number of pixels
@@ -1212,7 +1213,7 @@ void GSkymap::free_members(void)
 
 
 /***********************************************************************//**
- * @brief Set WCS
+ * @brief Set World Coordinate System
  *
  * @param[in] wcs World Coordinate System code.
  * @param[in] coords Coordinate system.
@@ -1256,18 +1257,21 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
         GWcsRegistry registry;
         
         // Allocate projection from registry
-        m_wcs = registry.alloc(uwcs);
+        m_proj = registry.alloc(uwcs);
+
+        // Cast to World Coordinate system
+        GWcslib* wcs = dynamic_cast<GWcslib*>(m_proj);
         
         // Signal if projection type is not known
-        if (m_wcs == NULL) {
+        if (wcs == NULL) {
             std::string message = "Projection code not known. "
                                   "Should be one of "+registry.list()+".";
             throw GException::wcs_invalid(G_SET_WCS, uwcs, message);
         }
 
         // Setup WCS
-        static_cast<GWcslib*>(m_wcs)->set(coords, crval1, crval2, crpix1, crpix2,
-                                          cdelt1, cdelt2);
+        wcs->set(coords, crval1, crval2, crpix1, crpix2,
+                 cdelt1, cdelt2);
     
     } // endelse: got projection from registry
 
@@ -1300,14 +1304,14 @@ void GSkymap::read_healpix(const GFitsTable* hdu)
         std::cout << "nrows=" << nrows << " ncols=" << ncols << std::endl;
         #endif
 
-        // Allocate Healpix WCS
-        m_wcs = new GWcsHPX;
+        // Allocate Healpix projection
+        m_proj = new GWcsHPX;
 
         // Read WCS information from FITS header
-        m_wcs->read(hdu);
+        m_proj->read(hdu);
 
         // Set number of pixels based on NSIDE parameter
-        m_num_pixels = static_cast<GWcsHPX*>(m_wcs)->npix();
+        m_num_pixels = static_cast<GWcsHPX*>(m_proj)->npix();
         #if defined(G_READ_HEALPIX_DEBUG)
         std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
         #endif
@@ -1418,8 +1422,8 @@ void GSkymap::read_wcs(const GFitsImage* hdu)
         // Allocate WCS
         alloc_wcs(hdu);
 
-        // Read WCS information from FITS header
-        m_wcs->read(hdu);
+        // Read projection information from FITS header
+        m_proj->read(hdu);
 
         // Extract map dimension and number of maps from image
         if (hdu->naxis() == 2) {
@@ -1512,10 +1516,10 @@ void GSkymap::alloc_wcs(const GFitsImage* hdu)
         GWcsRegistry registry;
         
         // Allocate projection from registry
-        m_wcs = registry.alloc(xproj);
+        m_proj = registry.alloc(xproj);
         
         // Signal if projection type is not known
-        if (m_wcs == NULL) {
+        if (m_proj == NULL) {
             std::string message = "Projection code not known. "
                                   "Should be one of "+registry.list()+".";
             throw GException::wcs_invalid(G_ALLOC_WCS, xproj, message);
@@ -1575,7 +1579,7 @@ GFitsBinTable* GSkymap::create_healpix_hdu(void) const
     hdu->extname("HEALPIX");
 
     // If we have WCS information then write into FITS header
-    if (m_wcs != NULL) m_wcs->write(hdu);
+    if (m_proj != NULL) m_proj->write(hdu);
 
     // Set additional keywords
     hdu->card("NBRBINS", m_num_maps, "Number of HEALPix maps");
@@ -1641,8 +1645,8 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
     // Set extension name
     hdu->extname("IMAGE");
 
-    // If we have WCS information then write into FITS header
-    if (m_wcs != NULL) m_wcs->write(hdu);
+    // If we have sky projection information then write into FITS header
+    if (m_proj != NULL) m_proj->write(hdu);
 
     // Set additional keywords
     //TODO

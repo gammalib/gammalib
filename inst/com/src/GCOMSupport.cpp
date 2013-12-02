@@ -54,7 +54,7 @@
 void com_wcs_mer2car(GSkymap& map)
 {
     // Get WCS poiunter
-    GWcslib* wcs = dynamic_cast<GWcslib*>(map.wcs());
+    GWcslib* wcs = dynamic_cast<GWcslib*>(map.projection());
 
     // Apply kluge only if the skymap is in Mercator's projection
     if (wcs->code() == "MER") {
@@ -85,7 +85,7 @@ void com_wcs_mer2car(GSkymap& map)
                                      cdelt1, cdelt2);
 
         // Set new WCS
-        map.wcs(car);
+        map.projection(car);
 
     } // endif: skymap was in Mercator projection
 

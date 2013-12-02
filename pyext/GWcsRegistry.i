@@ -36,20 +36,19 @@
  * @brief Interface definition for the WCS registry class
  ***************************************************************************/
 class GWcsRegistry : public GRegistry {
-
 public:
     // Constructors and destructors
     GWcsRegistry(void);
-    GWcsRegistry(const GWcs* prj);
+    explicit GWcsRegistry(const GSkyProjection* proj);
     GWcsRegistry(const GWcsRegistry& registry);
     virtual ~GWcsRegistry(void);
 
     // Methods
-    int         size(void) const { return m_number; }
-    GWcs*       alloc(const std::string& code) const;
-    std::string code(const int& index) const;
-    std::string name(const int& index) const;
-    std::string list(void) const;
+    int             size(void) const;
+    GSkyProjection* alloc(const std::string& code) const;
+    std::string     code(const int& index) const;
+    std::string     name(const int& index) const;
+    std::string     list(void) const;
 };
 
 

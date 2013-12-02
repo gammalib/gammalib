@@ -34,7 +34,7 @@
  *
  * @brief HealPix projection class Python interface defintion
  ***************************************************************************/
-class GWcsHPX : public GWcs {
+class GWcsHPX : public GSkyProjection {
 public:
     // Constructors and destructors
     GWcsHPX(void);

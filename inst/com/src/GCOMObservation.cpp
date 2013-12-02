@@ -845,7 +845,7 @@ void GCOMObservation::load_drx(const std::string& drxname)
  ***************************************************************************/
 bool GCOMObservation::check_map(const GSkymap& map) const
 {
-    // Get pointer on event cube map
+    // Get reference to event cube map
     const GSkymap& ref = dynamic_cast<GCOMEventCube*>(m_events)->map();
 
     // Compare dimensions
@@ -853,11 +853,11 @@ bool GCOMObservation::check_map(const GSkymap& map) const
                            (map.ny()    == ref.ny()) &&
                            (map.nmaps() == ref.nmaps()));
 
-    // Compare WCS
-    bool same_wcs = (*(map.wcs()) == *(ref.wcs()));
+    // Compare projections
+    bool same_projection = (*(map.projection()) == *(ref.projection()));
 
     // Return
-    return (same_dimension && same_wcs);
+    return (same_dimension && same_projection);
 }
 
 

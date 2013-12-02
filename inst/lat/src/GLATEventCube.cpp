@@ -467,9 +467,9 @@ std::string GLATEventCube::print(const GChatter& chatter) const
             result.append("not defined");
         }
 
-        // Append WCS
-        if (m_map.wcs() != NULL) {
-            result.append("\n"+m_map.wcs()->print(chatter));
+        // Append sky projection
+        if (m_map.projection() != NULL) {
+            result.append("\n"+m_map.projection()->print(chatter));
         }
 
         // Append source maps
@@ -729,8 +729,9 @@ void GLATEventCube::read_srcmap(const GFitsImage* hdu)
         // Read skymap
         map->read(hdu);
 
-        // Check that source map WCS is consistent with counts map WCS
-        if (*(m_map.wcs()) != *(map->wcs())) {
+        // Check that source map sky projection is consistent with counts
+        // map sky projection
+        if (*(m_map.projection()) != *(map->projection())) {
             throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());
         }
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GWcs.i - World Coordinate System virtual base class           *
+ *           GSkyProjection.i - Abstract sky projection base class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,43 +19,45 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcs.i
- * @brief World Coordinate System virtual base class Python interface
+ * @file GSkyProjection.i
+ * @brief Abstract sky projection base class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GWcs.hpp"
+#include "GSkyProjection.hpp"
 #include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GWcs
+ * @class GSkyProjection
  *
- * @brief World Coordinate System virtual base class Python interface
+ * @brief Abstract sky projection base class
+ *
+ * This class defines an abstract projection from sky coordinates into
+ * pixel coordinates.
  ***************************************************************************/
-class GWcs : public GBase {
-
+class GSkyProjection : public GBase {
 public:
     // Constructors and destructors
-    GWcs(void);
-    GWcs(const GWcs& wcs);
-    virtual ~GWcs(void);
+    GSkyProjection(void);
+    GSkyProjection(const GSkyProjection& proj);
+    virtual ~GSkyProjection(void);
 
     // Pure virtual methods (not implemented)
-    virtual void        clear(void) = 0;
-    virtual GWcs*       clone(void) const = 0;
-    virtual std::string code(void) const = 0;
-    virtual std::string name(void) const = 0;
-    virtual void        read(const GFitsHDU* hdu) = 0;
-    virtual void        write(GFitsHDU* hdu) const = 0;
-    virtual double      omega(const int& pix) const = 0;
-    virtual double      omega(const GSkyPixel& pix) const = 0;
-    virtual GSkyDir     pix2dir(const int& pix) const = 0;
-    virtual int         dir2pix(const GSkyDir& dir) const = 0;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const = 0;
-    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const = 0;
+    virtual void            clear(void) = 0;
+    virtual GSkyProjection* clone(void) const = 0;
+    virtual std::string     code(void) const = 0;
+    virtual std::string     name(void) const = 0;
+    virtual void            read(const GFitsHDU* hdu) = 0;
+    virtual void            write(GFitsHDU* hdu) const = 0;
+    virtual double          omega(const int& pix) const = 0;
+    virtual double          omega(const GSkyPixel& pix) const = 0;
+    virtual GSkyDir         pix2dir(const int& pix) const = 0;
+    virtual int             dir2pix(const GSkyDir& dir) const = 0;
+    virtual GSkyDir         xy2dir(const GSkyPixel& pix) const = 0;
+    virtual GSkyPixel       dir2xy(const GSkyDir& dir) const = 0;
 
     // Virtual methods
     virtual std::string coordsys(void) const;
@@ -63,13 +65,11 @@ public:
 };
 
 
-
-
 /***********************************************************************//**
- * @brief GWcs class extension
+ * @brief GSkyProjection class extension
  ***************************************************************************/
-%extend GWcs {
-    bool __is__(const GWcs &a) {
-            return (*self) == a;
+%extend GSkyProjection {
+    bool __is__(const GSkyProjection &proj) {
+            return (*self) == proj;
     }
 };

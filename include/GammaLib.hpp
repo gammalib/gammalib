@@ -140,7 +140,7 @@
 #include "GSkyRegions.hpp"
 #include "GSkyRegion.hpp"
 #include "GSkyRegionCircle.hpp"
-#include "GWcs.hpp"
+#include "GSkyProjection.hpp"
 #include "GWcsRegistry.hpp"
 #include "GWcslib.hpp"
 #include "GWcsAIT.hpp"

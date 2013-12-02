@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GWcs.cpp  -  World Coordinate System virtual base class       *
+ *          GSkyProjection.cpp - Abstract sky projection base class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcs.cpp
- * @brief World Coordinate System virtual base class implementation
+ * @file GSkyProjection.cpp
+ * @brief Abstract sky projection base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,10 +30,10 @@
 #endif
 #include "GException.hpp"
 #include "GTools.hpp"
-#include "GWcs.hpp"
+#include "GSkyProjection.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_COORDSYS_SET                          "GWcs::coordsys(std::string)"
+#define G_COORDSYS_SET                "GSkyProjection::coordsys(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -55,7 +55,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcs::GWcs(void)
+GSkyProjection::GSkyProjection(void)
 {
     // Initialise class members
     init_members();
@@ -68,15 +68,15 @@ GWcs::GWcs(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param wcs World Coordinate System.
+ * @param[in] proj Sky projection.
  ***************************************************************************/
-GWcs::GWcs(const GWcs& wcs)
+GSkyProjection::GSkyProjection(const GSkyProjection& proj)
 {
-    // Initialise class members for clean destruction
+    // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(wcs);
+    copy_members(proj);
 
     // Return
     return;
@@ -86,7 +86,7 @@ GWcs::GWcs(const GWcs& wcs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GWcs::~GWcs(void)
+GSkyProjection::~GSkyProjection(void)
 {
     // Free members
     free_members();
@@ -105,12 +105,13 @@ GWcs::~GWcs(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] wcs World Coordinate System.
+ * @param[in] proj Sky projection.
+ * @return Sky projection.
  ***************************************************************************/
-GWcs& GWcs::operator= (const GWcs& wcs)
+GSkyProjection& GSkyProjection::operator= (const GSkyProjection& proj)
 {
     // Execute only if object is not identical
-    if (this != &wcs) {
+    if (this != &proj) {
 
         // Free members
         free_members();
@@ -119,7 +120,7 @@ GWcs& GWcs::operator= (const GWcs& wcs)
         init_members();
 
         // Copy members
-        copy_members(wcs);
+        copy_members(proj);
 
     } // endif: object was not identical
 
@@ -137,6 +138,8 @@ GWcs& GWcs::operator= (const GWcs& wcs)
 /***********************************************************************//**
  * @brief Returns coordinate system.
  *
+ * @return Coordinate system string.
+ *
  * Returns one of 
  * 'EQU' (equatorial),
  * 'GAL' (galactic),
@@ -144,7 +147,7 @@ GWcs& GWcs::operator= (const GWcs& wcs)
  * 'HEL' (helioecliptic), and
  * 'SGL' (supergalactic).
  ***************************************************************************/
-std::string GWcs::coordsys(void) const
+std::string GSkyProjection::coordsys(void) const
 {
     // Set coordinate system
     std::string s_coordsys;
@@ -190,24 +193,30 @@ std::string GWcs::coordsys(void) const
  * 'HEL', 'H': helioecliptic, and
  * 'SGL', 'S': helioecliptic.
  ***************************************************************************/
-void GWcs::coordsys(const std::string& coordsys)
+void GSkyProjection::coordsys(const std::string& coordsys)
 {
     // Convert argument to upper case
     std::string ucoordsys = gammalib::toupper(coordsys);
 
     // Set coordinate system
-    if (ucoordsys == "EQU" || ucoordsys == "CEL" || ucoordsys == "C")
+    if (ucoordsys == "EQU" || ucoordsys == "CEL" || ucoordsys == "C") {
         m_coordsys = 0;
-    else if (ucoordsys == "GAL" || ucoordsys == "G")
+    }
+    else if (ucoordsys == "GAL" || ucoordsys == "G") {
         m_coordsys = 1;
-    else if (ucoordsys == "ECL" || ucoordsys == "E")
+    }
+    else if (ucoordsys == "ECL" || ucoordsys == "E") {
         m_coordsys = 2;
-    else if (ucoordsys == "HEL" || ucoordsys == "H")
+    }
+    else if (ucoordsys == "HEL" || ucoordsys == "H") {
         m_coordsys = 3;
-    else if (ucoordsys == "SGL" || ucoordsys == "S")
+    }
+    else if (ucoordsys == "SGL" || ucoordsys == "S") {
         m_coordsys = 4;
-    else
+    }
+    else {
         throw GException::wcs_bad_coords(G_COORDSYS_SET, coordsys);
+    }
 
     // Return
     return;
@@ -223,7 +232,7 @@ void GWcs::coordsys(const std::string& coordsys)
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GWcs::init_members(void)
+void GSkyProjection::init_members(void)
 {
     // Initialise members
     m_coordsys = 0;
@@ -236,12 +245,12 @@ void GWcs::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] wcs World Coordinate System.
+ * @param[in] proj Sky projection.
  ***************************************************************************/
-void GWcs::copy_members(const GWcs& wcs)
+void GSkyProjection::copy_members(const GSkyProjection& proj)
 {
     // Copy attributes
-    m_coordsys = wcs.m_coordsys;
+    m_coordsys = proj.m_coordsys;
 
     // Return
     return;
@@ -251,7 +260,7 @@ void GWcs::copy_members(const GWcs& wcs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GWcs::free_members(void)
+void GSkyProjection::free_members(void)
 {
     // Return
     return;
@@ -267,10 +276,11 @@ void GWcs::free_members(void)
 /***********************************************************************//**
  * @brief Equality operator
  *
- * @param[in] a First World Coordinate System.
- * @param[in] b Second World Coordinate System.
+ * @param[in] a First sky projection.
+ * @param[in] b Second sky projection.
+ * @return True if @p a and @p b are identical.
  ***************************************************************************/
-bool operator== (const GWcs &a, const GWcs &b)
+bool operator==(const GSkyProjection &a, const GSkyProjection &b)
 {
     // Return result
     return a.compare(b);
@@ -280,10 +290,11 @@ bool operator== (const GWcs &a, const GWcs &b)
 /***********************************************************************//**
  * @brief Non-equality operator
  *
- * @param[in] a First World Coordinate System.
- * @param[in] b Second World Coordinate System.
+ * @param[in] a First sky projection.
+ * @param[in] b Second sky projection.
+ * @return True if @p a and @p b are not identical.
  ***************************************************************************/
-bool operator!= (const GWcs &a, const GWcs &b)
+bool operator!=(const GSkyProjection &a, const GSkyProjection &b)
 {
     // Return result
     return !(a == b);

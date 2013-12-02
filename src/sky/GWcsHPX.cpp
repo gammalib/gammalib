@@ -33,7 +33,7 @@
 #include "GTools.hpp"
 #include "GMath.hpp"
 #include "GWcsHPX.hpp"
-#include "GWcsRegistry.hpp"
+//#include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT           "GWcsHPX::GWcsHPX(int,std::string,std::string)"
@@ -63,8 +63,8 @@ static short ctab[0x100];
 static short utab[0x100];
 
 /* __ Globals ____________________________________________________________ */
-const GWcsHPX      g_wcs_hpx_seed;
-const GWcsRegistry g_wcs_hpx_registry(&g_wcs_hpx_seed);
+//const GWcsHPX      g_wcs_hpx_seed;
+//const GWcsRegistry g_wcs_hpx_registry(&g_wcs_hpx_seed);
 
 
 /*==========================================================================
@@ -76,7 +76,7 @@ const GWcsRegistry g_wcs_hpx_registry(&g_wcs_hpx_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsHPX::GWcsHPX(void) : GWcs()
+GWcsHPX::GWcsHPX(void) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -101,7 +101,7 @@ GWcsHPX::GWcsHPX(void) : GWcs()
  *            Invalid ordering parameter.
  ***************************************************************************/
 GWcsHPX::GWcsHPX(const int& nside, const std::string& order,
-                 const std::string& coords) : GWcs()
+                 const std::string& coords) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -136,7 +136,7 @@ GWcsHPX::GWcsHPX(const int& nside, const std::string& order,
  *
  * @param[in] hdu Pointer to FITS HDU.
  ***************************************************************************/
-GWcsHPX::GWcsHPX(const GFitsHDU* hdu) : GWcs()
+GWcsHPX::GWcsHPX(const GFitsHDU* hdu) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -154,7 +154,7 @@ GWcsHPX::GWcsHPX(const GFitsHDU* hdu) : GWcs()
  *
  * @param[in] wcs GWcsHPX instance which should be used for construction.
  ***************************************************************************/
-GWcsHPX::GWcsHPX(const GWcsHPX& wcs) : GWcs(wcs)
+GWcsHPX::GWcsHPX(const GWcsHPX& wcs) : GSkyProjection(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -191,13 +191,13 @@ GWcsHPX::~GWcsHPX()
  *
  * @param[in] wcs GWcsHPX instance to be assigned.
  ***************************************************************************/
-GWcsHPX& GWcsHPX::operator= (const GWcsHPX& wcs)
+GWcsHPX& GWcsHPX::operator=(const GWcsHPX& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
 
         // Copy base class members
-        this->GWcs::operator=(wcs);
+        this->GSkyProjection::operator=(wcs);
 
         // Free members
         free_members();
@@ -230,10 +230,10 @@ void GWcsHPX::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GWcs::free_members();
+    this->GSkyProjection::free_members();
 
     // Initialise members
-    this->GWcs::init_members();
+    this->GSkyProjection::init_members();
     init_members();
 
     // Return
@@ -708,13 +708,13 @@ void GWcsHPX::free_members(void)
  *
  * This method is a helper for the World Coordinate Comparison friends.
  ***************************************************************************/
-bool GWcsHPX::compare(const GWcs& wcs) const
+bool GWcsHPX::compare(const GSkyProjection& proj) const
 {
     // Initialise result
     bool result = false;
     
     // Continue only we compare to a GWcsHPX object
-    const GWcsHPX* ptr = dynamic_cast<const GWcsHPX*>(&wcs);
+    const GWcsHPX* ptr = dynamic_cast<const GWcsHPX*>(&proj);
     if (ptr != NULL) {
         result = ((m_coordsys   == ptr->m_coordsys) &&
                   (m_nside      == ptr->m_nside)    &&
