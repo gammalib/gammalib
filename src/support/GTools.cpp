@@ -244,7 +244,7 @@ std::string gammalib::str(const unsigned short int& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -257,7 +257,7 @@ std::string gammalib::str(const unsigned int& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -270,7 +270,7 @@ std::string gammalib::str(const unsigned long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -283,7 +283,7 @@ std::string gammalib::str(const unsigned long long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -296,7 +296,7 @@ std::string gammalib::str(const short int& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -309,7 +309,7 @@ std::string gammalib::str(const int& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -322,7 +322,7 @@ std::string gammalib::str(const long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -335,7 +335,7 @@ std::string gammalib::str(const long long int& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -348,7 +348,7 @@ std::string gammalib::str(const float& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -361,7 +361,7 @@ std::string gammalib::str(const double& value)
 {
     std::ostringstream s_value;
     s_value << value;
-    return  s_value.str();
+    return s_value.str();
 }
 
 
@@ -598,7 +598,7 @@ std::vector<std::string> gammalib::split(const std::string& s,
  *
  * Replicates a given string n time.
  ***************************************************************************/
-std::string gammalib::fill(const std::string& s, int n)
+std::string gammalib::fill(const std::string& s, const int& n)
 {
     // Initialise result
     std::string result = "";
@@ -623,7 +623,7 @@ std::string gammalib::fill(const std::string& s, int n)
  * Left justify string by adding whitespace to the right to achieve a length
  * of n characters.
  ***************************************************************************/
-std::string gammalib::left(const std::string& s, int n, char c)
+std::string gammalib::left(const std::string& s, const int& n, const char& c)
 {
     // Compute number of characters to fill right
     int n_right  = n - s.length();
@@ -646,7 +646,7 @@ std::string gammalib::left(const std::string& s, int n, char c)
  * Right justify string by adding whitespace to the left to achieve a length
  * of n characters.
  ***************************************************************************/
-std::string gammalib::right(const std::string& s, int n, char c)
+std::string gammalib::right(const std::string& s, const int& n, const char& c)
 {
     // Compute number of characters to fill right
     int n_left  = n - s.length();
@@ -669,7 +669,7 @@ std::string gammalib::right(const std::string& s, int n, char c)
  * Center string by adding whitespace to the left and the right to achieve a
  * length of n characters.
  ***************************************************************************/
-std::string gammalib::center(const std::string& s, int n, char c)
+std::string gammalib::center(const std::string& s, const int& n, const char& c)
 {
     // Compute number of characters to fill left and right
     int n_right = (n-s.length()) / 2;
@@ -833,7 +833,7 @@ bool gammalib::file_exists(const std::string& filename)
  *
  * Checks if substring is contained in str
  ***************************************************************************/
-bool gammalib::contains(std::string str, std::string substring)
+bool gammalib::contains(const std::string& str, const std::string& substring)
 {
     // Initialise result
     bool result = false;
