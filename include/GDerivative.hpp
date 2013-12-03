@@ -70,8 +70,8 @@ public:
     void             function(GFunction* func);
     const GFunction* function(void) const;
     double           value(const double& x, const double& step = 0.0);
-    double           ridder(const double& x, const double& h, double& err);
-    double           minuit2(const double& x, double& err);
+    double           ridder(const double& x, const double& h, double* err);
+    double           minuit2(const double& x, double* err);
     double           difference(const double& x, const double& h);
     std::string      print(const GChatter& chatter = NORMAL) const;
 

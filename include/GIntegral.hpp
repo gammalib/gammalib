@@ -57,17 +57,18 @@ public:
     // Methods
     void             clear(void);
     GIntegral*       clone(void) const;
-    void             max_iter(const int& max_iter) { m_max_iter=max_iter; }
-    void             eps(const double& eps) { m_eps=eps; }
-    void             silent(const bool& silent) { m_silent=silent; }
-    const int&       iter(void) const { return m_iter; }
-    const int&       max_iter(void) const { return m_max_iter; }
-    const double&    eps(void) const { return m_eps; }
-    const bool&      silent(void) const { return m_silent; }
-    void             kernel(GFunction* kernel) { m_kernel=kernel; }
-    const GFunction* kernel(void) const { return m_kernel; }
-    double           romb(double a, double b, int k = 5);
-    double           trapzd(double a, double b, int n = 1, double result = 0.0);
+    void             max_iter(const int& max_iter);
+    void             eps(const double& eps);
+    void             silent(const bool& silent);
+    const int&       iter(void) const;
+    const int&       max_iter(void) const;
+    const double&    eps(void) const;
+    const bool&      silent(void) const;
+    void             kernel(GFunction* kernel);
+    const GFunction* kernel(void) const;
+    double           romb(const double& a, const double& b, const int& k = 5);
+    double           trapzd(const double& a, const double& b, const int& n = 1,
+                            double result = 0.0);
     std::string      print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -84,5 +85,119 @@ protected:
     int        m_iter;         //!< Number of iterations used
     bool       m_silent;       //!< Suppress integration warnings
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of iterations
+ *
+ * @return Number of iterations.
+ ***************************************************************************/
+inline
+const int& GIntegral::iter(void) const
+{
+    return m_iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum number of iterations
+ *
+ * @param[in] max_iter Maximum number of iterations.
+ ***************************************************************************/
+inline
+void GIntegral::max_iter(const int& max_iter)
+{
+    m_max_iter = max_iter;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum number of iterations
+ *
+ * @return Maximum number of iterations.
+ ***************************************************************************/
+inline
+const int& GIntegral::max_iter(void) const
+{
+    return m_max_iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Set precision
+ *
+ * @param[in] eps Precision.
+ ***************************************************************************/
+inline
+void GIntegral::eps(const double& eps)
+{
+    m_eps = eps;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get precision
+ *
+ * @return Precision.
+ ***************************************************************************/
+inline
+const double& GIntegral::eps(void) const
+{
+    return m_eps;
+}
+
+
+/***********************************************************************//**
+ * @brief Set silence flag
+ *
+ * @param[in] silent Silence flag.
+ ***************************************************************************/
+inline
+void GIntegral::silent(const bool& silent)
+{
+    m_silent = silent;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get silence flag
+ *
+ * @return True is class is silent, false otherwise.
+ ***************************************************************************/
+inline
+const bool& GIntegral::silent(void) const
+{
+    return m_silent;
+}
+
+
+/***********************************************************************//**
+ * @brief Set kernel
+ *
+ * @param[in] kernel Kernel.
+ *
+ * Sets the kernel for which the integral should be determined.
+ ***************************************************************************/
+inline
+void GIntegral::kernel(GFunction* kernel)
+{
+    m_kernel = kernel;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get kernel
+ *
+ * @return Kernel.
+ ***************************************************************************/
+inline
+const GFunction* GIntegral::kernel(void) const
+{
+    return m_kernel;
+}
 
 #endif /* GINTEGRAL_HPP */

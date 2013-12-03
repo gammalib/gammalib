@@ -39,7 +39,7 @@ class GDerivative : public GBase {
 public:
 
     GDerivative(void);
-    explicit GDerivative(GFunction* func);
+    explicit GDerivative(GFunction* function);
     GDerivative(const GDerivative& dx);
     virtual ~GDerivative(void);
 
@@ -55,11 +55,11 @@ public:
     const double&    eps(void) const;
     const double&    step_frac(void) const;
     const bool&      silent(void) const;
-    void             function(GFunction* func);
+    void             function(GFunction* function);
     const GFunction* function(void) const;
     double           value(const double& x, const double& step = 0.0);
-    double           ridder(const double& x, const double& h, double& err);
-    double           minuit2(const double& x, double& err);
+    double           ridder(const double& x, const double& h, double* err);
+    double           minuit2(const double& x, double* err);
     double           difference(const double& x, const double& h);
 };
 
