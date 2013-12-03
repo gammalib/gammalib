@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GWcsAZP.i  -  Zenithal/azimuthal perspective (AZP) projection class   *
+ *    GWcsAZP.i - Zenithal/azimuthal perspective (AZP) projection class    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GWcsAZP.i
- * @brief Zenithal/azimuthal perspective (AZP) projection class Python interface
- * @author J. Knodlseder
+ * @brief Zenithal/azimuthal perspective (AZP) projection class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GWcsAZP
  *
- * @brief Zenithal/azimuthal perspective (AZP) projection class definition
+ * @brief Zenithal/azimuthal perspective (AZP) projection class
  ***************************************************************************/
 class GWcsAZP : public GWcs {
 public:

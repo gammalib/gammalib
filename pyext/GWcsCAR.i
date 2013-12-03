@@ -1,7 +1,7 @@
 /***************************************************************************
  *            GWcsCAR.i  -  Plate carree (CAR) projection class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GWcsCAR.i
- * @brief Plate carree (CAR) projection class Python interface
- * @author J. Knodlseder
+ * @brief Plate carree (CAR) projection class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
