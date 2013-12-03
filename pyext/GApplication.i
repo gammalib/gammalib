@@ -64,8 +64,8 @@ public:
     bool               logDebug(void) const;
     bool               clobber(void) const;
     bool               haspar(const std::string& name) const;
-    std::string        par_filename(void) const;
-    std::string        log_filename(void) const;
+    const std::string& par_filename(void) const;
+    const std::string& log_filename(void) const;
     void               log_header(void);
     void               log_trailer(void);
     void               log_parameters(void);
@@ -79,9 +79,6 @@ public:
  * @brief GApplication class extension
  ***************************************************************************/
 %extend GApplication {
-    char *__str__() {
-        return gammalib::tochar(self->print());
-    }
     GPar& __getitem__(const std::string& name) {
         return (*self)[name];
     }

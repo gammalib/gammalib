@@ -81,8 +81,16 @@ GApplication::GApplication(const std::string& name, const std::string& version)
     m_name    = name;
     m_version = version;
 
+    // Set default parfile and logfile name
+    m_parfile = name+".par";
+    m_logfile = name+".log";
+
     // Initialise application parameters
     m_pars.load(par_filename());
+
+    // Set log filename and chattiness
+    set_log_filename();
+    set_log_chatter();
 
     // Return
     return;
@@ -114,6 +122,10 @@ GApplication::GApplication(const std::string& name, const std::string& version,
     m_name    = name;
     m_version = version;
 
+    // Set default parfile and logfile name
+    m_parfile = name+".par";
+    m_logfile = name+".log";
+
     // Save arguments as vector of strings
     for (int i = 0; i < argc; ++i) {
         m_args.push_back(gammalib::strip_whitespace(argv[i]));
@@ -121,6 +133,10 @@ GApplication::GApplication(const std::string& name, const std::string& version,
 
     // Initialise application parameters
     m_pars.load(par_filename(), m_args);
+
+    // Set log filename and chattiness
+    set_log_filename();
+    set_log_chatter();
 
     // Initialise the application logger
     logFileOpen();
@@ -294,7 +310,7 @@ void GApplication::logFileOpen(const bool& clobber)
 bool GApplication::logTerse(void) const
 {
     // Get chatter level (circumvent const correctness)
-    int chatter = ((GPar*)&m_pars["chatter"])->integer();
+    int chatter = const_cast<GPar*>(&m_pars["chatter"])->integer();
 
     // Return terse logging condition
     return (chatter > 0);
@@ -312,7 +328,7 @@ bool GApplication::logTerse(void) const
 bool GApplication::logNormal(void) const
 {
     // Get chatter level (circumvent const correctness)
-    int chatter = ((GPar*)&m_pars["chatter"])->integer();
+    int chatter = const_cast<GPar*>(&m_pars["chatter"])->integer();
 
     // Return normal logging condition
     return (chatter > 1);
@@ -330,7 +346,7 @@ bool GApplication::logNormal(void) const
 bool GApplication::logExplicit(void) const
 {
     // Get chatter level (circumvent const correctness)
-    int chatter = ((GPar*)&m_pars["chatter"])->integer();
+    int chatter = const_cast<GPar*>(&m_pars["chatter"])->integer();
 
     // Return explicit logging condition
     return (chatter > 2);
@@ -347,7 +363,7 @@ bool GApplication::logExplicit(void) const
 bool GApplication::logVerbose(void) const
 {
     // Get chatter level (circumvent const correctness)
-    int chatter = ((GPar*)&m_pars["chatter"])->integer();
+    int chatter = const_cast<GPar*>(&m_pars["chatter"])->integer();
 
     // Return verbose logging condition
     return (chatter > 3);
@@ -364,7 +380,7 @@ bool GApplication::logVerbose(void) const
 bool GApplication::logDebug(void) const
 {
     // Get debug condition (circumvent const correctness)
-    bool debug = ((GPar*)&m_pars["debug"])->boolean();
+    bool debug = const_cast<GPar*>(&m_pars["debug"])->boolean();
 
     // Return debug condition
     return (debug);
@@ -381,53 +397,10 @@ bool GApplication::logDebug(void) const
 bool GApplication::clobber(void) const
 {
     // Get clobber condition (circumvent const correctness)
-    bool clobber = ((GPar*)&m_pars["clobber"])->boolean();
+    bool clobber = const_cast<GPar*>(&m_pars["clobber"])->boolean();
 
     // Return clobber condition
     return (clobber);
-}
-
-
-/***********************************************************************//**
- * @brief Signal if specified parameter exists
- *
- * @param[in] name Parameter name.
- * @return True if an application parameter with the specified name exists.
- ***************************************************************************/
-bool GApplication::haspar(const std::string& name) const
-{
-    // Return test result
-    return (m_pars.haspar(name));
-}
-
-
-/***********************************************************************//**
- * @brief Returns parameter filename
- *
- * @return Parameter filename.
- *
- * The parameter filename is given by the task name to which the suffix
- * '.par' is added.
- ***************************************************************************/
-std::string GApplication::par_filename(void) const
-{
-    // Return
-    return (m_name+".par");
-}
-
-
-/***********************************************************************//**
- * @brief Returns log filename
- *
- * @return Log filename.
- *
- * The log filename is given by the task name to which the suffix ".log" is
- * added.
- ***************************************************************************/
-std::string GApplication::log_filename(void) const
-{
-    // Return
-    return (m_name+".log");
 }
 
 
@@ -577,6 +550,8 @@ void GApplication::init_members(void)
     // Initialise protected members
     m_name.clear();
     m_version.clear();
+    m_parfile.clear();
+    m_logfile.clear();
     m_args.clear();
     m_pars.clear();
 
@@ -604,6 +579,8 @@ void GApplication::copy_members(const GApplication& app)
     // Copy protected attributes
     m_name    = app.m_name;
     m_version = app.m_version;
+    m_parfile = app.m_parfile;
+    m_logfile = app.m_logfile;
     m_args    = app.m_args;
     m_tstart  = app.m_tstart;
     m_cstart  = app.m_cstart;
@@ -639,7 +616,7 @@ void GApplication::free_members(void)
 void GApplication::set_log_chatter(void)
 {
     // Get chattiness from application parameter
-    int chatter = (const_cast<GPar*>(&m_pars["chatter"]))->integer();
+    int chatter = m_pars["chatter"].integer();
 
     // Make sure that chatter is within valid range
     if (chatter < 0) {
@@ -651,6 +628,24 @@ void GApplication::set_log_chatter(void)
 
     // Set logger chatter
     log.chatter((GChatter)chatter);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set log filename from "logfile" parameter (if it exists)
+ ***************************************************************************/
+void GApplication::set_log_filename(void)
+{
+    // Continue only if logfile parameter exists
+    if (m_pars.contains("logfile")) {
+
+        // Get log filename from application parameter
+        m_logfile = m_pars["logfile"].filename();
+
+    }
 
     // Return
     return;

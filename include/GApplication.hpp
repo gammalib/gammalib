@@ -77,8 +77,8 @@ public:
     bool               logDebug(void) const;
     bool               clobber(void) const;
     bool               haspar(const std::string& name) const;
-    std::string        par_filename(void) const;
-    std::string        log_filename(void) const;
+    const std::string& par_filename(void) const;
+    const std::string& log_filename(void) const;
     void               log_header(void);
     void               log_trailer(void);
     void               log_parameters(void);
@@ -93,10 +93,13 @@ protected:
     void copy_members(const GApplication& app);
     void free_members(void);
     void set_log_chatter(void);
+    void set_log_filename(void);
 
     // Protected data members
     std::string              m_name;       //!< Application name
     std::string              m_version;    //!< Application version
+    std::string              m_parfile;    //!< Parameter filename
+    std::string              m_logfile;    //!< Log filename
     std::vector<std::string> m_args;       //!< Command line arguments
     std::time_t              m_tstart;     //!< Calendar start time of execution
     std::clock_t             m_cstart;     //!< Clock start time of execution
@@ -136,7 +139,6 @@ const GPar& GApplication::operator[](const std::string& name) const
 inline
 const std::string& GApplication::name(void) const
 {
-    // Return name
     return m_name;
 }
 
@@ -149,8 +151,44 @@ const std::string& GApplication::name(void) const
 inline
 const std::string& GApplication::version(void) const
 {
-    // Return version
     return m_version;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if specified parameter exists
+ *
+ * @param[in] name Parameter name.
+ * @return True if an application parameter with the specified name exists.
+ ***************************************************************************/
+inline
+bool GApplication::haspar(const std::string& name) const
+{
+    return (m_pars.contains(name));
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter filename
+ *
+ * @return Parameter filename.
+ ***************************************************************************/
+const std::string& GApplication::par_filename(void) const
+{
+    // Return
+    return (m_parfile);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns log filename
+ *
+ * @return Log filename.
+ ***************************************************************************/
+const std::string& GApplication::log_filename(void) const
+{
+    // Return
+    return (m_logfile);
 }
 
 #endif /* GAPPLICATION_HPP */

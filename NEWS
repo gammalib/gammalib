@@ -17,6 +17,11 @@ This section summarizes all modifications of public class interfaces
 that will lead to compatibility issues with respect to the last
 GammaLib release.
 
+GApplications
+  The par_filename() and log_filename() methods return a const
+  reference string as the filenames are stored explicitly by the
+  class.
+
 GBase
   The print() method now takes an optional argument of type GChatter
   that controls the chattiness of the object printing. The default
@@ -108,6 +113,12 @@ GOptimizer & GOptimizerLM
   The optimization operators have been removed and replaced by the
   optimize method.
 
+GPars
+  The GPars class now derives from GContainer and implements the
+  usual at(), size(), isempty(), append(), insert(), remove(),
+  reserve() and extent() methods. The haspar() method has been
+  renamed to contains() for consistency.
+
 GSkyPixel
   The class now supports 1D and 2D pixels. Type conversion methods
   have been added that allow assigning integer and double precision
@@ -154,7 +165,10 @@ checking.
 
 4. Application module
 ---------------------
-None
+The GApplication class now stores explicitly the log and parameter file
+names. The log filename can be changed by specifying the "logfile"
+parameter of file type in the parameter file. If not specified, the
+application name suffixed with ".log" will be used as log filename.
 
 
 5. Base module
@@ -162,10 +176,15 @@ None
 The GContainer interface class has been added to provide a common base
 class for all container classes. The following classes are now derived
 from GContainer:
+- GCTAOnOffObservations
 - GEbounds
+- GEnergies
 - GGti
+- GObservations
 - GOptimizerPars (and hence GModels)
+- GPars
 - GPhotons
+- GSkyRegions
 - GTimes
 - GXml
 - GXmlNode
@@ -263,6 +282,9 @@ for registry information handling. This circumvents the ill defined
 initialization problem of static variables and allow using of the
 GRegistryPointer smart pointer, removing memory leaks on exit of
 GammaLib.
+
+An energies container class GEnergies has been added to hold GEnergy
+objects.
 
 
 11. Optimization module

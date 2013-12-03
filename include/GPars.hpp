@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GPar.hpp"
 
 
@@ -41,7 +41,7 @@
  *
  * This class holds a collection of application parameters.
  ***************************************************************************/
-class GPars : public GBase {
+class GPars : public GContainer {
 
     // Friend classes
     friend class GApplication;
@@ -50,7 +50,8 @@ public:
     // Constructors and destructors
     GPars(void);
     explicit GPars(const std::string& filename);
-    explicit GPars(const std::string& filename, const std::vector<std::string>& args);
+    explicit GPars(const std::string& filename,
+                   const std::vector<std::string>& args);
     GPars(const GPars& pars);
     virtual ~GPars(void);
  
@@ -64,13 +65,23 @@ public:
     // Methods
     void        clear(void);
     GPars*      clone(void) const;
-    int         size(void) const { return m_pars.size(); }
-    void        append(const GPar& par);
+    GPar&       at(const int& index);
+    const GPar& at(const int& index) const;
+    int         size(void) const;
+    bool        isempty(void) const;
+    GPar&       append(const GPar& par);
     void        append_standard(void);
+    GPar&       insert(const int& index, const GPar& par);
+    GPar&       insert(const std::string& name, const GPar& par);
+    void        remove(const int& index);
+    void        remove(const std::string& name);
+    void        reserve(const int& num);
+    void        extend(const GPars& pars);
+    bool        contains(const std::string& name) const;
     void        load(const std::string& filename);
-    void        load(const std::string& filename, const std::vector<std::string>& args);
+    void        load(const std::string& filename,
+                     const std::vector<std::string>& args);
     void        save(const std::string& filename);
-    bool        haspar(const std::string& name) const;
     std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
@@ -84,6 +95,8 @@ protected:
     void        write(const std::string& filename) const;
     void        parse(void);
     void        update(void);
+    int         get_index(const std::string& name) const;
+    std::string parline(GPar& par, size_t* start, size_t* stop) const;
 
     // Protected data members
     std::vector<std::string> m_parfile;   //!< Parameter file lines
@@ -93,5 +106,76 @@ protected:
     std::vector<size_t>      m_vstop;     //!< Column of value stop
     std::string              m_mode;      //!< Effective mode
 };
+
+
+/***********************************************************************//**
+ * @brief Returns reference to parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * Returns a reference to the parameter with the specified @p index.
+ ***************************************************************************/
+inline
+GPar& GPars::operator[](const int& index)
+{
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * Returns a reference to the parameter with the specified @p index.
+ ***************************************************************************/
+inline
+const GPar& GPars::operator[](const int& index) const
+{
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of parameters in container
+ *
+ * @return Number of parameters in container.
+ *
+ * Returns the number of parameters in the parameter container.
+ ***************************************************************************/
+inline
+int GPars::size(void) const
+{
+    return (m_pars.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if there are no parameters in container
+ *
+ * @return True if container is empty, false otherwise.
+ *
+ * Signals if the parameter container does not contain any parameter.
+ ***************************************************************************/
+inline
+bool GPars::isempty(void) const
+{
+    return (m_pars.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for parameters in container
+ *
+ * @param[in] num Number of parameter
+ *
+ * Reserves space for @p num parameters in the container.
+ ***************************************************************************/
+inline
+void GPars::reserve(const int& num)
+{
+    m_pars.reserve(num);
+    return;
+}
 
 #endif /* GPARS_HPP */
