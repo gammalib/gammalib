@@ -173,6 +173,7 @@ bool GApplication::haspar(const std::string& name) const
  *
  * @return Parameter filename.
  ***************************************************************************/
+inline
 const std::string& GApplication::par_filename(void) const
 {
     // Return
@@ -185,6 +186,7 @@ const std::string& GApplication::par_filename(void) const
  *
  * @return Log filename.
  ***************************************************************************/
+inline
 const std::string& GApplication::log_filename(void) const
 {
     // Return
