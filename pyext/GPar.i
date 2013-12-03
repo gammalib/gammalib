@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GPar
  *
- * @brief Application parameter class Python interface defintion
+ * @brief Application parameter class
  ***************************************************************************/
 class GPar : public GBase {
 public:
@@ -47,34 +47,34 @@ public:
     virtual ~GPar(void);
  
     // Methods
-    void        clear(void);
-    GPar*       clone(void) const;
-    void        type(const std::string& type);
-    void        mode(const std::string& mode);
-    void        value(const std::string& value);
-    void        string(const std::string& value);
-    void        filename(const std::string& value);
-    void        boolean(const bool& value);
-    void        integer(const int& value);
-    void        real(const double& value);
-    std::string name(void) const;
-    std::string type(void) const;
-    std::string mode(void) const;
-    std::string value(void);
-    std::string string(void);
-    std::string filename(void);
-    bool        boolean(void);
-    int         integer(void);
-    double      real(void);
-    std::string min(void) const;
-    std::string max(void) const;
-    std::string prompt(void) const;
-    bool        islearn(void) const;
-    bool        isquery(void) const;
-    bool        isfilename(void) const;
-    bool        isvalid(void);
-    bool        isundefined(void);
-    bool        isnotanumber(void);
+    void               clear(void);
+    GPar*              clone(void) const;
+    void               type(const std::string& type);
+    void               mode(const std::string& mode);
+    void               value(const std::string& value);
+    void               string(const std::string& value);
+    void               filename(const std::string& value);
+    void               boolean(const bool& value);
+    void               integer(const int& value);
+    void               real(const double& value);
+    const std::string& name(void) const;
+    const std::string& type(void) const;
+    const std::string& mode(void) const;
+    std::string        value(void);
+    std::string        string(void);
+    std::string        filename(void);
+    bool               boolean(void);
+    int                integer(void);
+    double             real(void);
+    const std::string& min(void) const;
+    const std::string& max(void) const;
+    const std::string& prompt(void) const;
+    bool               islearn(void) const;
+    bool               isquery(void) const;
+    bool               isfilename(void) const;
+    bool               isvalid(void);
+    bool               isundefined(void);
+    bool               isnotanumber(void);
 };
 
 
@@ -82,9 +82,6 @@ public:
  * @brief GPar class extension
  ***************************************************************************/
 %extend GPar {
-    char *__str__() {
-        return gammalib::tochar(self->print());
-    }
     GPar copy() {
         return (*self);
     }

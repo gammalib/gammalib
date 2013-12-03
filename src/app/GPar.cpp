@@ -154,8 +154,9 @@ GPar::~GPar(void)
  * @brief Assignment operator
  *
  * @param[in] par Parameter.
+ * @return Parameter.
  ***************************************************************************/
-GPar& GPar::operator= (const GPar& par)
+GPar& GPar::operator=(const GPar& par)
 {
     // Execute only if object is not identical
     if (this != &par) {
@@ -183,7 +184,7 @@ GPar& GPar::operator= (const GPar& par)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
+ * @brief Clear parameter
  ***************************************************************************/
 void GPar::clear(void)
 {
@@ -199,7 +200,9 @@ void GPar::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone parameter
+ *
+ * @return Pointer to deep copy of parameter.
  ***************************************************************************/
 GPar* GPar::clone(void) const
 {
@@ -283,10 +286,11 @@ void GPar::value(const std::string& value)
 void GPar::string(const std::string& value)
 {
     // Check if parameter is a string parameter
-    if (m_type != "s")
+    if (m_type != "s") {
         throw GException::par_error(G_STRING_SET, name(),
               "attempted to set "+par_type_string(m_type)+
               " parameter with string value.");
+    }
 
     // Verify that value is a valid string
     check_value_string(value);
@@ -1247,4 +1251,3 @@ std::string GPar::par_status_string(void) const
     // Return status
     return status;
 }
-
