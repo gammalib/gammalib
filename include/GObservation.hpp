@@ -83,9 +83,11 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
 
     // Virtual methods
-    virtual double        model(const GModels& models, const GEvent& event,
+    virtual double        model(const GModels& models,
+                                const GEvent& event,
                                 GVector* gradient = NULL) const;
-    virtual double        npred(const GModels& models, GVector* gradient = NULL) const;
+    virtual double        npred(const GModels& models,
+                                GVector* gradient = NULL) const;
 
     // Implemented methods
     void                  name(const std::string& name);
@@ -98,8 +100,11 @@ public:
     const std::string&    statistics(void) const { return m_statistics; }
 
     // Other methods
-    virtual double model_grad(const GModel& model, const GEvent& event, int ipar) const;
-    virtual double npred_grad(const GModel& model, int ipar) const;
+    virtual double model_grad(const GModel& model,
+                              const GEvent& event,
+                              const int& ipar) const;
+    virtual double npred_grad(const GModel& model,
+                              const int& ipar) const;
 
 protected:
     // Protected methods
@@ -119,7 +124,7 @@ protected:
                    m_model(&model),
                    m_event(&event),
                    m_ipar(ipar) { }
-        double eval(double x);
+        double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
@@ -138,7 +143,7 @@ protected:
                         const GModel*       model) :
                         m_parent(parent),
                         m_model(model) { }
-        double eval(double x);
+        double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to source model
@@ -152,7 +157,7 @@ protected:
                         m_parent(parent),
                         m_model(model),
                         m_time(obsTime) { }
-        double eval(double x);
+        double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to source model
@@ -168,7 +173,7 @@ protected:
                    m_parent(parent),
                    m_model(&model),
                    m_ipar(ipar) { return; }
-        double eval(double x);
+        double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model

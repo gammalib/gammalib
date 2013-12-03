@@ -39,6 +39,10 @@ GFitsTable
   The append_column() and insert_column() methods have been  
   renamed to append() and insert().
 
+GFunction
+  The eval() method now takes a const reference to a double precisio
+  value as argument.
+
 GMatrixBase
 GMatrix
 GMatrixSparse (formerly GSparseMatrix)

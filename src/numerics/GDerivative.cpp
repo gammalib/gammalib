@@ -33,7 +33,9 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_VALUE                        "GDerivative::value(double&, double&)"
 #define G_RIDDER             "GDerivative::ridder(double&, double&, double&)"
+#define G_MINUIT2                    "GDerivative::minuit2(double&, double&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -127,8 +129,9 @@ GDerivative::~GDerivative(void)
  * @brief Assignment operator
  *
  * @param[in] dx Derivative.
+ * @return Derivative.
  ***************************************************************************/
-GDerivative& GDerivative::operator= (const GDerivative& dx)
+GDerivative& GDerivative::operator=(const GDerivative& dx)
 {
     // Execute only if object is not identical
     if (this != &dx) {
@@ -156,7 +159,7 @@ GDerivative& GDerivative::operator= (const GDerivative& dx)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear derivative
  ***************************************************************************/
 void GDerivative::clear(void)
 {
@@ -172,7 +175,9 @@ void GDerivative::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone derivative
+ *
+ * @return Pointer to deep copy of derivative.
  ***************************************************************************/
 GDerivative* GDerivative::clone(void) const
 {
@@ -195,7 +200,7 @@ GDerivative* GDerivative::clone(void) const
  * The maximum number of iterations is controlled by the max_iter()
  * method (by default, the maximum is set to 5).
  ***************************************************************************/
-double GDerivative::value(const double& x, double step)
+double GDerivative::value(const double& x, const double& step)
 {
     // Set constants
     const double min_h = 1.0e-6;
@@ -248,21 +253,19 @@ double GDerivative::value(const double& x, double step)
     // Compile option: signal if we exceed the tolerance
     if (!silent()) {
         if (err >= m_eps) {
-            std::cout << "WARNING: GDerivative::value(";
-            std::cout << "iter=" << m_iter;
-            std::cout << ", x=" << x;
-            std::cout << ", dy/dx=" << result;
-            std::cout << ", h=" << h;
-            std::cout << ", err=" << err;
-            std::cout << "): error exceeds tolerance of ";
-            std::cout << m_eps << std::endl;
+            std::string msg = "Derivative uncertainty "+gammalib::str(err)+
+                              " exceeds tolerance of "+gammalib::str(m_eps)+
+                              " at function value "+gammalib::str(x)+
+                              " (df/dx="+gammalib::str(result)+
+                              ", iter="+gammalib::str(m_iter)+
+                              ", h="+gammalib::str(h)+").";
+            gammalib::warning(G_VALUE, msg);
         }
     }
 
     // Return derivative
     return result;
 }
-
 
 /***********************************************************************//**
  * @brief Returns derivative by Ridders' method
@@ -480,15 +483,13 @@ double GDerivative::minuit2(const double& x, double& err)
     // Compile option: signal if we exceed the tolerance
     if (!silent()) {
         if (err >= grad_tol) {
-            std::cout << "WARNING: GDerivative::minuit(";
-            std::cout << "iter=" << m_iter;
-            std::cout << ", x=" << x;
-            std::cout << ", grd=" << grd;
-            std::cout << ", step=" << step;
-            std::cout << ", step_change=" << step_change;
-            std::cout << ", err=" << err;
-            std::cout << "): error exceeds tolerance of ";
-            std::cout << grad_tol << std::endl;
+            std::string msg = "Derivative uncertainty "+gammalib::str(err)+
+                              " exceeds tolerance of "+gammalib::str(grad_tol)+
+                              " at function value "+gammalib::str(x)+
+                              " (df/dx="+gammalib::str(grd)+
+                              ", step="+gammalib::str(step)+
+                              ", step_change="+gammalib::str(step_change)+").";
+            gammalib::warning(G_MINUIT2, msg);
         }
     }
 

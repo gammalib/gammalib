@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GFunction.hpp  -  Single parameter function abstract base class     *
+ *      GFunction.hpp - Single parameter function abstract base class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GFunction.hpp
- * @brief GFunction abstract virtual base class interface definition.
- * @author J. Knodlseder
+ * @brief Single parameter function abstract base class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFUNCTION_HPP
@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GFunction
  *
- * @brief GFunction class interface defintion.
+ * @brief Single parameter function abstract base class
  *
  * This class implements the abstract interface for a one parameter function.
  * This function is for example used for integration or numerical computation
@@ -47,19 +47,19 @@ public:
 
     // Constructors and destructors
     GFunction(void);
-    GFunction(const GFunction& func);
+    GFunction(const GFunction& function);
     virtual ~GFunction(void);
 
     // Operators
-    GFunction& operator= (const GFunction& func);
+    GFunction& operator=(const GFunction& function);
 
     // Methods
-    virtual double eval(double x) = 0;
+    virtual double eval(const double& x) = 0;
 
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GFunction& func);
+    void copy_members(const GFunction& function);
     void free_members(void);
 };
 

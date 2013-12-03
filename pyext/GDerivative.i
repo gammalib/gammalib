@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GDerivative
  *
- * @brief Numerical derivatives class interface defintion
+ * @brief Numerical derivatives class
  ***************************************************************************/
 class GDerivative : public GBase {
 public:
@@ -48,7 +48,7 @@ public:
     GDerivative*     clone(void) const;
     void             max_iter(const int& max_iter);
     void             eps(const double& eps);
-    void             step_frac(const double& f);
+    void             step_frac(const double& fraction);
     void             silent(const bool& silent);
     const int&       iter(void) const;
     const int&       max_iter(void) const;
@@ -57,7 +57,7 @@ public:
     const bool&      silent(void) const;
     void             function(GFunction* func);
     const GFunction* function(void) const;
-    double           value(const double& x, double step = 0.0);
+    double           value(const double& x, const double& step = 0.0);
     double           ridder(const double& x, const double& h, double& err);
     double           minuit2(const double& x, double& err);
     double           difference(const double& x, const double& h);

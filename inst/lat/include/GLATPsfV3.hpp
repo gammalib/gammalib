@@ -92,7 +92,7 @@ private:
                        m_ncore(ncore), m_ntail(ntail),
                        m_score(score), m_stail(stail),
                        m_gcore(gcore), m_gtail(gtail) { }
-        double eval(double x) {
+        double eval(const double& x) {
             double rc = x / m_score;
             double uc = 0.5 * rc * rc;
             double rt = x / m_stail;

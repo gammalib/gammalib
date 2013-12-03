@@ -82,7 +82,7 @@ private:
                        double gcore, double gtail) :
                        m_ncore(ncore), m_ntail(ntail), m_sigma(sigma),
                        m_gcore(gcore), m_gtail(gtail) { }
-        double eval(double x) {
+        double eval(const double& x) {
             double r = x / m_sigma;
             double u = 0.5 * r * r;
             double f = m_ncore * base_fct(u, m_gcore) +

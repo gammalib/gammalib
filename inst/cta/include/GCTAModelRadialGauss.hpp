@@ -91,7 +91,7 @@ protected:
     class integrand : public GFunction {
     public:
         integrand(double sigma) : m_sigma(sigma) { }
-        double eval(double x) {
+        double eval(const double& x) {
             double arg  = x * x / m_sigma;
             double arg2 = arg * arg;
             double f    = std::exp(-0.5 * arg2);

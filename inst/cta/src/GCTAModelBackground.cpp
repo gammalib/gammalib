@@ -1212,7 +1212,7 @@ GModelTemporal* GCTAModelBackground::xml_temporal(const GXmlElement& temporal) c
  * is limited to an arc around the vector connecting the model centre to
  * the ROI centre. This limitation assures proper converges properly.
  ***************************************************************************/
-double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
+double GCTAModelBackground::npred_roi_kern_theta::eval(const double& theta)
 {
     // Initialise value
     double value = 0.0;
@@ -1289,7 +1289,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
  *       multiplication is definitely not the fastest way to do that
  *       computation).
  ***************************************************************************/
-double GCTAModelBackground::npred_roi_kern_phi::eval(double phi)
+double GCTAModelBackground::npred_roi_kern_phi::eval(const double& phi)
 {
     // Initialise value
     double value = 0.0;

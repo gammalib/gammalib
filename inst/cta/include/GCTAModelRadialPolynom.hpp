@@ -94,7 +94,7 @@ protected:
     class integrand : public GFunction {
     public:
         integrand(const GCTAModelRadialPolynom* model) : m_model(model) { }
-        double eval(double x) {
+        double eval(const double& x) {
             return (std::sin(x)*m_model->eval(x*gammalib::rad2deg));
         }
     private:

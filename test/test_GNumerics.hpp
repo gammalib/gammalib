@@ -1,5 +1,5 @@
 /***************************************************************************
- *                test_GNumerics.hpp  -  test numerics modules             *
+ *                 test_GNumerics.hpp - test numerics modules              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -42,7 +42,7 @@ class Gauss : public GFunction {
 public:
     Gauss(const double& sigma) : m_sigma(sigma) { return; }
     virtual ~Gauss(void) { return; }
-    double eval(double x) {
+    double eval(const double& x) {
         double arg = -0.5*x*x/m_sigma/m_sigma;
         double val = 1.0/std::sqrt(gammalib::twopi)/m_sigma * std::exp(arg);
         return val;
@@ -53,20 +53,19 @@ protected:
 
 class TestGNumerics : public GTestSuite
 {
-    public:
-        // Constructors and destructors
-        TestGNumerics(void) : GTestSuite(), m_sigma(1.0) { return; }
-        virtual ~TestGNumerics(void){ return; }
+public:
+    // Constructors and destructors
+    TestGNumerics(void) : GTestSuite(), m_sigma(1.0) { }
+    virtual ~TestGNumerics(void){ }
 
-        // Methods
-        virtual void set(void);
-        void test_integral(void);
-        void test_romberg_integration(void);
+    // Methods
+    virtual void set(void);
+    void         test_integral(void);
+    void         test_romberg_integration(void);
 
-    // Private attributes
-    private:
-        double m_sigma;
-
+private:
+    // Private members
+    double m_sigma;
 };
 
 #endif /* TEST_NUMERICS_HPP */

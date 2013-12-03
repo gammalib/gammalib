@@ -982,7 +982,7 @@ void GModelSpectralExpPlaw::update_mc_cache(const GEnergy& emin,
  *
  * @param[in] energy Energy (MeV).
  ***************************************************************************/
-double GModelSpectralExpPlaw::flux_kernel::eval(double energy)
+double GModelSpectralExpPlaw::flux_kernel::eval(const double& energy)
 {
     // Evaluate function value
     double e_norm = energy * m_inv_pivot;
@@ -1000,7 +1000,7 @@ double GModelSpectralExpPlaw::flux_kernel::eval(double energy)
  *
  * @param[in] energy Energy (MeV).
  ***************************************************************************/
-double GModelSpectralExpPlaw::eflux_kernel::eval(double energy)
+double GModelSpectralExpPlaw::eflux_kernel::eval(const double& energy)
 {
     // Evaluate function value
     double e_norm = energy * m_inv_pivot;

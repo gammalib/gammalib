@@ -1041,7 +1041,7 @@ GModelTemporal* GCTAModelRadialAcceptance::xml_temporal(const GXmlElement& tempo
  * the arc of the azimuth angle that lies within the ROI. This integration
  * is done analytically using the "cta_roi_arclength" support function.
  ***************************************************************************/
-double GCTAModelRadialAcceptance::roi_kern::eval(double offset)
+double GCTAModelRadialAcceptance::roi_kern::eval(const double& offset)
 {
     // Circumvent const correctness
     GCTAModelRadial* radial = const_cast<GCTAModelRadial*>(m_parent);
@@ -1071,10 +1071,3 @@ double GCTAModelRadialAcceptance::roi_kern::eval(double offset)
     // Return
     return value;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

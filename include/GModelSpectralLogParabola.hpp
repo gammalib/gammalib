@@ -127,7 +127,7 @@ protected:
                   m_pivot(pivot) {};
 
     	// Method
-    	double eval(double x) {
+    	double eval(const double& x) {
             double xrel = x/m_pivot.MeV();
             return m_norm*std::pow(xrel, m_index + m_curvature * std::log(xrel));
         }
@@ -151,7 +151,7 @@ protected:
                    flux_kern(norm, index, curvature, pivot) {};
 
     	// Method
-    	double eval(double x) {
+    	double eval(const double& x) {
             return x * flux_kern::eval(x);
         }
     };

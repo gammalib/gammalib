@@ -1,7 +1,7 @@
 /***************************************************************************
  *       GFunction.i - Single parameter function abstract base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,9 +38,9 @@ class GFunction {
 public:
     // Constructors and destructors
     GFunction(void);
-    GFunction(const GFunction& func);
+    GFunction(const GFunction& function);
     virtual ~GFunction(void);
 
     // Methods
-    virtual double eval(double x) = 0;
+    virtual double eval(const double& x) = 0;
 };

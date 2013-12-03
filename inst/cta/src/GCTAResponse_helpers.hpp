@@ -78,7 +78,7 @@ public:
                             m_phi(phi),
                             m_zenith(zenith),
                             m_azimuth(azimuth) { }
-    double eval(double delta);
+    double eval(const double& delta);
 protected:
     const GCTAResponse& m_rsp;     //!< CTA response function
     const double&       m_roi;     //!< ROI radius in radians
@@ -153,7 +153,7 @@ public:
                             m_omega0(omega0),
                             m_delta_max(delta_max),
                             m_cos_delta_max(std::cos(delta_max)) { }
-    double eval(double rho);
+    double eval(const double& rho);
 protected:
     const GCTAResponse&        m_rsp;           //!< CTA response
     const GModelSpatialRadial& m_model;         //!< Radial spatial model
@@ -221,7 +221,7 @@ public:
                               m_sin_psf(sin_psf),
                               m_cos_ph(cos_ph),
                               m_sin_ph(sin_ph) { }
-    double eval(double omega);
+    double eval(const double& omega);
 protected:
     const GCTAResponse& m_rsp;           //!< CTA response
     const double&       m_zenith;        //!< Zenith angle
@@ -292,7 +292,7 @@ public:
                               m_radius(radius),
                               m_cos_radius(std::cos(radius)),
                               m_omega0(omega0) { }
-    double eval(double rho);
+    double eval(const double& rho);
 protected:
     const GCTAResponse&        m_rsp;        //!< CTA response
     const GModelSpatialRadial& m_model;      //!< Radial spatial model
@@ -345,7 +345,7 @@ public:
                                 m_rot(rot),
                                 m_sin_rho(sin_rho),
                                 m_cos_rho(cos_rho) { }
-    double eval(double omega);
+    double eval(const double& omega);
 protected:
     const GCTAResponse&    m_rsp;        //!< CTA response
     const GEnergy&         m_srcEng;     //!< True photon energy
@@ -419,7 +419,7 @@ public:
                                 m_omega0(omega0),
                                 m_delta_max(delta_max),
                                 m_cos_delta_max(std::cos(delta_max)) { }
-    double eval(double rho);
+    double eval(const double& rho);
 public:
     const GCTAResponse&            m_rsp;           //!< CTA response
     const GModelSpatialElliptical& m_model;         //!< Spatial model
@@ -493,7 +493,7 @@ public:
                                   m_sin_psf(sin_psf),
                                   m_cos_ph(cos_ph),
                                   m_sin_ph(sin_ph) { }
-    double eval(double omega);
+    double eval(const double& omega);
 public:
     const GCTAResponse&            m_rsp;        //!< CTA response
     const GModelSpatialElliptical& m_model;      //!< Spatial model
@@ -567,7 +567,7 @@ public:
                                   m_radius(radius),
                                   m_cos_radius(std::cos(radius)),
                                   m_omega0(omega0) { }
-    double eval(double rho);
+    double eval(const double& rho);
 protected:
     const GCTAResponse&            m_rsp;        //!< CTA response
     const GModelSpatialElliptical& m_model;      //!< Spatial model
@@ -624,7 +624,7 @@ public:
                                     m_rot(rot),
                                     m_sin_rho(sin_rho),
                                     m_cos_rho(cos_rho) { }
-    double eval(double omega);
+    double eval(const double& omega);
 protected:
     const GCTAResponse&            m_rsp;      //!< CTA response
     const GModelSpatialElliptical& m_model;    //!< Model
@@ -694,7 +694,7 @@ public:
                                m_rot(rot),
                                m_sin_eta(std::sin(eta)),
                                m_cos_eta(std::cos(eta)) { }
-    double eval(double theta);
+    double eval(const double& theta);
 protected:
     const GCTAResponse&  m_rsp;        //!< CTA response
     const GModelSpatial& m_model;      //!< Spatial model
@@ -764,7 +764,7 @@ public:
                              m_cos_theta(cos_theta),
                              m_sin_ph(sin_ph),
                              m_cos_ph(cos_ph) { }
-    double eval(double phi);
+    double eval(const double& phi);
 protected:
     const GCTAResponse&  m_rsp;        //!< CTA response
     const GModelSpatial& m_model;      //!< Spatial model
@@ -826,7 +826,7 @@ public:
                                  m_srcTime(srcTime),
                                  m_obs(obs),
                                  m_rot(rot) { }
-    double eval(double theta);
+    double eval(const double& theta);
 protected:
     const GCTAResponse&    m_rsp;        //!< CTA response
     const GModelSpatial&   m_model;      //!< Spatial model
@@ -876,7 +876,7 @@ public:
                                m_theta(theta),
                                m_cos_theta(std::cos(theta)),
                                m_sin_theta(sin_theta) { }
-    double eval(double phi);
+    double eval(const double& phi);
 protected:
     const GCTAResponse&    m_rsp;        //!< CTA response
     const GModelSpatial&   m_model;      //!< Spatial model
