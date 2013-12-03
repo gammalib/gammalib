@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GNodeArray.hpp  -  Array of nodes class                 *
+ *                  GNodeArray.hpp - Array of nodes class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -30,14 +30,14 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GBase.hpp"
+#include "GContainer.hpp"
 #include "GVector.hpp"
 
 
 /***********************************************************************//**
  * @class GNodeArray
  *
- * @brief Interface for the node array class
+ * @brief Node array class
  *
  * The node array class collects nodes \f$x_i\f$ that may be used to describe
  * a functional relation \f$y_i=f(x_i)\f$. This class may be used to perform
@@ -52,15 +52,15 @@
  * wgt_left() and wgt_right().
  * If the nodes are equally spaced, interpolation is more rapid.
  ***************************************************************************/
-class GNodeArray : public GBase {
+class GNodeArray : public GContainer {
 
 public:
     // Constructors and destructors
     GNodeArray(void);
+    explicit GNodeArray(const int& num, const double* array);
+    explicit GNodeArray(const GVector& vector);
+    explicit GNodeArray(const std::vector<double>& vector);
     GNodeArray(const GNodeArray& array);
-    GNodeArray(const int& num, const double* array);
-    GNodeArray(const GVector& vector);
-    GNodeArray(const std::vector<double>& vector);
     virtual ~GNodeArray(void);
 
     // Operators
@@ -71,18 +71,25 @@ public:
     // Methods
     void          clear(void);
     GNodeArray*   clone(void) const;
-    int           size(void) const { return m_node.size(); }
+    double&       at(const int& index);
+    const double& at(const int& index) const;
+    int           size(void) const;
+    bool          isempty(void) const;
+    void          append(const double& node);
+    void          insert(const int& index, const double& node);
+    void          remove(const int& index);
+    void          reserve(const int& num);
+    void          extend(const GNodeArray& nodes);
     void          nodes(const int& num, const double* array);
     void          nodes(const GVector& vector);
     void          nodes(const std::vector<double>& vector);
-    void          append(const double& node);
     double        interpolate(const double& value,
                               const std::vector<double>& vector) const;
     void          set_value(const double& value) const;
-    const int&    inx_left(void) const { return m_inx_left; }
-    const int&    inx_right(void) const { return m_inx_right; }
-    const double& wgt_left(void) const { return m_wgt_left; }
-    const double& wgt_right(void) const { return m_wgt_right; }
+    const int&    inx_left(void) const;
+    const int&    inx_right(void) const;
+    const double& wgt_left(void) const;
+    const double& wgt_right(void) const;
     std::string   print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -108,5 +115,140 @@ private:
     mutable double              m_wgt_left;       //!< Weight for left node for linear interpolation
     mutable double              m_wgt_right;      //!< Weight for right node for linear interpolation
 };
+
+
+/***********************************************************************//**
+ * @brief Node access operator
+ *
+ * @param[in] index Node index [0,...,size()-1].
+ * @return Node value.
+ *
+ * Returns a reference to the node with the specified @p index. No range
+ * checking is performed on @p index.
+ ***************************************************************************/
+inline
+double& GNodeArray::operator[](const int& index)
+{
+    m_need_setup = false;
+    return (m_node[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Node access operator (const version)
+ *
+ * @param[in] index Node index [0,...,size()-1].
+ * @return Node value.
+ *
+ * Returns a reference to the node with the specified @p index. No range
+ * checking is performed on @p index.
+ ***************************************************************************/
+inline
+const double& GNodeArray::operator[](const int& index) const
+{
+    m_need_setup = false;
+    return (m_node[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of nodes in node array
+ *
+ * @return Number of nodes in node array.
+ *
+ * Returns the number of nodes in the node array.
+ ***************************************************************************/
+inline
+int GNodeArray::size(void) const
+{
+    return (m_node.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if there are no nodes in node array
+ *
+ * @return True if node array is empty, false otherwise.
+ *
+ * Signals if the node array does not contain any node.
+ ***************************************************************************/
+inline
+bool GNodeArray::isempty(void) const
+{
+    return (m_node.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for nodes in node array
+ *
+ * @param[in] num Number of nodes.
+ *
+ * Reserves space for @p num nodes in the node array.
+ ***************************************************************************/
+inline
+void GNodeArray::reserve(const int& num)
+{
+    m_node.reserve(num);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns left node index
+ *
+ * @return Left node index.
+ *
+ * Returns the left node index to be used for interpolation.
+ ***************************************************************************/
+inline
+const int& GNodeArray::inx_left(void) const
+{
+    return m_inx_left;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns right node index
+ *
+ * @return Right node index.
+ *
+ * Returns the right node index to be used for interpolation.
+ ***************************************************************************/
+inline
+const int& GNodeArray::inx_right(void) const
+{
+    return m_inx_right;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns left node weight
+ *
+ * @return Left node weight.
+ *
+ * Returns the weighting factor for the left node to be used for
+ * interpolation.
+ ***************************************************************************/
+inline
+const double& GNodeArray::wgt_left(void) const
+{
+    return m_wgt_left;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns right node weight
+ *
+ * @return Right node weight.
+ *
+ * Returns the weighting factor for the right node to be used for
+ * interpolation.
+ ***************************************************************************/
+inline
+const double& GNodeArray::wgt_right(void) const
+{
+    return m_wgt_right;
+}
 
 #endif /* GNODEARRAY_HPP */

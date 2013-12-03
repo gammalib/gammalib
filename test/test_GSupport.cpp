@@ -246,6 +246,46 @@ void TestGSupport::test_node_array(void)
         test_try_failure(e);
     }
 
+    // Test container manipulation
+    test_try("Container manipulation");
+    try {
+        GNodeArray array;
+        test_assert(array.isempty(), "Node array should be empty");
+        array.append(0.0);
+        test_assert(!array.isempty(), "Node array should not be empty");
+        test_value(array.size(), 1);
+        array.append(1.0);
+        array.append(2.0);
+        array.append(3.0);
+        array.append(5.0);
+        test_value(array.size(), 5);
+        array.insert(4, 4.0);
+        test_value(array.size(), 6);
+        for (int i = 0; i < array.size(); ++i) {
+            test_value(array[i], double(i));   // 0, 1, 2, 3, 4, 5
+        }
+        array.remove(1);
+        array.remove(2);
+        array.remove(3);
+        test_value(array.size(), 3);
+        for (int i = 0; i < array.size(); ++i) {
+            test_value(array[i], double(2*i)); // 0, 2, 4
+        }
+        GNodeArray array2;
+        array2.append(6.0);
+        array2.append(8.0);
+        test_value(array2.size(), 2);
+        array.extend(array2);
+        test_value(array.size(), 5);
+        for (int i = 0; i < array.size(); ++i) {
+            test_value(array[i], double(2*i)); // 0, 2, 4, 6, 8
+        }
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
     // Test linear interpolation
     double array_lin[] = {-1.0, 0.0, 1.0};
     test_node_array_interpolation(3, array_lin);

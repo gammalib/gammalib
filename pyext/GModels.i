@@ -113,9 +113,6 @@ public:
         self->set(name, val);
         return;
     }
-    int __len__() {
-        return (self->size());
-    }
     GModels copy() {
         return (*self);
     }

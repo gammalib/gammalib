@@ -34,10 +34,12 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                                "GNodeArray::operator[](int)"
-#define G_INTERPOLATE "GNodeArray::interpolate(double&,std::vector<double>&)"
+#define G_AT                                           "GNodeArray::at(int&)"
+#define G_INSERT                          "GNodeArray::insert(int&, double&)"
+#define G_REMOVE                                   "GNodeArray::remove(int&)"
+#define G_INTERPOLATE                      "GNodeArray::interpolate(double&,"\
+                                                     " std::vector<double>&)"
 #define G_SET_VALUE                          "GNodeArray::set_value(double&)"
-#define G_SETUP                                         "GNodeArray::setup()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -68,30 +70,13 @@ GNodeArray::GNodeArray(void)
 
 
 /***********************************************************************//**
- * @brief Copy constructor
- *
- * @param[in] array Node array.
- ***************************************************************************/
-GNodeArray::GNodeArray(const GNodeArray& array)
-{
-    // Initialise class members for clean destruction
-    init_members();
-
-    // Copy members
-    copy_members(array);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Element constructor
  *
  * @param[in] num Number of elements.
  * @param[in] array Array of elements.
  *
- * Constructs node array from a number of elements in an array.
+ * Constructs a node array from an @p array of double precision values of
+ * length @p num.
  ***************************************************************************/
 GNodeArray::GNodeArray(const int& num, const double* array)
 {
@@ -111,7 +96,8 @@ GNodeArray::GNodeArray(const int& num, const double* array)
  *
  * @param[in] vector Vector.
  *
- * Constructs node array from the elements in a GVector object.
+ * Constructs a node array from the elements in a @p vector, represented by
+ * a GVector object.
  ***************************************************************************/
 GNodeArray::GNodeArray(const GVector& vector)
 {
@@ -131,7 +117,7 @@ GNodeArray::GNodeArray(const GVector& vector)
  *
  * @param[in] vector Vector.
  *
- * Constructs node array from the elements in a double precision vector.
+ * Constructs a node array from the elements in a double precision @p vector.
  ***************************************************************************/
 GNodeArray::GNodeArray(const std::vector<double>& vector)
 {
@@ -140,6 +126,24 @@ GNodeArray::GNodeArray(const std::vector<double>& vector)
 
     // Use vector to initialise nodes
     nodes(vector);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy constructor
+ *
+ * @param[in] array Node array.
+ ***************************************************************************/
+GNodeArray::GNodeArray(const GNodeArray& array)
+{
+    // Initialise class members for clean destruction
+    init_members();
+
+    // Copy members
+    copy_members(array);
 
     // Return
     return;
@@ -171,7 +175,7 @@ GNodeArray::~GNodeArray(void)
  * @param[in] array Node array.
  * @return Node array.
  ***************************************************************************/
-GNodeArray& GNodeArray::operator= (const GNodeArray& array)
+GNodeArray& GNodeArray::operator=(const GNodeArray& array)
 {
     // Execute only if object is not identical
     if (this != &array) {
@@ -192,6 +196,39 @@ GNodeArray& GNodeArray::operator= (const GNodeArray& array)
 }
 
 
+/*==========================================================================
+ =                                                                         =
+ =                             Public methods                              =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Clear node array
+ ***************************************************************************/
+void GNodeArray::clear(void)
+{
+    // Free class members
+    free_members();
+
+    // Initialise members
+    init_members();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone node array
+ *
+ * @return Pointer to deep copy of node array.
+ ***************************************************************************/
+GNodeArray* GNodeArray::clone(void) const
+{
+    return new GNodeArray(*this);
+}
+
+
 /***********************************************************************//**
  * @brief Node access operator
  *
@@ -200,13 +237,16 @@ GNodeArray& GNodeArray::operator= (const GNodeArray& array)
  *
  * @exception GException::out_of_range
  *            Node index is out of range.
+ *
+ * Returns a reference to the node with the specified @p index. The @p index
+ * is checked on its validity.
  ***************************************************************************/
-double& GNodeArray::operator[](const int& index)
+double& GNodeArray::at(const int& index)
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_ACCESS, index, size()-1);
+        throw GException::out_of_range(G_AT, "Node index", index, size());
     }
     #endif
 
@@ -226,13 +266,16 @@ double& GNodeArray::operator[](const int& index)
  *
  * @exception GException::out_of_range
  *            Node index is out of range.
+ *
+ * Returns a reference to the node with the specified @p index. The @p index
+ * is checked on its validity.
  ***************************************************************************/
-const double& GNodeArray::operator[](const int& index) const
+const double& GNodeArray::at(const int& index) const
 {
     // Compile option: raise an exception if index is out of range
     #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_ACCESS, index, size()-1);
+        throw GException::out_of_range(G_AT, "Node index", index, size());
     }
     #endif
 
@@ -241,39 +284,6 @@ const double& GNodeArray::operator[](const int& index) const
 
     // Return node
     return m_node[index];
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                             Public methods                              =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Clear instance
- ***************************************************************************/
-void GNodeArray::clear(void)
-{
-    // Free class members
-    free_members();
-
-    // Initialise members
-    init_members();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Clone instance
- *
- * @return Deep copy of node array.
- ***************************************************************************/
-GNodeArray* GNodeArray::clone(void) const
-{
-    return new GNodeArray(*this);
 }
 
 
@@ -301,6 +311,128 @@ void GNodeArray::nodes(const int& num, const double* array)
     // Setup node distances and linear array handling
     setup();
 
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append one node to array.
+ *
+ * @param[in] node Node.
+ ***************************************************************************/
+void GNodeArray::append(const double& node)
+{
+    // Add node
+    m_node.push_back(node);
+    
+    // Setup node distances and linear array handling
+    setup();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert one node into array.
+ *
+ * @param[in] index Node index [0,...,size()-1].
+ * @param[in] node Node.
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ *
+ * Inserts a @p node into the node array before the node with the specified
+ * @p index.
+ ***************************************************************************/
+void GNodeArray::insert(const int& index, const double& node)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (isempty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT, "Node index", index, size());
+        }
+    }
+    else {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_INSERT, "Node index", index, size());
+        }
+    }
+    #endif
+
+    // Inserts node
+    m_node.insert(m_node.begin()+index, node);
+    
+    // Setup node distances and linear array handling
+    setup();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove one node into array.
+ *
+ * @param[in] index Node index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Node index is out of range.
+ *
+ * Remove node of specified @p index from node array.
+ ***************************************************************************/
+void GNodeArray::remove(const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_REMOVE, "Node index", index, size());
+    }
+    #endif
+
+    // Remove node
+    m_node.erase(m_node.begin() + index);
+    
+    // Setup node distances and linear array handling
+    setup();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append node array
+ *
+ * @param[in] nodes Node array.
+ *
+ * Append a node array to the node array.
+ ***************************************************************************/
+void GNodeArray::extend(const GNodeArray& nodes)
+{
+    // Do nothing if node array is empty
+    if (!nodes.isempty()) {
+
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = nodes.size();
+
+        // Reserve enough space
+        reserve(size() + num);
+
+        // Append all nodes 
+        for (int i = 0; i < num; ++i) {
+            m_node.push_back(nodes[i]);
+        }
+
+        // Setup node distances and linear array handling
+        setup();
+
+    } // endif: node array was not empty
+    
     // Return
     return;
 }
@@ -352,24 +484,6 @@ void GNodeArray::nodes(const std::vector<double>& vector)
     // Set node values
     m_node = vector;
 
-    // Setup node distances and linear array handling
-    setup();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Append one node to array.
- *
- * @param[in] node Node to be appended to array.
- ***************************************************************************/
-void GNodeArray::append(const double& node)
-{
-    // Add node
-    m_node.push_back(node);
-    
     // Setup node distances and linear array handling
     setup();
 
@@ -555,19 +669,23 @@ std::string GNodeArray::print(const GChatter& chatter) const
             result.append("\n"+gammalib::parformat("Array type")+"nonlinear");
         }
 
-        // Append indices and weights
-        result.append("\n"+gammalib::parformat("Indices and weights"));
-        result.append("("+gammalib::str(m_inx_left)+",");
-        result.append(gammalib::str(m_inx_right)+")=");
-        result.append("("+gammalib::str(m_wgt_left)+",");
-        result.append(gammalib::str(m_wgt_right)+")");
+        // EXPLICIT: Append indices and weights
+        if (chatter >= EXPLICIT) {
+            result.append("\n"+gammalib::parformat("Indices and weights"));
+            result.append("("+gammalib::str(m_inx_left)+",");
+            result.append(gammalib::str(m_inx_right)+")=");
+            result.append("("+gammalib::str(m_wgt_left)+",");
+            result.append(gammalib::str(m_wgt_right)+")");
+        }
 
-        // Append nodes
-        for (int i = 0; i < size(); ++i) {
-            result.append("\n"+gammalib::parformat("Node "+gammalib::str(i)));
-            result.append(gammalib::str(m_node[i]));
-            if (i < m_step.size()) {
-                result.append(" (delta="+gammalib::str(m_step[i])+")");
+        // VERBOSE: Append nodes
+        if (chatter >= VERBOSE) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+gammalib::parformat("Node "+gammalib::str(i)));
+                result.append(gammalib::str(m_node[i]));
+                if (i < m_step.size()) {
+                    result.append(" (delta="+gammalib::str(m_step[i])+")");
+                }
             }
         }
 
@@ -580,7 +698,7 @@ std::string GNodeArray::print(const GChatter& chatter) const
 
 /*==========================================================================
  =                                                                         =
- =                         GNodeArray private methods                      =
+ =                             Private methods                             =
  =                                                                         =
  ==========================================================================*/
 
@@ -611,7 +729,7 @@ void GNodeArray::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] array Node array to be copied.
+ * @param[in] array Node array.
  ***************************************************************************/
 void GNodeArray::copy_members(const GNodeArray& array)
 {
@@ -648,7 +766,7 @@ void GNodeArray::free_members(void)
  * @brief Compute distance array and linear slope/offset
  *
  * Precomputes values for fast interpolation. The precomputation requires
- * at least 2 nodes to be present in the node array. If less then two
+ * at least 2 nodes to be present in the node array. If less than two
  * nodes are present, the distance vector m_step will be empty and no
  * computation is done.
  ***************************************************************************/
@@ -690,4 +808,3 @@ void GNodeArray::setup(void) const
     // Return
     return;
 }
-

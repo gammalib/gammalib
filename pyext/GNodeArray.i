@@ -20,43 +20,48 @@
  ***************************************************************************/
 /**
  * @file GNodeArray.i
- * @brief Node array class Python interface definition
+ * @brief Node array class interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GNodeArray.hpp"
-#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
  * @class GNodeArray
  *
- * @brief Python interface for the node array class
+ * @brief Node array class
  ***************************************************************************/
-class GNodeArray : public GBase {
-
+class GNodeArray : public GContainer {
 public:
     // Constructors and destructors
     GNodeArray(void);
+    explicit GNodeArray(const int& num, const double* array);
+    explicit GNodeArray(const GVector& vector);
+    explicit GNodeArray(const std::vector<double>& vector);
     GNodeArray(const GNodeArray& array);
-    GNodeArray(const int& num, const double* array);
-    GNodeArray(const GVector& vector);
-    GNodeArray(const std::vector<double>& vector);
     virtual ~GNodeArray(void);
 
     // Methods
     void          clear(void);
     GNodeArray*   clone(void) const;
+    double&       at(const int& index);
+    const double& at(const int& index) const;
     int           size(void) const;
+    bool          isempty(void) const;
+    void          append(const double& node);
+    void          insert(const int& index, const double& node);
+    void          remove(const int& index);
+    void          reserve(const int& num);
+    void          extend(const GNodeArray& nodes);
     void          nodes(const int& num, const double* array);
     void          nodes(const GVector& vector);
     void          nodes(const std::vector<double>& vector);
-    void          append(const double& node);
     double        interpolate(const double& value,
                               const std::vector<double>& vector) const;
-    void          set_value(const double& value);
+    void          set_value(const double& value) const;
     const int&    inx_left(void) const;
     const int&    inx_right(void) const;
     const double& wgt_left(void) const;
@@ -69,18 +74,21 @@ public:
  ***************************************************************************/
 %extend GNodeArray {
     double __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     void __setitem__(const int& index, const double& val) {
         if (index>=0 && index < self->size()) {
             (*self)[index] = val;
             return;
         }
-        else
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
     GNodeArray copy() {
         return (*self);
