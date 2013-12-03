@@ -120,8 +120,9 @@ GRan::~GRan(void)
  * @brief Assignment operator
  *
  * @param[in] ran Random number generator.
+ * @return Random number generator.
  ***************************************************************************/
-GRan& GRan::operator= (const GRan& ran)
+GRan& GRan::operator=(const GRan& ran)
 { 
     // Execute only if object is not identical
     if (this != &ran) {
@@ -149,7 +150,7 @@ GRan& GRan::operator= (const GRan& ran)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear random number generator
  *
  * This method properly resets the object to an initial state using the
  * default seed.
@@ -168,7 +169,9 @@ void GRan::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone random number generator
+ *
+ * @return Pointer to deep copy of random number generator.
  **************************************************************************/
 GRan* GRan::clone(void) const
 {
@@ -182,7 +185,7 @@ GRan* GRan::clone(void) const
  * @param[in] seed Random number generator seed.
  *
  * This method properly resets the object to an initial state using the
- * specified seed..
+ * specified seed.
  ***************************************************************************/
 void GRan::seed(unsigned long long int seed)
 {
@@ -277,7 +280,7 @@ double GRan::exp(const double& lambda)
     } while (x == 0.0);
 
     // Return random value
-    return (-log(x)/lambda);
+    return (-std::log(x)/lambda);
 }
 
 
@@ -358,7 +361,7 @@ double GRan::chisq2(void)
     } while (x == 1.0);
 
     // Return random value
-    return (sqrt(-2.0*log(1.0-x)));
+    return (std::sqrt(-2.0*std::log(1.0-x)));
 }
 
 
