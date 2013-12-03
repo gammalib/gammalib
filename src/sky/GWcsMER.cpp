@@ -70,7 +70,7 @@ GWcsMER::GWcsMER(void) : GWcs()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Projection constructor
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
@@ -136,8 +136,9 @@ GWcsMER::~GWcsMER(void)
  * @brief Assignment operator
  *
  * @param[in] wcs World Coordinate System.
+ * @return World Coordinate System.
  ***************************************************************************/
-GWcsMER& GWcsMER::operator= (const GWcsMER& wcs)
+GWcsMER& GWcsMER::operator=(const GWcsMER& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
@@ -168,7 +169,7 @@ GWcsMER& GWcsMER::operator= (const GWcsMER& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear Mercator's projection
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -190,7 +191,9 @@ void GWcsMER::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone Mercator's projection
+ *
+ * @return Pointer to deep copy of Mercator's projection.
  ***************************************************************************/
 GWcsMER* GWcsMER::clone(void) const
 {
@@ -202,7 +205,7 @@ GWcsMER* GWcsMER::clone(void) const
  * @brief Print WCS information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing WCS information.
+ * @return String containing Mercator's projection information.
  ***************************************************************************/
 std::string GWcsMER::print(const GChatter& chatter) const
 {
@@ -295,7 +298,8 @@ void GWcsMER::prj_set(void) const
         m_r0 = gammalib::rad2deg;
         m_w.push_back(1.0);
         m_w.push_back(1.0);
-    } else {
+    } 
+    else {
         m_w.push_back(m_r0 * gammalib::deg2rad);
         m_w.push_back(1.0/m_w[0]);
     }
@@ -312,7 +316,7 @@ void GWcsMER::prj_set(void) const
 
 
 /***********************************************************************//**
- * @brief Cartesian-to-spherical deprojection
+ * @brief Pixel-to-spherical deprojection
  *
  * @param[in] nx X vector length.
  * @param[in] ny Y vector length (0=no replication).
@@ -326,13 +330,13 @@ void GWcsMER::prj_set(void) const
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * Deproject Cartesian (x,y) coordinates in the plane of projection to native
+ * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
  * This method has been adapted from the wcslib function prj.c::merx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsMER::prj_x2s(int nx, int ny, int sxy, int spt, 
                       const double* x, const double* y,
@@ -386,7 +390,7 @@ void GWcsMER::prj_x2s(int nx, int ny, int sxy, int spt,
 
 
 /***********************************************************************//**
- * @brief Generic spherical-to-Cartesian projection
+ * @brief Generic spherical-to-pixel projection
  *
  * @param[in] nphi Longitude vector length.
  * @param[in] ntheta Latitude vector length (0=no replication).
@@ -400,15 +404,14 @@ void GWcsMER::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * Project native spherical coordinates (phi,theta) to Cartesian (x,y)
+ * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
  *
  * This method has been adapted from the wcslib function prj.c::mers2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
-#define G_PRJ_X2S
 void GWcsMER::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,
                       double* x, double* y, int* stat) const
@@ -472,10 +475,3 @@ void GWcsMER::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

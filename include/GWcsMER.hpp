@@ -53,13 +53,13 @@ public:
     virtual ~GWcsMER(void);
 
     // Operators
-    GWcsMER& operator= (const GWcsMER& wcs);
+    GWcsMER& operator=(const GWcsMER& wcs);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GWcsMER*    clone(void) const;
-    virtual std::string code(void) const { return "MER"; }
-    virtual std::string name(void) const { return "Mercator's"; }
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -75,5 +75,33 @@ private:
                  const double* phi, const double* theta,
                  double* x, double* y, int* stat) const;
 };
+
+
+/***********************************************************************//**
+ * @brief Return projection code
+ *
+ * @return Projection code.
+ *
+ * Returns the projection code "MER".
+ ***************************************************************************/
+inline
+std::string GWcsMER::code(void) const
+{
+    return "MER";
+}
+
+
+/***********************************************************************//**
+ * @brief Return projection name
+ *
+ * @return Projection name.
+ *
+ * Returns the projection name.
+ ***************************************************************************/
+inline
+std::string GWcsMER::name(void) const
+{
+    return "Mercator's";
+}
 
 #endif /* GWCSMER_HPP */

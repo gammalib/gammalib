@@ -28,6 +28,7 @@
 #define GWCSTAN_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GWcs.hpp"
 
 
@@ -52,13 +53,13 @@ public:
     virtual ~GWcsTAN(void);
 
     // Operators
-    GWcsTAN& operator= (const GWcsTAN& wcs);
+    GWcsTAN& operator=(const GWcsTAN& wcs);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GWcsTAN*    clone(void) const;
-    virtual std::string code(void) const { return "TAN"; }
-    virtual std::string name(void) const { return "gnomonic"; }
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -74,5 +75,33 @@ private:
                  const double* phi, const double* theta,
                  double* x, double* y, int* stat) const;
 };
+
+
+/***********************************************************************//**
+ * @brief Return projection code
+ *
+ * @return Projection code.
+ *
+ * Returns the projection code "TAN".
+ ***************************************************************************/
+inline
+std::string GWcsTAN::code(void) const
+{
+    return "TAN";
+}
+
+
+/***********************************************************************//**
+ * @brief Return projection name
+ *
+ * @return Projection name.
+ *
+ * Returns the projection name.
+ ***************************************************************************/
+inline
+std::string GWcsTAN::name(void) const
+{
+    return "gnomonic";
+}
 
 #endif /* GWCSTAN_HPP */

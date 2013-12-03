@@ -336,7 +336,7 @@ void GWcsCAR::prj_set(void) const
  * This method has been adapted from the wcslib function prj.c::carx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt, 
                       const double* x, const double* y,
@@ -410,7 +410,7 @@ void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt,
  * This method has been adapted from the wcslib function prj.c::cars2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsCAR::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,

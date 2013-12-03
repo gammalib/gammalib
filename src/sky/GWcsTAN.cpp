@@ -34,8 +34,8 @@
 #include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PRJ_S2X "GWcsTAN::prj_s2x(int,int,int,int,double*,double*,double*,"\
-                                                              "double*,int*)"
+#define G_PRJ_S2X    "GWcsTAN::prj_s2x(int, int, int, int, double*, double*,"\
+                                                   " double*, double*, int*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -72,7 +72,7 @@ GWcsTAN::GWcsTAN(void) : GWcs()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Projection constructor
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
@@ -138,8 +138,9 @@ GWcsTAN::~GWcsTAN(void)
  * @brief Assignment operator
  *
  * @param[in] wcs World Coordinate System.
+ * @return World Coordinate System.
  ***************************************************************************/
-GWcsTAN& GWcsTAN::operator= (const GWcsTAN& wcs)
+GWcsTAN& GWcsTAN::operator=(const GWcsTAN& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
@@ -170,9 +171,9 @@ GWcsTAN& GWcsTAN::operator= (const GWcsTAN& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear gnomonic projection
  *
- * This method properly resets the object to an initial state.
+ * Resets the gnomonic projection to an clean initial state.
  ***************************************************************************/
 void GWcsTAN::clear(void)
 {
@@ -192,7 +193,9 @@ void GWcsTAN::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone gnomonic projection
+ *
+ * @return Pointer to deep copy of gnomonic projection. 
  ***************************************************************************/
 GWcsTAN* GWcsTAN::clone(void) const
 {
@@ -201,10 +204,10 @@ GWcsTAN* GWcsTAN::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Print WCS information
+ * @brief Print gnomonic projection information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing WCS information.
+ * @return String containing gnomonic projection information.
  ***************************************************************************/
 std::string GWcsTAN::print(const GChatter& chatter) const
 {
@@ -274,7 +277,7 @@ void GWcsTAN::free_members(void)
  * @brief Setup of projection
  *
  * This method sets up the projection information. The method has been
- * adapted from the wcslib function prj.c::carset.
+ * adapted from the wcslib function prj.c::tanset.
  *
  *   Given and/or returned:
  *      m_r0      Reset to 180/pi if 0.
@@ -291,8 +294,9 @@ void GWcsTAN::prj_set(void) const
     m_w.clear();
     
     // Precompute 
-    if (m_r0 == 0.0)
+    if (m_r0 == 0.0) {
         m_r0 = gammalib::rad2deg;
+    }
     
     // Compute fiducial offset
     prj_off(0.0, 90.0);
@@ -306,7 +310,7 @@ void GWcsTAN::prj_set(void) const
 
 
 /***********************************************************************//**
- * @brief Cartesian-to-spherical deprojection
+ * @brief Pixel-to-spherical deprojection
  *
  * @param[in] nx X vector length.
  * @param[in] ny Y vector length (0=no replication).
@@ -320,21 +324,22 @@ void GWcsTAN::prj_set(void) const
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * Deproject Cartesian (x,y) coordinates in the plane of projection to native
+ * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
- * This method has been adapted from the wcslib function prj.c::carx2s().
+ * This method has been adapted from the wcslib function prj.c::tanx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsTAN::prj_x2s(int nx, int ny, int sxy, int spt, 
                       const double* x, const double* y,
                       double* phi, double* theta, int* stat) const
 {
     // Initialize projection if required
-    if (!m_prjset)
+    if (!m_prjset) {
         prj_set();
+    }
 
     // Set value replication length mx,my
     int mx;
@@ -356,8 +361,9 @@ void GWcsTAN::prj_x2s(int nx, int ny, int sxy, int spt,
     for (int ix = 0; ix < nx; ++ix, rowoff += spt, xp += sxy) {
         double  xj   = *xp + m_x0;
         double* phip = phi + rowoff;
-        for (int iy = 0; iy < my; ++iy, phip += rowlen)
+        for (int iy = 0; iy < my; ++iy, phip += rowlen) {
             *phip = xj;
+        }
     }
 
     // Do y dependence
@@ -371,10 +377,12 @@ void GWcsTAN::prj_x2s(int nx, int ny, int sxy, int spt,
         for (int ix = 0; ix < mx; ++ix, phip += spt, thetap += spt) {
             double xj = *phip;
             double r  = std::sqrt(xj*xj + yj2);
-            if (r == 0.0)
+            if (r == 0.0) {
                 *phip = 0.0;
-            else
+            }
+            else {
                 *phip = gammalib::atan2d(xj, -yj);
+            }
             *thetap    = gammalib::atan2d(m_r0, r);
             *(statp++) = 0;
         }
@@ -386,7 +394,7 @@ void GWcsTAN::prj_x2s(int nx, int ny, int sxy, int spt,
 
 
 /***********************************************************************//**
- * @brief Generic spherical-to-Cartesian projection
+ * @brief Generic spherical-to-pixel projection
  *
  * @param[in] nphi Longitude vector length.
  * @param[in] ntheta Latitude vector length (0=no replication).
@@ -400,21 +408,22 @@ void GWcsTAN::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * Project native spherical coordinates (phi,theta) to Cartesian (x,y)
+ * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
  *
- * This method has been adapted from the wcslib function prj.c::cars2x().
+ * This method has been adapted from the wcslib function prj.c::tans2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsTAN::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,
                       double* x, double* y, int* stat) const
 {
     // Initialize projection if required
-    if (!m_prjset)
+    if (!m_prjset) {
         prj_set();
+    }
 
     // Set value replication length mphi,mtheta
     int mphi;
@@ -492,16 +501,10 @@ void GWcsTAN::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     }
   
     // Handle status code
-    if (status == 4)
+    if (status == 4) {
         throw GException::wcs_invalid_phi_theta(G_PRJ_S2X, n_invalid);
+    }
     
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
