@@ -102,6 +102,10 @@ GModelTemporalConst
 GModels
   The set() method has been added for model setting.
 
+GNodeArray
+  The node array class now derives from GContainer, and all usual container
+  methods have been implemented.
+
 GObservations
   The observation is now passed as const reference in the append()
   method (was non-const before). The observation iterator has been
@@ -331,6 +335,11 @@ http addresses.
 
 The following URL types have been implemented so far:
 * GUrlFile: handles flat files.
+* GUrlString: handles writing into a string
+
+The code of the support module has been reviewed, and some minor
+adjustments have been made that very likely do not affect any
+existing code.
 
 
 14. XML module
