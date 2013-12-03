@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-22 November 2013
+3 December 2013
 
 
 1. Introduction
@@ -27,6 +27,12 @@ GEbounds
   from the last position to the first position in the argument list.
   The emin(), emax(), emean() and elogmean() methods now take a const
   integer reference as argument instead of an integer value.
+
+GFitsTable
+  The column table operator[] now returns a pointer instead of a
+  reference. Set set() method has been added for column setting.
+  The append_column() and insert_column() methods have been  
+  renamed to append() and insert().
 
 GMatrixBase
 GMatrix
@@ -102,11 +108,35 @@ GOptimizer & GOptimizerLM
   The optimization operators have been removed and replaced by the
   optimize method.
 
-GFitsTable
-  The column table operator[] now returns a pointer instead of a
-  reference. Set set() method has been added for column setting.
-  The append_column() and insert_column() methods have been
-  renamed to append() and insert().
+GSkyPixel
+  The class now supports 1D and 2D pixels. Type conversion methods
+  have been added that allow assigning integer and double precision
+  values from and to GSkyPixel for 1D pixels. A size() method has
+  been added that returns the pixel dimension. Also the is1D() and
+  is2D() methods can be used to determine whether a pixel is 1D
+  or 2D. index() methods have been added to set and get 1D pixel
+  values. A xy() method has been added to set x and y simultaneously
+  for 2D pixels. 1D and 2D pixel constructors exist now for
+  integer and double precision values.
+
+GWcs => GSkyProjection
+  The GWcs class has been renamed to GSkyProjection as it is more
+  general than the World Coordinate Systems. A size() method has
+  been added that returns the dimension of the projection (1D or
+  2D). The integer index methods have been removed as GSkyPixel
+  now supports 1D and 2D pixels.
+
+GWcslib => GWcs
+  The GWcslib class has been renamed to GWcs. The class now conforms
+  to the GSkyProjection base class interface.
+
+GWcsHPX => GHealpix
+  The GWcsHPX class has been renamed to GHealpix as the Healpix
+  projection is not a World Coordinate System. GHealpix is no
+  longer registered in GWcsRegistry.
+
+GWcsRegistry
+  Now holds objects of renamed type GWcs (see GHealpix).
 
 All GammaLib constants, defined in GTools.hpp, and functions are now
 put in the gammalib namespace to avoid name clashes. Mathematical
@@ -258,6 +288,12 @@ for registry information handling. This circumvents the ill defined
 initialization problem of static variables and allow using of the
 GRegistryPointer smart pointer, removing memory leaks on exit of
 GammaLib.
+
+The GSkyPixel class now supports 1D and 2D pixelisations, allowing
+a more generic usage of the class. Integer and double precision
+values can be assigned from and to GSkyPixel for 1D pixelisations.
+
+The GWcsAIT class has been added for Aitoff-Hammer projections.
 
 
 13. Support module
