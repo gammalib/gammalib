@@ -441,6 +441,9 @@ const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
  * Returns the skymap value for a given sky direction, obtained by bi-linear
  * interpolation of the neighbouring pixels. If the sky direction falls
  * outside the area covered by the skymap, a value of 0 is returned.
+ *
+ * @todo The actual method only works on 2D images. It will fail for Healpix
+ *       pixelisations.
  ***************************************************************************/
 double GSkymap::operator()(const GSkyDir& dir, const int& map) const
 {

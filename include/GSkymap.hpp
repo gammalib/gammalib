@@ -47,20 +47,34 @@
  *
  * @brief Sky map class
  *
- * This class implements a set of sky maps. Skymaps may either be present in
- * the HEALPix format or in any (supported) WCS format. Skymap pixels are
- * stored in a double precision array indexed by (x,y,map), with the x
- * axis being the most rapidely varying axis. 
- * 
- * Skymap pixels may be either accessed via index operators (i,map), where i 
- * runs over the (x,y) direction of the map, or via pixel operators (pixel,map),
- * where pixel implements a 2D (x,y) pixel direction. The first operator is
- * the preferred access method for HEALPix maps while the second operator is
- * the preferred access method for WCS maps. Conversion methods between the
- * index or sky pixel and the true physical sky direction are provided by the
- * pix2dir() and dir2pix() methods.
+ * This class implements a sky maps. Sky maps are collections of pixels that
+ * define a quantity as function of pixel location. Typical quantities are
+ * gamma-ray intensities, but may also be the number of measured counts.
  *
- * @todo Rewrite class description.
+ * Sky map pixels may be arranged in a 2-dimensional grid or in a linear
+ * 1-dimensional sequence. The link between pixel index and sky direction
+ * on the celestial sphere is established using a projection, implemented
+ * by the GSkyProjection class. 2-dimensional grids are represented by
+ * World Coordinate Systems. All World Coordinate Systems derive from GWcs
+ * and are registered in GWcsRegistry. The Healpix pixelisation, implemented
+ * by the GHealpix class, is the only 1-dimensional grid that is so far
+ * available.
+ *
+ * Sky map pixels may be accessed by their linear index, by pixel or by
+ * sky direction. While the index and pixel access return the sky map value
+ * at the pixel centre, the sky direction access operator performs an
+ * interpolation to the exact sky direction.
+ *
+ * Conversion methods exist to convert between the linear index, the pixel
+ * and the sky direction:
+ *
+ *     GSkyPixel pixel = map.inx2pix(index);   // Index to pixel
+ *     GSkyDir   dir   = map.inx2dir(index);   // Index to sky direction
+ *     GSkyDir   dir   = map.pix2dir(pixel);   // Pixel to sky direction
+ *     int       index = map.pix2inx(pixel);   // Pixel to index
+ *     int       index = map.dir2inx(dir);     // Sky direction to index
+ *     GSkyPixel pixel = map.dir2pix(dir);     // Sky direction to pixel
+ *  
  ***************************************************************************/
 class GSkymap : public GBase {
 
