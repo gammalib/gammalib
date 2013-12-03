@@ -73,6 +73,11 @@ test/*.trs
 test/region.reg
 examples/python/*.xml
 examples/python/*.html
+examples/cpp/*/*.fits
+examples/cpp/createfits/createfits
+examples/cpp/createskymap/createskymap
+examples/cpp/createxml/createxml
+examples/cpp/readmodel/readmodel
 
 # Binaries
 test/test_GApplication
