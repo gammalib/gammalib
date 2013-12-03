@@ -127,34 +127,30 @@ public:
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
 
-    // 1D pixel methods
-    GSkyDir       pix2dir(const int& pix) const;
-    int           dir2pix(const GSkyDir& dir) const;
-    double        omega(const int& pix) const;
-
-    // 2D pixel methods
-    GSkyDir       xy2dir(const GSkyPixel& pix) const;
-    GSkyPixel     dir2xy(const GSkyDir& dir) const;
-    double        omega(const GSkyPixel& pix) const;
-
     // Methods
-    void            clear(void);
-    GSkymap*        clone(void) const;
-    void            load(const std::string& filename);
-    void            save(const std::string& filename, bool clobber = false) const;
-    void            read(const GFitsHDU* hdu);
-    void            write(GFits* file) const;
-    int             npix(void) const;
-    int             nx(void) const;
-    int             ny(void) const;
-    int             nmaps(void) const;
-    int             xy2pix(const GSkyPixel& pix) const;
-    GSkyPixel       pix2xy(const int& pix) const;
-    GSkyProjection* projection(void) const;
-    void            projection(const GSkyProjection& proj);
-    double*         pixels(void) const;
-    bool            contains(const GSkyDir& dir) const;
-    bool            contains(const GSkyPixel& pixel) const;
+    void                  clear(void);
+    GSkymap*              clone(void) const;
+    const int&            npix(void) const;
+    const int&            nx(void) const;
+    const int&            ny(void) const;
+    const int&            nmaps(void) const;
+    GSkyPixel             inx2pix(const int& index) const;
+    GSkyDir               inx2dir(const int& index) const;
+    GSkyDir               pix2dir(const GSkyPixel& pixel) const;
+    int                   pix2inx(const GSkyPixel& pixel) const;
+    int                   dir2inx(const GSkyDir& dir) const;
+    GSkyPixel             dir2pix(const GSkyDir& dir) const;
+    double                omega(const int& index) const;
+    double                omega(const GSkyPixel& pixel) const;
+    bool                  contains(const GSkyDir& dir) const;
+    bool                  contains(const GSkyPixel& pixel) const;
+    const GSkyProjection* projection(void) const;
+    void                  projection(const GSkyProjection& proj);
+    const double*         pixels(void) const;
+    void                  load(const std::string& filename);
+    void                  save(const std::string& filename, bool clobber = false) const;
+    void                  read(const GFitsHDU* hdu);
+    void                  write(GFits* file) const;
 };
 
 

@@ -287,7 +287,7 @@ void TestGLATLtCube::test_one_ltcube(const std::string& datadir, const double& r
         GLATLtCube ltcube(lat_ltcube);
         GEnergy energy;
         for (int i = 0; i < map.npix(); ++i) {
-            GSkyDir dir = map.pix2dir(i);
+            GSkyDir dir = map.inx2dir(i);
             map(i) = ltcube(dir, energy, test_fct1);
         }
         map.save(file1, true);
@@ -304,7 +304,7 @@ void TestGLATLtCube::test_one_ltcube(const std::string& datadir, const double& r
         GLATLtCube ltcube(lat_ltcube);
         GEnergy energy;
         for (int i = 0; i < map.npix(); ++i) {
-            GSkyDir dir = map.pix2dir(i);
+            GSkyDir dir = map.inx2dir(i);
             map(i) = ltcube(dir, energy, test_fct2);
         }
         map.save(file2, true);

@@ -738,7 +738,7 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
 
                     // Compute offset angle in degrees
                     GSkyPixel pixel  = GSkyPixel(double(ix), double(iy));
-                    double    offset = cube->map().xy2dir(pixel).dist_deg(m_dir);
+                    double    offset = cube->map().pix2dir(pixel).dist_deg(m_dir);
                     double    omega  = cube->map().omega(pixel);
 
                     // Use only pixels within maximum PSF radius

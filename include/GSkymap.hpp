@@ -45,20 +45,22 @@
 /***********************************************************************//**
  * @class GSkymap
  *
- * @brief GSkymap class interface defintion
+ * @brief Sky map class
  *
- * This class implements a set of skymaps. Skymaps may either be present in
+ * This class implements a set of sky maps. Skymaps may either be present in
  * the HEALPix format or in any (supported) WCS format. Skymap pixels are
  * stored in a double precision array indexed by (x,y,map), with the x
  * axis being the most rapidely varying axis. 
  * 
- * Skymap pixels may be either accessed via 1D operators (i,map), where i 
- * runs over the (x,y) direction of the map, or via 2D operators (pixel,map),
+ * Skymap pixels may be either accessed via index operators (i,map), where i 
+ * runs over the (x,y) direction of the map, or via pixel operators (pixel,map),
  * where pixel implements a 2D (x,y) pixel direction. The first operator is
  * the preferred access method for HEALPix maps while the second operator is
  * the preferred access method for WCS maps. Conversion methods between the
  * index or sky pixel and the true physical sky direction are provided by the
  * pix2dir() and dir2pix() methods.
+ *
+ * @todo Rewrite class description.
  ***************************************************************************/
 class GSkymap : public GBase {
 
@@ -83,44 +85,38 @@ public:
     virtual ~GSkymap(void);
 
     // Operators
-    GSkymap& operator=(const GSkymap& map);
-
-    // 1D pixel methods
-    double&       operator()(const int& pixel, const int& map = 0);
-    const double& operator()(const int& pixel, const int& map = 0) const;
-    GSkyDir       pix2dir(const int& pix) const;
-    int           dir2pix(const GSkyDir& dir) const;
-    double        omega(const int& pix) const;
-
-    // 2D pixel methods
+    GSkymap&      operator=(const GSkymap& map);
+    double&       operator()(const int& index, const int& map = 0);
+    const double& operator()(const int& index, const int& map = 0) const;
     double&       operator()(const GSkyPixel& pixel, const int& map = 0);
     const double& operator()(const GSkyPixel& pixel, const int& map = 0) const;
-    GSkyDir       xy2dir(const GSkyPixel& pix) const;
-    GSkyPixel     dir2xy(const GSkyDir& dir) const;
-    double        omega(const GSkyPixel& pix) const;
-
-    // Sky direction methods
     double        operator()(const GSkyDir& dir, const int& map = 0) const;
 
     // Methods
-    void            clear(void);
-    GSkymap*        clone(void) const;
-    void            load(const std::string& filename);
-    void            save(const std::string& filename, bool clobber = false) const;
-    void            read(const GFitsHDU* hdu);
-    void            write(GFits* file) const;
-    int             npix(void) const;
-    int             nx(void) const;
-    int             ny(void) const;
-    int             nmaps(void) const;
-    int             xy2pix(const GSkyPixel& pix) const;
-    GSkyPixel       pix2xy(const int& pix) const;
-    GSkyProjection* projection(void) const { return m_proj; }
-    void            projection(const GSkyProjection& proj);
-    double*         pixels(void) const { return m_pixels; }
-    bool            contains(const GSkyDir& dir) const;
-    bool            contains(const GSkyPixel& pixel) const;
-    std::string     print(const GChatter& chatter = NORMAL) const;
+    void                  clear(void);
+    GSkymap*              clone(void) const;
+    const int&            npix(void) const;
+    const int&            nx(void) const;
+    const int&            ny(void) const;
+    const int&            nmaps(void) const;
+    GSkyPixel             inx2pix(const int& index) const;
+    GSkyDir               inx2dir(const int& index) const;
+    GSkyDir               pix2dir(const GSkyPixel& pixel) const;
+    int                   pix2inx(const GSkyPixel& pixel) const;
+    int                   dir2inx(const GSkyDir& dir) const;
+    GSkyPixel             dir2pix(const GSkyDir& dir) const;
+    double                omega(const int& index) const;
+    double                omega(const GSkyPixel& pixel) const;
+    bool                  contains(const GSkyDir& dir) const;
+    bool                  contains(const GSkyPixel& pixel) const;
+    const GSkyProjection* projection(void) const;
+    void                  projection(const GSkyProjection& proj);
+    const double*         pixels(void) const;
+    void                  load(const std::string& filename);
+    void                  save(const std::string& filename, bool clobber = false) const;
+    void                  read(const GFitsHDU* hdu);
+    void                  write(GFits* file) const;
+    std::string           print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods
@@ -147,5 +143,87 @@ private:
     GSkyProjection* m_proj;       //!< Pointer to sky projection
     double*         m_pixels;     //!< Pointer to skymap pixels
 };
+
+
+/***********************************************************************//**
+ * @brief Returns number of pixels
+ *
+ * @return Number of pixels in one sky map.
+ *
+ * Returns the number of pixels in one sky map.
+ ***************************************************************************/
+inline
+const int& GSkymap::npix(void) const
+{
+    return m_num_pixels;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of pixels in x coordinate
+ *
+ * @return Number of pixels in the X direction.
+ *
+ * Returns the number of pixels in the X direction. If the sky map is a
+ * one dimensional array (which is the case for the Healpix projection),
+ * the method returns 0.
+ ***************************************************************************/
+inline
+const int& GSkymap::nx(void) const
+{
+    return m_num_x;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of pixels in y coordinate
+ *
+ * @return Number of pixels in the Y direction.
+ *
+ * Returns the number of pixels in the Y direction. If the sky map is a
+ * one dimensional array (which is the case for the Healpix projection),
+ * the method returns 0.
+ ***************************************************************************/
+inline
+const int& GSkymap::ny(void) const
+{
+    return m_num_y;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns number of maps
+ *
+ * @return Number of maps in the sky map object.
+ ***************************************************************************/
+inline
+const int& GSkymap::nmaps(void) const
+{
+    return m_num_maps;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to sky projection
+ *
+ * @return Pointer to sky projection (NULL if no projection is defined).
+ ***************************************************************************/
+inline
+const GSkyProjection* GSkymap::projection(void) const
+{
+    return m_proj;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to pixel data
+ *
+ * @return Pointer to pixel data.
+ ***************************************************************************/
+inline
+const double* GSkymap::pixels(void) const
+{
+    return m_pixels;
+}
 
 #endif /* GSKYMAP_HPP */

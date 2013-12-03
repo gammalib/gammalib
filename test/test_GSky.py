@@ -73,10 +73,11 @@ class Test(GPythonTestSuite):
         # Append tests
         self.append(self.test_skymap_healpix, "Test HEALPix map")
         self.append(self.test_skymap_ait, "Test AIT projection map")
-        self.append(self.test_skymap_car, "Test CAR projection map")
-        self.append(self.test_skymap_tan, "Test TAN projection map")
-        self.append(self.test_skymap_stg, "Test STG projection map")
         self.append(self.test_skymap_azp, "Test AZP projection map")
+        self.append(self.test_skymap_car, "Test CAR projection map")
+        self.append(self.test_skymap_mer, "Test MER projection map")
+        self.append(self.test_skymap_stg, "Test STG projection map")
+        self.append(self.test_skymap_tan, "Test TAN projection map")
         self.append(self.test_fk5_to_galactic, "Test FK5 to Galactic coordinate conversion")
         
         # Return
@@ -87,21 +88,21 @@ class Test(GPythonTestSuite):
         """
         Control coordinate and pixel transformation methods.
         """
-        # Control pix2dir / dir2pix methods for all pixels
+        # Control inx2dir/dir2inx methods for all pixels
         for i in range(pixels.npix()):
-            dir = pixels.pix2dir(i)
-            ipix = pixels.dir2pix(dir)
-            msg = map + " pix2dir/dir2pix check for pixel " + str(i)
-            err = map + " GSkymap trouble with pixel " + str(i) + " (" + str(ipix) + \
+            dir = pixels.inx2dir(i)
+            inx = pixels.dir2inx(dir)
+            msg = map + " inx2dir/dir2inx check for pixel " + str(i)
+            err = map + " GSkymap trouble with pixel " + str(i) + " (" + str(inx) + \
                 "), RA=" + str(dir.ra() * 180 / pi) + ", Dec=" + str(dir.dec() * 180 / pi)
-            self.test_assert(i == ipix, msg, err)
+            self.test_assert(i == inx, msg, err)
 
         # Control SkyDir coordinate transformation for all pixels
         for i in range(pixels.npix()):
-            dir = pixels.pix2dir(i)
+            dir     = pixels.inx2dir(i)
             dir_new = GSkyDir()
             dir_new.lb(dir.l(), dir.b())
-            dra = abs(dir.ra() - dir_new.ra())
+            dra     = abs(dir.ra() - dir_new.ra())
             if (dra >= 5.0):
                 dra -= 2.0 * pi
             ddec = abs(dir.dec() - dir_new.dec())
@@ -196,6 +197,17 @@ class Test(GPythonTestSuite):
         # Return
         return
 
+    # Test AZP projection
+    def test_skymap_azp(self):
+        """
+        Test AZP projection.
+        """
+        # Execute generic test
+        self.test_skymap_proj("AZP")
+
+        # Return
+        return
+
     # Test CAR projection
     def test_skymap_car(self):
         """
@@ -207,13 +219,13 @@ class Test(GPythonTestSuite):
         # Return
         return
 
-    # Test TAN projection
-    def test_skymap_tan(self):
+    # Test MER projection
+    def test_skymap_mer(self):
         """
-        Test TAN projection.
+        Test MER projection.
         """
         # Execute generic test
-        self.test_skymap_proj("TAN")
+        self.test_skymap_proj("MER")
 
         # Return
         return
@@ -229,13 +241,13 @@ class Test(GPythonTestSuite):
         # Return
         return
 
-    # Test AZP projection
-    def test_skymap_azp(self):
+    # Test TAN projection
+    def test_skymap_tan(self):
         """
-        Test AZP projection.
+        Test TAN projection.
         """
         # Execute generic test
-        self.test_skymap_proj("AZP")
+        self.test_skymap_proj("TAN")
 
         # Return
         return

@@ -388,7 +388,7 @@ int GLATEventCube::number(void) const
     double number = 0.0;
 
     // Get pointer on skymap pixels
-    double* pixels = m_map.pixels();
+    const double* pixels = m_map.pixels();
 
     // Sum event cube
     if (size() > 0 && pixels != NULL) {
@@ -561,7 +561,7 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     int iy = 0;
     for (int ix = 0; ix < nx(); ++ix) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
         if (distance < radius) {
             radius = distance;
         }
@@ -571,7 +571,7 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     iy = ny()-1;
     for (int ix = 0; ix < nx(); ++ix) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
         if (distance < radius) {
             radius = distance;
         }
@@ -581,7 +581,7 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     int ix = 0;
     for (int iy = 0; iy < ny(); ++iy) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
         if (distance < radius) {
             radius = distance;
         }
@@ -591,7 +591,7 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     ix = nx()-1;
     for (int iy = 0; iy < ny(); ++iy) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
         if (distance < radius) {
             radius = distance;
         }
@@ -841,7 +841,7 @@ void GLATEventCube::set_directions(void)
     for (int iy = 0; iy < ny(); ++iy) {
         for (int ix = 0; ix < nx(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
-            m_dirs.push_back(GLATInstDir(m_map.xy2dir(pixel)));
+            m_dirs.push_back(GLATInstDir(m_map.pix2dir(pixel)));
             m_omega.push_back(m_map.omega(pixel));
         }
     }
@@ -967,7 +967,7 @@ void GLATEventCube::set_bin(const int& index)
 
     // Set pointers
     m_bin.m_cube   = this;
-    m_bin.m_counts = &(m_map.pixels()[index]);
+    m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
     m_bin.m_energy = &(m_energies[m_bin.m_ieng]);
     m_bin.m_time   = &m_time;
     m_bin.m_dir    = &(m_dirs[m_bin.m_ipix]);

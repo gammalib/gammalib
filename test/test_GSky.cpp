@@ -106,10 +106,10 @@ double TestGSky::wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1,
             GSkyPixel pix_in(x,y);
 
             // Forth: Transform to world
-            GSkyDir dir = wcs->xy2dir(pix_in);
+            GSkyDir dir = wcs->pix2dir(pix_in);
 
             // Back: Transform to pixel
-            GSkyPixel pix_out = wcs->dir2xy(dir);
+            GSkyPixel pix_out = wcs->dir2pix(dir);
 
             // Compute distance
             double dx      = pix_in.x()-pix_out.x();
@@ -177,7 +177,7 @@ double TestGSky::wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crp
         for (int iy = -ny; iy <= ny; ++iy) {
 
             // Set y value
-            double    y = double(iy) + crpix2;
+            double y = double(iy) + crpix2;
 
             // Skip pixels outside valid range (they are not expected to
             // transform bijectively)
@@ -189,8 +189,8 @@ double TestGSky::wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crp
             GSkyPixel pix_in(x,y);
 
             // Transform to world
-            GSkyDir dir1 = wcs->xy2dir(pix_in);
-            GSkyDir dir2 = cpy->xy2dir(pix_in);
+            GSkyDir dir1 = wcs->pix2dir(pix_in);
+            GSkyDir dir2 = cpy->pix2dir(pix_in);
             double angle = dir1.dist_deg(dir2);
             if (angle > angle_max) {
                 angle_max = angle;
@@ -207,8 +207,8 @@ double TestGSky::wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crp
             #endif
 
             // Transform to pixel
-            GSkyPixel pix_out1 = wcs->dir2xy(dir1);
-            GSkyPixel pix_out2 = cpy->dir2xy(dir2);
+            GSkyPixel pix_out1 = wcs->dir2pix(dir1);
+            GSkyPixel pix_out2 = cpy->dir2pix(dir2);
 
             // Compute distance
             double dx   = pix_out1.x()-pix_out2.x();
@@ -715,8 +715,8 @@ void TestGSky::test_GSkymap_wcs_construct(void)
         for (int l = -180; l < 180; ++l) {
             for (int b = -90; b < 90; ++b) {
                 dir.lb_deg(double(l),double(b));
-                GSkyPixel pixel    = map1.dir2xy(dir);
-                GSkyDir   dir_back = map1.xy2dir(pixel);
+                GSkyPixel pixel    = map1.dir2pix(dir);
+                GSkyDir   dir_back = map1.pix2dir(pixel);
                 double    dist     = dir.dist_deg(dir_back);
                 if (dist > eps) {
                     throw exception_failure("Sky direction differs: dir="+dir.print()+" pixel="+pixel.print()+" dir_back"+ dir_back.print()+" dist="+gammalib::str(dist)+" deg");

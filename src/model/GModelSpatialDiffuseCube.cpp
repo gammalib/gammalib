@@ -446,15 +446,15 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
             }
         }
 
-        // Convert 1D pixel index to 2D pixel index
-        GSkyPixel pixel = m_cube.pix2xy(low-offset);
+        // Convert sky map index to sky map pixel
+        GSkyPixel pixel = m_cube.inx2pix(low-offset);
 
         // Randomize pixel
         pixel.x(pixel.x() + ran.uniform() - 0.5);
         pixel.y(pixel.y() + ran.uniform() - 0.5);
 
         // Get sky direction
-        dir = m_cube.xy2dir(pixel);
+        dir = m_cube.pix2dir(pixel);
     
     } // endif: there were pixels in sky map
 

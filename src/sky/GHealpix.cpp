@@ -350,27 +350,14 @@ void GHealpix::write(GFitsHDU* hdu) const
 /***********************************************************************//**
  * @brief Returns solid angle of pixel
  *
- * @param[in] pix Pixel number (0,1,...,num_pixels).
+ * @param[in] pixel Sky pixel.
+ * @return Solid angle of pixel.
  *
- * HEALPix pixels have all the same solid angle, hence the pix argument is
- * not used.
+ * Returns the solid angle of the specified @p pixel. Note that HEALPix
+ * pixels have all the same solid angle, hence the @p pixel argument is in
+ * fact not used by the method.
  ***************************************************************************/
-double GHealpix::omega(const int& pix) const
-{
-    // Return solid angle
-    return m_omega;
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Sky pixel.
- *
- * HEALPix pixels have all the same solid angle, hence the pix argument is
- * not used.
- ***************************************************************************/
-double GHealpix::omega(const GSkyPixel& pix) const
+double GHealpix::omega(const GSkyPixel& pixel) const
 {
     // Return solid angle
     return m_omega;
@@ -380,28 +367,35 @@ double GHealpix::omega(const GSkyPixel& pix) const
 /***********************************************************************//**
  * @brief Returns sky direction of pixel
  *
- * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ * @param[in] pixel Sky map pixel.
  ***************************************************************************/
-GSkyDir GHealpix::pix2dir(const int& pix) const
+GSkyDir GHealpix::pix2dir(const GSkyPixel& pixel) const
 {
-    // Declare result
-    GSkyDir result;
-    double  theta = 0.0;
-    double  phi   = 0.0;
+    // Throw an exception if sky map pixel is not 1D
+    if (!pixel.is1D()) {
+        std::string msg = "Sky map pixel "+pixel.print()+" is not"
+                          " 1-dimensional.\n"
+                          "Only 1-dimensional pixels are supported by the"
+                          " Healpix projection.";
+        throw GException::invalid_argument(G_XY2DIR, msg);
+    }
 
     // Perform ordering dependent conversion
+    double theta = 0.0;
+    double phi   = 0.0;
     switch (m_ordering) {
     case 0:
-        pix2ang_ring(pix, &theta, &phi);
+        pix2ang_ring(int(pixel), &theta, &phi);
         break;
     case 1:
-        pix2ang_nest(pix, &theta, &phi);
+        pix2ang_nest(int(pixel), &theta, &phi);
         break;
     default:
         break;
     }
 
     // Store coordinate system dependent result
+    GSkyDir result;
     switch (m_coordsys) {
     case 0:
         result.radec(phi, gammalib::pihalf - theta);
@@ -412,25 +406,23 @@ GSkyDir GHealpix::pix2dir(const int& pix) const
     default:
         break;
     }
-
-    // Return result
+    
+    // Return
     return result;
 }
 
 
 /***********************************************************************//**
- * @brief Returns pixel for a given sky direction
+ * @brief Returns sky map pixel of sky coordinate
  *
- * @param[in] dir Sky direction.
+ * @param[in] dir Sky coordinate.
+ * @return Sky map pixel.
  ***************************************************************************/
-int GHealpix::dir2pix(const GSkyDir& dir) const
+GSkyPixel GHealpix::dir2pix(const GSkyDir& dir) const
 {
-    // Declare result
-    int    pix;
+    // Compute coordinate system dependent (z,phi)
     double z;
     double phi;
-
-    // Compute coordinate system dependent (z,phi)
     switch (m_coordsys) {
     case 0:
         z   = cos(gammalib::pihalf - dir.dec());
@@ -445,75 +437,20 @@ int GHealpix::dir2pix(const GSkyDir& dir) const
     }
 
     // Perform ordering dependent conversion
+    int index;
     switch (m_ordering) {
     case 0:
-        pix = ang2pix_z_phi_ring(z, phi);
+        index = ang2pix_z_phi_ring(z, phi);
         break;
     case 1:
-        pix = ang2pix_z_phi_nest(z, phi);
+        index = ang2pix_z_phi_nest(z, phi);
         break;
     default:
         break;
     }
 
-    // Return pixel index
-    return pix;
-}
-
-
-/***********************************************************************//**
- * @brief Returns sky direction of pixel
- *
- * @param[in] pix Sky pixel.
- *
- * This dummy method throws an error when called as sky pixels are not
- * implemented for a HealPix grid. Maybe we should implement them?
- *
- * @todo Think about implementation of sky pixel for HealPix data. We may
- *       use only the first argument, and even carry a usage flag in
- *       GSkyPixel
- ***************************************************************************/
-GSkyDir GHealpix::xy2dir(const GSkyPixel& pix) const
-{
-    // Set error message
-    std::string message = "Method not defined for HPX projection.";
-
-    // Throw error
-    throw GException::wcs(G_XY2DIR, message);
-
-    // Set dummy return value
-    GSkyDir result;
-    
-    // Return
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel of sky direction
- *
- * @param[in] dir Sky direction.
- *
- * This dummy method throws an error when called as sky pixels are not
- * implemented for a HealPix grid. Maybe we should implement them?
- *
- * @todo Think about implementation of sky pixel for HealPix data. We may
- *       use only the first argument, and even carry a usage flag in
- *       GSkyPixel
- ***************************************************************************/
-GSkyPixel GHealpix::dir2xy(const GSkyDir& dir) const
-{
-    // Set error message
-    std::string message = "Method not defined for HPX projection.";
-
-    // Throw error
-    throw GException::wcs(G_DIR2XY2, message);
-
-    // Set dummy return value
-    GSkyPixel result;
-    
-    // Return
-    return result;
+    // Return sky map pixel
+    return (GSkyPixel(index));
 }
 
 

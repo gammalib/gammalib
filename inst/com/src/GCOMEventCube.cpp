@@ -504,7 +504,7 @@ int GCOMEventCube::number(void) const
     double number = 0.0;
 
     // Get pointer on skymap pixels
-    double* pixels = m_map.pixels();
+    const double* pixels = m_map.pixels();
 
     // Sum event cube
     if (size() > 0 && pixels != NULL) {
@@ -708,7 +708,7 @@ void GCOMEventCube::set_scatter_directions(void)
     for (int iy = 0; iy < npsi(); ++iy) {
         for (int ix = 0; ix < nchi(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
-            m_dirs.push_back(m_map.xy2dir(pixel));
+            m_dirs.push_back(m_map.pix2dir(pixel));
             m_omega.push_back(m_map.omega(pixel));
         }
     }
@@ -871,7 +871,7 @@ void GCOMEventCube::set_bin(const int& index)
     m_dir.phibar(m_phi[iphi]);
     
     // Set pointers
-    m_bin.m_counts = &(m_map.pixels()[index]);
+    m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
     m_bin.m_omega  = &(m_omega[ipix]);
 
     // Return

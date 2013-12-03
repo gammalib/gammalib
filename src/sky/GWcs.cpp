@@ -436,35 +436,9 @@ void GWcs::write(GFitsHDU* hdu) const
 /***********************************************************************//**
  * @brief Returns solid angle of pixel in units of steradians
  *
- * @param[in] pix Pixel index.
+ * @param[in] pixel Pixel index (x,y)
  *
- * This dummy method throws an error when called as pixel indices are not
- * implemented for a HealPix grid. Maybe we should drop this method and
- * implement a general GSkyPixel class tha also handles HealPix?
- *
- * @todo Think about implementation of sky pixel for HealPix data. We may
- *       use only the first argument, and even carry a usage flag in
- *       GSkyPixel
- ***************************************************************************/
-double GWcs::omega(const int& pix) const
-{
-    // Set error message
-    std::string message = "Method not defined for general WCS projection.";
-
-    // Throw error
-    throw GException::wcs(G_OMEGA, message);
-
-    // Return
-    return 0.0;
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel in units of steradians
- *
- * @param[in] pix Pixel index (x,y)
- *
- * Estimate solid angles of pixel by compuing the coordinates in the 4 pixel
+ * Estimate solid angles of pixel by computing the coordinates in the 4 pixel
  * corners. The surface is computed using a cartesian approximation:
  *           a
  *     1-----5-----2                 a+b
@@ -475,15 +449,15 @@ double GWcs::omega(const int& pix) const
  * rotated sky maps. Something more intelligent should be implemented in
  * the future.
  ***************************************************************************/
-double GWcs::omega(const GSkyPixel& pix) const
+double GWcs::omega(const GSkyPixel& pixel) const
 {
     // Get the sky directions of the 6 points
-    GSkyDir dir1 = xy2dir(GSkyPixel(pix.x()-0.5, pix.y()-0.5));
-    GSkyDir dir2 = xy2dir(GSkyPixel(pix.x()+0.5, pix.y()-0.5));
-    GSkyDir dir3 = xy2dir(GSkyPixel(pix.x()+0.5, pix.y()+0.5));
-    GSkyDir dir4 = xy2dir(GSkyPixel(pix.x()-0.5, pix.y()+0.5));
-    GSkyDir dir5 = xy2dir(GSkyPixel(pix.x(), pix.y()-0.5));
-    GSkyDir dir6 = xy2dir(GSkyPixel(pix.x(), pix.y()+0.5));
+    GSkyDir dir1 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5));
+    GSkyDir dir2 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()-0.5));
+    GSkyDir dir3 = pix2dir(GSkyPixel(pixel.x()+0.5, pixel.y()+0.5));
+    GSkyDir dir4 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()+0.5));
+    GSkyDir dir5 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()-0.5));
+    GSkyDir dir6 = pix2dir(GSkyPixel(pixel.x(),     pixel.y()+0.5));
 
     // Compute distances between sky directions
     double a = dir1.dist(dir2);
@@ -499,64 +473,16 @@ double GWcs::omega(const GSkyPixel& pix) const
 
 
 /***********************************************************************//**
- * @brief Returns sky direction of pixel (DUMMY METHOD)
+ * @brief Returns sky direction of sky map pixel
  *
- * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ * @param[in] pixel Sky map pixel.
+ * @return Sky direction.
  *
- * @exception GException::wcs
- *            Method not defined for projection.
- *
- * This method should be overloaded by the appropriate method of the derived
- * class. It thus should never get called.
+ * Returns the sky direction of a sky map @p pixel. Note that the sky
+ * map pixel values start from 0 while the WCS pixel reference starts from
+ * 1.
  ***************************************************************************/
-GSkyDir GWcs::pix2dir(const int& pix) const
-{
-    // Set error message
-    std::string message = "Method not defined for general WCS projection.";
-
-    // Throw error
-    throw GException::wcs(G_PIX2DIR, message);
-
-    // Define direction
-    GSkyDir dir;
-
-    // Return
-    return dir;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel for sky direction (DUMMY METHOD)
- *
- * @param[in] dir Sky direction.
- *
- * @exception GException::wcs
- *            Method not defined for projection.
- *
- * This method should be overloaded by the appropriate method of the derived
- * class. It thus should never get called.
- ***************************************************************************/
-int GWcs::dir2pix(const GSkyDir& dir) const
-{
-    // Set error message
-    std::string message = "Method not defined for general WCS projection.";
-
-    // Throw error
-    throw GException::wcs(G_DIR2PIX, message);
-
-    // Return
-    return 0;
-}
-
-
-/***********************************************************************//**
- * @brief Returns sky direction of pixel
- *
- * @param[in] pix Sky pixel.
- *
- * Note that pixel indices start from 0.
- ***************************************************************************/
-GSkyDir GWcs::xy2dir(const GSkyPixel& pix) const
+GSkyDir GWcs::pix2dir(const GSkyPixel& pixel) const
 {
     // Allocate memory for transformation
     double pixcrd[2];
@@ -568,8 +494,8 @@ GSkyDir GWcs::xy2dir(const GSkyPixel& pix) const
     
     // Set sky pixel. We have to add 1.0 here as the WCS pixel reference
     // (CRPIX) starts from one while GSkyPixel starts from 0.
-    pixcrd[0] = pix.x() + 1.0;
-    pixcrd[1] = pix.y() + 1.0;
+    pixcrd[0] = pixel.x() + 1.0;
+    pixcrd[1] = pixel.y() + 1.0;
     
     // Trasform pixel-to-world coordinate
     wcs_p2s(1, 2, pixcrd, imgcrd, &phi, &theta, world, &stat);
@@ -585,7 +511,7 @@ GSkyDir GWcs::xy2dir(const GSkyPixel& pix) const
 
     // Debug: Dump transformation steps
     #if defined(G_XY2DIR_DEBUG)
-    std::cout << "xy2dir: pixel=" << pix
+    std::cout << "xy2dir: pixel=" << pixel
               << " (x,y)=(" << pixcrd[0] << "," << pixcrd[1] << ")"
               << " (phi,theta)=(" << phi << "," << theta << ")"
               << " (lng,lat)=(" << world[0] << "," << world[1] << ")" << std::endl;
@@ -597,14 +523,16 @@ GSkyDir GWcs::xy2dir(const GSkyPixel& pix) const
 
 
 /***********************************************************************//**
- * @brief Returns pixel of sky direction
+ * @brief Returns sky map pixel of sky direction
  *
  * @param[in] dir Sky direction.
+ * @return Sky map pixel.
  *
- * Note that GSkyPixel indices start from 0 while the WCS pixel reference
- * starts from 1.
+ * Returns the sky map pixel for a given sky direction. Note that the sky
+ * map pixel values start from 0 while the WCS pixel reference starts from
+ * 1.
  ***************************************************************************/
-GSkyPixel GWcs::dir2xy(const GSkyDir& dir) const
+GSkyPixel GWcs::dir2pix(const GSkyDir& dir) const
 {
     // Allocate memory for transformation
     double pixcrd[2];

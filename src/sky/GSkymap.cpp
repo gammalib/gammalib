@@ -46,13 +46,13 @@
 #define G_OP_ACCESS_1D                        "GSkymap::operator(int&, int&)"
 #define G_OP_ACCESS_2D                  "GSkymap::operator(GSkyPixel&, int&)"
 #define G_OP_VALUE                        "GSkymap::operator(GSkyDir&, int&)"
-#define G_READ                               "GSkymap::read(const GFitsHDU*)"
-#define G_PIX2DIR                                    "GSkymap::pix2dir(int&)"
+#define G_INX2DIR                                    "GSkymap::inx2dir(int&)"
+#define G_PIX2DIR                              "GSkymap::pix2dir(GSkyPixel&)"
+#define G_DIR2INX                                "GSkymap::dir2inx(GSkyDir&)"
 #define G_DIR2PIX                                "GSkymap::dir2pix(GSkyDir&)"
-#define G_XY2DIR                                "GSkymap::xy2dir(GSkyPixel&)"
-#define G_DIR2XY                                  "GSkymap::dir2xy(GSkyDir&)"
 #define G_OMEGA1                                       "GSkymap::omega(int&)"
 #define G_OMEGA2                                 "GSkymap::omega(GSkyPixel&)"
+#define G_READ                               "GSkymap::read(const GFitsHDU*)"
 #define G_SET_WCS     "GSkymap::set_wcs(std::string&, std::string&, double&,"\
                               " double&, double&, double&, double&, double&,"\
                                                        " GMatrix&, GVector&)"
@@ -260,72 +260,104 @@ GSkymap::~GSkymap(void)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief 1D pixel access operator
+ * @brief Assignment operator
  *
- * @param[in] pixel Pixel index (0,1,...,m_num_pixels).
- * @param[in] map Map index (0,1,...,m_num_maps).
+ * @param[in] map Sky map.
+ * @return Sky map.
+ ***************************************************************************/
+GSkymap& GSkymap::operator=(const GSkymap& map)
+{
+    // Execute only if object is not identical
+    if (this != &map) {
+
+        // Free members
+        free_members();
+
+        // Initialise private members for clean destruction
+        init_members();
+
+        // Copy members
+        copy_members(map);
+
+    } // endif: object was not identical
+
+    // Return this object
+    return *this;
+}
+
+
+/***********************************************************************//**
+ * @brief Pixel index access operator
+ *
+ * @param[in] index Pixel index [0,...,npix()-1].
+ * @param[in] map Map index [0,...,nmaps()-1].
+ * @return Sky map pixel value.
  *
  * @exception GException::out_of_range
  *            Pixel index and/or map index are outside valid range.
  *
  * Access sky map pixel by its index, where the most quickly varying axis is
  * the x axis of the map.
- *
- * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
-double& GSkymap::operator() (const int& pixel, const int& map)
+double& GSkymap::operator()(const int& index, const int& map)
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
-    if (pixel < 0 || pixel >= m_num_pixels) {
-        throw GException::out_of_range(G_OP_ACCESS_1D, pixel, 0, m_num_pixels-1);
+    if (index < 0 || index >= m_num_pixels) {
+        throw GException::out_of_range(G_OP_ACCESS_1D,
+                                       "Sky map pixel index",
+                                       index, m_num_pixels);
     }
     if (map < 0 || map >= m_num_maps) {
-        throw GException::out_of_range(G_OP_ACCESS_1D, map, 0, m_num_maps-1);
+        throw GException::out_of_range(G_OP_ACCESS_1D,
+                                       "Sky map map index",
+                                       map, m_num_maps);
     }
     #endif
 
     // Return reference to pixel value
-    return m_pixels[pixel+m_num_pixels*map];
+    return m_pixels[index+m_num_pixels*map];
 }
 
 
 /***********************************************************************//**
- * @brief 1D pixel access operator (const variant)
+ * @brief Pixel index access operator (const variant)
  *
- * @param[in] pixel Pixel index (0,1,...,m_num_pixels).
- * @param[in] map Map index (0,1,...,m_num_maps).
+ * @param[in] index Pixel index [0,...,npix()-1].
+ * @param[in] map Map index [0,...,nmaps()-1].
  *
  * @exception GException::out_of_range
  *            Pixel index and/or map index are outside valid range.
  *
  * Access sky map pixel by its index, where the most quickly varying axis is
  * the x axis of the map.
- *
- * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
-const double& GSkymap::operator() (const int& pixel, const int& map) const
+const double& GSkymap::operator()(const int& index, const int& map) const
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
-    if (pixel < 0 || pixel >= m_num_pixels) {
-        throw GException::out_of_range(G_OP_ACCESS_1D, pixel, 0, m_num_pixels-1);
+    if (index < 0 || index >= m_num_pixels) {
+        throw GException::out_of_range(G_OP_ACCESS_1D,
+                                       "Sky map pixel index",
+                                       index, m_num_pixels);
     }
     if (map < 0 || map >= m_num_maps) {
-        throw GException::out_of_range(G_OP_ACCESS_1D, map, 0, m_num_maps-1);
+        throw GException::out_of_range(G_OP_ACCESS_1D,
+                                       "Sky map map index",
+                                       map, m_num_maps);
     }
     #endif
 
     // Return reference to pixel value
-    return m_pixels[pixel+m_num_pixels*map];
+    return m_pixels[index+m_num_pixels*map];
 }
 
 
 /***********************************************************************//**
- * @brief 2D pixel access operator
+ * @brief Sky map pixel access operator
  *
- * @param[in] pixel Sky pixel.
- * @param[in] map Map index (0,1,...,m_num_maps).
+ * @param[in] pixel Sky map pixel.
+ * @param[in] map Map index [0,...,nmaps()-1].
  *
  * @exception GException::out_of_range
  *            Sky pixel and/or map index are outside valid range.
@@ -335,7 +367,7 @@ const double& GSkymap::operator() (const int& pixel, const int& map) const
  *
  * @todo Implement proper skymap exception (actual is for matrix elements)
  ***************************************************************************/
-double& GSkymap::operator() (const GSkyPixel& pixel, const int& map)
+double& GSkymap::operator()(const GSkyPixel& pixel, const int& map)
 {
     // Throw an error if pixel index or map index is not in valid range
     #if defined(G_RANGE_CHECK)
@@ -345,12 +377,14 @@ double& GSkymap::operator() (const GSkyPixel& pixel, const int& map)
                                        m_num_x-1, m_num_y-1);
     }
     if (map < 0 || map >= m_num_maps) {
-        throw GException::out_of_range(G_OP_ACCESS_2D, map, 0, m_num_maps-1);
+        throw GException::out_of_range(G_OP_ACCESS_2D,
+                                       "Sky map map index",
+                                       map, m_num_maps);
     }
     #endif
 
     // Get pixel index
-    int index = xy2pix(pixel);
+    int index = pix2inx(pixel);
 
     // Return reference to pixel value
     return m_pixels[index+m_num_pixels*map];
@@ -358,10 +392,10 @@ double& GSkymap::operator() (const GSkyPixel& pixel, const int& map)
 
 
 /***********************************************************************//**
- * @brief 2D pixel access operator
+ * @brief Sky map pixel access operator
  *
- * @param[in] pixel Sky pixel.
- * @param[in] map Map index (0,1,...,m_num_maps).
+ * @param[in] pixel Sky map pixel.
+ * @param[in] map Map index [0,...,nmaps()-1].
  *
  * @exception GException::out_of_range
  *            Sky pixel and/or map index are outside valid range.
@@ -381,12 +415,14 @@ const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
                                        m_num_x-1, m_num_y-1);
     }
     if (map < 0 || map >= m_num_maps) {
-        throw GException::out_of_range(G_OP_ACCESS_2D, map, 0, m_num_maps-1);
+        throw GException::out_of_range(G_OP_ACCESS_2D,
+                                       "Sky map map index",
+                                       map, m_num_maps);
     }
     #endif
 
     // Get pixel index
-    int index = xy2pix(pixel);
+    int index = pix2inx(pixel);
 
     // Return reference to pixel value
     return m_pixels[index+m_num_pixels*map];
@@ -397,7 +433,7 @@ const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
  * @brief Return interpolated skymap value for sky direction
  *
  * @param[in] dir Sky direction.
- * @param[in] map Map index (0,1,...,m_num_maps).
+ * @param[in] map Map index [0,...,nmaps()-1].
  *
  * @exception GException::out_of_range
  *            Map index lies outside valid range.
@@ -406,12 +442,14 @@ const double& GSkymap::operator()(const GSkyPixel& pixel, const int& map) const
  * interpolation of the neighbouring pixels. If the sky direction falls
  * outside the area covered by the skymap, a value of 0 is returned.
  ***************************************************************************/
-double GSkymap::operator() (const GSkyDir& dir, const int& map) const
+double GSkymap::operator()(const GSkyDir& dir, const int& map) const
 {
     // Throw an error if the map index is not in valid range
     #if defined(G_RANGE_CHECK)
     if (map < 0 || map >= m_num_maps) {
-        throw GException::out_of_range(G_OP_VALUE, map, 0, m_num_maps-1);
+        throw GException::out_of_range(G_OP_VALUE,
+                                       "Sky map map index",
+                                       map, m_num_maps);
     }
     #endif
 
@@ -419,7 +457,7 @@ double GSkymap::operator() (const GSkyDir& dir, const int& map) const
     double intensity = 0.0;
 
     // Determine sky pixel
-    GSkyPixel pixel = dir2xy(dir);
+    GSkyPixel pixel = dir2pix(dir);
 
     // Continue only if pixel is within the map
     if (contains(pixel)) {
@@ -476,32 +514,6 @@ double GSkymap::operator() (const GSkyDir& dir, const int& map) const
 }
 
 
-/***********************************************************************//**
- * @brief Assignment operator
- *
- * @param[in] map Sky map.
- ***************************************************************************/
-GSkymap& GSkymap::operator= (const GSkymap& map)
-{
-    // Execute only if object is not identical
-    if (this != &map) {
-
-        // Free members
-        free_members();
-
-        // Initialise private members for clean destruction
-        init_members();
-
-        // Copy members
-        copy_members(map);
-
-    } // endif: object was not identical
-
-    // Return this object
-    return *this;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =
@@ -511,7 +523,7 @@ GSkymap& GSkymap::operator= (const GSkymap& map)
  /***********************************************************************//**
  * @brief Clear instance.
  *
- * This method properly resets the object to an initial state.
+ * Resets the sky map to the initial state.
  ***************************************************************************/
 void GSkymap::clear(void)
 {
@@ -527,13 +539,377 @@ void GSkymap::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone sky map
+ *
+ * @return Pointer to deep copy of sky map.
  ***************************************************************************/
 GSkymap* GSkymap::clone(void) const
 {
     return new GSkymap(*this);
 }
 
+
+/***********************************************************************//**
+ * @brief Converts pixel index into sky map pixel
+ *
+ * @param[in] index Pixel index [0,...,npix()-1].
+ * @return Sky map pixel.
+ *
+ * Converts the pixel @p index into a sky map pixel (GSkyPixel).The dimension
+ * of GSkyPixel will be identical to the dimension of the sky map (i.e. a 1D
+ * sky map leads to a 1D GSkyPixel object, a 2D sky map leads to a 2D
+ * GSkyPixel object.
+ ***************************************************************************/
+GSkyPixel GSkymap::inx2pix(const int& index) const
+{
+    // Initialise sky map pixel
+    GSkyPixel pixel;
+
+    // Get x and y indices
+    double x;
+    double y;
+    if (m_num_x != 0) { //!< 2D sky map
+        pixel.x(double(index % m_num_x));
+        pixel.y(double(index / m_num_x));
+    }
+    else {              //!< 1D sky map
+        pixel.index(index);
+    }
+
+    // Return pixel
+    return pixel;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] index Pixel index [0,...,npix()-1].
+ * @return Sky direction.
+ *
+ * @exception GException::invalid_value
+ *            No valid sky projection found.
+ *
+ * Returns sky direction for a given pixel index.
+ ***************************************************************************/
+GSkyDir GSkymap::inx2dir(const int& index) const
+{
+    // Throw error if sky projection is not valid
+    if (m_proj == NULL) {
+        std::string msg = "Sky projection has not been defined.";
+        throw GException::invalid_value(G_INX2DIR, msg);
+    }
+
+    // Determine sky direction from pixel index.
+    GSkyDir dir = m_proj->pix2dir(inx2pix(index));
+
+    // Return sky direction
+    return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky direction of pixel
+ *
+ * @param[in] pixel Sky map pixel.
+ * @return Sky direction.
+ *
+ * @exception GException::invalid_value
+ *            No valid sky projection found.
+ * @exception GException::invalid_argument
+ *            2D sky map pixel used to access 1D projection.
+ *
+ * Returns sky direction for a given sky map @p pixel.
+ ***************************************************************************/
+GSkyDir GSkymap::pix2dir(const GSkyPixel& pixel) const
+{
+    // Throw error if WCS is not valid
+    if (m_proj == NULL) {
+        std::string msg = "Sky projection has not been defined.";
+        throw GException::invalid_value(G_PIX2DIR, msg);
+    }
+
+    // Initialise sky direction
+    GSkyDir dir;
+
+    // If pixel size matches the projection size then perform a straight
+    // forward conversion
+    if (m_proj->size() == pixel.size()) {
+        dir = m_proj->pix2dir(pixel);
+    }
+
+    // ... otherwise, if we have a 2D projection but a 1D pixel then
+    // interpret the pixel as the linear index in the pixel array
+    else if (m_proj->size() == 2) {
+        dir = m_proj->pix2dir(GSkyPixel(inx2pix(int(pixel))));
+    }
+
+    // ... otherwise we have a 1D projection but a 2D pixel. There is
+    // no unambiguous way to handle this case, hence we throw an exception
+    else {
+        std::string msg = "A 2-dimensional sky map pixel "+pixel.print()+
+                          " is used to determine the sky direction for"
+                          " the 1-dimensional sky projection \""+
+                          m_proj->name()+"\"\n"
+                          "Please specify a 1-dimensional sky map pixel.";
+        throw GException::invalid_argument(G_PIX2DIR, msg);
+    }
+
+    // Return sky direction
+    return dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Converts sky map pixel into pixel index
+ *
+ * @param[in] pixel Sky map pixel.
+ * @return Pixel index [0,...,npix()-1].
+ *
+ * Converts a sky map @p pixel into the pixel index.
+ ***************************************************************************/
+int GSkymap::pix2inx(const GSkyPixel& pixel) const
+{
+    // Initialise pixel index
+    int index = 0;
+
+    // Handle 1D sky map pixel
+    if (pixel.is1D()) {
+        index = int(pixel);
+    }
+
+    // Handle 2D sky map pixel
+    else if (pixel.is2D()) {
+
+        // Get x and y indices by rounding the (x,y) values
+        int ix = int(pixel.x()+0.5);
+        int iy = int(pixel.y()+0.5);
+
+        // Set index
+        index = ix + iy * m_num_x;
+
+    }
+
+    // Return index
+    return index;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pixel index for a given sky direction
+ *
+ * @param[in] dir Sky direction.
+ * @return Pixel index [0,...,npix()-1].
+ *
+ * @exception GException::invalid_value
+ *            No valid sky projection found.
+ *
+ * Returns sky map pixel index for a given sky direction.
+ ***************************************************************************/
+int GSkymap::dir2inx(const GSkyDir& dir) const
+{
+    // Throw error if WCS is not valid
+    if (m_proj == NULL) {
+        std::string msg = "Sky projection has not been defined.";
+        throw GException::invalid_value(G_DIR2INX, msg);
+    }
+
+    // Determine pixel index for a given sky direction
+    int index = pix2inx(m_proj->dir2pix(dir));
+
+    // Return pixel index
+    return index;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns sky map pixel for a given sky direction
+ *
+ * @param[in] dir Sky direction.
+ * @return Sky map pixel.
+ *
+ * @exception GException::invalid_value
+ *            No valid sky projection found.
+ *
+ * Returns sky map pixel for a given sky direction.
+ ***************************************************************************/
+GSkyPixel GSkymap::dir2pix(const GSkyDir& dir) const
+{
+    // Throw error if WCS is not valid
+    if (m_proj == NULL) {
+        std::string msg = "Sky projection has not been defined.";
+        throw GException::invalid_value(G_DIR2PIX, msg);
+    }
+
+    // Determine pixel for a given sky direction
+    GSkyPixel pixel = m_proj->dir2pix(dir);
+
+    // Return pixel
+    return pixel;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] index Pixel index [0,...,npix()-1].
+ * @return Solid angle (steradians)
+ *
+ * @exception GException::invalid_value
+ *            No valid sky projection found.
+ *
+ * Returns the solid angle of the pixel with the specified @p index.
+ ***************************************************************************/
+double GSkymap::omega(const int& index) const
+{
+    // Throw error if WCS is not valid
+    if (m_proj == NULL) {
+        std::string msg = "Sky projection has not been defined.";
+        throw GException::invalid_value(G_OMEGA1, msg);
+    }
+
+    // Determine solid angle from pixel index.
+    double omega = m_proj->omega(inx2pix(index));
+
+    // Return solid angle
+    return omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pixel Sky map pixel.
+ * @return Solid angle (steradians)
+ *
+ * @exception GException::invalid_value
+ *            No valid sky projection found.
+ *
+ * Returns the solid angle of the specified sky map @p pixel.
+ ***************************************************************************/
+double GSkymap::omega(const GSkyPixel& pixel) const
+{
+    // Throw error if WCS is not valid
+    if (m_proj == NULL) {
+        std::string msg = "Sky projection has not been defined.";
+        throw GException::invalid_value(G_OMEGA2, msg);
+    }
+
+    // Initialise solid angle
+    double omega = 0.0;
+
+    // If pixel size matches the projection size then perform a straight
+    // forward solid angle determination
+    if (m_proj->size() == pixel.size()) {
+        omega = m_proj->omega(pixel);
+    }
+
+    // ... otherwise, if we have a 2D projection but a 1D pixel then
+    // interpret the pixel as the linear index in the pixel array
+    else if (m_proj->size() == 2) {
+        omega = m_proj->omega(GSkyPixel(inx2pix(int(pixel))));
+    }
+
+    // ... otherwise we have a 1D projection but a 2D pixel. There is
+    // no unambiguous way to handle this case, hence we throw an exception
+    else {
+        std::string msg = "A 2-dimensional sky map pixel "+pixel.print()+
+                          " is used to determine the solid angle for"
+                          " the 1-dimensional sky projection \""+
+                          m_proj->name()+"\"\n"
+                          "Please specify a 1-dimensional sky map pixel.";
+        throw GException::invalid_argument(G_OMEGA2, msg);
+    }
+
+    // Return solid angle
+    return omega;
+}
+
+
+/***********************************************************************//**
+ * @brief Set sky projection
+ *
+ * @param[in] proj Sky projection.
+ *
+ * Sets the projection from celestial to pixel coordinates. The method
+ * performs a deep copy of @p proj, allowing to destroy the argument after
+ * using the method.
+ *
+ * Warning: this method may corrupt the GSkymap object as it allows assigning
+ * for example a 1D projection to a 2D skymap. Please use this method only
+ * when you know what you're doing.
+ *
+ * @todo We may restrict this method to not allow changing the projection
+ * dimension.
+ ***************************************************************************/
+void GSkymap::projection(const GSkyProjection& proj)
+{
+    // Free any existing WCS
+    if (m_proj != NULL) delete m_proj;
+
+    // Clone input WCS
+    m_proj = proj.clone();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Verifies if sky direction falls in map
+ *
+ * @param[in] dir Sky direction.
+ *
+ * This method checks if the specified sky direction falls within the pixels
+ * covered by the skymap. The method uses the dir2xy method to convert the
+ * sky direction into 2D pixel indices, and then checks whether the pixel
+ * indices fall in the skymap.
+ ***************************************************************************/
+bool GSkymap::contains(const GSkyDir& dir) const
+{
+    // Convert sky direction into sky pixel
+    GSkyPixel pixel = dir2pix(dir);
+    
+    // Return location flag
+    return (contains(pixel));
+}
+
+
+/***********************************************************************//**
+ * @brief Checks if sky map pixel falls in map
+ *
+ * @param[in] pixel Sky map pixel.
+ * @return Trus if pixels is within map, false otherwise.
+ *
+ * Checks whether the specified sky map @p pixel falls within the skymap
+ * or not. 
+ ***************************************************************************/
+bool GSkymap::contains(const GSkyPixel& pixel) const
+{
+    // Initialise containment flag
+    bool inmap = false;
+
+    // Test 1D pixels
+    if (pixel.is1D()) {
+        if (pixel.index()+0.5 >= 0.0 && pixel.index()-0.5 < m_num_pixels) {
+            inmap = true;
+        }
+    }
+
+    // Test 2D pixels
+    else if (pixel.is2D()) {
+
+        // If pixel is in range then set containment flag to true
+        if ((pixel.x()+0.5 >= 0.0 && pixel.x()-0.5 < m_num_x) &&
+            (pixel.y()+0.5 >= 0.0 && pixel.y()-0.5 < m_num_y)) {
+            inmap = true;
+        }
+
+    }
+
+    // Return containment flag
+    return inmap;
+}
 
 
 /***********************************************************************//**
@@ -544,6 +920,9 @@ GSkymap* GSkymap::clone(void) const
  * Loads HEALPix and non HEALPix skymaps. First searches for HEALPix map in
  * FITS file by scanning all HDUs for PIXTYPE=HEALPIX. If no HEALPix map has
  * been found then search load first non-empty image.
+ *
+ * @todo Do we have to restrict a HEALPix map to a BinTable and a WCS map
+ * to a Double precision image???
  ***************************************************************************/
 void GSkymap::load(const std::string& filename)
 {
@@ -568,16 +947,12 @@ void GSkymap::load(const std::string& filename)
 
         // Get pointer to HDU
         hdu = fits.hdu(extno);
-
+        
         // If PIXTYPE keyword equals "HEALPIX" then load map
-        try {
-            if (hdu->string("PIXTYPE") == "HEALPIX") {
-                read_healpix(static_cast<const GFitsBinTable*>(hdu));
-                loaded = true;
-                break;
-            }
-        }
-        catch (GException::fits_key_not_found &e) {
+        if (hdu->hascard("PIXTYPE") && hdu->string("PIXTYPE") == "HEALPIX") {
+            read_healpix(static_cast<const GFitsTable*>(hdu));
+            loaded = true;
+            break;
         }
 
     } // endfor: looped over HDUs
@@ -597,7 +972,7 @@ void GSkymap::load(const std::string& filename)
             }
 
             // Load WCS map
-            read_wcs(static_cast<const GFitsImageDouble*>(hdu));
+            read_wcs(static_cast<const GFitsImage*>(hdu));
             loaded = true;
             break;
 
@@ -674,14 +1049,10 @@ void GSkymap::read(const GFitsHDU* hdu)
         // Initialize load flag
         bool loaded = false;
 
-        // Try load as HEALPix map
-        try {
-            if (hdu->string("PIXTYPE") == "HEALPIX") {
-                read_healpix(static_cast<const GFitsBinTable*>(hdu));
-                loaded = true;
-            }
-        }
-        catch (GException::fits_key_not_found &e) {
+        // If PIXTYPE keyword equals "HEALPIX" then load map
+        if (hdu->hascard("PIXTYPE") && hdu->string("PIXTYPE") == "HEALPIX") {
+            read_healpix(static_cast<const GFitsTable*>(hdu));
+            loaded = true;
         }
 
         // ... otherwise try loading as non HEALPix map
@@ -689,7 +1060,7 @@ void GSkymap::read(const GFitsHDU* hdu)
 
             // Load only if HDU contains an image
             if (hdu->exttype() == 0) {
-                read_wcs(static_cast<const GFitsImageDouble*>(hdu));
+                read_wcs(static_cast<const GFitsImage*>(hdu));
                 loaded = true;
             }
 
@@ -741,332 +1112,6 @@ void GSkymap::write(GFits* file) const
 
 
 /***********************************************************************//**
- * @brief Returns sky direction of pixel
- *
- * @param[in] pix Pixel number (0,1,...,m_num_pixels).
- *
- * @exception GException::wcs
- *            No valid WCS found.
- *
- * Returns sky direction for a given sky map pixel. This methods works for
- * sky maps that have a 1D (e.g. HEALPix) or 2D pixel indexation scheme.
- * Automatic index conversion is provided so that 1D schemes need only to
- * implement 1D conversion methods while 2D schemes need only to implement
- * 2D conversion methods.
- ***************************************************************************/
-GSkyDir GSkymap::pix2dir(const int& pix) const
-{
-    // Throw error if sky projection is not valid
-    if (m_proj == NULL) {
-        throw GException::wcs(G_PIX2DIR, "No valid sky projection found.");
-    }
-
-    // Determine sky direction from pixel. Use 2D version if sky map is
-    // 2D, otherwise use 1D version.
-    GSkyDir dir = (m_num_x == 0) ? m_proj->pix2dir(pix)
-                                 : m_proj->xy2dir(pix2xy(pix));
-
-    // Return sky direction
-    return dir;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel index for a given sky direction
- *
- * @param[in] dir Sky direction.
- *
- * @exception GException::wcs
- *            No valid WCS found.
- *
- * Returns sky map pixel for a given sky direction. This methods works for
- * sky maps that have a 1D (e.g. HEALPix) or 2D pixel indexation scheme.
- * Automatic index conversion is provided so that 1D schemes need only to
- * implement 1D conversion methods while 2D schemes need only to implement
- * 2D conversion methods.
- ***************************************************************************/
-int GSkymap::dir2pix(const GSkyDir& dir) const
-{
-    // Throw error if WCS is not valid
-    if (m_proj == NULL) {
-        throw GException::wcs(G_DIR2PIX, "No valid sky projection found.");
-    }
-
-    // Determine 1D pixel index for a given sky direction
-    int pix = (m_num_x == 0) ? m_proj->dir2pix(dir)
-                             : xy2pix(m_proj->dir2xy(dir));
-
-    // Return pixel index
-    return pix;
-}
-
-
-/***********************************************************************//**
- * @brief Returns sky direction of pixel
- *
- * @param[in] pix Sky map pixel.
- *
- * @exception GException::wcs
- *            No valid WCS found.
- *
- * Returns sky direction for a given sky map pixel. This methods works for
- * sky maps that have a 1D (e.g. HEALPix) or 2D pixel indexation scheme.
- * Automatic index conversion is provided so that 1D schemes need only to
- * implement 1D conversion methods while 2D schemes need only to implement
- * 2D conversion methods.
- ***************************************************************************/
-GSkyDir GSkymap::xy2dir(const GSkyPixel& pix) const
-{
-    // Throw error if WCS is not valid
-    if (m_proj == NULL) {
-        throw GException::wcs(G_XY2DIR, "No valid sky projection found.");
-    }
-
-    // Determine sky direction from pixel. Use 2D version if sky map is
-    // 2D, otherwise use 1D version.
-    GSkyDir dir = (m_num_x == 0) ? m_proj->pix2dir(xy2pix(pix))
-                                 : m_proj->xy2dir(pix);
-
-    // Return sky direction
-    return dir;
-}
-
-
-/***********************************************************************//**
- * @brief Returns sky map pixel for a given sky direction
- *
- * @param[in] dir Sky direction.
- *
- * @exception GException::wcs
- *            No valid WCS found.
- *
- * Returns sky map pixel for a given sky direction. This methods works for
- * sky maps that have a 1D (e.g. HEALPix) or 2D pixel indexation scheme.
- * Automatic index conversion is provided so that 1D schemes need only to
- * implement 1D conversion methods while 2D schemes need only to implement
- * 2D conversion methods.
- ***************************************************************************/
-GSkyPixel GSkymap::dir2xy(const GSkyDir& dir) const
-{
-    // Throw error if WCS is not valid
-    if (m_proj == NULL) {
-        throw GException::wcs(G_DIR2XY, "No valid sky projection found.");
-    }
-
-    // Determine 1D pixel index for a given sky direction
-    GSkyPixel pix = (m_num_x == 0) ? pix2xy(m_proj->dir2pix(dir))
-                                   : m_proj->dir2xy(dir);
-
-    // Return pixel index
-    return pix;
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Pixel number (0,1,...,m_num_pixels).
- *
- * @exception GException::wcs
- *            No valid WCS found.
- ***************************************************************************/
-double GSkymap::omega(const int& pix) const
-{
-    // Throw error if WCS is not valid
-    if (m_proj == NULL) {
-        throw GException::wcs(G_OMEGA1, "No valid sky projection found.");
-    }
-
-    // Determine solid angle from pixel. Use 2D version if sky map is
-    // 2D, otherwise use 1D version.
-    double omega = (m_num_x == 0) ? m_proj->omega(pix)
-                                  : m_proj->omega(pix2xy(pix));
-
-    // Return solid angle
-    return omega;
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Sky map pixel.
- *
- * @exception GException::wcs
- *            No valid WCS found.
- ***************************************************************************/
-double GSkymap::omega(const GSkyPixel& pix) const
-{
-    // Throw error if WCS is not valid
-    if (m_proj == NULL) {
-        throw GException::wcs(G_OMEGA2, "No valid sky projection found.");
-    }
-
-    // Determine solid angle from pixel. Use 2D version if sky map is
-    // 2D, otherwise use 1D version.
-    double omega = (m_num_x == 0) ? m_proj->omega(xy2pix(pix))
-                                  : m_proj->omega(pix);
-
-    // Return solid angle
-    return omega;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of pixels
- ***************************************************************************/
-int GSkymap::npix(void) const
-{
-    // Return number of pixels
-    return m_num_pixels;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of pixels in x coordinate
- ***************************************************************************/
-int GSkymap::nx(void) const
-{
-    // Return number of pixels
-    return m_num_x;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of pixels in y coordinate
- ***************************************************************************/
-int GSkymap::ny(void) const
-{
-    // Return number of pixels
-    return m_num_y;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of maps
- ***************************************************************************/
-int GSkymap::nmaps(void) const
-{
-    // Return number of maps
-    return m_num_maps;
-}
-
-
-/***********************************************************************//**
- * @brief Converts 2D index (x,y) into 1D pixel index
- *
- * @param[in] pix 2D pixel index.
- *
- * The (x,y) value is rounded to nearest integers before conversion. The x 
- * axis is assumed as the most rapidely varying index.
- ***************************************************************************/
-int GSkymap::xy2pix(const GSkyPixel& pix) const
-{
-    // Get x and y indices by rounding the (x,y) values
-    int ix = int(pix.x()+0.5);
-    int iy = int(pix.y()+0.5);
-
-    // Return index
-    return (ix+iy*m_num_x);
-}
-
-
-/***********************************************************************//**
- * @brief Converts 1D pixel index into 2D index (x,y)
- *
- * @param[in] pix 1D pixel index.
- *
- * If skymap is not 2D the pixel index is returned in the x element of the
- * GSkyPixel object.
- ***************************************************************************/
-GSkyPixel GSkymap::pix2xy(const int& pix) const
-{
-    // Get x and y indices
-    double x;
-    double y;
-    if (m_num_x != 0) {
-        x = double(pix % m_num_x);
-        y = double(pix / m_num_x);
-    }
-    else {
-        x = double(pix);
-        y = 0.0;
-    }
-
-    // Set pixel
-    GSkyPixel pixel(x, y);
-
-    // Return pixel
-    return pixel;
-}
-
-
-/***********************************************************************//**
- * @brief Set sky projection
- *
- * @param[in] proj Sky projection.
- *
- * Sets the projection from celestial to pixel coordinates. The method
- * performs a deep copy of @p proj, allowing to destroy the argument after
- * using the method. 
- ***************************************************************************/
-void GSkymap::projection(const GSkyProjection& proj)
-{
-    // Free any existing WCS
-    if (m_proj != NULL) delete m_proj;
-
-    // Clone input WCS
-    m_proj = proj.clone();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Verifies if sky direction falls in map
- *
- * @param[in] dir Sky direction.
- *
- * This method checks if the specified sky direction falls within the pixels
- * covered by the skymap. The method uses the dir2xy method to convert the
- * sky direction into 2D pixel indices, and then checks whether the pixel
- * indices fall in the skymap.
- ***************************************************************************/
-bool GSkymap::contains(const GSkyDir& dir) const
-{
-    // Convert sky direction into sky pixel
-    GSkyPixel pixel = dir2xy(dir);
-    
-    // Return location flag
-    return (contains(pixel));
-}
-
-
-/***********************************************************************//**
- * @brief Verifies if sky pixel falls in map
- *
- * @param[in] pixel Sky pixel.
- *
- * This method checks if the specified sky pixel is within the skymap.
- ***************************************************************************/
-bool GSkymap::contains(const GSkyPixel& pixel) const
-{
-    // Initialise location flag
-    bool inmap = false;
-
-    // If pixel is in range then set location flag to true
-    if ((pixel.x()+0.5 >= 0.0 && pixel.x()-0.5 < m_num_x) &&
-        (pixel.y()+0.5 >= 0.0 && pixel.y()-0.5 < m_num_y)) {
-        inmap = true;
-    }
-
-    // Return location flag
-    return inmap;
-}
-
-
-/***********************************************************************//**
  * @brief Print sky map
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -1088,7 +1133,7 @@ std::string GSkymap::print(const GChatter& chatter) const
         result.append(gammalib::str(m_num_pixels));
         result.append("\n"+gammalib::parformat("Number of maps"));
         result.append(gammalib::str(m_num_maps));
-        if (m_proj != NULL && m_proj->code() != "HPX") {
+        if (m_proj != NULL && m_proj->size() == 2) {
             result.append("\n"+gammalib::parformat("X axis dimension"));
             result.append(gammalib::str(m_num_x));
             result.append("\n"+gammalib::parformat("Y axis dimension"));
@@ -1181,7 +1226,7 @@ void GSkymap::copy_members(const GSkymap& map)
     // Copy pixels
     if (size > 0 && map.m_pixels != NULL) {
         alloc_pixels();
-        for (int i = 0; i <  size; ++i) {
+        for (int i = 0; i < size; ++i) {
             m_pixels[i] = map.m_pixels[i];
         }
     }

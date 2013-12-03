@@ -53,14 +53,12 @@ public:
     virtual std::string name(void) const = 0;
     
     // Implemented virtual methods
+    virtual int         size(void) const;
     virtual void        read(const GFitsHDU* hdu);
     virtual void        write(GFitsHDU* hdu) const;
-    virtual double      omega(const int& pix) const;
-    virtual double      omega(const GSkyPixel& pix) const;
-    virtual GSkyDir     pix2dir(const int& pix) const;
-    virtual int         dir2pix(const GSkyDir& dir) const;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
-    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
+    virtual double      omega(const GSkyPixel& pixel) const;
+    virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
+    virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;
 
     // Other methods
     void   set(const std::string& coords,

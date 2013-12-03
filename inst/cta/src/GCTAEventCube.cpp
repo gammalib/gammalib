@@ -418,7 +418,7 @@ int GCTAEventCube::number(void) const
     double number = 0.0;
 
     // Get pointer on skymap pixels
-    double* pixels = m_map.pixels();
+    const double* pixels = m_map.pixels();
 
     // Sum event cube
     if (size() > 0 && pixels != NULL) {
@@ -670,7 +670,7 @@ void GCTAEventCube::set_directions(void)
     for (int iy = 0; iy < ny(); ++iy) {
         for (int ix = 0; ix < nx(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
-            m_dirs.push_back(GCTAInstDir(m_map.xy2dir(pixel)));
+            m_dirs.push_back(GCTAInstDir(m_map.pix2dir(pixel)));
             m_omega.push_back(m_map.omega(pixel));
         }
     }
@@ -770,24 +770,27 @@ void GCTAEventCube::set_bin(const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
+    if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_SET_BIN, index, 0, size()-1);
+    }
     #endif
 
     // Check for the existence of energies and energy widths
-    if (m_energies.size() != ebins() || m_ewidth.size() != ebins())
+    if (m_energies.size() != ebins() || m_ewidth.size() != ebins()) {
         throw GCTAException::no_energies(G_SET_BIN);
+    }
 
     // Check for the existence of sky directions and solid angles
-    if (m_dirs.size() != npix() || m_omega.size() != npix())
+    if (m_dirs.size() != npix() || m_omega.size() != npix()) {
         throw GCTAException::no_dirs(G_SET_BIN);
+    }
 
     // Get pixel and energy bin indices.
     int ipix = index % npix();
     int ieng = index / npix();
 
     // Set pointers
-    m_bin.m_counts = &(m_map.pixels()[index]);
+    m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
     m_bin.m_energy = &(m_energies[ieng]);
     m_bin.m_time   = &m_time;
     m_bin.m_dir    = &(m_dirs[ipix]);
