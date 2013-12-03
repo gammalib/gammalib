@@ -683,7 +683,7 @@ void GPars::load(const std::string& filename,
     // Overwrite parameter values that are specified in the command line
     for (int i = 1; i < args.size(); ++i) {
 
-        // Extract parameter name and value
+        // Extract parameter name and value (empty values are permitted)
         size_t pos = args[i].find("=");
         if (pos == std::string::npos) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
@@ -695,11 +695,7 @@ void GPars::load(const std::string& filename,
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                        "no parameter name before \"=\"");
         }
-        if (value.length() < 1) {
-            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                       "no parameter value after \"=\"");
-        }
-
+        
         // Check if parameter exists
         if (!contains(name)) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],

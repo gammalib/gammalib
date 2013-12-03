@@ -281,15 +281,22 @@ double GApplication::celapse(void) const
 /***********************************************************************//**
  * @brief Open log file
  *
- * @param[in] clobber (defaults to true)
+ * @param[in] clobber Overwrite (true) or append (false) to existing file
+ *                    (defaults to true)
  *
  * Opens application log file and sets the logger chattiness dependent on
  * the chatter parameter of the application.
  ***************************************************************************/
 void GApplication::logFileOpen(const bool& clobber)
 {
-    // Initialise the application logger
-    log.open(log_filename(), clobber);
+    // Open logger only if filename is non-empty
+    if (!log_filename().empty()) {
+
+        // Initialise the application logger
+        log.open(log_filename(), clobber);
+
+
+    }
 
     // Set logger chattiness
     set_log_chatter();
