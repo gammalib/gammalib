@@ -650,13 +650,20 @@ void GCTAEventCube::read_gti(const GFitsTable* hdu)
  * cube pixels. Sky directions are stored in an array of GCTAInstDir objects
  * while solid angles are stored in units of sr in an array of double
  * precision variables.
+ *
+ * A kluge has been introduced that handles invalid pixels. Invalid pixels
+ * may occur if a Hammer-Aitoff projection is used. In this case, pixels may
+ * lie outside the valid sky region. As invalid pixels lead to exceptions
+ * in the WCS classes, we simply need to catch the exceptions here. Invalid
+ * pixels are signaled by setting the solid angle of the pixel to 0.
  ***************************************************************************/
 void GCTAEventCube::set_directions(void)
 {
     // Throw an error if we have no sky pixels
-    if (npix() < 1)
+    if (npix() < 1) {
         throw GCTAException::no_sky(G_SET_DIRECTIONS, "Every CTA event cube"
                                    " needs a definiton of the sky pixels.");
+    }
 
     // Clear old pixel directions and solid angle
     m_dirs.clear();
@@ -669,9 +676,15 @@ void GCTAEventCube::set_directions(void)
     // Set pixel directions and solid angles
     for (int iy = 0; iy < ny(); ++iy) {
         for (int ix = 0; ix < nx(); ++ix) {
-            GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
-            m_dirs.push_back(GCTAInstDir(m_map.pix2dir(pixel)));
-            m_omega.push_back(m_map.omega(pixel));
+            try {
+                GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
+                m_dirs.push_back(GCTAInstDir(m_map.pix2dir(pixel)));
+                m_omega.push_back(m_map.omega(pixel));
+            }
+            catch (GException::wcs_invalid_x_y& e) {
+                m_dirs.push_back(GCTAInstDir());
+                m_omega.push_back(0.0);
+            }
         }
     }
 

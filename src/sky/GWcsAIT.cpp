@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GMath.hpp"
+#include "GTools.hpp"
 #include "GWcsAIT.hpp"
 #include "GWcsRegistry.hpp"
 
@@ -44,6 +45,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_PRJ                             //!< Debug GWcsAIT::prj_x2s
 
 /* __ Local prototypes ___________________________________________________ */
 
@@ -304,7 +306,9 @@ void GWcsAIT::prj_set(void) const
     m_w.assign(4, 0.0);
     
     // Set undefined parameters
-    if (m_r0 == 0.0) m_r0 = gammalib::rad2deg;
+    if (m_r0 == 0.0) {
+        m_r0 = gammalib::rad2deg;
+    }
     
     // Precompute 
     m_w[0] = 2.0 * m_r0 * m_r0;
@@ -415,6 +419,19 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
                     istat  = 1;
                     status = 3;
                     n_invalid++;
+                    #if defined(G_DEBUG_PRJ)
+                    std::cout << "prj_x2s(Phi)..:";
+                    std::cout << " nx=" << nx;
+                    std::cout << " ny=" << ny;
+                    std::cout << " ix=" << ix;
+                    std::cout << " iy=" << iy;
+                    std::cout << " yp=" << *yp;
+                    std::cout << " yj=" << yj;
+                    std::cout << " yj2=" << yj2;
+                    std::cout << " phip=" << *phip;
+                    std::cout << " s=" << s;
+                    std::cout << std::endl;
+                    #endif
                 }
                 s = 0.5;
             }
@@ -432,9 +449,22 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
             double t = z*yj/m_r0;
             if (std::abs(t) > 1.0) {
                 if (fabs(t) > 1.0+tol) {
-                    istat  = 1;
-                    status = 3;
-                    n_invalid++;
+                    if (istat == 0) {
+                        istat  = 1;
+                        status = 3;
+                        n_invalid++;
+                    }
+                    #if defined(G_DEBUG_PRJ)
+                    std::cout << "prj_x2s(Theta):";
+                    std::cout << " x0=" << x0;
+                    std::cout << " y0=" << y0;
+                    std::cout << " phip=" << *phip;
+                    std::cout << " z=" << z;
+                    std::cout << " yj=" << yj;
+                    std::cout << " m_r0=" << m_r0;
+                    std::cout << " t=" << t;
+                    std::cout << std::endl;
+                    #endif
                 }
                 t = (t < 0) ? -90.0 : 90.0;
             }
