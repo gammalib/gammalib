@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  test_GFits.hpp  -   test FITS class                    *
+ *                   test_GFits.hpp - Test FITS class                      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file test_GFits.hpp
  * @brief Definition of unit tests for FITS classes
- * @author J. Knoedlseder
+ * @author Jean-Baptiste Cayrou
  */
 
 #ifndef TEST_GFITS_HPP

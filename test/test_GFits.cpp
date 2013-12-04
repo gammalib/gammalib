@@ -420,6 +420,7 @@ void TestGFits::test_create(void)
     system("rm -rf test_empty_image.fits");
     system("rm -rf test.fits");
     system("rm -rf test_create_bintable.fits");
+    system("rm -rf test_container.fits");
 
     // Create empty FITS file
     test_try("Create empty FITS file");
@@ -446,7 +447,7 @@ void TestGFits::test_create(void)
         test_try_failure(e);
     }
 
-    // Attach double precision image
+    // Append double precision image
     double sum = 0.0;
     test_try("Attach double precision image");
     try {
@@ -494,7 +495,7 @@ void TestGFits::test_create(void)
     }
     test_value(total, sum, 1e-10, "Test loading of double precision image");
 
-    // Attach binary table (save variant)
+    // Append binary table (save variant)
     test_try("Attach binary table (save variant)");
     try {
         // Re-open FITS file
@@ -525,7 +526,6 @@ void TestGFits::test_create(void)
         test_try_failure(e);
     }
 
-
     // Create binary table (saveto variant)
     test_try("Create binary table (saveto variant)");
     try {
@@ -555,6 +555,130 @@ void TestGFits::test_create(void)
         test_try_failure(e);
     }
 
+    // Test FITS file in memory container manipulation
+    test_try("In memory container manipulation");
+    try {
+        // Allocate empty FITS file
+        GFits fits;
+        test_assert(fits.isempty(), "FITS file should be empty");
+        test_value(fits.size(), 0);
+
+        // Create an image and a table to play with
+        GFitsImageDouble image(10, 10);
+        GFitsBinTable    table(10);
+
+        // Append two images
+        fits.append(image);
+        fits.append(image);
+        test_assert(!fits.isempty(), "FITS file should not be empty");
+        test_value(fits.size(), 2);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+
+        // Replace image by table
+        fits.set(1, table);
+        test_value(fits.size(), 2);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+
+        // Insert image in 2nd slot
+        fits.insert(1, image);
+        test_value(fits.size(), 3);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+
+        // Remove image in 2nd slot
+        fits.remove(1);
+        test_value(fits.size(), 2);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+
+        // Extent FITS file
+        fits.extend(fits);
+        test_value(fits.size(), 4);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+
+        // Signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test FITS file container manipulation
+/*
+    test_try("File container manipulation");
+    try {
+        // Create FITS file
+        GFits fits("test_container.fits", true);
+        test_assert(fits.isempty(), "FITS file should be empty");
+        test_value(fits.size(), 0);
+
+        // Create an image and a table to play with
+        GFitsImageDouble image(10, 10);
+        GFitsBinTable    table(10);
+
+        // Append two images
+        fits.append(image);
+        fits.append(image);
+        fits.save(true);
+        fits.close();
+        fits.open("test_container.fits");
+        test_assert(!fits.isempty(), "FITS file should not be empty");
+        test_value(fits.size(), 2);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+std::cout << fits << std::endl;
+
+        // Replace image by table
+        fits.set(1, table);
+        fits.save(true);
+        fits.close();
+        fits.open("test_container.fits");
+        test_value(fits.size(), 2);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+std::cout << fits << std::endl;
+
+        // Insert image in 2nd slot
+        fits.insert(1, image);
+        test_value(fits.size(), 3);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+std::cout << fits << std::endl;
+
+        // Remove image in 2nd slot
+        fits.remove(1);
+        test_value(fits.size(), 2);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+std::cout << fits << std::endl;
+
+        // Extent FITS file
+        fits.extend(fits);
+        test_value(fits.size(), 4);
+        for (int i = 0; i < fits.size(); ++i) {
+            test_value(fits.at(i)->extno(), i);
+        }
+std::cout << fits << std::endl;
+        
+        // Signal success
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+*/
     // Return
     return;
 }
