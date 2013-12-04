@@ -470,7 +470,7 @@ double GModelSpectralLogParabola::eflux(const GEnergy& emin,
         integral.eps(1.0e-8);
 
         // Calculate integral between emin and emax
-        double eflux = integral.romb(emin.MeV(), emax.MeV());
+        eflux = integral.romb(emin.MeV(), emax.MeV());
 
     } // endif: integration range was valid
 
