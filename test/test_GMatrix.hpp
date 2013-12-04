@@ -1,7 +1,7 @@
 /***************************************************************************
- *             test_GMatrix.hpp  -  Test generic matrix class              *
+ *              test_GMatrix.hpp - Test generic matrix class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,16 +48,17 @@ public:
     virtual ~TestGMatrix(void) {}
 
     // Methods
-    virtual void set(void);
-    void         alloc_matrix(void);
-    void         assign_values(void);
-    void         copy_matrix(void);
-    void         matrix_operations(void);
-    void         matrix_arithmetics(void);
-    void         matrix_functions(void);
-    void         matrix_compare(void);
-    //void         matrix_cholesky(void);
-    void         matrix_print(void);
+    virtual void         set(void);
+    virtual TestGMatrix* clone(void) const;
+    void                 alloc_matrix(void);
+    void                 assign_values(void);
+    void                 copy_matrix(void);
+    void                 matrix_operations(void);
+    void                 matrix_arithmetics(void);
+    void                 matrix_functions(void);
+    void                 matrix_compare(void);
+    //void                 matrix_cholesky(void);
+    void                 matrix_print(void);
 
 private:
     // Private methods

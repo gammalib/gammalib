@@ -69,6 +69,18 @@ void TestGObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGObservation* TestGObservation::clone(void) const
+{
+    // Clone test suite
+    return new TestGObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test GEbounds
  ***************************************************************************/
 void TestGObservation::test_ebounds(void)
@@ -750,16 +762,28 @@ void TestOpenMP::set(void)
     // Set test name
     name("OpenMP");
 
-    // Unbinned
+    // Append unbinned tests
     append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_unbinned_1), "Test unbinned optimization (1 thread)");
     append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_unbinned_10), "Test unbinned optimization (10 threads)");
 
-    // Binned
+    // Append binned tests
     append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_binned_1), "Test binned optimization (1 thread)");
     append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_binned_10), "Test binned optimisation (10 threads)");
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestOpenMP* TestOpenMP::clone(void) const
+{
+    // Clone test suite
+    return new TestOpenMP(*this);
 }
 
 

@@ -32,6 +32,7 @@
 
 /* __ Globals ____________________________________________________________ */
 
+
 /***********************************************************************//**
  * @brief Set tests
  ***************************************************************************/
@@ -43,11 +44,24 @@ void TestGNumerics::set(void)
     // Set parameters
     m_sigma = 2.5;
 
-    //Unbinned
-    add_test(static_cast<pfunction>(&TestGNumerics::test_integral),"Test GIntegral");
-    add_test(static_cast<pfunction>(&TestGNumerics::test_romberg_integration),"Test Romberg integration");
+    // Append tests
+    append(static_cast<pfunction>(&TestGNumerics::test_integral),"Test GIntegral");
+    append(static_cast<pfunction>(&TestGNumerics::test_romberg_integration),"Test Romberg integration");
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGNumerics* TestGNumerics::clone(void) const
+{
+    // Clone test suite
+    return new TestGNumerics(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Test model parameter handling.

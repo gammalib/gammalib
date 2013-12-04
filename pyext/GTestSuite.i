@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GTestSuite.i - Test suite class Python interface             *
+ *              GTestSuite.i - Abstract test suite base class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestSuite.i
- * @brief Test suite class Python interface defintion
+ * @brief Abstract test suite base class definition
  * @author Jean-Baptiste Cayrou
  */
 %{
@@ -28,6 +28,7 @@
 #include "GTestSuite.hpp"
 #include "GTools.hpp"
 #include "GException.hpp"
+
 
 /***********************************************************************//**
  * @class GPythonException
@@ -106,6 +107,11 @@ public:
     void set(void) {
     }
 
+    // Clone method
+    GPythonTestSuite* clone(void) const {
+        return new GPythonTestSuite(*this);
+    }
+
     // Generic test function for Python callback
     void test(void) {
         PyObject* args = Py_BuildValue("()");
@@ -125,7 +131,8 @@ public:
     void append(PyObject* function, const std::string& name) {
         m_py_objects.push_back(function);
         Py_INCREF(function);
-        add_test(static_cast<pfunction>(&GPythonTestSuite::test), name);
+        this->GTestSuite::append(static_cast<pfunction>(&GPythonTestSuite::test),
+                                 name);
     }
     std::vector<PyObject*> m_py_objects; //!< Python callback function list
 };
@@ -137,25 +144,26 @@ public:
  *
  * @brief Abstract test suite Python interface defintion
  ***************************************************************************/
-class GTestSuite {
-
-public:
-        
+class GTestSuite : public GBase {
+public:        
     // Constructors and destructors
     GTestSuite(void);
     GTestSuite(const GTestSuite& testsuite);
     GTestSuite(const std::string& name);
     virtual ~GTestSuite(void);
 
+    // Pure virtual methods
+    virtual GTestSuite*       clone(void) const = 0;
+    virtual void              set(void) = 0;
+
     // Methods
     void                      clear(void);
     int                       size(void) const;
-    virtual void              set(void) = 0;
-    virtual bool              run(void);
-    std::string               name(void) const;
+    bool                      run(void);
+    const std::string&        name(void) const;
     void                      name(const std::string& name);
     void                      cout(const bool& flag);
-    void                      test_assert(bool result,
+    void                      test_assert(const bool&        result,
                                           const std::string& name,
                                           const std::string& message = "");
     void                      test_value(const int&         value,
@@ -174,10 +182,10 @@ public:
     void                      test_try_failure(const std::exception& e);
     GException::test_failure& exception_failure(const std::string& message);
     GException::test_error&   exception_error(const std::string& message);
-    int                       errors(void) const;
-    int                       failures(void) const;
+    const int&                errors(void) const;
+    const int&                failures(void) const;
     int                       success(void) const;
-    time_t                    timestamp(void) const;
+    const time_t&             timestamp(void) const;
     double                    duration(void) const;
 };
 
@@ -186,9 +194,11 @@ public:
  * @brief GTestSuite class extension
  ***************************************************************************/
 %extend GTestSuite {
+    /*
     char *__str__() {
         return gammalib::tochar(self->print());
     }
+    */
     GTestCase& __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
@@ -214,15 +224,14 @@ public:
  *
  * @brief Test suite Python interface defintion
  ***************************************************************************/
-class GPythonTestSuite  : public GTestSuite {
-
-public:
-        
+class GPythonTestSuite : public GTestSuite {
+public:        
     // Constructors and destructors
     GPythonTestSuite(void);
     virtual ~GPythonTestSuite(void);
 
     // Methods
-    void set(void);
-    void append(PyObject* function, const std::string& name);
+    void              set(void);
+    GPythonTestSuite* clone(void) const;
+    void              append(PyObject* function, const std::string& name);
 };

@@ -63,42 +63,54 @@ void TestGModel::set(void)
     m_xml_model_radial_shell      = "data/model_radial_shell.xml";
     m_xml_model_elliptical_disk   = "data/model_elliptical_disk.xml";
 
-    // Add tests
-    add_test(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
-    add_test(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
+    // Append tests
+    append(static_cast<pfunction>(&TestGModel::test_model_par), "Test GModelPar");
+    append(static_cast<pfunction>(&TestGModel::test_sky_model), "Test GModelSky");
 
-    // Add spatial model tests
-    add_test(static_cast<pfunction>(&TestGModel::test_point_source), "Test GModelSpatialPointSource");
-    add_test(static_cast<pfunction>(&TestGModel::test_radial_disk), "Test GModelSpatialRadialDisk");
-    add_test(static_cast<pfunction>(&TestGModel::test_radial_gauss), "Test GModelSpatialRadialGauss");
-    add_test(static_cast<pfunction>(&TestGModel::test_radial_shell), "Test GModelSpatialRadialShell");
-    add_test(static_cast<pfunction>(&TestGModel::test_elliptical_disk), "Test GModelSpatialEllipticalDisk");
-    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
-    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
-    add_test(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
-    add_test(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
+    // Append spatial model tests
+    append(static_cast<pfunction>(&TestGModel::test_point_source), "Test GModelSpatialPointSource");
+    append(static_cast<pfunction>(&TestGModel::test_radial_disk), "Test GModelSpatialRadialDisk");
+    append(static_cast<pfunction>(&TestGModel::test_radial_gauss), "Test GModelSpatialRadialGauss");
+    append(static_cast<pfunction>(&TestGModel::test_radial_shell), "Test GModelSpatialRadialShell");
+    append(static_cast<pfunction>(&TestGModel::test_elliptical_disk), "Test GModelSpatialEllipticalDisk");
+    append(static_cast<pfunction>(&TestGModel::test_diffuse_const), "Test GModelSpatialDiffuseConst");
+    append(static_cast<pfunction>(&TestGModel::test_diffuse_cube), "Test GModelSpatialDiffuseCube");
+    append(static_cast<pfunction>(&TestGModel::test_diffuse_map), "Test GModelSpatialDiffuseMap");
+    append(static_cast<pfunction>(&TestGModel::test_spatial_model), "Test spatial model XML I/O");
 
-    // Add spatial model tests
-    add_test(static_cast<pfunction>(&TestGModel::test_const), "Test GModelSpectralConst");
-    add_test(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
-    add_test(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
-    add_test(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
-    add_test(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
-    add_test(static_cast<pfunction>(&TestGModel::test_nodes), "Test GModelSpectralNodes");
-    add_test(static_cast<pfunction>(&TestGModel::test_filefct), "Test GModelSpectralFunc");
-    add_test(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
+    // Append spectral model tests
+    append(static_cast<pfunction>(&TestGModel::test_const), "Test GModelSpectralConst");
+    append(static_cast<pfunction>(&TestGModel::test_plaw), "Test GModelSpectralPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_plaw2), "Test GModelSpectralPlaw2");
+    append(static_cast<pfunction>(&TestGModel::test_eplaw), "Test GModelSpectralExpPlaw");
+    append(static_cast<pfunction>(&TestGModel::test_logparabola), "Test GModelSpectralLogParabola");
+    append(static_cast<pfunction>(&TestGModel::test_nodes), "Test GModelSpectralNodes");
+    append(static_cast<pfunction>(&TestGModel::test_filefct), "Test GModelSpectralFunc");
+    append(static_cast<pfunction>(&TestGModel::test_spectral_model), "Test spectral model XML I/O");
 
-    // Add temporal model tests
-    add_test(static_cast<pfunction>(&TestGModel::test_temp_const), "Test GModelTemporalConst");
+    // Append temporal model tests
+    append(static_cast<pfunction>(&TestGModel::test_temp_const), "Test GModelTemporalConst");
 
-    // Add model container tests
-    add_test(static_cast<pfunction>(&TestGModel::test_models), "Test GModels");
+    // Append model container tests
+    append(static_cast<pfunction>(&TestGModel::test_models), "Test GModels");
 
-    // Add model registry tests
-    add_test(static_cast<pfunction>(&TestGModel::test_model_registry), "Test model registries");
+    // Append model registry tests
+    append(static_cast<pfunction>(&TestGModel::test_model_registry), "Test model registries");
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGModel* TestGModel::clone(void) const
+{
+    // Clone test suite
+    return new TestGModel(*this);
 }
 
 

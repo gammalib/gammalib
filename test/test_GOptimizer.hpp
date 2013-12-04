@@ -44,10 +44,11 @@ public:
     virtual ~TestGOptimizer(void){}
 
     // Methods
-    virtual void set(void);
-    void         test_unbinned_optimizer(void);
-    void         test_binned_optimizer(void);
-    void         test_optimizer(const int& mode);
+    virtual void            set(void);
+    virtual TestGOptimizer* clone(void) const;
+    void                    test_unbinned_optimizer(void);
+    void                    test_binned_optimizer(void);
+    void                    test_optimizer(const int& mode);
 };
 
 #endif /* TEST_GOPTIMIZER_HPP */

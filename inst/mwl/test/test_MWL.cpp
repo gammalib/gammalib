@@ -64,6 +64,18 @@ void TestGMWL::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGMWL* TestGMWL::clone(void) const
+{
+    // Clone test suite
+    return new TestGMWL(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test observation handling
  ***************************************************************************/
 void TestGMWL::test_obs(void)

@@ -56,6 +56,18 @@ void TestGXml::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGXml* TestGXml::clone(void) const
+{
+    // Clone test suite
+    return new TestGXml(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test XML arrtibutes
  **************************************************************************/
 void TestGXml::test_GXml_attributes(void)

@@ -44,12 +44,13 @@ public:
     virtual ~TestGXml(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_GXml_attributes(void);
-    void         test_GXml_elements(void);
-    void         test_GXml_construct(void);
-    void         test_GXml_load(void);
-    void         test_GXml_access(void);
+    virtual void      set(void);
+    virtual TestGXml* clone(void) const;
+    void              test_GXml_attributes(void);
+    void              test_GXml_elements(void);
+    void              test_GXml_construct(void);
+    void              test_GXml_load(void);
+    void              test_GXml_access(void);
 
 private:
     // Private members

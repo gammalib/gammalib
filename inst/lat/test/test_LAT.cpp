@@ -78,6 +78,18 @@ void TestGLATResponse::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGLATResponse* TestGLATResponse::clone(void) const
+{
+    // Clone test suite
+    return new TestGLATResponse(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set LAT livetime cube test methods
  ***************************************************************************/
 void TestGLATLtCube::set(void)
@@ -91,6 +103,18 @@ void TestGLATLtCube::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGLATLtCube* TestGLATLtCube::clone(void) const
+{
+    // Clone test suite
+    return new TestGLATLtCube(*this);
 }
 
 
@@ -114,6 +138,18 @@ void TestGLATObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGLATObservation* TestGLATObservation::clone(void) const
+{
+    // Clone test suite
+    return new TestGLATObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set LAT optimizer test methods
  ***************************************************************************/
 void TestGLATOptimize::set(void)
@@ -127,6 +163,18 @@ void TestGLATOptimize::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGLATOptimize* TestGLATOptimize::clone(void) const
+{
+    // Clone test suite
+    return new TestGLATOptimize(*this);
 }
 
 

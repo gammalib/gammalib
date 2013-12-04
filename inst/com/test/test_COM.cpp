@@ -68,6 +68,18 @@ void TestGCOMResponse::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCOMResponse* TestGCOMResponse::clone(void) const
+{
+    // Clone test suite
+    return new TestGCOMResponse(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set COMPTEL observation test methods
  ***************************************************************************/
 void TestGCOMObservation::set(void)
@@ -86,6 +98,18 @@ void TestGCOMObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCOMObservation* TestGCOMObservation::clone(void) const
+{
+    // Clone test suite
+    return new TestGCOMObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set COMPTEL optimizer test methods
  ***************************************************************************/
 void TestGCOMOptimize::set(void)
@@ -98,6 +122,18 @@ void TestGCOMOptimize::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCOMOptimize* TestGCOMOptimize::clone(void) const
+{
+    // Clone test suite
+    return new TestGCOMOptimize(*this);
 }
 
 

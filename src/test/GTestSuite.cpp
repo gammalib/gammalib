@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GTestSuite.cpp - Test Suite class for GammaLib              *
+ *             GTestSuite.cpp - Abstract test suite base class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestSuite.cpp
- * @brief Abstract test Suite class implementation
+ * @brief Abstract test suite base class implementation
  * @author Jean-Baptiste Cayrou
  */
  
@@ -46,7 +46,7 @@ pthread_attr_t gomp_thread_attr;
 #define G_OP_ACCESS                            "GTestSuite::operator[](int&)"
 #define G_TRY_SUCCESS                        "GTestSuite::test_try_success()"
 #define G_TRY_FAILURE1           "GTestSuite::test_try_failure(std::string&,"\
-                                                              "std::string&)"
+                                                             " std::string&)"
 #define G_TRY_FAILURE2        "GTestSuite::test_try_failure(std::exception&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -134,8 +134,9 @@ GTestSuite::~GTestSuite(void)
  * @brief Assignment operator
  *
  * @param[in] suite Test suite.
+ * @return Test suite.
  ***************************************************************************/
-GTestSuite&  GTestSuite::operator= (const GTestSuite& suite)
+GTestSuite& GTestSuite::operator=(const GTestSuite& suite)
 {
     // Execute only if object is not identical
     if (this != &suite) {
@@ -166,10 +167,12 @@ GTestSuite&  GTestSuite::operator= (const GTestSuite& suite)
  ***************************************************************************/
 GTestCase& GTestSuite::operator[](const int& index)
 {
-    // If index is outside boundary then throw an error
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_OP_ACCESS, "Test case index", index, size());
     }
+    #endif
 
     // Return reference
     return *(m_tests[index]);
@@ -185,10 +188,12 @@ GTestCase& GTestSuite::operator[](const int& index)
  ***************************************************************************/
 const GTestCase& GTestSuite::operator[](const int& index) const
 {
-    // If index is outside boundary then throw an error
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
+        throw GException::out_of_range(G_OP_ACCESS, "Test case index", index, size());
     }
+    #endif
 
     // Return reference
     return *(m_tests[index]);
@@ -218,16 +223,6 @@ void GTestSuite::clear(void)
 
 
 /***********************************************************************//**
- * @brief Return number of tests in test suite
- ***************************************************************************/
-int GTestSuite::size(void) const
-{
-    // Return size
-    return m_tests.size();
-}
-
-
-/***********************************************************************//**
  * @brief Append test functions to test suite
  *
  * @param[in] function Test function pointer.
@@ -249,6 +244,8 @@ void GTestSuite::append(const pfunction function, const std::string& name)
 
 /***********************************************************************//**
  * @brief Run all tests in test suite
+ *
+ * @return True is all tests were successful, false otherwise.
  *
  * Executes all test functions that have been appended to the test suite.
  * For each test function a test case is added to the test suite.
@@ -354,48 +351,6 @@ bool GTestSuite::run(void)
 
 
 /***********************************************************************//**
- * @brief Return test suite name
- ***************************************************************************/
-std::string GTestSuite::name(void) const
-{
-    // Return name
-    return m_name;
-}
-
-
-/***********************************************************************//**
- * @brief Set Test Suite name
- *
- * @param[in] name Test suite name.
- ***************************************************************************/
-void GTestSuite::name(const std::string& name)
-{
-    // Set name
-    m_name = name;
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Enables/disables logging into standard output stream
- *
- * @param[in] flag Enable/disable logging (true/false).
- *
- * Enables or disables logging into the standard output stream.
- ***************************************************************************/
-void GTestSuite::cout(const bool& flag)
-{
-    // Enables or disables logging into the standard output stream
-    m_log.cout(flag);
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Test an assert
  *
  * @param[in] assert Assert (true/false).
@@ -409,7 +364,7 @@ void GTestSuite::cout(const bool& flag)
  *   test_assert(x>3, "Test if x > 3");
  *   test_assert(x>3 && x<10, "Test if  3 < x < 10 ");
  ***************************************************************************/
-void GTestSuite::test_assert(bool               assert,
+void GTestSuite::test_assert(const bool&        assert,
                              const std::string& name,
                              const std::string& message)
 {
@@ -798,64 +753,12 @@ GException::test_error& GTestSuite::exception_error(const std::string& message)
 
 
 /***********************************************************************//**
- * @brief Add test functions to test suite
- *
- * @param[in] function Test function pointer.
- * @param[in] name Test name.
- *
- * This method adds test functions to the test suite. For each test function
- * a test case is allocated. The function pointer is stored as a member of
- * the test case class.
- ***************************************************************************/
-void GTestSuite::add_test(const pfunction function, const std::string& name)
-{
-    // Append function
-    append(function, name);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return the number of errors
- ***************************************************************************/
-int GTestSuite::errors(void) const
-{
-    // Return errors
-    return m_errors; 
-}
-
-
-/***********************************************************************//**
- * @brief Return the number of failures
- ***************************************************************************/
-int GTestSuite::failures(void) const
-{
-    // Return failures
-    return m_failures; 
-}
-
-
-/***********************************************************************//**
  * @brief Return the number of successful tests
  ***************************************************************************/
 int GTestSuite::success(void) const
 {
     // Return successes
     return size()-(m_errors+m_failures);
-}
-
-
-/***********************************************************************//**
- * @brief Return the timestamp
- *
- * The timestamp is set at the construction of the object.
- ***************************************************************************/
-time_t GTestSuite::timestamp(void) const
-{
-    // Return timestamp
-    return m_timestamp;
 }
 
 

@@ -44,10 +44,11 @@ public:
     virtual ~TestGXspec(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_GPha(void);
-    void         test_GArf(void);
-    void         test_GRmf(void);
+    virtual void        set(void);
+    virtual TestGXspec* clone(void) const;
+    void                test_GPha(void);
+    void                test_GArf(void);
+    void                test_GRmf(void);
 
 private:
     // Private members

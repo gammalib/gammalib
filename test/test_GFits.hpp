@@ -40,30 +40,31 @@ class TestGFits : public GTestSuite {
 
 public:
     // Constructors and destructors
-    TestGFits(void) : GTestSuite(){ return; }
-    virtual ~TestGFits(void){ return; }
+    TestGFits(void) : GTestSuite(){ }
+    virtual ~TestGFits(void){ }
 
     // Methods
-    virtual void set(void);
-    void         test_create(void);
-    void         test_image_byte(void);
-    void         test_image_ushort(void);
-    void         test_image_short(void);
-    void         test_image_ulong(void);
-    void         test_image_long(void);
-    void         test_image_longlong(void);
-    void         test_image_float(void);
-    void         test_image_double(void);
-    void         test_bintable_bit(void);
-    void         test_bintable_logical(void);
-    void         test_bintable_string(void);
-    void         test_bintable_double(void);
-    void         test_bintable_float(void);
-    void         test_bintable_ushort(void);
-    void         test_bintable_short(void);
-    void         test_bintable_ulong(void);
-    void         test_bintable_long(void);
-    void         test_bintable_longlong(void);
+    virtual void       set(void);
+    virtual TestGFits* clone(void) const;
+    void               test_create(void);
+    void               test_image_byte(void);
+    void               test_image_ushort(void);
+    void               test_image_short(void);
+    void               test_image_ulong(void);
+    void               test_image_long(void);
+    void               test_image_longlong(void);
+    void               test_image_float(void);
+    void               test_image_double(void);
+    void               test_bintable_bit(void);
+    void               test_bintable_logical(void);
+    void               test_bintable_string(void);
+    void               test_bintable_double(void);
+    void               test_bintable_float(void);
+    void               test_bintable_ushort(void);
+    void               test_bintable_short(void);
+    void               test_bintable_ulong(void);
+    void               test_bintable_long(void);
+    void               test_bintable_longlong(void);
 };
 
 #endif /* TEST_GFITS_HPP */

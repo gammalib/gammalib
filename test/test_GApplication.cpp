@@ -53,6 +53,18 @@ void TestGApplication::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGApplication* TestGApplication::clone(void) const
+{
+    // Clone test suite
+    return new TestGApplication(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test GLog constructor
  **************************************************************************/
 void TestGApplication::test_constructor(void)

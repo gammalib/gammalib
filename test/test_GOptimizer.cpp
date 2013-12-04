@@ -55,6 +55,18 @@ void TestGOptimizer::set(void){
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGOptimizer* TestGOptimizer::clone(void) const
+{
+    // Clone test suite
+    return new TestGOptimizer(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test optimizer
  *
  * @param[in] mode Testing mode.

@@ -59,9 +59,10 @@ public:
     virtual ~TestGNumerics(void){ }
 
     // Methods
-    virtual void set(void);
-    void         test_integral(void);
-    void         test_romberg_integration(void);
+    virtual void           set(void);
+    virtual TestGNumerics* clone(void) const;
+    void                   test_integral(void);
+    void                   test_romberg_integration(void);
 
 private:
     // Private members

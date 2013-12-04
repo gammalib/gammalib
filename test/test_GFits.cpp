@@ -370,7 +370,7 @@ void TestGFits::set(void)
     // Set test name
     name("GFits");
 
-    // Add tests
+    // Append tests
     append(static_cast<pfunction>(&TestGFits::test_create), "Test create");
     append(static_cast<pfunction>(&TestGFits::test_image_byte), "Test image byte");
     append(static_cast<pfunction>(&TestGFits::test_image_ushort), "Test image ushort");
@@ -393,6 +393,18 @@ void TestGFits::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGFits* TestGFits::clone(void) const
+{
+    // Clone test suite
+    return new TestGFits(*this);
 }
 
 

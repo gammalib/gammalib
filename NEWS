@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-3 December 2013
+4 December 2013
 
 
 1. Introduction
@@ -137,6 +137,21 @@ GSkyPixel
   values. A xy() method has been added to set x and y simultaneously
   for 2D pixels. 1D and 2D pixel constructors exist now for
   integer and double precision values.
+
+GTestSuites
+  The GTestSuites class now derives from GContainer and implements
+  the usual container class methods (at(), size(), isempty(),
+  set(), append(), insert(), remove(), reserve() and extend()).
+  The operator[] now returns pointers to GTestSuite. The name()
+  and timestamp() methods now return const references.
+
+GTestSuite
+  The GTestSuite class now derives from GBase. This implies that
+  the clone() method needs to be implemented for derived classes.
+  The test_assert() method now takes a const reference for the
+  boolean argument. The name(), errors(), failures(), and
+  timestamp() methods return const references. The obsolete
+  add_test() method has been removed.
 
 GWcs => GSkyProjection
   The GWcs class has been renamed to GSkyProjection as it is more

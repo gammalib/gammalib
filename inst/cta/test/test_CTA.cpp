@@ -72,6 +72,19 @@ void TestGCTAResponse::set(void)
     return;
 }
 
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAResponse* TestGCTAResponse::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAResponse(*this);
+}
+
+
 /***********************************************************************//**
  * @brief Set CTA model test methods
  ***************************************************************************/
@@ -85,6 +98,18 @@ void TestGCTAModelBackground::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAModelBackground* TestGCTAModelBackground::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAModelBackground(*this);
 }
 
 
@@ -106,6 +131,18 @@ void TestGCTAObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAObservation* TestGCTAObservation::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set CTA optimizer test methods
  ***************************************************************************/
 void TestGCTAOptimize::set(void)
@@ -119,6 +156,18 @@ void TestGCTAOptimize::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAOptimize* TestGCTAOptimize::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAOptimize(*this);
 }
 
 

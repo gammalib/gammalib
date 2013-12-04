@@ -39,6 +39,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 
+
 /***********************************************************************//**
  * @brief Set parameters and tests
  ***************************************************************************/
@@ -47,15 +48,28 @@ void TestGSupport::set(void){
     // Set test name
     name("GSupport");
 
-    // Add tests
-    add_test(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
-    add_test(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
-    add_test(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
-    add_test(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
+    // Append tests
+    append(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
+    append(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
+    append(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
+    append(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
 
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGSupport* TestGSupport::clone(void) const
+{
+    // Clone test suite
+    return new TestGSupport(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Test expand_env function

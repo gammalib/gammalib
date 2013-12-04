@@ -51,18 +51,33 @@ void TestGSky::set(void){
     // Test name
     name("GSky");
 
-    // Add tests
-    add_test(static_cast<pfunction>(&TestGSky::test_GWcs),"Test GWcs");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyPixel),"Test GSkyPixel");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_construct),"Test Healpix GSkymap constructors");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
+    // Append tests
+    append(static_cast<pfunction>(&TestGSky::test_GWcs),"Test GWcs");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyPixel),"Test GSkyPixel");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_construct),"Test Healpix GSkymap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
+
+    // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGSky* TestGSky::clone(void) const
+{
+    // Clone test suite
+    return new TestGSky(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Test consistency of forward and background transformations

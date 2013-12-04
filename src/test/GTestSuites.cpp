@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GTestSuites.cpp  - Test Suites class for GammaLib            *
+ *              GTestSuites.cpp - Test suite container class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestSuites.cpp
- * @brief Test Suites class implementation
+ * @brief Test suite container class implementation
  * @author Jean-Baptiste Cayrou
  */
 
@@ -34,7 +34,10 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_OP_ACCESS                           "GTestSuites::operator[](int&)"
+#define G_AT                                          "GTestSuites::at(int&)"
+#define G_SET                           "GTestSuites::set(int&, GTestSuite&)"
+#define G_INSERT         "GTestSuite* GTestSuites::insert(int&, GTestSuite&)"
+#define G_REMOVE                                  "GTestSuites::remove(int&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -121,8 +124,9 @@ GTestSuites::~GTestSuites()
  * @brief Assignment operator
  *
  * @param[in] suites Test suite container.
+ * @return Test suite container.
  ***************************************************************************/
-GTestSuites&  GTestSuites::operator= (const GTestSuites& suites)
+GTestSuites& GTestSuites::operator=(const GTestSuites& suites)
 {
     // Execute only if object is not identical
     if (this != &suites) {
@@ -143,46 +147,6 @@ GTestSuites&  GTestSuites::operator= (const GTestSuites& suites)
 }
 
 
-/***********************************************************************//**
- * @brief Returns reference to test suite
- *
- * @param[in] index Test suites index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Test suites index is out of range.
- ***************************************************************************/
-GTestSuite& GTestSuites::operator[](const int& index)
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
-    }
-
-    // Return reference
-    return *(m_testsuites[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to test suite (const version)
- *
- * @param[in] index Test Suites index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Test Suites index is out of range.
- ***************************************************************************/
-const GTestSuite& GTestSuites::operator[](const int& index) const
-{
-    // If index is outside boundary then throw an error
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_OP_ACCESS, index, 0, size()-1);
-    }
-
-    // Return reference
-    return *(m_testsuites[index]);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                            Public methods                               =
@@ -190,7 +154,7 @@ const GTestSuite& GTestSuites::operator[](const int& index) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear container
+ * @brief Clear test suites
  ***************************************************************************/
 void GTestSuites::clear(void)
 {
@@ -206,7 +170,9 @@ void GTestSuites::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone test suites
+ *
+ * @return Pointer to deep copy of test suites.
  ***************************************************************************/
 GTestSuites* GTestSuites::clone(void) const
 {
@@ -216,12 +182,79 @@ GTestSuites* GTestSuites::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of test suite in container
+ * @brief Returns pointer to test suite
+ *
+ * @param[in] index Test suite index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Test suite index is out of range.
  ***************************************************************************/
-int GTestSuites::size(void) const
+GTestSuite* GTestSuites::at(const int& index)
 {
-    // Return size
-    return m_testsuites.size();
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, "Test suite index", index, size());
+    }
+    #endif
+
+    // Return test suite
+    return (m_testsuites[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to test suite (const version)
+ *
+ * @param[in] index Test Suite index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Test suite index is out of range.
+ ***************************************************************************/
+const GTestSuite* GTestSuites::at(const int& index) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, "Test suite index", index, size());
+    }
+    #endif
+
+    // Return test suite
+    return (m_testsuites[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Set test suite in container
+ *
+ * @param[in] index Test suite index [0,...,size()-1].
+ * @param[in] suite Test suite.
+ * @return Pointer to deep copy of test suite.
+ *
+ * @exception GException::out_of_range
+ *            Test suite index is out of range.
+ *
+ * Set test suite in the container. A deep copy of the test suite will be
+ * made.
+ ***************************************************************************/
+GTestSuite* GTestSuites::set(const int& index, const GTestSuite& suite)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_SET, "Test suite index", index, size());
+    }
+    #endif
+
+    // Delete any existing test suite
+    if (m_testsuites[index] != NULL) delete m_testsuites[index];
+
+    // Assign new test suite by cloning
+    m_testsuites[index] = suite.clone();
+
+    // Return pointer to test suite
+    return m_testsuites[index];
 }
 
 
@@ -229,16 +262,174 @@ int GTestSuites::size(void) const
  * @brief Append test suite to container
  *
  * @param[in] suite Test suite.
+ * @return Pointer to deep copy of test suite.
  *
- * This method appends one test suite to the container.
+ * Appends test suite to the container by making a deep copy of the test
+ * suite and storing its pointer.
  ***************************************************************************/
-void GTestSuites::append(GTestSuite& suite)
+GTestSuite* GTestSuites::append(const GTestSuite& suite)
 {
-    // Add testsuite to container
-    m_testsuites.push_back(&suite);
+    // Create deep copy of test suite
+    GTestSuite* ptr = suite.clone();
+
+    // Append deep copy to container
+    m_testsuites.push_back(ptr);
+
+    // Return pointer to test suite
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert test suite into container
+ *
+ * @param[in] index Test suite index [0,...,size()-1].
+ * @param[in] suite Test suite.
+ * @return Pointer to deep copy of test suite.
+ *
+ * @exception GException::out_of_range
+ *            Test suite index is out of range.
+ *
+ * Inserts a test @p suite into the container before the test suite with the
+ * specified @p index.
+ ***************************************************************************/
+GTestSuite* GTestSuites::insert(const int& index, const GTestSuite& suite)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (isempty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT, "Test suite index", index, size());
+        }
+    }
+    else {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_INSERT, "Test suite index", index, size());
+        }
+    }
+    #endif
+
+    // Create deep copy of test suite
+    GTestSuite* ptr = suite.clone();
+
+    // Append deep copy to container
+    m_testsuites.insert(m_testsuites.begin()+index, ptr);
+
+    // Return pointer to test suite
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove test suite from container
+ *
+ * @param[in] index Test suite index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Test suite index is out of range.
+ *
+ * Remove test suite of specified @p index from container.
+ ***************************************************************************/
+void GTestSuites::remove(const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_REMOVE, "Test suite index", index, size());
+    }
+    #endif
+
+    // Erase test suite from container
+    m_testsuites.erase(m_testsuites.begin() + index);
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append test suite container
+ *
+ * @param[in] suites Test suite container.
+ *
+ * Append test suite container to the container.
+ ***************************************************************************/
+void GTestSuites::extend(const GTestSuites& suites)
+{
+    // Do nothing if test suite container is empty
+    if (!suites.isempty()) {
+
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = suites.size();
+
+        // Reserve enough space
+        reserve(size() + num);
+
+        // Append deep copies of test suites to container 
+        for (int i = 0; i < num; ++i) {
+            m_testsuites.push_back(suites[i]->clone());
+        }
+
+    } // endif: test suite container was not empty
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return the total number of errors in all test suites
+ ***************************************************************************/
+int GTestSuites::errors(void) const
+{
+    // Initialise number of errors
+    int errors = 0;
+    
+    // Add up the errors from all test suites
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+        errors += m_testsuites[i]->errors(); 
+    }
+
+    // Return errors
+    return errors;
+}
+
+
+/***********************************************************************//**
+ * @brief Return the total number of failures in all test suites
+ ***************************************************************************/
+int GTestSuites::failures(void) const
+{
+    // Initialise number of failures
+    int failures=0;
+    
+    // Add up the failures from all test suites
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+        failures += m_testsuites[i]->failures(); 
+    }
+
+    // Return failures
+    return failures;
+}
+
+
+/***********************************************************************//**
+ * @brief Return the total number of tests they are in all test suites
+ ***************************************************************************/
+int GTestSuites::tests(void) const
+{
+    // Initialise number of tests
+    int tests = 0;
+    
+    // Add up the number of tests from all test suites
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+        tests += m_testsuites[i]->size(); 
+    }
+
+    // Return number of tests
+    return tests; 
 }
 
 
@@ -300,115 +491,6 @@ void GTestSuites::save(const std::string& filename) const
 
 
 /***********************************************************************//**
- * @brief Return test suites name
- ***************************************************************************/
-std::string GTestSuites::name(void) const
-{
-    //return Test Suites name
-    return m_name;
-}
-
-
-/***********************************************************************//**
- * @brief Set test suites name
- *
- * @param[in] name Test suites name.
- ***************************************************************************/
-void GTestSuites::name(const std::string& name)
-{
-    // Set name
-    m_name = name;
-    
-    //Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Enables/disables logging into standard output stream
- *
- * @param[in] flag Enable/disable logging (true/false).
- *
- * Enables or disables logging into the standard output stream.
- ***************************************************************************/
-void GTestSuites::cout(const bool& flag)
-{
-    // Enables or disables logging into the standard output stream
-    m_log.cout(flag);
-    
-    //Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return the total number of errors in all test suites
- ***************************************************************************/
-int GTestSuites::errors(void) const
-{
-    // Initialise number of errors
-    int errors = 0;
-    
-    // Add up the errors from all test suites
-    for (int i = 0; i < m_testsuites.size(); ++i) {
-        errors += m_testsuites[i]->errors(); 
-    }
-
-    // Return errors
-    return errors;
-}
-
-
-/***********************************************************************//**
- * @brief Return the total number of failures in all test suites
- ***************************************************************************/
-int GTestSuites::failures(void) const
-{
-    // Initialise number of failures
-    int failures=0;
-    
-    // Add up the failures from all test suites
-    for (int i = 0; i < m_testsuites.size(); ++i) {
-        failures += m_testsuites[i]->failures(); 
-    }
-
-    // Return failures
-    return failures;
-}
-
-
-/***********************************************************************//**
- * @brief Return the total number of tests they are in all test suites
- ***************************************************************************/
-int GTestSuites::tests(void) const
-{
-    // Initialise number of tests
-    int tests = 0;
-    
-    // Add up the number of tests from all test suites
-    for (int i = 0; i < m_testsuites.size(); ++i) {
-        tests += m_testsuites[i]->size(); 
-    }
-
-    // Return number of tests
-    return tests; 
-}
-
-
-/***********************************************************************//**
- * @brief Return the timestamp
- *
- * The time step is set at the moment of construction of the test suites
- * container.
- ***************************************************************************/
-time_t GTestSuites::timestamp(void) const
-{
-    // Return the timestamp
-    return m_timestamp;
-}
-
-
-/***********************************************************************//**
  * @brief Print test suites information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
@@ -439,7 +521,7 @@ std::string GTestSuites::print(const GChatter& chatter) const
         // Append test suites
         for (int i = 0; i < size(); ++i) {
             result.append("\n");
-            result.append((*this)[i].print(chatter));
+            result.append((*this)[i]->print(chatter));
         }
 
     } // endif: chatter was not silent
