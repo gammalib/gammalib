@@ -38,7 +38,50 @@ typedef enum {
     VERBOSE = 4
 } GChatter;
 
-
 /* __ Typemaps ___________________________________________________________ */
+
+/* __ Prototypes _________________________________________________________ */
+namespace gammalib {
+    GChatter reduce(const GChatter& chatter);
+}
+
+
+/***********************************************************************//**
+ * @brief Reduce chattiness by one level
+ *
+ * @param[in] chatter Chattiness.
+ * @return Reduced chattiness.
+ ***************************************************************************/
+inline
+GChatter gammalib::reduce(const GChatter& chatter)
+{
+    // Allocate reduced chattiness
+    GChatter reduced;
+
+    // Reduce chattiness
+    switch (chatter) {
+        case SILENT:
+            reduced = SILENT;
+            break;
+        case TERSE:
+            reduced = SILENT;
+            break;
+        case NORMAL:
+            reduced = TERSE;
+            break;
+        case EXPLICIT:
+            reduced = NORMAL;
+            break;
+        case VERBOSE:
+            reduced = EXPLICIT;
+            break;
+        default:
+            reduced = chatter;
+            break;
+    }
+    
+    // Return reduced chattiness
+    return reduced;
+}
 
 #endif /* GTYPEMAPS_HPP */
