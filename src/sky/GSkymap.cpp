@@ -569,8 +569,6 @@ GSkyPixel GSkymap::inx2pix(const int& index) const
     GSkyPixel pixel;
 
     // Get x and y indices
-    double x;
-    double y;
     if (m_num_x != 0) { //!< 2D sky map
         pixel.x(double(index % m_num_x));
         pixel.y(double(index / m_num_x));
