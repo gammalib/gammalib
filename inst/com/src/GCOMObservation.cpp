@@ -704,7 +704,7 @@ void GCOMObservation::load_dre(const std::string& drename)
     m_events->read(file);
 
     // Read observation attributes from primary extension
-    GFitsHDU* hdu = file.hdu(0);
+    GFitsHDU* hdu = file[0];
     read_attributes(hdu);
 
     // Close FITS file

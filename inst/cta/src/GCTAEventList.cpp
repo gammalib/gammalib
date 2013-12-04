@@ -303,18 +303,18 @@ void GCTAEventList::save(const std::string& filename, bool clobber) const
  * @todo Ultimately, any events file should have a GTI extension, hence the
  *       extraction of GTIs from TSTART and TSTOP should not be necessary.
  ***************************************************************************/
-void GCTAEventList::read(const GFits& file)
+void GCTAEventList::read(const GFits& fits)
 {
     // Clear object
     clear();
 
     // Get event list HDU
-    GFitsTable* events = file.table("EVENTS");
+    const GFitsTable* events = fits.table("EVENTS");
 
     // If we have a GTI extension, then read Good Time Intervals from that
     // extension
-    if (file.hashdu("GTI")) {
-        GFitsTable* gti = file.table("GTI");
+    if (fits.contains("GTI")) {
+        const GFitsTable* gti = fits.table("GTI");
         m_gti.read(gti);
     }
 

@@ -33,6 +33,16 @@ GEbounds
   The emin(), emax(), emean() and elogmean() methods now take a const
   integer reference as argument instead of an integer value.
 
+GFits
+  The GFits class now derives from GContainer and implements all generic
+  container class methods (at(), size(), isempty(), set(), append(),
+  insert(), remove(), reserve(), extend()). The hashdu() method has
+  been renamed to contains() for compliance with other container classes.
+  The hdu() methods have been renamed to at(), also for compliance.
+  Boolean arguments are now passed as const references, and members are
+  returned as const references. HDU access operators[] have been
+  implemented to access FITS extensions without range checking.
+
 GFitsTable
   The column table operator[] now returns a pointer instead of a
   reference. Set set() method has been added for column setting.

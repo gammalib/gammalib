@@ -239,8 +239,8 @@ void GLATEdisp::read(const GFits& fits)
     clear();
 
     // Get pointer to effective area HDU
-    GFitsTable* hdu_edisp = fits.table("ENERGY DISPERSION");
-    GFitsTable* hdu_scale = fits.table("EDISP_SCALING_PARAMS");
+    const GFitsTable* hdu_edisp = fits.table("ENERGY DISPERSION");
+    const GFitsTable* hdu_scale = fits.table("EDISP_SCALING_PARAMS");
     if (hdu_edisp == NULL)
         throw GException::fits_hdu_not_found(G_READ, "ENERGY DISPERSION");
     if (hdu_scale == NULL)

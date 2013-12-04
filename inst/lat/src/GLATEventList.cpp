@@ -277,7 +277,7 @@ void GLATEventList::read(const GFits& file)
     clear();
 
     // Get HDU
-    GFitsTable* hdu = file.table("EVENTS");
+    const GFitsTable* hdu = file.table("EVENTS");
 
     // Continue only if event HDU is valid
     if (hdu != NULL) {
@@ -292,8 +292,8 @@ void GLATEventList::read(const GFits& file)
 
     // If we have a GTI extension, then read Good Time Intervals from that
     // extension
-    if (file.hashdu("GTI")) {
-        GFitsTable* gti = file.table("GTI");
+    if (file.contains("GTI")) {
+        const GFitsTable* gti = file.table("GTI");
         m_gti.read(gti);
     }
 

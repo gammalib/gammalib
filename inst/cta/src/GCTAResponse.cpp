@@ -659,14 +659,14 @@ void GCTAResponse::load_aeff(const std::string& filename)
 
         // If file contains an "EFFECTIVE AREA" extension then load it
         // as CTA response table
-        if (file.hashdu("EFFECTIVE AREA")) {
+        if (file.contains("EFFECTIVE AREA")) {
             file.close();
             m_aeff = new GCTAAeff2D(filename);
         }
 
         // ... else if file contains a "SPECRESP" extension then load it
         // as ARF
-        else if (file.hashdu("SPECRESP")) {
+        else if (file.contains("SPECRESP")) {
             file.close();
             m_aeff = new GCTAAeffArf(filename);
         }
@@ -723,7 +723,7 @@ void GCTAResponse::load_psf(const std::string& filename)
 
         // If file contains a "POINT SPREAD FUNCTION" extension then load it
         // as CTA response table
-        if (file.hashdu("POINT SPREAD FUNCTION")) {
+        if (file.contains("POINT SPREAD FUNCTION")) {
             file.close();
             m_psf = new GCTAPsf2D(filename);
         }

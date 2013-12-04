@@ -331,7 +331,7 @@ void GLATAeff::read(const GFits* fits)
     clear();
 
     // Get pointer to effective area HDU
-    GFitsTable* hdu_aeff = fits->table("EFFECTIVE AREA");
+    const GFitsTable* hdu_aeff = fits->table("EFFECTIVE AREA");
 
     // Read effective area
     read_aeff(hdu_aeff);
@@ -341,7 +341,7 @@ void GLATAeff::read(const GFits* fits)
     try {
     
         // Get pointer to efficiency factor HDU
-        GFitsTable* hdu_eff = fits->table("EFFICIENCY_PARAMS");
+        const GFitsTable* hdu_eff = fits->table("EFFICIENCY_PARAMS");
 
         // Read efficiency factors
         read_efficiency(hdu_eff);

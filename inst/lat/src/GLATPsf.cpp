@@ -302,13 +302,13 @@ void GLATPsf::read(const GFits& fits)
     clear();
 
     // Get pointer to PSF parameters table
-    GFitsTable* hdu_rpsf  = fits.table("RPSF");
+    const GFitsTable* hdu_rpsf = fits.table("RPSF");
     if (hdu_rpsf == NULL) {
         throw GException::fits_hdu_not_found(G_READ, "RPSF");
     }
 
     // Get pointer to PSF scaling parameters table
-    GFitsTable* hdu_scale = fits.table("PSF_SCALING_PARAMS");
+    const GFitsTable* hdu_scale = fits.table("PSF_SCALING_PARAMS");
     if (hdu_scale == NULL) {
         throw GException::fits_hdu_not_found(G_READ, "PSF_SCALING_PARAMS");
     }

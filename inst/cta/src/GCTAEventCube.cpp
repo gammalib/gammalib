@@ -316,13 +316,13 @@ void GCTAEventCube::load(const std::string& filename)
     clear();
 
     // Open counts map FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Load counts map
-    read(file);
+    read(fits);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Return
     return;
@@ -356,7 +356,7 @@ void GCTAEventCube::save(const std::string& filename, bool clobber) const
 /***********************************************************************//**
  * @brief Read CTA event cube from FITS file
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
  * It is assumed that the counts map resides in the primary extension of the
  * FITS file, the energy boundaries reside in the EBOUNDS extension and the
@@ -364,15 +364,15 @@ void GCTAEventCube::save(const std::string& filename, bool clobber) const
  * object before loading, thus any events residing in the object before
  * loading will be lost.
  ***************************************************************************/
-void GCTAEventCube::read(const GFits& file)
+void GCTAEventCube::read(const GFits& fits)
 {
     // Clear object
     clear();
 
     // Get HDUs
-    GFitsImage* hdu_cntmap  = file.image("Primary");
-    GFitsTable* hdu_ebounds = file.table("EBOUNDS");
-    GFitsTable* hdu_gti     = file.table("GTI");
+    const GFitsImage* hdu_cntmap  = fits.image("Primary");
+    const GFitsTable* hdu_ebounds = fits.table("EBOUNDS");
+    const GFitsTable* hdu_gti     = fits.table("GTI");
 
     // Load counts map
     read_cntmap(hdu_cntmap);
@@ -391,18 +391,18 @@ void GCTAEventCube::read(const GFits& file)
 /***********************************************************************//**
  * @brief Write CTA event cube into FITS file.
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  ***************************************************************************/
-void GCTAEventCube::write(GFits& file) const
+void GCTAEventCube::write(GFits& fits) const
 {
     // Write cube
-    m_map.write(&file);
+    m_map.write(&fits);
 
     // Write energy boundaries
-    ebounds().write(&file);
+    ebounds().write(&fits);
 
     // Write Good Time intervals
-    gti().write(&file);
+    gti().write(&fits);
 
     // Return
     return;

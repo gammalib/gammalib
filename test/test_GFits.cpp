@@ -478,8 +478,8 @@ void TestGFits::test_create(void)
     try {
         GFits fits;
         fits.open("test.fits");
-        GFitsHDU*         hdu   = fits.hdu(0);
-        GFitsImageDouble* image = static_cast<GFitsImageDouble*>(fits.hdu(1));
+        GFitsHDU*         hdu   = fits.at(0);
+        GFitsImageDouble* image = static_cast<GFitsImageDouble*>(fits.at(1));
         int nx = image->naxes(0);
         int ny = image->naxes(1);
         for (int ix = 0; ix < nx; ++ix) {

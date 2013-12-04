@@ -947,7 +947,7 @@ void GSkymap::load(const std::string& filename)
     for (int extno = 1; extno < num; ++extno) {
 
         // Get pointer to HDU
-        hdu = fits.hdu(extno);
+        hdu = fits.at(extno);
         
         // If PIXTYPE keyword equals "HEALPIX" then load map
         if (hdu->hascard("PIXTYPE") && hdu->string("PIXTYPE") == "HEALPIX") {
@@ -964,7 +964,7 @@ void GSkymap::load(const std::string& filename)
         for (int extno = 0; extno < num; ++extno) {
 
             // Get pointer to HDU
-            hdu = fits.hdu(extno);
+            hdu = fits.at(extno);
 
             // Skip if extension is not an image
             if (extno > 0) {

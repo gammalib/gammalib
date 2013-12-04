@@ -336,13 +336,13 @@ void GPha::load(const std::string& filename)
     clear();
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get PHA table
-    GFitsTable* pha = file.table("SPECTRUM");
+    GFitsTable* pha = fits.table("SPECTRUM");
 
     // Get EBOUNDS table (NULL if the table does not exist)
-    GFitsTable* ebounds = (file.hashdu("EBOUNDS")) ? file.table("EBOUNDS") : NULL;
+    GFitsTable* ebounds = (fits.contains("EBOUNDS")) ? fits.table("EBOUNDS") : NULL;
 
     // Read PHA data
     read(pha);
@@ -351,7 +351,7 @@ void GPha::load(const std::string& filename)
     m_ebounds.read(ebounds);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;

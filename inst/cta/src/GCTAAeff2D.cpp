@@ -283,7 +283,7 @@ void GCTAAeff2D::read(const GFits* fits)
     m_aeff.clear();
 
     // Get pointer to effective area HDU
-    GFitsTable* hdu = fits->table("EFFECTIVE AREA");
+    const GFitsTable* hdu = fits->table("EFFECTIVE AREA");
 
     // Read effective area table
     m_aeff.read(hdu);

@@ -760,17 +760,17 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     m_events = events;
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Read event list
-    events->read(file);
+    events->read(fits);
 
     // Read observation attributes from EVENTS extension
-    GFitsHDU* hdu = file.hdu("EVENTS");
+    const GFitsHDU* hdu = fits.at("EVENTS");
     read_attributes(hdu);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store event filename
     m_eventfile = filename;
@@ -799,17 +799,17 @@ void GCTAObservation::load_binned(const std::string& filename)
     m_events = events;
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Read event cube
-    events->read(file);
+    events->read(fits);
 
     // Read observation attributes from primary extension
-    GFitsHDU* hdu = file.hdu(0);
+    const GFitsHDU* hdu = fits.at(0);
     read_attributes(hdu);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store event filename
     m_eventfile = filename;
@@ -842,7 +842,7 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
         list->write(fits);
 
         // Write observation attributes into EVENTS header
-        GFitsHDU* hdu = fits.hdu("EVENTS");
+        GFitsHDU* hdu = fits.at("EVENTS");
         write_attributes(hdu);
 
     } // endif: observation contained an event list
@@ -856,7 +856,7 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
         cube->write(fits);
 
         // Write observation attributes into primary header
-        GFitsHDU* hdu = fits.hdu(0);
+        GFitsHDU* hdu = fits.at(0);
         write_attributes(hdu);
 
     } // endelse: observation contained an event cube

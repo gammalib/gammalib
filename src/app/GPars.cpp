@@ -282,10 +282,12 @@ GPars* GPars::clone(void) const
  ***************************************************************************/
 GPar& GPars::at(const int& index)
 {
-    // Raise exception if index is out of range
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_AT, "Parameter index", index, size());
     }
+    #endif
 
     // Return reference
     return (m_pars[index]);
@@ -302,10 +304,12 @@ GPar& GPars::at(const int& index)
  ***************************************************************************/
 const GPar& GPars::at(const int& index) const
 {
-    // Raise exception if index is out of range
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
         throw GException::out_of_range(G_AT, "Parameter index", index, size());
     }
+    #endif
 
     // Return reference
     return (m_pars[index]);

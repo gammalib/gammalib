@@ -1,5 +1,5 @@
 /***************************************************************************
- *            GMWLSpectrum.cpp -  Multi-wavelength spectrum class          *
+ *             GMWLSpectrum.cpp - Multi-wavelength spectrum class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -369,16 +369,16 @@ void GMWLSpectrum::read(const GFits& file)
 /***********************************************************************//**
  * @brief Read spectrum from FITS file
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  * @param[in] extname FITS extension name.
  ***************************************************************************/
-void GMWLSpectrum::read(const GFits& file, const std::string& extname)
+void GMWLSpectrum::read(const GFits& fits, const std::string& extname)
 {
     // Clear object
     clear();
 
     // Get table pointer
-    GFitsTable* table = file.table(extname);
+    const GFitsTable* table = fits.table(extname);
 
     // Read spectrum from table
     read_fits(table);
@@ -391,7 +391,7 @@ void GMWLSpectrum::read(const GFits& file, const std::string& extname)
 /***********************************************************************//**
  * @brief Read spectrum from FITS file
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  * @param[in] extno Extension number of spectrum.
  *
  * @exception GMWLException::file_open_error
@@ -401,16 +401,16 @@ void GMWLSpectrum::read(const GFits& file, const std::string& extname)
  * In no extension number if specified (or if extno=0) then the spectrum
  * is loaded from the first table extension that is found in the file.
  ***************************************************************************/
-void GMWLSpectrum::read(const GFits& file, int extno)
+void GMWLSpectrum::read(const GFits& fits, int extno)
 {
     // Clear object
     clear();
 
     // If the extension number is 0 then load first FITS table in file.
     if (extno == 0) {
-        for (int i = 0; i < file.size(); ++i) {
-            if (file.hdu(i)->exttype() == GFitsHDU::HT_ASCII_TABLE ||
-                file.hdu(i)->exttype() == GFitsHDU::HT_BIN_TABLE) {
+        for (int i = 0; i < fits.size(); ++i) {
+            if (fits.at(i)->exttype() == GFitsHDU::HT_ASCII_TABLE ||
+                fits.at(i)->exttype() == GFitsHDU::HT_BIN_TABLE) {
                 extno = i;
                 break;
             }
@@ -418,12 +418,13 @@ void GMWLSpectrum::read(const GFits& file, int extno)
     }
 
     // If we found no table then throw an exception
-    if (extno == 0)
-        throw GMWLException::file_open_error(G_READ, file.name(),
+    if (extno == 0) {
+        throw GMWLException::file_open_error(G_READ, fits.filename(),
                                              "No table found in file.");
+    }
 
     // Get table pointer
-    GFitsTable* table = file.table(extno);
+    const GFitsTable* table = fits.table(extno);
 
     // Read spectrum from table
     read_fits(table);

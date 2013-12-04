@@ -406,19 +406,19 @@ void GCOMEventCube::save(const std::string& filename, bool clobber) const
 /***********************************************************************//**
  * @brief Read COMPTEL event cube from FITS file
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
  * Reads an COMPTEL event cube from a DRE FITS file. The event cube is loaded
  * into a skymap and the header keywords are analyzed to determine the
  * scatter angle axis, the energy range and the time range.
  ***************************************************************************/
-void GCOMEventCube::read(const GFits& file)
+void GCOMEventCube::read(const GFits& fits)
 {
     // Clear object
     clear();
 
     // Get HDU
-    GFitsImage* hdu = file.image("Primary");
+    const GFitsImage* hdu = fits.image("Primary");
 
     // Load counts map as sky map
     m_map.read(hdu);

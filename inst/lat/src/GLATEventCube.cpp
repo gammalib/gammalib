@@ -323,7 +323,7 @@ void GLATEventCube::save(const std::string& filename, bool clobber) const
 /***********************************************************************//**
  * @brief Read LAT event cube from FITS file.
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
  * It is assumed that the counts map resides in the primary extension of the
  * FITS file, the energy boundaries reside in the EBOUNDS extension and the
@@ -331,15 +331,15 @@ void GLATEventCube::save(const std::string& filename, bool clobber) const
  * object before loading, thus any events residing in the object before
  * loading will be lost.
  ***************************************************************************/
-void GLATEventCube::read(const GFits& file)
+void GLATEventCube::read(const GFits& fits)
 {
     // Clear object
     clear();
 
     // Get HDUs
-    GFitsImage* hdu_cntmap  = file.image("Primary");
-    GFitsTable* hdu_ebounds = file.table("EBOUNDS");
-    GFitsTable* hdu_gti     = file.table("GTI");
+    const GFitsImage* hdu_cntmap  = fits.image("Primary");
+    const GFitsTable* hdu_ebounds = fits.table("EBOUNDS");
+    const GFitsTable* hdu_gti     = fits.table("GTI");
 
     // Load counts map
     read_cntmap(hdu_cntmap);
@@ -351,9 +351,9 @@ void GLATEventCube::read(const GFits& file)
     read_gti(hdu_gti);
 
     // Load additional source maps
-    for (int i = 1; i < file.size(); ++i) {
-        if (file.hdu(i)->exttype() == GFitsHDU::HT_IMAGE) {
-            GFitsImage* hdu_srcmap = file.image(i);
+    for (int i = 1; i < fits.size(); ++i) {
+        if (fits.at(i)->exttype() == GFitsHDU::HT_IMAGE) {
+            const GFitsImage* hdu_srcmap = fits.image(i);
             read_srcmap(hdu_srcmap);
         }
     }
@@ -366,11 +366,11 @@ void GLATEventCube::read(const GFits& file)
 /***********************************************************************//**
  * @brief Write LAT event cube into FITS file
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GLATEventCube::write(GFits& file) const
+void GLATEventCube::write(GFits& fits) const
 {
     // Return
     return;
