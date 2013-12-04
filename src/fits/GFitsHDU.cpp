@@ -531,7 +531,7 @@ std::string GFitsHDU::print_hdu(const GChatter& chatter) const
         // Append HDU information
         result.append(gammalib::parformat("HDU number"));
         result.append(gammalib::str(m_hdunum)+"\n");
-        result.append(gammalib::parformat("HDU name")+m_name+"\n");
+        result.append(gammalib::parformat("HDU name")+m_name);
 
     } // endif: chatter was not silent
 

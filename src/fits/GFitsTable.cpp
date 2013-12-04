@@ -636,48 +636,52 @@ std::string GFitsTable::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GFitsTable ===\n");
+        result.append("=== GFitsTable ===");
 
         // Append HDU information
-        result.append(print_hdu(chatter));
+        result.append("\n"+print_hdu(chatter));
 
         // Append table type
-        result.append(gammalib::parformat("Table type"));
+        result.append("\n"+gammalib::parformat("Table type"));
         switch (m_type) {
         case GFitsHDU::HT_ASCII_TABLE:
-            result.append("ASCII table\n");
+            result.append("ASCII table");
             break;
         case GFitsHDU::HT_BIN_TABLE:
-            result.append("Binary table\n");
+            result.append("Binary table");
             break;
         default:
-            result.append("Unknown\n");
+            result.append("Unknown");
             break;
         }
 
         // Append table dimensions
-        result.append(gammalib::parformat("Number of rows"));
-        result.append(gammalib::str(m_rows)+"\n");
-        result.append(gammalib::parformat("Number of columns"));
-        result.append(gammalib::str(m_cols)+"\n");
+        result.append("\n"+gammalib::parformat("Number of rows"));
+        result.append(gammalib::str(m_rows));
+        result.append("\n"+gammalib::parformat("Number of columns"));
+        result.append(gammalib::str(m_cols));
 
-        // Append header information
-        result.append(m_header.print(chatter));
+        // NORMAL: Append header information
+        if (chatter >= NORMAL) {
+            result.append("\n"+m_header.print(gammalib::reduce(chatter)));
+        }
 
-        // Append table columns
-        if (m_columns != NULL) {
-            for (int i = 0; i < m_cols; ++i) {
-                result.append("\n");
-                if (m_columns[i] != NULL) {
-                    result.append(m_columns[i]->print(chatter));
-                }
-                else {
-                    result.append(" Column "+gammalib::str(i)+" undefined");
+        // NORMAL: Append table columns
+        if (chatter >= NORMAL) {
+            if (m_columns != NULL) {
+                for (int i = 0; i < m_cols; ++i) {
+                    result.append("\n");
+                    if (m_columns[i] != NULL) {
+                        result.append(m_columns[i]->print(gammalib::reduce(chatter)));
+                    }
+                    else {
+                        result.append(" Column "+gammalib::str(i)+" undefined");
+                    }
                 }
             }
-        }
-        else {
-            result.append(" Table columns undefined");
+            else {
+                result.append("\n Table columns undefined");
+            }
         }
 
     } // endif: chatter was not silent

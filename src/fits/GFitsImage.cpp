@@ -446,22 +446,24 @@ std::string GFitsImage::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GFitsImage ===\n");
+        result.append("=== GFitsImage ===");
 
         // Append HDU information
-        result.append(print_hdu(chatter));
+        result.append("\n"+print_hdu(chatter));
 
         // Append image dimensions
-        result.append(gammalib::parformat("Image type")+typecode(type())+"\n");
-        result.append(gammalib::parformat("Number of dimensions")+gammalib::str(naxis())+"\n");
-        result.append(gammalib::parformat("Number of image pixels")+gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Image type")+typecode(type()));
+        result.append("\n"+gammalib::parformat("Number of dimensions")+gammalib::str(naxis()));
+        result.append("\n"+gammalib::parformat("Number of image pixels")+gammalib::str(size()));
         for (int i = 0; i < naxis(); ++i) {
             result.append("\n"+gammalib::parformat("Number of bins in "+gammalib::str(i)) +
                           gammalib::str(naxes(i)));
         }
 
-        // Append header information
-        result.append(+"\n"+m_header.print(chatter));
+        // NORMAL: Append header information
+        if (chatter >= NORMAL) {
+            result.append(+"\n"+m_header.print(gammalib::reduce(chatter)));
+        }
 
     } // endif: chatter was not silent
 
