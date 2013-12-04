@@ -138,12 +138,9 @@ GSkyPixel
   for 2D pixels. 1D and 2D pixel constructors exist now for
   integer and double precision values.
 
-GTestSuites
-  The GTestSuites class now derives from GContainer and implements
-  the usual container class methods (at(), size(), isempty(),
-  set(), append(), insert(), remove(), reserve() and extend()).
-  The operator[] now returns pointers to GTestSuite. The name()
-  and timestamp() methods now return const references.
+GTestCase
+  The name(), message(), type(), kind(), passed() and
+  duration() methods now all return a const reference.
 
 GTestSuite
   The GTestSuite class now derives from GBase. This implies that
@@ -152,6 +149,13 @@ GTestSuite
   boolean argument. The name(), errors(), failures(), and
   timestamp() methods return const references. The obsolete
   add_test() method has been removed.
+
+GTestSuites
+  The GTestSuites class now derives from GContainer and implements
+  the usual container class methods (at(), size(), isempty(),
+  set(), append(), insert(), remove(), reserve() and extend()).
+  The operator[] now returns pointers to GTestSuite. The name()
+  and timestamp() methods now return const references.
 
 GWcs => GSkyProjection
   The GWcs class has been renamed to GSkyProjection as it is more

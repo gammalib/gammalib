@@ -1,5 +1,5 @@
 /***************************************************************************
- *                    GTestCase.hpp  - Test case class                     *
+ *                    GTestCase.hpp - Test case class                      *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestCase.hpp
- * @brief Test case class definition
+ * @brief Test case class interface definition
  * @author Jean-Baptiste Cayrou
  */
  
@@ -38,16 +38,16 @@
  * @brief Test class
  *
  * This class implements a single test case result. It contains information
- * about the test name, an optional message that is created in case on an
+ * about the test name, an optional message that is created in case of an
  * error or a failure, a type information (containing usually the name of
- * the class that as failing), and some information about the test duration.
+ * the class that is failing), and some information about the test duration.
  * Furthermore, the test case knows whether the test succeeded or failed,
  * and whether the test was an error or a failure test.
  ***************************************************************************/
 class GTestCase : public GBase {
     
 public:
-    // public enumerators
+    // Public enumerators
     enum ErrorKind {
         FAIL_TEST,
         ERROR_TEST
@@ -55,29 +55,29 @@ public:
 
     // Constructors and destructors
     GTestCase(void);
+    GTestCase(const ErrorKind& kind, const std::string& name = "");
     GTestCase(const GTestCase& test);
-    GTestCase(ErrorKind kind, const std::string& name = "");
     virtual ~GTestCase(void);
 
     // Operators
-    GTestCase&  operator= (const GTestCase& test);
+    GTestCase& operator=(const GTestCase& test);
 
     // Methods
-    void        clear(void);
-    GTestCase*  clone(void) const;
-    std::string name(void) const;
-    void        name(const std::string& name);
-    std::string message(void) const;
-    void        message( const std::string& message);
-    std::string type(void) const;
-    void        type( const std::string& type);
-    ErrorKind   kind(void) const;
-    void        kind(ErrorKind kind);
-    bool        passed(void) const;
-    void        passed(const bool& passed);
-    double      duration(void) const;
-    void        duration(const double& duration);
-    std::string print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GTestCase*         clone(void) const;
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    const std::string& message(void) const;
+    void               message( const std::string& message);
+    const std::string& type(void) const;
+    void               type( const std::string& type);
+    const ErrorKind&   kind(void) const;
+    void               kind(const ErrorKind& kind);
+    const bool&        passed(void) const;
+    void               passed(const bool& passed);
+    const double&      duration(void) const;
+    void               duration(const double& duration);
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
      // Protected methods
@@ -86,12 +86,170 @@ protected:
     void free_members(void);
         
     // Private members
-    std::string m_name;        //!< Test name
-    std::string m_message;     //!< Test message
-    std::string m_type;        //!< Test type
-    bool        m_passed;      //!< Boolean to check test success
-    ErrorKind   m_kind;        //!< Kind of test case (failure or error test)
-    double      m_duration;    //!< Test duration
+    std::string m_name;      //!< Test name
+    std::string m_message;   //!< Test message
+    std::string m_type;      //!< Test type
+    bool        m_passed;    //!< Boolean to check test success
+    ErrorKind   m_kind;      //!< Kind of test case (failure or error test)
+    double      m_duration;  //!< Test duration
 };
+
+
+/***********************************************************************//**
+ * @brief Return test case name
+ *
+ * @return Test case name.
+ ***************************************************************************/
+inline
+const std::string& GTestCase::name(void) const
+{
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Set test case name
+ *
+ * @param[in] name Test case name.
+ ***************************************************************************/
+inline
+void GTestCase::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return test case message
+ *
+ * @return Test case message.
+ ***************************************************************************/
+inline
+const std::string& GTestCase::message(void) const
+{
+    return m_message;
+}
+
+
+/***********************************************************************//**
+ * @brief Set test case message
+ *
+ * @param[in] message Test case message.
+ ***************************************************************************/
+inline
+void GTestCase::message(const std::string& message)
+{
+    m_message = message;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return test case type
+ *
+ * @return Type of test case.
+ ***************************************************************************/
+inline
+const std::string& GTestCase::type(void) const
+{
+    return m_type;
+}
+
+
+/***********************************************************************//**
+ * @brief Set type of test case
+ *
+ * @param[in] type Type of test case.
+ ***************************************************************************/
+inline
+void GTestCase::type(const std::string& type)
+{
+    m_type = type;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return kind of test case
+ *
+ * @return Test case kind (FAIL_TEST or ERROR_TEST).
+ *
+ * Returns whether this test case is for failure testing (FAIL_TEST) or
+ * error testing (ERROR_TEST).
+ ***************************************************************************/
+inline
+const GTestCase::ErrorKind& GTestCase::kind(void) const
+{
+    return m_kind; 
+}
+
+
+/***********************************************************************//**
+ * @brief Set kind of test case
+ *
+ * @param[in] kind Kind of test case (FAIL_TEST or ERROR_TEST)
+ *
+ * Specifies whether this test case is for failure testing (FAIL_TEST) or
+ * error testing (ERROR_TEST).
+ ***************************************************************************/
+inline
+void GTestCase::kind(const ErrorKind& kind)
+{
+    m_kind = kind;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return whether the test passed
+ *
+ * @return True if test has passed, false otherwise.
+ *
+ * This method returns true if the test has passed, false otherwise.
+ ***************************************************************************/
+inline
+const bool& GTestCase::passed(void) const
+{
+    return m_passed;
+}
+
+
+/***********************************************************************//**
+ * @brief Set if test passed
+ *
+ * @param[in] passed Test passed (true or false)
+ ***************************************************************************/
+inline
+void GTestCase::passed(const bool& passed)
+{
+    m_passed = passed;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return test case duration
+ *
+ * @return Duration of test case.
+ ***************************************************************************/
+inline
+const double& GTestCase::duration(void) const
+{
+    return m_duration;
+}
+
+
+/***********************************************************************//**
+ * @brief Set test duration
+ *
+ * @param[in] duration Test duration.
+ ***************************************************************************/
+inline
+void GTestCase::duration(const double& duration)
+{
+    m_duration = duration;
+    return;
+}
 
 #endif /* GTESTCASE_H */
