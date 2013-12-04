@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GFitsImage.cpp - FITS image class                     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -714,7 +714,22 @@ void GFitsImage::save_image(int datatype, const void* pixels)
     // Move to HDU. We use here an explicit cfitsio moveto function since we
     // want to recover the error code ...
     int status = 0;
-    status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
+    int type   = 0;
+    status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, &type, &status);
+
+    // If move was successful but HDU type in file differs from HDU type
+    // of object then replace the HDU in the file
+    if (status == 0 && type != exttype()) {
+        status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
+        if (status != 0) {
+            throw GException::fits_error(G_SAVE_IMAGE, status);
+        }
+        status = __ffiimg(FPTR(m_fitsfile), m_bitpix, m_naxis, m_naxes, &status);
+        //status = __ffiimgll(FPTR(m_fitsfile), m_bitpix, m_naxis, m_naxes, &status);
+        if (status != 0) {
+            throw GException::fits_error(G_SAVE_IMAGE, status);
+        }
+    }
 
     // If HDU does not yet exist in file then create it now
     if (status == 107) {

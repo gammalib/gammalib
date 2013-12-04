@@ -915,11 +915,12 @@ void GFitsTable::data_open(void* vptr)
  * @exception GException::fits_bad_col_length
  *            Table columns have inconsistent lengths.
  *
- * This method saves a table into a FITS file.
+ * Saves the FITS table into the FITS file.
  *
- * In case that no table HDU exists it will be created by appending a new
- * HDU to the existing file. The definition of this HDU will be based on the
- * table definition in the class instance.
+ * In case that no table HDU exists so far in the FITS file, a new table
+ * will be appended to the FITS file. In case that a different HDU type
+ * exists at the requested extension number, the existing HDU will be
+ * deleted and be replaced by the requested table type.
  *
  * The method also verifies the consistency of all table columns. Table
  * columns need to have identical lengths to be saved into a FITS table.
@@ -957,10 +958,16 @@ void GFitsTable::data_save(void)
 
     // Move to HDU
     int status = 0;
-    status = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
+    int type   = 0;
+    status = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, &type, &status);
 
-    // If HDU does not exist in file then create it now
-    if (status == 107) {
+    // If move was successful but HDU type in file differs from HDU type
+    // of object then replace the HDU in the file
+    bool replace = (status == 0 && type != m_type);
+
+    // If HDU does not exist in file or should be replaced then create or
+    // replace it now
+    if (status == 107 || replace) {
 
         // Reset status
         status = 0;
@@ -991,11 +998,40 @@ void GFitsTable::data_save(void)
             }
         }
 
-        // Create FITS table
-        status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields, ttype, tform,
-                          tunit, NULL, &status);
-        if (status != 0) {
-            throw GException::fits_error(G_DATA_SAVE, status);
+        // Replace FITS HDU by table
+        if (replace) {
+
+            // Delete current FITS HDU
+            status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
+            if (status != 0) {
+                throw GException::fits_error(G_DATA_SAVE, status);
+            }
+
+            // Insert either ASCII or Binary table at current HDU position
+            if (exttype() == GFitsHDU::HT_ASCII_TABLE) {
+                long tbcol  = 0;
+                long rowlen = 0;
+                status = __ffgabc(tfields, tform, 1, &rowlen, &tbcol, &status);
+                status = __ffitab(FPTR(m_fitsfile), rowlen, m_rows, tfields, ttype,
+                                  &tbcol, tform, tunit, NULL, &status);
+            }
+            else {
+                status = __ffibin(FPTR(m_fitsfile), m_rows, tfields, ttype, tform,
+                                tunit, NULL, 0, &status);
+            }
+            if (status != 0) {
+                throw GException::fits_error(G_DATA_SAVE, status);
+            }
+
+        }
+
+        // ... otherwise create FITS table
+        else {
+            status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields,
+                              ttype, tform, tunit, NULL, &status);
+            if (status != 0) {
+                throw GException::fits_error(G_DATA_SAVE, status);
+            }
         }
 
         // De-allocate column definition arrays

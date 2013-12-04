@@ -437,15 +437,17 @@ GFitsHDU::HDUType GFitsHDU::get_hdu_type(void) const
 void GFitsHDU::open(void* vptr, int hdunum)
 {
     // Verify that FITS file pointer is valid
-    if (vptr == NULL)
+    if (vptr == NULL) {
         throw GException::fits_file_not_open(G_OPEN,
               "FITS file pointer does not point to an open FITS file.");
+    }
 
     // Move to HDU
     int status = 0;
     status     = __ffmahd(FPTR(vptr), hdunum+1, NULL, &status);
-    if (status != 0)
+    if (status != 0) {
         throw GException::fits_error(G_OPEN, status);
+    }
 
     // Save the FITS file pointer and the HDU number
     FPTR_COPY(m_fitsfile, vptr);

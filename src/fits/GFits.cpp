@@ -70,7 +70,6 @@
 #define G_DELETE_EMPTY_FITS_FILES          //!< Do not write empty FITS files
 
 /* __ Debug definitions __________________________________________________ */
-#define DEBUG 0                                    //!< Code debugging option
 
 
 /*==========================================================================
@@ -658,7 +657,7 @@ GFitsHDU* GFits::set(const std::string& extname, const GFitsHDU& hdu)
 GFitsHDU* GFits::append(const GFitsHDU& hdu)
 {
     // Debug header
-    #if DEBUG
+    #if defined(G_DEBUG)
     std::cout << "GFits::append(";
     switch (hdu.exttype()) {
     case GFitsHDU::HT_IMAGE:
@@ -694,7 +693,7 @@ GFitsHDU* GFits::append(const GFitsHDU& hdu)
         }
 
         // Debug information
-        #if DEBUG
+        #if defined(G_DEBUG)
         std::cout << "Append primary image to HDU." << std::endl;
         #endif
 
@@ -722,7 +721,7 @@ GFitsHDU* GFits::append(const GFitsHDU& hdu)
         }
 
         // Debug information
-        #if DEBUG
+        #if defined(G_DEBUG)
         std::cout << "Append HDU (extno=" << n_hdu << ")." << std::endl;
         #endif
 
@@ -730,7 +729,7 @@ GFitsHDU* GFits::append(const GFitsHDU& hdu)
         m_hdu.push_back(ptr);
 
         // Debug trailer
-        #if DEBUG
+        #if defined(G_DEBUG)
         std::cout << "<-- GFits::append" << std::endl;
         #endif
         
@@ -1138,9 +1137,12 @@ void GFits::open(const std::string& filename, const bool& create)
 void GFits::save(const bool& clobber)
 {
     // Debug header
-    #if DEBUG
+    #if defined(G_DEBUG)
     std::cout << "GFits::save (size=" << size() << ") -->" << std::endl;
     #endif
+
+    // Initialise cfitsio status
+    int status = 0;
 
     // If we attempt to save an existing file without overwriting permission
     // then throw an error
@@ -1156,7 +1158,6 @@ void GFits::save(const bool& clobber)
 
     // If no HDUs exist then save an empty primary image.
     if (size() == 0) {
-        int status = 0;
         status     = __ffmahd(FPTR(m_fitsfile), 1, NULL, &status);
         status     = __ffcrim(FPTR(m_fitsfile), 8, 0, NULL, &status);
         if (status != 0) {
@@ -1172,11 +1173,27 @@ void GFits::save(const bool& clobber)
         }
     }
 
+    // Determine number of HDUs in FITS file
+    int num_hdu = 0;
+    status = __ffthdu(FPTR(m_fitsfile), &num_hdu, &status);
+    if (status != 0) {
+        throw GException::fits_error(G_SAVE, status);
+    }
+
+    // Delete all excedent HDUs (these may be their following removal
+    // of HDUs from the GFits object)
+    for (int i = num_hdu-1; i >= size(); --i) {
+        status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
+        if (status != 0) {
+            throw GException::fits_error(G_SAVE, status);
+        }
+    }
+
     // Signal that file needs not to be created anymore
     m_created = false;
     
     // Debug trailer
-    #if DEBUG
+    #if defined(G_DEBUG)
     std::cout << "<-- GFits::save" << std::endl;
     #endif
 
@@ -1204,7 +1221,7 @@ void GFits::saveto(const std::string& filename, const bool& clobber)
     std::string fname = gammalib::expand_env(filename);
 
     // Debug header
-    #if DEBUG
+    #if defined(G_DEBUG)
     std::cout << "GFits::saveto(\"" << fname << "\", " << clobber << ")"
               << " (size=" << size() << ") -->" << std::endl;
     #endif
@@ -1235,7 +1252,7 @@ void GFits::saveto(const std::string& filename, const bool& clobber)
     new_fits.close();
 
     // Debug trailer
-    #if DEBUG
+    #if defined(G_DEBUG)
     std::cout << "<-- GFits::saveto" << std::endl;
     #endif
 

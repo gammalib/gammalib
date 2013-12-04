@@ -217,12 +217,14 @@ from GContainer:
 - GEbounds
 - GEnergies
 - GGti
+- GFits
 - GObservations
 - GOptimizerPars (and hence GModels)
 - GPars
 - GPhotons
 - GSkyRegions
 - GTimes
+- GTestSuites
 - GXml
 - GXmlNode
 
@@ -235,7 +237,11 @@ file that avoids memory leaks on exit of GammaLib.
 
 6. FITS I/O Interface
 ---------------------
-Variable-length columns are now supported by the FITS classes.
+Variable-length columns are now supported by the FITS table classes.
+
+The GFits class is now organised as a container class, and HDU
+manipulations including setting, appending, inserting, removing
+or extending FITS extensions are now fully supported.
 
 
 7. Linear algebra module

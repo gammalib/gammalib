@@ -47,6 +47,7 @@ public:
     virtual void       set(void);
     virtual TestGFits* clone(void) const;
     void               test_create(void);
+    void               test_file_manipulation(void);
     void               test_image_byte(void);
     void               test_image_ushort(void);
     void               test_image_short(void);

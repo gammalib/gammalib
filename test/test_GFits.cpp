@@ -371,7 +371,8 @@ void TestGFits::set(void)
     name("GFits");
 
     // Append tests
-    append(static_cast<pfunction>(&TestGFits::test_create), "Test create");
+    append(static_cast<pfunction>(&TestGFits::test_create), "Test file creation");
+    append(static_cast<pfunction>(&TestGFits::test_file_manipulation), "Test file manipulation");
     append(static_cast<pfunction>(&TestGFits::test_image_byte), "Test image byte");
     append(static_cast<pfunction>(&TestGFits::test_image_ushort), "Test image ushort");
     append(static_cast<pfunction>(&TestGFits::test_image_short), "Test image short");
@@ -420,7 +421,6 @@ void TestGFits::test_create(void)
     system("rm -rf test_empty_image.fits");
     system("rm -rf test.fits");
     system("rm -rf test_create_bintable.fits");
-    system("rm -rf test_container.fits");
 
     // Create empty FITS file
     test_try("Create empty FITS file");
@@ -555,6 +555,19 @@ void TestGFits::test_create(void)
         test_try_failure(e);
     }
 
+    // Return
+    return;
+}
+
+
+/***************************************************************************
+ * @brief Test FITS file manipulation
+ ***************************************************************************/
+void TestGFits::test_file_manipulation(void)
+{
+    // Remove FITS file
+    system("rm -rf test_container.fits");
+
     // Test FITS file in memory container manipulation
     test_try("In memory container manipulation");
     try {
@@ -612,7 +625,6 @@ void TestGFits::test_create(void)
     }
 
     // Test FITS file container manipulation
-/*
     test_try("File container manipulation");
     try {
         // Create FITS file
@@ -635,7 +647,6 @@ void TestGFits::test_create(void)
         for (int i = 0; i < fits.size(); ++i) {
             test_value(fits.at(i)->extno(), i);
         }
-std::cout << fits << std::endl;
 
         // Replace image by table
         fits.set(1, table);
@@ -646,31 +657,36 @@ std::cout << fits << std::endl;
         for (int i = 0; i < fits.size(); ++i) {
             test_value(fits.at(i)->extno(), i);
         }
-std::cout << fits << std::endl;
 
         // Insert image in 2nd slot
         fits.insert(1, image);
+        fits.save(true);
+        fits.close();
+        fits.open("test_container.fits");
         test_value(fits.size(), 3);
         for (int i = 0; i < fits.size(); ++i) {
             test_value(fits.at(i)->extno(), i);
         }
-std::cout << fits << std::endl;
 
         // Remove image in 2nd slot
         fits.remove(1);
+        fits.save(true);
+        fits.close();
+        fits.open("test_container.fits");
         test_value(fits.size(), 2);
         for (int i = 0; i < fits.size(); ++i) {
             test_value(fits.at(i)->extno(), i);
         }
-std::cout << fits << std::endl;
 
-        // Extent FITS file
+        // Extend FITS file
         fits.extend(fits);
+        fits.save(true);
+        fits.close();
+        fits.open("test_container.fits");
         test_value(fits.size(), 4);
         for (int i = 0; i < fits.size(); ++i) {
             test_value(fits.at(i)->extno(), i);
         }
-std::cout << fits << std::endl;
         
         // Signal success
         test_try_success();
@@ -678,7 +694,6 @@ std::cout << fits << std::endl;
     catch (std::exception &e) {
         test_try_failure(e);
     }
-*/
     // Return
     return;
 }
