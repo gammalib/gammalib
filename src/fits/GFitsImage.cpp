@@ -560,23 +560,23 @@ void GFitsImage::data_connect(void* vptr)
 void GFitsImage::init_image_header(void)
 {
     // Set image header keywords
-    m_header.update(GFitsHeaderCard("XTENSION", "IMAGE   ",
+    m_header.append(GFitsHeaderCard("XTENSION", "IMAGE   ",
                                     "IMAGE extension"));
-    m_header.update(GFitsHeaderCard("BITPIX", bitpix(),
+    m_header.append(GFitsHeaderCard("BITPIX", bitpix(),
                                     "number of bits per data pixel"));
-    m_header.update(GFitsHeaderCard("NAXIS", naxis(),
+    m_header.append(GFitsHeaderCard("NAXIS", naxis(),
                                     "number of data axes"));
     for (int i = 0; i < naxis(); ++i) {
         std::ostringstream s_key;
         std::ostringstream s_comment;
         s_key     << "NAXIS" << (i+1);
         s_comment << "length of data axis " << (i+1);
-        m_header.update(GFitsHeaderCard(s_key.str(), naxes(i),
+        m_header.append(GFitsHeaderCard(s_key.str(), naxes(i),
                                         s_comment.str()));
     }
-    m_header.update(GFitsHeaderCard("PCOUNT", 0,
+    m_header.append(GFitsHeaderCard("PCOUNT", 0,
                                     "required keyword; must = 0"));
-    m_header.update(GFitsHeaderCard("GCOUNT", 1,
+    m_header.append(GFitsHeaderCard("GCOUNT", 1,
                                     "required keyword; must = 1"));
 
     // Return

@@ -294,7 +294,7 @@ void GLATPsf::save(const std::string& filename, bool clobber)
  * and allocates the proper PSF version class. It reads the PSF information
  * from the FITS file. 
  *
- * @todo Implement PSF versions 2 and 3.
+ * @todo Implement PSF version 2.
  ***************************************************************************/
 void GLATPsf::read(const GFits& fits)
 {
@@ -314,13 +314,7 @@ void GLATPsf::read(const GFits& fits)
     }
 
     // Determine PSF version (default version is version 1)
-    int version = 1;
-    try {
-        version = hdu_rpsf->integer("PSFVER");
-    }
-    catch (GException::fits_key_not_found &e) {
-        version = 1;
-    }
+    int version = (hdu_rpsf->hascard("PSFVER")) ? hdu_rpsf->integer("PSFVER") : 1;
 
     // Determine PSF type
     bool        front  = true;

@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GFitsHDU.hpp - FITS HDU handling class                 *
+ *            GFitsHDU.hpp - Abstract FITS extension base class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsHDU.hpp
- * @brief GFitsHDU class definition.
+ * @brief Abstract FITS extension base class definition.
  * @author Juergen Knoedlseder
  */
 
@@ -37,13 +37,13 @@
 /***********************************************************************//**
  * @class GFitsHDU
  *
- * @brief Implements the FITS Header Data Unit (HDU) interface
+ * @brief Abstract FITS extension base class
  *
- * The HDU is the basic unit of a FITS file. Each HDU consists of a header
- * and a data area. The header is composed of cards and is implemented by
- * the GFitsHeader class. The data are is either an image or a table and
- * is implemented by the abstract GFitsData base class.
- * The class holds a copy of the original FITS
+ * This class defines the abstract interface for a FITS extension, also known
+ * as Header Data Unit (HDU). Each HDU consists of a header and a data area.
+ * The header is composed of cards and is implemented by the GFitsHeader
+ * class. The data are is either an image or a table which are implemented
+ * as derived classes from GFitsHDU.
  *
  * @todo Implement GFitsHDU* select(const std::string& expr) that applies
  * to a table HDU for row selection.
@@ -60,7 +60,7 @@ public:
     virtual ~GFitsHDU(void);
 
     // Operators
-    GFitsHDU& operator= (const GFitsHDU& hdu);
+    GFitsHDU& operator=(const GFitsHDU& hdu);
 
     // Public enumerators
     enum HDUType {
@@ -76,16 +76,17 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented methods
-    int              size(void) const { return m_header.size(); }
-    std::string      extname(void) const { return m_name; }
-    void             extname(const std::string& extname);
-    int              extno(void) const { return m_hdunum; }
-    void             extno(int num) { m_hdunum=num; }
-    GFitsHeader*     header(void) { return &m_header; }
-    bool             hascard(const std::string& keyname) const;
-    bool             hascard(const int& cardno) const;
-    GFitsHeaderCard* card(const std::string& keyname);
-    GFitsHeaderCard* card(const int& cardno);
+    int                size(void) const;
+    const std::string& extname(void) const;
+    void               extname(const std::string& extname);
+    const int&         extno(void) const;
+    void               extno(const int& extno);
+    const GFitsHeader& header(void) const;
+    
+    bool               hascard(const std::string& keyname) const;
+    bool               hascard(const int& cardno) const;
+    GFitsHeaderCard*   card(const std::string& keyname);
+    GFitsHeaderCard*   card(const int& cardno);
     std::string      string(const std::string& keyname) const;
     double           real(const std::string& keyname) const;
     int              integer(const std::string& keyname) const;
@@ -121,5 +122,76 @@ protected:
     std::string  m_name;        //!< HDU name (extname)
     GFitsHeader  m_header;      //!< HDU header
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of cards in HDU header
+ *
+ * @return Number of cards in HDU header.
+ *
+ * Returns the number of cards in the header of the FITS extension.
+ ***************************************************************************/
+inline
+int GFitsHDU::size(void) const
+{
+    return (m_header.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Return extension name
+ *
+ * @return Extension name.
+ *
+ * Returns the name of the FITS extension.
+ ***************************************************************************/
+inline
+const std::string& GFitsHDU::extname(void) const
+{
+    return (m_name);
+}
+
+
+/***********************************************************************//**
+ * @brief Return extension number
+ *
+ * @return Extension number (starting from 0 for the primary image).
+ *
+ * Returns the number of the FITS extension.
+ ***************************************************************************/
+inline
+const int& GFitsHDU::extno(void) const
+{
+    return (m_hdunum);
+}
+
+
+/***********************************************************************//**
+ * @brief Set extension number
+ *
+ * @param[in] extno Extension number (starting from 0 for the primary image).
+ *
+ * Set the number of the FITS extension.
+ ***************************************************************************/
+inline
+void GFitsHDU::extno(const int& extno)
+{
+    m_hdunum = extno;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return extension header
+ *
+ * @return Extension header.
+ *
+ * Returns the extension header.
+ ***************************************************************************/
+inline
+const GFitsHeader& GFitsHDU::header(void) const
+{
+    return (m_header);
+}
 
 #endif /* GFITSHDU_HPP */

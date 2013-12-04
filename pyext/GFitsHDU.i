@@ -61,12 +61,13 @@ public:
     virtual HDUType   exttype(void) const = 0;
 
     // Implemented methods
-    int              size(void) const;
-    std::string      extname(void) const;
-    void             extname(const std::string& extname);
-    int              extno(void) const;
-    void             extno(int num);
-    GFitsHeader*     header(void);
+    int                size(void) const;
+    const std::string& extname(void) const;
+    void               extname(const std::string& extname);
+    const int&         extno(void) const;
+    void               extno(const int& extno);
+    const GFitsHeader& header(void) const;
+
     bool             hascard(const std::string& keyname) const;
     bool             hascard(const int& cardno) const;
     GFitsHeaderCard* card(const std::string& keyname);

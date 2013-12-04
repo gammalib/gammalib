@@ -280,10 +280,10 @@ void GHealpix::read(const GFitsHDU* hdu)
     // versions of LAT exposure cubes). If not found then search for standard
     // COORDSYS keyword.
     std::string coords;
-    try {
+    if (hdu->hascard("HIER_CRD")) {
         coords = hdu->string("HIER_CRD");
     }
-    catch (GException::fits_key_not_found &e) {
+    else if (hdu->hascard("COORDSYS")) {
         coords = hdu->string("COORDSYS");
     }
 

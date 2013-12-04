@@ -616,38 +616,38 @@ void GLATEventList::read_ds_keys(const GFitsHDU& hdu)
         for (int i = 0; i < ds_num; ++i) {
 
             // Get DSTYPnn
-            try {
-                std::sprintf(keyword, "DSTYP%d", i+1);
+            std::sprintf(keyword, "DSTYP%d", i+1);
+            if (ptr->hascard(keyword)) {
                 m_ds_type.push_back(ptr->card(std::string(keyword))->string());
             }
-            catch (GException::fits_key_not_found &e) {
+            else {
                 m_ds_type.push_back("");
             }
 
             // Get DSUNInn
-            try {
-                std::sprintf(keyword, "DSUNI%d", i+1);
+            std::sprintf(keyword, "DSUNI%d", i+1);
+            if (ptr->hascard(keyword)) {
                 m_ds_unit.push_back(ptr->card(std::string(keyword))->string());
             }
-            catch (GException::fits_key_not_found &e) {
+            else {
                 m_ds_unit.push_back("");
             }
 
             // Get DSVALnn
-            try {
-                std::sprintf(keyword, "DSVAL%d", i+1);
+            std::sprintf(keyword, "DSVAL%d", i+1);
+            if (ptr->hascard(keyword)) {
                 m_ds_value.push_back(ptr->card(std::string(keyword))->string());
             }
-            catch (GException::fits_key_not_found &e) {
+            else {
                 m_ds_value.push_back("");
             }
 
             // Get DSREFnn
-            try {
-                std::sprintf(keyword, "DSREF%d", i+1);
+            std::sprintf(keyword, "DSREF%d", i+1);
+            if (ptr->hascard(keyword)) {
                 m_ds_reference.push_back(ptr->card(std::string(keyword))->string());
             }
-            catch (GException::fits_key_not_found &e) {
+            else {
                 m_ds_reference.push_back("");
             }
 

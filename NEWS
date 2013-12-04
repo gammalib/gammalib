@@ -43,6 +43,16 @@ GFits
   returned as const references. HDU access operators[] have been
   implemented to access FITS extensions without range checking.
 
+GFitsHeader
+  The GFitsHeader class now derives from GContainer and implements all
+  generic container class methods (at(), size(), isempty(), append(),
+  insert(), remove(), reserve(), extend()). The hascard() methods have
+  been renamed to contains() for compliance with other container classes.
+  The card() methods have been renamed to at(), also for compliance.
+  The card access operators and methods now return the cards by
+  reference. Card access operators[] have been implemented to access
+  header cards without range checking.
+
 GFitsTable
   The column table operator[] now returns a pointer instead of a
   reference. Set set() method has been added for column setting.
@@ -218,6 +228,7 @@ from GContainer:
 - GEnergies
 - GGti
 - GFits
+- GFitsHeader
 - GObservations
 - GOptimizerPars (and hence GModels)
 - GPars

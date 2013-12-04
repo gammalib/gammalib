@@ -676,18 +676,18 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
     }
 
     // Get telescope name
-    try {
+    if (table->hascard("TELESCOP")) {
         m_telescope = table->string("TELESCOP");
     }
-    catch (GException::fits_key_not_found &e) {
+    else {
         m_telescope = "unknown";
     }
 
     // Get instrument name
-    try {
+    if (table->hascard("INSTRUME")) {
         m_instrument = table->string("INSTRUME");
     }
-    catch (GException::fits_key_not_found &e) {
+    else {
         m_instrument = "unknown";
     }
 

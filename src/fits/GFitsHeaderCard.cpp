@@ -506,7 +506,7 @@ void GFitsHeaderCard::value(const long long& value)
  * Convert header card value into a string.
  * Any hyphens that may occur in the FITS card will be automatically stripped.
  ***************************************************************************/
-std::string GFitsHeaderCard::string(void)
+std::string GFitsHeaderCard::string(void) const
 {
     // Initialize return value to actual value string
     std::string result = m_value;
@@ -537,7 +537,7 @@ std::string GFitsHeaderCard::string(void)
  * card did not contain a numerical value, 0 will be returned by the
  * method.
  ***************************************************************************/
-double GFitsHeaderCard::real(void)
+double GFitsHeaderCard::real(void) const
 {
     // Initialize return value to 0.0
     double result = 0.0;
@@ -572,7 +572,7 @@ double GFitsHeaderCard::real(void)
  * card did not contain a numerical value, 0 will be returned by the
  * method.
  ***************************************************************************/
-int GFitsHeaderCard::integer(void)
+int GFitsHeaderCard::integer(void) const
 {
     // Initialize return value to 0
     int result = 0;
@@ -1068,7 +1068,7 @@ void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
  *
  * Writes any kind of header card to a FITS file.
  ***************************************************************************/
-void GFitsHeaderCard::write(void* vptr)
+void GFitsHeaderCard::write(void* vptr) const
 {
     // Move to HDU
     int status = 0;

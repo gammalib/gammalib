@@ -164,7 +164,7 @@ void GFitsHDU::extname(const std::string& extname)
     //if (m_header == NULL) m_header = new GFitsHeader();
 
     // Update header
-    m_header.update(GFitsHeaderCard("EXTNAME", extname,
+    m_header.append(GFitsHeaderCard("EXTNAME", extname,
                                     "name of this extension"));
 
     // Return
@@ -180,7 +180,7 @@ void GFitsHDU::extname(const std::string& extname)
 GFitsHeaderCard* GFitsHDU::card(const std::string& keyname)
 {
     // Return pointer
-    return m_header.card(keyname);
+    return &(m_header.at(keyname));
 }
 
 
@@ -192,7 +192,7 @@ GFitsHeaderCard* GFitsHDU::card(const std::string& keyname)
 GFitsHeaderCard* GFitsHDU::card(const int& cardno)
 {
     // Return pointer
-    return m_header.card(cardno);
+    return &(m_header.at(cardno));
 }
 
 
@@ -203,11 +203,8 @@ GFitsHeaderCard* GFitsHDU::card(const int& cardno)
  ***************************************************************************/
 std::string GFitsHDU::string(const std::string& keyname) const
 {
-    // Get pointer on card
-    GFitsHeaderCard* card = const_cast<GFitsHDU*>(this)->card(keyname);
-
     // Return card value
-    return (card->string());
+    return (m_header.at(keyname).string());
 }
 
 
@@ -218,11 +215,8 @@ std::string GFitsHDU::string(const std::string& keyname) const
  ***************************************************************************/
 double GFitsHDU::real(const std::string& keyname) const
 {
-    // Get pointer on card
-    GFitsHeaderCard* card = const_cast<GFitsHDU*>(this)->card(keyname);
-
     // Return card value
-    return (card->real());
+    return (m_header.at(keyname).real());
 }
 
 
@@ -233,11 +227,8 @@ double GFitsHDU::real(const std::string& keyname) const
  ***************************************************************************/
 int GFitsHDU::integer(const std::string& keyname) const
 {
-    // Get pointer on card
-    GFitsHeaderCard* card = const_cast<GFitsHDU*>(this)->card(keyname);
-
     // Return card value
-    return (card->integer());
+    return (m_header.at(keyname).integer());
 }
 
 
@@ -252,7 +243,7 @@ void GFitsHDU::card(const std::string& keyname, const std::string& value,
                     const std::string& comment)
 {
     // Update card
-    m_header.update(GFitsHeaderCard(keyname, value, comment));
+    m_header.append(GFitsHeaderCard(keyname, value, comment));
 
     // Return
     return;
@@ -270,7 +261,7 @@ void GFitsHDU::card(const std::string& keyname, const double& value,
                     const std::string& comment)
 {
     // Update card
-    m_header.update(GFitsHeaderCard(keyname, value, comment));
+    m_header.append(GFitsHeaderCard(keyname, value, comment));
 
     // Return
     return;
@@ -288,7 +279,7 @@ void GFitsHDU::card(const std::string& keyname, const int& value,
                     const std::string& comment)
 {
     // Update card
-    m_header.update(GFitsHeaderCard(keyname,  value, comment));
+    m_header.append(GFitsHeaderCard(keyname,  value, comment));
 
     // Return
     return;
@@ -303,7 +294,7 @@ void GFitsHDU::card(const std::string& keyname, const int& value,
 bool GFitsHDU::hascard(const std::string& keyname) const
 {
     // Return presence
-    return (m_header.hascard(keyname));
+    return (m_header.contains(keyname));
 }
 
 
@@ -315,7 +306,7 @@ bool GFitsHDU::hascard(const std::string& keyname) const
 bool GFitsHDU::hascard(const int& cardno) const
 {
     // Return presence
-    return m_header.hascard(cardno);
+    return m_header.contains(cardno);
 }
 
 
@@ -453,25 +444,27 @@ void GFitsHDU::open(void* vptr, int hdunum)
     FPTR_COPY(m_fitsfile, vptr);
     m_hdunum = hdunum;
 
-    // Open HDU header
-    m_header.open(FPTR(m_fitsfile));
+    // Load HDU header
+    m_header.load(FPTR(m_fitsfile));
 
     // Open HDU data area
     data_open(FPTR(m_fitsfile));
 
     // Get HDU name from header. If no name was found and this is the primary
-    // HDU then set the name to "PRIMARY", otherwise to "NoName".
-    try {
+    // HDU then set the name to "Primary", otherwise to "NoName".
+    if (m_header.contains("EXTNAME")) {
         m_name = gammalib::strip_whitespace(m_header.string("EXTNAME"));
     }
-    catch (GException::fits_key_not_found &e) {
+    else {
         m_name.clear();
     }
     if (m_name.length() == 0) {
-        if (hdunum == 0)
+        if (hdunum == 0) {
             m_name = "Primary";
-        else
+        }
+        else {
             m_name = "NoName";
+        }
     }
 
     // Return
