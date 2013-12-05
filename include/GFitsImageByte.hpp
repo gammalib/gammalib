@@ -34,7 +34,7 @@
 /***********************************************************************//**
  * @class GFitsImageByte
  *
- * @brief Implements a FITS Byte image
+ * @brief FITS Byte image class
  ***************************************************************************/
 class GFitsImageByte : public GFitsImage {
 
