@@ -1072,18 +1072,8 @@ void GFits::open(const std::string& filename, const bool& create)
     // Open and append all HDUs
     for (int i = 0; i < num_hdu; ++i) {
 
-        // Move to HDU
-        status = __ffmahd(FPTR(m_fitsfile), i+1, NULL, &status);
-        if (status != 0) {
-            throw GException::fits_hdu_not_found(G_OPEN, i+1, status);
-        }
-
-        // Get HDU type
-        int type;
-        status = __ffghdt(FPTR(m_fitsfile), &type, &status);
-        if (status != 0) {
-            throw GException::fits_error(G_OPEN, status);
-        }
+        // Move to HDU and get HDU type
+        int type = gammalib::fits_move_to_hdu(G_OPEN, m_fitsfile, i+1);
 
         // Perform type dependent HDU allocation
         GFitsHDU* hdu = NULL;
@@ -1659,4 +1649,50 @@ GFitsImage* GFits::new_primary(void)
 
     // Return image
     return image;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                         FITS utility functions                          =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Move to FITS extension
+ *
+ * @param[in] caller Name of caller.
+ * @param[in] vptr FITS file void pointer.
+ * @param[in] hdunum HDU number (optional)
+ *
+ * @exception GException::fits_error
+ *            cfitsio error occured.
+ *
+ * If @p hdunum is >0, moves the FITS file void pointer to the HDU
+ * specified by @p hdunum. Otherwise, the FITS file void pointer is moved
+ * to the HDU specified by the @p HDUposition attribute of the void pointer.
+ ***************************************************************************/
+int gammalib::fits_move_to_hdu(const std::string& caller, void* vptr,
+                               const int& hdunum)
+{
+    // Initialise status and HDU type
+    int status = 0;
+    int type   = 0;
+
+    // Set HDU position
+    int position = (hdunum > 0) ? hdunum : (FPTR(vptr)->HDUposition)+1;
+
+    // Move to HDU
+    status = __ffmahd(FPTR(vptr), position, &type, &status);
+
+    // Throw exception in case of an error
+    if (status != 0) {
+        std::string msg = "Unable to move FITS file pointer to extension"
+                          " number "+
+                          gammalib::str(position-1)+".";
+        throw GException::fits_error(caller, status, msg);
+    }
+
+    // Return HDU type
+    return type;
 }

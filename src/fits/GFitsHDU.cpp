@@ -32,6 +32,7 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
+#include "GFits.hpp"
 #include "GFitsHDU.hpp"
 #include "GFitsHeaderCard.hpp"
 #include "GTools.hpp"
@@ -172,144 +173,6 @@ void GFitsHDU::extname(const std::string& extname)
 }
 
 
-/***********************************************************************//**
- * @brief Get pointer to header card
- *
- * @param[in] keyname Name of header card.
- ***************************************************************************/
-GFitsHeaderCard* GFitsHDU::card(const std::string& keyname)
-{
-    // Return pointer
-    return &(m_header.at(keyname));
-}
-
-
-/***********************************************************************//**
- * @brief Get pointer to header card
- *
- * @param[in] cardno Number of card in header.
- ***************************************************************************/
-GFitsHeaderCard* GFitsHDU::card(const int& cardno)
-{
-    // Return pointer
-    return &(m_header.at(cardno));
-}
-
-
-/***********************************************************************//**
- * @brief Return card value as string
- *
- * @param[in] keyname Name of header card.
- ***************************************************************************/
-std::string GFitsHDU::string(const std::string& keyname) const
-{
-    // Return card value
-    return (m_header.at(keyname).string());
-}
-
-
-/***********************************************************************//**
- * @brief Return card value as double precision
- *
- * @param[in] keyname Name of header card.
- ***************************************************************************/
-double GFitsHDU::real(const std::string& keyname) const
-{
-    // Return card value
-    return (m_header.at(keyname).real());
-}
-
-
-/***********************************************************************//**
- * @brief Return card value as integer
- *
- * @param[in] keyname Name of header card.
- ***************************************************************************/
-int GFitsHDU::integer(const std::string& keyname) const
-{
-    // Return card value
-    return (m_header.at(keyname).integer());
-}
-
-
-/***********************************************************************//**
- * @brief Update header card (string value)
- *
- * @param[in] keyname Name of the header card.
- * @param[in] value String value of the header card.
- * @param[in] comment Comment of the header card.
- ***************************************************************************/
-void GFitsHDU::card(const std::string& keyname, const std::string& value,
-                    const std::string& comment)
-{
-    // Update card
-    m_header.append(GFitsHeaderCard(keyname, value, comment));
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Update header card (double precision value)
- *
- * @param[in] keyname Name of the header card.
- * @param[in] value Double precision value of the header card.
- * @param[in] comment Comment of the header card.
- ***************************************************************************/
-void GFitsHDU::card(const std::string& keyname, const double& value,
-                    const std::string& comment)
-{
-    // Update card
-    m_header.append(GFitsHeaderCard(keyname, value, comment));
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Update header card (integer value)
- *
- * @param[in] keyname Name of the header card.
- * @param[in] value Integer value of the header card.
- * @param[in] comment Comment of the header card.
- ***************************************************************************/
-void GFitsHDU::card(const std::string& keyname, const int& value,
-                    const std::string& comment)
-{
-    // Update card
-    m_header.append(GFitsHeaderCard(keyname,  value, comment));
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Checks for presence of header card
- *
- * @param[in] keyname Name of header card.
- ***************************************************************************/
-bool GFitsHDU::hascard(const std::string& keyname) const
-{
-    // Return presence
-    return (m_header.contains(keyname));
-}
-
-
-/***********************************************************************//**
- * @brief Checks for presence of header card
- *
- * @param[in] cardno Number of card in header.
- ***************************************************************************/
-bool GFitsHDU::hascard(const int& cardno) const
-{
-    // Return presence
-    return m_header.contains(cardno);
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                            Protected methods                            =
@@ -351,8 +214,6 @@ void GFitsHDU::connect(void* vptr)
  *
  * @exception GException::fits_file_not_open
  *            No FITS file has been opened.
- * @exception GException::fits_hdu_not_found
- *            Requested HDU not found.
  *
  * Moves to FITS file pointer to the actual HDU. This operation should
  * preceed any FITS file manipulation.
@@ -366,12 +227,7 @@ void GFitsHDU::move_to_hdu(void)
     }
 
     // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
-    if (status != 0) {
-        throw GException::fits_hdu_not_found(G_MOVE_TO_HDU, m_hdunum,
-                                             status);
-    }
+    gammalib::fits_move_to_hdu(G_MOVE_TO_HDU, m_fitsfile, m_hdunum+1);
 
     // Return
     return;
@@ -434,11 +290,7 @@ void GFitsHDU::open(void* vptr, int hdunum)
     }
 
     // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(vptr), hdunum+1, NULL, &status);
-    if (status != 0) {
-        throw GException::fits_error(G_OPEN, status);
-    }
+    gammalib::fits_move_to_hdu(G_OPEN, vptr, hdunum+1);
 
     // Save the FITS file pointer and the HDU number
     FPTR_COPY(m_fitsfile, vptr);

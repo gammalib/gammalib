@@ -35,6 +35,12 @@
 #include "GFitsImage.hpp"
 #include "GFitsTable.hpp"
 
+/* __ Prototypes _________________________________________________________ */
+namespace gammalib {
+    int fits_move_to_hdu(const std::string& caller, void* vptr,
+                         const int& hdunum = 0);
+}
+
 
 /***********************************************************************//**
  * @class GFits

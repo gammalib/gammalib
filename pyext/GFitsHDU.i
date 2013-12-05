@@ -66,21 +66,24 @@ public:
     void               extname(const std::string& extname);
     const int&         extno(void) const;
     void               extno(const int& extno);
-    const GFitsHeader& header(void) const;
-
-    bool             hascard(const std::string& keyname) const;
-    bool             hascard(const int& cardno) const;
-    GFitsHeaderCard* card(const std::string& keyname);
-    GFitsHeaderCard* card(const int& cardno);
-    std::string      string(const std::string& keyname) const;
-    double           real(const std::string& keyname) const;
-    int              integer(const std::string& keyname) const;
-    void             card(const std::string& keyname, const std::string& value,
-                          const std::string& comment);
-    void             card(const std::string& keyname, const double& value,
-                          const std::string& comment);
-    void             card(const std::string& keyname, const int& value,
-                          const std::string& comment);
+    GFitsHeader&       header(void);
+    bool               hascard(const int& cardno) const;
+    bool               hascard(const std::string& keyname) const;
+    GFitsHeaderCard&   card(const int& cardno);
+    GFitsHeaderCard&   card(const std::string& keyname);
+    void               card(const GFitsHeaderCard& card);
+    void               card(const std::string& keyname,
+                            const std::string& value,
+                            const std::string& comment);
+    void               card(const std::string& keyname,
+                            const double& value,
+                            const std::string& comment);
+    void               card(const std::string& keyname,
+                            const int& value,
+                            const std::string& comment);
+    std::string        string(const std::string& keyname) const;
+    double             real(const std::string& keyname) const;
+    int                integer(const std::string& keyname) const;
 };
 
 

@@ -276,12 +276,14 @@ public:
         fits_already_opened(std::string origin,
 		                    std::string filename);
     };
+    /*
     class fits_key_not_found : public GExceptionHandler {
     public:
         fits_key_not_found(std::string origin,
 		                   std::string keyname, 
                            int         status = 0);
     };
+    */
     class fits_column_not_found : public GExceptionHandler {
     public:
         fits_column_not_found(std::string origin,

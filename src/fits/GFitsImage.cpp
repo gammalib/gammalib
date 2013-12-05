@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
+#include "GFits.hpp"
 #include "GFitsImage.hpp"
 #include "GTools.hpp"
 
@@ -598,17 +599,14 @@ void GFitsImage::init_image_header(void)
 void GFitsImage::open_image(void* vptr)
 {
     // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0) {
-        throw GException::fits_error(G_OPEN_IMAGE, status);
-    }
+    gammalib::fits_move_to_hdu(G_OPEN_IMAGE, vptr);
 
     // Save the FITS file pointer and the HDU number
     FPTR_COPY(m_fitsfile, vptr);
     m_hdunum = FPTR(vptr)->HDUposition;
 
     // Get the image dimensions
+    int status = 0;
     status = __ffgidm(FPTR(m_fitsfile), &m_naxis, &status);
     if (status != 0) {
         throw GException::fits_error(G_OPEN_IMAGE, status);

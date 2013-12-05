@@ -719,20 +719,15 @@ std::string GFitsTable::print(const GChatter& chatter) const
 void GFitsTable::data_open(void* vptr)
 {
     // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0) {
-        throw GException::fits_hdu_not_found(G_DATA_OPEN,
-                                             (FPTR(vptr)->HDUposition)+1,
-                                             status);
-    }
+    gammalib::fits_move_to_hdu(G_DATA_OPEN, vptr);
 
     // Save FITS file pointer
     FPTR_COPY(m_fitsfile, vptr);
 
     // Determine number of rows in table
-    long nrows  = 0;
-    status      = __ffgnrw(FPTR(m_fitsfile), &nrows, &status);
+    int status = 0;
+    long nrows = 0;
+    status     = __ffgnrw(FPTR(m_fitsfile), &nrows, &status);
     if (status != 0) {
         throw GException::fits_error(G_DATA_OPEN, status);
     }

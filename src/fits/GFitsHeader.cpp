@@ -30,6 +30,7 @@
 #endif
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
+#include "GFits.hpp"
 #include "GFitsHeader.hpp"
 #include "GTools.hpp"
 
@@ -621,13 +622,10 @@ void GFitsHeader::extend(const GFitsHeader& header)
 void GFitsHeader::load(void* vptr)
 {
     // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0) {
-        throw GException::fits_error(G_OPEN, status);
-    }
+    gammalib::fits_move_to_hdu(G_OPEN, vptr);
 
     // Determine number of cards in header
+    int status    = 0;
     int num_cards = 0;
     status = __ffghsp(FPTR(vptr), &num_cards, NULL, &status);
     if (status != 0) {
@@ -670,13 +668,6 @@ void GFitsHeader::load(void* vptr)
  ***************************************************************************/
 void GFitsHeader::save(void* vptr) const
 {
-    // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0) {
-        throw GException::fits_error(G_SAVE, status);
-    }
-
     // Save all cards
     for (int i = 0; i < size(); ++i) {
         if (m_cards[i].keyname() != "SIMPLE" &&

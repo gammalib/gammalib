@@ -177,6 +177,7 @@ GException::fits_already_opened::fits_already_opened(std::string origin,
  * @param[in] keyname Name of keyword that was not found.
  * @param[in] status cfitsio status.
  ***************************************************************************/
+/*
 GException::fits_key_not_found::fits_key_not_found(std::string origin,
                                                    std::string keyname,
                                                    int         status)
@@ -194,6 +195,7 @@ GException::fits_key_not_found::fits_key_not_found(std::string origin,
     // Return
     return;
 }
+*/
 
 
 /***********************************************************************//**

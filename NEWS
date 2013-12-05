@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-4 December 2013
+5 December 2013
 
 
 1. Introduction
@@ -42,6 +42,9 @@ GFits
   Boolean arguments are now passed as const references, and members are
   returned as const references. HDU access operators[] have been
   implemented to access FITS extensions without range checking.
+
+GFitsHDU
+  The card() methods now return a reference instead of a pointer.
 
 GFitsHeader
   The GFitsHeader class now derives from GContainer and implements all

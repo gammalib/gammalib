@@ -885,65 +885,41 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU* hdu)
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
-        // Get number of data selection keywords
-        int ndskeys = 0;
-        try {
-            ndskeys = hdu->integer("NDSKEYS");
-        }
-        catch (GException::fits_key_not_found &e) {
-            ;
-        }
+        // Get number of data selection keywords (default to 0 if keyword is
+        // not found)
+        int ndskeys = (hdu->hascard("NDSKEYS")) ? hdu->integer("NDSKEYS") : 0;
 
         // Loop over all data selection keys
         for (int i = 1; i <= ndskeys; ++i) {
+
+            // Set data selection key strings
             std::string type_key  = "DSTYP"+gammalib::str(i);
             std::string unit_key  = "DSUNI"+gammalib::str(i);
             std::string value_key = "DSVAL"+gammalib::str(i);
-            try {
-                if (hdu->string(type_key) == "ENERGY") {
-                    std::string unit                 = gammalib::toupper(hdu->string(unit_key));
-                    std::string value                = hdu->string(value_key);
-                    std::vector<std::string> ebounds = gammalib::split(value, ":");
-                    if (ebounds.size() == 2) {
-                        double  emin = gammalib::todouble(ebounds[0]);
-                        double  emax = gammalib::todouble(ebounds[1]);
-                        GEnergy e_min;
-                        GEnergy e_max;
-                        if (unit == "KEV") {
-                            e_min.keV(emin);
-                            e_max.keV(emax);
-                        }
-                        else if (unit == "MEV") {
-                            e_min.MeV(emin);
-                            e_max.MeV(emax);
-                        }
-                        else if (unit == "GEV") {
-                            e_min.GeV(emin);
-                            e_max.GeV(emax);
-                        }
-                        else if (unit == "TEV") {
-                            e_min.TeV(emin);
-                            e_max.TeV(emax);
-                        }
-                        else {
-                            throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
-                                  "Invalid energy unit \""+unit+
-                                  "\" encountered in data selection key \""+
-                                  unit_key+"\"");
-                        }
-                        m_ebounds.append(e_min, e_max);
-                    }
-                    else {
-                        throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
-                              "Invalid energy value \""+value+
-                              "\" encountered in data selection key \""+
-                              value_key+"\"");
-                    }
-                } // endif: ENERGY type found
-            }
-            catch (GException::fits_key_not_found &e) {
-                ;
-            }
+
+            // Continue only if type_key is found and if this key is ENERGY
+            if (hdu->hascard(type_key) && hdu->string(type_key) == "ENERGY") {
+
+                // Extract energy boundaries
+                std::string value                = hdu->string(value_key);
+                std::string unit                 = hdu->string(unit_key);
+                std::vector<std::string> ebounds = gammalib::split(value, ":");
+                if (ebounds.size() == 2) {
+                    double  emin = gammalib::todouble(ebounds[0]);
+                    double  emax = gammalib::todouble(ebounds[1]);
+                    GEnergy e_min(emin, unit);
+                    GEnergy e_max(emax, unit);
+                    m_ebounds.append(e_min, e_max);
+                }
+                else {
+                    throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
+                          "Invalid energy value \""+value+
+                          "\" encountered in data selection key \""+
+                          value_key+"\"");
+                }
+                
+            } // endif: ENERGY type_key found
+
         } // endfor: looped over data selection keys
 
     } // endif: HDU was valid
@@ -978,47 +954,45 @@ void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
     // Continue only if HDU is valid
     if (hdu != NULL) {
 
-        // Get number of data selection keywords
-        int ndskeys = 0;
-        try {
-            ndskeys = hdu->integer("NDSKEYS");
-        }
-        catch (GException::fits_key_not_found &e) {
-            ;
-        }
+        // Get number of data selection keywords (default to 0 if keyword is
+        // not found)
+        int ndskeys = (hdu->hascard("NDSKEYS")) ? hdu->integer("NDSKEYS") : 0;
 
         // Loop over all data selection keys
         for (int i = 1; i <= ndskeys; ++i) {
+
+            // Set data selection key strings
             std::string type_key  = "DSTYP"+gammalib::str(i);
             //std::string unit_key  = "DSUNI"+gammalib::str(i);
             std::string value_key = "DSVAL"+gammalib::str(i);
-            try {
-                if (hdu->string(type_key) == "POS(RA,DEC)") {
-                    //std::string unit              = gammalib::toupper(hdu->string(unit_key));
-                    std::string value             = hdu->string(value_key);
-                    value                         = gammalib::strip_chars(value, "CIRCLE(");
-                    value                         = gammalib::strip_chars(value, ")");
-                    std::vector<std::string> args = gammalib::split(value, ",");
-                    if (args.size() == 3) {
-                        double  ra  = gammalib::todouble(args[0]);
-                        double  dec = gammalib::todouble(args[1]);
-                        double  rad = gammalib::todouble(args[2]);
-                        GCTAInstDir dir;
-                        dir.dir().radec_deg(ra, dec);
-                        m_roi.centre(dir);
-                        m_roi.radius(rad);
-                    }
-                    else {
-                        throw GException::no_roi(G_READ_DS_ROI,
-                              "Invalid acceptance cone value \""+value+
-                              "\" encountered in data selection key \""+
-                              value_key+"\"");
-                    }
-                } // endif: POS(RA,DEC) type found
-            }
-            catch (GException::fits_key_not_found &e) {
-                ;
-            }
+
+            // Continue only if type_key is found and if this key is POS(RA,DEC)
+            if (hdu->hascard(type_key) && hdu->string(type_key) == "POS(RA,DEC)") {
+
+                // ...
+                //std::string unit              = gammalib::toupper(hdu->string(unit_key));
+                std::string value             = hdu->string(value_key);
+                value                         = gammalib::strip_chars(value, "CIRCLE(");
+                value                         = gammalib::strip_chars(value, ")");
+                std::vector<std::string> args = gammalib::split(value, ",");
+                if (args.size() == 3) {
+                    double ra  = gammalib::todouble(args[0]);
+                    double dec = gammalib::todouble(args[1]);
+                    double rad = gammalib::todouble(args[2]);
+                    GCTAInstDir dir;
+                    dir.dir().radec_deg(ra, dec);
+                    m_roi.centre(dir);
+                    m_roi.radius(rad);
+                }
+                else {
+                    throw GException::no_roi(G_READ_DS_ROI,
+                          "Invalid acceptance cone value \""+value+
+                          "\" encountered in data selection key \""+
+                          value_key+"\"");
+                }
+
+            } // endif: POS(RA,DEC) type found
+
         } // endfor: looped over data selection keys
 
     } // endif: HDU was valid
