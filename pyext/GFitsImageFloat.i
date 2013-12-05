@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GFitsImageFloat.i  - FITS single precision image class SWIG interface  *
+ *          GFitsImageFloat.i - Single precision FITS image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageFloat.i
- * @brief GFitsImageFloat class SWIG file.
+ * @brief Single precision FITS image class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,17 +33,17 @@
 /***********************************************************************//**
  * @class GFitsImageFloat
  *
- * @brief SWIG interface for the FITS single precision image class.
+ * @brief Single precision FITS image class
  ***************************************************************************/
 class GFitsImageFloat : public GFitsImage {
-
 public:
     // Constructors and destructors
     GFitsImageFloat(void);
-    explicit GFitsImageFloat(int nx, const float* pixels = NULL);
-    explicit GFitsImageFloat(int nx, int ny, const float* pixels = NULL);
-    explicit GFitsImageFloat(int nx, int ny, int nz, const float* pixels = NULL);
-    explicit GFitsImageFloat(int nx, int ny, int nz, int nt, const float* pixels = NULL);
+    GFitsImageFloat(const int& nx, const float* pixels = NULL);
+    GFitsImageFloat(const int& nx, const int& ny, const float* pixels = NULL);
+    GFitsImageFloat(const int& nx, const int& ny, const int& nz, const float* pixels = NULL);
+    GFitsImageFloat(const int& nx, const int& ny, const int& nz, const int& nt, const float* pixels = NULL);
+    GFitsImageFloat(const int& naxis, const int* naxes, const float* pixels = NULL);
     GFitsImageFloat(const GFitsImageFloat& image);
     virtual ~GFitsImageFloat(void);
 

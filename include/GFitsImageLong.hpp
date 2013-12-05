@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GFitsImageLong.hpp  - FITS long integer image class          *
+ *            GFitsImageLong.hpp - Long integer FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GFitsImageLong.hpp
- * @brief GFitsImageLong class definition.
- * @author J. Knoedlseder
+ * @brief Long integer FITS image class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSIMAGELONG_HPP
@@ -34,31 +34,31 @@
 /***********************************************************************//**
  * @class GFitsImageLong
  *
- * @brief Implements a FITS long integer image
+ * @brief Long integer FITS image class
  ***************************************************************************/
 class GFitsImageLong : public GFitsImage {
 
 public:
     // Constructors and destructors
     GFitsImageLong(void);
-    explicit GFitsImageLong(int nx, const long* pixels = NULL);
-    explicit GFitsImageLong(int nx, int ny, const long* pixels = NULL);
-    explicit GFitsImageLong(int nx, int ny, int nz, const long* pixels = NULL);
-    explicit GFitsImageLong(int nx, int ny, int nz, int nt, const long* pixels = NULL);
-    explicit GFitsImageLong(int naxis, const int* naxes, const long* pixels = NULL);
+    GFitsImageLong(const int& nx, const long* pixels = NULL);
+    GFitsImageLong(const int& nx, const int& ny, const long* pixels = NULL);
+    GFitsImageLong(const int& nx, const int& ny, const int& nz, const long* pixels = NULL);
+    GFitsImageLong(const int& nx, const int& ny, const int& nz, const int& nt, const long* pixels = NULL);
+    GFitsImageLong(const int& naxis, const int* naxes, const long* pixels = NULL);
     GFitsImageLong(const GFitsImageLong& image);
     virtual ~GFitsImageLong(void);
 
     // Operators
-    GFitsImageLong& operator= (const GFitsImageLong& image);
-    long&           operator() (const int& ix);
-    long&           operator() (const int& ix, const int& iy);
-    long&           operator() (const int& ix, const int& iy, const int& iz);
-    long&           operator() (const int& ix, const int& iy, const int& iz, const int& it);
-    const long&     operator() (const int& ix) const;
-    const long&     operator() (const int& ix, const int& iy) const;
-    const long&     operator() (const int& ix, const int& iy, const int& iz) const;
-    const long&     operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
+    GFitsImageLong& operator=(const GFitsImageLong& image);
+    long&           operator()(const int& ix);
+    long&           operator()(const int& ix, const int& iy);
+    long&           operator()(const int& ix, const int& iy, const int& iz);
+    long&           operator()(const int& ix, const int& iy, const int& iz, const int& it);
+    const long&     operator()(const int& ix) const;
+    const long&     operator()(const int& ix, const int& iy) const;
+    const long&     operator()(const int& ix, const int& iy, const int& iz) const;
+    const long&     operator()(const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
     void            clear(void);

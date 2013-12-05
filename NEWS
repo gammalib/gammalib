@@ -43,6 +43,10 @@ GFits
   returned as const references. HDU access operators[] have been
   implemented to access FITS extensions without range checking.
 
+GFitsAsciiTable
+GFitsBinTable
+  The table constructors now take a const reference as argument.
+
 GFitsHDU
   The card() methods now return a reference instead of a pointer.
 
@@ -55,6 +59,22 @@ GFitsHeader
   The card access operators and methods now return the cards by
   reference. Card access operators[] have been implemented to access
   header cards without range checking.
+
+GFitsImage
+  All constructors and methods now take const references as arguments.
+  The size(), bitpix(), naxis() and anynul() methods return const
+  references, nulval() returns a const pointer.
+
+GFitsImageByte
+GFitsImageDouble
+GFitsImageFloat
+GFitsImageLong
+GFitsImageLongLong
+GFitsImageSByte
+GFitsImageShort
+GFitsImageULong
+GFitsImageUShort
+  All constructors now take const references as arguments.
 
 GFitsTable
   The column table operator[] now returns a pointer instead of a

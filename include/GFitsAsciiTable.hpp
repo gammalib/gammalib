@@ -1,7 +1,7 @@
 /***************************************************************************
  *             GFitsAsciiTable.hpp - FITS ASCII table class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,7 +34,7 @@
 /***********************************************************************//**
  * @class GFitsAsciiTable
  *
- * @brief Interface for FITS ASCII table
+ * @brief FITS ASCII table class
  *
  * The following ASCII table columns are supported: 
  * TSTRING (A),
@@ -47,17 +47,17 @@ class GFitsAsciiTable : public GFitsTable {
 public:
     // Constructors and destructors
     GFitsAsciiTable(void);
-    GFitsAsciiTable(int nrows);
+    GFitsAsciiTable(const int& nrows);
     GFitsAsciiTable(const GFitsAsciiTable& table);
     virtual ~GFitsAsciiTable(void);
 
     // Operators
-    GFitsAsciiTable& operator= (const GFitsAsciiTable& table);
+    GFitsAsciiTable& operator=(const GFitsAsciiTable& table);
 
     // Methods
     virtual void             clear(void);
     virtual GFitsAsciiTable* clone(void) const;
-    HDUType                  exttype(void) const { return HT_ASCII_TABLE; }
+    HDUType                  exttype(void) const;
 
 private:
     // Private methods
@@ -65,5 +65,17 @@ private:
     void copy_members(const GFitsAsciiTable& table);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Return extension type
+ *
+ * @return Extension type (HT_ASCII_TABLE).
+ ***************************************************************************/
+inline
+GFitsHDU::HDUType GFitsAsciiTable::exttype(void) const
+{
+    return (HT_ASCII_TABLE);
+}
 
 #endif /* GFITSASCIITABLE_HPP */

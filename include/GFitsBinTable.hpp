@@ -1,7 +1,7 @@
 /***************************************************************************
  *               GFitsBinTable.hpp - FITS binary table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -34,24 +34,24 @@
 /***********************************************************************//**
  * @class GFitsBinTable
  *
- * @brief Interface for FITS binary table
+ * @brief FITS binary table class
  ***************************************************************************/
 class GFitsBinTable : public GFitsTable {
 
 public:
     // Constructors and destructors
     GFitsBinTable(void);
-    GFitsBinTable(int nrows);
+    GFitsBinTable(const int& nrows);
     GFitsBinTable(const GFitsBinTable& table);
     virtual ~GFitsBinTable(void);
 
     // Operators
-    GFitsBinTable& operator= (const GFitsBinTable& table);
+    GFitsBinTable& operator=(const GFitsBinTable& table);
 
     // Implemented pure virtual methods
     virtual void           clear(void);
     virtual GFitsBinTable* clone(void) const;
-    HDUType                exttype(void) const { return HT_BIN_TABLE; }
+    HDUType                exttype(void) const;
 
 private:
     // Private methods
@@ -59,5 +59,17 @@ private:
     void copy_members(const GFitsBinTable& table);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Return extension type
+ *
+ * @return Extension type (HT_BIN_TABLE).
+ ***************************************************************************/
+inline
+GFitsHDU::HDUType GFitsBinTable::exttype(void) const
+{
+    return (HT_BIN_TABLE);
+}
 
 #endif /* GFITSBINTABLE_HPP */

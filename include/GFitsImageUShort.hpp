@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GFitsImageUShort.hpp  - FITS unsigned short image class         *
+ *         GFitsImageUShort.hpp - Unsigned short FITS image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageUShort.hpp
- * @brief GFitsImageUShort class definition.
+ * @brief Unsigned short FITS image class definition
  * @author Juergen Knoedlseder
  */
 
@@ -34,31 +34,31 @@
 /***********************************************************************//**
  * @class GFitsImageUShort
  *
- * @brief Implements a FITS unsigned short integer image
+ * @brief Unsigned short FITS image class
  ***************************************************************************/
 class GFitsImageUShort : public GFitsImage {
 
 public:
     // Constructors and destructors
     GFitsImageUShort(void);
-    explicit GFitsImageUShort(int nx, const unsigned short* pixels = NULL);
-    explicit GFitsImageUShort(int nx, int ny, const unsigned short* pixels = NULL);
-    explicit GFitsImageUShort(int nx, int ny, int nz, const unsigned short* pixels = NULL);
-    explicit GFitsImageUShort(int nx, int ny, int nz, int nt, const unsigned short* pixels = NULL);
-    explicit GFitsImageUShort(int naxis, const int* naxes, const unsigned short* pixels = NULL);
+    GFitsImageUShort(const int& nx, const unsigned short* pixels = NULL);
+    GFitsImageUShort(const int& nx, const int& ny, const unsigned short* pixels = NULL);
+    GFitsImageUShort(const int& nx, const int& ny, const int& nz, const unsigned short* pixels = NULL);
+    GFitsImageUShort(const int& nx, const int& ny, const int& nz, const int& nt, const unsigned short* pixels = NULL);
+    GFitsImageUShort(const int& naxis, const int* naxes, const unsigned short* pixels = NULL);
     GFitsImageUShort(const GFitsImageUShort& image);
     virtual ~GFitsImageUShort(void);
 
     // Operators
-    GFitsImageUShort&     operator= (const GFitsImageUShort& image);
-    unsigned short&       operator() (const int& ix);
-    unsigned short&       operator() (const int& ix, const int& iy);
-    unsigned short&       operator() (const int& ix, const int& iy, const int& iz);
-    unsigned short&       operator() (const int& ix, const int& iy, const int& iz, const int& it);
-    const unsigned short& operator() (const int& ix) const;
-    const unsigned short& operator() (const int& ix, const int& iy) const;
-    const unsigned short& operator() (const int& ix, const int& iy, const int& iz) const;
-    const unsigned short& operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
+    GFitsImageUShort&     operator=(const GFitsImageUShort& image);
+    unsigned short&       operator()(const int& ix);
+    unsigned short&       operator()(const int& ix, const int& iy);
+    unsigned short&       operator()(const int& ix, const int& iy, const int& iz);
+    unsigned short&       operator()(const int& ix, const int& iy, const int& iz, const int& it);
+    const unsigned short& operator()(const int& ix) const;
+    const unsigned short& operator()(const int& ix, const int& iy) const;
+    const unsigned short& operator()(const int& ix, const int& iy, const int& iz) const;
+    const unsigned short& operator()(const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
     void                  clear(void);

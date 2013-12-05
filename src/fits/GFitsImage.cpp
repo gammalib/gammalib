@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GFitsImage.cpp - FITS image class                     *
+ *               GFitsImage.cpp - Abstract FITS image base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImage.cpp
- * @brief FITS image class implementation
+ * @brief Abstract FITS image base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -82,7 +82,7 @@ GFitsImage::GFitsImage(void) : GFitsHDU()
  * Construct 1D instance of GFitsImage by specifying the number of pixels.
  * This method also adds the relevant header cards.
  ***************************************************************************/
-GFitsImage::GFitsImage(int bitpix, int nx) : GFitsHDU()
+GFitsImage::GFitsImage(const int& bitpix, const int& nx) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -116,7 +116,8 @@ GFitsImage::GFitsImage(int bitpix, int nx) : GFitsHDU()
  * Construct 2D instance of GFitsImage by specifying the number of pixels
  * in each dimension. This method also adds the relevant header cards.
  ***************************************************************************/
-GFitsImage::GFitsImage(int bitpix, int nx, int ny) : GFitsHDU()
+GFitsImage::GFitsImage(const int& bitpix, const int& nx, const int& ny) :
+            GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -152,7 +153,8 @@ GFitsImage::GFitsImage(int bitpix, int nx, int ny) : GFitsHDU()
  * Construct 3D instance of GFitsImage by specifying the number of pixels
  * in each dimension. This method also adds the relevant header cards.
  ***************************************************************************/
-GFitsImage::GFitsImage(int bitpix, int nx, int ny, int nz) : GFitsHDU()
+GFitsImage::GFitsImage(const int& bitpix, const int& nx, const int& ny,
+                       const int& nz) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -190,7 +192,8 @@ GFitsImage::GFitsImage(int bitpix, int nx, int ny, int nz) : GFitsHDU()
  * Construct 4D instance of GFitsImage by specifying the number of pixels
  * in each dimension. This method also adds the relevant header cards.
  ***************************************************************************/
-GFitsImage::GFitsImage(int bitpix, int nx, int ny, int nz, int nt) : GFitsHDU()
+GFitsImage::GFitsImage(const int& bitpix, const int& nx, const int& ny,
+                       const int& nz, const int& nt) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -221,14 +224,15 @@ GFitsImage::GFitsImage(int bitpix, int nx, int ny, int nz, int nt) : GFitsHDU()
  * @brief Constructor
  *
  * @param[in] bitpix Number of Bits per pixel (negative is floating point).
- * @param[in] naxis Image dimensions (0,1,2,3,4).
- * @param[in] naxes Number of pixels in each dimension.
+ * @param[in] naxis Image dimensions [0,1,2,3,4].
+ * @param[in] naxes Pointer to array giving number of pixels in each dimension.
  *
  * Construct instance of GFitsImage by specifying the image dimension and
  * the number of pixels in each dimension. This method also adds the relevant
  * header cards.
  ***************************************************************************/
-GFitsImage::GFitsImage(int bitpix, int naxis, const int* naxes) : GFitsHDU()
+GFitsImage::GFitsImage(const int& bitpix, const int& naxis,
+                       const int* naxes) : GFitsHDU()
 {
     // Initialise class members for clean destruction
     init_members();
@@ -261,7 +265,7 @@ GFitsImage::GFitsImage(int bitpix, int naxis, const int* naxes) : GFitsHDU()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] image FITS image which should be used for construction.
+ * @param[in] image FITS image.
  ***************************************************************************/
 GFitsImage::GFitsImage(const GFitsImage& image) : GFitsHDU(image)
 {
@@ -298,9 +302,10 @@ GFitsImage::~GFitsImage(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] image FITS image to be assigned
+ * @param[in] image FITS image.
+ * @return FITS image.
  ***************************************************************************/
-GFitsImage& GFitsImage::operator= (const GFitsImage& image)
+GFitsImage& GFitsImage::operator=(const GFitsImage& image)
 {
     // Execute only if object is not identical
     if (this != &image) {
@@ -331,49 +336,19 @@ GFitsImage& GFitsImage::operator= (const GFitsImage& image)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Return size of pixel array
- ***************************************************************************/
-int GFitsImage::size(void) const
-{
-    // Return number of pixels
-    return m_num_pixels;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of Bits per pixel (negative=floating point)
- ***************************************************************************/
-int GFitsImage::bitpix(void) const
-{
-    // Return number of Bits per pixel
-    return m_bitpix;
-}
-
-
-/***********************************************************************//**
- * @brief Return dimension of image
- ***************************************************************************/
-int GFitsImage::naxis(void) const
-{
-    // Return dimension
-    return m_naxis;
-}
-
-
-/***********************************************************************//**
  * @brief Return dimension of an image axis
  *
- * @param[in] axis Image axis (starting from 0).
+ * @param[in] axis Image axis [0,...,naxis()-1].
  *
  * @exception GException::out_of_range
  *            Image axis not valid.
  ***************************************************************************/
-int GFitsImage::naxes(int axis) const
+int GFitsImage::naxes(const int& axis) const
 {
     // Check if axis is within the range
     #if defined(G_RANGE_CHECK)
-    if (axis < 0 || axis >= m_naxis) {
-        throw GException::out_of_range(G_NAXES, axis, 0, m_naxis-1);
+    if (axis < 0 || axis >= naxis()) {
+        throw GException::out_of_range(G_NAXES, "Image axis", axis, naxis());
     }
     #endif
 
@@ -382,16 +357,6 @@ int GFitsImage::naxes(int axis) const
 
     // Return axis dimension
     return dim;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of nul values envountered during loading
- ***************************************************************************/
-int GFitsImage::anynul(void) const
-{
-    // Return number of nul values
-    return m_anynul;
 }
 
 
@@ -411,20 +376,11 @@ void GFitsImage::nulval(const void* value)
     // Allocate nul value
     alloc_nulval(value);
 
-    // Update column
+    // Update image
+    //TODO
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return nul value
- ***************************************************************************/
-void* GFitsImage::nulval(void)
-{
-    // Return
-    return (ptr_nulval());
 }
 
 
@@ -453,12 +409,15 @@ std::string GFitsImage::print(const GChatter& chatter) const
         result.append("\n"+print_hdu(chatter));
 
         // Append image dimensions
-        result.append("\n"+gammalib::parformat("Image type")+typecode(type()));
-        result.append("\n"+gammalib::parformat("Number of dimensions")+gammalib::str(naxis()));
-        result.append("\n"+gammalib::parformat("Number of image pixels")+gammalib::str(size()));
+        result.append("\n"+gammalib::parformat("Image type"));
+        result.append(typecode(type()));
+        result.append("\n"+gammalib::parformat("Number of dimensions"));
+        result.append(gammalib::str(naxis()));
+        result.append("\n"+gammalib::parformat("Number of image pixels"));
+        result.append(gammalib::str(size()));
         for (int i = 0; i < naxis(); ++i) {
-            result.append("\n"+gammalib::parformat("Number of bins in "+gammalib::str(i)) +
-                          gammalib::str(naxes(i)));
+            result.append("\n"+gammalib::parformat("Number of bins in "+gammalib::str(i)));
+            result.append(gammalib::str(naxes(i)));
         }
 
         // NORMAL: Append header information
@@ -478,6 +437,66 @@ std::string GFitsImage::print(const GChatter& chatter) const
  =                            Protected methods                            =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GFitsImage::init_members(void)
+{
+    // Initialise members
+    m_bitpix     = 8;
+    m_naxis      = 0;
+    m_naxes      = NULL;
+    m_num_pixels = 0;
+    m_anynul     = 0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] image FITS image to copy
+ ***************************************************************************/
+void GFitsImage::copy_members(const GFitsImage& image)
+{
+    // Copy attributes
+    m_bitpix     = image.m_bitpix;
+    m_naxis      = image.m_naxis;
+    m_num_pixels = image.m_num_pixels;
+    m_anynul     = image.m_anynul;
+
+    // Copy axes
+    m_naxes = NULL;
+    if (image.m_naxes != NULL && m_naxis > 0) {
+        m_naxes = new long[m_naxis];
+        for (int i = 0; i < m_naxis; ++i) {
+            m_naxes[i] = image.m_naxes[i];
+        }
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GFitsImage::free_members(void)
+{
+    // Free memory
+    if (m_naxes != NULL) delete [] m_naxes;
+
+    // Mark memory as free
+    m_naxes = NULL;
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Open FITS image
@@ -952,70 +971,4 @@ int GFitsImage::offset(const int& ix, const int& iy, const int& iz,
 
     // Return offset
     return (ix + m_naxes[0] * (iy + m_naxes[1] * (iz + it *  m_naxes[2])));
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                             Private methods                             =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GFitsImage::init_members(void)
-{
-    // Initialise members
-    m_bitpix     = 8;
-    m_naxis      = 0;
-    m_naxes      = NULL;
-    m_num_pixels = 0;
-    m_anynul     = 0;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] image FITS image to copy
- ***************************************************************************/
-void GFitsImage::copy_members(const GFitsImage& image)
-{
-    // Copy attributes
-    m_bitpix     = image.m_bitpix;
-    m_naxis      = image.m_naxis;
-    m_num_pixels = image.m_num_pixels;
-    m_anynul     = image.m_anynul;
-
-    // Copy axes
-    m_naxes = NULL;
-    if (image.m_naxes != NULL && m_naxis > 0) {
-        m_naxes = new long[m_naxis];
-        for (int i = 0; i < m_naxis; ++i) {
-            m_naxes[i] = image.m_naxes[i];
-        }
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GFitsImage::free_members(void)
-{
-    // Free memory
-    if (m_naxes != NULL) delete [] m_naxes;
-
-    // Mark memory as free
-    m_naxes = NULL;
-
-    // Return
-    return;
 }

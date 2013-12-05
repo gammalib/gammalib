@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GFitsImageShort.i  - FITS short integer image class SWIG interface    *
+ *           GFitsImageShort.i - Short integer FITS image class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageShort.i
- * @brief GFitsImageShort class SWIG file.
+ * @brief Short integer FITS image class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,17 +33,17 @@
 /***********************************************************************//**
  * @class GFitsImageShort
  *
- * @brief SWIG interface for the FITS short integer image class.
+ * @brief Short integer FITS image class
  ***************************************************************************/
 class GFitsImageShort : public GFitsImage {
-
 public:
     // Constructors and destructors
     GFitsImageShort(void);
-    explicit GFitsImageShort(int nx, const short* pixels = NULL);
-    explicit GFitsImageShort(int nx, int ny, const short* pixels = NULL);
-    explicit GFitsImageShort(int nx, int ny, int nz, const short* pixels = NULL);
-    explicit GFitsImageShort(int nx, int ny, int nz, int nt, const short* pixels = NULL);
+    GFitsImageShort(const int& nx, const short* pixels = NULL);
+    GFitsImageShort(const int& nx, const int& ny, const short* pixels = NULL);
+    GFitsImageShort(const int& nx, const int& ny, const int& nz, const short* pixels = NULL);
+    GFitsImageShort(const int& nx, const int& ny, const int& nz, const int& nt, const short* pixels = NULL);
+    GFitsImageShort(const int& naxis, const int* naxes, const short* pixels = NULL);
     GFitsImageShort(const GFitsImageShort& image);
     virtual ~GFitsImageShort(void);
 

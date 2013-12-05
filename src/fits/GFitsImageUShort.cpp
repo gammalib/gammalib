@@ -1,7 +1,7 @@
 /***************************************************************************
- *     GFitsImageUShort.cpp  - FITS unsigned short integer image class     *
+ *         GFitsImageUShort.cpp - Unsigned short FITS image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageUShort.cpp
- * @brief FITS unsigned short integer image class implementation
+ * @brief Unsigned short FITS image class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsImageUShort.hpp"
@@ -71,7 +70,8 @@ GFitsImageUShort::GFitsImageUShort(void) : GFitsImage()
  *
  * Construct 1D instance by specifying the number of pixels in the image.
  ***************************************************************************/
-GFitsImageUShort::GFitsImageUShort(int nx, const unsigned short* pixels) :
+GFitsImageUShort::GFitsImageUShort(const int& nx,
+                                   const unsigned short* pixels) :
                   GFitsImage(G_BITPIX, nx)
 {
     // Initialise class members for clean destruction
@@ -94,7 +94,8 @@ GFitsImageUShort::GFitsImageUShort(int nx, const unsigned short* pixels) :
  *
  * Construct 2D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageUShort::GFitsImageUShort(int nx, int ny, const unsigned short* pixels) :
+GFitsImageUShort::GFitsImageUShort(const int& nx, const int& ny,
+                                   const unsigned short* pixels) :
                   GFitsImage(G_BITPIX, nx, ny)
 {
     // Initialise class members for clean destruction
@@ -118,7 +119,7 @@ GFitsImageUShort::GFitsImageUShort(int nx, int ny, const unsigned short* pixels)
  *
  * Construct 3D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageUShort::GFitsImageUShort(int nx, int ny, int nz,
+GFitsImageUShort::GFitsImageUShort(const int& nx, const int& ny, const int& nz,
                                    const unsigned short* pixels) :
                   GFitsImage(G_BITPIX, nx, ny, nz)
 {
@@ -144,7 +145,8 @@ GFitsImageUShort::GFitsImageUShort(int nx, int ny, int nz,
  *
  * Construct 4D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageUShort::GFitsImageUShort(int nx, int ny, int nz, int nt,
+GFitsImageUShort::GFitsImageUShort(const int& nx, const int& ny,
+                                   const int& nz, const int& nt,
                                    const unsigned short* pixels) :
                   GFitsImage(G_BITPIX, nx, ny, nz, nt)
 {
@@ -170,7 +172,7 @@ GFitsImageUShort::GFitsImageUShort(int nx, int ny, int nz, int nt,
  * the number of pixels in each dimension. Note that this constructor does
  * not allocate any memory for the actual image.
  ***************************************************************************/
-GFitsImageUShort::GFitsImageUShort(int naxis, const int* naxes,
+GFitsImageUShort::GFitsImageUShort(const int& naxis, const int* naxes,
                                    const unsigned short* pixels) :
                   GFitsImage(G_BITPIX, naxis, naxes)
 {
@@ -228,7 +230,7 @@ GFitsImageUShort::~GFitsImageUShort(void)
  *
  * @param[in] image FITS image.
  ***************************************************************************/
-GFitsImageUShort& GFitsImageUShort::operator= (const GFitsImageUShort& image)
+GFitsImageUShort& GFitsImageUShort::operator=(const GFitsImageUShort& image)
 {
     // Execute only if object is not identical
     if (this != &image) {
@@ -260,7 +262,7 @@ GFitsImageUShort& GFitsImageUShort::operator= (const GFitsImageUShort& image)
  * Provides access to an image pixel. No range checking is performed.
  * Use the at(ix) method if range checking is required.
  ***************************************************************************/
-unsigned short& GFitsImageUShort::operator() (const int& ix)
+unsigned short& GFitsImageUShort::operator()(const int& ix)
 {
     // Load data
     load_data();
@@ -280,7 +282,7 @@ unsigned short& GFitsImageUShort::operator() (const int& ix)
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy)
+unsigned short& GFitsImageUShort::operator()(const int& ix, const int& iy)
 {
     // Load data
     load_data();
@@ -304,8 +306,8 @@ unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy)
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
-                                              const int& iz)
+unsigned short& GFitsImageUShort::operator()(const int& ix, const int& iy,
+                                             const int& iz)
 {
     // Load data
     load_data();
@@ -330,8 +332,8 @@ unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
-                                              const int& iz, const int& it)
+unsigned short& GFitsImageUShort::operator()(const int& ix, const int& iy,
+                                             const int& iz, const int& it)
 {
     // Load data
     load_data();
@@ -352,7 +354,7 @@ unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
  * Provides access to an image pixel. No range checking is performed.
  * Use the at(ix) method if range checking is required.
  ***************************************************************************/
-const unsigned short& GFitsImageUShort::operator() (const int& ix) const
+const unsigned short& GFitsImageUShort::operator()(const int& ix) const
 {
     // Load data
     load_data();
@@ -372,7 +374,7 @@ const unsigned short& GFitsImageUShort::operator() (const int& ix) const
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy) const
+const unsigned short& GFitsImageUShort::operator()(const int& ix, const int& iy) const
 {
     // Load data
     load_data();
@@ -396,8 +398,8 @@ const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
-                                                    const int& iz) const
+const unsigned short& GFitsImageUShort::operator()(const int& ix, const int& iy,
+                                                   const int& iz) const
 {
     // Load data
     load_data();
@@ -422,8 +424,8 @@ const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const unsigned short& GFitsImageUShort::operator() (const int& ix, const int& iy,
-                                                    const int& iz, const int& it) const
+const unsigned short& GFitsImageUShort::operator()(const int& ix, const int& iy,
+                                                   const int& iz, const int& it) const
 {
     // Load data
     load_data();
@@ -925,10 +927,3 @@ void GFitsImageUShort::alloc_nulval(const void* value)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GFitsImageByte.hpp  - FITS Byte image class               *
+ *               GFitsImageByte.hpp - FITS Byte image class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GFitsImageByte.hpp
- * @brief GFitsImageByte class definition.
- * @author J. Knodlseder
+ * @brief FITS Byte image class definition
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GFITSIMAGEBYTE_HPP
@@ -41,24 +41,24 @@ class GFitsImageByte : public GFitsImage {
 public:
     // Constructors and destructors
     GFitsImageByte(void);
-    explicit GFitsImageByte(int nx, const unsigned char* pixels = NULL);
-    explicit GFitsImageByte(int nx, int ny, const unsigned char* pixels = NULL);
-    explicit GFitsImageByte(int nx, int ny, int nz, const unsigned char* pixels = NULL);
-    explicit GFitsImageByte(int nx, int ny, int nz, int nt, const unsigned char* pixels = NULL);
-    explicit GFitsImageByte(int naxis, const int* naxes, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& nx, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& nx, const int& ny, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& nx, const int& ny, const int& nz, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& nx, const int& ny, const int& nz, const int& nt, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& naxis, const int* naxes, const unsigned char* pixels = NULL);
     GFitsImageByte(const GFitsImageByte& image);
     virtual ~GFitsImageByte(void);
 
     // Operators
-    GFitsImageByte&      operator= (const GFitsImageByte& image);
-    unsigned char&       operator() (const int& ix);
-    unsigned char&       operator() (const int& ix, const int& iy);
-    unsigned char&       operator() (const int& ix, const int& iy, const int& iz);
-    unsigned char&       operator() (const int& ix, const int& iy, const int& iz, const int& it);
-    const unsigned char& operator() (const int& ix) const;
-    const unsigned char& operator() (const int& ix, const int& iy) const;
-    const unsigned char& operator() (const int& ix, const int& iy, const int& iz) const;
-    const unsigned char& operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
+    GFitsImageByte&      operator=(const GFitsImageByte& image);
+    unsigned char&       operator()(const int& ix);
+    unsigned char&       operator()(const int& ix, const int& iy);
+    unsigned char&       operator()(const int& ix, const int& iy, const int& iz);
+    unsigned char&       operator()(const int& ix, const int& iy, const int& iz, const int& it);
+    const unsigned char& operator()(const int& ix) const;
+    const unsigned char& operator()(const int& ix, const int& iy) const;
+    const unsigned char& operator()(const int& ix, const int& iy, const int& iz) const;
+    const unsigned char& operator()(const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
     void                 clear(void);

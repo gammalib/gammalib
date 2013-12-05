@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GFitsImageByte.i  - FITS Byte image class SWIG interface         *
+ *                GFitsImageByte.i - FITS Byte image class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageByte.i
- * @brief GFitsImageByte class SWIG file.
+ * @brief FITS Byte image class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,17 +32,17 @@
 /***********************************************************************//**
  * @class GFitsImageByte
  *
- * @brief SWIG interface for the FITS Byte image class.
+ * @brief FITS Byte image class
  ***************************************************************************/
 class GFitsImageByte : public GFitsImage {
-
 public:
     // Constructors and destructors
     GFitsImageByte(void);
-    explicit GFitsImageByte(int nx, const unsigned char* pixels = NULL);
-    explicit GFitsImageByte(int nx, int ny, const unsigned char* pixels = NULL);
-    explicit GFitsImageByte(int nx, int ny, int nz, const unsigned char* pixels = NULL);
-    explicit GFitsImageByte(int nx, int ny, int nz, int nt, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& nx, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& nx, const int& ny, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& nx, const int& ny, const int& nz, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& nx, const int& ny, const int& nz, const int& nt, const unsigned char* pixels = NULL);
+    GFitsImageByte(const int& naxis, const int* naxes, const unsigned char* pixels = NULL);
     GFitsImageByte(const GFitsImageByte& image);
     virtual ~GFitsImageByte(void);
 
