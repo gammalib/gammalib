@@ -1,7 +1,7 @@
 /***************************************************************************
  *                          GTime.hpp - Time class                         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -52,17 +52,17 @@
 class GTime : public GBase {
 
     // Operator friends
-    friend GTime operator+ (const GTime &a, const GTime &b);
-    friend GTime operator- (const GTime &a, const GTime &b);
-    friend GTime operator* (const double &a, const GTime &b);
-    friend GTime operator* (const GTime &a, const double &b);
-    friend GTime operator/ (const GTime &a, const double &b);
-    friend bool  operator== (const GTime &a, const GTime &b);
-    friend bool  operator!= (const GTime &a, const GTime &b);
-    friend bool  operator< (const GTime &a, const GTime &b);
-    friend bool  operator<= (const GTime &a, const GTime &b);
-    friend bool  operator> (const GTime &a, const GTime &b);
-    friend bool  operator>= (const GTime &a, const GTime &b);
+    friend GTime operator+(const GTime &a, const GTime &b);
+    friend GTime operator-(const GTime &a, const GTime &b);
+    friend GTime operator*(const double &s, const GTime &time);
+    friend GTime operator* (const GTime &time, const double &s);
+    friend GTime operator/(const GTime &time, const double &s);
+    friend bool  operator==(const GTime &a, const GTime &b);
+    friend bool  operator!=(const GTime &a, const GTime &b);
+    friend bool  operator<(const GTime &a, const GTime &b);
+    friend bool  operator<=(const GTime &a, const GTime &b);
+    friend bool  operator>(const GTime &a, const GTime &b);
+    friend bool  operator>=(const GTime &a, const GTime &b);
 
 public:
     // Constructors and destructors
@@ -80,7 +80,7 @@ public:
     GTime*         clone(void) const;
     double         jd(void) const;
     double         mjd(void) const;
-    double         secs(void) const;
+    const double&  secs(void) const;
     double         days(void) const;
     double         convert(const GTimeReference& ref) const;
     void           jd(const double& time);
@@ -102,71 +102,190 @@ protected:
 };
 
 
-/***************************************************************************
- *                               Inline friends                            *
+/***********************************************************************//**
+ * @brief Return time in native reference (TT) (unit: seconds)
+ *
+ * @return Time in native reference [seconds].
  ***************************************************************************/
 inline
-GTime operator+ (const GTime& a, const GTime& b)
+const double& GTime::secs(void) const
+{
+    return m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time in native reference in seconds (TT)
+ *
+ * @param[in] seconds Time (TT) [seconds].
+ ***************************************************************************/
+inline
+void GTime::secs(const double& seconds)
+{
+    m_time = seconds;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Time addition operator friend
+ *
+ * @param[in] a First time.
+ * @param[in] b Second time.
+ * @return Added time.
+ ***************************************************************************/
+inline
+GTime operator+(const GTime& a, const GTime& b)
 {
     GTime result;
     result.m_time = a.m_time + b.m_time;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Time subtraction operator friend
+ *
+ * @param[in] a First time.
+ * @param[in] b Second time.
+ * @return Subtracted time.
+ ***************************************************************************/
 inline
-GTime operator- (const GTime& a, const GTime& b)
+GTime operator-(const GTime& a, const GTime& b)
 {
     GTime result;
     result.m_time = a.m_time - b.m_time;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Time multiplication operator friend
+ *
+ * @param[in] s Multiplier.
+ * @param[in] time Time.
+ * @return Multiplied time.
+ ***************************************************************************/
 inline
-GTime operator* (const double& a, const GTime& b)
+GTime operator*(const double& s, const GTime& time)
 {
     GTime result;
-    result.m_time = a * b.m_time;
+    result.m_time = s * time.m_time;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Time multiplication operator friend
+ *
+ * @param[in] time Time.
+ * @param[in] s Multiplier.
+ * @return Multiplied time.
+ ***************************************************************************/
 inline
-GTime operator* (const GTime& a, const double& b)
+GTime operator* (const GTime& time, const double& s)
 {
     GTime result;
-    result.m_time = b * a.m_time;
+    result.m_time = s * time.m_time;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Time division operator friend
+ *
+ * @param[in] time Time.
+ * @param[in] s Divider.
+ * @return Divided time.
+ ***************************************************************************/
 inline
-GTime operator/ (const GTime& a, const double& b)
+GTime operator/(const GTime& time, const double& s)
 {
     GTime result;
-    result.m_time = a.m_time / b;
+    result.m_time = time.m_time / s;
     return result;
 }
+
+
+/***********************************************************************//**
+ * @brief Time equality operator friend
+ *
+ * @param[in] a First time.
+ * @param[in] b Second time.
+ * @return True if @p a equals @p b.
+ ***************************************************************************/
 inline
-bool operator== (const GTime &a, const GTime &b)
+bool operator==(const GTime &a, const GTime &b)
 {
     return (a.m_time == b.m_time);
 }
+
+
+/***********************************************************************//**
+ * @brief Time non-equality operator friend
+ *
+ * @param[in] a First time.
+ * @param[in] b Second time.
+ * @return True if @p a is not equal to @p b.
+ ***************************************************************************/
 inline
-bool operator!= (const GTime &a, const GTime &b)
+bool operator!=(const GTime &a, const GTime &b)
 {
     return (a.m_time != b.m_time);
 }
+
+
+/***********************************************************************//**
+ * @brief Time smaller than operator friend
+ *
+ * @param[in] a First time.
+ * @param[in] b Second time.
+ * @return True if @p a is smaller than @p b.
+ ***************************************************************************/
 inline
-bool operator< (const GTime &a, const GTime &b)
+bool operator<(const GTime &a, const GTime &b)
 {
     return (a.m_time < b.m_time);
 }
+
+
+/***********************************************************************//**
+ * @brief Time smaller than or equal operator friend
+ *
+ * @param[in] a First time.
+ * @param[in] b Second time.
+ * @return True if @p a is smaller than or equal to @p b.
+ ***************************************************************************/
 inline
-bool operator<= (const GTime &a, const GTime &b)
+bool operator<=(const GTime &a, const GTime &b)
 {
     return (a.m_time <= b.m_time);
 }
+
+
+/***********************************************************************//**
+ * @brief Time larger than operator friend
+ *
+ * @param[in] a First time.
+ * @param[in] b Second time.
+ * @return True if @p a is larger than @p b.
+ ***************************************************************************/
 inline
-bool operator> (const GTime &a, const GTime &b)
+bool operator>(const GTime &a, const GTime &b)
 {
     return (a.m_time > b.m_time);
 }
+
+
+/***********************************************************************//**
+ * @brief Time larger than or equal operator friend
+ *
+ * @param[in] a First time.
+ * @param[in] b Second time.
+ * @return True if @p a is larger than or equal to @p b.
+ ***************************************************************************/
 inline
-bool operator>= (const GTime &a, const GTime &b)
+bool operator>=(const GTime &a, const GTime &b)
 {
     return (a.m_time >= b.m_time);
 }

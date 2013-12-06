@@ -1052,7 +1052,7 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         // Set observation time information
         hdu->card("TSTART",   tstart, "[s] Mission time of start of observation");
         hdu->card("TSTOP",    tstop, "[s] Mission time of end of observation");
-        timeref.write(hdu);
+        timeref.write(*hdu);
         hdu->card("TELAPSE",  telapse, "[s] Mission elapsed time");
         hdu->card("ONTIME",   ontime, "[s] Total good time including deadtime");
         hdu->card("LIVETIME", livetime(), "[s] Total livetime");

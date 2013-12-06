@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GPhoton.hpp
- * @brief Photon class definition.
+ * @brief Photon class definition
  * @author Juergen Knoedlseder
  */
 
@@ -53,30 +53,31 @@ class GPhoton : public GBase {
 public:
     // Constructors and destructors
     GPhoton(void);
-    explicit GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
-    GPhoton(const GPhoton& ph);
+    GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time,
+            const int& mcid = -1);
+    GPhoton(const GPhoton& photon);
     virtual ~GPhoton(void);
  
     // Operators
-    GPhoton& operator=(const GPhoton& ph);
+    GPhoton& operator=(const GPhoton& photon);
 
     // Methods
     void           clear(void);
     GPhoton*       clone(void) const;
-    const GSkyDir& dir(void) const { return m_dir; }
-    const GEnergy& energy(void) const { return m_energy; }
-    const GTime&   time(void) const { return m_time; }
-    const int&     mcid(void) const { return m_mc_id; }
-    void           dir(const GSkyDir& dir) { m_dir=dir; }
-    void           energy(const GEnergy& energy) { m_energy=energy; }
-    void           time(const GTime& time) { m_time=time; }
-    void           mcid(const int& mcid) { m_mc_id=mcid; }
+    const GSkyDir& dir(void) const;
+    const GEnergy& energy(void) const;
+    const GTime&   time(void) const;
+    const int&     mcid(void) const;
+    void           dir(const GSkyDir& dir);
+    void           energy(const GEnergy& energy);
+    void           time(const GTime& time);
+    void           mcid(const int& mcid);
     std::string    print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods
     void init_members(void);
-    void copy_members(const GPhoton& ph);
+    void copy_members(const GPhoton& photon);
     void free_members(void);
 
     // Protected data members
@@ -87,17 +88,130 @@ protected:
 };
 
 
-/***************************************************************************
- *                               Inline friends                            *
+/***********************************************************************//**
+ * @brief Return photon sky direction
+ *
+ * @return Sky direction of photon.
  ***************************************************************************/
 inline
-bool operator== (const GPhoton &a, const GPhoton &b)
+const GSkyDir& GPhoton::dir(void) const
+{
+    return m_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return photon energy
+ *
+ * @return Energy of photon.
+ ***************************************************************************/
+inline
+const GEnergy& GPhoton::energy(void) const
+{
+    return m_energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Return photon time
+ *
+ * @return Time of photon.
+ ***************************************************************************/
+inline
+const GTime& GPhoton::time(void) const
+{
+    return m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return photon Monte-Carlo identifier
+ *
+ * @return Photon Monte-Carlo identifier.
+ ***************************************************************************/
+inline
+const int& GPhoton::mcid(void) const
+{
+    return m_mc_id;
+}
+
+
+/***********************************************************************//**
+ * @brief Set photon sky direction
+ *
+ * @param[in] dir Sky direction of photon.
+ ***************************************************************************/
+inline
+void GPhoton::dir(const GSkyDir& dir)
+{
+    m_dir = dir;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set photon energy
+ *
+ * @param[in] energy Photon energy.
+ ***************************************************************************/
+inline
+void GPhoton::energy(const GEnergy& energy)
+{
+    m_energy = energy;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set photon time
+ *
+ * @param[in] time Photon time.
+ ***************************************************************************/
+inline
+void GPhoton::time(const GTime& time)
+{
+    m_time = time;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set photon Monte-Carlo identifier
+ *
+ * @param[in] mcid Photon Monte-Carlo identifier.
+ ***************************************************************************/
+inline
+void GPhoton::mcid(const int& mcid)
+{
+    m_mc_id = mcid;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Equality friend operator
+ *
+ * @param[in] a First photon.
+ * @param[in] b Second photon.
+ * @return True is first photon is identical to second photon
+ ***************************************************************************/
+inline
+bool operator==(const GPhoton &a, const GPhoton &b)
 {
     return (a.m_energy == b.m_energy && a.m_time == b.m_time &&
             a.m_dir.dist(b.m_dir) == 0.0);
 }
+
+
+/***********************************************************************//**
+ * @brief Non-equality friend operator
+ *
+ * @param[in] a First photon.
+ * @param[in] b Second photon.
+ * @return True is first photon is not identical to second photon
+ ***************************************************************************/
 inline
-bool operator!= (const GPhoton &a, const GPhoton &b)
+bool operator!=(const GPhoton &a, const GPhoton &b)
 {
     return (a.m_energy != b.m_energy ||  a.m_time != b.m_time ||
             a.m_dir.dist(b.m_dir) > 0.0);

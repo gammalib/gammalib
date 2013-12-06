@@ -407,7 +407,7 @@ void GLATLtCube::load(const std::string& filename)
     // Load cos theta boundaries
     
     // Load GTIs
-    m_gti.read(hdu_gti);
+    m_gti.read(*hdu_gti);
 
     // Close FITS file
     file.close();

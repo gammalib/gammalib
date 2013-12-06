@@ -341,14 +341,19 @@ void GPha::load(const std::string& filename)
     // Get PHA table
     GFitsTable* pha = fits.table("SPECTRUM");
 
-    // Get EBOUNDS table (NULL if the table does not exist)
-    GFitsTable* ebounds = (fits.contains("EBOUNDS")) ? fits.table("EBOUNDS") : NULL;
-
     // Read PHA data
     read(pha);
 
-    // Read EBOUNDS data (will do nothing if table has not been found)
-    m_ebounds.read(ebounds);
+    // Optionally read EBOUNDS data
+    if (fits.contains("EBOUNDS")) {
+
+        // Get EBOUNDS table
+        const GFitsTable& ebounds = *fits.table("EBOUNDS");
+
+        // Read EBOUNDS data
+        m_ebounds.read(ebounds);
+
+    } // endif: has EBOUNDS table
 
     // Close FITS file
     fits.close();
@@ -486,7 +491,7 @@ void GPha::write(GFits& fits) const
 
         // Optionally append energy boundaries
         if (m_ebounds.size() > 0) {
-            m_ebounds.write(&fits);
+            m_ebounds.write(fits);
         }
 
     } // endif: there were data to write

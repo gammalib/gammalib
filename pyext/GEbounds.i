@@ -35,7 +35,7 @@
  *
  * @brief Energy boundaries container class
  ***************************************************************************/
-class GEbounds : public GBase {
+class GEbounds : public GContainer {
 public:
     // Constructors and destructors
     GEbounds(void);
@@ -46,34 +46,35 @@ public:
     virtual ~GEbounds(void);
 
     // Methods
-    void        clear(void);
-    GEbounds*   clone(void) const;
-    int         size(void) const;
-    bool        isempty(void) const;
-    void        append(const GEnergy& emin, const GEnergy& emax);
-    void        insert(const GEnergy& emin, const GEnergy& emax);
-    void        merge(void);
-    void        merge(const GEnergy& emin, const GEnergy& emax);
-    void        remove(const int& index);
-    void        reserve(const int& num);
-    void        extend(const GEbounds& ebds);
-    void        setlin(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void        setlog(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void        load(const std::string& filename,
-                     const std::string& extname = "EBOUNDS");
-    void        save(const std::string& filename, bool clobber,
-                     const std::string& extname = "EBOUNDS") const;
-    void        read(GFitsTable* hdu);
-    void        write(GFits* file, const std::string& extname = "EBOUNDS") const;
-    int         index(const GEnergy& eng) const;
-    GEnergy     emin(void) const;
-    GEnergy     emax(void) const;
-    GEnergy     emin(const int& index) const;
-    GEnergy     emax(const int& index) const;
-    GEnergy     emean(const int& index) const;
-    GEnergy     elogmean(const int& index) const;
-    GEnergy     ewidth(const int& index) const;
-    bool        contains(const GEnergy& eng) const;
+    void           clear(void);
+    GEbounds*      clone(void) const;
+    int            size(void) const;
+    bool           isempty(void) const;
+    void           append(const GEnergy& emin, const GEnergy& emax);
+    void           insert(const GEnergy& emin, const GEnergy& emax);
+    void           merge(void);
+    void           merge(const GEnergy& emin, const GEnergy& emax);
+    void           remove(const int& index);
+    void           reserve(const int& num);
+    void           extend(const GEbounds& ebds);
+    void           setlin(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void           setlog(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void           load(const std::string& filename,
+                        const std::string& extname = "EBOUNDS");
+    void           save(const std::string& filename,
+                        const bool& clobber = false,
+                        const std::string& extname = "EBOUNDS") const;
+    void           read(const GFitsTable& table);
+    void           write(GFits& file, const std::string& extname = "EBOUNDS") const;
+    int            index(const GEnergy& eng) const;
+    const GEnergy& emin(void) const;
+    const GEnergy& emax(void) const;
+    GEnergy        emin(const int& index) const;
+    GEnergy        emax(const int& index) const;
+    GEnergy        emean(const int& index) const;
+    GEnergy        elogmean(const int& index) const;
+    GEnergy        ewidth(const int& index) const;
+    bool           contains(const GEnergy& eng) const;
 };
 
 
@@ -81,9 +82,6 @@ public:
  * @brief GEbounds class extension
  ***************************************************************************/
 %extend GEbounds {
-    int __len__() {
-        return (self->size());
-    }
     GEbounds copy() {
         return (*self);
     }

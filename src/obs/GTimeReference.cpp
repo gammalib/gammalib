@@ -35,7 +35,7 @@
 /* __ Constants __________________________________________________________ */
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                              "GTimeReference::read(GFitsHDU*)"
+#define G_READ                              "GTimeReference::read(GFitsHDU&)"
 #define G_SET     "GTimeReference::set(double&, std::string&, std::string&, "\
                                                               "std::string&)"
 
@@ -147,7 +147,7 @@ GTimeReference::GTimeReference(const int&         mjdrefi,
  * Constructs time reference from the information found in the FITS header.
  * See GTimeReference::read for more information on the expected format.
  ***************************************************************************/
-GTimeReference::GTimeReference(const GFitsHDU* hdu)
+GTimeReference::GTimeReference(const GFitsHDU& hdu)
 {
     // Initialise private members
     init_members();
@@ -256,38 +256,32 @@ GTimeReference* GTimeReference::clone(void) const
  *     TIMESYS  ("TT")
  *     TIMEREF  ("LOCAL")
  *
- * Nothing is done if the HDU pointer is NULL.
  ***************************************************************************/
-void GTimeReference::read(const GFitsHDU* hdu)
+void GTimeReference::read(const GFitsHDU& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get reference MJD
+    double mjdref  = (hdu.hascard("MJDREF"))  ? hdu.real("MJDREF") : 0.0;
+    int    mjdrefi = (hdu.hascard("MJDREFI")) ? hdu.integer("MJDREFI") : 0;
+    double mjdreff = (hdu.hascard("MJDREFF")) ? hdu.real("MJDREFF") : 0.0;
 
-        // Get reference MJD
-        double mjdref  = (hdu->hascard("MJDREF"))  ? hdu->real("MJDREF") : 0.0;
-        int    mjdrefi = (hdu->hascard("MJDREFI")) ? hdu->integer("MJDREFI") : 0;
-        double mjdreff = (hdu->hascard("MJDREFF")) ? hdu->real("MJDREFF") : 0.0;
+    // Get remaining keywords. To accept a large variety of FITS headers,
+    // all keywords are optionally.
+    std::string timeunit = (hdu.hascard("TIMEUNIT")) ? hdu.string("TIMEUNIT") : "s";
+    std::string timesys  = (hdu.hascard("TIMESYS"))  ? hdu.string("TIMESYS")  : "TT";
+    std::string timeref  = (hdu.hascard("TIMEREF"))  ? hdu.string("TIMEREF")  : "LOCAL";
 
-        // Get remaining keywords. To accept a large variety of FITS headers,
-        // all keywords are optionally.
-        std::string timeunit = (hdu->hascard("TIMEUNIT")) ? hdu->string("TIMEUNIT") : "s";
-        std::string timesys  = (hdu->hascard("TIMESYS"))  ? hdu->string("TIMESYS")  : "TT";
-        std::string timeref  = (hdu->hascard("TIMEREF"))  ? hdu->string("TIMEREF")  : "LOCAL";
-
-        // Set time reference
-        if (hdu->hascard("MJDREF")) {
-            set(mjdref, timeunit, timesys, timeref);
-        }
-        else if (hdu->hascard("MJDREFI") && hdu->hascard("MJDREFF")) {
-            set(mjdrefi, mjdreff, timeunit, timesys, timeref);
-        }
-        else {
-            throw GException::no_valid_time_ref(G_READ,
-                  "Require either keyword \"MJDREF\" or keyword pair"
-                  " \"MJDREFI\" and \"MJDREFF\".");
-        }
-
-    } // endif: HDU was valid
+    // Set time reference
+    if (hdu.hascard("MJDREF")) {
+        set(mjdref, timeunit, timesys, timeref);
+    }
+    else if (hdu.hascard("MJDREFI") && hdu.hascard("MJDREFF")) {
+        set(mjdrefi, mjdreff, timeunit, timesys, timeref);
+    }
+    else {
+        throw GException::no_valid_time_ref(G_READ,
+              "Require either keyword \"MJDREF\" or keyword pair"
+              " \"MJDREFI\" and \"MJDREFF\".");
+    }
 
     // Return
     return;
@@ -312,32 +306,25 @@ void GTimeReference::read(const GFitsHDU* hdu)
  *     TIMESYS
  *     TIMEREF
  *
- * Nothing is done if the HDU pointer is NULL.
  ***************************************************************************/
-void GTimeReference::write(GFitsHDU* hdu) const
+void GTimeReference::write(GFitsHDU& hdu) const
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+   // Case A: use floating point reference MJD
+   if (hdu.hascard("MJDREF")) {
+       hdu.card("MJDREF",   mjdref(),   "[days] Time reference MJD");
+       hdu.card("TIMEUNIT", timeunit(), "Time unit");
+       hdu.card("TIMESYS",  timesys(),  "Time system");
+       hdu.card("TIMEREF",  timeref(),  "Time reference");
+   }
 
-        // Case A: use floating point reference MJD
-        if (hdu->hascard("MJDREF")) {
-            hdu->card("MJDREF",   mjdref(),   "[days] Time reference MJD");
-            hdu->card("TIMEUNIT", timeunit(), "Time unit");
-            hdu->card("TIMESYS",  timesys(),  "Time system");
-            hdu->card("TIMEREF",  timeref(),  "Time reference");
-        }
-
-        // Case B: use fractional reference MJD
-        else {
-            hdu->card("MJDREFI",  mjdrefi(),  "[days] Integer part of time reference MJD");
-            hdu->card("MJDREFF",  mjdreff(),  "[days] Fractional part of time reference MJD");
-            hdu->card("TIMEUNIT", timeunit(), "Time unit");
-            hdu->card("TIMESYS",  timesys(),  "Time system");
-            hdu->card("TIMEREF",  timeref(),  "Time reference");
-        }
-
-
-    } // endif: HDU was valid
+   // Case B: use fractional reference MJD
+   else {
+       hdu.card("MJDREFI",  mjdrefi(),  "[days] Integer part of time reference MJD");
+       hdu.card("MJDREFF",  mjdreff(),  "[days] Fractional part of time reference MJD");
+       hdu.card("TIMEUNIT", timeunit(), "Time unit");
+       hdu.card("TIMESYS",  timesys(),  "Time system");
+       hdu.card("TIMEREF",  timeref(),  "Time reference");
+   }
 
     // Return
     return;

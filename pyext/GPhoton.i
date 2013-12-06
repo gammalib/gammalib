@@ -20,13 +20,12 @@
  ***************************************************************************/
 /**
  * @file GPhoton.i
- * @brief GPhoton class python interface
+ * @brief Photon class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GPhoton.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -43,8 +42,9 @@ class GPhoton : public GBase {
 public:
     // Constructors and destructors
     GPhoton(void);
-    explicit GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time);
-    GPhoton(const GPhoton& ph);
+    GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time,
+            const int& mcid = -1);
+    GPhoton(const GPhoton& photon);
     virtual ~GPhoton(void);
  
     // Methods
@@ -65,11 +65,11 @@ public:
  * @brief GPhoton class extension
  ***************************************************************************/
 %extend GPhoton {
-    bool __eq__(const GPhoton& ph) const {
-        return ((*self) == ph);
+    bool __eq__(const GPhoton& photon) const {
+        return ((*self) == photon);
     }
-    bool __ne__(const GPhoton& ph) const {
-        return ((*self) != ph);
+    bool __ne__(const GPhoton& photon) const {
+        return ((*self) != photon);
     }
     GPhoton copy() {
         return (*self);

@@ -416,14 +416,14 @@ void TestGObservation::test_time_reference(void)
     GTimeReference reference(55197.000766018518519, "s", "TT", "LOCAL");
     GFits          fits;
     GFitsBinTable  table;
-    reference.write(&table);
+    reference.write(table);
     fits.append(table);
     fits.saveto("test_time_reference.fits", true);
     fits.close();
 
     // Read back from FITS file and check values
     fits.open("test_time_reference.fits");
-    GFitsTable* hdu = fits.table(1);
+    const GFitsTable& hdu = *fits.table(1);
     GTimeReference value(hdu);
     fits.close();
     test_value(value.mjdref(),  reference.mjdref());

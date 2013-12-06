@@ -773,7 +773,7 @@ void GLATEventCube::read_ebds(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Read energy boundaries
-        m_ebounds.read(const_cast<GFitsTable*>(hdu));
+        m_ebounds.read(*hdu);
 
         // Set log mean energies and energy widths
         set_energies();
@@ -800,7 +800,7 @@ void GLATEventCube::read_gti(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Read Good Time Intervals
-        m_gti.read(const_cast<GFitsTable*>(hdu));
+        m_gti.read(*hdu);
 
         // Set time
         set_times();

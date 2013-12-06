@@ -399,10 +399,10 @@ void GCTAEventCube::write(GFits& fits) const
     m_map.write(&fits);
 
     // Write energy boundaries
-    ebounds().write(&fits);
+    ebounds().write(fits);
 
     // Write Good Time intervals
-    gti().write(&fits);
+    gti().write(fits);
 
     // Return
     return;
@@ -601,7 +601,7 @@ void GCTAEventCube::read_ebds(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Read energy boundaries
-        m_ebounds.read(const_cast<GFitsTable*>(hdu));
+        m_ebounds.read(*hdu);
 
         // Set log mean energies and energy widths
         set_energies();
@@ -619,8 +619,6 @@ void GCTAEventCube::read_ebds(const GFitsTable* hdu)
  * @param[in] hdu Pointer to GTI table.
  *
  * Reads the Good Time Intervals from the GTI extension.
- *
- * @todo GTI read method should take const GFitsTable* as argument
  ***************************************************************************/
 void GCTAEventCube::read_gti(const GFitsTable* hdu)
 {
@@ -628,7 +626,7 @@ void GCTAEventCube::read_gti(const GFitsTable* hdu)
     if (hdu != NULL) {
 
         // Read Good Time Intervals
-        m_gti.read(const_cast<GFitsTable*>(hdu));
+        m_gti.read(*hdu);
 
         // Set times
         set_times();

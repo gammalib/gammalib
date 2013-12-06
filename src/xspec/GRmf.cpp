@@ -496,7 +496,7 @@ void GRmf::write(GFits& fits) const
         delete hdu;
 
         // Append measured energy boundaries
-        m_ebds_measured.write(&fits);
+        m_ebds_measured.write(fits);
 
     } // endif: there were data to write
 

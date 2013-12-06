@@ -58,10 +58,11 @@ public:
     void                  extend(const GGti& gti);
     void                  load(const std::string& filename,
                                const std::string& extname = "GTI");
-    void                  save(const std::string& filename, bool clobber,
+    void                  save(const std::string& filename,
+                               const bool& clobber = false,
                                const std::string& extname = "GTI") const;
-    void                  read(const GFitsTable* hdu);
-    void                  write(GFits* file,
+    void                  read(const GFitsTable& table);
+    void                  write(GFits& file,
                                 const std::string& extname = "GTI") const;
     const GTime&          tstart(void) const;
     const GTime&          tstop(void) const;

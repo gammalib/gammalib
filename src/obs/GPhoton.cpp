@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GPhoton.cpp
- * @brief Photon class implementation.
+ * @brief Photon class implementation
  * @author Juergen Knodlseder
  */
 
@@ -67,8 +67,10 @@ GPhoton::GPhoton(void)
  * @param[in] dir Sky direction.
  * @param[in] energy Energy.
  * @param[in] time Time.
+ * @param[in] mcid Monte-Carlo identifier.
  ***************************************************************************/
-GPhoton::GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time)
+GPhoton::GPhoton(const GSkyDir& dir, const GEnergy& energy,
+                 const GTime& time, const int& mcid)
 { 
     // Initialise private members
     init_members();
@@ -77,6 +79,7 @@ GPhoton::GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time)
     m_dir    = dir;
     m_energy = energy;
     m_time   = time;
+    m_mc_id  = mcid;
 
     // Return
     return;
@@ -86,15 +89,15 @@ GPhoton::GPhoton(const GSkyDir& dir, const GEnergy& energy, const GTime& time)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] ph Photon.
+ * @param[in] photon Photon.
  ***************************************************************************/
-GPhoton::GPhoton(const GPhoton& ph)
+GPhoton::GPhoton(const GPhoton& photon)
 { 
     // Initialise private members
     init_members();
 
     // Copy members
-    copy_members(ph);
+    copy_members(photon);
 
     // Return
     return;
@@ -123,12 +126,13 @@ GPhoton::~GPhoton(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] ph Photon.
+ * @param[in] photon Photon.
+ * @return Photon.
  ***************************************************************************/
-GPhoton& GPhoton::operator= (const GPhoton& ph)
+GPhoton& GPhoton::operator=(const GPhoton& photon)
 { 
     // Execute only if object is not identical
-    if (this != &ph) {
+    if (this != &photon) {
 
         // Free members
         free_members();
@@ -137,7 +141,7 @@ GPhoton& GPhoton::operator= (const GPhoton& ph)
         init_members();
 
         // Copy members
-        copy_members(ph);
+        copy_members(photon);
 
     } // endif: object was not identical
   
@@ -153,7 +157,7 @@ GPhoton& GPhoton::operator= (const GPhoton& ph)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear photon
  ***************************************************************************/
 void GPhoton::clear(void)
 {
@@ -169,7 +173,9 @@ void GPhoton::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone photon
+ *
+ * @return Pointer to deep copy of photon.
  ***************************************************************************/
 GPhoton* GPhoton::clone(void) const
 {
@@ -235,15 +241,15 @@ void GPhoton::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] ph Photon.
+ * @param[in] photon Photon.
  ***************************************************************************/
-void GPhoton::copy_members(const GPhoton& ph)
+void GPhoton::copy_members(const GPhoton& photon)
 {
     // Copy time
-    m_dir    = ph.m_dir;
-    m_energy = ph.m_energy;
-    m_time   = ph.m_time;
-    m_mc_id  = ph.m_mc_id;
+    m_dir    = photon.m_dir;
+    m_energy = photon.m_energy;
+    m_time   = photon.m_time;
+    m_mc_id  = photon.m_mc_id;
     
     // Return
     return;

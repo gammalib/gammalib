@@ -49,14 +49,14 @@ public:
                             const std::string& timeunit,
                             const std::string& timesys = "TT",
                             const std::string& timeref = "local");
-    explicit GTimeReference(const GFitsHDU* hdu);
+    explicit GTimeReference(const GFitsHDU& hdu);
     virtual ~GTimeReference(void);
 
     // Methods
     void               clear(void);
     GTimeReference*    clone(void) const;
-    void               read(const GFitsHDU* hdu);
-    void               write(GFitsHDU* hdu) const;
+    void               read(const GFitsHDU& hdu);
+    void               write(GFitsHDU& hdu) const;
     void               set(const double&      mrdref,
                            const std::string& timeunit,
                            const std::string& timesys = "TT",

@@ -309,12 +309,12 @@ void GCTAEventList::read(const GFits& fits)
     clear();
 
     // Get event list HDU
-    const GFitsTable* events = fits.table("EVENTS");
+    const GFitsTable& events = *fits.table("EVENTS");
 
     // If we have a GTI extension, then read Good Time Intervals from that
     // extension
     if (fits.contains("GTI")) {
-        const GFitsTable* gti = fits.table("GTI");
+        const GFitsTable& gti = *fits.table("GTI");
         m_gti.read(gti);
     }
 
@@ -322,8 +322,8 @@ void GCTAEventList::read(const GFits& fits)
     else {
 
         // Read start and stop time
-        double tstart = events->real("TSTART");
-        double tstop  = events->real("TSTOP");
+        double tstart = events.real("TSTART");
+        double tstop  = events.real("TSTOP");
 
         // Create time reference from header information
         GTimeReference timeref(events);
@@ -341,13 +341,13 @@ void GCTAEventList::read(const GFits& fits)
     } // endelse: GTI built from TSTART and TSTOP
 
     // Load event data
-    read_events(events);
+    read_events(&events);
 
     // Read region of interest from data selection keyword
-    read_ds_roi(events);
+    read_ds_roi(&events);
 
     // Read energy boundaries from data selection keyword
-    read_ds_ebounds(events);
+    read_ds_ebounds(&events);
 
     // Return
     return;
@@ -382,7 +382,7 @@ void GCTAEventList::write(GFits& file) const
     delete events;
 
     // Append GTI to FITS file
-    gti().write(&file);
+    gti().write(file);
 
     // Return
     return;

@@ -276,33 +276,28 @@ void GLATEventList::read(const GFits& file)
     // Clear object
     clear();
 
-    // Get HDU
-    const GFitsTable* hdu = file.table("EVENTS");
+    // Get HDU (pointer is always valid)
+    const GFitsTable& hdu = *file.table("EVENTS");
 
-    // Continue only if event HDU is valid
-    if (hdu != NULL) {
+    // Read event data
+    read_events(hdu);
 
-        // Read event data
-        read_events(*hdu);
-
-        // Read data selection keywords
-        read_ds_keys(*hdu);
-    
-    } // endif: HDU was valid
+    // Read data selection keywords
+    read_ds_keys(hdu);
 
     // If we have a GTI extension, then read Good Time Intervals from that
     // extension
     if (file.contains("GTI")) {
-        const GFitsTable* gti = file.table("GTI");
+        const GFitsTable& gti = *file.table("GTI");
         m_gti.read(gti);
     }
 
     // ... otherwise build GTI from TSTART and TSTOP
-    else if (hdu != NULL) {
+    else {
 
         // Read start and stop time
-        double tstart = hdu->real("TSTART");
-        double tstop  = hdu->real("TSTOP");
+        double tstart = hdu.real("TSTART");
+        double tstop  = hdu.real("TSTOP");
 
         // Create time reference from header information
         GTimeReference timeref(hdu);

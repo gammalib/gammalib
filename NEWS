@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-5 December 2013
+6 December 2013
 
 
 1. Introduction
@@ -31,7 +31,9 @@ GEbounds
   The number argument in the setlin() and setlon() methods has been moved
   from the last position to the first position in the argument list.
   The emin(), emax(), emean() and elogmean() methods now take a const
-  integer reference as argument instead of an integer value.
+  integer reference as argument instead of an integer value. The read()
+  and write() methods now use FITS references instead of pointers. The
+  clobber argument in the save() method is passed as const reference.
 
 GFits
   The GFits class now derives from GContainer and implements all generic
@@ -85,6 +87,11 @@ GFitsTable
 GFunction
   The eval() method now takes a const reference to a double precisio
   value as argument.
+
+GGti
+  The read() and write() methods now use references instead of
+  pointers. The clobber argument in the save() method is passed
+  as const reference.
 
 GMatrixBase
 GMatrix
@@ -170,6 +177,9 @@ GPars
   reserve() and extent() methods. The haspar() method has been
   renamed to contains() for consistency.
 
+GPhoton
+  Add mcid argument to Photon constructor (defaults to -1).
+
 GSkyPixel
   The class now supports 1D and 2D pixels. Type conversion methods
   have been added that allow assigning integer and double precision
@@ -199,6 +209,13 @@ GTestSuites
   set(), append(), insert(), remove(), reserve() and extend()).
   The operator[] now returns pointers to GTestSuite. The name()
   and timestamp() methods now return const references.
+
+GTime
+  The secs() method now returns a const reference.
+
+GTimeReference
+  The load constructor and the read() and write() methods take
+  a const reference instead of a pointer.
 
 GWcs => GSkyProjection
   The GWcs class has been renamed to GSkyProjection as it is more
