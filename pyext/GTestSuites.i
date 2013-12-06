@@ -48,7 +48,6 @@ class GTestSuites : public GContainer {
     void               clear(void);
     GTestSuites*       clone(void) const;
     GTestSuite*        at(const int& index);
-    const GTestSuite*  at(const int& index) const;
     int                size(void) const;
     bool               isempty(void) const;
     GTestSuite*        set(const int& index, const GTestSuite& suite);

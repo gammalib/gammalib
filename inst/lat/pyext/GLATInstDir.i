@@ -46,9 +46,8 @@ public:
     virtual GLATInstDir* clone(void) const;
 
     // Other methods
-    void           dir(const GSkyDir& dir);
-    GSkyDir&       dir(void);
-    const GSkyDir& dir(void) const;
+    void     dir(const GSkyDir& dir);
+    GSkyDir& dir(void);
 };
 
 

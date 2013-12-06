@@ -47,24 +47,22 @@ public:
     virtual ~GEnergies(void);
  
     // Methods
-    void           clear(void);
-    GEnergies*     clone(void) const;
-    GEnergy&       at(const int& index);
-    const GEnergy& at(const int& index) const;
-    int            size(void) const;
-    bool           isempty(void) const;
-    GEnergy&       append(const GEnergy& energy);
-    GEnergy&       insert(const int& index, const GEnergy& energy);
-    void           remove(const int& index);
-    void           reserve(const int& num);
-    void           extend(const GEnergies& energies);
-    void           load(const std::string& filename,
-                        const std::string& extname = "ENERGIES");
-    void           save(const std::string& filename, bool clobber,
-                        const std::string& extname = "ENERGIES") const;
-    void           read(const GFitsTable* hdu);
-    void           write(GFits* file,
-                         const std::string& extname = "ENERGIES") const;
+    void       clear(void);
+    GEnergies* clone(void) const;
+    GEnergy&   at(const int& index);
+    int        size(void) const;
+    bool       isempty(void) const;
+    GEnergy&   append(const GEnergy& energy);
+    GEnergy&   insert(const int& index, const GEnergy& energy);
+    void       remove(const int& index);
+    void       reserve(const int& num);
+    void       extend(const GEnergies& energies);
+    void       load(const std::string& filename,
+                    const std::string& extname = "ENERGIES");
+    void       save(const std::string& filename, bool clobber,
+                    const std::string& extname = "ENERGIES") const;
+    void       read(const GFitsTable* hdu);
+    void       write(GFits* file, const std::string& extname = "ENERGIES") const;
 };
 
 

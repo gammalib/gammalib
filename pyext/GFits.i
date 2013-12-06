@@ -154,17 +154,11 @@ public:
     void               clear(void);
     GFits*             clone(void) const;
     GFitsHDU*          at(const int& extno);
-    const GFitsHDU*    at(const int& extno) const;
     GFitsHDU*          at(const std::string& extname);
-    const GFitsHDU*    at(const std::string& extname) const;
     GFitsImage*        image(const int& extno);
-    const GFitsImage*  image(const int& extno) const;
     GFitsImage*        image(const std::string& extname);
-    const GFitsImage*  image(const std::string& extname) const;
     GFitsTable*        table(const int& extno);
-    const GFitsTable*  table(const int& extno) const;
     GFitsTable*        table(const std::string& extname);
-    const GFitsTable*  table(const std::string& extname) const;
     int                size(void) const;
     bool               isempty(void) const;
     GFitsHDU*          set(const int& extno, const GFitsHDU& hdu);
