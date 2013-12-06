@@ -36,7 +36,7 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CONSTRUCT    "GHealpix::GHealpix(int& ,std::string& ,std::string&)"
-#define G_READ                                    "GHealpix::read(GFitsHDU*)"
+#define G_READ                                    "GHealpix::read(GFitsHDU&)"
 #define G_XY2DIR                               "GHealpix::xy2dir(GSkyPixel&)"
 #define G_DIR2XY2                                "GHealpix::dir2xy(GSkyDir&)"
 #define G_PIX2ANG_RING        "GHealpix::pix2ang_ring(int, double*, double*)"
@@ -133,14 +133,14 @@ GHealpix::GHealpix(const int&         nside,
 /***********************************************************************//**
  * @brief Constructor from FITS HDU table
  *
- * @param[in] hdu Pointer to FITS HDU.
+ * @param[in] hdu FITS HDU.
  ***************************************************************************/
-GHealpix::GHealpix(const GFitsHDU* hdu) : GSkyProjection()
+GHealpix::GHealpix(const GFitsHDU& hdu) : GSkyProjection()
 {
     // Initialise class members
     init_members();
 
-    // Read Healpix defintion from FITS HDU
+    // Read Healpix defintion from FITS table
     read(hdu);
 
     // Return
@@ -253,7 +253,7 @@ GHealpix* GHealpix::clone(void) const
 /***********************************************************************//**
  * @brief Read Healpix definiton from FITS header
  *
- * @param[in] hdu FITS HDU containing the Healpix definition.
+ * @param[in] hdu FITS HDU.
  *
  * @exception GException::wcs
  *            Unable to load Healpix definition from HDU.
@@ -262,29 +262,29 @@ GHealpix* GHealpix::clone(void) const
  * @exception GException::wcs_hpx_bad_ordering
  *            Invalid ordering parameter.
  ***************************************************************************/
-void GHealpix::read(const GFitsHDU* hdu)
+void GHealpix::read(const GFitsHDU& hdu)
 {
     // Clear object
     clear();
 
     // Check if we have a healpix representation
-    if (hdu->string("PIXTYPE") != "HEALPIX") {
+    if (hdu.string("PIXTYPE") != "HEALPIX") {
         throw GException::wcs(G_READ, "HDU does not contain Healpix data");
     }
 
     // Get pixel ordering
-    std::string order = hdu->string("ORDERING");
+    std::string order = hdu.string("ORDERING");
 
     // Get coordinate system.
     // First search for HIER_CRD keyword (this has been used in older
     // versions of LAT exposure cubes). If not found then search for standard
     // COORDSYS keyword.
     std::string coords;
-    if (hdu->hascard("HIER_CRD")) {
-        coords = hdu->string("HIER_CRD");
+    if (hdu.hascard("HIER_CRD")) {
+        coords = hdu.string("HIER_CRD");
     }
-    else if (hdu->hascard("COORDSYS")) {
-        coords = hdu->string("COORDSYS");
+    else if (hdu.hascard("COORDSYS")) {
+        coords = hdu.string("COORDSYS");
     }
 
     // Set coordinate system
@@ -294,7 +294,7 @@ void GHealpix::read(const GFitsHDU* hdu)
     ordering(order);
 
     // Get Healpix resolution and determine number of pixels and solid angle
-    m_nside      = hdu->integer("NSIDE");
+    m_nside      = hdu.integer("NSIDE");
     m_npface     = m_nside * m_nside;
     m_ncap       = 2 * (m_npface - m_nside);
     m_num_pixels = 12 * m_npface;
@@ -322,25 +322,20 @@ void GHealpix::read(const GFitsHDU* hdu)
  * ORDERING = ordering()
  * COORDSYS = coordsys()
  ***************************************************************************/
-void GHealpix::write(GFitsHDU* hdu) const
+void GHealpix::write(GFitsHDU& hdu) const
 {
-    // Continue only if file pointer is valid
-    if (hdu != NULL) {
+    // Set extension name
+    hdu.extname("HEALPIX");
 
-        // Set extension name
-        hdu->extname("HEALPIX");
-
-        // Set keywords
-        hdu->card("PIXTYPE",  "HEALPIX",  "HEALPix pixelisation");
-        hdu->card("NSIDE",    nside(),    "HEALPix resolution parameter");
-        hdu->card("FIRSTPIX", 0,          "Index of first pixel");
-        hdu->card("LASTPIX",  npix()-1,   "Index of last pixel");
-        hdu->card("ORDERING", ordering(),
-                  "Pixel ordering scheme, either RING or NESTED");
-        hdu->card("COORDSYS", coordsys(),
-                  "Coordinate system, either EQU or GAL");
-
-    } // endif: HDU was valid
+    // Set keywords
+    hdu.card("PIXTYPE",  "HEALPIX",  "HEALPix pixelisation");
+    hdu.card("NSIDE",    nside(),    "HEALPix resolution parameter");
+    hdu.card("FIRSTPIX", 0,          "Index of first pixel");
+    hdu.card("LASTPIX",  npix()-1,   "Index of last pixel");
+    hdu.card("ORDERING", ordering(),
+             "Pixel ordering scheme, either RING or NESTED");
+    hdu.card("COORDSYS", coordsys(),
+             "Coordinate system, either EQU or GAL");
 
     // Return
     return;

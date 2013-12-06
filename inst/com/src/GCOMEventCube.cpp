@@ -417,11 +417,11 @@ void GCOMEventCube::read(const GFits& fits)
     // Clear object
     clear();
 
-    // Get HDU
-    const GFitsImage* hdu = fits.image("Primary");
+    // Get image
+    const GFitsImage& image = *fits.image("Primary");
 
     // Load counts map as sky map
-    m_map.read(hdu);
+    m_map.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_map);
@@ -430,9 +430,9 @@ void GCOMEventCube::read(const GFits& fits)
     set_scatter_directions();
 
     // Extract Phibar minimum and step size
-    double crval3 = hdu->real("CRVAL3");
-    double crpix3 = hdu->real("CRPIX3");
-    double dphi   = hdu->real("CDELT3");
+    double crval3 = image.real("CRVAL3");
+    double crpix3 = image.real("CRPIX3");
+    double dphi   = image.real("CDELT3");
     double phimin = crval3 + (crpix3-1.0) * dphi;
 
     // Set scatter angles
@@ -441,8 +441,8 @@ void GCOMEventCube::read(const GFits& fits)
     // Extract energy range
     GEnergy emin;
     GEnergy emax;
-    emin.MeV(hdu->real("E_MIN"));
-    emax.MeV(hdu->real("E_MAX"));
+    emin.MeV(image.real("E_MIN"));
+    emax.MeV(image.real("E_MAX"));
 
     // Set energy boundaries
     m_ebounds.clear();
@@ -454,8 +454,8 @@ void GCOMEventCube::read(const GFits& fits)
     // Extract time range
     GTime  tstart;
     GTime  tstop;
-    tstart.jd(hdu->real("TSTART"));
-    tstop.jd(hdu->real("TSTOP"));
+    tstart.jd(image.real("TSTART"));
+    tstop.jd(image.real("TSTOP"));
 
     // Set GTIs
     m_gti.clear();
@@ -479,7 +479,7 @@ void GCOMEventCube::read(const GFits& fits)
 void GCOMEventCube::write(GFits& file) const
 {
     // Write cube
-    m_map.write(&file);
+    m_map.write(file);
 
     // Write energy boundaries
 

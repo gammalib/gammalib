@@ -36,7 +36,7 @@
 #include "GWcs.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                                        "GWcs::read(GFitsHDU*)"
+#define G_READ                                        "GWcs::read(GFitsHDU&)"
 #define G_OMEGA                                           "GWcs::omega(int&)"
 #define G_PIX2DIR                                       "GWcs::pix2dir(int&)"
 #define G_DIR2PIX                                   "GWcs::dir2pix(GSkyDir&)"
@@ -121,7 +121,7 @@ GWcs::GWcs(const std::string& coords,
  *
  * @param[in] hdu FITS HDU.
  ***************************************************************************/
-GWcs::GWcs(const GFitsHDU* hdu) : GSkyProjection()
+GWcs::GWcs(const GFitsHDU& hdu) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -210,93 +210,88 @@ GWcs& GWcs::operator=(const GWcs& wcs)
 /***********************************************************************//**
  * @brief Read WCS definiton from FITS header.
  *
- * @param[in] hdu FITS HDU containing the WCS definition.
+ * @param[in] hdu FITS HDU.
  *
  * @exception GException::wcs_bad_coords
  *            Coordinate system is not of valid type.
  *
  * This method reads the WCS definition from the FITS header.
  ***************************************************************************/
-void GWcs::read(const GFitsHDU* hdu)
+void GWcs::read(const GFitsHDU& hdu)
 {
     // Clear object
     clear();
 
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get standard keywords
+    std::string ctype1 = hdu.string("CTYPE1");
+    std::string ctype2 = hdu.string("CTYPE2");
+    double      crval1 = hdu.real("CRVAL1");
+    double      crval2 = hdu.real("CRVAL2");
+    double      crpix1 = hdu.real("CRPIX1");
+    double      crpix2 = hdu.real("CRPIX2");
+    double      cdelt1 = hdu.real("CDELT1");
+    double      cdelt2 = hdu.real("CDELT2");
 
-        // Get standard keywords
-        std::string ctype1 = hdu->string("CTYPE1");
-        std::string ctype2 = hdu->string("CTYPE2");
-        double      crval1 = hdu->real("CRVAL1");
-        double      crval2 = hdu->real("CRVAL2");
-        double      crpix1 = hdu->real("CRPIX1");
-        double      crpix2 = hdu->real("CRPIX2");
-        double      cdelt1 = hdu->real("CDELT1");
-        double      cdelt2 = hdu->real("CDELT2");
+    // Determine coordinate system
+    std::string coords;
+    std::string xcoord = ctype1.substr(0,4);
+    std::string ycoord = ctype2.substr(0,4);
+    if (xcoord == "RA--" && ycoord == "DEC-") {
+        m_lng  = 0;
+        m_lat  = 1;
+        coords = "EQU";
+    }
+    else if (xcoord == "DEC-" && ycoord == "RA--") {
+        m_lng  = 1;
+        m_lat  = 0;
+        coords = "EQU";
+    }
+    else if (xcoord == "GLON" && ycoord == "GLAT") {
+        m_lng  = 0;
+        m_lat  = 1;
+        coords = "GAL";
+    }
+    else if (xcoord == "GLAT" && ycoord == "GLON") {
+        m_lng  = 1;
+        m_lat  = 0;
+        coords = "GAL";
+    }
+    else if (xcoord == "ELON" && ycoord == "ELAT") {
+        m_lng  = 0;
+        m_lat  = 1;
+        coords = "ECL";
+    }
+    else if (xcoord == "ELAT" && ycoord == "ELON") {
+        m_lng  = 1;
+        m_lat  = 0;
+        coords = "ECL";
+    }
+    else if (xcoord == "HLON" && ycoord == "HLAT") {
+        m_lng  = 0;
+        m_lat  = 1;
+        coords = "HEL";
+    }
+    else if (xcoord == "HLAT" && ycoord == "HLON") {
+        m_lng  = 1;
+        m_lat  = 0;
+        coords = "HEL";
+    }
+    else if (xcoord == "SLON" && ycoord == "SLAT") {
+        m_lng  = 0;
+        m_lat  = 1;
+        coords = "SGL";
+    }
+    else if (xcoord == "SLAT" && ycoord == "SLON") {
+        m_lng  = 1;
+        m_lat  = 0;
+        coords = "SGL";
+    }
+    else {
+        throw GException::wcs_bad_coords(G_READ, coordsys());
+    }
 
-        // Determine coordinate system
-        std::string coords;
-        std::string xcoord = ctype1.substr(0,4);
-        std::string ycoord = ctype2.substr(0,4);
-        if (xcoord == "RA--" && ycoord == "DEC-") {
-            m_lng  = 0;
-            m_lat  = 1;
-            coords = "EQU";
-        }
-        else if (xcoord == "DEC-" && ycoord == "RA--") {
-            m_lng  = 1;
-            m_lat  = 0;
-            coords = "EQU";
-        }
-        else if (xcoord == "GLON" && ycoord == "GLAT") {
-            m_lng  = 0;
-            m_lat  = 1;
-            coords = "GAL";
-        }
-        else if (xcoord == "GLAT" && ycoord == "GLON") {
-            m_lng  = 1;
-            m_lat  = 0;
-            coords = "GAL";
-        }
-        else if (xcoord == "ELON" && ycoord == "ELAT") {
-            m_lng  = 0;
-            m_lat  = 1;
-            coords = "ECL";
-        }
-        else if (xcoord == "ELAT" && ycoord == "ELON") {
-            m_lng  = 1;
-            m_lat  = 0;
-            coords = "ECL";
-        }
-        else if (xcoord == "HLON" && ycoord == "HLAT") {
-            m_lng  = 0;
-            m_lat  = 1;
-            coords = "HEL";
-        }
-        else if (xcoord == "HLAT" && ycoord == "HLON") {
-            m_lng  = 1;
-            m_lat  = 0;
-            coords = "HEL";
-        }
-        else if (xcoord == "SLON" && ycoord == "SLAT") {
-            m_lng  = 0;
-            m_lat  = 1;
-            coords = "SGL";
-        }
-        else if (xcoord == "SLAT" && ycoord == "SLON") {
-            m_lng  = 1;
-            m_lat  = 0;
-            coords = "SGL";
-        }
-        else {
-            throw GException::wcs_bad_coords(G_READ, coordsys());
-        }
-
-        // Set standard parameters
-        set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
-
-    } // endif: HDU was valid
+    // Set standard parameters
+    set_members(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2);
 
     // Return
     return;
@@ -311,122 +306,115 @@ void GWcs::read(const GFitsHDU* hdu)
  * This method writes the World Coordinate System definition into the FITS
  * HDU header.
  *
- * The method does nothing if the HDU is not valid.
- *
  * This method has been adapted from wcshdr.c::wcshdo().
  ***************************************************************************/
-void GWcs::write(GFitsHDU* hdu) const
+void GWcs::write(GFitsHDU& hdu) const
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Write reference pixel coordinates
+    for (int i = 0; i < m_naxis; ++i) {
+        std::string keyname = "CRPIX"+gammalib::str(i+1);
+        std::string comment = "Pixel coordinate of reference point (starting from 1)";
+        hdu.card(keyname, m_crpix.at(i), comment);
+    }
+    
+    //TODO: Write linear transformation matrix
+    
+    // Write coordinate increment at reference point
+    for (int i = 0; i < m_naxis; ++i) {
+        std::string keyname = "CDELT"+gammalib::str(i+1);
+        std::string comment;
+        if (m_cunit.at(i).length() > 0) {
+            comment += "["+gammalib::strip_whitespace(m_cunit.at(i))+"] ";
+        }
+        comment += "Coordinate increment at reference point";
+        hdu.card(keyname, m_cdelt.at(i), comment);
+    }
+    
+    // Write units of coordinate increment and reference value
+    for (int i = 0; i < m_naxis; ++i) {
+        if (m_cunit.at(i).length() > 0) {
+            std::string keyname = "CUNIT"+gammalib::str(i+1);
+            std::string comment = "Units of coordinate increment and value";
+            hdu.card(keyname, m_cunit.at(0), comment);
+        }
+    }
+    
+    // Write coordinate type
+    wcs_set_ctype();
+    for (int i = 0; i < m_naxis; ++i) {
+        if (i == m_lng) {
+            std::string keyname = "CTYPE"+gammalib::str(i+1);
+            hdu.card(keyname, m_ctype.at(i), m_ctype_c.at(i));
+        }
+        if (i == m_lat) {
+            std::string keyname = "CTYPE"+gammalib::str(i+1);
+            hdu.card(keyname, m_ctype.at(i), m_ctype_c.at(i));
+        }
+        if (i == m_spec) {
+            std::string keyname = "CTYPE"+gammalib::str(i+1);
+            hdu.card(keyname, m_ctype.at(i), m_ctype_c.at(i));
+        }
+    }
 
-        // Write reference pixel coordinates
-        for (int i = 0; i < m_naxis; ++i) {
-            std::string keyname = "CRPIX"+gammalib::str(i+1);
-            std::string comment = "Pixel coordinate of reference point (starting from 1)";
-            hdu->card(keyname, m_crpix.at(i), comment);
+    // Write coordinate value at reference point
+    for (int i = 0; i < m_naxis; ++i) {
+        std::string keyname = "CRVAL"+gammalib::str(i+1);
+        std::string comment;
+        if (m_cunit.at(i).length() > 0) {
+            comment += "["+gammalib::strip_whitespace(m_cunit.at(i))+"] ";
         }
-        
-        //TODO: Write linear transformation matrix
-        
-        // Write coordinate increment at reference point
-        for (int i = 0; i < m_naxis; ++i) {
-            std::string keyname = "CDELT"+gammalib::str(i+1);
-            std::string comment;
-            if (m_cunit.at(i).length() > 0) {
-                comment += "["+gammalib::strip_whitespace(m_cunit.at(i))+"] ";
-            }
-            comment += "Coordinate increment at reference point";
-            hdu->card(keyname, m_cdelt.at(i), comment);
-        }
-        
-        // Write units of coordinate increment and reference value
-        for (int i = 0; i < m_naxis; ++i) {
-            if (m_cunit.at(i).length() > 0) {
-                std::string keyname = "CUNIT"+gammalib::str(i+1);
-                std::string comment = "Units of coordinate increment and value";
-                hdu->card(keyname, m_cunit.at(0), comment);
-            }
-        }
-        
-        // Write coordinate type
-        wcs_set_ctype();
-        for (int i = 0; i < m_naxis; ++i) {
-            if (i == m_lng) {
-                std::string keyname = "CTYPE"+gammalib::str(i+1);
-                hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
-            }
-            if (i == m_lat) {
-                std::string keyname = "CTYPE"+gammalib::str(i+1);
-                hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
-            }
-            if (i == m_spec) {
-                std::string keyname = "CTYPE"+gammalib::str(i+1);
-                hdu->card(keyname, m_ctype.at(i), m_ctype_c.at(i));
-            }
-        }
-
-        // Write coordinate value at reference point
-        for (int i = 0; i < m_naxis; ++i) {
-            std::string keyname = "CRVAL"+gammalib::str(i+1);
-            std::string comment;
-            if (m_cunit.at(i).length() > 0) {
-                comment += "["+gammalib::strip_whitespace(m_cunit.at(i))+"] ";
-            }
-            comment += "Coordinate value at reference point";
-            hdu->card(keyname, m_crval.at(i), comment);
-        }
-        
-        //TODO: Parameter values
-        hdu->card("CROTA2", 0.0, "[deg] Rotation Angle"); // Old style, use PV instead
-        //hdu->card("PV2_1",   0.0,          "Projection parameter 1");
-        //hdu->card("PV2_2",   0.0,          "Projection parameter 2");
-        
-        // Celestial and spectral transformation parameters
-        if (!undefined(m_lonpole)) {
-            hdu->card("LONPOLE", m_lonpole, "[deg] Native longitude of celestial pole");
-        }
-        if (!undefined(m_latpole)) {
-            hdu->card("LATPOLE", m_latpole, "[deg] Native latitude of celestial pole");
-        }
-        if (!undefined(m_restfrq)) {
-            hdu->card("RESTFRQ", m_restfrq, "[Hz] Line rest frequency");
-        }
-        if (!undefined(m_restwav)) {
-            hdu->card("RESTWAV", m_restwav, "[Hz] Line rest wavelength");
-        }
-        
-        // Equatorial coordinate system type
-        if (m_radesys.length() > 0) {
-            hdu->card("RADESYS", m_radesys, "Equatorial coordinate system");
-        }
-        
-        // Equinox of equatorial coordinate system
-        if (!undefined(m_equinox)) {
-            hdu->card("EQUINOX", m_equinox, "[yr] Equinox of equatorial coordinates");
-        }
-        
-        //TODO: Reference frame of spectral coordinates
-        
-        //TODO: Reference frame of spectral observation
-        
-        //TODO: Observer's velocity towards source
-        
-        //TODO: Reference frame of source redshift
-        
-        //TODO: Redshift of the source
-        
-        //TODO: Observatory coordinates
-        
-        //TODO: MJD of observation
-        
-        //TODO: MJD mid-observation time
-        
-        //TODO: ISO-8601 date corresponding to MJD-OBS
-        
-        //TODO: ISO-8601 date corresponding to MJD-AVG
-
-    } // endif: HDU was valid
+        comment += "Coordinate value at reference point";
+        hdu.card(keyname, m_crval.at(i), comment);
+    }
+    
+    //TODO: Parameter values
+    hdu.card("CROTA2", 0.0, "[deg] Rotation Angle"); // Old style, use PV instead
+    //hdu.card("PV2_1",   0.0,          "Projection parameter 1");
+    //hdu.card("PV2_2",   0.0,          "Projection parameter 2");
+    
+    // Celestial and spectral transformation parameters
+    if (!undefined(m_lonpole)) {
+        hdu.card("LONPOLE", m_lonpole, "[deg] Native longitude of celestial pole");
+    }
+    if (!undefined(m_latpole)) {
+        hdu.card("LATPOLE", m_latpole, "[deg] Native latitude of celestial pole");
+    }
+    if (!undefined(m_restfrq)) {
+        hdu.card("RESTFRQ", m_restfrq, "[Hz] Line rest frequency");
+    }
+    if (!undefined(m_restwav)) {
+        hdu.card("RESTWAV", m_restwav, "[Hz] Line rest wavelength");
+    }
+    
+    // Equatorial coordinate system type
+    if (m_radesys.length() > 0) {
+        hdu.card("RADESYS", m_radesys, "Equatorial coordinate system");
+    }
+    
+    // Equinox of equatorial coordinate system
+    if (!undefined(m_equinox)) {
+        hdu.card("EQUINOX", m_equinox, "[yr] Equinox of equatorial coordinates");
+    }
+    
+    //TODO: Reference frame of spectral coordinates
+    
+    //TODO: Reference frame of spectral observation
+    
+    //TODO: Observer's velocity towards source
+    
+    //TODO: Reference frame of source redshift
+    
+    //TODO: Redshift of the source
+    
+    //TODO: Observatory coordinates
+    
+    //TODO: MJD of observation
+    
+    //TODO: MJD mid-observation time
+    
+    //TODO: ISO-8601 date corresponding to MJD-OBS
+    
+    //TODO: ISO-8601 date corresponding to MJD-AVG
 
     // Return
     return;

@@ -734,11 +734,11 @@ void GCOMObservation::load_drb(const std::string& drbname)
     // Open FITS file
     GFits file(drbname);
 
-    // Get HDU
-    GFitsImage* hdu = file.image("Primary");
+    // Get image
+    const GFitsImage& image = *file.image("Primary");
 
     // Load background model as sky map
-    m_drb.read(hdu);
+    m_drb.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_drb);
@@ -776,11 +776,11 @@ void GCOMObservation::load_drg(const std::string& drgname)
     // Open FITS file
     GFits file(drgname);
 
-    // Get HDU
-    GFitsImage* hdu = file.image("Primary");
+    // Get image
+    const GFitsImage& image = *file.image("Primary");
 
     // Load geometry factors as sky map
-    m_drg.read(hdu);
+    m_drg.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_drg);
@@ -815,10 +815,10 @@ void GCOMObservation::load_drx(const std::string& drxname)
     GFits file(drxname);
 
     // Get HDU
-    GFitsImage* hdu = file.image("Primary");
+    const GFitsImage& image = *file.image("Primary");
 
     // Load exposure map as sky map
-    m_drx.read(hdu);
+    m_drx.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_drx);

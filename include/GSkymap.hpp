@@ -128,8 +128,8 @@ public:
     const double*         pixels(void) const;
     void                  load(const std::string& filename);
     void                  save(const std::string& filename, bool clobber = false) const;
-    void                  read(const GFitsHDU* hdu);
-    void                  write(GFits* file) const;
+    void                  read(const GFitsHDU& hdu);
+    void                  write(GFits& file) const;
     std::string           print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -143,9 +143,9 @@ private:
                               const double& crpix1, const double& crpix2,
                               const double& cdelt1, const double& cdelt2,
                               const GMatrix& cd, const GVector& pv2);
-    void              read_healpix(const GFitsTable* hdu);
-    void              read_wcs(const GFitsImage* hdu);
-    void              alloc_wcs(const GFitsImage* hdu);
+    void              read_healpix(const GFitsTable& table);
+    void              read_wcs(const GFitsImage& image);
+    void              alloc_wcs(const GFitsImage& image);
     GFitsBinTable*    create_healpix_hdu(void) const;
     GFitsImageDouble* create_wcs_hdu(void) const;
 

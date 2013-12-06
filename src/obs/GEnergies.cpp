@@ -363,11 +363,11 @@ void GEnergies::load(const std::string& filename, const std::string& extname)
     // Open FITS file
     file.open(filename);
 
-    // Get energies HDU
-    GFitsTable* hdu = file.table(extname);
+    // Get energies table
+    const GFitsTable& table = *file.table(extname);
 
-    // Read energies from HDU
-    read(hdu);
+    // Read energies from table
+    read(table);
 
     // Close FITS file
     file.close();
@@ -396,7 +396,7 @@ void GEnergies::save(const std::string& filename, bool clobber,
     GFits file;
 
     // Write energies to FITS file
-    write(&file, extname);
+    write(file, extname);
 
     // Save to file
     file.saveto(filename, clobber);
@@ -409,11 +409,11 @@ void GEnergies::save(const std::string& filename, bool clobber,
 /***********************************************************************//**
  * @brief Read energies from FITS table
  *
- * @param[in] hdu Pointer to FITS table.
+ * @param[in] table FITS table.
  *
  * Reads the energies from a FITS table.
  ***************************************************************************/
-void GEnergies::read(const GFitsTable* hdu)
+void GEnergies::read(const GFitsTable& table)
 {
     // Free members
     free_members();
@@ -421,33 +421,28 @@ void GEnergies::read(const GFitsTable* hdu)
     // Initialise attributes
     init_members();
 
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Extract number of energy bins in FITS file
+    int num = table.integer("NAXIS2");
 
-        // Extract number of energy bins in FITS file
-        int num = hdu->integer("NAXIS2");
+    // Continue only if there are energy bins
+    if (num > 0) {
 
-        // Continue only if there are energy bins
-        if (num > 0) {
+        // Get the unit of the energies. If no TUNIT1 header keyword is
+        // found then use MeV
+        std::string unit = "MeV";
+        if (table.hascard("TUNIT1")) {
+            unit = table.string("TUNIT1");
+        }
 
-            // Get the unit of the energies. If no TUNIT1 header keyword is
-            // found then use MeV
-            std::string unit = "MeV";
-            if (hdu->hascard("TUNIT1")) {
-                unit = hdu->string("TUNIT1");
-            }
+        // Get the column with the name "Energy"
+        const GFitsTableCol* col_energy = table["Energy"];
 
-            // Get the column with the name "Energy"
-            const GFitsTableCol* col_energy = (*hdu)["Energy"];
+        // Set energies
+        for (int i = 0; i < num; ++i) {
+            append(GEnergy(col_energy->real(i), unit));
+        }
 
-            // Set energies
-            for (int i = 0; i < num; ++i) {
-                append(GEnergy(col_energy->real(i), unit));
-            }
-
-        } // endif: there were energy bins
-
-    } // endif: the HDU was valid
+    } // endif: there were energy bins
 
     // Return
     return;
@@ -457,12 +452,12 @@ void GEnergies::read(const GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Write energies into FITS object
  *
- * @param[in] file Pointer to FITS file.
+ * @param[in] file FITS file.
  * @param[in] extname Energy extension name (defaults to "ENERGIES")
  *
  * Writes energies into FITS object.
  ***************************************************************************/
-void GEnergies::write(GFits* file, const std::string& extname) const
+void GEnergies::write(GFits& file, const std::string& extname) const
 {
     // Set number of energies
     int num = m_energies.size();
@@ -482,7 +477,7 @@ void GEnergies::write(GFits* file, const std::string& extname) const
     table->extname(extname);
 
     // Write to FITS file
-    file->append(*table);
+    file.append(*table);
 
     // Free table
     delete table;

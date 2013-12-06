@@ -396,7 +396,7 @@ void GCTAEventCube::read(const GFits& fits)
 void GCTAEventCube::write(GFits& fits) const
 {
     // Write cube
-    m_map.write(&fits);
+    m_map.write(fits);
 
     // Write energy boundaries
     ebounds().write(fits);
@@ -574,7 +574,7 @@ void GCTAEventCube::read_cntmap(const GFitsImage* hdu)
     if (hdu != NULL) {
 
         // Load counts map as sky map
-        m_map.read(hdu);
+        m_map.read(*hdu);
 
         // Set sky directions
         set_directions();

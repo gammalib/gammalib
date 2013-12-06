@@ -40,7 +40,7 @@ public:
     GHealpix(void);
     explicit GHealpix(const int& nside, const std::string& ordering = "NESTED",
                       const std::string& coordsys = "GAL");
-    explicit GHealpix(const GFitsHDU* hdu);
+    explicit GHealpix(const GFitsHDU& hdu);
     GHealpix(const GHealpix& wcs);
     virtual ~GHealpix(void);
 
@@ -50,8 +50,8 @@ public:
     virtual int         size(void) const;
     virtual std::string code(void) const;
     virtual std::string name(void) const;
-    virtual void        read(const GFitsHDU* hdu);
-    virtual void        write(GFitsHDU* hdu) const;
+    virtual void        read(const GFitsHDU& hdu);
+    virtual void        write(GFitsHDU& hdu) const;
     virtual double      omega(const GSkyPixel& pixel) const;
     virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
     virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;

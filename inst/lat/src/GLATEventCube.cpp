@@ -695,7 +695,7 @@ void GLATEventCube::read_cntmap(const GFitsImage* hdu)
     if (hdu != NULL) {
 
         // Load counts map as sky map
-        m_map.read(hdu);
+        m_map.read(*hdu);
 
         // Set sky directions
         set_directions();
@@ -727,7 +727,7 @@ void GLATEventCube::read_srcmap(const GFitsImage* hdu)
         GSkymap* map = new GSkymap;
 
         // Read skymap
-        map->read(hdu);
+        map->read(*hdu);
 
         // Check that source map sky projection is consistent with counts
         // map sky projection

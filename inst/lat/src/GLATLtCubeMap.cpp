@@ -372,7 +372,7 @@ void GLATLtCubeMap::read(const GFitsTable* hdu)
     clear();
 
     // Load skymap
-    m_map.read(hdu);
+    m_map.read(*hdu);
 
     // Set costheta binning scheme
     std::string scheme = gammalib::strip_whitespace(gammalib::toupper(hdu->string("THETABIN")));

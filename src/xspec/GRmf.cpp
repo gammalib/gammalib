@@ -276,7 +276,7 @@ void GRmf::load(const std::string& filename)
     m_ebds_measured.load(filename);
 
     // Get RMF table
-    GFitsTable* table = file.table("MATRIX");
+    const GFitsTable& table = *file.table("MATRIX");
 
     // Read RMF data
     read(table);
@@ -320,58 +320,53 @@ void GRmf::save(const std::string& filename, const bool& clobber) const
 /***********************************************************************//**
  * @brief Read Redistribution Matrix File
  *
- * @param[in] hdu RMF FITS table.
+ * @param[in] table RMF FITS table.
  ***************************************************************************/
-void GRmf::read(const GFitsTable* hdu)
+void GRmf::read(const GFitsTable& table)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Initialise members
+    m_ebds_true.clear();
 
-        // Initialise members
-        m_ebds_true.clear();
+    // Get pointer to data columns
+    const GFitsTableCol* energy_lo = table["ENERG_LO"];
+    const GFitsTableCol* energy_hi = table["ENERG_HI"];
+    const GFitsTableCol* n_grp     = table["N_GRP"];
+    const GFitsTableCol* f_chan    = table["F_CHAN"];
+    const GFitsTableCol* n_chan    = table["N_CHAN"];
+    const GFitsTableCol* matrix    = table["MATRIX"];
 
-        // Get pointer to data columns
-        const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
-        const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
-        const GFitsTableCol* n_grp     = (*hdu)["N_GRP"];
-        const GFitsTableCol* f_chan    = (*hdu)["F_CHAN"];
-        const GFitsTableCol* n_chan    = (*hdu)["N_CHAN"];
-        const GFitsTableCol* matrix    = (*hdu)["MATRIX"];
+    // Set matrix rows and columns
+    int rows    = energy_lo->length();
+    int columns = m_ebds_measured.size();
 
-        // Set matrix rows and columns
-        int rows    = energy_lo->length();
-        int columns = m_ebds_measured.size();
+    // Initialize matrix
+    m_matrix = GMatrixSparse(rows, columns);
 
-        // Initialize matrix
-        m_matrix = GMatrixSparse(rows, columns);
-
-        // Set true energy bins
-        for (int itrue = 0; itrue < rows; ++itrue) {
+    // Set true energy bins
+    for (int itrue = 0; itrue < rows; ++itrue) {
     
-            // Append energy bin
-            GEnergy emin(energy_lo->real(itrue), energy_lo->unit());
-            GEnergy emax(energy_hi->real(itrue), energy_hi->unit());
-            m_ebds_true.append(emin, emax);
+        // Append energy bin
+        GEnergy emin(energy_lo->real(itrue), energy_lo->unit());
+        GEnergy emax(energy_hi->real(itrue), energy_hi->unit());
+        m_ebds_true.append(emin, emax);
 
-            // Loop over groups
-            int icolumn = 0;
-            int ngroups = n_grp->integer(itrue);
-            for (int igroup = 0; igroup < ngroups; ++igroup) {
+        // Loop over groups
+        int icolumn = 0;
+        int ngroups = n_grp->integer(itrue);
+        for (int igroup = 0; igroup < ngroups; ++igroup) {
 
-                // Get start column index and number of columns
-                int imeasured = f_chan->integer(itrue, igroup);
-                int nvalues   = n_chan->integer(itrue, igroup);
+            // Get start column index and number of columns
+            int imeasured = f_chan->integer(itrue, igroup);
+            int nvalues   = n_chan->integer(itrue, igroup);
 
-                // Get values
-                for (int i = 0; i < nvalues; ++i, ++imeasured, ++icolumn) {
-                    m_matrix(itrue, imeasured) = matrix->real(itrue, icolumn);
-                }
+            // Get values
+            for (int i = 0; i < nvalues; ++i, ++imeasured, ++icolumn) {
+                m_matrix(itrue, imeasured) = matrix->real(itrue, icolumn);
+            }
 
-            } // endfor: looped over groups
+        } // endfor: looped over groups
 
-        } // endfor: looped over true energy bins
-
-    } // endif: HDU was valid
+    } // endfor: looped over true energy bins
 
     // Return
     return;

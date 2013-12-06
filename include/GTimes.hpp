@@ -58,8 +58,8 @@ public:
     // Methods
     void        clear(void);
     GTimes*     clone(void) const;
-    int         size(void) const { return m_times.size(); }
-    bool        isempty(void) const { return m_times.empty(); }
+    int         size(void) const;
+    bool        isempty(void) const;
     void        append(const GTime& time);
     void        insert(const int& index, const GTime& time);
     void        remove(const int& index);
@@ -76,5 +76,29 @@ protected:
     // Protected data members
     std::vector<GTime> m_times;  //!< List of times
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of times
+ *
+ * @return Number of times.
+ ***************************************************************************/
+inline
+int GTimes::size(void) const
+{
+    return m_times.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if there are no times
+ *
+ * @return True if there are no times.
+ ***************************************************************************/
+inline
+bool GTimes::isempty(void) const
+{
+    return m_times.empty();
+}
 
 #endif /* GTIMES_HPP */

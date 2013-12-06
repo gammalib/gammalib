@@ -57,8 +57,9 @@ public:
     const GEbounds& etrue(void) const;
     const GEbounds& emeasured(void) const;
     void            load(const std::string& filename);
-    void            save(const std::string& filename, const bool& clobber = false) const;
-    void            read(const GFitsTable* hdu);
+    void            save(const std::string& filename,
+                         const bool& clobber = false) const;
+    void            read(const GFitsTable& table);
     void            write(GFits& fits) const;
 };
 

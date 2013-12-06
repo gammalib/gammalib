@@ -52,7 +52,7 @@
 #define G_DIR2PIX                                "GSkymap::dir2pix(GSkyDir&)"
 #define G_OMEGA1                                       "GSkymap::omega(int&)"
 #define G_OMEGA2                                 "GSkymap::omega(GSkyPixel&)"
-#define G_READ                               "GSkymap::read(const GFitsHDU*)"
+#define G_READ                               "GSkymap::read(const GFitsHDU&)"
 #define G_SET_WCS     "GSkymap::set_wcs(std::string&, std::string&, double&,"\
                               " double&, double&, double&, double&, double&,"\
                                                        " GMatrix&, GVector&)"
@@ -937,21 +937,20 @@ void GSkymap::load(const std::string& filename)
     // Get number of HDUs
     int num = fits.size();
 
-    // Initialize pointer to HDU and load flag
-    GFitsHDU* hdu    = NULL;
-    bool      loaded = false;
+    // Initialize load flag
+    bool loaded = false;
 
     // First search for HEALPix extension. We can skip the first extension
     // since this is always an image and a HEALPix map is stored in a
     // binary table
     for (int extno = 1; extno < num; ++extno) {
 
-        // Get pointer to HDU
-        hdu = fits.at(extno);
+        // Get reference to HDU
+        const GFitsHDU& hdu = *fits.at(extno);
         
         // If PIXTYPE keyword equals "HEALPIX" then load map
-        if (hdu->hascard("PIXTYPE") && hdu->string("PIXTYPE") == "HEALPIX") {
-            read_healpix(static_cast<const GFitsTable*>(hdu));
+        if (hdu.hascard("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
+            read_healpix(static_cast<const GFitsTable&>(hdu));
             loaded = true;
             break;
         }
@@ -963,17 +962,17 @@ void GSkymap::load(const std::string& filename)
     if (!loaded) {
         for (int extno = 0; extno < num; ++extno) {
 
-            // Get pointer to HDU
-            hdu = fits.at(extno);
+            // Get referene to HDU
+            const GFitsHDU& hdu = *fits.at(extno);
 
             // Skip if extension is not an image
             if (extno > 0) {
-                if (hdu->string("XTENSION") != "IMAGE")
+                if (hdu.string("XTENSION") != "IMAGE")
                     continue;
             }
 
             // Load WCS map
-            read_wcs(static_cast<const GFitsImage*>(hdu));
+            read_wcs(static_cast<const GFitsImage&>(hdu));
             loaded = true;
             break;
 
@@ -1035,39 +1034,32 @@ void GSkymap::save(const std::string& filename, bool clobber) const
  * @brief Read skymap from FITS HDU
  *
  * @param[in] hdu FITS HDU.
- *
- * The method returns an empty skymap of the HDU pointer was not valid.
  ***************************************************************************/
-void GSkymap::read(const GFitsHDU* hdu)
+void GSkymap::read(const GFitsHDU& hdu)
 {
     // Free memory and initialise members
     free_members();
     init_members();
 
-    // Continue only if HDU pointer is valid
-    if (hdu != NULL) {
+    // Initialize load flag
+    bool loaded = false;
 
-        // Initialize load flag
-        bool loaded = false;
+    // If PIXTYPE keyword equals "HEALPIX" then load map
+    if (hdu.hascard("PIXTYPE") && hdu.string("PIXTYPE") == "HEALPIX") {
+        read_healpix(static_cast<const GFitsTable&>(hdu));
+        loaded = true;
+    }
 
-        // If PIXTYPE keyword equals "HEALPIX" then load map
-        if (hdu->hascard("PIXTYPE") && hdu->string("PIXTYPE") == "HEALPIX") {
-            read_healpix(static_cast<const GFitsTable*>(hdu));
+    // ... otherwise try loading as non HEALPix map
+    if (!loaded) {
+
+        // Load only if HDU contains an image
+        if (hdu.exttype() == 0) {
+            read_wcs(static_cast<const GFitsImage&>(hdu));
             loaded = true;
         }
 
-        // ... otherwise try loading as non HEALPix map
-        if (!loaded) {
-
-            // Load only if HDU contains an image
-            if (hdu->exttype() == 0) {
-                read_wcs(static_cast<const GFitsImage*>(hdu));
-                loaded = true;
-            }
-
-        } // endif
-
-    } // endif: HDU pointer was valid
+    } // endif
 
     // Return
     return;
@@ -1079,7 +1071,7 @@ void GSkymap::read(const GFitsHDU* hdu)
  *
  * @param[in] file FITS file pointer.
  ***************************************************************************/
-void GSkymap::write(GFits* file) const
+void GSkymap::write(GFits& file) const
 {
     // Continue only if we have data to save
     if (m_proj != NULL) {
@@ -1099,7 +1091,7 @@ void GSkymap::write(GFits* file) const
 
         // Append HDU to FITS file.
         if (hdu != NULL) {
-            file->append(*hdu);
+            file.append(*hdu);
         }
 
         // Delete HDU
@@ -1330,7 +1322,7 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
 /***********************************************************************//**
  * @brief Read Healpix data from FITS table.
  *
- * @param[in] hdu FITS HDU containing the Healpix data.
+ * @param[in] table FITS table.
  *
  * HEALPix data may be stored in various formats depending on the 
  * application that has writted the data. HEALPix IDL, for example, may
@@ -1339,114 +1331,109 @@ void GSkymap::set_wcs(const std::string& wcs, const std::string& coords,
  * several HEALPix maps into a single column. Alternatively, multiple maps
  * may be stored in multiple columns.
  ***************************************************************************/
-void GSkymap::read_healpix(const GFitsTable* hdu)
+void GSkymap::read_healpix(const GFitsTable& table)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Determine number of rows and columns in table
+    int nrows = table.nrows();
+    int ncols = table.ncols();
+    #if defined(G_READ_HEALPIX_DEBUG)
+    std::cout << "nrows=" << nrows << " ncols=" << ncols << std::endl;
+    #endif
 
-        // Determine number of rows and columns in table
-        int nrows = hdu->nrows();
-        int ncols = hdu->ncols();
-        #if defined(G_READ_HEALPIX_DEBUG)
-        std::cout << "nrows=" << nrows << " ncols=" << ncols << std::endl;
-        #endif
+    // Allocate Healpix projection
+    m_proj = new GHealpix;
 
-        // Allocate Healpix projection
-        m_proj = new GHealpix;
+    // Read WCS information from FITS header
+    m_proj->read(table);
 
-        // Read WCS information from FITS header
-        m_proj->read(hdu);
+    // Set number of pixels based on NSIDE parameter
+    m_num_pixels = static_cast<GHealpix*>(m_proj)->npix();
+    #if defined(G_READ_HEALPIX_DEBUG)
+    std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
+    #endif
 
-        // Set number of pixels based on NSIDE parameter
-        m_num_pixels = static_cast<GHealpix*>(m_proj)->npix();
-        #if defined(G_READ_HEALPIX_DEBUG)
-        std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
-        #endif
+    // Number of map pixels has to be a multiple of the number of
+    // rows in column
+    if (m_num_pixels % nrows != 0) {
+        throw GException::skymap_bad_size(G_READ_HEALPIX, nrows,
+                                          m_num_pixels);
+    }
 
-        // Number of map pixels has to be a multiple of the number of
-        // rows in column
-        if (m_num_pixels % nrows != 0) {
-            throw GException::skymap_bad_size(G_READ_HEALPIX, nrows,
-                                              m_num_pixels);
+    // Determine vector length for HEALPix data storage
+    int nentry = m_num_pixels / nrows;
+    #if defined(G_READ_HEALPIX_DEBUG)
+    std::cout << "nentry=" << nentry << std::endl;
+    #endif
+
+    // Determine number of maps from the number of maps that fit into
+    // all columns. Only count columns that can fully hold the map.
+    m_num_maps = 0;
+    for (int icol = 0; icol < ncols; ++icol) {
+        const GFitsTableCol* col = table[icol];
+        if (col->number() % nentry == 0) {
+            m_num_maps += col->number() / nentry;
+        }
+    }
+    #if defined(G_READ_HEALPIX_DEBUG)
+    std::cout << "m_num_maps=" << m_num_maps << std::endl;
+    #endif
+
+    // Allocate pixels to hold the map
+    alloc_pixels();
+
+    // Initialise map counter
+    int imap = 0;
+
+    // Loop over all columns
+    for (int icol = 0; icol < ncols; ++icol) {
+
+        // Get next column
+        const GFitsTableCol* col = table[icol];
+
+        // Only consider columns that can fully hold maps
+        if (col->number() % nentry == 0) {
+
+            // Determine number of maps in column
+            int num = col->number() / nentry;
+
+            // Loop over all maps in column
+            int inx_start = 0;
+            int inx_end   = nentry;
+            for (int i = 0; i < num; ++i) {
+
+                // Load map
+                double *ptr = m_pixels + m_num_pixels*imap;
+                for (int row = 0; row < col->length(); ++row) {
+                    for (int inx = inx_start; inx < inx_end; ++inx) {
+                        *ptr++ = col->real(row,inx);
+                    }
+                }
+                #if defined(G_READ_HEALPIX_DEBUG)
+                std::cout << "Load map=" << imap << " index="
+                          << inx_start << "-" << inx_end << std::endl;
+                #endif
+
+                // Increment index range
+                inx_start  = inx_end;
+                inx_end   += nentry;
+
+                // Increment map counter
+                imap++;
+
+                // Break if we have loaded all maps
+                if (imap >= m_num_maps) {
+                    break;
+                }
+
+            } // endfor: looped over all maps in column
+        } // endif: column could fully hold maps
+
+        // Break if we have loaded all maps
+        if (imap >= m_num_maps) {
+            break;
         }
 
-        // Determine vector length for HEALPix data storage
-        int nentry = m_num_pixels / nrows;
-        #if defined(G_READ_HEALPIX_DEBUG)
-        std::cout << "nentry=" << nentry << std::endl;
-        #endif
-
-        // Determine number of maps from the number of maps that fit into
-        // all columns. Only count columns that can fully hold the map.
-        m_num_maps = 0;
-        for (int icol = 0; icol < ncols; ++icol) {
-            const GFitsTableCol* col = (*hdu)[icol];
-            if (col->number() % nentry == 0) {
-                m_num_maps += col->number() / nentry;
-            }
-        }
-        #if defined(G_READ_HEALPIX_DEBUG)
-        std::cout << "m_num_maps=" << m_num_maps << std::endl;
-        #endif
-
-        // Allocate pixels to hold the map
-        alloc_pixels();
-
-        // Initialise map counter
-        int imap = 0;
-
-        // Loop over all columns
-        for (int icol = 0; icol < ncols; ++icol) {
-
-            // Get next column
-            const GFitsTableCol* col = (*hdu)[icol];
-
-            // Only consider columns that can fully hold maps
-            if (col->number() % nentry == 0) {
-
-                // Determine number of maps in column
-                int num = col->number() / nentry;
-
-                // Loop over all maps in column
-                int inx_start = 0;
-                int inx_end   = nentry;
-                for (int i = 0; i < num; ++i) {
-
-                    // Load map
-                    double *ptr = m_pixels + m_num_pixels*imap;
-                    for (int row = 0; row < col->length(); ++row) {
-                        for (int inx = inx_start; inx < inx_end; ++inx) {
-                            *ptr++ = col->real(row,inx);
-                        }
-                    }
-                    #if defined(G_READ_HEALPIX_DEBUG)
-                    std::cout << "Load map=" << imap << " index="
-                              << inx_start << "-" << inx_end << std::endl;
-                    #endif
-
-                    // Increment index range
-                    inx_start  = inx_end;
-                    inx_end   += nentry;
-
-                    // Increment map counter
-                    imap++;
-
-                    // Break if we have loaded all maps
-                    if (imap >= m_num_maps) {
-                        break;
-                    }
-
-                } // endfor: looped over all maps in column
-            } // endif: column could fully hold maps
-
-            // Break if we have loaded all maps
-            if (imap >= m_num_maps) {
-                break;
-            }
-
-        } // endfor: looped over all columns
-
-    } // endif: HDU was valid
+    } // endfor: looped over all columns
 
     // Return
     return;
@@ -1456,72 +1443,67 @@ void GSkymap::read_healpix(const GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Read WCS image from FITS HDU
  *
- * @param[in] hdu FITS HDU containing the WCS image.
+ * @param[in] image FITS image.
  *
  * @exception GException::skymap_bad_image_dim
  *            WCS image has invalid dimension (naxis=2 or 3).
  ***************************************************************************/
-void GSkymap::read_wcs(const GFitsImage* hdu)
+void GSkymap::read_wcs(const GFitsImage& image)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Allocate WCS
+    alloc_wcs(image);
 
-        // Allocate WCS
-        alloc_wcs(hdu);
+    // Read projection information from FITS header
+    m_proj->read(image);
 
-        // Read projection information from FITS header
-        m_proj->read(hdu);
+    // Extract map dimension and number of maps from image
+    if (image.naxis() == 2) {
+        m_num_x    = image.naxes(0);
+        m_num_y    = image.naxes(1);
+        m_num_maps = 1;
+    }
+    else if (image.naxis() >= 3) {
+        m_num_x    = image.naxes(0);
+        m_num_y    = image.naxes(1);
+        m_num_maps = image.naxes(2);
+    }
+    else {
+        throw GException::skymap_bad_image_dim(G_READ_WCS, image.naxis());
+    }
+    #if defined(G_READ_WCS_DEBUG)
+    std::cout << "m_num_x=" << m_num_x << std::endl;
+    std::cout << "m_num_y=" << m_num_y << std::endl;
+    std::cout << "m_num_maps=" << m_num_maps << std::endl;
+    #endif
 
-        // Extract map dimension and number of maps from image
-        if (hdu->naxis() == 2) {
-            m_num_x    = hdu->naxes(0);
-            m_num_y    = hdu->naxes(1);
-            m_num_maps = 1;
+    // Compute number of pixels
+    m_num_pixels = m_num_x * m_num_y;
+    #if defined(G_READ_WCS_DEBUG)
+    std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
+    #endif
+
+    // Allocate pixels to hold the map
+    alloc_pixels();
+
+    // Read image
+    if (image.naxis() == 2) {
+        double* ptr = m_pixels;
+        for (int iy = 0; iy < m_num_y; ++iy) {
+            for (int ix = 0; ix < m_num_x; ++ix) {
+                *ptr++ = image.pixel(ix,iy);
+            }
         }
-        else if (hdu->naxis() >= 3) {
-            m_num_x    = hdu->naxes(0);
-            m_num_y    = hdu->naxes(1);
-            m_num_maps = hdu->naxes(2);
-        }
-        else {
-            throw GException::skymap_bad_image_dim(G_READ_WCS, hdu->naxis());
-        }
-        #if defined(G_READ_WCS_DEBUG)
-        std::cout << "m_num_x=" << m_num_x << std::endl;
-        std::cout << "m_num_y=" << m_num_y << std::endl;
-        std::cout << "m_num_maps=" << m_num_maps << std::endl;
-        #endif
-
-        // Compute number of pixels
-        m_num_pixels = m_num_x * m_num_y;
-        #if defined(G_READ_WCS_DEBUG)
-        std::cout << "m_num_pixels=" << m_num_pixels << std::endl;
-        #endif
-
-        // Allocate pixels to hold the map
-        alloc_pixels();
-
-        // Read image
-        if (hdu->naxis() == 2) {
-            double* ptr = m_pixels;
+    }
+    else {
+        double* ptr = m_pixels;
+        for (int imap = 0; imap < m_num_maps; ++imap) {
             for (int iy = 0; iy < m_num_y; ++iy) {
                 for (int ix = 0; ix < m_num_x; ++ix) {
-                    *ptr++ = hdu->pixel(ix,iy);
+                    *ptr++ = image.pixel(ix,iy,imap);
                 }
             }
         }
-        else {
-            double* ptr = m_pixels;
-            for (int imap = 0; imap < m_num_maps; ++imap) {
-                for (int iy = 0; iy < m_num_y; ++iy) {
-                    for (int ix = 0; ix < m_num_x; ++ix) {
-                        *ptr++ = hdu->pixel(ix,iy,imap);
-                    }
-                }
-            }
-        }
-
-    } // endif: HDU was valid
+    }
 
     // Return
     return;
@@ -1531,7 +1513,7 @@ void GSkymap::read_wcs(const GFitsImage* hdu)
 /***********************************************************************//**
  * @brief Allocate WCS class
  *
- * @param[in] hdu FITS HDU containing the WCS image.
+ * @param[in] image FITS image.
  *
  * @exception GException::fits_key_not_found
  *            Unable to find required FITS header keyword.
@@ -1540,39 +1522,34 @@ void GSkymap::read_wcs(const GFitsImage* hdu)
  * @exception GException::wcs_invalid
  *            WCS projection of FITS file not supported by GammaLib.
  ***************************************************************************/
-void GSkymap::alloc_wcs(const GFitsImage* hdu)
+void GSkymap::alloc_wcs(const GFitsImage& image)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get standard keywords
+    std::string ctype1 = image.string("CTYPE1");
+    std::string ctype2 = image.string("CTYPE2");
 
-        // Get standard keywords
-        std::string ctype1 = hdu->string("CTYPE1");
-        std::string ctype2 = hdu->string("CTYPE2");
+    // Extract projection type
+    std::string xproj = ctype1.substr(5,3);
+    std::string yproj = ctype2.substr(5,3);
 
-        // Extract projection type
-        std::string xproj = ctype1.substr(5,3);
-        std::string yproj = ctype2.substr(5,3);
+    // Check that projection type is identical on both axes
+    if (xproj != yproj) {
+        throw GException::skymap_bad_ctype(G_ALLOC_WCS,
+                                           ctype1, ctype2);
+    }
 
-        // Check that projection type is identical on both axes
-        if (xproj != yproj) {
-            throw GException::skymap_bad_ctype(G_ALLOC_WCS,
-                                               ctype1, ctype2);
-        }
-
-        // Allocate WCS registry
-        GWcsRegistry registry;
-        
-        // Allocate projection from registry
-        m_proj = registry.alloc(xproj);
-        
-        // Signal if projection type is not known
-        if (m_proj == NULL) {
-            std::string message = "Projection code not known. "
-                                  "Should be one of "+registry.list()+".";
-            throw GException::wcs_invalid(G_ALLOC_WCS, xproj, message);
-        }
-
-    } // endif: HDU was valid
+    // Allocate WCS registry
+    GWcsRegistry registry;
+    
+    // Allocate projection from registry
+    m_proj = registry.alloc(xproj);
+    
+    // Signal if projection type is not known
+    if (m_proj == NULL) {
+        std::string message = "Projection code not known. "
+                              "Should be one of "+registry.list()+".";
+        throw GException::wcs_invalid(G_ALLOC_WCS, xproj, message);
+    }
 
     // Return
     return;
@@ -1626,7 +1603,7 @@ GFitsBinTable* GSkymap::create_healpix_hdu(void) const
     hdu->extname("HEALPIX");
 
     // If we have WCS information then write into FITS header
-    if (m_proj != NULL) m_proj->write(hdu);
+    if (m_proj != NULL) m_proj->write(*hdu);
 
     // Set additional keywords
     hdu->card("NBRBINS", m_num_maps, "Number of HEALPix maps");
@@ -1693,7 +1670,7 @@ GFitsImageDouble* GSkymap::create_wcs_hdu(void) const
     hdu->extname("IMAGE");
 
     // If we have sky projection information then write into FITS header
-    if (m_proj != NULL) m_proj->write(hdu);
+    if (m_proj != NULL) m_proj->write(*hdu);
 
     // Set additional keywords
     //TODO

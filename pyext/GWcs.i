@@ -42,7 +42,7 @@ public:
                   const double& crval1, const double& crval2,
                   const double& crpix1, const double& crpix2,
                   const double& cdelt1, const double& cdelt2);
-    explicit GWcs(const GFitsHDU* hdu);
+    explicit GWcs(const GFitsHDU& hdu);
     GWcs(const GWcs& wcs);
     virtual ~GWcs(void);
 
@@ -54,8 +54,8 @@ public:
     
     // Implemented virtual methods
     virtual int         size(void) const;
-    virtual void        read(const GFitsHDU* hdu);
-    virtual void        write(GFitsHDU* hdu) const;
+    virtual void        read(const GFitsHDU& hdu);
+    virtual void        write(GFitsHDU& hdu) const;
     virtual double      omega(const GSkyPixel& pixel) const;
     virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
     virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;
