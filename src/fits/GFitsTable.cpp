@@ -667,7 +667,7 @@ std::string GFitsTable::print(const GChatter& chatter) const
         }
 
         // NORMAL: Append table columns
-        if (chatter >= NORMAL) {
+        if (chatter >= VERBOSE) {
             if (m_columns != NULL) {
                 for (int i = 0; i < m_cols; ++i) {
                     result.append("\n");

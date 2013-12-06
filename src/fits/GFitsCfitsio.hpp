@@ -90,6 +90,7 @@
 #define __ffpcom(A, B, C) ffpcom(A, B, C)
 #define __ffphis(A, B, C) ffphis(A, B, C)
 #define __ffpss(A, B, C, D, E, F) ffpss(A, B, C, D, E, F)
+#define __ffprec(A, B, C) ffprec(A, B, C)
 #define __ffsrow(A, B, C, D) ffsrow(A, B, C, D)
 #define __ffthdu(A, B, C) ffthdu(A, B, C)
 #define __ffuky(A, B, C, D, E, F) ffuky(A, B, C, D, E, F)
@@ -98,6 +99,8 @@
 #define __ffukyj(A, B, C, D, E) ffukyj(A, B, C, D, E)
 #define __ffukyl(A, B, C, D, E) ffukyl(A, B, C, D, E)
 #define __ffukys(A, B, C, D, E) ffukys(A, B, C, D, E)
+#define __ffukyu(A, B, C, D) ffukyu(A, B, C, D)
+#define __TNULL       0
 #define __TBIT        TBIT
 #define __TBYTE       TBYTE
 #define __TSBYTE      TSBYTE
@@ -164,6 +167,7 @@ typedef fitsfile __fitsfile;
 #define __ffpcom(A, B, C) __dummy()
 #define __ffphis(A, B, C) __dummy()
 #define __ffpss(A, B, C, D, E, F) __dummy()
+#define __ffprec(A, B, C) __dummy()
 #define __ffsrow(A, B, C, D) __dummy()
 #define __ffthdu(A, B, C) __dummy()
 #define __ffuky(A, B, C, D, E, F) __dummy()
@@ -172,6 +176,8 @@ typedef fitsfile __fitsfile;
 #define __ffukyj(A, B, C, D, E) __dummy()
 #define __ffukyl(A, B, C, D, E) __dummy()
 #define __ffukys(A, B, C, D, E) __dummy()
+#define __ffukyu(A, B, C, D) __dummy()
+#define __TNULL         0
 #define __TBIT          1
 #define __TBYTE        11
 #define __TSBYTE       12

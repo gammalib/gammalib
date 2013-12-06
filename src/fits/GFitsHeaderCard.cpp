@@ -620,7 +620,7 @@ std::string GFitsHeaderCard::print(const GChatter& chatter) const
         result.append(gammalib::left(m_keyname,8));
 
         // Format values
-        if (m_keyname != "COMMENT" && m_keyname != "HISTORY") {
+        if (m_keyname != "COMMENT" && m_keyname != "HISTORY" && m_keyname != "") {
             if (m_unit.length() > 0) {
                 result.append(" ="+gammalib::right(m_value,21)+" / ["+m_unit+"] "+m_comment);
             }
@@ -635,6 +635,9 @@ std::string GFitsHeaderCard::print(const GChatter& chatter) const
         // Attach card type
         if (m_value_dtype != NULL) {
             switch (m_dtype) {
+            case __TNULL:
+                result.append(" <null>");
+                break;
             case __TBIT:
                 result.append(" <bit>");
                 break;
@@ -688,9 +691,18 @@ std::string GFitsHeaderCard::print(const GChatter& chatter) const
                 break;
             }
         }
+        /*
         else {
-            result.append(" <non native>");
+            switch (m_dtype) {
+            case __TNULL:
+                result.append(" <null>");
+                break;
+            default:
+                result.append(" <non native>");
+                break;
+            }
         }
+        */
 
     } // endif: chatter was not silent
 
@@ -716,9 +728,9 @@ void GFitsHeaderCard::init_members(void)
     m_unit.clear();
     m_comment.clear();
     m_value_dtype    = NULL;
-    m_dtype          = 0;
+    m_dtype          = __TNULL;
     m_value_decimals = 10;
-    m_comment_write  = false;
+    m_comment_write  = true; // Was false before, not sure why ...
 
     // Return
     return;
@@ -896,19 +908,18 @@ void GFitsHeaderCard::set_dtype(const std::string& value)
         // Get index of last string element
         int last = m_value.length() - 1;
 
-        // If value is empty then we either have a COMMENT or HISTORY card or
-        // we don't know the type
+        // If value is empty and there is a COMMENT, HISTORY or BLANKFIELD
+        // (empty) keyword then we have a commentary card. We can just
+        // skip this card here. Otherwise we have an undefined value, also
+        // called NULL value.
         if (last < 0) {
-            if (m_keyname == "COMMENT" || m_keyname == "HISTORY") {
+            if (m_keyname == "COMMENT" ||
+                m_keyname == "HISTORY" ||
+                m_keyname == "") {
                 continue;
             }
             else {
-                std::string msg = "Invalid empty value keyword \""+
-                                  m_keyname+"\" encountered in FITS header.\n"
-                                  "Only \"COMMENT\" or \"HISTORY\" are"
-                                  " allowed as keywords for empty value"
-                                  " header cards.";
-                gammalib::warning(G_SET_DTYPE, msg);
+                m_dtype = __TNULL;
                 continue;
             }
         }
@@ -1104,6 +1115,13 @@ void GFitsHeaderCard::write(void* vptr) const
         }
     }
 
+    // If card is BLANKFIELD (empty keyword) then write empty line
+    else if (m_keyname == "") {
+        if (m_comment_write) {
+            status = __ffprec(FPTR(vptr), "", &status);
+        }
+    }
+
     // If card holds a native data type then write it
     else if (m_value_dtype != NULL) {
         switch (m_dtype) {
@@ -1135,6 +1153,12 @@ void GFitsHeaderCard::write(void* vptr) const
             break;
         }
     } // endif: had native data type
+
+    // ... otherwise if card holds a NULL value then write it
+    else if (m_dtype == __TNULL) {
+        status = __ffukyu(FPTR(vptr), (char*)m_keyname.c_str(), 
+                          (char*)m_comment.c_str(), &status);
+    }
 
     // ... capture all other stuff
     else {
