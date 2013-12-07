@@ -61,7 +61,7 @@ public:
     virtual void                clear(void);
     virtual GMWLObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
-    virtual const GMWLResponse* response(void) const;
+    virtual const GMWLResponse& response(void) const;
     virtual std::string         instrument(void) const { return "MWL"; }
     virtual double              ontime(void) const { return 1.0; }
     virtual double              livetime(void) const { return 1.0; }
@@ -94,5 +94,18 @@ protected:
     std::string  m_extname;      //!< Extension name
     GMWLResponse m_response;     //!< Response function
 };
+
+
+/***********************************************************************//**
+ * @brief Return response
+ *
+ * @return Response.
+ ***************************************************************************/
+inline
+const GMWLResponse& GMWLObservation::response(void) const
+{
+    // Return response
+    return m_response;
+}
 
 #endif /* GMWLOBSERVATION_HPP */

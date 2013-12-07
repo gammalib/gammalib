@@ -499,9 +499,6 @@ void GCTAOnOffObservation::compute_response(const GCTAObservation& obs,
  *
  * @param[in] obs CTA observation.
  *
- * @exception GException::invalid_value
- *            No CTA response found in observation
- *
  * @todo Implement GCTAResponse::npred usage.
  ***************************************************************************/
 void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
@@ -521,14 +518,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
     
         // Get CTA response pointer. Throw an exception if no response is
         // found
-        const GCTAResponse* response = obs.response();
-        if (response == NULL) {
-            std::string msg =
-                "No response information has been found in CTA observation"
-                " \""+obs.name()+"\" (ID="+obs.id()+").\n"
-                "Response information is needed for ARF computation.";
-            throw GException::invalid_value(G_COMPUTE_ARF, msg);
-        }
+        const GCTAResponse& response = obs.response();
 
         // Initialize ARF
         m_arf = GArf(ereco);
@@ -540,11 +530,11 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
             double logenergy = ereco.elogmean(i).log10TeV();
 
             // Set specresp value
-            m_arf[i] = response->aeff(theta,
-                                      phi,
-                                      zenith,
-                                      azimuth,
-                                      logenergy);
+            m_arf[i] = response.aeff(theta,
+                                     phi,
+                                     zenith,
+                                     azimuth,
+                                     logenergy);
         
         } // endfor: looped over reconstructed energies
         
@@ -560,9 +550,6 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
  *
  * @param[in] obs CTA observation.
  * @param[in] etrue True energy boundaries.
- *
- * @exception GException::invalid_value
- *            No CTA response found in observation
  ***************************************************************************/
 void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                                        const GEbounds&        etrue)
@@ -582,14 +569,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
     if (ntrue > 0 && nreco > 0) {
     
         // Get CTA response pointer
-        const GCTAResponse* response = obs.response();
-        if (response == NULL) {
-            std::string msg =
-                "No response information has been found in CTA observation"
-                " \""+obs.name()+"\" (ID="+obs.id()+").\n"
-                "Response information is needed for RMF computation.";
-            throw GException::invalid_value(G_COMPUTE_RMF, msg);
-        }
+        const GCTAResponse& response = obs.response();
 
         // Initialize RMF
         m_rmf = GRmf(etrue, ereco);
@@ -607,12 +587,12 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
                 double eng_true = etrue.elogmean(itrue).log10TeV();
 
                 // Set RMF value
-                m_rmf(itrue, ireco) = response->edisp(eng_reco,
-                                                      theta,
-                                                      phi,
-                                                      zenith,
-                                                      azimuth,
-                                                      eng_true);
+                m_rmf(itrue, ireco) = response.edisp(eng_reco,
+                                                     theta,
+                                                     phi,
+                                                     zenith,
+                                                     azimuth,
+                                                     eng_true);
             } // endfor: looped over true energy
         } // endfor: looped over reconstructed energy
     } // endif: there were energy bins

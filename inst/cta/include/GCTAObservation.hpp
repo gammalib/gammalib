@@ -58,7 +58,7 @@ public:
     virtual void                clear(void);
     virtual GCTAObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
-    virtual const GCTAResponse* response(void) const;
+    virtual const GCTAResponse& response(void) const;
     virtual std::string         instrument(void) const { return m_instrument; }
     virtual double              ontime(void) const { return m_ontime; }
     virtual double              livetime(void) const { return m_livetime; }
@@ -68,7 +68,7 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const GCTAPointing* pointing(void) const;
+    const GCTAPointing& pointing(void) const;
     void        load_unbinned(const std::string& filename);
     void        load_binned(const std::string& filename);
     void        save(const std::string& filename, bool clobber) const;
@@ -106,5 +106,27 @@ protected:
     double        m_ra_obj;       //!< Right Ascension of object
     double        m_dec_obj;      //!< Declination of object
 };
+
+
+/***********************************************************************//**
+ * @brief Return CTA response function
+ ***************************************************************************/
+inline
+const GCTAResponse& GCTAObservation::response(void) const
+{
+    // Return response pointer
+    return *m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Return CTA pointing direction
+ ***************************************************************************/
+inline
+const GCTAPointing& GCTAObservation::pointing(void) const
+{
+    // Return pointing pointer
+    return *m_pointing;
+}
 
 #endif /* GCTAOBSERVATION_HPP */

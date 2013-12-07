@@ -277,30 +277,6 @@ void GCOMObservation::response(const std::string& iaqname,
 
 
 /***********************************************************************//**
- * @brief Returns pointer to response function
- *
- * @return Pointer to response function.
- ***************************************************************************/
-GCOMResponse* GCOMObservation::response(void) const
-{
-    // Return response pointer
-    return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to pointing direction
- *
- * @return Pointer to pointing direction.
- ***************************************************************************/
-GCOMPointing* GCOMObservation::pointing(void) const
-{
-    // Return pointing pointer
-    return m_pointing;
-}
-
-
-/***********************************************************************//**
  * @brief Read observation from XML element
  *
  * @param[in] xml XML element.
@@ -566,7 +542,7 @@ std::string GCOMObservation::print(const GChatter& chatter) const
 
         // Append pointing
         if (m_pointing != NULL) {
-            result.append("\n"+m_pointing->print(chatter));
+            result.append("\n"+pointing().print(chatter));
         }
         else {
             result.append("\n"+gammalib::parformat("Pointing")+"undefined");
@@ -574,7 +550,7 @@ std::string GCOMObservation::print(const GChatter& chatter) const
 
         // Append response
         if (m_response != NULL) {
-            result.append("\n"+response()->print(chatter));
+            result.append("\n"+response().print(chatter));
         }
         else {
             result.append("\n"+gammalib::parformat("Response")+"undefined");

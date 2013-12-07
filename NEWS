@@ -167,7 +167,8 @@ GNodeArray
 
 GObservation
   The events() set method now takes a const reference instead of a const
-  pointer as argument.
+  pointer as argument. The response() method now returns a const
+  reference.
 
 GObservations
   The observation is now passed as const reference in the append()

@@ -236,46 +236,6 @@ void GLATObservation::response(const std::string& irfname, std::string caldb)
 
 
 /***********************************************************************//**
- * @brief Returns pointer to LAT response function
- ***************************************************************************/
-GLATResponse* GLATObservation::response(void) const
-{
-    // Return response pointer
-    return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to LAT pointing direction
- ***************************************************************************/
-GLATPointing* GLATObservation::pointing(void) const
-{
-    // Return response pointer
-    return m_pointing;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to LAT livetime cube
- ***************************************************************************/
-GLATLtCube* GLATObservation::ltcube(void) const
-{
-    // Return livetime cube pointer
-    return m_ltcube;
-}
-
-
-/***********************************************************************//**
- * @brief Returns instrument name
- ***************************************************************************/
-std::string GLATObservation::instrument(void) const
-{
-    // Return instument name
-    return ("LAT");
-}
-
-
-/***********************************************************************//**
  * @brief Read observation from XML element
  *
  * @param[in] xml XML element.

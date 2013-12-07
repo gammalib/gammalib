@@ -271,16 +271,6 @@ void GMWLObservation::response(const GResponse& rsp)
 
 
 /***********************************************************************//**
- * @brief Returns pointer to response function
- ***************************************************************************/
-const GMWLResponse* GMWLObservation::response(void) const
-{
-    // Return response pointer
-    return &m_response;
-}
-
-
-/***********************************************************************//**
  * @brief Read observation from XML element
  *
  * @param[in] xml XML element.
@@ -589,6 +579,7 @@ void GMWLObservation::init_members(void)
     m_filename.clear();
     m_extno.clear();
     m_extname.clear();
+    m_response.clear();
 
     // Overwrite base class statistics
     m_statistics = "Gaussian";

@@ -49,16 +49,16 @@ public:
     virtual ~GMWLObservation(void);
 
     // Implement pure virtual methods
-    virtual void             clear(void);
-    virtual GMWLObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual const GMWLResponse* response(void) const;
-    virtual std::string      instrument(void) const;
-    virtual double           ontime(void) const;
-    virtual double           livetime(void) const;
-    virtual double           deadc(const GTime& time) const;
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
+    virtual void                clear(void);
+    virtual GMWLObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GMWLResponse& response(void) const;
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
     void        load(const std::string& filename);

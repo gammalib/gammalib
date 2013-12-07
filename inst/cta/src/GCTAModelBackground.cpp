@@ -290,7 +290,6 @@ GCTAModelBackground* GCTAModelBackground::clone(void) const
  * @return Function value.
  *
  * @exception GException::invalid_argument
- *            No CTA pointing found in observation.
  *            No CTA instrument direction found in event.
  *
  * Evaluates tha CTA background model which is a factorization of a
@@ -308,14 +307,6 @@ double GCTAModelBackground::eval(const GEvent& event,
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
     if (ctaobs == NULL) {
         std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL, msg);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        std::string msg = "No CTA pointing found in observation.\n" +
                           obs.print();
         throw GException::invalid_argument(G_EVAL, msg);
     }
@@ -360,7 +351,6 @@ double GCTAModelBackground::eval(const GEvent& event,
  * @return Function value.
  *
  * @exception GException::invalid_argument
- *            No CTA pointing found in observation.
  *            No CTA instrument direction found in event.
  *
  * Evaluates tha CTA background model and parameter gradients. The CTA
@@ -379,14 +369,6 @@ double GCTAModelBackground::eval_gradients(const GEvent& event,
     const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
     if (ctaobs == NULL) {
         std::string msg = "Specified observation is not a CTA observation.\n" +
-                          obs.print();
-        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        std::string msg = "No CTA pointing found in observation.\n" +
                           obs.print();
         throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }

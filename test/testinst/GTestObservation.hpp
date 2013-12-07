@@ -78,7 +78,7 @@ public:
         m_response = *(testrsp->clone());
         return;
     }
-    virtual const GTestResponse* response(void) const { return &m_response;}
+    virtual const GTestResponse& response(void) const { return m_response;}
     virtual std::string          instrument(void) const { return m_instrument; }
     virtual double               ontime(void) const { return m_ontime; }
     virtual double               livetime(void) const { return m_ontime; }

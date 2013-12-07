@@ -269,28 +269,6 @@ void GCTAObservation::response(const std::string& irfname, std::string caldb)
 
 
 /***********************************************************************//**
- * @brief Returns pointer to CTA response function
- ***************************************************************************/
-const GCTAResponse* GCTAObservation::response(void) const
-{
-    // Return response pointer
-    return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to CTA pointing direction
- *
- * Returns pointer to pointing direction.
- ***************************************************************************/
-const GCTAPointing* GCTAObservation::pointing(void) const
-{
-    // Return pointing pointer
-    return m_pointing;
-}
-
-
-/***********************************************************************//**
  * @brief Set CTA pointing direction
  *
  * @param[in] pointing Pointing.
@@ -713,7 +691,7 @@ std::string GCTAObservation::print(const GChatter& chatter) const
 
         // Append pointing
         if (m_pointing != NULL) {
-            result.append("\n"+m_pointing->print(chatter));
+            result.append("\n"+pointing().print(chatter));
         }
         else {
             result.append("\n"+gammalib::parformat("CTA pointing"));
@@ -722,7 +700,7 @@ std::string GCTAObservation::print(const GChatter& chatter) const
 
         // Append response
         if (m_response != NULL) {
-            result.append("\n"+response()->print(chatter));
+            result.append("\n"+response().print(chatter));
         }
         else {
             result.append("\n"+gammalib::parformat("CTA response"));

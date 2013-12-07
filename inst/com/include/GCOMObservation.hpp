@@ -61,20 +61,20 @@ public:
     virtual GCOMObservation& operator= (const GCOMObservation& obs);
 
     // Implement pure virtual methods
-    virtual void             clear(void);
-    virtual GCOMObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GCOMResponse*    response(void) const;
-    virtual GCOMPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const { return m_instrument; }
-    virtual double           ontime(void) const { return m_ontime; }
-    virtual double           livetime(void) const { return m_livetime; }
-    virtual double           deadc(const GTime& time) const { return m_deadc; }
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
-    virtual std::string      print(const GChatter& chatter = NORMAL) const;
+    virtual void                clear(void);
+    virtual GCOMObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GCOMResponse& response(void) const;
+    virtual std::string         instrument(void) const { return m_instrument; }
+    virtual double              ontime(void) const { return m_ontime; }
+    virtual double              livetime(void) const { return m_livetime; }
+    virtual double              deadc(const GTime& time) const { return m_deadc; }
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
+    virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    const GCOMPointing& pointing(void) const;
     void           load(const std::string& drename,
                         const std::string& drbname,
                         const std::string& drgname,
@@ -122,5 +122,31 @@ protected:
     double        m_deadc;       //!< Deadtime correction
     double        m_ewidth;      //!< Energy width (MeV)
 };
+
+
+/***********************************************************************//**
+ * @brief Return response function
+ *
+ * @return Response function.
+ ***************************************************************************/
+inline
+const GCOMResponse& GCOMObservation::response(void) const
+{
+    // Return response pointer
+    return *m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointing direction
+ *
+ * @return Pointing direction.
+ ***************************************************************************/
+inline
+const GCOMPointing& GCOMObservation::pointing(void) const
+{
+    // Return pointing pointer
+    return *m_pointing;
+}
 
 #endif /* GCOMOBSERVATION_HPP */

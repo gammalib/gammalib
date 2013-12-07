@@ -71,7 +71,7 @@ public:
     virtual void             clear(void) = 0;
     virtual GObservation*    clone(void) const = 0;
     virtual void             response(const GResponse& rsp) = 0;
-    virtual const GResponse* response(void) const = 0;
+    virtual const GResponse& response(void) const = 0;
     virtual std::string      instrument(void) const = 0;
     virtual double           ontime(void) const = 0;
     virtual double           livetime(void) const = 0;
@@ -80,29 +80,25 @@ public:
     virtual void             write(GXmlElement& xml) const = 0;
     virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
 
-    // Virtual methods
-    virtual double        model(const GModels& models,
-                                const GEvent&  event,
-                                GVector*       gradient = NULL) const;
-    virtual double        npred(const GModels& models,
-                                GVector*       gradient = NULL) const;
-
     // Implemented methods
-    void                  name(const std::string& name);
-    void                  id(const std::string& id);
-    void                  events(const GEvents& events);
-    void                  statistics(const std::string& statistics);
-    const std::string&    name(void) const;
-    const std::string&    id(void) const;
-    const GEvents*        events(void) const;
-    const std::string&    statistics(void) const;
-
-    // Other methods
-    virtual double model_grad(const GModel& model,
-                              const GEvent& event,
-                              const int&    ipar) const;
-    virtual double npred_grad(const GModel& model,
-                              const int&    ipar) const;
+    void               name(const std::string& name);
+    void               id(const std::string& id);
+    void               events(const GEvents& events);
+    void               statistics(const std::string& statistics);
+    const std::string& name(void) const;
+    const std::string& id(void) const;
+    const GEvents*     events(void) const;
+    const std::string& statistics(void) const;
+    virtual double     model(const GModels& models,
+                             const GEvent&  event,
+                             GVector*       gradient = NULL) const;
+    virtual double     npred(const GModels& models,
+                             GVector*       gradient = NULL) const;
+    virtual double     model_grad(const GModel& model,
+                                  const GEvent& event,
+                                  const int&    ipar) const;
+    virtual double     npred_grad(const GModel& model,
+                                  const int&    ipar) const;
 
 protected:
     // Protected methods

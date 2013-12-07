@@ -289,10 +289,7 @@ double GCTAResponse::irf(const GEvent&       event,
     }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_IRF);
-    }
+    const GCTAPointing& pnt = ctaobs->pointing();
 
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
@@ -310,11 +307,11 @@ double GCTAResponse::irf(const GEvent&       event,
     const GTime&   srcTime = photon.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
 
     // Get radial offset and polar angles of true photon in camera [radians]
-    double theta = pnt->dir().dist(srcDir);
+    double theta = pnt.dir().dist(srcDir);
     double phi   = 0.0; //TODO: Implement Phi dependence
 
     // Get log10(E/TeV) of true photon energy.
@@ -385,8 +382,6 @@ double GCTAResponse::irf(const GEvent&       event,
  *
  * @exception GCTAException::bad_observation_type
  *            Observation is not a CTA observations.
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found.
  * @exception GException::no_list
  *            Observation does not contain a valid CTA event list.
  *
@@ -403,10 +398,7 @@ double GCTAResponse::npred(const GPhoton&      photon,
     }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_NPRED);
-    }
+    const GCTAPointing& pnt = ctaobs->pointing();
 
     // Get pointer on CTA events list
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
@@ -420,11 +412,11 @@ double GCTAResponse::npred(const GPhoton&      photon,
     const GTime&   srcTime = photon.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
 
     // Get radial offset and polar angles of true photon in camera [radians]
-    double theta = pnt->dir().dist(srcDir);
+    double theta = pnt.dir().dist(srcDir);
     double phi   = 0.0; //TODO: Implement Phi dependence
 
     // Get log10(E/TeV) of true photon energy.
@@ -437,13 +429,13 @@ double GCTAResponse::npred(const GPhoton&      photon,
     if (npred > 0.0) {
 
         // Get PSF
-        npred *= npsf(srcDir, srcLogEng, srcTime, *pnt, events->roi());
+        npred *= npsf(srcDir, srcLogEng, srcTime, pnt, events->roi());
 
         // Multiply-in energy dispersion
         if (hasedisp() && npred > 0.0) {
 
             // Get energy dispersion
-            npred *= nedisp(srcDir, srcEng, srcTime, *pnt, events->ebounds());
+            npred *= nedisp(srcDir, srcEng, srcTime, pnt, events->ebounds());
 
         } // endif: had energy dispersion
 
@@ -477,8 +469,8 @@ double GCTAResponse::npred(const GPhoton&      photon,
  * @param[in] obs Observation.
  * @param[in] ran Random number generator.
  *
- * @exception GCTAException::no_pointing
- *            No CTA pointing found in observation.
+ * @exception GCTAException::bad_observation_type
+ *            No CTA observation found.
  *
  * Simulates a CTA event using the response function from an incident photon.
  * If the event is not detected a NULL pointer is returned.
@@ -503,17 +495,14 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
     }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_MC);
-    }
+    const GCTAPointing& pnt = ctaobs->pointing();
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
 
     // Get radial offset and polar angles of true photon in camera [radians]
-    double theta = pnt->dir().dist(photon.dir());
+    double theta = pnt.dir().dist(photon.dir());
     double phi   = 0.0;  //TODO Implement Phi dependence
 
     // Compute effective area for photon
@@ -882,8 +871,6 @@ std::string GCTAResponse::print(const GChatter& chatter) const
  *
  * @exception GCTAException::bad_observation_type
  *            Specified observation is not a CTA observations.
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found.
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction.
  * @exception GCTAException::bad_model_type
@@ -936,10 +923,7 @@ double GCTAResponse::irf_radial(const GEvent&       event,
     }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_IRF_RADIAL);
-    }
+    const GCTAPointing& pnt = ctaobs->pointing();
 
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
@@ -964,8 +948,8 @@ double GCTAResponse::irf_radial(const GEvent&       event,
     const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
 
     // Determine angular distance between measured photon direction and model
     // centre [radians]
@@ -973,11 +957,11 @@ double GCTAResponse::irf_radial(const GEvent&       event,
 
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
-    double eta = pnt->dir().dist(dir->dir());
+    double eta = pnt.dir().dist(dir->dir());
 
     // Determine angular distance between model centre and pointing direction
     // [radians]
-    double lambda = centre.dist(pnt->dir());
+    double lambda = centre.dist(pnt.dir());
 
     // Compute azimuth angle of pointing in model system [radians]
     // Will be comprised in interval [0,pi]
@@ -1078,8 +1062,6 @@ double GCTAResponse::irf_radial(const GEvent&       event,
  *
  * @exception GCTAException::bad_observation_type
  *            Specified observation is not a CTA observations.
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found.
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction.
  * @exception GCTAException::bad_model_type
@@ -1121,10 +1103,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_IRF_ELLIPTICAL);
-    }
+    const GCTAPointing& pnt = ctaobs->pointing();
 
     // Get pointer on CTA instrument direction
     const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
@@ -1149,8 +1128,8 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
 
     // Determine angular distance between observed photon direction and model
     // centre and position angle of observed photon direction seen from the
@@ -1160,11 +1139,11 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
 
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
-    double eta = pnt->dir().dist(obsDir);
+    double eta = pnt.dir().dist(obsDir);
 
     // Determine angular distance between model centre and pointing direction
     // [radians]
-    double lambda = centre.dist(pnt->dir());
+    double lambda = centre.dist(pnt.dir());
 
     // Compute azimuth angle of pointing in model coordinate system [radians]
     // This azimuth angle is comprised in the interval [0,pi], and defines
@@ -1325,10 +1304,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
     if (!has_irf) {
 
         // Get pointer on CTA pointing
-        const GCTAPointing *pnt = ctaobs->pointing();
-        if (pnt == NULL) {
-            throw GCTAException::no_pointing(G_IRF_DIFFUSE);
-        }
+        const GCTAPointing& pnt = ctaobs->pointing();
 
         // Get pointer on CTA instrument direction
         const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
@@ -1352,12 +1328,12 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
         const GTime&   srcTime = source.time();
 
         // Get pointing direction zenith angle and azimuth [radians]
-        double zenith  = pnt->zenith();
-        double azimuth = pnt->azimuth();
+        double zenith  = pnt.zenith();
+        double azimuth = pnt.azimuth();
 
         // Determine angular distance between measured photon direction and
         // pointing direction [radians]
-        double eta = pnt->dir().dist(dir->dir());
+        double eta = pnt.dir().dist(dir->dir());
 
         // Get log10(E/TeV) of true and measured photon energies
         double srcLogEng = srcEng.log10TeV();
@@ -1512,10 +1488,7 @@ double GCTAResponse::npred_radial(const GSource& source,
     }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_NPRED_RADIAL);
-    }
+    const GCTAPointing& pnt = ctaobs->pointing();
 
     // Get pointer on CTA events list
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
@@ -1536,8 +1509,8 @@ double GCTAResponse::npred_radial(const GSource& source,
     const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
 
     // Get log10(E/TeV) of true photon energy
     double srcLogEng = srcEng.log10TeV();
@@ -1635,8 +1608,6 @@ double GCTAResponse::npred_radial(const GSource& source,
  *
  * @exception GCTAException::bad_observation_type
  *            Observation is not a CTA observation.
- * @exception GCTAException::no_pointing
- *            Pointing is not a CTA pointing.
  * @exception GException::no_list
  *            Observation contains no event list.
  * @exception GCTAException::bad_model_type
@@ -1694,10 +1665,7 @@ double GCTAResponse::npred_elliptical(const GSource& source,
     }
 
     // Get pointer on CTA pointing
-    const GCTAPointing *pnt = ctaobs->pointing();
-    if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_NPRED_ELLIPTICAL);
-    }
+    const GCTAPointing& pnt = ctaobs->pointing();
 
     // Get pointer on CTA events list
     const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
@@ -1718,8 +1686,8 @@ double GCTAResponse::npred_elliptical(const GSource& source,
     const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
-    double zenith  = pnt->zenith();
-    double azimuth = pnt->azimuth();
+    double zenith  = pnt.zenith();
+    double azimuth = pnt.azimuth();
 
     // Get log10(E/TeV) of true photon energy
     double srcLogEng = srcEng.log10TeV();
@@ -1901,10 +1869,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
         }
 
         // Get pointer on CTA pointing
-        const GCTAPointing *pnt = ctaobs->pointing();
-        if (pnt == NULL) {
-            throw GCTAException::no_pointing(G_IRF_DIFFUSE);
-        }
+        const GCTAPointing& pnt = ctaobs->pointing();
 
         // Get pointer on CTA events list
         const GCTAEventList* events =
@@ -1925,8 +1890,8 @@ double GCTAResponse::npred_diffuse(const GSource& source,
         const GTime&   srcTime = source.time();
 
         // Get pointing direction zenith angle and azimuth [radians]
-        double zenith  = pnt->zenith();
-        double azimuth = pnt->azimuth();
+        double zenith  = pnt.zenith();
+        double azimuth = pnt.azimuth();
 
         // Get log10(E/TeV) of true photon energy
         double srcLogEng = srcEng.log10TeV();

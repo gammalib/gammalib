@@ -46,19 +46,19 @@ public:
     virtual ~GCOMObservation(void);
 
     // Implement pure virtual methods
-    virtual void             clear(void);
-    virtual GCOMObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GCOMResponse*    response(void) const;
-    virtual GCOMPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const;
-    virtual double           ontime(void) const;
-    virtual double           livetime(void) const;
-    virtual double           deadc(const GTime& time) const;
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
+    virtual void                clear(void);
+    virtual GCOMObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GCOMResponse& response(void) const;
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    const GCOMPointing& pointing(void) const;
     void           load(const std::string& drename,
                         const std::string& drbname,
                         const std::string& drgname,

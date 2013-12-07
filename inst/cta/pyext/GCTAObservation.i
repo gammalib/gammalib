@@ -42,19 +42,19 @@ public:
     virtual ~GCTAObservation(void);
 
     // Implemented pure virtual base class methods
-    virtual void             clear(void);
-    virtual GCTAObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GCTAResponse*    response(void) const;
-    virtual GCTAPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const;
-    virtual double           ontime(void) const;
-    virtual double           livetime(void) const;
-    virtual double           deadc(const GTime& time) const;
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
+    virtual void                clear(void);
+    virtual GCTAObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GCTAResponse& response(void) const;
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    const GCTAPointing& pointing(void) const;
     void        load_unbinned(const std::string& filename);
     void        load_binned(const std::string& filename);
     void        save(const std::string& filename, bool clobber) const;

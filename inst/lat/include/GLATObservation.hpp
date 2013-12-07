@@ -57,29 +57,29 @@ public:
     GLATObservation& operator= (const GLATObservation& obs);
 
     // Implemented pure virtual base class methods
-    virtual void             clear(void);
-    virtual GLATObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GLATResponse*    response(void) const;
-    virtual GLATPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const;
-    virtual double           ontime(void) const { return 0.0; }
-    virtual double           livetime(void) const { return 0.0; }
-    virtual double           deadc(const GTime& time) const { return 0.0; }
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
-    virtual std::string      print(const GChatter& chatter = NORMAL) const;
+    virtual void                clear(void);
+    virtual GLATObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GLATResponse& response(void) const;
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const { return 0.0; }
+    virtual double              livetime(void) const { return 0.0; }
+    virtual double              deadc(const GTime& time) const { return 0.0; }
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
+    virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                     load_unbinned(const std::string& ft1name,
-                                           const std::string& ft2name,
-                                           const std::string& ltcube_name);
-    void                     load_binned(const std::string& cntmap_name,
-                                         const std::string& expmap_name,
-                                         const std::string& ltcube_name);
-    void                     response(const std::string& irfname,
-                                      std::string caldb = "");    
-    GLATLtCube*              ltcube(void) const;
+    const GLATPointing& pointing(void) const;
+    void                load_unbinned(const std::string& ft1name,
+                                      const std::string& ft2name,
+                                      const std::string& ltcube_name);
+    void                load_binned(const std::string& cntmap_name,
+                                    const std::string& expmap_name,
+                                    const std::string& ltcube_name);
+    void                response(const std::string& irfname,
+                                 std::string caldb = "");    
+    GLATLtCube*         ltcube(void) const;
 
 protected:
     // Protected methods
@@ -97,5 +97,49 @@ protected:
     GLATPointing* m_pointing;     //!< Pointer to pointing direction
     GLATLtCube*   m_ltcube;       //!< Pointer to lifetime cube
 };
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to LAT response function
+ ***************************************************************************/
+inline
+const GLATResponse& GLATObservation::response(void) const
+{
+    // Return response pointer
+    return *m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to LAT pointing direction
+ ***************************************************************************/
+inline
+const GLATPointing& GLATObservation::pointing(void) const
+{
+    // Return response pointer
+    return *m_pointing;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns pointer to LAT livetime cube
+ ***************************************************************************/
+inline
+GLATLtCube* GLATObservation::ltcube(void) const
+{
+    // Return livetime cube pointer
+    return m_ltcube;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns instrument name
+ ***************************************************************************/
+inline
+std::string GLATObservation::instrument(void) const
+{
+    // Return instument name
+    return ("LAT");
+}
 
 #endif /* GLATOBSERVATION_HPP */

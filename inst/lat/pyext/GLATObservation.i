@@ -42,28 +42,28 @@ public:
     virtual ~GLATObservation();
 
     // Implemented pure virtual base class methods
-    virtual void             clear(void);
-    virtual GLATObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GLATResponse*    response(void) const;
-    virtual GLATPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const;
-    virtual double           ontime(void) const;
-    virtual double           livetime(void) const;
-    virtual double           deadc(const GTime& time) const;
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
+    virtual void                clear(void);
+    virtual GLATObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GLATResponse& response(void) const;
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    void                     load_unbinned(const std::string& ft1name,
-                                           const std::string& ft2name,
-                                           const std::string& ltcube_name);
-    void                     load_binned(const std::string& cntmap_name,
-                                         const std::string& expmap_name,
-                                         const std::string& ltcube_name);
-    void                     response(const std::string& irfname,
-                                      std::string caldb = "");    
-    GLATLtCube*              ltcube(void) const;
+    const GLATPointing& pointing(void) const;
+    void                load_unbinned(const std::string& ft1name,
+                                      const std::string& ft2name,
+                                      const std::string& ltcube_name);
+    void                load_binned(const std::string& cntmap_name,
+                                    const std::string& expmap_name,
+                                    const std::string& ltcube_name);
+    void                response(const std::string& irfname,
+                                 std::string caldb = "");    
+    GLATLtCube*         ltcube(void) const;
 };
 
 

@@ -298,8 +298,6 @@ int GLATMeanPsf::size(void) const
  * @param[in] dir Source location.
  * @param[in] obs LAT observation.
  *
- * @exception GException::no_response
- *            Response has not been defined.
  * @exception GLATException::no_ltcube
  *            Livetime cube has not been defined.
  *
@@ -316,9 +314,7 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     m_energy.clear();
 
     // Get pointers on response, livetime cube and energy boundaries
-    GLATResponse* rsp = obs.response();
-    if (rsp == NULL)
-        throw GException::no_response(G_SET);
+    const GLATResponse& rsp = obs.response();
 
     // Get pointer on livetime cube
     GLATLtCube* ltcube = obs.ltcube();
@@ -336,9 +332,9 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     // set the costhetamin parameter of Aeff to m_theta_max. Store also the
     // original values in a vector for later restoration.
     std::vector<double> save_costhetamin;
-    for (int i = 0; i < rsp->size(); ++i) {
-        save_costhetamin.push_back(rsp->aeff(i)->costhetamin());
-        rsp->aeff(i)->costhetamin(cos(m_theta_max*gammalib::deg2rad));
+    for (int i = 0; i < rsp.size(); ++i) {
+        save_costhetamin.push_back(rsp.aeff(i)->costhetamin());
+        rsp.aeff(i)->costhetamin(cos(m_theta_max*gammalib::deg2rad));
     }
     
     // Allocate room for arrays
@@ -362,8 +358,9 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
 
         // Compute exposure by looping over the responses
         double exposure = 0.0;
-        for (int i = 0; i < rsp->size(); ++i)
-            exposure += (*ltcube)(dir, energy[ieng], *rsp->aeff(i));
+        for (int i = 0; i < rsp.size(); ++i) {
+            exposure += (*ltcube)(dir, energy[ieng], *rsp.aeff(i));
+        }
 
         // Set exposure
         m_exposure.push_back(exposure);
@@ -373,9 +370,9 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
 
             // Compute point spread function by looping over the responses
             double psf = 0.0;
-            for (int i = 0; i < rsp->size(); ++i)
+            for (int i = 0; i < rsp.size(); ++i)
                 psf += (*ltcube)(dir, energy[ieng], m_offset[ioffset],
-                                 *rsp->psf(i), *rsp->aeff(i));
+                                 *rsp.psf(i), *rsp.aeff(i));
 
             // Normalize PSF by exposure and clip when exposure drops to 0
             psf = (exposure > 0.0) ? psf/exposure : 0.0;
@@ -387,8 +384,9 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     } // endfor: looped over energies
 
     // Restore initial Aeff zenith angle restriction
-    for (int i = 0; i < rsp->size(); ++i)
-        rsp->aeff(i)->costhetamin(save_costhetamin[i]);
+    for (int i = 0; i < rsp.size(); ++i) {
+        rsp.aeff(i)->costhetamin(save_costhetamin[i]);
+    }
 
     // Compute map corrections
     set_map_corrections(obs);
