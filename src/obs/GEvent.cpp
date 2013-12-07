@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GEvent.cpp  -  Event abstract base class                 *
+ *                   GEvent.cpp - Abstract event base class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEvent.cpp
- * @brief GEvent abstract base class implementation.
+ * @brief Abstract event base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -100,8 +100,9 @@ GEvent::~GEvent(void)
  * @brief Assignment operator
  *
  * @param[in] event Event.
+ * @return Event.
  ***************************************************************************/
-GEvent& GEvent::operator= (const GEvent& event)
+GEvent& GEvent::operator=(const GEvent& event)
 {
     // Execute only if object is not identical
     if (this != &event) {

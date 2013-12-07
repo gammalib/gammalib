@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GEventAtom.hpp - Event atom abstract base class           *
+ *               GEventAtom.hpp - Abstract event atom base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEventAtom.hpp
- * @brief GEventAtom abstract base class interface definition.
+ * @brief Abstract event atom base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -71,22 +71,22 @@ public:
     virtual ~GEventAtom(void);
 
     // Operators
-    virtual GEventAtom& operator= (const GEventAtom& atom);
+    virtual GEventAtom& operator=(const GEventAtom& atom);
 
     // Pure virtual methods
     virtual void            clear(void) = 0;
     virtual GEvent*         clone(void) const = 0;
-    virtual double          size(void) const { return 1.0; }
+    virtual double          size(void) const;
     virtual const GInstDir& dir(void) const = 0;
     virtual const GEnergy&  energy(void) const = 0;
     virtual const GTime&    time(void) const = 0;
-    virtual double          counts(void) const { return 1.0; }
-    virtual double          error(void) const { return 0.0; }
+    virtual double          counts(void) const;
+    virtual double          error(void) const;
     virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
-    bool isatom(void) const { return true; }
-    bool isbin(void) const { return false; }
+    bool isatom(void) const;
+    bool isbin(void) const;
 
 protected:
     // Protected methods
@@ -94,5 +94,70 @@ protected:
     void copy_members(const GEventAtom& atom);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Return size of an event atom
+ *
+ * @return Event size, fixed to 1.0 for an event atom.
+ *
+ * Returns the size of an event atom. The size is only useful for event bins,
+ * for which it is defined as the quantity that needs to be multiplied by the
+ * event probability to give the predicted number of events in a bin. For
+ * event atoms, the size is fixed to 1.0.
+ ***************************************************************************/
+inline
+double GEventAtom::size(void) const
+{
+    return (1.0);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of counts in event atom
+ *
+ * @return Number of counts, fixed to 1.0 for an event atom.
+ ***************************************************************************/
+inline
+double GEventAtom::counts(void) const
+{
+    return (1.0);
+}
+
+
+/***********************************************************************//**
+ * @brief Return error in number of counts in event atom
+ *
+ * @return Error in number of counts, fixed to 0.0 for an event atom.
+ ***************************************************************************/
+inline
+double GEventAtom::error(void) const
+{
+    return (0.0);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if event is an atom
+ *
+ * @return True.
+ ***************************************************************************/
+inline
+bool GEventAtom::isatom(void) const
+{
+    return (true);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if event is a bin
+ *
+ * @return False.
+ ***************************************************************************/
+inline
+bool GEventAtom::isbin(void) const
+{
+    return (false);
+}
 
 #endif /* GEVENTATOM_HPP */
