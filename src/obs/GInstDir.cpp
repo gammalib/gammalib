@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GInstDir.cpp  -  Instrument direction class               *
+ *          GInstDir.cpp - Abstract instrument direction base class        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -100,8 +100,9 @@ GInstDir::~GInstDir(void)
  * @brief Assignment operator
  *
  * @param[in] dir Instrument direction.
+ * @return Instrument direction.
  ***************************************************************************/
-GInstDir& GInstDir::operator= (const GInstDir& dir)
+GInstDir& GInstDir::operator=(const GInstDir& dir)
 {
     // Execute only if object is not identical
     if (this != &dir) {

@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.hpp  -  Abstract observation base class          *
+ *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -42,7 +42,7 @@
 /***********************************************************************//**
  * @class GObservation
  *
- * @brief Abstract interface for the observation classes
+ * @brief Abstract observation base class
  *
  * This class provides an abstract interface for an observation. The
  * observation collects information about the instrument, holds the measured
@@ -66,7 +66,7 @@ public:
     virtual ~GObservation(void);
 
     // Operators
-    virtual GObservation& operator= (const GObservation& obs);
+    virtual GObservation& operator=(const GObservation& obs);
 
     // Pure virtual methods
     virtual void          clear(void) = 0;
@@ -84,34 +84,33 @@ public:
 
     // Virtual methods
     virtual double        model(const GModels& models,
-                                const GEvent& event,
-                                GVector* gradient = NULL) const;
+                                const GEvent&  event,
+                                GVector*       gradient = NULL) const;
     virtual double        npred(const GModels& models,
-                                GVector* gradient = NULL) const;
+                                GVector*       gradient = NULL) const;
 
     // Implemented methods
     void                  name(const std::string& name);
     void                  id(const std::string& id);
-    void                  events(const GEvents* events);
+    void                  events(const GEvents& events);
     void                  statistics(const std::string& statistics);
-    const std::string&    name(void) const { return m_name; }
-    const std::string&    id(void) const { return m_id; }
+    const std::string&    name(void) const;
+    const std::string&    id(void) const;
     const GEvents*        events(void) const;
-    const std::string&    statistics(void) const { return m_statistics; }
+    const std::string&    statistics(void) const;
 
     // Other methods
     virtual double model_grad(const GModel& model,
                               const GEvent& event,
-                              const int& ipar) const;
+                              const int&    ipar) const;
     virtual double npred_grad(const GModel& model,
-                              const int& ipar) const;
+                              const int&    ipar) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GObservation& obs);
     void free_members(void);
-
 
     // Model gradient kernel classes
     class model_func : public GFunction {
@@ -172,7 +171,7 @@ protected:
                    int                 ipar) :
                    m_parent(parent),
                    m_model(&model),
-                   m_ipar(ipar) { return; }
+                   m_ipar(ipar) { }
         double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
@@ -181,10 +180,91 @@ protected:
     };
 
     // Protected data area
-    std::string m_name;         //!< Name of observation
-    std::string m_id;           //!< Observation identifier
-    std::string m_statistics;   //!< Optimizer statistics (default=poisson)
-    GEvents*    m_events;       //!< Pointer to event container
+    std::string m_name;        //!< Observation name
+    std::string m_id;          //!< Observation identifier
+    std::string m_statistics;  //!< Optimizer statistics (default=Poisson)
+    GEvents*    m_events;      //!< Pointer to event container
 };
+
+
+/***********************************************************************//**
+ * @brief Set observation name
+ *
+ * @param[in] name Observation name.
+ *
+ * Set name of the observation.
+ ***************************************************************************/
+inline
+void GObservation::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set observation identifier
+ *
+ * @param[in] id Observation identifier.
+ *
+ * Set identifier of the observation.
+ ***************************************************************************/
+inline
+void GObservation::id(const std::string& id)
+{
+    m_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set optimizer statistics
+ *
+ * @param[in] statistics Optimizer statistics.
+ *
+ * Set optimizer statistics for the observation.
+ ***************************************************************************/
+inline
+void GObservation::statistics(const std::string& statistics)
+{
+    m_statistics = statistics;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation name
+ *
+ * @return Observation name.
+ ***************************************************************************/
+inline
+const std::string& GObservation::name(void) const
+{
+    return (m_name);
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation identifier
+ *
+ * @return Observation identifier.
+ ***************************************************************************/
+inline
+const std::string& GObservation::id(void) const
+{
+    return (m_id);
+}
+
+
+/***********************************************************************//**
+ * @brief Return optimizer statistics
+ *
+ * @return Optimizer statistics.
+ ***************************************************************************/
+inline
+const std::string& GObservation::statistics(void) const
+{
+    return (m_statistics);
+}
 
 #endif /* GOBSERVATION_HPP */

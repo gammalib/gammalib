@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GInstDir.i - Abstract instrument direction base class          *
+ *           GInstDir.i - Abstract instrument direction base class         *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GInstDir.i
- * @brief GInstDir class python interface
+ * @brief Abstract instrument direction base class definition
  * @author Juergen Knoedlseder
  */
 %{

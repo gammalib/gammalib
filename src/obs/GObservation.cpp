@@ -125,10 +125,11 @@ GObservation::~GObservation(void)
  * @brief Assignment operator
  *
  * @param[in] obs Observation.
+ * @return Observation.
  *
  * Assign observation.
  ***************************************************************************/
-GObservation& GObservation::operator= (const GObservation& obs)
+GObservation& GObservation::operator=(const GObservation& obs)
 {
     // Execute only if object is not identical
     if (this != &obs) {
@@ -309,77 +310,20 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
 
 /***********************************************************************//**
- * @brief Set observation name
- *
- * @param[in] name Observation name.
- *
- * Set name of the observation.
- ***************************************************************************/
-void GObservation::name(const std::string& name)
-{
-    // Set name
-    m_name = name;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set observation identifier
- *
- * @param[in] id Observation identifier.
- *
- * Set identifier of the observation.
- ***************************************************************************/
-void GObservation::id(const std::string& id)
-{
-    // Set identifier
-    m_id = id;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Set event container
  *
- * @param[in] events Event container pointer.
+ * @param[in] events Event container.
  *
  * Set the event container for this observation by cloning the container
- * specified in the argument. If NULL is passed to this method, any existing
- * events are cleared an no event container is attached.
+ * specified in the argument.
  ***************************************************************************/
-void GObservation::events(const GEvents* events)
+void GObservation::events(const GEvents& events)
 {
     // Remove an existing event container
     if (m_events != NULL) delete m_events;
 
-    // Signal event container as free
-    m_events = NULL;
-
-    // Set event container if the input pointer is valid
-    if (events != NULL) {
-        m_events = events->clone();
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set optimizer statistics
- *
- * @param[in] statistics Optimizer statistics.
- *
- * Set optimizer statistics for the observation.
- ***************************************************************************/
-void GObservation::statistics(const std::string& statistics)
-{
-    // Set statistics
-    m_statistics = statistics;
+    // Clone events
+    m_events = events.clone();
 
     // Return
     return;

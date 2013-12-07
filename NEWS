@@ -165,6 +165,10 @@ GNodeArray
   The node array class now derives from GContainer, and all usual container
   methods have been implemented.
 
+GObservation
+  The events() set method now takes a const reference instead of a const
+  pointer as argument.
+
 GObservations
   The observation is now passed as const reference in the append()
   method (was non-const before). The observation iterator has been

@@ -330,7 +330,7 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     obs.livetime(1600.0);
     obs.deadc(1600.0/1800.0);
     obs.response(cta_irf, cta_caldb);
-    obs.events(&cube);
+    obs.events(cube);
     obs.pointing(pnt);
 
     // Load model for IRF computation
@@ -411,7 +411,7 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     obs.livetime(1600.0);
     obs.deadc(1600.0/1800.0);
     obs.response(cta_irf, cta_caldb);
-    obs.events(&events);
+    obs.events(events);
     obs.pointing(pnt);
 
     // Load models for Npred computation
@@ -492,7 +492,7 @@ void TestGCTAModelBackground::test_modelbg_npred(void)
     obs.livetime(1800.0);
     obs.deadc(1.0);
     obs.response(cta_irf, cta_caldb);
-    obs.events(&events);
+    obs.events(events);
     obs.pointing(pnt);
 
     // Perform Npred computation

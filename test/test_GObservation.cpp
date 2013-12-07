@@ -836,7 +836,7 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
         ob.id(gammalib::str(i));
 
         // Add events to the observation
-        ob.events(events);
+        ob.events(*events);
         ob.ontime(tmax.secs()-tmin.secs());
         obs.append(ob);
 

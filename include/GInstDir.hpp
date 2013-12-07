@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GInstDir.hpp - Instrument direction abstract base class        *
+ *          GInstDir.hpp - Abstract instrument direction base class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GInstDir.hpp
- * @brief GInstDir abstract base class definition.
+ * @brief Abstract instrument direction base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -35,7 +35,7 @@
 /***********************************************************************//**
  * @class GInstDir
  *
- * @brief Abstract interface for the instrument direction of an event.
+ * @brief Abstract instrument direction base class
  *
  * The instrument direction of an event is the equivalent of the sky
  * direction (implemented by GSkyDir) but in the instrument data space.
@@ -53,7 +53,7 @@ public:
     virtual ~GInstDir(void);
 
     // Operators
-    virtual GInstDir& operator= (const GInstDir& dir);
+    virtual GInstDir& operator=(const GInstDir& dir);
 
     // Pure virtual methods
     virtual void        clear(void) = 0;

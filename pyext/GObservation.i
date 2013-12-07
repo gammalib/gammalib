@@ -49,10 +49,9 @@
 /***********************************************************************//**
  * @class GObservation
  *
- * @brief Abstract Python interface for the observation classes
+ * @brief Abstract observation base class
  ***************************************************************************/
 class GObservation : public GBase {
-
 public:
     // Constructors and destructors
     GObservation(void);
@@ -68,18 +67,21 @@ public:
     virtual std::string   instrument(void) const = 0;
     virtual double        ontime(void) const = 0;
     virtual double        livetime(void) const = 0;
+    virtual double        deadc(const GTime& time) const = 0;
     virtual void          read(const GXmlElement& xml) = 0;
     virtual void          write(GXmlElement& xml) const = 0;
 
     // Virtual methods
-    virtual double        model(const GModels& models, const GEvent& event,
-                                GVector* gradient = NULL) const;
-    virtual double        npred(const GModels& models, GVector* gradient = NULL) const;
+    virtual double        model(const GModels& models,
+                                const GEvent&  event,
+                                GVector*       gradient = NULL) const;
+    virtual double        npred(const GModels& models,
+                                GVector*       gradient = NULL) const;
 
     // Implemented methods
     void                  name(const std::string& name);
     void                  id(const std::string& id);
-    void                  events(const GEvents* events);
+    void                  events(const GEvents& events);
     void                  statistics(const std::string& statistics);
     const std::string&    name(void) const;
     const std::string&    id(void) const;
@@ -87,8 +89,11 @@ public:
     const std::string&    statistics(void) const;
 
     // Other methods
-    virtual double model_grad(const GModel& model, const GEvent& event, int ipar) const;
-    virtual double npred_grad(const GModel& model, int ipar) const;
+    virtual double model_grad(const GModel& model,
+                              const GEvent& event,
+                              const int&    ipar) const;
+    virtual double npred_grad(const GModel& model,
+                              const int&    ipar) const;
 };
 
 
