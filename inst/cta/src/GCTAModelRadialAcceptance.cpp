@@ -300,10 +300,20 @@ GCTAModelRadialAcceptance* GCTAModelRadialAcceptance::clone(void) const
 double GCTAModelRadialAcceptance::eval(const GEvent& event,
                                        const GObservation& obs) const
 {
-    // Extract CTA pointing direction
-    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL) {
+        std::string msg = "Specified observation is not a CTA observation.\n" +
+                          obs.print();
+        throw GException::invalid_argument(G_EVAL, msg);
+    }
+
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing();
     if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_EVAL);
+        std::string msg = "No CTA pointing found in observation.\n" +
+                          obs.print();
+        throw GException::invalid_argument(G_EVAL, msg);
     }
 
     // Get instrument direction
@@ -359,10 +369,20 @@ double GCTAModelRadialAcceptance::eval(const GEvent& event,
 double GCTAModelRadialAcceptance::eval_gradients(const GEvent& event,
                                                  const GObservation& obs) const
 {
-    // Extract CTA pointing direction
-    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL) {
+        std::string msg = "Specified observation is not a CTA observation.\n" +
+                          obs.print();
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
+    }
+
+    // Get pointer on CTA pointing
+    const GCTAPointing *pnt = ctaobs->pointing();
     if (pnt == NULL) {
-        throw GCTAException::no_pointing(G_EVAL_GRADIENTS);
+        std::string msg = "No CTA pointing found in observation.\n" +
+                          obs.print();
+        throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
 
     // Get instrument direction
@@ -451,10 +471,20 @@ double GCTAModelRadialAcceptance::npred(const GEnergy&      obsEng,
             throw GException::no_list(G_NPRED);
         }
 
-        // Get CTA pointing direction
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+        // Get pointer on CTA observation
+        const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+        if (ctaobs == NULL) {
+            std::string msg = "Specified observation is not a CTA observation.\n" +
+                            obs.print();
+            throw GException::invalid_argument(G_NPRED, msg);
+        }
+
+        // Get pointer on CTA pointing
+        const GCTAPointing *pnt = ctaobs->pointing();
         if (pnt == NULL) {
-            throw GCTAException::no_pointing(G_NPRED);
+            std::string msg = "No CTA pointing found in observation.\n" +
+                            obs.print();
+            throw GException::invalid_argument(G_NPRED, msg);
         }
 
         // Get ROI radius in radians
@@ -519,10 +549,20 @@ GCTAEventList* GCTAModelRadialAcceptance::mc(const GObservation& obs,
     // Continue only if model is valid)
     if (valid_model()) {
 
-        // Extract CTA pointing direction at beginning of observation
-        GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+        // Get pointer on CTA observation
+        const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+        if (ctaobs == NULL) {
+            std::string msg = "Specified observation is not a CTA observation.\n" +
+                            obs.print();
+            throw GException::invalid_argument(G_MC, msg);
+        }
+
+        // Get pointer on CTA pointing
+        const GCTAPointing *pnt = ctaobs->pointing();
         if (pnt == NULL) {
-            throw GCTAException::no_pointing(G_MC);
+            std::string msg = "No CTA pointing found in observation.\n" +
+                            obs.print();
+            throw GException::invalid_argument(G_MC, msg);
         }
 
         // Convert CTA pointing direction in instrument system

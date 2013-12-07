@@ -29,7 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GPointing.hpp"
 #include "GSkyDir.hpp"
 
 
@@ -41,7 +40,7 @@
  * This class implements a COMPTEL pointing. For the time being it is assumed
  * that the pointing direction is time-independent.
  ***************************************************************************/
-class GCOMPointing : public GPointing {
+class GCOMPointing {
 
 public:
     // Constructors and destructors

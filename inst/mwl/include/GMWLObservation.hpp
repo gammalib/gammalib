@@ -32,7 +32,6 @@
 #include "GTime.hpp"
 #include "GModel.hpp"
 #include "GMWLResponse.hpp"
-#include "GMWLPointing.hpp"
 
 
 /***********************************************************************//**
@@ -59,18 +58,17 @@ public:
     virtual GMWLObservation& operator= (const GMWLObservation& obs);
 
     // Implement pure virtual methods
-    virtual void             clear(void);
-    virtual GMWLObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GMWLResponse*    response(void) const;
-    virtual GMWLPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const { return "MWL"; }
-    virtual double           ontime(void) const { return 1.0; }
-    virtual double           livetime(void) const { return 1.0; }
-    virtual double           deadc(const GTime& time) const { return 1.0; }
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
-    virtual std::string      print(const GChatter& chatter = NORMAL) const;
+    virtual void                clear(void);
+    virtual GMWLObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GMWLResponse* response(void) const;
+    virtual std::string         instrument(void) const { return "MWL"; }
+    virtual double              ontime(void) const { return 1.0; }
+    virtual double              livetime(void) const { return 1.0; }
+    virtual double              deadc(const GTime& time) const { return 1.0; }
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
+    virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     void        load(const std::string& filename);
@@ -90,12 +88,11 @@ protected:
     void free_members(void);
 
     // Protected members
-    std::string   m_instrument;   //!< Instrument name
-    std::string   m_filename;     //!< Filename
-    std::string   m_extno;        //!< Extension number
-    std::string   m_extname;      //!< Extension name
-    GMWLResponse* m_response;     //!< Pointer to response functions
-    GMWLPointing* m_pointing;     //!< Pointer to pointing direction
+    std::string  m_instrument;   //!< Instrument name
+    std::string  m_filename;     //!< Filename
+    std::string  m_extno;        //!< Extension number
+    std::string  m_extname;      //!< Extension name
+    GMWLResponse m_response;     //!< Response function
 };
 
 #endif /* GMWLOBSERVATION_HPP */

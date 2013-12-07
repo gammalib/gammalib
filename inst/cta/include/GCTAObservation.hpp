@@ -29,7 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GObservation.hpp"
-#include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
@@ -56,20 +55,20 @@ public:
     GCTAObservation& operator= (const GCTAObservation& obs);
 
     // Implemented pure virtual base class methods
-    virtual void             clear(void);
-    virtual GCTAObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GCTAResponse*    response(void) const;
-    virtual GCTAPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const { return m_instrument; }
-    virtual double           ontime(void) const { return m_ontime; }
-    virtual double           livetime(void) const { return m_livetime; }
-    virtual double           deadc(const GTime& time) const { return m_deadc; }
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
-    virtual std::string      print(const GChatter& chatter = NORMAL) const;
+    virtual void                clear(void);
+    virtual GCTAObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GCTAResponse* response(void) const;
+    virtual std::string         instrument(void) const { return m_instrument; }
+    virtual double              ontime(void) const { return m_ontime; }
+    virtual double              livetime(void) const { return m_livetime; }
+    virtual double              deadc(const GTime& time) const { return m_deadc; }
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
+    virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    const GCTAPointing* pointing(void) const;
     void        load_unbinned(const std::string& filename);
     void        load_binned(const std::string& filename);
     void        save(const std::string& filename, bool clobber) const;

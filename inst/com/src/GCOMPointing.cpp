@@ -50,7 +50,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCOMPointing::GCOMPointing(void) : GPointing()
+GCOMPointing::GCOMPointing(void)
 {
     // Initialise members
     init_members();
@@ -67,7 +67,7 @@ GCOMPointing::GCOMPointing(void) : GPointing()
  *
  * Construct COMPTEL pointing from sky direction.
  ***************************************************************************/
-GCOMPointing::GCOMPointing(const GSkyDir& dir) : GPointing()
+GCOMPointing::GCOMPointing(const GSkyDir& dir)
 {
     // Initialise members
     init_members();
@@ -85,7 +85,7 @@ GCOMPointing::GCOMPointing(const GSkyDir& dir) : GPointing()
  *
  * @param[in] pnt COMPTEL pointing.
  ***************************************************************************/
-GCOMPointing::GCOMPointing(const GCOMPointing& pnt) : GPointing(pnt)
+GCOMPointing::GCOMPointing(const GCOMPointing& pnt)
 {
     // Initialise members
     init_members();
@@ -122,13 +122,10 @@ GCOMPointing::~GCOMPointing(void)
  *
  * @param[in] pnt COMPTEL pointing.
  ***************************************************************************/
-GCOMPointing& GCOMPointing::operator= (const GCOMPointing& pnt)
+GCOMPointing& GCOMPointing::operator=(const GCOMPointing& pnt)
 {
     // Execute only if object is not identical
     if (this != &pnt) {
-
-        // Copy base class members
-        this->GPointing::operator=(pnt);
 
         // Free members
         free_members();
@@ -159,10 +156,8 @@ void GCOMPointing::clear(void)
 {
     // Free members
     free_members();
-    this->GPointing::free_members();
 
     // Initialise private members
-    this->GPointing::init_members();
     init_members();
 
     // Return
@@ -278,10 +273,3 @@ void GCOMPointing::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

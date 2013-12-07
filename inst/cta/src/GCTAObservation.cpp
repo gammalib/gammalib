@@ -271,7 +271,7 @@ void GCTAObservation::response(const std::string& irfname, std::string caldb)
 /***********************************************************************//**
  * @brief Returns pointer to CTA response function
  ***************************************************************************/
-GCTAResponse* GCTAObservation::response(void) const
+const GCTAResponse* GCTAObservation::response(void) const
 {
     // Return response pointer
     return m_response;
@@ -283,7 +283,7 @@ GCTAResponse* GCTAObservation::response(void) const
  *
  * Returns pointer to pointing direction.
  ***************************************************************************/
-GCTAPointing* GCTAObservation::pointing(void) const
+const GCTAPointing* GCTAObservation::pointing(void) const
 {
     // Return pointing pointer
     return m_pointing;

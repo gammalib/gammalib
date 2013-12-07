@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-6 December 2013
+7 December 2013
 
 
 1. Introduction
@@ -192,6 +192,10 @@ GPars
 
 GPhoton
   Add mcid argument to Photon constructor (defaults to -1).
+
+GPointing
+  Remove the class as no abstract pointing interface is needed
+  so far.
 
 GSkymap
   Rename xy2dir() to pix2dir(), dir2xy() to dir2pix(), xy2pix() to

@@ -561,7 +561,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
     if (valid_model()) {
 
         // Get response function
-        GResponse* rsp = obs.response();
+        const GResponse* rsp = obs.response();
         if (rsp == NULL) {
             throw GException::no_response(G_NPRED);
         }
@@ -1279,7 +1279,7 @@ double GModelSky::integrate_time(const GEvent& event,
     double value = 0.0;
 
     // Get response function
-    GResponse* rsp = obs.response();
+    const GResponse* rsp = obs.response();
     if (rsp == NULL) {
         throw GException::no_response(G_INTEGRATE_TIME);
     }
@@ -1353,7 +1353,7 @@ double GModelSky::integrate_energy(const GEvent& event,
     double value = 0.0;
 
     // Get response function
-    GResponse* rsp = obs.response();
+    const GResponse* rsp = obs.response();
     if (rsp == NULL) {
         throw GException::no_response(G_INTEGRATE_ENERGY);
     }
@@ -1427,7 +1427,7 @@ double GModelSky::integrate_dir(const GEvent&       event,
     if (m_spatial != NULL) {
 
         // Get response function
-        GResponse* rsp = obs.response();
+        const GResponse* rsp = obs.response();
         if (rsp == NULL) {
             throw GException::no_response(G_INTEGRATE_DIR);
         }

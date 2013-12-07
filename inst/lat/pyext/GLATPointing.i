@@ -35,7 +35,7 @@
  *
  * @brief Interface for the Fermi-LAT pointing
  ***************************************************************************/
-class GLATPointing : public GPointing {
+class GLATPointing {
 public:
     // Constructors and destructors
     GLATPointing(void);

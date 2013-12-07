@@ -36,7 +36,6 @@
 #include "GModelSky.hpp"
 #include "GObservation.hpp"
 #include "GResponse.hpp"
-#include "GPointing.hpp"
 #include "GInstDir.hpp"
 #include "GRoi.hpp"
 #include "GGti.hpp"

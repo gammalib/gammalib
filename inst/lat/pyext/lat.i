@@ -54,7 +54,6 @@
 %import(module="gammalib.obs") "GEventList.i";
 %import(module="gammalib.obs") "GEventCube.i";
 %import(module="gammalib.obs") "GResponse.i";
-%import(module="gammalib.obs") "GPointing.i";
 %import(module="gammalib.obs") "GInstDir.i";
 %import(module="gammalib.obs") "GRoi.i";
 

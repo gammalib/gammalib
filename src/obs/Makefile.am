@@ -27,7 +27,6 @@ sources = GEnergies.cpp \
           GEbounds.cpp \
           GResponse.cpp \
           GInstDir.cpp \
-          GPointing.cpp \
           GPhotons.cpp \
           GPhoton.cpp \
           GSource.cpp \

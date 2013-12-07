@@ -29,7 +29,6 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GPointing.hpp"
 #include "GSkyDir.hpp"
 #include "GTime.hpp"
 #include "GMatrix.hpp"
@@ -43,7 +42,7 @@
  * This class implements a CTA pointing. For the time being it is assumed
  * that the pointing direction is time-independent.
  ***************************************************************************/
-class GCTAPointing : public GPointing {
+class GCTAPointing {
 
 public:
     // Constructors and destructors

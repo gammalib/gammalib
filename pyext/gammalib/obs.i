@@ -67,7 +67,6 @@
 %include "GEventBin.i"
 %include "GInstDir.i"
 %include "GRoi.i"
-%include "GPointing.i"
 %include "GResponse.i"
 %include "GPhoton.i"
 %include "GPhotons.i"

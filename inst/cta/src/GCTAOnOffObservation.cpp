@@ -521,7 +521,7 @@ void GCTAOnOffObservation::compute_arf(const GCTAObservation& obs)
     
         // Get CTA response pointer. Throw an exception if no response is
         // found
-        GCTAResponse* response = obs.response();
+        const GCTAResponse* response = obs.response();
         if (response == NULL) {
             std::string msg =
                 "No response information has been found in CTA observation"
@@ -582,7 +582,7 @@ void GCTAOnOffObservation::compute_rmf(const GCTAObservation& obs,
     if (ntrue > 0 && nreco > 0) {
     
         // Get CTA response pointer
-        GCTAResponse* response = obs.response();
+        const GCTAResponse* response = obs.response();
         if (response == NULL) {
             std::string msg =
                 "No response information has been found in CTA observation"

@@ -496,8 +496,14 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
     // Initialise event
     GCTAEventAtom* event = NULL;
 
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL) {
+        throw GCTAException::bad_observation_type(G_MC);
+    }
+
     // Get pointer on CTA pointing
-    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
+    const GCTAPointing *pnt = ctaobs->pointing();
     if (pnt == NULL) {
         throw GCTAException::no_pointing(G_MC);
     }

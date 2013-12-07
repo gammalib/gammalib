@@ -171,7 +171,6 @@
 #include "GRoi.hpp"
 #include "GEbounds.hpp"
 #include "GInstDir.hpp"
-#include "GPointing.hpp"
 #include "GResponse.hpp"
 #include "GPhotons.hpp"
 #include "GPhoton.hpp"

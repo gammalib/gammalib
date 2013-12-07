@@ -50,7 +50,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAPointing::GCTAPointing(void) : GPointing()
+GCTAPointing::GCTAPointing(void)
 {
     // Initialise members
     init_members();
@@ -67,7 +67,7 @@ GCTAPointing::GCTAPointing(void) : GPointing()
  *
  * Construct CTA pointing from sky direction.
  ***************************************************************************/
-GCTAPointing::GCTAPointing(const GSkyDir& dir) : GPointing()
+GCTAPointing::GCTAPointing(const GSkyDir& dir)
 {
     // Initialise members
     init_members();
@@ -85,7 +85,7 @@ GCTAPointing::GCTAPointing(const GSkyDir& dir) : GPointing()
  *
  * @param[in] pnt CTA pointing.
  ***************************************************************************/
-GCTAPointing::GCTAPointing(const GCTAPointing& pnt) : GPointing(pnt)
+GCTAPointing::GCTAPointing(const GCTAPointing& pnt)
 {
     // Initialise members
     init_members();
@@ -127,9 +127,6 @@ GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
     // Execute only if object is not identical
     if (this != &pnt) {
 
-        // Copy base class members
-        this->GPointing::operator=(pnt);
-
         // Free members
         free_members();
 
@@ -159,10 +156,8 @@ void GCTAPointing::clear(void)
 {
     // Free members
     free_members();
-    this->GPointing::free_members();
 
     // Initialise private members
-    this->GPointing::init_members();
     init_members();
 
     // Return

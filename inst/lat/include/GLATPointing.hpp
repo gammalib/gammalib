@@ -28,7 +28,11 @@
 #define GLATPOINTING_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GPointing.hpp"
+#include <string>
+#include "GSkyDir.hpp"
+#include "GTypemaps.hpp"
+
+/* __ Forward declarations _______________________________________________ */
 
 
 /***********************************************************************//**
@@ -38,7 +42,7 @@
  *
  * The LAT pointing class contains information for a specific LAT pointing.
  ***************************************************************************/
-class GLATPointing : public GPointing {
+class GLATPointing {
 
 public:
     // Constructors and destructors

@@ -34,7 +34,7 @@
  *
  * @brief Interface for the COMPTEL pointing class.
  ***************************************************************************/
-class GCOMPointing : public GPointing {
+class GCOMPointing {
 public:
     // Constructors and destructors
     GCOMPointing(void);

@@ -110,7 +110,6 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GRoi.hpp \
                      GEbounds.hpp \
                      GInstDir.hpp \
-                     GPointing.hpp \
                      GResponse.hpp \
                      GPhotons.hpp \
                      GPhoton.hpp \

@@ -59,17 +59,16 @@ public:
     virtual ~GObservation(void);
 
     // Pure virtual methods
-    virtual void          clear(void) = 0;
-    virtual GObservation* clone(void) const = 0;
-    virtual void          response(const GResponse& rsp) = 0;
-    virtual GResponse*    response(void) const = 0;
-    virtual GPointing*    pointing(void) const = 0;
-    virtual std::string   instrument(void) const = 0;
-    virtual double        ontime(void) const = 0;
-    virtual double        livetime(void) const = 0;
-    virtual double        deadc(const GTime& time) const = 0;
-    virtual void          read(const GXmlElement& xml) = 0;
-    virtual void          write(GXmlElement& xml) const = 0;
+    virtual void             clear(void) = 0;
+    virtual GObservation*    clone(void) const = 0;
+    virtual void             response(const GResponse& rsp) = 0;
+    virtual const GResponse* response(void) const = 0;
+    virtual std::string      instrument(void) const = 0;
+    virtual double           ontime(void) const = 0;
+    virtual double           livetime(void) const = 0;
+    virtual double           deadc(const GTime& time) const = 0;
+    virtual void             read(const GXmlElement& xml) = 0;
+    virtual void             write(GXmlElement& xml) const = 0;
 
     // Virtual methods
     virtual double        model(const GModels& models,

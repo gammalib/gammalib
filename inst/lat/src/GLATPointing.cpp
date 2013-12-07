@@ -103,7 +103,7 @@ GLATPointing::~GLATPointing(void)
  *
  * @param[in] pnt Pointing.
  ***************************************************************************/
-GLATPointing& GLATPointing::operator= (const GLATPointing& pnt)
+GLATPointing& GLATPointing::operator=(const GLATPointing& pnt)
 {
     // Execute only if object is not identical
     if (this != &pnt) {
@@ -137,10 +137,8 @@ void GLATPointing::clear(void)
 {
     // Free members
     free_members();
-    this->GPointing::free_members();
 
     // Initialise private members
-    this->GPointing::init_members();
     init_members();
 
     // Return
@@ -227,10 +225,3 @@ void GLATPointing::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/
