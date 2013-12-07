@@ -339,7 +339,8 @@ void GMWLSpectrum::load(const std::string& filename, int extno)
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GMWLSpectrum::save(const std::string& filename, bool clobber) const
+void GMWLSpectrum::save(const std::string& filename,
+                        const bool& clobber) const
 {
     // Return
     return;

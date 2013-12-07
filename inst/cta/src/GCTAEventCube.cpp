@@ -268,19 +268,21 @@ int GCTAEventCube::dim(void) const
 /***********************************************************************//**
  * @brief Return number of bins in axis
  *
- * @param[in] axis Axis.
+ * @param[in] axis Axis [0,...,dim()-1]
+ * @return Number of bins in specified axis
  *
  * @exception GException::out_of_range
  *            Axis is out of range.
  *
- * Returns the number of bins along a given event cube axis.
+ * Returns the number of bins along a given event cube @p axis.
  ***************************************************************************/
-int GCTAEventCube::naxis(int axis) const
+int GCTAEventCube::naxis(const int& axis) const
 {
     // Optionally check if the axis is valid
     #if defined(G_RANGE_CHECK)
-    if (axis < 0 || axis >= dim())
-        throw GException::out_of_range(G_NAXIS, axis, 0, dim()-1);
+    if (axis < 0 || axis >= dim()) {
+        throw GException::out_of_range(G_NAXIS, "CTA event cube axis", axis, dim());
+    }
     #endif
 
     // Set result
@@ -337,7 +339,8 @@ void GCTAEventCube::load(const std::string& filename)
  *
  * Save the CTA event cube into FITS file.
  ***************************************************************************/
-void GCTAEventCube::save(const std::string& filename, bool clobber) const
+void GCTAEventCube::save(const std::string& filename,
+                         const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;

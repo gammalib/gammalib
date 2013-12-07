@@ -251,14 +251,14 @@ int GLATEventCube::dim(void) const
  * @exception GException::out_of_range
  *            Axis is out of range.
  *
- * Returns the number of bins along a given event cube axis.
+ * Returns the number of bins along a given event cube @p axis.
  ***************************************************************************/
-int GLATEventCube::naxis(int axis) const
+int GLATEventCube::naxis(const int& axis) const
 {
     // Optionally check if the axis is valid
     #if defined(G_RANGE_CHECK)
     if (axis < 0 || axis >= dim()) {
-        throw GException::out_of_range(G_NAXIS, axis, 0, dim()-1);
+        throw GException::out_of_range(G_NAXIS, "LAT event cube axis", axis, dim());
     }
     #endif
 
@@ -313,7 +313,8 @@ void GLATEventCube::load(const std::string& filename)
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GLATEventCube::save(const std::string& filename, bool clobber) const
+void GLATEventCube::save(const std::string& filename,
+                         const bool& clobber) const
 {
     // Return
     return;

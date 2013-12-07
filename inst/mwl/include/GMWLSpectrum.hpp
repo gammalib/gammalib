@@ -63,9 +63,10 @@ public:
     virtual GMWLSpectrum* clone(void) const;
     virtual int           size(void) const { return m_data.size(); }
     virtual int           dim(void) const { return 1; }
-    virtual int           naxis(int axis) const { return m_data.size(); }
+    virtual int           naxis(const int& axis) const { return m_data.size(); }
     virtual void          load(const std::string& filename);
-    virtual void          save(const std::string& filename, bool clobber = false) const;
+    virtual void          save(const std::string& filename,
+                               const bool& clobber = false) const;
     virtual void          read(const GFits& file);
     virtual void          write(GFits& file) const;
     virtual int           number(void) const;

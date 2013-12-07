@@ -267,7 +267,8 @@ void GCTAEventList::load(const std::string& filename)
  *
  * Write the CTA event list into FITS file.
  ***************************************************************************/
-void GCTAEventList::save(const std::string& filename, bool clobber) const
+void GCTAEventList::save(const std::string& filename,
+                         const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;

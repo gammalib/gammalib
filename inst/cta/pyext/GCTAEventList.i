@@ -45,14 +45,15 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GCTAEventList* clone(void) const;
-    virtual int            size(void) const { return m_events.size(); }
+    virtual int            size(void) const;
     virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           save(const std::string& filename,
+                                const bool& clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
-    virtual int            number(void) const { return m_events.size(); }
+    virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
-    virtual const GCTARoi& roi(void) const { return m_roi; }
+    virtual const GCTARoi& roi(void) const;
 
     // Implement other methods
     void                   append(const GCTAEventAtom& event);

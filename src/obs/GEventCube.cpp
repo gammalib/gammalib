@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GEventCube.cpp  -  Abstract event bin container class          *
+ *           GEventCube.cpp - Abstract event bin container class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2011 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventCube.cpp
  * @brief Abstract event bin container class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -99,6 +99,7 @@ GEventCube::~GEventCube(void)
  * @brief Assignment operator
  *
  * @param[in] cube Event cube.
+ * @return Event cube.
  ***************************************************************************/
 GEventCube& GEventCube::operator=(const GEventCube& cube)
 {
@@ -166,10 +167,3 @@ void GEventCube::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

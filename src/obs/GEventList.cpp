@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GEventList.cpp  -  Abstract event atom container class         *
+ *           GEventList.cpp - Abstract event atom container class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventList.cpp
  * @brief Abstract event atom container class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -99,6 +99,7 @@ GEventList::~GEventList(void)
  * @brief Assignment operator
  *
  * @param[in] list Event list.
+ * @return Event list.
  ***************************************************************************/
 GEventList& GEventList::operator=(const GEventList& list)
 {
@@ -166,10 +167,3 @@ void GEventList::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

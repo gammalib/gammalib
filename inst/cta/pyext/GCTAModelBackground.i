@@ -36,8 +36,7 @@
 * @brief CTA background model class
 ***************************************************************************/
 class GCTAModelBackground : public GModelData {
-    
-public:
+    public:
     // Constructors and destructors
     GCTAModelBackground(void);
     explicit GCTAModelBackground(const GXmlElement& xml);
@@ -68,7 +67,7 @@ public:
 };
 
 /***********************************************************************//**
-* @brief GCTAModelSpatial class extension
+* @brief GCTAModelBackground class extension
 ***************************************************************************/
-%extend GCTAModelSpatial {
+%extend GCTAModelBackground {
 };

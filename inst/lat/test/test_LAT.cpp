@@ -476,10 +476,10 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
         test_try_failure(e);
     }
 
-    // Loop over all events using iterator
+    // Loop over all events
+    const GEvents *ptr = run.events();
     int num = 0;
-    GLATEventList *ptr = static_cast<GLATEventList*>(const_cast<GEvents*>(run.events()));
-    for (GLATEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
+    for (int i = 0; i < ptr->size(); ++i) {
         num++;
     }
     test_value(num, nevents, 1.0e-20, "Test event iterator");
@@ -568,12 +568,12 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
     }
 
     // Loop over all events using iterator
+    const GEvents* events = run.events();
     int num = 0;
     int sum = 0;
-    GLATEventCube *ptr = static_cast<GLATEventCube*>(const_cast<GEvents*>(run.events()));
-    for (GLATEventCube::iterator event = ptr->begin(); event != ptr->end(); ++event) {
+    for (int i = 0; i < events->size(); ++i) {
         num++;
-        sum += (int)event->counts();
+        sum += (int)((*events)[i]->counts());
     }
     test_value(sum, nevents, 1.0e-20, "Test event iterator (counts)");
     test_value(num, nsize, 1.0e-20, "Test event iterator (bins)");

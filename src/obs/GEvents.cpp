@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GEvents.cpp  -  Abstract Event container class             *
+ *               GEvents.hpp - Abstract event container class              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -99,6 +99,7 @@ GEvents::~GEvents(void)
  * @brief Assignment operator
  *
  * @param[in] events Event container.
+ * @return Event container.
  ***************************************************************************/
 GEvents& GEvents::operator=(const GEvents& events)
 {
@@ -128,38 +129,6 @@ GEvents& GEvents::operator=(const GEvents& events)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Get iterator for first event
- ***************************************************************************/
-GEvents::iterator GEvents::begin(void)
-{
-    // Allocate iterator object
-    GEvents::iterator iter(this);
-
-    // Set iterator for first event
-    iter.m_index = 0;
-
-    // Return
-    return iter;
-}
-
-
-/***********************************************************************//**
- * @brief Get iterator after last event
- ***************************************************************************/
-GEvents::iterator GEvents::end(void)
-{
-    // Allocate iterator object
-    GEvents::iterator iter(this);
-
-    // Set iterator beyond last event
-    iter.m_index = iter.m_num;
-
-    // Return
-    return iter;
-}
-
-
-/***********************************************************************//**
  * @brief Set energy boundaries
  *
  * @param[in] ebounds Energy boundaries.
@@ -169,7 +138,7 @@ void GEvents::ebounds(const GEbounds& ebounds)
     // Store energy boundaries
     m_ebounds = ebounds;
 
-    // Call (optional) energy boundary update method
+    // Call (abstract) energy boundary update method
     set_energies();
 
     // Return
@@ -187,63 +156,11 @@ void GEvents::gti(const GGti& gti)
     // Store Good Time Intervals
     m_gti = gti;
 
-    // Call (optional) good time interval update method
+    // Call (abstract) good time interval update method
     set_times();
 
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                          GEvents event iterator                         =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Iterator Constructor
- ***************************************************************************/
-GEvents::iterator::iterator()
-{
-    // Initialise iterator
-    m_num   = 0;
-    m_index = 0;
-    m_base  = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator Constructor
- ***************************************************************************/
-GEvents::iterator::iterator(GEvents *events)
-{
-    // Initialise iterator
-    m_num   = (events != NULL) ? events->size() : 0;
-    m_index = 0;
-    m_base  = events;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Iterator postfix operator
- ***************************************************************************/
-GEvents::iterator GEvents::iterator::operator++(int junk)
-{
-    // Save actual iterator
-    GEvents::iterator actual = *this;
-
-    // Increment using prefix iterator
-    ++(*this);
-
-    // Return actual iterator
-    return actual;
 }
 
 

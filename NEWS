@@ -35,6 +35,15 @@ GEbounds
   and write() methods now use FITS references instead of pointers. The
   clobber argument in the save() method is passed as const reference.
 
+GEvents
+GEventList
+  The clobber argument of the save() method is now passed as const
+  reference.
+
+GEventCube
+  The clobber argument of the save() method and the axis argument of the
+  naxis() method are now passed as const references.
+
 GFits
   The GFits class now derives from GContainer and implements all generic
   container class methods (at(), size(), isempty(), set(), append(),

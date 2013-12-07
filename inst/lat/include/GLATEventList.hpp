@@ -61,7 +61,8 @@ public:
     virtual GLATEventList* clone(void) const;
     virtual int            size(void) const { return m_events.size(); }
     virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           save(const std::string& filename,
+                                const bool& clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const { return m_events.size(); }

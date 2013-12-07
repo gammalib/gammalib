@@ -254,7 +254,8 @@ void GLATEventList::load(const std::string& filename)
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GLATEventList::save(const std::string& filename, bool clobber) const
+void GLATEventList::save(const std::string& filename,
+                         const bool& clobber) const
 {
     // Return
     return;
