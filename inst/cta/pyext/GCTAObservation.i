@@ -38,6 +38,7 @@ class GCTAObservation : public GObservation {
 public:
     // Constructors and destructors
     GCTAObservation(void);
+    explicit GCTAObservation(const std::string& instrument);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -54,23 +55,23 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
+    void                load_unbinned(const std::string& filename);
+    void                load_binned(const std::string& filename);
+    void                save(const std::string& filename, const bool& clobber) const;
+    void                response(const std::string& irfname, std::string caldb = "");
+    void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
-    void        load_unbinned(const std::string& filename);
-    void        load_binned(const std::string& filename);
-    void        save(const std::string& filename, bool clobber) const;
-    void        response(const std::string& irfname, std::string caldb = "");
-    void        pointing(const GCTAPointing& pointing);
-    void        obs_id(const int& id);
-    void        ra_obj(const double& ra);
-    void        dec_obj(const double& dec);
-    void        ontime(const double& ontime);
-    void        livetime(const double& livetime);
-    void        deadc(const double& deadc);
-    int         obs_id(void) const;
-    double      ra_obj(void) const;
-    double      dec_obj(void) const;
-    std::string eventfile(void) const;
-    void        eventfile(const std::string& filename);
+    void                obs_id(const int& id);
+    const int&          obs_id(void) const;
+    void                ra_obj(const double& ra);
+    const double&       ra_obj(void) const;
+    void                dec_obj(const double& dec);
+    const double&       dec_obj(void) const;
+    void                ontime(const double& ontime);
+    void                livetime(const double& livetime);
+    void                deadc(const double& deadc);
+    void                eventfile(const std::string& filename);
+    const std::string&  eventfile(void) const;
 };
 
 

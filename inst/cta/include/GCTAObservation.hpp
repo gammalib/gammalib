@@ -47,7 +47,7 @@ class GCTAObservation : public GObservation {
 public:
     // Constructors and destructors
     GCTAObservation(void);
-    GCTAObservation(const std::string& instrument);
+    explicit GCTAObservation(const std::string& instrument);
     GCTAObservation(const GCTAObservation& obs);
     virtual ~GCTAObservation(void);
 
@@ -68,23 +68,23 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
+    void                load_unbinned(const std::string& filename);
+    void                load_binned(const std::string& filename);
+    void                save(const std::string& filename, const bool& clobber) const;
+    void                response(const std::string& irfname, std::string caldb = "");
+    void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
-    void        load_unbinned(const std::string& filename);
-    void        load_binned(const std::string& filename);
-    void        save(const std::string& filename, bool clobber) const;
-    void        response(const std::string& irfname, std::string caldb = "");
-    void        pointing(const GCTAPointing& pointing);
-    void        obs_id(const int& id) { m_obs_id=id; }
-    void        ra_obj(const double& ra) { m_ra_obj=ra; }
-    void        dec_obj(const double& dec) { m_dec_obj=dec; }
-    void        ontime(const double& ontime) { m_ontime=ontime; }
-    void        livetime(const double& livetime) { m_livetime=livetime; }
-    void        deadc(const double& deadc) { m_deadc=deadc; }
-    int         obs_id(void) const { return m_obs_id; }
-    double      ra_obj(void) const { return m_ra_obj; }
-    double      dec_obj(void) const { return m_dec_obj; }
-    std::string eventfile(void) const { return m_eventfile; }
-    void        eventfile(const std::string& filename) { m_eventfile = filename; }
+    void                obs_id(const int& id);
+    const int&          obs_id(void) const;
+    void                ra_obj(const double& ra);
+    const double&       ra_obj(void) const;
+    void                dec_obj(const double& dec);
+    const double&       dec_obj(void) const;
+    void                ontime(const double& ontime);
+    void                livetime(const double& livetime);
+    void                deadc(const double& deadc);
+    void                eventfile(const std::string& filename);
+    const std::string&  eventfile(void) const;
 
 protected:
     // Protected methods
@@ -95,16 +95,16 @@ protected:
     void write_attributes(GFitsHDU* hdu) const;
 
     // Protected members
-    std::string   m_instrument;   //!< Instrument name
-    std::string   m_eventfile;    //!< Event filename
-    GCTAResponse* m_response;     //!< Pointer to instrument response functions
-    GCTAPointing* m_pointing;     //!< Pointer to pointing direction
-    int           m_obs_id;       //!< Observation ID
-    double        m_ontime;       //!< Ontime
-    double        m_livetime;     //!< Livetime
-    double        m_deadc;        //!< Deadtime correction
-    double        m_ra_obj;       //!< Right Ascension of object
-    double        m_dec_obj;      //!< Declination of object
+    std::string  m_instrument;   //!< Instrument name
+    std::string  m_eventfile;    //!< Event filename
+    GCTAResponse m_response;     //!< Instrument response functions
+    GCTAPointing m_pointing;     //!< Pointing direction
+    int          m_obs_id;       //!< Observation ID
+    double       m_ontime;       //!< Ontime
+    double       m_livetime;     //!< Livetime
+    double       m_deadc;        //!< Deadtime correction
+    double       m_ra_obj;       //!< Right Ascension of object
+    double       m_dec_obj;      //!< Declination of object
 };
 
 
@@ -114,8 +114,7 @@ protected:
 inline
 const GCTAResponse& GCTAObservation::response(void) const
 {
-    // Return response pointer
-    return *m_response;
+    return m_response;
 }
 
 
@@ -125,8 +124,159 @@ const GCTAResponse& GCTAObservation::response(void) const
 inline
 const GCTAPointing& GCTAObservation::pointing(void) const
 {
-    // Return pointing pointer
-    return *m_pointing;
+    return m_pointing;
+}
+
+
+/***********************************************************************//**
+ * @brief Set CTA pointing direction
+ *
+ * @param[in] pointing Pointing.
+ ***************************************************************************/
+inline
+void GCTAObservation::pointing(const GCTAPointing& pointing)
+{
+    m_pointing = pointing;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set CTA observation identifier
+ *
+ * @param[in] id Observation identifier.
+ ***************************************************************************/
+inline
+void GCTAObservation::obs_id(const int& id)
+{
+    m_obs_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return CTA observation identifier
+ *
+ * @return Observation identifier.
+ ***************************************************************************/
+inline
+const int& GCTAObservation::obs_id(void) const
+{
+    return m_obs_id;
+}
+
+
+/***********************************************************************//**
+ * @brief Set CTA object Right Ascension
+ *
+ * @param[in] ra Object Right Ascension.
+ ***************************************************************************/
+inline
+void GCTAObservation::ra_obj(const double& ra)
+{
+    m_ra_obj = ra;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return CTA object Right Ascension
+ *
+ * @return Object Right Ascension.
+ ***************************************************************************/
+inline
+const double& GCTAObservation::ra_obj(void) const
+{
+    return m_ra_obj;
+}
+
+
+/***********************************************************************//**
+ * @brief Set CTA object Declination
+ *
+ * @param[in] ra Object Declination.
+ ***************************************************************************/
+inline
+void GCTAObservation::dec_obj(const double& dec)
+{
+    m_dec_obj = dec;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return CTA object Declination
+ *
+ * @return Object Declination.
+ ***************************************************************************/
+inline
+const double& GCTAObservation::dec_obj(void) const
+{
+    return m_dec_obj;
+}
+
+
+/***********************************************************************//**
+ * @brief Set ontime
+ *
+ * @param[in] ontime Ontime.
+ ***************************************************************************/
+inline
+void GCTAObservation::ontime(const double& ontime)
+{
+    m_ontime = ontime;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set livetime
+ *
+ * @param[in] livetime Livetime.
+ ***************************************************************************/
+inline
+void GCTAObservation::livetime(const double& livetime)
+{
+    m_livetime = livetime;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set deadtime correction
+ *
+ * @param[in] deadc Deadtime correction.
+ ***************************************************************************/
+inline
+void GCTAObservation::deadc(const double& deadc)
+{
+    m_deadc = deadc;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set event file name
+ *
+ * @param[in] filename Event file name.
+ ***************************************************************************/
+inline
+void GCTAObservation::eventfile(const std::string& filename)
+{
+    m_eventfile = filename;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event file name
+ *
+ * @return Event file name.
+ ***************************************************************************/
+inline
+const std::string& GCTAObservation::eventfile(void) const
+{
+    return m_eventfile;
 }
 
 #endif /* GCTAOBSERVATION_HPP */

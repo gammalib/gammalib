@@ -229,14 +229,12 @@ void GCTAObservation::response(const GResponse& rsp)
 {
     // Get pointer on CTA response
     const GCTAResponse* ctarsp = dynamic_cast<const GCTAResponse*>(&rsp);
-    if (ctarsp == NULL)
+    if (ctarsp == NULL) {
         throw GCTAException::bad_response_type(G_RESPONSE);
+    }
 
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Clone response function
-    m_response = ctarsp->clone();
+    // Copy response function
+    m_response = *ctarsp;
 
     // Return
     return;
@@ -251,36 +249,14 @@ void GCTAObservation::response(const GResponse& rsp)
  ***************************************************************************/
 void GCTAObservation::response(const std::string& irfname, std::string caldb)
 {
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new CTA response function
-    m_response = new GCTAResponse;
+    // Clear response function
+    m_response.clear();
 
     // Set calibration database
-    m_response->caldb(caldb);
+    m_response.caldb(caldb);
 
     // Load instrument response function
-    m_response->load(irfname);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set CTA pointing direction
- *
- * @param[in] pointing Pointing.
- ***************************************************************************/
-void GCTAObservation::pointing(const GCTAPointing& pointing)
-{
-    // Free any existing pointing
-    if (m_pointing != NULL) delete m_pointing;
-    m_pointing = NULL;
-
-    // Clone pointing
-    m_pointing = pointing.clone();
+    m_response.load(irfname);
 
     // Return
     return;
@@ -325,12 +301,6 @@ void GCTAObservation::read(const GXmlElement& xml)
 {
     // Clear observation
     clear();
-
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new CTA response function
-    m_response = new GCTAResponse;
 
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
@@ -388,7 +358,7 @@ void GCTAObservation::read(const GXmlElement& xml)
             if (gammalib::strip_whitespace(filename).length() > 0) {
 
                 // Load effective area
-                m_response->load_aeff(filename);
+                m_response.load_aeff(filename);
 
                 // Optional attributes
                 double thetacut = 0.0;
@@ -414,7 +384,7 @@ void GCTAObservation::read(const GXmlElement& xml)
                 }
 
                 // If we have an ARF then set attributes
-                GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response->aeff()));
+                GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response.aeff()));
                 if (arf != NULL) {
                     arf->thetacut(thetacut);
                     arf->scale(scale);
@@ -422,7 +392,7 @@ void GCTAObservation::read(const GXmlElement& xml)
                 }
 
                 // If we have a performance table then set attributes
-                GCTAAeffPerfTable* perf = const_cast<GCTAAeffPerfTable*>(dynamic_cast<const GCTAAeffPerfTable*>(m_response->aeff()));
+                GCTAAeffPerfTable* perf = const_cast<GCTAAeffPerfTable*>(dynamic_cast<const GCTAAeffPerfTable*>(m_response.aeff()));
                 if (perf != NULL) {
                     perf->sigma(sigma);
                 }
@@ -442,7 +412,7 @@ void GCTAObservation::read(const GXmlElement& xml)
 
             // If filename is not empty then load point spread function
             if (gammalib::strip_whitespace(filename).length() > 0) {
-                m_response->load_psf(filename);
+                m_response.load_psf(filename);
             }
 
             // Increase number of parameters
@@ -459,7 +429,7 @@ void GCTAObservation::read(const GXmlElement& xml)
 
             // If filename is not empty then load energy dispersion
             if (gammalib::strip_whitespace(filename).length() > 0) {
-                m_response->load_edisp(filename);
+                m_response.load_edisp(filename);
             }
 
             // Increase number of parameters
@@ -476,10 +446,10 @@ void GCTAObservation::read(const GXmlElement& xml)
     }
 
     // If we have an ARF then remove thetacut if necessary
-    GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response->aeff()));
+    GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response.aeff()));
     if (arf != NULL) {
         if (arf->thetacut() > 0.0) {
-            arf->remove_thetacut(*m_response);
+            arf->remove_thetacut(m_response);
         }
     }
 
@@ -584,31 +554,29 @@ void GCTAObservation::write(GXmlElement& xml) const
             double      scale    = 1.0;
             double      sigma    = 0.0;
 
-            // Continue only if response and effective area are valid
-            if (m_response != NULL) {
-                if (m_response->aeff() != NULL) {
+            // Continue only if area is valid
+            if (m_response.aeff() != NULL) {
 
-                    // Get filename
-                    filename = m_response->aeff()->filename();
+                // Get filename
+                filename = m_response.aeff()->filename();
 
-                    // Get optional ARF attributes
-                    const GCTAAeffArf* arf =
-                          dynamic_cast<const GCTAAeffArf*>(m_response->aeff());
-                    if (arf != NULL) {
-                        thetacut = arf->thetacut();
-                        scale    = arf->scale();
-                        sigma    = arf->sigma();
-                    }
+                // Get optional ARF attributes
+                const GCTAAeffArf* arf =
+                      dynamic_cast<const GCTAAeffArf*>(m_response.aeff());
+                if (arf != NULL) {
+                    thetacut = arf->thetacut();
+                    scale    = arf->scale();
+                    sigma    = arf->sigma();
+                }
 
-                    // Get optional performance table attributes
-                    const GCTAAeffPerfTable* perf =
-                          dynamic_cast<const GCTAAeffPerfTable*>(m_response->aeff());
-                    if (perf != NULL) {
-                        sigma = perf->sigma();
-                    }
+                // Get optional performance table attributes
+                const GCTAAeffPerfTable* perf =
+                      dynamic_cast<const GCTAAeffPerfTable*>(m_response.aeff());
+                if (perf != NULL) {
+                    sigma = perf->sigma();
+                }
 
-                } // endif: effective area was valid
-            } // endif: response was valid
+            } // endif: effective area was valid
 
             // Set attributes
             par->attribute("file", filename);
@@ -627,10 +595,8 @@ void GCTAObservation::write(GXmlElement& xml) const
         // Handle PSF
         else if (par->attribute("name") == "PointSpreadFunction") {
             std::string filename = "";
-            if (m_response != NULL) {
-                if (m_response->psf() != NULL) {
-                    filename = m_response->psf()->filename();
-                }
+            if (m_response.psf() != NULL) {
+                filename = m_response.psf()->filename();
             }
             par->attribute("file", filename);
             npar[2]++;
@@ -639,9 +605,7 @@ void GCTAObservation::write(GXmlElement& xml) const
         // Handle RMF
         else if (par->attribute("name") == "EnergyDispersion") {
             std::string filename = "";
-            if (m_response != NULL) {
-                filename = m_response->rmffile();
-            }
+            filename = m_response.rmffile();
             par->attribute("file", filename);
             npar[3]++;
         }
@@ -690,26 +654,14 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append(gammalib::str(m_deadc));
 
         // Append pointing
-        if (m_pointing != NULL) {
-            result.append("\n"+pointing().print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("CTA pointing"));
-            result.append("undefined");
-        }
+        result.append("\n"+pointing().print(gammalib::reduce(chatter)));
 
         // Append response
-        if (m_response != NULL) {
-            result.append("\n"+response().print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("CTA response"));
-            result.append("undefined");
-        }
+        result.append("\n"+response().print(gammalib::reduce(chatter)));
 
         // Append events
         if (m_events != NULL) {
-            result.append("\n"+m_events->print(chatter));
+            result.append("\n"+m_events->print(gammalib::reduce(chatter)));
         }
 
     } // endif: chatter was not silent
@@ -803,7 +755,7 @@ void GCTAObservation::load_binned(const std::string& filename)
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite existing FITS file (default=false).
  ***************************************************************************/
-void GCTAObservation::save(const std::string& filename, bool clobber) const
+void GCTAObservation::save(const std::string& filename, const bool& clobber) const
 {
     // Create FITS file
     GFits fits;
@@ -861,8 +813,8 @@ void GCTAObservation::init_members(void)
     // Initialise members
     m_instrument = "CTA";
     m_eventfile.clear();
-    m_response   = NULL;
-    m_pointing   = NULL;
+    m_response.clear();
+    m_pointing.clear();
     m_obs_id     = 0;
     m_ontime     = 0.0;
     m_livetime   = 0.0;
@@ -882,13 +834,11 @@ void GCTAObservation::init_members(void)
  ***************************************************************************/
 void GCTAObservation::copy_members(const GCTAObservation& obs)
 {
-    // Clone members
-    if (obs.m_response != NULL) m_response = obs.m_response->clone();
-    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
-
     // Copy members
     m_instrument = obs.m_instrument;
     m_eventfile  = obs.m_eventfile;
+    m_response   = obs.m_response;
+    m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;
     m_ontime     = obs.m_ontime;
     m_livetime   = obs.m_livetime;
@@ -906,14 +856,6 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
  ***************************************************************************/
 void GCTAObservation::free_members(void)
 {
-    // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_pointing != NULL) delete m_pointing;
-
-    // Mark memory as free
-    m_response = NULL;
-    m_pointing = NULL;
-
     // Return
     return;
 }
@@ -983,9 +925,7 @@ void GCTAObservation::read_attributes(const GFitsHDU* hdu)
         // Set pointing information
         GSkyDir pnt;
         pnt.radec_deg(ra_pnt, dec_pnt);
-        if (m_pointing != NULL) delete m_pointing;
-        m_pointing = new GCTAPointing;
-        m_pointing->dir(pnt);
+        m_pointing.dir(pnt);
 
     } // endif: HDU was valid
 
@@ -1010,8 +950,8 @@ void GCTAObservation::write_attributes(GFitsHDU* hdu) const
         GTimeReference timeref = events()->gti().reference();
 
         // Compute some attributes
-        double ra_pnt  = (m_pointing != NULL) ? m_pointing->dir().ra_deg() : 0.0;
-        double dec_pnt = (m_pointing != NULL) ? m_pointing->dir().dec_deg() : 0.0;
+        double ra_pnt  = m_pointing.dir().ra_deg();
+        double dec_pnt = m_pointing.dir().dec_deg();
         double tstart  = events()->tstart().convert(timeref);
         double tstop   = events()->tstop().convert(timeref);
         double telapse = events()->gti().telapse();
