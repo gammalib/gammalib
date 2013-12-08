@@ -48,7 +48,7 @@ public:
     virtual GUrlString* clone(void) const;
     virtual void        open(const std::string& string, const std::string& mode = "");
     virtual void        close(void);
-    virtual int         getchar(void);
+    virtual int         getchar(void) const;
     virtual void        putchar(const int& character);
 
     // Other methods

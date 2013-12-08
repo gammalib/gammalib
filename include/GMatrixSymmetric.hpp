@@ -120,9 +120,9 @@ public:
     GMatrixSymmetric abs(void) const;
     GMatrix          extract_lower_triangle(void) const;
     GMatrix          extract_upper_triangle(void) const;
-    GMatrixSymmetric cholesky_decompose(bool compress = true) const;
-    GVector          cholesky_solver(const GVector& vector, bool compress = true) const;
-    GMatrixSymmetric cholesky_invert(bool compress = true) const;
+    GMatrixSymmetric cholesky_decompose(const bool& compress = true) const;
+    GVector          cholesky_solver(const GVector& vector, const bool& compress = true) const;
+    GMatrixSymmetric cholesky_invert(const bool& compress = true) const;
 
 private:
     // Private methods

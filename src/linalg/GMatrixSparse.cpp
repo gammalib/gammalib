@@ -1615,7 +1615,7 @@ double GMatrixSparse::sum(void) const
  * Returns the Cholesky decomposition of a sparse matrix. The decomposition
  * is stored within a GMatrixSparse object.
  ***************************************************************************/
-GMatrixSparse GMatrixSparse::cholesky_decompose(bool compress) const
+GMatrixSparse GMatrixSparse::cholesky_decompose(const bool& compress) const
 {
     // Create copy of matrix
     GMatrixSparse matrix = *this;
@@ -1695,7 +1695,7 @@ GMatrixSparse GMatrixSparse::cholesky_decompose(bool compress) const
  * Choleksy factorization has been produced using 'cholesky_decompose'.
  ***************************************************************************/
 GVector GMatrixSparse::cholesky_solver(const GVector& vector,
-                                       bool compress) const
+                                       const bool& compress) const
 {
     // Dump header
     #if defined(G_DEBUG_SPARSE_COMPRESSION)
@@ -1920,7 +1920,7 @@ GVector GMatrixSparse::cholesky_solver(const GVector& vector,
  *
  * Inverts the matrix using a Cholesky decomposition.
  ***************************************************************************/
-GMatrixSparse GMatrixSparse::cholesky_invert(bool compress) const
+GMatrixSparse GMatrixSparse::cholesky_invert(const bool& compress) const
 {
     // Generate Cholesky decomposition of matrix
     GMatrixSparse decomposition = cholesky_decompose(compress);

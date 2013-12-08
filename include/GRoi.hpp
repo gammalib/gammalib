@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GRoi.hpp - Region of interest interface class              *
+ *            GRoi.hpp - Abstract Region of interest base class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GRoi.hpp
- * @brief Region of interest interface class definition
+ * @brief Abstract Region of interest base class definition
  * @author Juergen Knoedlseder
  */
 

@@ -389,7 +389,7 @@ void GEnergies::load(const std::string& filename, const std::string& extname)
  * extension. If another energies extension exists already it is overwritten
  * if @p clobber=true.
  ***************************************************************************/
-void GEnergies::save(const std::string& filename, bool clobber,
+void GEnergies::save(const std::string& filename, const bool& clobber,
                      const std::string& extname) const
 {
     // Allocate FITS file

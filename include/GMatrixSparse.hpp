@@ -256,9 +256,9 @@ public:
     GMatrixSparse invert(void) const;
     GVector       solve(const GVector& vector) const;
     GMatrixSparse abs(void) const;
-    GMatrixSparse cholesky_decompose(bool compress = true) const;
-    GVector       cholesky_solver(const GVector& vector, bool compress = true) const;
-    GMatrixSparse cholesky_invert(bool compress = true) const;
+    GMatrixSparse cholesky_decompose(const bool& compress = true) const;
+    GVector       cholesky_solver(const GVector& vector, const bool& compress = true) const;
+    GMatrixSparse cholesky_invert(const bool& compress = true) const;
     void          set_mem_block(const int& block);
     void          stack_init(const int& size = 0, const int& entries = 0);
     int           stack_push_column(const GVector& vector, const int& col);

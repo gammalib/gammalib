@@ -524,7 +524,7 @@ void GXml::save(const std::string& filename)
  * Reads in the XML document by parsing a Unified Resource Locator of any
  * type.
  ***************************************************************************/
-void GXml::read(GUrl& url)
+void GXml::read(const GUrl& url)
 {
     // Clear object
     clear();
@@ -656,7 +656,7 @@ void GXml::free_members(void)
  * nodes. The XML file is split into segments, made either of text or of
  * tags.
  ***************************************************************************/
-void GXml::parse(GUrl& url)
+void GXml::parse(const GUrl& url)
 {
     // Initialise parser
     int         c;

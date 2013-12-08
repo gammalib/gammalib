@@ -72,9 +72,9 @@ public:
     // Implemented methods
     void              clear(void);
     GSkyRegionCircle* clone(void) const;
-    double            radius(void) const;
+    const double&     radius(void) const;
     void              radius(const double& radius);
-    GSkyDir           centre(void) const;
+    const GSkyDir&    centre(void) const;
     void              centre(const GSkyDir& centre);
     void              centre(const double& ra,const double& dec);
     double            ra(void) const;
@@ -107,7 +107,7 @@ protected:
  * Returns the region radius in degrees.
  ***************************************************************************/
 inline
-double GSkyRegionCircle::radius(void) const
+const double& GSkyRegionCircle::radius(void) const
 {
     return (m_radius);
 }
@@ -121,7 +121,7 @@ double GSkyRegionCircle::radius(void) const
  * Returns the region centre.
  ***************************************************************************/
 inline
-GSkyDir GSkyRegionCircle::centre(void) const
+const GSkyDir& GSkyRegionCircle::centre(void) const
 {
     return (m_centre);
 }

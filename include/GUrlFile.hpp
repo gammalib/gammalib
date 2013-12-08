@@ -57,7 +57,7 @@ public:
     virtual void        close(void);
     virtual int         read(void* buffer, const int& nbyte);
     virtual int         write(const void* buffer, const int& nbyte);
-    virtual int         getchar(void);
+    virtual int         getchar(void) const;
     virtual void        putchar(const int& character);
     virtual void        scanf(const char* format, ...);
     virtual void        printf(const char* format, ...);
