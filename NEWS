@@ -248,18 +248,21 @@ GWcs => GSkyProjection
   been added that returns the dimension of the projection (1D or
   2D). The integer index methods have been removed as GSkyPixel
   now supports 1D and 2D pixels. The read() and write() methods
-  now take a reference instead of a pointer.
+  now take a reference instead of a pointer. The omega() method
+  has been renamed to solidangle().
 
 GWcslib => GWcs
   The GWcslib class has been renamed to GWcs. The class now conforms
   to the GSkyProjection base class interface. The read() and write()
-  methods now take a reference instead of a pointer.
+  methods now take a reference instead of a pointer. The omega()
+  method has been renamed to solidangle().
 
 GWcsHPX => GHealpix
   The GWcsHPX class has been renamed to GHealpix as the Healpix
   projection is not a World Coordinate System. GHealpix is no
   longer registered in GWcsRegistry. The read() and write()
-  methods now take a reference instead of a pointer.
+  methods now take a reference instead of a pointer. The
+  omega() method has been renamed to solidangle().
 
 GWcsRegistry
   Now holds objects of renamed type GWcs (see GHealpix).

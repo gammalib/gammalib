@@ -709,7 +709,7 @@ void GCOMEventCube::set_scatter_directions(void)
         for (int ix = 0; ix < nchi(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
             m_dirs.push_back(m_map.pix2dir(pixel));
-            m_omega.push_back(m_map.omega(pixel));
+            m_omega.push_back(m_map.solidangle(pixel));
         }
     }
 

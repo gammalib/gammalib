@@ -50,8 +50,8 @@
 #define G_PIX2DIR                              "GSkymap::pix2dir(GSkyPixel&)"
 #define G_DIR2INX                                "GSkymap::dir2inx(GSkyDir&)"
 #define G_DIR2PIX                                "GSkymap::dir2pix(GSkyDir&)"
-#define G_OMEGA1                                       "GSkymap::omega(int&)"
-#define G_OMEGA2                                 "GSkymap::omega(GSkyPixel&)"
+#define G_SOLIDANGLE1                             "GSkymap::solidangle(int&)"
+#define G_SOLIDANGLE2                       "GSkymap::solidangle(GSkyPixel&)"
 #define G_READ                               "GSkymap::read(const GFitsHDU&)"
 #define G_SET_WCS     "GSkymap::set_wcs(std::string&, std::string&, double&,"\
                               " double&, double&, double&, double&, double&,"\
@@ -761,19 +761,19 @@ GSkyPixel GSkymap::dir2pix(const GSkyDir& dir) const
  *
  * Returns the solid angle of the pixel with the specified @p index.
  ***************************************************************************/
-double GSkymap::omega(const int& index) const
+double GSkymap::solidangle(const int& index) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
         std::string msg = "Sky projection has not been defined.";
-        throw GException::invalid_value(G_OMEGA1, msg);
+        throw GException::invalid_value(G_SOLIDANGLE1, msg);
     }
 
     // Determine solid angle from pixel index.
-    double omega = m_proj->omega(inx2pix(index));
+    double solidangle = m_proj->solidangle(inx2pix(index));
 
     // Return solid angle
-    return omega;
+    return solidangle;
 }
 
 
@@ -788,27 +788,27 @@ double GSkymap::omega(const int& index) const
  *
  * Returns the solid angle of the specified sky map @p pixel.
  ***************************************************************************/
-double GSkymap::omega(const GSkyPixel& pixel) const
+double GSkymap::solidangle(const GSkyPixel& pixel) const
 {
     // Throw error if WCS is not valid
     if (m_proj == NULL) {
         std::string msg = "Sky projection has not been defined.";
-        throw GException::invalid_value(G_OMEGA2, msg);
+        throw GException::invalid_value(G_SOLIDANGLE2, msg);
     }
 
     // Initialise solid angle
-    double omega = 0.0;
+    double solidangle = 0.0;
 
     // If pixel size matches the projection size then perform a straight
     // forward solid angle determination
     if (m_proj->size() == pixel.size()) {
-        omega = m_proj->omega(pixel);
+        solidangle = m_proj->solidangle(pixel);
     }
 
     // ... otherwise, if we have a 2D projection but a 1D pixel then
     // interpret the pixel as the linear index in the pixel array
     else if (m_proj->size() == 2) {
-        omega = m_proj->omega(GSkyPixel(inx2pix(int(pixel))));
+        solidangle = m_proj->solidangle(GSkyPixel(inx2pix(int(pixel))));
     }
 
     // ... otherwise we have a 1D projection but a 2D pixel. There is
@@ -819,11 +819,11 @@ double GSkymap::omega(const GSkyPixel& pixel) const
                           " the 1-dimensional sky projection \""+
                           m_proj->name()+"\"\n"
                           "Please specify a 1-dimensional sky map pixel.";
-        throw GException::invalid_argument(G_OMEGA2, msg);
+        throw GException::invalid_argument(G_SOLIDANGLE2, msg);
     }
 
     // Return solid angle
-    return omega;
+    return solidangle;
 }
 
 

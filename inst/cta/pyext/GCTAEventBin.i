@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GCTAEventBin.i  -  CTA event bin class                 *
+ *                   GCTAEventBin.i - CTA event bin class                  *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventBin.i
- * @brief CTA event bin class Python interface definition
+ * @brief CTA event bin class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -57,7 +57,7 @@ public:
     virtual void               counts(const double& counts);
 
     // Other methods
-    const double&  omega(void) const;
+    const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
 };

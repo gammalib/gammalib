@@ -343,23 +343,6 @@ void GHealpix::write(GFitsHDU& hdu) const
 
 
 /***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pixel Sky pixel.
- * @return Solid angle of pixel.
- *
- * Returns the solid angle of the specified @p pixel. Note that HEALPix
- * pixels have all the same solid angle, hence the @p pixel argument is in
- * fact not used by the method.
- ***************************************************************************/
-double GHealpix::omega(const GSkyPixel& pixel) const
-{
-    // Return solid angle
-    return m_omega;
-}
-
-
-/***********************************************************************//**
  * @brief Returns sky direction of pixel
  *
  * @param[in] pixel Sky map pixel.

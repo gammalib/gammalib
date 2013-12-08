@@ -37,7 +37,6 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_READ                                        "GWcs::read(GFitsHDU&)"
-#define G_OMEGA                                           "GWcs::omega(int&)"
 #define G_PIX2DIR                                       "GWcs::pix2dir(int&)"
 #define G_DIR2PIX                                   "GWcs::dir2pix(GSkyDir&)"
 #define G_CRVAL                                           "GWcs::crval(int&)"
@@ -437,7 +436,7 @@ void GWcs::write(GFitsHDU& hdu) const
  * rotated sky maps. Something more intelligent should be implemented in
  * the future.
  ***************************************************************************/
-double GWcs::omega(const GSkyPixel& pixel) const
+double GWcs::solidangle(const GSkyPixel& pixel) const
 {
     // Get the sky directions of the 6 points
     GSkyDir dir1 = pix2dir(GSkyPixel(pixel.x()-0.5, pixel.y()-0.5));

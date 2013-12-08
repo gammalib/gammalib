@@ -76,7 +76,7 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const double&  omega(void) const;
+    const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
 

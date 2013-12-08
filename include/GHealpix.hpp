@@ -66,7 +66,7 @@ public:
     virtual std::string name(void) const;
     virtual void        read(const GFitsHDU& hdu);
     virtual void        write(GFitsHDU& hdu) const;
-    virtual double      omega(const GSkyPixel& pixel) const;
+    virtual double      solidangle(const GSkyPixel& pixel) const;
     virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
     virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
@@ -165,6 +165,23 @@ inline
 const int& GHealpix::nside(void) const
 {
     return m_nside;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns solid angle of pixel
+ *
+ * @param[in] pixel Sky pixel.
+ * @return Solid angle of pixel.
+ *
+ * Returns the solid angle of the specified @p pixel. Note that HEALPix
+ * pixels have all the same solid angle, hence the @p pixel argument is in
+ * fact not used by the method.
+ ***************************************************************************/
+inline
+double GHealpix::solidangle(const GSkyPixel& pixel) const
+{
+    return m_omega;
 }
 
 #endif /* GHEALPIX_HPP */

@@ -735,16 +735,16 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
                 for (int ix = 0; ix < cube->nx(); ++ix) {
 
                     // Compute offset angle in degrees
-                    GSkyPixel pixel  = GSkyPixel(double(ix), double(iy));
-                    double    offset = cube->map().pix2dir(pixel).dist_deg(m_dir);
-                    double    omega  = cube->map().omega(pixel);
+                    GSkyPixel pixel      = GSkyPixel(double(ix), double(iy));
+                    double    offset     = cube->map().pix2dir(pixel).dist_deg(m_dir);
+                    double    solidangle = cube->map().solidangle(pixel);
 
                     // Use only pixels within maximum PSF radius
                     if (offset <= radius) {
 
                         // Accumulate energy dependent pixel sum
                         for (int ieng = 0; ieng < m_energy.size(); ++ieng)
-                            sum[ieng] += psf(offset, m_energy[ieng]) * omega;
+                            sum[ieng] += psf(offset, m_energy[ieng]) * solidangle;
                         
                     } // endif: pixel was within maximum PSF radius
 

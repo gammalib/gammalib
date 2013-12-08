@@ -781,7 +781,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 // that corresponds to the pixel's solid angle. For security,
                 // the radius is enhanced by 50%.
                 double pixel_radius =
-                       std::acos(1.0 - m_cube.omega(k)/gammalib::twopi) *
+                       std::acos(1.0 - m_cube.solidangle(k)/gammalib::twopi) *
                        gammalib::rad2deg * 1.5;
 
                 // Add up flux with simulation cone radius + effective pixel
@@ -793,7 +793,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 // simulated event is contained in the simulation cone.
                 double distance = centre.dist_deg(m_cube.pix2dir(k));
                 if (distance <= radius+pixel_radius) {
-                    double flux = m_cube(k,i) * m_cube.omega(k);
+                    double flux = m_cube(k,i) * m_cube.solidangle(k);
                     if (flux > 0.0) {
                         total_flux += flux;
                     }

@@ -640,7 +640,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         // zero intensity in the skymap.
         double sum = 0.0;
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i) * m_map.omega(i);
+            double flux = m_map(i) * m_map.solidangle(i);
             if (flux < 0.0) {
                 m_map(i) = 0.0;
                 flux     = 0.0;
@@ -665,7 +665,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         #if defined(G_DEBUG_PREPARE)
         double sum_control = 0.0;
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i) * m_map.omega(i);
+            double flux = m_map(i) * m_map.solidangle(i);
             if (flux >= 0.0) {
                 sum_control += flux;
             }

@@ -680,7 +680,7 @@ void GCTAEventCube::set_directions(void)
             try {
                 GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
                 m_dirs.push_back(GCTAInstDir(m_map.pix2dir(pixel)));
-                m_omega.push_back(m_map.omega(pixel));
+                m_omega.push_back(m_map.solidangle(pixel));
             }
             catch (GException::wcs_invalid_x_y& e) {
                 m_dirs.push_back(GCTAInstDir());

@@ -52,7 +52,7 @@ public:
     virtual std::string name(void) const;
     virtual void        read(const GFitsHDU& hdu);
     virtual void        write(GFitsHDU& hdu) const;
-    virtual double      omega(const GSkyPixel& pixel) const;
+    virtual double      solidangle(const GSkyPixel& pixel) const;
     virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
     virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;
 

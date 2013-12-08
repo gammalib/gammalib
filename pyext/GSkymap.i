@@ -140,8 +140,8 @@ public:
     int                   pix2inx(const GSkyPixel& pixel) const;
     int                   dir2inx(const GSkyDir& dir) const;
     GSkyPixel             dir2pix(const GSkyDir& dir) const;
-    double                omega(const int& index) const;
-    double                omega(const GSkyPixel& pixel) const;
+    double                solidangle(const int& index) const;
+    double                solidangle(const GSkyPixel& pixel) const;
     bool                  contains(const GSkyDir& dir) const;
     bool                  contains(const GSkyPixel& pixel) const;
     const GSkyProjection* projection(void) const;

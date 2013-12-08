@@ -843,7 +843,7 @@ void GLATEventCube::set_directions(void)
         for (int ix = 0; ix < nx(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
             m_dirs.push_back(GLATInstDir(m_map.pix2dir(pixel)));
-            m_omega.push_back(m_map.omega(pixel));
+            m_omega.push_back(m_map.solidangle(pixel));
         }
     }
 
