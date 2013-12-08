@@ -236,11 +236,8 @@ void GCOMObservation::response(const GResponse& rsp)
               typeid(&rsp).name(), "Expected type \"GCOMResponse\".");
     }
 
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
     // Clone response function
-    m_response = comrsp->clone();
+    m_response = *comrsp;
 
     // Return
     return;
@@ -259,17 +256,14 @@ void GCOMObservation::response(const GResponse& rsp)
 void GCOMObservation::response(const std::string& iaqname,
                                const std::string& caldb)
 {
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new COM response function
-    m_response = new GCOMResponse;
+    // Clear COM response function
+    m_response.clear();
 
     // Set calibration database
-    m_response->caldb(caldb);
+    m_response.caldb(caldb);
 
     // Load instrument response function
-    m_response->load(iaqname);
+    m_response.load(iaqname);
 
     // Return
     return;
@@ -454,9 +448,7 @@ void GCOMObservation::write(GXmlElement& xml) const
         // Handle IAQ
         else if (par->attribute("name") == "IAQ") {
             std::string iaqname = "";
-            if (m_response != NULL) {
-                iaqname = m_response->iaqname();
-            }
+            iaqname = m_response.iaqname();
             par->attribute("file", iaqname);
             npar[4]++;
         }
@@ -541,24 +533,14 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         result.append(gammalib::str(ewidth())+" MeV");
 
         // Append pointing
-        if (m_pointing != NULL) {
-            result.append("\n"+pointing().print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Pointing")+"undefined");
-        }
+        result.append("\n"+pointing().print(gammalib::reduce(chatter)));
 
         // Append response
-        if (m_response != NULL) {
-            result.append("\n"+response().print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Response")+"undefined");
-        }
+        result.append("\n"+response().print(gammalib::reduce(chatter)));
 
         // Append events
         if (m_events != NULL) {
-            result.append("\n"+m_events->print(chatter));
+            result.append("\n"+m_events->print(gammalib::reduce(chatter)));
         }
         else {
             result.append("\n"+gammalib::parformat("Events")+"undefined");
@@ -596,8 +578,8 @@ void GCOMObservation::init_members(void)
     m_drb.clear();
     m_drg.clear();
     m_drx.clear();
-    m_pointing   = NULL;
-    m_response   = NULL;
+    m_pointing.clear();
+    m_response.clear();
     m_obs_id     = 0;
     m_ontime     = 0.0;
     m_livetime   = 0.0;
@@ -616,10 +598,6 @@ void GCOMObservation::init_members(void)
  ***************************************************************************/
 void GCOMObservation::copy_members(const GCOMObservation& obs)
 {
-    // Clone members. Note that the events are cloned by the base class.
-    if (obs.m_response != NULL) m_response = obs.m_response->clone();
-    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
-
     // Copy members
     m_instrument = obs.m_instrument;
     m_drename    = obs.m_drename;
@@ -629,6 +607,8 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_drb        = obs.m_drb;
     m_drg        = obs.m_drg;
     m_drx        = obs.m_drx;
+    m_response   = obs.m_response;
+    m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;
     m_ontime     = obs.m_ontime;
     m_livetime   = obs.m_livetime;
@@ -645,14 +625,6 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
  ***************************************************************************/
 void GCOMObservation::free_members(void)
 {
-    // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_pointing != NULL) delete m_pointing;
-
-    // Mark memory as free
-    m_response = NULL;
-    m_pointing = NULL;
-
     // Return
     return;
 }
@@ -889,9 +861,7 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
         double  ra_scz  = hdu->real("RA_SCZ");
         double  dec_scz = hdu->real("DEC_SCZ");
         pnt.radec_deg(ra_scz, dec_scz);
-        if (m_pointing != NULL) delete m_pointing;
-        m_pointing = new GCOMPointing;
-        m_pointing->dir(pnt);
+        m_pointing.dir(pnt);
 
     } // endif: HDU was valid
 

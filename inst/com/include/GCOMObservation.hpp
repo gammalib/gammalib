@@ -106,21 +106,21 @@ protected:
     void write_attributes(GFitsHDU* hdu) const;
 
     // Protected members
-    std::string   m_instrument;  //!< Instrument name
-    std::string   m_drename;     //!< DRE filename
-    std::string   m_drbname;     //!< DRB filename
-    std::string   m_drgname;     //!< DRG filename
-    std::string   m_drxname;     //!< DRX filename
-    GSkymap       m_drb;         //!< Background model
-    GSkymap       m_drg;         //!< Geometry factors
-    GSkymap       m_drx;         //!< Exposure map
-    GCOMPointing* m_pointing;    //!< Pointer to pointing direction
-    GCOMResponse* m_response;    //!< Pointer to response functions
-    double        m_obs_id;      //!< Observation ID
-    double        m_ontime;      //!< Ontime (sec)
-    double        m_livetime;    //!< Livetime (sec)
-    double        m_deadc;       //!< Deadtime correction
-    double        m_ewidth;      //!< Energy width (MeV)
+    std::string  m_instrument;  //!< Instrument name
+    std::string  m_drename;     //!< DRE filename
+    std::string  m_drbname;     //!< DRB filename
+    std::string  m_drgname;     //!< DRG filename
+    std::string  m_drxname;     //!< DRX filename
+    GSkymap      m_drb;         //!< Background model
+    GSkymap      m_drg;         //!< Geometry factors
+    GSkymap      m_drx;         //!< Exposure map
+    GCOMPointing m_pointing;    //!< Pointer to pointing direction
+    GCOMResponse m_response;    //!< Pointer to response functions
+    double       m_obs_id;      //!< Observation ID
+    double       m_ontime;      //!< Ontime (sec)
+    double       m_livetime;    //!< Livetime (sec)
+    double       m_deadc;       //!< Deadtime correction
+    double       m_ewidth;      //!< Energy width (MeV)
 };
 
 
@@ -133,7 +133,7 @@ inline
 const GCOMResponse& GCOMObservation::response(void) const
 {
     // Return response pointer
-    return *m_response;
+    return m_response;
 }
 
 
@@ -146,7 +146,7 @@ inline
 const GCOMPointing& GCOMObservation::pointing(void) const
 {
     // Return pointing pointer
-    return *m_pointing;
+    return m_pointing;
 }
 
 #endif /* GCOMOBSERVATION_HPP */
