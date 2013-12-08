@@ -191,11 +191,8 @@ void GLATObservation::response(const GResponse& rsp)
     if (latrsp == NULL)
         throw GLATException::bad_response_type(G_RESPONSE);
 
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Clone response function
-    m_response = latrsp->clone();
+    // Copy response function
+    m_response = *latrsp;
 
     // Return
     return;
@@ -218,17 +215,14 @@ void GLATObservation::response(const GResponse& rsp)
  ***************************************************************************/
 void GLATObservation::response(const std::string& irfname, std::string caldb)
 {
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new LAT response function
-    m_response = new GLATResponse;
+    // Clear LAT response function
+    m_response.clear();
 
     // Set calibration database
-    m_response->caldb(caldb);
+    m_response.caldb(caldb);
 
     // Load instrument response function
-    m_response->load(irfname);
+    m_response.load(irfname);
 
     // Return
     return;
@@ -467,9 +461,7 @@ void GLATObservation::write(GXmlElement& xml) const
         // Handle IRF
         else if (par->attribute("name") == "IRF") {
             std::string irfname = "";
-            if (m_response != NULL) {
-                irfname = m_response->rspname();
-            }
+            irfname = m_response.rspname();
             par->attribute("value", irfname);
             npar[3]++;
         }
@@ -515,16 +507,11 @@ std::string GLATObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Livetime")+gammalib::str(livetime()));
 
         // Append response
-        if (m_response != NULL) {
-            result.append("\n"+m_response->print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("LAT response")+"undefined");
-        }
+        result.append("\n"+m_response.print(gammalib::reduce(chatter)));
 
         // Append livetime cube
         if (m_ltcube != NULL) {
-            result.append("\n"+m_ltcube->print(chatter));
+            result.append("\n"+m_ltcube->print(gammalib::reduce(chatter)));
         }
         else {
             result.append("\n"+gammalib::parformat("LAT livetime cube")+"undefined");
@@ -533,7 +520,7 @@ std::string GLATObservation::print(const GChatter& chatter) const
         // EXPLICIT: Append events
         if (chatter >= EXPLICIT) {
             if (m_events != NULL) {
-                result.append("\n"+m_events->print(chatter));
+                result.append("\n"+m_events->print(gammalib::reduce(chatter)));
             }
         }
 
@@ -661,9 +648,9 @@ void GLATObservation::init_members(void)
     m_ltfile.clear();
     m_cntfile.clear();
     m_expfile.clear();
-    m_response = NULL;
-    m_pointing = NULL;
-    m_ltcube   = NULL;
+    m_response.clear();
+    m_pointing.clear();
+    m_ltcube = NULL;
 
     // Return
     return;
@@ -678,16 +665,16 @@ void GLATObservation::init_members(void)
 void GLATObservation::copy_members(const GLATObservation& obs)
 {
     // Copy members
-    m_ft1file = obs.m_ft1file;
-    m_ft2file = obs.m_ft2file;
-    m_ltfile  = obs.m_ltfile;
-    m_cntfile = obs.m_cntfile;
-    m_expfile = obs.m_expfile;
+    m_ft1file  = obs.m_ft1file;
+    m_ft2file  = obs.m_ft2file;
+    m_ltfile   = obs.m_ltfile;
+    m_cntfile  = obs.m_cntfile;
+    m_expfile  = obs.m_expfile;
+    m_response = obs.m_response;
+    m_pointing = obs.m_pointing;
     
     // Clone members
-    if (obs.m_response != NULL) m_response = obs.m_response->clone();
-    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
-    if (obs.m_ltcube   != NULL) m_ltcube   = obs.m_ltcube->clone();
+    if (obs.m_ltcube != NULL) m_ltcube = obs.m_ltcube->clone();
 
     // Return
     return;
@@ -700,22 +687,11 @@ void GLATObservation::copy_members(const GLATObservation& obs)
 void GLATObservation::free_members(void)
 {
     // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_pointing != NULL) delete m_pointing;
-    if (m_ltcube   != NULL) delete m_ltcube;
+    if (m_ltcube  != NULL) delete m_ltcube;
 
     // Mark memory as free
-    m_response = NULL;
-    m_pointing = NULL;
-    m_ltcube   = NULL;
+    m_ltcube = NULL;
 
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

@@ -70,7 +70,6 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const GLATPointing& pointing(void) const;
     void                load_unbinned(const std::string& ft1name,
                                       const std::string& ft2name,
                                       const std::string& ltcube_name);
@@ -79,6 +78,7 @@ public:
                                     const std::string& ltcube_name);
     void                response(const std::string& irfname,
                                  std::string caldb = "");    
+    const GLATPointing& pointing(void) const;
     GLATLtCube*         ltcube(void) const;
 
 protected:
@@ -88,14 +88,14 @@ protected:
     void free_members(void);
 
     // Protected members
-    std::string   m_ft1file;      //!< FT1 filename
-    std::string   m_ft2file;      //!< FT2 filename
-    std::string   m_ltfile;       //!< Lifetime cube filename
-    std::string   m_cntfile;      //!< Counts map filename
-    std::string   m_expfile;      //!< Exposure map filename
-    GLATResponse* m_response;     //!< Pointer to instrument response functions
-    GLATPointing* m_pointing;     //!< Pointer to pointing direction
-    GLATLtCube*   m_ltcube;       //!< Pointer to lifetime cube
+    std::string  m_ft1file;      //!< FT1 filename
+    std::string  m_ft2file;      //!< FT2 filename
+    std::string  m_ltfile;       //!< Lifetime cube filename
+    std::string  m_cntfile;      //!< Counts map filename
+    std::string  m_expfile;      //!< Exposure map filename
+    GLATResponse m_response;     //!< Instrument response functions
+    GLATPointing m_pointing;     //!< Pointing direction
+    GLATLtCube*  m_ltcube;       //!< Pointer to lifetime cube
 };
 
 
@@ -106,7 +106,7 @@ inline
 const GLATResponse& GLATObservation::response(void) const
 {
     // Return response pointer
-    return *m_response;
+    return m_response;
 }
 
 
@@ -117,7 +117,7 @@ inline
 const GLATPointing& GLATObservation::pointing(void) const
 {
     // Return response pointer
-    return *m_pointing;
+    return m_pointing;
 }
 
 

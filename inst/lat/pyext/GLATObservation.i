@@ -54,7 +54,6 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    const GLATPointing& pointing(void) const;
     void                load_unbinned(const std::string& ft1name,
                                       const std::string& ft2name,
                                       const std::string& ltcube_name);
@@ -63,6 +62,7 @@ public:
                                     const std::string& ltcube_name);
     void                response(const std::string& irfname,
                                  std::string caldb = "");    
+    const GLATPointing& pointing(void) const;
     GLATLtCube*         ltcube(void) const;
 };
 
