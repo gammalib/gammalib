@@ -48,7 +48,6 @@ public:
     void          clear(void);
     GNodeArray*   clone(void) const;
     double&       at(const int& index);
-    const double& at(const int& index) const;
     int           size(void) const;
     bool          isempty(void) const;
     void          append(const double& node);
