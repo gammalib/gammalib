@@ -143,6 +143,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GModelSpectralPlaw2.hpp \
                      GModelSpectralLogParabola.hpp \
                      GModelSpectralConst.hpp \
-                     GModelTemporal.hpp \
+                     GModelSpectralBrokenPlaw.hpp \
+		     GModelTemporal.hpp \
                      GModelTemporalRegistry.hpp \
                      GModelTemporalConst.hpp

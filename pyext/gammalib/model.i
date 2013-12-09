@@ -79,6 +79,7 @@
 %include "GModelSpectralPlaw.i"
 %include "GModelSpectralPlaw2.i"
 %include "GModelSpectralLogParabola.i"
+%include "GModelSpectralBrokenPlaw.i"
 %include "GModelTemporal.i"
 %include "GModelTemporalRegistry.i"
 %include "GModelTemporalConst.i"
