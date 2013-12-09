@@ -30,24 +30,26 @@
 /* __ Includes ___________________________________________________________ */
 #include <vector>
 #include <string>
-#include "GEvent.hpp"
-#include "GObservation.hpp"
-#include "GResponse.hpp"
-#include "GEbounds.hpp"
-#include "GSkyDir.hpp"
 #include "GEnergy.hpp"
 #include "GTime.hpp"
-#include "GPhoton.hpp"
-#include "GCTAPointing.hpp"
-#include "GCTARoi.hpp"
-#include "GCTAEventAtom.hpp"
-#include "GCTAAeff.hpp"
-#include "GCTAPsf.hpp"
-#include "GCTAEdisp.hpp"
+#include "GResponse.hpp"
 
 /* __ Type definitions ___________________________________________________ */
 
-/* __ Forward declaration ________________________________________________ */
+/* __ Forward declarations _______________________________________________ */
+class GSkyDir;
+class GPhoton;
+class GEbounds;
+class GEvent;
+class GObservation;
+class GCTAObservation;
+class GCTAPointing;
+class GCTAEventAtom;
+class GCTARoi;
+class GCTAInstDir;
+class GCTAAeff;
+class GCTAPsf;
+class GCTAEdisp;
 
 
 /***********************************************************************//**
@@ -153,9 +155,17 @@ public:
 
 private:
     // Private methods
-    void init_members(void);
-    void copy_members(const GCTAResponse& rsp);
-    void free_members(void);
+    void                   init_members(void);
+    void                   copy_members(const GCTAResponse& rsp);
+    void                   free_members(void);
+    const GCTAObservation& retrieve_obs(const std::string& origin,
+                                        const GObservation& obs) const;
+    const GCTAPointing&    retrieve_pnt(const std::string& origin,
+                                        const GObservation& obs) const;
+    const GCTARoi&         retrieve_roi(const std::string& origin,
+                                        const GObservation& obs) const;
+    const GCTAInstDir&     retrieve_dir(const std::string& origin,
+                                        const GEvent&      event) const;
 
     // Private data members
     std::string         m_caldb;    //!< Name of or path to the calibration database

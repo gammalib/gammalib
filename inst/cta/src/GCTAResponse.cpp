@@ -42,6 +42,7 @@
 #include "GCTAResponse.hpp"
 #include "GCTAResponse_helpers.hpp"
 #include "GCTAPointing.hpp"
+#include "GCTAEventAtom.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTARoi.hpp"
 #include "GCTAException.hpp"
@@ -52,6 +53,9 @@
 #include "GCTAPsf2D.hpp"
 #include "GCTAPsfVector.hpp"
 #include "GCTAPsfPerfTable.hpp"
+#include "GCTAAeff.hpp"
+#include "GCTAPsf.hpp"
+#include "GCTAEdisp.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_CALDB                           "GCTAResponse::caldb(std::string&)"
@@ -269,36 +273,18 @@ GCTAResponse* GCTAResponse::clone(void) const
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Observation is not a CTA observations.
- * @exception GCTAException::no_pointing
- *            No valid CTA pointing found.
- * @exception GCTAException::bad_instdir_type
- *            Instrument direction is not a valid CTA instrument direction.
- *
  * @todo Set polar angle phi of photon in camera system
  ***************************************************************************/
 double GCTAResponse::irf(const GEvent&       event,
                          const GPhoton&      photon,
                          const GObservation& obs) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_IRF);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
-
-    // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        throw GCTAException::bad_instdir_type(G_IRF);
-    }
+    // Retrieve CTA pointing and instrument direction
+    const GCTAPointing& pnt = retrieve_pnt(G_IRF, obs);
+    const GCTAInstDir&  dir = retrieve_dir(G_IRF, event);
 
     // Get event attributes
-    const GSkyDir& obsDir = dir->dir();
+    const GSkyDir& obsDir = dir.dir();
     const GEnergy& obsEng = event.energy();
 
     // Get photon attributes
@@ -380,31 +366,16 @@ double GCTAResponse::irf(const GEvent&       event,
  * @param[in] photon Incident photon.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Observation is not a CTA observations.
- * @exception GException::no_list
- *            Observation does not contain a valid CTA event list.
- *
  * @todo Set polar angle phi of photon in camera system
  * @todo Write method documentation
  ***************************************************************************/
 double GCTAResponse::npred(const GPhoton&      photon,
                            const GObservation& obs) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_NPRED);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
-
-    // Get pointer on CTA events list
-    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
-    if (events == NULL) {
-        throw GException::no_list(G_NPRED);
-    }
+    // Retrieve CTA observation, ROI and pointing
+    const GCTAObservation& cta = retrieve_obs(G_NPRED, obs);
+    const GCTARoi&         roi = retrieve_roi(G_NPRED, obs);
+    const GCTAPointing&    pnt = cta.pointing();
 
     // Get photon attributes
     const GSkyDir& srcDir  = photon.dir();
@@ -429,13 +400,13 @@ double GCTAResponse::npred(const GPhoton&      photon,
     if (npred > 0.0) {
 
         // Get PSF
-        npred *= npsf(srcDir, srcLogEng, srcTime, pnt, events->roi());
+        npred *= npsf(srcDir, srcLogEng, srcTime, pnt, roi);
 
         // Multiply-in energy dispersion
         if (hasedisp() && npred > 0.0) {
 
             // Get energy dispersion
-            npred *= nedisp(srcDir, srcEng, srcTime, pnt, events->ebounds());
+            npred *= nedisp(srcDir, srcEng, srcTime, pnt, cta.events()->ebounds());
 
         } // endif: had energy dispersion
 
@@ -469,9 +440,6 @@ double GCTAResponse::npred(const GPhoton&      photon,
  * @param[in] obs Observation.
  * @param[in] ran Random number generator.
  *
- * @exception GCTAException::bad_observation_type
- *            No CTA observation found.
- *
  * Simulates a CTA event using the response function from an incident photon.
  * If the event is not detected a NULL pointer is returned.
  *
@@ -488,14 +456,8 @@ GCTAEventAtom* GCTAResponse::mc(const double& area, const GPhoton& photon,
     // Initialise event
     GCTAEventAtom* event = NULL;
 
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_MC);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
+    // Retrieve CTA pointing
+    const GCTAPointing& pnt = retrieve_pnt(G_MC, obs);
 
     // Get pointing direction zenith angle and azimuth [radians]
     double zenith  = pnt.zenith();
@@ -869,10 +831,6 @@ std::string GCTAResponse::print(const GChatter& chatter) const
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Specified observation is not a CTA observations.
- * @exception GCTAException::bad_instdir_type
- *            Instrument direction is not a valid CTA instrument direction.
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
@@ -916,20 +874,9 @@ double GCTAResponse::irf_radial(const GEvent&       event,
                                 const GSource&      source,
                                 const GObservation& obs) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_IRF_RADIAL);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
-
-    // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        throw GCTAException::bad_instdir_type(G_IRF_RADIAL);
-    }
+    // Retrieve CTA pointing
+    const GCTAPointing& pnt = retrieve_pnt(G_IRF_RADIAL, obs);
+    const GCTAInstDir&  dir = retrieve_dir(G_IRF_RADIAL, event);
 
     // Get pointer on radial model
     const GModelSpatialRadial* model =
@@ -953,11 +900,11 @@ double GCTAResponse::irf_radial(const GEvent&       event,
 
     // Determine angular distance between measured photon direction and model
     // centre [radians]
-    double zeta = centre.dist(dir->dir());
+    double zeta = centre.dist(dir.dir());
 
     // Determine angular distance between measured photon direction and
     // pointing direction [radians]
-    double eta = pnt.dir().dist(dir->dir());
+    double eta = pnt.dir().dist(dir.dir());
 
     // Determine angular distance between model centre and pointing direction
     // [radians]
@@ -1060,8 +1007,6 @@ double GCTAResponse::irf_radial(const GEvent&       event,
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Specified observation is not a CTA observations.
  * @exception GCTAException::bad_instdir_type
  *            Instrument direction is not a valid CTA instrument direction.
  * @exception GCTAException::bad_model_type
@@ -1096,20 +1041,9 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
                                     const GSource&      source,
                                     const GObservation& obs) const
 {
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_IRF_ELLIPTICAL);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
-
-    // Get pointer on CTA instrument direction
-    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-    if (dir == NULL) {
-        throw GCTAException::bad_instdir_type(G_IRF_ELLIPTICAL);
-    }
+    // Retrieve CTA pointing
+    const GCTAPointing& pnt = retrieve_pnt(G_IRF_ELLIPTICAL, obs);
+    const GCTAInstDir&  dir = retrieve_dir(G_IRF_ELLIPTICAL, event);
 
     // Get pointer on elliptical model
     const GModelSpatialElliptical* model =
@@ -1119,7 +1053,7 @@ double GCTAResponse::irf_elliptical(const GEvent&       event,
     }
 
     // Get event attributes (measured photon)
-    const GSkyDir& obsDir = dir->dir();
+    const GSkyDir& obsDir = dir.dir();
     const GEnergy& obsEng = event.energy();
 
     // Get source attributes
@@ -1275,11 +1209,8 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
     bool   has_irf = false;
     double irf     = 0.0;
 
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_IRF_DIFFUSE);
-    }
+    // Retrieve CTA pointing
+    const GCTAPointing& pnt = retrieve_pnt(G_IRF_DIFFUSE, obs);
 
     // Try getting the IRF value from cache
     #if defined(G_USE_IRF_CACHE)
@@ -1303,14 +1234,8 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
     // Continue only if we have no IRF value
     if (!has_irf) {
 
-        // Get pointer on CTA pointing
-        const GCTAPointing& pnt = ctaobs->pointing();
-
-        // Get pointer on CTA instrument direction
-        const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
-        if (dir == NULL) {
-            throw GCTAException::bad_instdir_type(G_IRF_DIFFUSE);
-        }
+        // Get CTA instrument direction
+        const GCTAInstDir&  dir = retrieve_dir(G_IRF_ELLIPTICAL, event);
 
         // Get pointer on spatial model
         const GModelSpatial* model =
@@ -1320,7 +1245,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
         }
 
         // Get event attributes
-        //const GSkyDir& obsDir = dir->dir();
+        //const GSkyDir& obsDir = dir.dir();
         const GEnergy& obsEng = event.energy();
 
         // Get source attributes
@@ -1333,7 +1258,7 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
 
         // Determine angular distance between measured photon direction and
         // pointing direction [radians]
-        double eta = pnt.dir().dist(dir->dir());
+        double eta = pnt.dir().dist(dir.dir());
 
         // Get log10(E/TeV) of true and measured photon energies
         double srcLogEng = srcEng.log10TeV();
@@ -1360,8 +1285,8 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
             // celestial coordinates
             GMatrix ry;
             GMatrix rz;
-            ry.eulery(dir->dir().dec_deg() - 90.0);
-            rz.eulerz(-dir->dir().ra_deg());
+            ry.eulery(dir.dir().dec_deg() - 90.0);
+            rz.eulerz(-dir.dir().ra_deg());
             GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
@@ -1428,12 +1353,6 @@ double GCTAResponse::irf_diffuse(const GEvent&       event,
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Observation is not a CTA observation.
- * @exception GCTAException::no_pointing
- *            Pointing is not a CTA pointing.
- * @exception GException::no_list
- *            Observation contains no event list.
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
@@ -1481,20 +1400,10 @@ double GCTAResponse::npred_radial(const GSource& source,
     // Initialise Npred value
     double npred = 0.0;
 
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_NPRED_RADIAL);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
-
-    // Get pointer on CTA events list
-    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
-    if (events == NULL) {
-        throw GException::no_list(G_NPRED_RADIAL);
-    }
+    // Retrieve CTA observation, ROI and pointing
+    const GCTAObservation& cta = retrieve_obs(G_NPRED_RADIAL, obs);
+    const GCTARoi&         roi = retrieve_roi(G_NPRED_RADIAL, obs);
+    const GCTAPointing&    pnt = cta.pointing();
 
     // Get pointer on radial model
     const GModelSpatialRadial* model =
@@ -1523,10 +1432,10 @@ double GCTAResponse::npred_radial(const GSource& source,
     double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
     // Extract ROI radius (radians)
-    double roi_radius = events->roi().radius() * gammalib::deg2rad;
+    double roi_radius = roi.radius() * gammalib::deg2rad;
 
     // Compute distance between ROI and model centre (radians)
-    double roi_model_distance = events->roi().centre().dir().dist(centre);
+    double roi_model_distance = roi.centre().dir().dist(centre);
 
     // Compute the ROI radius plus maximum PSF radius (radians). Any photon
     // coming from beyond this radius will not make it in the dataspace and
@@ -1553,14 +1462,14 @@ double GCTAResponse::npred_radial(const GSource& source,
 
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
-        double omega0 = centre.posang(events->roi().centre().dir());
+        double omega0 = centre.posang(roi.centre().dir());
 
         // Setup integration kernel
         cta_npred_radial_kern_rho integrand(*this,
                                             *model,
                                             source.energy(),
                                             source.time(),
-                                            *ctaobs,
+                                            cta,
                                             rot,
                                             roi_model_distance,
                                             roi_psf_radius,
@@ -1606,10 +1515,6 @@ double GCTAResponse::npred_radial(const GSource& source,
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Observation is not a CTA observation.
- * @exception GException::no_list
- *            Observation contains no event list.
  * @exception GCTAException::bad_model_type
  *            Model is not an elliptical model.
  *
@@ -1658,20 +1563,10 @@ double GCTAResponse::npred_elliptical(const GSource& source,
     // Initialise Npred value
     double npred = 0.0;
 
-    // Get pointer on CTA observation
-    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
-    if (ctaobs == NULL) {
-        throw GCTAException::bad_observation_type(G_NPRED_ELLIPTICAL);
-    }
-
-    // Get pointer on CTA pointing
-    const GCTAPointing& pnt = ctaobs->pointing();
-
-    // Get pointer on CTA events list
-    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(ctaobs->events());
-    if (events == NULL) {
-        throw GException::no_list(G_NPRED_ELLIPTICAL);
-    }
+    // Retrieve CTA observation, ROI and pointing
+    const GCTAObservation& cta = retrieve_obs(G_NPRED_ELLIPTICAL, obs);
+    const GCTARoi&         roi = retrieve_roi(G_NPRED_ELLIPTICAL, obs);
+    const GCTAPointing&    pnt = cta.pointing();
 
     // Get pointer on elliptical model
     const GModelSpatialElliptical* model =
@@ -1681,8 +1576,8 @@ double GCTAResponse::npred_elliptical(const GSource& source,
     }
 
     // Get source attributes
-    const GSkyDir& centre = model->dir();
-    const GEnergy& srcEng = source.energy();
+    const GSkyDir& centre  = model->dir();
+    const GEnergy& srcEng  = source.energy();
     const GTime&   srcTime = source.time();
 
     // Get pointing direction zenith angle and azimuth [radians]
@@ -1700,10 +1595,10 @@ double GCTAResponse::npred_elliptical(const GSource& source,
     double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
     // Extract ROI radius (radians)
-    double roi_radius = events->roi().radius() * gammalib::deg2rad;
+    double roi_radius = roi.radius() * gammalib::deg2rad;
 
     // Compute distance between ROI and model centre (radians)
-    double roi_model_distance = events->roi().centre().dir().dist(centre);
+    double roi_model_distance = roi.centre().dir().dist(centre);
 
     // Compute the ROI radius plus maximum PSF radius (radians). Any photon
     // coming from beyond this radius will not make it in the dataspace and
@@ -1730,14 +1625,14 @@ double GCTAResponse::npred_elliptical(const GSource& source,
 
         // Compute position angle of ROI centre with respect to model
         // centre (radians)
-        double omega0 = centre.posang(events->roi().centre().dir());
+        double omega0 = centre.posang(roi.centre().dir());
 
         // Setup integration kernel
         cta_npred_elliptical_kern_rho integrand(*this,
                                                 *model,
                                                 source.energy(),
                                                 source.time(),
-                                                *ctaobs,
+                                                cta,
                                                 rot,
                                                 roi_model_distance,
                                                 roi_psf_radius,
@@ -1783,12 +1678,6 @@ double GCTAResponse::npred_elliptical(const GSource& source,
  * @param[in] source Source.
  * @param[in] obs Observation.
  *
- * @exception GCTAException::bad_observation_type
- *            Observation is not a CTA observation.
- * @exception GCTAException::no_pointing
- *            Pointing is not a CTA pointing.
- * @exception GException::no_list
- *            Observation contains no event list.
  * @exception GCTAException::bad_model_type
  *            Model is not a radial model.
  *
@@ -1861,22 +1750,10 @@ double GCTAResponse::npred_diffuse(const GSource& source,
     // Continue only if no Npred cache value was found
     if (!has_npred) {
 
-        // Get pointer on CTA observation
-        const GCTAObservation* ctaobs =
-            dynamic_cast<const GCTAObservation*>(&obs);
-        if (ctaobs == NULL) {
-            throw GCTAException::bad_observation_type(G_NPRED_DIFFUSE);
-        }
-
-        // Get pointer on CTA pointing
-        const GCTAPointing& pnt = ctaobs->pointing();
-
-        // Get pointer on CTA events list
-        const GCTAEventList* events =
-            dynamic_cast<const GCTAEventList*>(ctaobs->events());
-        if (events == NULL) {
-            throw GException::no_list(G_NPRED_DIFFUSE);
-        }
+        // Retrieve CTA observation, ROI and pointing
+        const GCTAObservation& cta = retrieve_obs(G_NPRED_DIFFUSE, obs);
+        const GCTARoi&         roi = retrieve_roi(G_NPRED_DIFFUSE, obs);
+        const GCTAPointing&    pnt = cta.pointing();
 
         // Get pointer on spatial model
         const GModelSpatial* model =
@@ -1904,7 +1781,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
         double psf_max_radius = psf_delta_max(0.0, 0.0, zenith, azimuth, srcLogEng);
 
         // Extract ROI radius (radians)
-        double roi_radius = events->roi().radius() * gammalib::deg2rad;
+        double roi_radius = roi.radius() * gammalib::deg2rad;
 
         // Compute the ROI radius plus maximum PSF radius (radians). Any photon
         // coming from beyond this radius will not make it in the dataspace and
@@ -1918,8 +1795,8 @@ double GCTAResponse::npred_diffuse(const GSource& source,
             // given by (theta,phi), into celestial coordinates.
             GMatrix ry;
             GMatrix rz;
-            ry.eulery(events->roi().centre().dir().dec_deg() - 90.0);
-            rz.eulerz(-events->roi().centre().dir().ra_deg());
+            ry.eulery(roi.centre().dir().dec_deg() - 90.0);
+            rz.eulerz(-roi.centre().dir().ra_deg());
             GMatrix rot = (ry * rz).transpose();
 
             // Setup integration kernel
@@ -1927,7 +1804,7 @@ double GCTAResponse::npred_diffuse(const GSource& source,
                                                    *model,
                                                    source.energy(),
                                                    source.time(),
-                                                   *ctaobs,
+                                                   cta,
                                                    rot);
 
             // Integrate over theta
@@ -2336,3 +2213,118 @@ void GCTAResponse::free_members(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA observation from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs is not a CTA observations.
+ *
+ * Dynamically casts generic observation into a CTA observation. If the
+ * generic observation is not a CTA observation, an exception is thrown.
+ ***************************************************************************/
+const GCTAObservation& GCTAResponse::retrieve_obs(const std::string& origin,
+                                                  const GObservation& obs) const
+{
+    // Get pointer on CTA observation
+    const GCTAObservation* cta = dynamic_cast<const GCTAObservation*>(&obs);
+
+    // If pointer is not valid then throw an exception
+    if (cta == NULL) {
+        std::string msg = "Specified observation is not a CTA observation.\n"
+                          "Please specify a CTA observation when calling"
+                          " this method.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return reference
+    return *cta;
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA pointing from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ *
+ * Extract CTA pointing from a CTA observation.
+ ***************************************************************************/
+const GCTAPointing& GCTAResponse::retrieve_pnt(const std::string& origin,
+                                               const GObservation& obs) const
+{
+    // Retrieve CTA observation and pointing
+    const GCTAObservation& cta = retrieve_obs(origin, obs);
+    const GCTAPointing&    pnt = cta.pointing();
+
+    // Return CTA pointing
+    return pnt;
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA ROI from generic observation
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] obs Generic observation.
+ *
+ * @exception GException::invalid_argument
+ *            Observation @p obs does not contain a CTA event list.
+ *
+ * Extract CTA Region of Interest from a CTA observation.
+ ***************************************************************************/
+const GCTARoi& GCTAResponse::retrieve_roi(const std::string& origin,
+                                          const GObservation& obs) const
+{
+    // Retrieve CTA observation
+    const GCTAObservation& cta = retrieve_obs(origin, obs);
+
+    // Get pointer on CTA events list
+    const GCTAEventList* events = dynamic_cast<const GCTAEventList*>(cta.events());
+
+    // If pointer is not valid then throw an exception
+    if (events == NULL) {
+        std::string msg = "Specified observation does not contain a CTA event"
+                          " list.\n"
+                          "Please specify a CTA observation containing a CTA"
+                          " event list when calling this method.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return CTA ROI
+    return (events->roi());
+}
+
+
+/***********************************************************************//**
+ * @brief Retrieve CTA instrument direction from generic event
+ *
+ * @param[in] origin Method asking for pointer retrieval.
+ * @param[in] event Generic event.
+ *
+ * @exception GException::invalid_argument
+ *            @p event does not contain a CTA instrument direction.
+ *
+ * Extract CTA Instrument Direction from an event.
+ ***************************************************************************/
+const GCTAInstDir& GCTAResponse::retrieve_dir(const std::string& origin,
+                                              const GEvent&      event) const
+{
+    // Get pointer on CTA instrument direction
+    const GCTAInstDir* dir = dynamic_cast<const GCTAInstDir*>(&(event.dir()));
+
+    // If pointer is not valid then throw an exception
+    if (dir == NULL) {
+        std::string msg = "Specified event is not a CTA event.\n"
+                          "Please specify a CTA event when calling this method.";
+        throw GException::invalid_argument(origin, msg);
+    }
+
+    // Return reference
+    return *dir;
+}
+

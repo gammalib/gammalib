@@ -28,11 +28,16 @@
 #define GCTAOBSERVATION_HPP
 
 /* __ Includes ___________________________________________________________ */
+#include <string>
 #include "GObservation.hpp"
 #include "GCTAResponse.hpp"
-#include "GTime.hpp"
-#include "GModel.hpp"
-#include "GFitsTable.hpp"
+#include "GCTAPointing.hpp"
+
+/* __ Forward declarations _______________________________________________ */
+class GTime;
+class GFitsHDU;
+class GResponse;
+class GXmlElement;
 
 
 /***********************************************************************//**
@@ -52,7 +57,7 @@ public:
     virtual ~GCTAObservation(void);
 
     // Operators
-    GCTAObservation& operator= (const GCTAObservation& obs);
+    GCTAObservation& operator=(const GCTAObservation& obs);
 
     // Implemented pure virtual base class methods
     virtual void                clear(void);
