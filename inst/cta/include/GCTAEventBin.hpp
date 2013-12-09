@@ -61,7 +61,7 @@ public:
     virtual ~GCTAEventBin(void);
 
     // Operators
-    virtual GCTAEventBin& operator= (const GCTAEventBin& bin);
+    virtual GCTAEventBin& operator=(const GCTAEventBin& bin);
 
     // Implemented pure virtual base class methods
     virtual void               clear(void);

@@ -111,8 +111,9 @@ GCTAEventBin::~GCTAEventBin(void)
  * @brief Assignment operator
  *
  * @param[in] bin Event bin.
+ * @return Event bin.
  ***************************************************************************/
-GCTAEventBin& GCTAEventBin::operator= (const GCTAEventBin& bin)
+GCTAEventBin& GCTAEventBin::operator=(const GCTAEventBin& bin)
 {
     // Execute only if object is not identical
     if (this != &bin) {
@@ -143,9 +144,7 @@ GCTAEventBin& GCTAEventBin::operator= (const GCTAEventBin& bin)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the instance to an initial state.
+ * @brief Clear eventbin
  ***************************************************************************/
 void GCTAEventBin::clear(void)
 {
@@ -165,8 +164,10 @@ void GCTAEventBin::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone event bin
+ *
+ * @return Pointer to deep copy of event bin.
+ ***************************************************************************/
 GCTAEventBin* GCTAEventBin::clone(void) const
 {
     return new GCTAEventBin(*this);
@@ -481,10 +482,3 @@ void GCTAEventBin::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

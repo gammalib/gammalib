@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GCTAEventCube.i  -  CTA event bin container class           *
+ *              GCTAEventCube.i - CTA event bin container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -38,7 +38,7 @@ class GCTAEventCube : public GEventCube {
 public:
     // Constructors and destructors
     GCTAEventCube(void);
-    explicit GCTAEventCube(const GSkymap& map, const GEbounds& ebds, const GGti& gti);
+    GCTAEventCube(const GSkymap& map, const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 

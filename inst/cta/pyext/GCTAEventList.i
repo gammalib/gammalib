@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GCTAEventList.i  -  CTA event atom container class           *
+ *             GCTAEventList.i - CTA event atom container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -56,8 +56,11 @@ public:
     virtual const GCTARoi& roi(void) const;
 
     // Implement other methods
-    void                   append(const GCTAEventAtom& event);
-    void                   reserve(const int& number);
+    void   append(const GCTAEventAtom& event);
+    void   reserve(const int& number);
+    double irf_cache(const std::string& name, const int& index) const;
+    void   irf_cache(const std::string& name, const int& index,
+                     const double& irf) const;
 };
 
 

@@ -61,15 +61,15 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GCTAEventList* clone(void) const;
-    virtual int            size(void) const { return m_events.size(); }
+    virtual int            size(void) const;
     virtual void           load(const std::string& filename);
     virtual void           save(const std::string& filename,
                                 const bool& clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
-    virtual int            number(void) const { return m_events.size(); }
+    virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
-    virtual const GCTARoi& roi(void) const { return m_roi; }
+    virtual const GCTARoi& roi(void) const;
     std::string            print(const GChatter& chatter = NORMAL) const;
 
     // Implement other methods
@@ -86,14 +86,14 @@ protected:
     void         free_members(void);
     virtual void set_energies(void) { return; }
     virtual void set_times(void) { return; }
-    void         read_events(const GFitsTable* hdu);
-    void         read_events_v0(const GFitsTable* hdu);
-    void         read_events_v1(const GFitsTable* hdu);
-    void         read_events_hillas(const GFitsTable* hdu);
-    void         read_ds_ebounds(const GFitsHDU* hdu);
-    void         read_ds_roi(const GFitsHDU* hdu);
-    void         write_events(GFitsBinTable* hdu) const;
-    void         write_ds_keys(GFitsHDU* hdu) const;
+    void         read_events(const GFitsTable& hdu);
+    void         read_events_v0(const GFitsTable& hdu);
+    void         read_events_v1(const GFitsTable& hdu);
+    void         read_events_hillas(const GFitsTable& hdu);
+    void         read_ds_ebounds(const GFitsHDU& hdu);
+    void         read_ds_roi(const GFitsHDU& hdu);
+    void         write_events(GFitsBinTable& hdu) const;
+    void         write_ds_keys(GFitsHDU& hdu) const;
     int          irf_cache_init(const std::string& name) const;
     int          irf_cache_index(const std::string& name) const;
 
@@ -105,5 +105,56 @@ protected:
     mutable std::vector<std::string>          m_irf_names;  //!< Model names
     mutable std::vector<std::vector<double> > m_irf_values; //!< IRF values
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of events in list
+ *
+ * @return Number of events in list.
+ ***************************************************************************/
+inline
+int GCTAEventList::size(void) const
+{
+    return (m_events.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of events in list
+ *
+ * @return Number of events in list.
+ ***************************************************************************/
+inline
+int GCTAEventList::number(void) const
+{
+    return (m_events.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Return Region of Interest
+ *
+ * @return Region of Interest.
+ ***************************************************************************/
+inline
+const GCTARoi& GCTAEventList::roi(void) const
+{
+    return (m_roi);
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for events
+ *
+ * @param[in] number Number of events.
+ *
+ * Reserves space for number events in the event list.
+ ***************************************************************************/
+inline
+void GCTAEventList::reserve(const int& number)
+{
+    m_events.reserve(number);
+    return;
+}
 
 #endif /* GCTAEVENTLIST_HPP */

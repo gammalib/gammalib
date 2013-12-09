@@ -342,13 +342,13 @@ void GCTAEventList::read(const GFits& fits)
     } // endelse: GTI built from TSTART and TSTOP
 
     // Load event data
-    read_events(&events);
+    read_events(events);
 
     // Read region of interest from data selection keyword
-    read_ds_roi(&events);
+    read_ds_roi(events);
 
     // Read energy boundaries from data selection keyword
-    read_ds_ebounds(&events);
+    read_ds_ebounds(events);
 
     // Return
     return;
@@ -371,10 +371,10 @@ void GCTAEventList::write(GFits& file) const
     GFitsBinTable* events = new GFitsBinTable;
 
     // Write events
-    write_events(events);
+    write_events(*events);
 
     // Write data selection keywords
-    write_ds_keys(events);
+    write_ds_keys(*events);
 
     // Append event table to FITS file
     file.append(*events);
@@ -450,7 +450,7 @@ std::string GCTAEventList::print(const GChatter& chatter) const
 
         // Append energy intervals
         if (ebounds().size() > 0) {
-            result.append("\n"+ebounds().print(chatter));
+            result.append("\n"+ebounds().print(gammalib::reduce(chatter)));
         }
         else {
             result.append("\n"+gammalib::parformat("Energy intervals") +
@@ -459,7 +459,7 @@ std::string GCTAEventList::print(const GChatter& chatter) const
 
         // Append ROI
         if (roi().radius() > 0) {
-            result.append("\n"+roi().print(chatter));
+            result.append("\n"+roi().print(gammalib::reduce(chatter)));
         }
         else {
             result.append("\n"+gammalib::parformat("Region of interest") +
@@ -504,23 +504,6 @@ void GCTAEventList::append(const GCTAEventAtom& event)
     // Set event index
     int index = m_events.size()-1;
     m_events[index].m_index = index;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Reserves space for events
- *
- * @param[in] number Number of events.
- *
- * Reserves space for number events in the event list.
- ***************************************************************************/
-void GCTAEventList::reserve(const int& number)
-{
-    // Reserve space
-    m_events.reserve(number);
 
     // Return
     return;
@@ -584,42 +567,37 @@ void GCTAEventList::free_members(void)
 /***********************************************************************//**
  * @brief Read CTA events from FITS table
  *
- * @param[in] table FITS table pointer.
+ * @param[in] table FITS table.
  *
  * This method reads the CTA event list from a FITS table HDU into memory.
  * Depending on the columns existing in the file, it either selects v0 or
  * v1 of the event list reader.
  ***************************************************************************/
-void GCTAEventList::read_events(const GFitsTable* table)
+void GCTAEventList::read_events(const GFitsTable& table)
 {
     // Clear existing events
     m_events.clear();
 
-    // Continue only if HDU is valid
-    if (table != NULL) {
+    // Extract number of events in FITS file
+    int num = table.integer("NAXIS2");
 
-        // Extract number of events in FITS file
-        int num = table->integer("NAXIS2");
+    // Continue only if there are events
+    if (num > 0) {
 
-        // Continue only if there are events
-        if (num > 0) {
+        // Read events for v1
+        if (table.contains("SHWIDTH") && table.contains("SHLENGTH")) {
+            read_events_v1(table);
+        }
 
-            // Read events for v1
-            if (table->hascolumn("SHWIDTH") && table->hascolumn("SHLENGTH")) {
-                read_events_v1(table);
-            }
+        // ... otherwise read events for v0
+        else {
+            read_events_v0(table);
+        }
 
-            // ... otherwise read events for v0
-            else {
-                read_events_v0(table);
-            }
+        // Read (optional) Hillas parameters
+        read_events_hillas(table);
 
-            // Read (optional) Hillas parameters
-            read_events_hillas(table);
-
-        } // endif: there were events
-
-    } // endif: HDU was valid
+    } // endif: there were events
 
     // Return
     return;
@@ -629,79 +607,74 @@ void GCTAEventList::read_events(const GFitsTable* table)
 /***********************************************************************//**
  * @brief Read CTA events from FITS table (version 0)
  *
- * @param[in] table FITS table pointer.
+ * @param[in] table FITS table.
  *
  * This method reads the CTA event list from a FITS table HDU into memory.
  * It is a minimal event reader that is compliant with the initial data
  * format distributed by Karl Kosack. Information that is not present in
  * that format is set to 0.
  ***************************************************************************/
-void GCTAEventList::read_events_v0(const GFitsTable* table)
+void GCTAEventList::read_events_v0(const GFitsTable& table)
 {
     // Clear existing events
     m_events.clear();
 
-    // Continue only if HDU is valid
-    if (table != NULL) {
+    // Extract number of events in FITS file
+    int num = table.nrows();
 
-        // Extract number of events in FITS file
-        int num = table->integer("NAXIS2");
+    // If there are events then load them
+    if (num > 0) {
 
-        // If there are events then load them
-        if (num > 0) {
+        // Reserve data
+        m_events.reserve(num);
 
-            // Reserve data
-            m_events.reserve(num);
+        // Get column pointers
+        const GFitsTableCol* ptr_eid         = table["EVENT_ID"];
+        const GFitsTableCol* ptr_time        = table["TIME"];
+        const GFitsTableCol* ptr_multip      = table["MULTIP"];
+        const GFitsTableCol* ptr_ra          = table["RA"];
+        const GFitsTableCol* ptr_dec         = table["DEC"];
+        const GFitsTableCol* ptr_dir_err     = table["DIR_ERR"];
+        const GFitsTableCol* ptr_detx        = table["DETX"];
+        const GFitsTableCol* ptr_dety        = table["DETY"];
+        const GFitsTableCol* ptr_alt         = table["ALT"];
+        const GFitsTableCol* ptr_az          = table["AZ"];
+        const GFitsTableCol* ptr_corex       = table["COREX"];
+        const GFitsTableCol* ptr_corey       = table["COREY"];
+        const GFitsTableCol* ptr_core_err    = table["CORE_ERR"];
+        const GFitsTableCol* ptr_xmax        = table["XMAX"];
+        const GFitsTableCol* ptr_xmax_err    = table["XMAX_ERR"];
+        const GFitsTableCol* ptr_energy      = table["ENERGY"];
+        const GFitsTableCol* ptr_energy_err  = table["ENERGY_ERR"];
 
-            // Get column pointers
-            const GFitsTableCol* ptr_eid         = (*table)["EVENT_ID"];
-            const GFitsTableCol* ptr_time        = (*table)["TIME"];
-            const GFitsTableCol* ptr_multip      = (*table)["MULTIP"];
-            const GFitsTableCol* ptr_ra          = (*table)["RA"];
-            const GFitsTableCol* ptr_dec         = (*table)["DEC"];
-            const GFitsTableCol* ptr_dir_err     = (*table)["DIR_ERR"];
-            const GFitsTableCol* ptr_detx        = (*table)["DETX"];
-            const GFitsTableCol* ptr_dety        = (*table)["DETY"];
-            const GFitsTableCol* ptr_alt         = (*table)["ALT"];
-            const GFitsTableCol* ptr_az          = (*table)["AZ"];
-            const GFitsTableCol* ptr_corex       = (*table)["COREX"];
-            const GFitsTableCol* ptr_corey       = (*table)["COREY"];
-            const GFitsTableCol* ptr_core_err    = (*table)["CORE_ERR"];
-            const GFitsTableCol* ptr_xmax        = (*table)["XMAX"];
-            const GFitsTableCol* ptr_xmax_err    = (*table)["XMAX_ERR"];
-            const GFitsTableCol* ptr_energy      = (*table)["ENERGY"];
-            const GFitsTableCol* ptr_energy_err  = (*table)["ENERGY_ERR"];
+        // Copy data from columns into GCTAEventAtom objects
+        GCTAEventAtom event;
+        for (int i = 0; i < num; ++i) {
+            event.m_index     = i;
+            event.m_time.set(ptr_time->real(i), m_gti.reference());
+            event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
+            event.m_energy.TeV(ptr_energy->real(i));
+            event.m_event_id    = ptr_eid->integer(i);
+            event.m_obs_id      = 0;
+            event.m_multip      = ptr_multip->integer(i);
+            event.m_telmask     = 0;
+            event.m_dir_err     = ptr_dir_err->real(i);
+            event.m_detx        = ptr_detx->real(i);
+            event.m_dety        = ptr_dety->real(i);
+            event.m_alt         = ptr_alt->real(i);
+            event.m_az          = ptr_az->real(i);
+            event.m_corex       = ptr_corex->real(i);
+            event.m_corey       = ptr_corey->real(i);
+            event.m_core_err    = ptr_core_err->real(i);
+            event.m_xmax        = ptr_xmax->real(i);
+            event.m_xmax_err    = ptr_xmax_err->real(i);
+            event.m_shwidth     = 0.0;
+            event.m_shlength    = 0.0;
+            event.m_energy_err  = ptr_energy_err->real(i);
+            m_events.push_back(event);
+        }
 
-            // Copy data from columns into GCTAEventAtom objects
-            GCTAEventAtom event;
-            for (int i = 0; i < num; ++i) {
-                event.m_index     = i;
-                event.m_time.set(ptr_time->real(i), m_gti.reference());
-                event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
-                event.m_energy.TeV(ptr_energy->real(i));
-                event.m_event_id    = ptr_eid->integer(i);
-                event.m_obs_id      = 0;
-                event.m_multip      = ptr_multip->integer(i);
-                event.m_telmask     = 0;
-                event.m_dir_err     = ptr_dir_err->real(i);
-                event.m_detx        = ptr_detx->real(i);
-                event.m_dety        = ptr_dety->real(i);
-                event.m_alt         = ptr_alt->real(i);
-                event.m_az          = ptr_az->real(i);
-                event.m_corex       = ptr_corex->real(i);
-                event.m_corey       = ptr_corey->real(i);
-                event.m_core_err    = ptr_core_err->real(i);
-                event.m_xmax        = ptr_xmax->real(i);
-                event.m_xmax_err    = ptr_xmax_err->real(i);
-                event.m_shwidth     = 0.0;
-                event.m_shlength    = 0.0;
-                event.m_energy_err  = ptr_energy_err->real(i);
-                m_events.push_back(event);
-            }
-
-        } // endif: there were events
-
-    } // endif: HDU was valid
+    } // endif: there were events
 
     // Return
     return;
@@ -711,81 +684,76 @@ void GCTAEventList::read_events_v0(const GFitsTable* table)
 /***********************************************************************//**
  * @brief Read CTA events from FITS table (version 1)
  *
- * @param[in] table FITS table pointer.
+ * @param[in] table FITS table.
  *
  * This method reads the CTA event list from a FITS table HDU into memory.
  *
  * @todo Implement agreed column format
  ***************************************************************************/
-void GCTAEventList::read_events_v1(const GFitsTable* table)
+void GCTAEventList::read_events_v1(const GFitsTable& table)
 {
     // Clear existing events
     m_events.clear();
 
-    // Continue only if HDU is valid
-    if (table != NULL) {
+    // Extract number of events in FITS file
+    int num = table.nrows();
 
-        // Extract number of events in FITS file
-        int num = table->integer("NAXIS2");
+    // If there are events then load them
+    if (num > 0) {
 
-        // If there are events then load them
-        if (num > 0) {
+        // Reserve data
+        m_events.reserve(num);
 
-            // Reserve data
-            m_events.reserve(num);
+        // Get column pointers
+        const GFitsTableCol* ptr_eid         = table["EVENT_ID"];
+        const GFitsTableCol* ptr_oid         = table["OBS_ID"];
+        const GFitsTableCol* ptr_time        = table["TIME"];
+        const GFitsTableCol* ptr_multip      = table["MULTIP"];
+        const GFitsTableCol* ptr_ra          = table["RA"];
+        const GFitsTableCol* ptr_dec         = table["DEC"];
+        const GFitsTableCol* ptr_dir_err     = table["DIR_ERR"];
+        const GFitsTableCol* ptr_detx        = table["DETX"];
+        const GFitsTableCol* ptr_dety        = table["DETY"];
+        const GFitsTableCol* ptr_alt         = table["ALT"];
+        const GFitsTableCol* ptr_az          = table["AZ"];
+        const GFitsTableCol* ptr_corex       = table["COREX"];
+        const GFitsTableCol* ptr_corey       = table["COREY"];
+        const GFitsTableCol* ptr_core_err    = table["CORE_ERR"];
+        const GFitsTableCol* ptr_xmax        = table["XMAX"];
+        const GFitsTableCol* ptr_xmax_err    = table["XMAX_ERR"];
+        const GFitsTableCol* ptr_shw         = table["SHWIDTH"];
+        const GFitsTableCol* ptr_shl         = table["SHLENGTH"];
+        const GFitsTableCol* ptr_energy      = table["ENERGY"];
+        const GFitsTableCol* ptr_energy_err  = table["ENERGY_ERR"];
 
-            // Get column pointers
-            const GFitsTableCol* ptr_eid         = (*table)["EVENT_ID"];
-            const GFitsTableCol* ptr_oid         = (*table)["OBS_ID"];
-            const GFitsTableCol* ptr_time        = (*table)["TIME"];
-            const GFitsTableCol* ptr_multip      = (*table)["MULTIP"];
-            const GFitsTableCol* ptr_ra          = (*table)["RA"];
-            const GFitsTableCol* ptr_dec         = (*table)["DEC"];
-            const GFitsTableCol* ptr_dir_err     = (*table)["DIR_ERR"];
-            const GFitsTableCol* ptr_detx        = (*table)["DETX"];
-            const GFitsTableCol* ptr_dety        = (*table)["DETY"];
-            const GFitsTableCol* ptr_alt         = (*table)["ALT"];
-            const GFitsTableCol* ptr_az          = (*table)["AZ"];
-            const GFitsTableCol* ptr_corex       = (*table)["COREX"];
-            const GFitsTableCol* ptr_corey       = (*table)["COREY"];
-            const GFitsTableCol* ptr_core_err    = (*table)["CORE_ERR"];
-            const GFitsTableCol* ptr_xmax        = (*table)["XMAX"];
-            const GFitsTableCol* ptr_xmax_err    = (*table)["XMAX_ERR"];
-            const GFitsTableCol* ptr_shw         = (*table)["SHWIDTH"];
-            const GFitsTableCol* ptr_shl         = (*table)["SHLENGTH"];
-            const GFitsTableCol* ptr_energy      = (*table)["ENERGY"];
-            const GFitsTableCol* ptr_energy_err  = (*table)["ENERGY_ERR"];
+        // Copy data from columns into GCTAEventAtom objects
+        GCTAEventAtom event;
+        for (int i = 0; i < num; ++i) {
+            event.m_index     = i;
+            event.m_time.set(ptr_time->real(i), m_gti.reference());
+            event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
+            event.m_energy.TeV(ptr_energy->real(i));
+            event.m_event_id    = ptr_eid->integer(i);
+            event.m_obs_id      = ptr_oid->integer(i);
+            event.m_multip      = ptr_multip->integer(i);
+            event.m_telmask     = 0;
+            event.m_dir_err     = ptr_dir_err->real(i);
+            event.m_detx        = ptr_detx->real(i);
+            event.m_dety        = ptr_dety->real(i);
+            event.m_alt         = ptr_alt->real(i);
+            event.m_az          = ptr_az->real(i);
+            event.m_corex       = ptr_corex->real(i);
+            event.m_corey       = ptr_corey->real(i);
+            event.m_core_err    = ptr_core_err->real(i);
+            event.m_xmax        = ptr_xmax->real(i);
+            event.m_xmax_err    = ptr_xmax_err->real(i);
+            event.m_shwidth     = ptr_shw->real(i);
+            event.m_shlength    = ptr_shl->real(i);
+            event.m_energy_err  = ptr_energy_err->real(i);
+            m_events.push_back(event);
+        }
 
-            // Copy data from columns into GCTAEventAtom objects
-            GCTAEventAtom event;
-            for (int i = 0; i < num; ++i) {
-                event.m_index     = i;
-                event.m_time.set(ptr_time->real(i), m_gti.reference());
-                event.m_dir.dir().radec_deg(ptr_ra->real(i), ptr_dec->real(i));
-                event.m_energy.TeV(ptr_energy->real(i));
-                event.m_event_id    = ptr_eid->integer(i);
-                event.m_obs_id      = ptr_oid->integer(i);
-                event.m_multip      = ptr_multip->integer(i);
-                event.m_telmask     = 0;
-                event.m_dir_err     = ptr_dir_err->real(i);
-                event.m_detx        = ptr_detx->real(i);
-                event.m_dety        = ptr_dety->real(i);
-                event.m_alt         = ptr_alt->real(i);
-                event.m_az          = ptr_az->real(i);
-                event.m_corex       = ptr_corex->real(i);
-                event.m_corey       = ptr_corey->real(i);
-                event.m_core_err    = ptr_core_err->real(i);
-                event.m_xmax        = ptr_xmax->real(i);
-                event.m_xmax_err    = ptr_xmax_err->real(i);
-                event.m_shwidth     = ptr_shw->real(i);
-                event.m_shlength    = ptr_shl->real(i);
-                event.m_energy_err  = ptr_energy_err->real(i);
-                m_events.push_back(event);
-            }
-
-        } // endif: there were events
-
-    } // endif: HDU was valid
+    } // endif: there were events
 
     // Return
     return;
@@ -795,7 +763,7 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
 /***********************************************************************//**
  * @brief Read Hillas information for CTA events from FITS table
  *
- * @param[in] table FITS table pointer.
+ * @param[in] table FITS table.
  *
  * This method reads the Hillas reconstruction information for CTA events
  * from an EVENTS file. It searches for the columns HIL_MSW, HIL_MSW_ERR,
@@ -805,55 +773,50 @@ void GCTAEventList::read_events_v1(const GFitsTable* table)
  *
  * @todo Verify consistency of event list size
  ***************************************************************************/
-void GCTAEventList::read_events_hillas(const GFitsTable* table)
+void GCTAEventList::read_events_hillas(const GFitsTable& table)
 {
-    // Continue only if HDU is valid
-    if (table != NULL) {
+    // Extract number of events in FITS file
+    int num = table.nrows();
 
-        // Extract number of events in FITS file
-        int num = table->integer("NAXIS2");
+    //TODO: Make sure that dimension is consistent with existing event
+    //      list
 
-        //TODO: Make sure that dimension is consistent with existing event
-        //      list
+    // Continue only if there are events
+    if (num > 0) {
 
-        // Continue only if there are events
-        if (num > 0) {
-
-            // HIL_MSW
-            if (table->hascolumn("HIL_MSW")) {
-                const GFitsTableCol* ptr = (*table)["HIL_MSW"];
-                for (int i = 0; i < num; ++i) {
-                    m_events[i].m_hil_msw = ptr->real(i);
-                }
+        // HIL_MSW
+        if (table.contains("HIL_MSW")) {
+            const GFitsTableCol* ptr = table["HIL_MSW"];
+            for (int i = 0; i < num; ++i) {
+                m_events[i].m_hil_msw = ptr->real(i);
             }
+        }
 
-            // HIL_MSW_ERR
-            if (table->hascolumn("HIL_MSW_ERR")) {
-                const GFitsTableCol* ptr = (*table)["HIL_MSW_ERR"];
-                for (int i = 0; i < num; ++i) {
-                    m_events[i].m_hil_msw_err = ptr->real(i);
-                }
+        // HIL_MSW_ERR
+        if (table.contains("HIL_MSW_ERR")) {
+            const GFitsTableCol* ptr = table["HIL_MSW_ERR"];
+            for (int i = 0; i < num; ++i) {
+                m_events[i].m_hil_msw_err = ptr->real(i);
             }
+        }
 
-            // HIL_MSL
-            if (table->hascolumn("HIL_MSL")) {
-                const GFitsTableCol* ptr = (*table)["HIL_MSL"];
-                for (int i = 0; i < num; ++i) {
-                    m_events[i].m_hil_msl = ptr->real(i);
-                }
+        // HIL_MSL
+        if (table.contains("HIL_MSL")) {
+            const GFitsTableCol* ptr = table["HIL_MSL"];
+            for (int i = 0; i < num; ++i) {
+                m_events[i].m_hil_msl = ptr->real(i);
             }
+        }
 
-            // HIL_MSL_ERR
-            if (table->hascolumn("HIL_MSL_ERR")) {
-                const GFitsTableCol* ptr = (*table)["HIL_MSL_ERR"];
-                for (int i = 0; i < num; ++i) {
-                    m_events[i].m_hil_msl_err = ptr->real(i);
-                }
+        // HIL_MSL_ERR
+        if (table.contains("HIL_MSL_ERR")) {
+            const GFitsTableCol* ptr = table["HIL_MSL_ERR"];
+            for (int i = 0; i < num; ++i) {
+                m_events[i].m_hil_msl_err = ptr->real(i);
             }
+        }
 
-        } // endif: there were events
-
-    } // endif: HDU was valid
+    } // endif: there were events
 
     // Return
     return;
@@ -878,52 +841,47 @@ void GCTAEventList::read_events_hillas(const GFitsTable* table)
  * This method clears the energy boundaries, irrespectively of whether energy
  * boundary information has been found in the HDU.
  ***************************************************************************/
-void GCTAEventList::read_ds_ebounds(const GFitsHDU* hdu)
+void GCTAEventList::read_ds_ebounds(const GFitsHDU& hdu)
 {
     // Reset energy boundaries
     m_ebounds.clear();
 
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get number of data selection keywords (default to 0 if keyword is
+    // not found)
+    int ndskeys = (hdu.hascard("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
 
-        // Get number of data selection keywords (default to 0 if keyword is
-        // not found)
-        int ndskeys = (hdu->hascard("NDSKEYS")) ? hdu->integer("NDSKEYS") : 0;
+    // Loop over all data selection keys
+    for (int i = 1; i <= ndskeys; ++i) {
 
-        // Loop over all data selection keys
-        for (int i = 1; i <= ndskeys; ++i) {
+        // Set data selection key strings
+        std::string type_key  = "DSTYP"+gammalib::str(i);
+        std::string unit_key  = "DSUNI"+gammalib::str(i);
+        std::string value_key = "DSVAL"+gammalib::str(i);
 
-            // Set data selection key strings
-            std::string type_key  = "DSTYP"+gammalib::str(i);
-            std::string unit_key  = "DSUNI"+gammalib::str(i);
-            std::string value_key = "DSVAL"+gammalib::str(i);
+        // Continue only if type_key is found and if this key is ENERGY
+        if (hdu.hascard(type_key) && hdu.string(type_key) == "ENERGY") {
 
-            // Continue only if type_key is found and if this key is ENERGY
-            if (hdu->hascard(type_key) && hdu->string(type_key) == "ENERGY") {
+            // Extract energy boundaries
+            std::string value                = hdu.string(value_key);
+            std::string unit                 = hdu.string(unit_key);
+            std::vector<std::string> ebounds = gammalib::split(value, ":");
+            if (ebounds.size() == 2) {
+                double  emin = gammalib::todouble(ebounds[0]);
+                double  emax = gammalib::todouble(ebounds[1]);
+                GEnergy e_min(emin, unit);
+                GEnergy e_max(emax, unit);
+                m_ebounds.append(e_min, e_max);
+            }
+            else {
+                throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
+                      "Invalid energy value \""+value+
+                      "\" encountered in data selection key \""+
+                      value_key+"\"");
+            }
+            
+        } // endif: ENERGY type_key found
 
-                // Extract energy boundaries
-                std::string value                = hdu->string(value_key);
-                std::string unit                 = hdu->string(unit_key);
-                std::vector<std::string> ebounds = gammalib::split(value, ":");
-                if (ebounds.size() == 2) {
-                    double  emin = gammalib::todouble(ebounds[0]);
-                    double  emax = gammalib::todouble(ebounds[1]);
-                    GEnergy e_min(emin, unit);
-                    GEnergy e_max(emax, unit);
-                    m_ebounds.append(e_min, e_max);
-                }
-                else {
-                    throw GCTAException::no_ebds(G_READ_DS_EBOUNDS,
-                          "Invalid energy value \""+value+
-                          "\" encountered in data selection key \""+
-                          value_key+"\"");
-                }
-                
-            } // endif: ENERGY type_key found
-
-        } // endfor: looped over data selection keys
-
-    } // endif: HDU was valid
+    } // endfor: looped over data selection keys
 
     // Return
     return;
@@ -947,56 +905,51 @@ void GCTAEventList::read_ds_ebounds(const GFitsHDU* hdu)
  * This method clears the ROI, irrespectively of whether ROI information has
  * been found in the HDU.
  ***************************************************************************/
-void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
+void GCTAEventList::read_ds_roi(const GFitsHDU& hdu)
 {
     // Reset ROI
     m_roi.clear();
 
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get number of data selection keywords (default to 0 if keyword is
+    // not found)
+    int ndskeys = (hdu.hascard("NDSKEYS")) ? hdu.integer("NDSKEYS") : 0;
 
-        // Get number of data selection keywords (default to 0 if keyword is
-        // not found)
-        int ndskeys = (hdu->hascard("NDSKEYS")) ? hdu->integer("NDSKEYS") : 0;
+    // Loop over all data selection keys
+    for (int i = 1; i <= ndskeys; ++i) {
 
-        // Loop over all data selection keys
-        for (int i = 1; i <= ndskeys; ++i) {
+        // Set data selection key strings
+        std::string type_key  = "DSTYP"+gammalib::str(i);
+        //std::string unit_key  = "DSUNI"+gammalib::str(i);
+        std::string value_key = "DSVAL"+gammalib::str(i);
 
-            // Set data selection key strings
-            std::string type_key  = "DSTYP"+gammalib::str(i);
-            //std::string unit_key  = "DSUNI"+gammalib::str(i);
-            std::string value_key = "DSVAL"+gammalib::str(i);
+        // Continue only if type_key is found and if this key is POS(RA,DEC)
+        if (hdu.hascard(type_key) && hdu.string(type_key) == "POS(RA,DEC)") {
 
-            // Continue only if type_key is found and if this key is POS(RA,DEC)
-            if (hdu->hascard(type_key) && hdu->string(type_key) == "POS(RA,DEC)") {
+            // ...
+            //std::string unit              = gammalib::toupper(hdu.string(unit_key));
+            std::string value             = hdu.string(value_key);
+            value                         = gammalib::strip_chars(value, "CIRCLE(");
+            value                         = gammalib::strip_chars(value, ")");
+            std::vector<std::string> args = gammalib::split(value, ",");
+            if (args.size() == 3) {
+                double ra  = gammalib::todouble(args[0]);
+                double dec = gammalib::todouble(args[1]);
+                double rad = gammalib::todouble(args[2]);
+                GCTAInstDir dir;
+                dir.dir().radec_deg(ra, dec);
+                m_roi.centre(dir);
+                m_roi.radius(rad);
+            }
+            else {
+                throw GException::no_roi(G_READ_DS_ROI,
+                      "Invalid acceptance cone value \""+value+
+                      "\" encountered in data selection key \""+
+                      value_key+"\"");
+            }
 
-                // ...
-                //std::string unit              = gammalib::toupper(hdu->string(unit_key));
-                std::string value             = hdu->string(value_key);
-                value                         = gammalib::strip_chars(value, "CIRCLE(");
-                value                         = gammalib::strip_chars(value, ")");
-                std::vector<std::string> args = gammalib::split(value, ",");
-                if (args.size() == 3) {
-                    double ra  = gammalib::todouble(args[0]);
-                    double dec = gammalib::todouble(args[1]);
-                    double rad = gammalib::todouble(args[2]);
-                    GCTAInstDir dir;
-                    dir.dir().radec_deg(ra, dec);
-                    m_roi.centre(dir);
-                    m_roi.radius(rad);
-                }
-                else {
-                    throw GException::no_roi(G_READ_DS_ROI,
-                          "Invalid acceptance cone value \""+value+
-                          "\" encountered in data selection key \""+
-                          value_key+"\"");
-                }
+        } // endif: POS(RA,DEC) type found
 
-            } // endif: POS(RA,DEC) type found
-
-        } // endfor: looped over data selection keys
-
-    } // endif: HDU was valid
+    } // endfor: looped over data selection keys
 
     // Return
     return;
@@ -1013,106 +966,101 @@ void GCTAEventList::read_ds_roi(const GFitsHDU* hdu)
  * @todo The TELMASK column is allocated with a dummy length of 100.
  * @todo Implement agreed column format
  ***************************************************************************/
-void GCTAEventList::write_events(GFitsBinTable* hdu) const
+void GCTAEventList::write_events(GFitsBinTable& hdu) const
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Set extension name
+    hdu.extname("EVENTS");
 
-        // Set extension name
-        hdu->extname("EVENTS");
+    // If there are events then write them now
+    if (size() > 0) {
 
-        // If there are events then write them now
-        if (size() > 0) {
+        // Allocate columns
+        GFitsTableULongCol  col_eid         = GFitsTableULongCol("EVENT_ID", size());
+        GFitsTableULongCol  col_oid         = GFitsTableULongCol("OBS_ID", size());
+        GFitsTableDoubleCol col_time        = GFitsTableDoubleCol("TIME", size());
+        GFitsTableDoubleCol col_live        = GFitsTableDoubleCol("TLIVE", size());
+        GFitsTableShortCol  col_multip      = GFitsTableShortCol("MULTIP", size());
+        GFitsTableBitCol    col_telmask     = GFitsTableBitCol("TELMASK", size(), 100);
+        GFitsTableFloatCol  col_ra          = GFitsTableFloatCol("RA", size());
+        GFitsTableFloatCol  col_dec         = GFitsTableFloatCol("DEC", size());
+        GFitsTableFloatCol  col_direrr      = GFitsTableFloatCol("DIR_ERR", size());
+        GFitsTableFloatCol  col_detx        = GFitsTableFloatCol("DETX", size());
+        GFitsTableFloatCol  col_dety        = GFitsTableFloatCol("DETY", size());
+        GFitsTableFloatCol  col_alt         = GFitsTableFloatCol("ALT", size());
+        GFitsTableFloatCol  col_az          = GFitsTableFloatCol("AZ", size());
+        GFitsTableFloatCol  col_corex       = GFitsTableFloatCol("COREX", size());
+        GFitsTableFloatCol  col_corey       = GFitsTableFloatCol("COREY", size());
+        GFitsTableFloatCol  col_core_err    = GFitsTableFloatCol("CORE_ERR", size());
+        GFitsTableFloatCol  col_xmax        = GFitsTableFloatCol("XMAX", size());
+        GFitsTableFloatCol  col_xmax_err    = GFitsTableFloatCol("XMAX_ERR", size());
+        GFitsTableFloatCol  col_shw         = GFitsTableFloatCol("SHWIDTH", size());
+        GFitsTableFloatCol  col_shl         = GFitsTableFloatCol("SHLENGTH", size());
+        GFitsTableFloatCol  col_energy      = GFitsTableFloatCol("ENERGY", size());
+        GFitsTableFloatCol  col_energy_err  = GFitsTableFloatCol("ENERGY_ERR", size());
+        GFitsTableFloatCol  col_hil_msw     = GFitsTableFloatCol("HIL_MSW", size());
+        GFitsTableFloatCol  col_hil_msw_err = GFitsTableFloatCol("HIL_MSW_ERR", size());
+        GFitsTableFloatCol  col_hil_msl     = GFitsTableFloatCol("HIL_MSL", size());
+        GFitsTableFloatCol  col_hil_msl_err = GFitsTableFloatCol("HIL_MSL_ERR", size());
 
-            // Allocate columns
-            GFitsTableULongCol  col_eid         = GFitsTableULongCol("EVENT_ID", size());
-            GFitsTableULongCol  col_oid         = GFitsTableULongCol("OBS_ID", size());
-            GFitsTableDoubleCol col_time        = GFitsTableDoubleCol("TIME", size());
-            GFitsTableDoubleCol col_live        = GFitsTableDoubleCol("TLIVE", size());
-            GFitsTableShortCol  col_multip      = GFitsTableShortCol("MULTIP", size());
-            GFitsTableBitCol    col_telmask     = GFitsTableBitCol("TELMASK", size(), 100);
-            GFitsTableFloatCol  col_ra          = GFitsTableFloatCol("RA", size());
-            GFitsTableFloatCol  col_dec         = GFitsTableFloatCol("DEC", size());
-            GFitsTableFloatCol  col_direrr      = GFitsTableFloatCol("DIR_ERR", size());
-            GFitsTableFloatCol  col_detx        = GFitsTableFloatCol("DETX", size());
-            GFitsTableFloatCol  col_dety        = GFitsTableFloatCol("DETY", size());
-            GFitsTableFloatCol  col_alt         = GFitsTableFloatCol("ALT", size());
-            GFitsTableFloatCol  col_az          = GFitsTableFloatCol("AZ", size());
-            GFitsTableFloatCol  col_corex       = GFitsTableFloatCol("COREX", size());
-            GFitsTableFloatCol  col_corey       = GFitsTableFloatCol("COREY", size());
-            GFitsTableFloatCol  col_core_err    = GFitsTableFloatCol("CORE_ERR", size());
-            GFitsTableFloatCol  col_xmax        = GFitsTableFloatCol("XMAX", size());
-            GFitsTableFloatCol  col_xmax_err    = GFitsTableFloatCol("XMAX_ERR", size());
-            GFitsTableFloatCol  col_shw         = GFitsTableFloatCol("SHWIDTH", size());
-            GFitsTableFloatCol  col_shl         = GFitsTableFloatCol("SHLENGTH", size());
-            GFitsTableFloatCol  col_energy      = GFitsTableFloatCol("ENERGY", size());
-            GFitsTableFloatCol  col_energy_err  = GFitsTableFloatCol("ENERGY_ERR", size());
-            GFitsTableFloatCol  col_hil_msw     = GFitsTableFloatCol("HIL_MSW", size());
-            GFitsTableFloatCol  col_hil_msw_err = GFitsTableFloatCol("HIL_MSW_ERR", size());
-            GFitsTableFloatCol  col_hil_msl     = GFitsTableFloatCol("HIL_MSL", size());
-            GFitsTableFloatCol  col_hil_msl_err = GFitsTableFloatCol("HIL_MSL_ERR", size());
+        // Fill columns
+        for (int i = 0; i < size(); ++i) {
+            col_eid(i)         = m_events[i].m_event_id;
+            col_oid(i)         = m_events[i].m_obs_id;
+            col_time(i)        = m_events[i].time().convert(m_gti.reference());
+            col_live(i)        = 0.0;
+            col_multip(i)      = 0;
+            //col_telmask
+            col_ra(i)          = m_events[i].dir().dir().ra_deg();
+            col_dec(i)         = m_events[i].dir().dir().dec_deg();
+            col_direrr(i)      = m_events[i].m_dir_err;
+            col_detx(i)        = m_events[i].m_detx;
+            col_dety(i)        = m_events[i].m_dety;
+            col_alt(i)         = m_events[i].m_alt;
+            col_az(i)          = m_events[i].m_az;
+            col_corex(i)       = m_events[i].m_corex;
+            col_corey(i)       = m_events[i].m_corey;
+            col_core_err(i)    = m_events[i].m_core_err;
+            col_xmax(i)        = m_events[i].m_xmax;
+            col_xmax_err(i)    = m_events[i].m_xmax_err;
+            col_shw(i)         = m_events[i].m_shwidth;
+            col_shl(i)         = m_events[i].m_shlength;
+            col_energy(i)      = m_events[i].energy().TeV();
+            col_energy_err(i)  = m_events[i].m_energy_err;
+            col_hil_msw(i)     = m_events[i].m_hil_msw;
+            col_hil_msw_err(i) = m_events[i].m_hil_msw_err;
+            col_hil_msl(i)     = m_events[i].m_hil_msl;
+            col_hil_msl_err(i) = m_events[i].m_hil_msl_err;
+        } // endfor: looped over rows
 
-            // Fill columns
-            for (int i = 0; i < size(); ++i) {
-                col_eid(i)         = m_events[i].m_event_id;
-                col_oid(i)         = m_events[i].m_obs_id;
-                col_time(i)        = m_events[i].time().convert(m_gti.reference());
-                col_live(i)        = 0.0;
-                col_multip(i)      = 0;
-                //col_telmask
-                col_ra(i)          = m_events[i].dir().dir().ra_deg();
-                col_dec(i)         = m_events[i].dir().dir().dec_deg();
-                col_direrr(i)      = m_events[i].m_dir_err;
-                col_detx(i)        = m_events[i].m_detx;
-                col_dety(i)        = m_events[i].m_dety;
-                col_alt(i)         = m_events[i].m_alt;
-                col_az(i)          = m_events[i].m_az;
-                col_corex(i)       = m_events[i].m_corex;
-                col_corey(i)       = m_events[i].m_corey;
-                col_core_err(i)    = m_events[i].m_core_err;
-                col_xmax(i)        = m_events[i].m_xmax;
-                col_xmax_err(i)    = m_events[i].m_xmax_err;
-                col_shw(i)         = m_events[i].m_shwidth;
-                col_shl(i)         = m_events[i].m_shlength;
-                col_energy(i)      = m_events[i].energy().TeV();
-                col_energy_err(i)  = m_events[i].m_energy_err;
-                col_hil_msw(i)     = m_events[i].m_hil_msw;
-                col_hil_msw_err(i) = m_events[i].m_hil_msw_err;
-                col_hil_msl(i)     = m_events[i].m_hil_msl;
-                col_hil_msl_err(i) = m_events[i].m_hil_msl_err;
-            } // endfor: looped over rows
+        // Append columns to table
+        hdu.append(col_eid);
+        hdu.append(col_oid);
+        hdu.append(col_time);
+        hdu.append(col_live);
+        hdu.append(col_multip);
+        hdu.append(col_telmask);
+        hdu.append(col_ra);
+        hdu.append(col_dec);
+        hdu.append(col_direrr);
+        hdu.append(col_detx);
+        hdu.append(col_dety);
+        hdu.append(col_alt);
+        hdu.append(col_az);
+        hdu.append(col_corex);
+        hdu.append(col_corey);
+        hdu.append(col_core_err);
+        hdu.append(col_xmax);
+        hdu.append(col_xmax_err);
+        hdu.append(col_shw);
+        hdu.append(col_shl);
+        hdu.append(col_energy);
+        hdu.append(col_energy_err);
+        hdu.append(col_hil_msw);
+        hdu.append(col_hil_msw_err);
+        hdu.append(col_hil_msl);
+        hdu.append(col_hil_msl_err);
 
-            // Append columns to table
-            hdu->append(col_eid);
-            hdu->append(col_oid);
-            hdu->append(col_time);
-            hdu->append(col_live);
-            hdu->append(col_multip);
-            hdu->append(col_telmask);
-            hdu->append(col_ra);
-            hdu->append(col_dec);
-            hdu->append(col_direrr);
-            hdu->append(col_detx);
-            hdu->append(col_dety);
-            hdu->append(col_alt);
-            hdu->append(col_az);
-            hdu->append(col_corex);
-            hdu->append(col_corey);
-            hdu->append(col_core_err);
-            hdu->append(col_xmax);
-            hdu->append(col_xmax_err);
-            hdu->append(col_shw);
-            hdu->append(col_shl);
-            hdu->append(col_energy);
-            hdu->append(col_energy_err);
-            hdu->append(col_hil_msw);
-            hdu->append(col_hil_msw_err);
-            hdu->append(col_hil_msl);
-            hdu->append(col_hil_msl_err);
-
-        } // endif: there were events to write
-
-    } // endif: HDU was valid
+    } // endif: there were events to write
 
     // Return
     return;
@@ -1122,59 +1070,54 @@ void GCTAEventList::write_events(GFitsBinTable* hdu) const
 /***********************************************************************//**
  * @brief Write data selection keywords into FITS HDU
  *
- * @param[in] hdu FITS HDU pointer.
+ * @param[in] hdu FITS HDU.
  *
  * This method does nothing if the HDU pointer is NULL.
  *
  * @todo This is a very dumb data selection keyword writing routine that does
  *       not take into account any existing keywords. We definitely want a
  *       more secure logic that checks for existing keywords and possible
- *       conflicts. But for this prototype software, this code does the job.
+ *       conflicts. But for the moment, this code does the job.
  ***************************************************************************/
-void GCTAEventList::write_ds_keys(GFitsHDU* hdu) const
+void GCTAEventList::write_ds_keys(GFitsHDU& hdu) const
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Set ROI parameters
+    double ra  = roi().centre().dir().ra_deg();
+    double dec = roi().centre().dir().dec_deg();
+    double rad = roi().radius();
 
-        // Set ROI parameters
-        double ra  = roi().centre().dir().ra_deg();
-        double dec = roi().centre().dir().dec_deg();
-        double rad = roi().radius();
+    // Set energy range parameters
+    double e_min = emin().TeV();
+    double e_max = emax().TeV();
 
-        // Set energy range parameters
-        double e_min = emin().TeV();
-        double e_max = emax().TeV();
+    // Set cone selection string
+    std::string dsval2 = "CIRCLE(" +
+                         gammalib::str(ra) + "," +
+                         gammalib::str(dec) + "," +
+                         gammalib::str(rad) + ")";
 
-        // Set cone selection string
-        std::string dsval2 = "CIRCLE(" +
-                             gammalib::str(ra) + "," +
-                             gammalib::str(dec) + "," +
-                             gammalib::str(rad) + ")";
+    // Set energy selection string
+    std::string dsval3 = gammalib::str(e_min) + ":" +
+                         gammalib::str(e_max);
 
-        // Set energy selection string
-        std::string dsval3 = gammalib::str(e_min) + ":" +
-                             gammalib::str(e_max);
+    // Add time selection keywords
+    hdu.card("DSTYP1", "TIME",  "Data selection type");
+    hdu.card("DSUNI1", "s",     "Data selection unit");
+    hdu.card("DSVAL1", "TABLE", "Data selection value");
+    hdu.card("DSREF1", ":GTI",  "Data selection reference");
 
-        // Add time selection keywords
-        hdu->card("DSTYP1", "TIME",  "Data selection type");
-        hdu->card("DSUNI1", "s",     "Data selection unit");
-        hdu->card("DSVAL1", "TABLE", "Data selection value");
-        hdu->card("DSREF1", ":GTI",  "Data selection reference");
+    // Add acceptance cone selection
+    hdu.card("DSTYP2", "POS(RA,DEC)", "Data selection type");
+    hdu.card("DSUNI2", "deg",         "Data selection unit");
+    hdu.card("DSVAL2", dsval2,        "Data selection value");
 
-        // Add acceptance cone selection
-        hdu->card("DSTYP2", "POS(RA,DEC)", "Data selection type");
-        hdu->card("DSUNI2", "deg",         "Data selection unit");
-        hdu->card("DSVAL2", dsval2,        "Data selection value");
+    // Add energy range selection
+    hdu.card("DSTYP3", "ENERGY", "Data selection type");
+    hdu.card("DSUNI3", "TeV",    "Data selection unit");
+    hdu.card("DSVAL3", dsval3,   "Data selection value");
 
-        // Add energy range selection
-        hdu->card("DSTYP3", "ENERGY", "Data selection type");
-        hdu->card("DSUNI3", "TeV",    "Data selection unit");
-        hdu->card("DSVAL3", dsval3,   "Data selection value");
-
-        // Set number of data selection keys
-        hdu->card("NDSKEYS", 3,  "Number of data selections");
-
-    } // endif: HDU was valid
+    // Set number of data selection keys
+    hdu.card("NDSKEYS", 3,  "Number of data selections");
 
     // Return
     return;

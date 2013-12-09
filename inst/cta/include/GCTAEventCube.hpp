@@ -54,7 +54,7 @@ class GCTAEventCube : public GEventCube {
 public:
     // Constructors and destructors
     GCTAEventCube(void);
-    explicit GCTAEventCube(const GSkymap& map, const GEbounds& ebds, const GGti& gti);
+    GCTAEventCube(const GSkymap& map, const GEbounds& ebds, const GGti& gti);
     GCTAEventCube(const GCTAEventCube& cube);
     virtual ~GCTAEventCube(void);
 
@@ -79,20 +79,20 @@ public:
 
     // Other methods
     void                   map(const GSkymap& map);
-    const GSkymap&         map(void) const { return m_map; }
-    int                    nx(void) const { return m_map.nx(); }
-    int                    ny(void) const { return m_map.ny(); }
-    int                    npix(void) const { return m_map.npix(); }
-    int                    ebins(void) const { return m_map.nmaps(); }
+    const GSkymap&         map(void) const;
+    int                    nx(void) const;
+    int                    ny(void) const;
+    int                    npix(void) const;
+    int                    ebins(void) const;
 
 protected:
     // Protected methods
     void         init_members(void);
     void         copy_members(const GCTAEventCube& cube);
     void         free_members(void);
-    void         read_cntmap(const GFitsImage* hdu);
-    void         read_ebds(const GFitsTable* hdu);
-    void         read_gti(const GFitsTable* hdu);
+    void         read_cntmap(const GFitsImage& hdu);
+    void         read_ebds(const GFitsTable& hdu);
+    void         read_gti(const GFitsTable& hdu);
     void         set_directions(void);
     virtual void set_energies(void);
     virtual void set_times(void);
@@ -108,5 +108,69 @@ protected:
     std::vector<GEnergy>     m_ewidth;     //!< Array of energy bin widths
     double                   m_ontime;     //!< Event cube ontime (sec)
 };
+
+
+/***********************************************************************//**
+ * @brief Return event cube sky map
+ *
+ * @return Event cube sky map.
+ *
+ * The GCTAEventCube represents the event cube as a sky map. This methods
+ * returns the sky map that is stored internally by GCTAEventCube as event
+ * cube.
+ ***************************************************************************/
+inline
+const GSkymap& GCTAEventCube::map(void) const
+{
+    return (m_map);
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in X direction
+ *
+ * @return Number of bins in X direction.
+ ***************************************************************************/
+inline
+int GCTAEventCube::nx(void) const
+{
+    return (m_map.nx());
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in Y direction
+ *
+ * @return Number of bins in Y direction.
+ ***************************************************************************/
+inline
+int GCTAEventCube::ny(void) const
+{
+    return (m_map.ny());
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of pixels in one energy bins of the event cube
+ *
+ * @return Number of pixels in one energy bins of the event cube.
+ ***************************************************************************/
+inline
+int GCTAEventCube::npix(void) const
+{
+    return (m_map.npix());
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of energy bins in the event cube
+ *
+ * @return Number of energy bins in the event cube.
+ ***************************************************************************/
+inline
+int GCTAEventCube::ebins(void) const
+{
+    return (m_map.nmaps());
+}
 
 #endif /* GCTAEVENTCUBE_HPP */

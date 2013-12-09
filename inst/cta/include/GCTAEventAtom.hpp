@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventAtom.hpp
- * @brief GCTAEventAtom class interface definition.
+ * @brief CTA event atom class definition
  * @author Juergen Knoedlseder
  */
 
@@ -38,9 +38,9 @@
 /***********************************************************************//**
  * @class GCTAEventAtom
  *
- * @brief GCTAEventAtom class interface defintion
+ * @brief CTA event atom class
  *
- * This class implement a CTA event atom. It collects all the relevant event
+ * This class implements a CTA event atom. It collects all the relevant event
  * information needed for CTA unbinned analysis.
  ***************************************************************************/
 class GCTAEventAtom : public GEventAtom {
@@ -55,25 +55,25 @@ public:
     virtual ~GCTAEventAtom(void);
 
     // Operators
-    GCTAEventAtom& operator= (const GCTAEventAtom& atom);
+    GCTAEventAtom& operator=(const GCTAEventAtom& atom);
 
     // Implemented pure virtual base class methods
     void               clear(void);
     GCTAEventAtom*     clone(void) const;
-    const GCTAInstDir& dir(void) const { return m_dir; }
-    const GEnergy&     energy(void) const { return m_energy; }
-    const GTime&       time(void) const { return m_time; }
-    void               dir(const GCTAInstDir& dir) { m_dir=dir; }
-    void               energy(const GEnergy& energy) { m_energy=energy; }
-    void               time(const GTime& time) { m_time=time; }
+    const GCTAInstDir& dir(void) const;
+    const GEnergy&     energy(void) const;
+    const GTime&       time(void) const;
+    void               dir(const GCTAInstDir& dir);
+    void               energy(const GEnergy& energy);
+    void               time(const GTime& time);
     std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const int&           index(void) const { return m_index; }
-    const unsigned long& event_id(void) const { return m_event_id; }
-    const unsigned long& obs_id(void)   const { return m_obs_id; }
-    void                 event_id(const unsigned long& id) { m_event_id=id; }
-    void                 obs_id(const unsigned long& id) { m_obs_id=id; }
+    const int&           index(void) const;
+    const unsigned long& event_id(void) const;
+    const unsigned long& obs_id(void)   const;
+    void                 event_id(const unsigned long& id);
+    void                 obs_id(const unsigned long& id);
 
 protected:
     // Protected methods
@@ -108,5 +108,144 @@ protected:
     float         m_hil_msl;        //!< Hillas MSL
     float         m_hil_msl_err;    //!< Hillas MSL error
 };
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction
+ *
+ * @return Instrument direction.
+ ***************************************************************************/
+inline
+const GCTAInstDir& GCTAEventAtom::dir(void) const
+{
+    return (m_dir);
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy
+ *
+ * @return Energy.
+ ***************************************************************************/
+inline
+const GEnergy& GCTAEventAtom::energy(void) const
+{
+    return (m_energy);
+}
+
+
+/***********************************************************************//**
+ * @brief Return time
+ *
+ * @return Time.
+ ***************************************************************************/
+inline
+const GTime& GCTAEventAtom::time(void) const
+{
+    return (m_time);
+}
+
+
+/***********************************************************************//**
+ * @brief Set instrument direction
+ *
+ * @param[in] dir Instrument direction.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::dir(const GCTAInstDir& dir)
+{
+    m_dir = dir;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set energy
+ *
+ * @param[in] energy Energy.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::energy(const GEnergy& energy)
+{
+    m_energy = energy;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set time
+ *
+ * @param[in] time Time.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::time(const GTime& time)
+{
+    m_time = time;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event index in list
+ *
+ * @return Index.
+ *
+ * Returns the index of the event in case it is part of a list.
+ ***************************************************************************/
+inline
+const int& GCTAEventAtom::index(void) const
+{
+    return (m_index);
+}
+
+
+/***********************************************************************//**
+ * @brief Return event identifier
+ *
+ * @return Event identifier.
+ ***************************************************************************/
+inline
+const unsigned long& GCTAEventAtom::event_id(void) const
+{
+    return (m_event_id);
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation identifier
+ *
+ * @return Observation identifier.
+ ***************************************************************************/
+inline
+const unsigned long& GCTAEventAtom::obs_id(void) const
+{
+    return (m_obs_id);
+}
+
+
+/***********************************************************************//**
+ * @brief Set event identifier
+ *
+ * @param[in] id Event identifier.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::event_id(const unsigned long& id)
+{
+    m_event_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set observation identifier
+ *
+ * @param[in] id Observation identifier.
+ ***************************************************************************/
+inline
+void GCTAEventAtom::obs_id(const unsigned long& id)
+{
+    m_obs_id = id;
+    return;
+}
 
 #endif /* GCTAEVENTATOM_HPP */

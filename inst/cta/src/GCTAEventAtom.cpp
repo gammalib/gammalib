@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventAtom.cpp
- * @brief GCTAEventAtom class implementation.
+ * @brief CTA event atom class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -103,8 +103,9 @@ GCTAEventAtom::~GCTAEventAtom(void)
  * @brief Assignment operator
  *
  * @param[in] atom Event atom.
+ * @return Event atom.
  ***************************************************************************/
-GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
+GCTAEventAtom& GCTAEventAtom::operator=(const GCTAEventAtom& atom)
 {
     // Execute only if object is not identical
     if (this != &atom) {
@@ -135,9 +136,7 @@ GCTAEventAtom& GCTAEventAtom::operator= (const GCTAEventAtom& atom)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the instance to an initial state.
+ * @brief Clear event atom
  ***************************************************************************/
 void GCTAEventAtom::clear(void)
 {
@@ -157,7 +156,9 @@ void GCTAEventAtom::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone event atom
+ *
+ * @return Pointer to deep copy of event atom.
  ***************************************************************************/
 GCTAEventAtom* GCTAEventAtom::clone(void) const
 {
