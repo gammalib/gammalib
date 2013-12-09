@@ -38,6 +38,7 @@
 #include "GCTAEventList.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTARoi.hpp"
+#include "GCTAPsf.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAAeff2D.hpp"
 #include "GCTAAeffArf.hpp"
