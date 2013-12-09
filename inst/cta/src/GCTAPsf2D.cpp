@@ -259,7 +259,7 @@ void GCTAPsf2D::load(const std::string& filename)
     GFits file(filename);
 
     // Get PSF table
-    GFitsTable* table = file.table("POINT SPREAD FUNCTION");
+    const GFitsTable& table = *file.table("POINT SPREAD FUNCTION");
 
     // Read PSF table
     m_psf.read(table);

@@ -52,7 +52,7 @@ class GCTAAeffArf : public GCTAAeff {
 public:
     // Constructors and destructors
     GCTAAeffArf(void);
-    GCTAAeffArf(const std::string& filename);
+    explicit GCTAAeffArf(const std::string& filename);
     GCTAAeffArf(const GCTAAeffArf& cta);
     virtual ~GCTAAeffArf(void);
 
@@ -73,14 +73,14 @@ public:
     std::string  print(const GChatter& chatter = NORMAL) const;
 
     // Methods
-    int           size(void) const { return m_logE.size(); }
-    void          sigma(const double& sigma) { m_sigma=sigma; }
-    const double& sigma(void) const { return m_sigma; }
-    void          thetacut(const double& thetacut) { m_thetacut=thetacut; }
-    const double& thetacut(void) const { return m_thetacut; }
-    void          scale(const double& scale) { m_scale=scale; }
-    const double& scale(void) const { return m_scale; }
-    void          read_arf(const GFitsTable* hdu);
+    int           size(void) const;
+    void          sigma(const double& sigma);
+    const double& sigma(void) const;
+    void          thetacut(const double& thetacut);
+    const double& thetacut(void) const;
+    void          scale(const double& scale);
+    const double& scale(void) const;
+    void          read(const GFitsTable& hdu);
     void          remove_thetacut(const GCTAResponse& rsp);
     
 private:
@@ -97,5 +97,114 @@ private:
     double              m_thetacut;  //!< Theta cut for ARF
     double              m_scale;     //!< Scale for ARF
 };
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which effective area was loaded.
+ ***************************************************************************/
+inline
+std::string GCTAAeffArf::filename(void) const
+{
+    return m_filename;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of node energies in response
+ *
+ * @return Number of node energies.
+ ***************************************************************************/
+inline
+int GCTAAeffArf::size(void) const
+{
+    return (m_logE.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Set sigma for offset angle dependence
+ *
+ * @param[in] sigma Sigma for offset angle dependence.
+ *
+ * Sets the sigma parameter for the offset angle dependence of the effective
+ * area. If @p sigma is 0 (which is the default value), no offset angle
+ * dependency will be assumed.
+ ***************************************************************************/
+inline
+void GCTAAeffArf::sigma(const double& sigma)
+{
+    m_sigma = sigma;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sigma for offset angle dependence
+ *
+ * @return Sigma for offset angle dependence.
+ ***************************************************************************/
+inline
+const double& GCTAAeffArf::sigma(void) const
+{
+    return (m_sigma);
+}
+
+
+/***********************************************************************//**
+ * @brief Set theta cut angle
+ *
+ * @param[in] thetacut Set theta cut angle.
+ *
+ * Sets the theta cut angle which defines the energy independent cut that
+ * has been assumed in deriving the ARF values. If @p thetacut os 0 (which
+ * is the default avlue), not thetacut will be applied.
+ ***************************************************************************/
+inline
+void GCTAAeffArf::thetacut(const double& thetacut)
+{
+    m_thetacut = thetacut;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return theta cut angle
+ *
+ * @return Theta cut angle.
+ ***************************************************************************/
+inline
+const double& GCTAAeffArf::thetacut(void) const
+{
+    return (m_thetacut);
+}
+
+
+/***********************************************************************//**
+ * @brief Set effective area scaling factor
+ *
+ * @param[in] scale Set effective area scaling factor.
+ *
+ * Sets the scaling factor for the effective area (by default is 1).
+ ***************************************************************************/
+inline
+void GCTAAeffArf::scale(const double& scale)
+{
+    m_scale = scale;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return effective area scaling factor
+ *
+ * @return Effective area scaling factor.
+ ***************************************************************************/
+inline
+const double& GCTAAeffArf::scale(void) const
+{
+    return (m_scale);
+}
 
 #endif /* GCTAAEFFARF_HPP */

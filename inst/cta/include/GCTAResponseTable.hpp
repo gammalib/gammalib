@@ -49,11 +49,11 @@ public:
     // Constructors and destructors
     GCTAResponseTable(void);
     GCTAResponseTable(const GCTAResponseTable& table);
-    GCTAResponseTable(const GFitsTable* hdu);
+    explicit GCTAResponseTable(const GFitsTable& hdu);
     virtual ~GCTAResponseTable(void);
 
     // Operators
-    GCTAResponseTable&  operator= (const GCTAResponseTable & table);
+    GCTAResponseTable&  operator= (const GCTAResponseTable& table);
     std::vector<double> operator()(const double& arg) const;
     std::vector<double> operator()(const double& arg1, const double& arg2) const;
     double              operator()(const int& index, const double& arg) const;
@@ -73,7 +73,7 @@ public:
     void               axis_log10(const int& index);
     void               axis_radians(const int& index);
     void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable* hdu);
+    void               read(const GFitsTable& hdu);
     void               write(GFitsTable* hdu) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
@@ -82,9 +82,9 @@ private:
     void init_members(void);
     void copy_members(const GCTAResponseTable& table);
     void free_members(void);
-    void read_colnames(const GFitsTable* hdu);
-    void read_axes(const GFitsTable* hdu);
-    void read_pars(const GFitsTable* hdu);
+    void read_colnames(const GFitsTable& hdu);
+    void read_axes(const GFitsTable& hdu);
+    void read_pars(const GFitsTable& hdu);
     void update(const double& arg) const;
     void update(const double& arg1, const double& arg2) const;
 

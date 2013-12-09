@@ -39,7 +39,6 @@
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                              "GCTAAeffArf::load(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -134,7 +133,7 @@ GCTAAeffArf::~GCTAAeffArf(void)
  * @param[in] aeff Effective area.
  * @return Effective area.
  ***************************************************************************/
-GCTAAeffArf& GCTAAeffArf::operator= (const GCTAAeffArf& aeff)
+GCTAAeffArf& GCTAAeffArf::operator=(const GCTAAeffArf& aeff)
 {
     // Execute only if object is not identical
     if (this != &aeff) {
@@ -243,9 +242,6 @@ GCTAAeffArf* GCTAAeffArf::clone(void) const
  *
  * @param[in] filename Performance table file name.
  *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
- *
  * This method loads the effective area information from an ASCII
  * performance table.
  ***************************************************************************/
@@ -255,10 +251,10 @@ void GCTAAeffArf::load(const std::string& filename)
     GFits file(filename);
 
     // Get ARF table
-    GFitsTable* table = file.table("SPECRESP");
+    const GFitsTable& table = *file.table("SPECRESP");
 
     // Read ARF
-    read_arf(table);
+    read(table);
 
     // Close ARF FITS file
     file.close();
@@ -272,21 +268,9 @@ void GCTAAeffArf::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Return filename
- *
- * @return Returns filename from which effective area was loaded
- ***************************************************************************/
-std::string GCTAAeffArf::filename(void) const
-{
-    // Return filename
-    return m_filename;
-}
-
-
-/***********************************************************************//**
  * @brief Read CTA ARF vector
  *
- * @param[in] hdu FITS table pointer.
+ * @param[in] hdu FITS table.
  *
  * This method reads a CTA ARF vector from the FITS HDU. Note that the
  * energies are converted to TeV and the effective area is converted to cm2.
@@ -298,16 +282,16 @@ std::string GCTAAeffArf::filename(void) const
  *       For appropriate theta angle assignment, we would need this
  *       information in the response header.
  ***************************************************************************/
-void GCTAAeffArf::read_arf(const GFitsTable* hdu)
+void GCTAAeffArf::read(const GFitsTable& hdu)
 {
     // Clear arrays
     m_logE.clear();
     m_aeff.clear();
 
     // Get pointers to table columns
-    const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
-    const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
-    const GFitsTableCol* specresp  = (*hdu)["SPECRESP"];
+    const GFitsTableCol* energy_lo = hdu["ENERG_LO"];
+    const GFitsTableCol* energy_hi = hdu["ENERG_HI"];
+    const GFitsTableCol* specresp  = hdu["SPECRESP"];
 
     // Determine unit conversion factors (default: TeV and cm^2)
     std::string u_energy_lo = gammalib::tolower(gammalib::strip_whitespace(energy_lo->unit()));

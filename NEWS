@@ -267,6 +267,13 @@ GWcsHPX => GHealpix
 GWcsRegistry
   Now holds objects of renamed type GWcs (see GHealpix).
 
+GCTAAeff2D
+  The read() method now takes a reference instead of a pointer.
+
+GCTAAeffArf
+  Rename read_arf() to read(). read() now takes a reference as
+  argument instead of a pointer.
+
 All GammaLib constants, defined in GTools.hpp, and functions are now
 put in the gammalib namespace to avoid name clashes. Mathematical
 constants and functions have been moved to a new model named GMath.

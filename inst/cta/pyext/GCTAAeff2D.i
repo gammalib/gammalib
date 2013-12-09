@@ -40,7 +40,7 @@ class GCTAAeff2D : public GCTAAeff {
 public:
     // Constructors and destructors
     GCTAAeff2D(void);
-    GCTAAeff2D(const std::string& filename);
+    explicit GCTAAeff2D(const std::string& filename);
     GCTAAeff2D(const GCTAAeff2D& cta);
     virtual ~GCTAAeff2D(void);
 
@@ -59,7 +59,7 @@ public:
     std::string filename(void) const;
 
     // Methods
-    void read(const GFits* file);
+    void read(const GFits& file);
 };
 
 

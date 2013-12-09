@@ -243,7 +243,7 @@ void GCTAAeff2D::load(const std::string& filename)
     GFits fits(filename);
 
     // Read effective area from file
-    read(&fits);
+    read(fits);
 
     // Close FITS file
     fits.close();
@@ -277,16 +277,16 @@ std::string GCTAAeff2D::filename(void) const
  * The data are stored in m_aeff which is of type GCTAResponseTable. The
  * energy axis will be set to log10, the offset angle axis to radians.
  ***************************************************************************/
-void GCTAAeff2D::read(const GFits* fits)
+void GCTAAeff2D::read(const GFits& fits)
 {
     // Clear response table
     m_aeff.clear();
 
-    // Get pointer to effective area HDU
-    const GFitsTable* hdu = fits->table("EFFECTIVE AREA");
+    // Get effective area table
+    const GFitsTable& table = *fits.table("EFFECTIVE AREA");
 
     // Read effective area table
-    m_aeff.read(hdu);
+    m_aeff.read(table);
 
     // Set energy axis to logarithmic scale
     m_aeff.axis_log10(0);
