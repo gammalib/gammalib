@@ -72,15 +72,15 @@ public:
     void                  name(const std::string& name);
     void                  instrument(const std::string& instrument);
     void                  id(const std::string& id);
-    void                  off_regions(const GSkyRegions& regions);
     void                  on_regions(const GSkyRegions& regions);
+    void                  off_regions(const GSkyRegions& regions);
     const std::string&    name(void) const;
     const std::string&    instrument(void) const;
     const std::string&    id(void) const;
     const GPha&           on_spec(void) const;
     const GPha&           off_spec(void) const;
-    const GArf&           arf(void);
-    const GRmf&           rmf(void);
+    const GArf&           arf(void) const;
+    const GRmf&           rmf(void) const;
     void                  fill(const GCTAObservation& obs);
     void                  compute_response(const GCTAObservation& obs,
                                            const GEbounds& etrue);

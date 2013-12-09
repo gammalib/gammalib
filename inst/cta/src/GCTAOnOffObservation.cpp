@@ -623,14 +623,14 @@ std::string GCTAOnOffObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Identifier")+m_id);
 
         // Append spectra, ARF and RMF
-        result.append("\n"+m_on_spec.print());
-        result.append("\n"+m_off_spec.print());
-        result.append("\n"+m_arf.print());
-        result.append("\n"+m_rmf.print());
+        result.append("\n"+m_on_spec.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_off_spec.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_arf.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_rmf.print(gammalib::reduce(chatter)));
 
         // Append regions
-        result.append("\n"+m_on_regions.print());
-        result.append("\n"+m_off_regions.print());
+        result.append("\n"+m_on_regions.print(gammalib::reduce(chatter)));
+        result.append("\n"+m_off_regions.print(gammalib::reduce(chatter)));
     }
 
     // Return result
@@ -652,7 +652,7 @@ void GCTAOnOffObservation::init_members(void)
     // Initialise members
     m_name.clear();
     m_id.clear();
-    m_instrument = "CTA";
+    m_instrument = "CTAOnOff";
     m_on_spec.clear();
     m_off_spec.clear();
     m_arf.clear();
