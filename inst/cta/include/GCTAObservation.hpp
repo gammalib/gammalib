@@ -59,10 +59,10 @@ public:
     virtual GCTAObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GCTAResponse& response(void) const;
-    virtual std::string         instrument(void) const { return m_instrument; }
-    virtual double              ontime(void) const { return m_ontime; }
-    virtual double              livetime(void) const { return m_livetime; }
-    virtual double              deadc(const GTime& time) const { return m_deadc; }
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
@@ -70,8 +70,10 @@ public:
     // Other methods
     void                load_unbinned(const std::string& filename);
     void                load_binned(const std::string& filename);
-    void                save(const std::string& filename, const bool& clobber) const;
-    void                response(const std::string& irfname, std::string caldb = "");
+    void                save(const std::string& filename,
+                             const bool& clobber = false) const;
+    void                response(const std::string& irfname,
+                                 const std::string& caldb = "");
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     void                obs_id(const int& id);
@@ -91,8 +93,8 @@ protected:
     void init_members(void);
     void copy_members(const GCTAObservation& obs);
     void free_members(void);
-    void read_attributes(const GFitsHDU* hdu);
-    void write_attributes(GFitsHDU* hdu) const;
+    void read_attributes(const GFitsHDU& hdu);
+    void write_attributes(GFitsHDU& hdu) const;
 
     // Protected members
     std::string  m_instrument;   //!< Instrument name
@@ -115,6 +117,46 @@ inline
 const GCTAResponse& GCTAObservation::response(void) const
 {
     return m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument
+ ***************************************************************************/
+inline
+std::string GCTAObservation::instrument(void) const
+{
+    return m_instrument;
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime
+ ***************************************************************************/
+inline
+double GCTAObservation::ontime(void) const
+{
+    return m_ontime;
+}
+
+
+/***********************************************************************//**
+ * @brief Return livetime
+ ***************************************************************************/
+inline
+double GCTAObservation::livetime(void) const
+{
+    return m_livetime;
+}
+
+
+/***********************************************************************//**
+ * @brief Return deadtime
+ ***************************************************************************/
+inline
+double GCTAObservation::deadc(const GTime& time) const
+{
+    return m_deadc;
 }
 
 

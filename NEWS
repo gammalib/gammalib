@@ -275,6 +275,9 @@ GCTAAeffArf
   Rename read_arf() to read(). read() now takes a reference as
   argument instead of a pointer.
 
+GCTAObservation
+  caldb argument to response() method now passed as const reference.
+
 All GammaLib constants, defined in GTools.hpp, and functions are now
 put in the gammalib namespace to avoid name clashes. Mathematical
 constants and functions have been moved to a new model named GMath.

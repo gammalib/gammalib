@@ -57,8 +57,10 @@ public:
     // Other methods
     void                load_unbinned(const std::string& filename);
     void                load_binned(const std::string& filename);
-    void                save(const std::string& filename, const bool& clobber) const;
-    void                response(const std::string& irfname, std::string caldb = "");
+    void                save(const std::string& filename,
+                             const bool& clobber = false) const;
+    void                response(const std::string& irfname,
+                                 const std::string& caldb = "");
     void                pointing(const GCTAPointing& pointing);
     const GCTAPointing& pointing(void) const;
     void                obs_id(const int& id);

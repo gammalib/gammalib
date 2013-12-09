@@ -57,8 +57,6 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_RESPONSE                    "GCTAObservation::response(GResponse&)"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
-#define G_READ_DS_EBOUNDS       "GCTAObservation::read_ds_ebounds(GFitsHDU*)"
-#define G_READ_DS_ROI               "GCTAObservation::read_ds_roi(GFitsHDU*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -245,9 +243,10 @@ void GCTAObservation::response(const GResponse& rsp)
  * @brief Set CTA response function
  *
  * @param[in] irfname Name of CTA response function.
- * @param[in] caldb Optional name of calibration database.
+ * @param[in] caldb Optional name of calibration database (defaults to "").
  ***************************************************************************/
-void GCTAObservation::response(const std::string& irfname, std::string caldb)
+void GCTAObservation::response(const std::string& irfname,
+                               const std::string& caldb)
 {
     // Clear response function
     m_response.clear();
@@ -696,7 +695,7 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     events->read(fits);
 
     // Read observation attributes from EVENTS extension
-    const GFitsHDU* hdu = fits.at("EVENTS");
+    const GFitsHDU& hdu = *fits.at("EVENTS");
     read_attributes(hdu);
 
     // Close FITS file
@@ -735,7 +734,7 @@ void GCTAObservation::load_binned(const std::string& filename)
     events->read(fits);
 
     // Read observation attributes from primary extension
-    const GFitsHDU* hdu = fits.at(0);
+    const GFitsHDU& hdu = *fits.at(0);
     read_attributes(hdu);
 
     // Close FITS file
@@ -772,7 +771,7 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
         list->write(fits);
 
         // Write observation attributes into EVENTS header
-        GFitsHDU* hdu = fits.at("EVENTS");
+        GFitsHDU& hdu = *fits.at("EVENTS");
         write_attributes(hdu);
 
     } // endif: observation contained an event list
@@ -786,7 +785,7 @@ void GCTAObservation::save(const std::string& filename, const bool& clobber) con
         cube->write(fits);
 
         // Write observation attributes into primary header
-        GFitsHDU* hdu = fits.at(0);
+        GFitsHDU& hdu = *fits.at(0);
         write_attributes(hdu);
 
     } // endelse: observation contained an event cube
@@ -864,7 +863,7 @@ void GCTAObservation::free_members(void)
 /***********************************************************************//**
  * @brief Read observation attributes
  *
- * @param[in] hdu FITS HDU pointer
+ * @param[in] hdu FITS HDU.
  *
  * Reads CTA observation attributes from HDU. Mandatory attributes are
  *
@@ -886,48 +885,41 @@ void GCTAObservation::free_members(void)
  * Based on RA_PNT and DEC_PNT, the CTA pointing direction is set. Note that
  * DEADC is computed using DEADC=LIVETIME/ONTIME
  *
- * Nothing is done if the HDU pointer is NULL.
- *
  * @todo The actual reader is a minimal reader to accomodate as many
  *       different datasets as possible. Once the CTA data format is fixed
  *       the reader should have more mandatory attributes.
  ***************************************************************************/
-void GCTAObservation::read_attributes(const GFitsHDU* hdu)
+void GCTAObservation::read_attributes(const GFitsHDU& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Read mandatory attributes
+    double ra_pnt  = hdu.real("RA_PNT");
+    double dec_pnt = hdu.real("DEC_PNT");
+    m_ontime   = (hdu.hascard("ONTIME"))   ? hdu.real("ONTIME") : 0.0;
+    m_livetime = (hdu.hascard("LIVETIME")) ? hdu.real("LIVETIME") : 0.0;
 
-        // Read mandatory attributes
-        double ra_pnt  = hdu->real("RA_PNT");
-        double dec_pnt = hdu->real("DEC_PNT");
-        m_ontime   = (hdu->hascard("ONTIME"))   ? hdu->real("ONTIME") : 0.0;
-        m_livetime = (hdu->hascard("LIVETIME")) ? hdu->real("LIVETIME") : 0.0;
+    // Read optional attributes
+    m_name     = (hdu.hascard("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
+    m_deadc    = (hdu.hascard("DEADC"))    ? hdu.real("DEADC") : 0.0;
+    m_ra_obj   = (hdu.hascard("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
+    m_dec_obj  = (hdu.hascard("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
+    m_obs_id   = (hdu.hascard("OBS_ID"))   ? hdu.integer("OBS_ID") : 0;
+    //double alt = (hdu.hascard("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
+    //double az  = (hdu.hascard("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
 
-        // Read optional attributes
-        m_name     = (hdu->hascard("OBJECT"))   ? hdu->string("OBJECT") : "unknown";
-        m_deadc    = (hdu->hascard("DEADC"))    ? hdu->real("DEADC") : 0.0;
-        m_ra_obj   = (hdu->hascard("RA_OBJ"))   ? hdu->real("RA_OBJ") : 0.0;
-        m_dec_obj  = (hdu->hascard("DEC_OBJ"))  ? hdu->real("DEC_OBJ") : 0.0;
-        m_obs_id   = (hdu->hascard("OBS_ID"))   ? hdu->integer("OBS_ID") : 0;
-        //double alt = (hdu->hascard("ALT_PNT"))  ? hdu->real("ALT_PNT") : 0.0;
-        //double az  = (hdu->hascard("AZ_PNT"))   ? hdu->real("AZ_PNT") : 0.0;
+    // Kluge: compute DEADC from livetime and ontime instead of using the
+    // keyword value as the original event lists had this values badly
+    // assigned
+    if (m_ontime > 0) {
+        m_deadc = m_livetime / m_ontime;
+    }
+    else {
+        m_deadc = 0.0;
+    }
 
-        // Kluge: compute DEADC from livetime and ontime instead of using the
-        // keyword value as the original event lists had this values badly
-        // assigned
-        if (m_ontime > 0) {
-            m_deadc = m_livetime / m_ontime;
-        }
-        else {
-            m_deadc = 0.0;
-        }
-
-        // Set pointing information
-        GSkyDir pnt;
-        pnt.radec_deg(ra_pnt, dec_pnt);
-        m_pointing.dir(pnt);
-
-    } // endif: HDU was valid
+    // Set pointing information
+    GSkyDir pnt;
+    pnt.radec_deg(ra_pnt, dec_pnt);
+    m_pointing.dir(pnt);
 
     // Return
     return;
@@ -937,73 +929,66 @@ void GCTAObservation::read_attributes(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Write observation attributes
  *
- * @param[in] hdu FITS HDU pointer
- *
- * Nothing is done if the HDU pointer is NULL.
+ * @param[in] hdu FITS HDU.
  ***************************************************************************/
-void GCTAObservation::write_attributes(GFitsHDU* hdu) const
+void GCTAObservation::write_attributes(GFitsHDU& hdu) const
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get time reference
+    GTimeReference timeref = events()->gti().reference();
 
-        // Get time reference
-        GTimeReference timeref = events()->gti().reference();
+    // Compute some attributes
+    double ra_pnt  = m_pointing.dir().ra_deg();
+    double dec_pnt = m_pointing.dir().dec_deg();
+    double tstart  = events()->tstart().convert(timeref);
+    double tstop   = events()->tstop().convert(timeref);
+    double telapse = events()->gti().telapse();
+    double ontime  = events()->gti().ontime();
+    double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
 
-        // Compute some attributes
-        double ra_pnt  = m_pointing.dir().ra_deg();
-        double dec_pnt = m_pointing.dir().dec_deg();
-        double tstart  = events()->tstart().convert(timeref);
-        double tstop   = events()->tstop().convert(timeref);
-        double telapse = events()->gti().telapse();
-        double ontime  = events()->gti().ontime();
-        double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
+    // Set observation information
+    hdu.card("CREATOR",  "GammaLib",   "Program which created the file");
+    hdu.card("TELESCOP", instrument(), "Telescope");
+    hdu.card("OBS_ID",   obs_id(),     "Observation identifier");
+    hdu.card("DATE_OBS", "string",     "Observation start date");
+    hdu.card("TIME_OBS", "string",     "Observation start time");
+    hdu.card("DATE_END", "string",     "Observation end date");
+    hdu.card("TIME_END", "string",     "Observation end time");
 
-        // Set observation information
-        hdu->card("CREATOR",  "GammaLib",   "Program which created the file");
-        hdu->card("TELESCOP", instrument(), "Telescope");
-        hdu->card("OBS_ID",   obs_id(),     "Observation identifier");
-        hdu->card("DATE_OBS", "string",     "Observation start date");
-        hdu->card("TIME_OBS", "string",     "Observation start time");
-        hdu->card("DATE_END", "string",     "Observation end date");
-        hdu->card("TIME_END", "string",     "Observation end time");
+    // Set observation time information
+    hdu.card("TSTART",   tstart, "[s] Mission time of start of observation");
+    hdu.card("TSTOP",    tstop, "[s] Mission time of end of observation");
+    timeref.write(hdu);
+    hdu.card("TELAPSE",  telapse, "[s] Mission elapsed time");
+    hdu.card("ONTIME",   ontime, "[s] Total good time including deadtime");
+    hdu.card("LIVETIME", livetime(), "[s] Total livetime");
+    hdu.card("DEADC",    deadc, "Deadtime correction factor");
+    hdu.card("TIMEDEL",  1.0, "Time resolution");
 
-        // Set observation time information
-        hdu->card("TSTART",   tstart, "[s] Mission time of start of observation");
-        hdu->card("TSTOP",    tstop, "[s] Mission time of end of observation");
-        timeref.write(*hdu);
-        hdu->card("TELAPSE",  telapse, "[s] Mission elapsed time");
-        hdu->card("ONTIME",   ontime, "[s] Total good time including deadtime");
-        hdu->card("LIVETIME", livetime(), "[s] Total livetime");
-        hdu->card("DEADC",    deadc, "Deadtime correction factor");
-        hdu->card("TIMEDEL",  1.0, "Time resolution");
+    // Set pointing information
+    hdu.card("OBJECT",   name(),    "Observed object");
+    hdu.card("RA_OBJ",   ra_obj(),  "[deg] Target Right Ascension");
+    hdu.card("DEC_OBJ",  dec_obj(), "[deg] Target Declination");
+    hdu.card("RA_PNT",   ra_pnt,    "[deg] Pointing Right Ascension");
+    hdu.card("DEC_PNT",  dec_pnt,   "[deg] Pointing Declination");
+    hdu.card("ALT_PNT",  0.0,       "[deg] Average altitude of pointing");
+    hdu.card("AZ_PNT",   0.0,       "[deg] Average azimuth of pointing");
+    hdu.card("RADECSYS", "FK5",     "Coordinate system");
+    hdu.card("EQUINOX",  2000.0,    "Epoch");
+    hdu.card("CONV_DEP", 0.0,       "Convergence depth of telescopes");
+    hdu.card("CONV_RA",  0.0,       "[deg] Convergence Right Ascension");
+    hdu.card("CONV_DEC", 0.0,       "[deg] Convergence Declination");
+    hdu.card("OBSERVER", "string",  "Observer");
 
-        // Set pointing information
-        hdu->card("OBJECT",   name(),    "Observed object");
-        hdu->card("RA_OBJ",   ra_obj(),  "[deg] Target Right Ascension");
-        hdu->card("DEC_OBJ",  dec_obj(), "[deg] Target Declination");
-        hdu->card("RA_PNT",   ra_pnt,    "[deg] Pointing Right Ascension");
-        hdu->card("DEC_PNT",  dec_pnt,   "[deg] Pointing Declination");
-        hdu->card("ALT_PNT",  0.0,       "[deg] Average altitude of pointing");
-        hdu->card("AZ_PNT",   0.0,       "[deg] Average azimuth of pointing");
-        hdu->card("RADECSYS", "FK5",     "Coordinate system");
-        hdu->card("EQUINOX",  2000.0,    "Epoch");
-        hdu->card("CONV_DEP", 0.0,       "Convergence depth of telescopes");
-        hdu->card("CONV_RA",  0.0,       "[deg] Convergence Right Ascension");
-        hdu->card("CONV_DEC", 0.0,       "[deg] Convergence Declination");
-        hdu->card("OBSERVER", "string",  "Observer");
+    // Telescope information
+    hdu.card("N_TELS",   100,      "Number of telescopes in event list");
+    hdu.card("TELLIST",  "string", "Telescope IDs");
+    hdu.card("GEOLAT",   0.0,      "[deg] Geographic latitude of array centre");
+    hdu.card("GEOLON",   0.0,      "[deg] Geographic longitude of array centre");
+    hdu.card("ALTITUDE", 0.0,      "[km] Altitude of array centre");
 
-        // Telescope information
-        hdu->card("N_TELS",   100,      "Number of telescopes in event list");
-        hdu->card("TELLIST",  "string", "Telescope IDs");
-        hdu->card("GEOLAT",   0.0,      "[deg] Geographic latitude of array centre");
-        hdu->card("GEOLON",   0.0,      "[deg] Geographic longitude of array centre");
-        hdu->card("ALTITUDE", 0.0,      "[km] Altitude of array centre");
-
-        // Other information
-        hdu->card("EUNIT",    "TeV",    "Energy unit");
-        hdu->card("EVTVER",   "draft1", "Event list version number");
-
-    } // endif: HDU was valid
+    // Other information
+    hdu.card("EUNIT",    "TeV",    "Energy unit");
+    hdu.card("EVTVER",   "draft1", "Event list version number");
 
     // Return
     return;
