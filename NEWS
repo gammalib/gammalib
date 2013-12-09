@@ -91,7 +91,8 @@ GFitsTable
   The column table operator[] now returns a pointer instead of a
   reference. Set set() method has been added for column setting.
   The append_column() and insert_column() methods have been  
-  renamed to append() and insert().
+  renamed to append() and insert(). The hascolumn() method has
+  been renamed to contains().
 
 GFunction
   The eval() method now takes a const reference to a double precisio

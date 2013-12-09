@@ -611,7 +611,7 @@ void GFitsTable::remove_rows(const int& row, const int& nrows)
  * @param[in] colname Column name.
  * @return True of the column exists, false otherwise.
  ***************************************************************************/
-bool GFitsTable::hascolumn(const std::string& colname) const
+bool GFitsTable::contains(const std::string& colname) const
 {
     // Get pointer in column
     GFitsTableCol* ptr = ptr_column(colname);
