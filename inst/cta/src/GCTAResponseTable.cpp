@@ -403,48 +403,6 @@ GCTAResponseTable* GCTAResponseTable::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of parameters in response table
- *
- * @return Number of parameters in response table.
- *
- * Returns the number of parameters in response table.
- ***************************************************************************/
-int GCTAResponseTable::size(void) const
-{
-    // Return number of parameters
-    return m_npars;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of elements per parameter
- *
- * @return Number of elements per parameter.
- *
- * Returns the number of elements per parameter.
- ***************************************************************************/
-int GCTAResponseTable::elements(void) const
-{
-    // Return number of elements
-    return m_nelements;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of axes in response table
- *
- * @return Number of axes in response table.
- *
- * Returns the number of axes in response table.
- ***************************************************************************/
-int GCTAResponseTable::axes(void) const
-{
-    // Return number of axes
-    return m_naxes;
-}
-
-
-/***********************************************************************//**
  * @brief Return axis length
  *
  * @param[in] index Axis index [0,...,axes()-1].
@@ -695,7 +653,7 @@ void GCTAResponseTable::scale(const int& index, const double& scale)
 /***********************************************************************//**
  * @brief Read response table from FITS table HDU
  *
- * @param[in] hdu Response table HDU pointer.
+ * @param[in] table Response table.
  *
  * Reads CTA response table information from a FITS table. The FITS table
  * is expected to have a single row, and axes and parameter information are
@@ -715,19 +673,19 @@ void GCTAResponseTable::scale(const int& index, const double& scale)
  * In case that the HDU table pointer is not valid (i.e. NULL), this method
  * clears the objects and does nothing else.
  ***************************************************************************/
-void GCTAResponseTable::read(const GFitsTable& hdu)
+void GCTAResponseTable::read(const GFitsTable& table)
 {
     // Clear instance
     clear();
 
     // Read column names
-    read_colnames(hdu);
+    read_colnames(table);
 
     // Read axes
-    read_axes(hdu);
+    read_axes(table);
 
     // Read parameter cubes
-    read_pars(hdu);
+    read_pars(table);
 
     // Return
     return;
@@ -737,35 +695,12 @@ void GCTAResponseTable::read(const GFitsTable& hdu)
 /***********************************************************************//**
  * @brief Write response table into FITS table
  *
- * @param[in] hdu Fits table HDU.
+ * @param[in] table Response table.
  *
  * @todo Implement method
  ***************************************************************************/
-void GCTAResponseTable::write(GFitsTable* hdu) const
+void GCTAResponseTable::write(GFitsTable& table) const
 {
-/*
-    // Allocate floating point vector columns
-    GFitsTableFloatCol col_energy_lo = GFitsTableFloatCol("ENERG_LO",  1, m_energy_num);
-    GFitsTableFloatCol col_energy_hi = GFitsTableFloatCol("ENERG_HI",  1, m_energy_num);
-    GFitsTableFloatCol col_ctheta_lo = GFitsTableFloatCol("CTHETA_LO", 1, m_ctheta_num);
-    GFitsTableFloatCol col_ctheta_hi = GFitsTableFloatCol("CTHETA_HI", 1, m_ctheta_num);
-
-    // Set column values
-    for (int i = 0; i < m_energy_num; ++i) {
-        col_energy_lo(0,i) = m_energy_lo[i];
-        col_energy_hi(0,i) = m_energy_hi[i];
-    }
-    for (int i = 0; i < m_ctheta_num; ++i) {
-        col_ctheta_lo(0,i) = m_ctheta_lo[i];
-        col_ctheta_hi(0,i) = m_ctheta_hi[i];
-    }
-
-    // Append columns to boundary table
-    hdu->append_column(col_energy_lo);
-    hdu->append_column(col_energy_hi);
-    hdu->append_column(col_ctheta_lo);
-    hdu->append_column(col_ctheta_hi);
-*/
     // Return
     return;
 }
