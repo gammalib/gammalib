@@ -68,7 +68,7 @@ public:
     // Implemented pure virtual methods
     virtual void                    clear(void);
     virtual GCTAModelRadialPolynom* clone(void) const;
-    virtual std::string             type(void) const { return "Polynom"; }
+    virtual std::string             type(void) const;
     virtual double                  eval(const double& offset) const;
     virtual double                  eval_gradients(const double& offset) const;
     virtual GCTAInstDir             mc(const GCTAInstDir& dir, GRan& ran) const;
@@ -78,7 +78,7 @@ public:
     virtual std::string             print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    int    size(void) const { return m_coeffs.size(); }
+    int    size(void) const;
     //double coeff(void) const;
     //void   coeff(const double& value);
 
@@ -104,5 +104,29 @@ protected:
     // Protected members
     std::vector<GModelPar> m_coeffs;        //!< Coefficients
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return Model type "Polynom".
+ ***************************************************************************/
+inline
+std::string GCTAModelRadialPolynom::type(void) const
+{
+    return ("Polynom");
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of coefficients in polynomial
+ *
+ * @return Number of coefficients in polynomial.
+ ***************************************************************************/
+inline
+int GCTAModelRadialPolynom::size(void) const
+{
+    return (m_coeffs.size());
+}
 
 #endif /* GCTAMODELRADIALPOLYNOM_HPP */

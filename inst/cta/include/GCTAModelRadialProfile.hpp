@@ -69,7 +69,7 @@ public:
     // Implemented pure virtual methods
     virtual void                    clear(void);
     virtual GCTAModelRadialProfile* clone(void) const;
-    virtual std::string             type(void) const { return "Profile"; }
+    virtual std::string             type(void) const;
     virtual double                  eval(const double& offset) const;
     virtual double                  eval_gradients(const double& offset) const;
     virtual GCTAInstDir             mc(const GCTAInstDir& dir, GRan& ran) const;
@@ -79,12 +79,12 @@ public:
     virtual std::string             print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    double width(void) const { return m_width.value(); }
-    double core(void) const { return m_core.value(); }
-    double tail(void) const { return m_tail.value(); }
-    void   width(const double& width) { m_width.value(width); }
-    void   core(const double& core) { m_core.value(core); }
-    void   tail(const double& tail) { m_tail.value(tail); }
+    double width(void) const;
+    double core(void) const;
+    double tail(void) const;
+    void   width(const double& width);
+    void   core(const double& core);
+    void   tail(const double& tail);
 
 protected:
     // Protected methods
@@ -109,5 +109,92 @@ protected:
     GModelPar m_core;         //!< Core parameter
     GModelPar m_tail;         //!< Tail parameter
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return Model type "Profile".
+ ***************************************************************************/
+inline
+std::string GCTAModelRadialProfile::type(void) const
+{
+    return ("Profile");
+}
+
+
+/***********************************************************************//**
+ * @brief Return profile width
+ *
+ * @return Profile width.
+ ***************************************************************************/
+inline
+double GCTAModelRadialProfile::width(void) const
+{
+    return (m_width.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return profile core
+ *
+ * @return Profile core.
+ ***************************************************************************/
+inline
+double GCTAModelRadialProfile::core(void) const
+{
+    return (m_core.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Return profile tail
+ *
+ * @return Profile tail.
+ ***************************************************************************/
+inline
+double GCTAModelRadialProfile::tail(void) const
+{
+    return (m_tail.value());
+}
+
+
+/***********************************************************************//**
+ * @brief Set profile width
+ *
+ * @param[in] Profile width.
+ ***************************************************************************/
+inline
+void GCTAModelRadialProfile::width(const double& width)
+{
+    m_width.value(width);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set profile core
+ *
+ * @param[in] Profile core.
+ ***************************************************************************/
+inline
+void GCTAModelRadialProfile::core(const double& core)
+{
+    m_core.value(core);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set profile tail
+ *
+ * @param[in] Profile tail.
+ ***************************************************************************/
+inline
+void GCTAModelRadialProfile::tail(const double& tail)
+{
+    m_tail.value(tail);
+    return;
+}
 
 #endif /* GCTAMODELRADIALPROFILE_HPP */

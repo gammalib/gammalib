@@ -60,7 +60,7 @@ public:
     virtual ~GCTAModelRadialRegistry(void);
 
     // Operators
-    GCTAModelRadialRegistry& operator= (const GCTAModelRadialRegistry& registry);
+    GCTAModelRadialRegistry& operator=(const GCTAModelRadialRegistry& registry);
 
     // Methods
     int              size(void) const;
