@@ -83,7 +83,7 @@ public:
     std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void read(const GFitsTable* hdu);
+    void read(const GFitsTable& table);
 
 private:
     // Methods
@@ -104,5 +104,17 @@ private:
     mutable double      m_par_sigma; //!< Gaussian sigma (radians)
     mutable double      m_par_width; //!< Gaussian width parameter
 };
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which point spread function was loaded
+ ***************************************************************************/
+inline
+std::string GCTAPsfVector::filename(void) const
+{
+    return m_filename;
+}
 
 #endif /* GCTAPSFVECTOR_HPP */

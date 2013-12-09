@@ -287,18 +287,6 @@ void GCTAPsf2D::load(const std::string& filename)
 
 
 /***********************************************************************//**
- * @brief Return filename
- *
- * @return Returns filename from which point spread function was loaded
- ***************************************************************************/
-std::string GCTAPsf2D::filename(void) const
-{
-    // Return filename
-    return m_filename;
-}
-
-
-/***********************************************************************//**
  * @brief Simulate PSF offset (radians)
  *
  * @param[in] ran Random number generator.

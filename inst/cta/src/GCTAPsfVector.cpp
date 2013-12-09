@@ -37,7 +37,6 @@
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                            "GCTAPsfVector::load(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -231,9 +230,6 @@ GCTAPsfVector* GCTAPsfVector::clone(void) const
  *
  * @param[in] filename Performance table file name.
  *
- * @exception GCTAExceptionHandler::file_open_error
- *            File could not be opened for read access.
- *
  * This method loads the point spread function information from a FITS file
  * that contains the PSF width in a single column.
  ***************************************************************************/
@@ -243,7 +239,7 @@ void GCTAPsfVector::load(const std::string& filename)
     GFits file(filename);
 
     // Get PSF table
-    GFitsTable* table = file.table(1);
+    const GFitsTable& table = *file.table(1);
 
     // Read PSF
     read(table);
@@ -262,7 +258,7 @@ void GCTAPsfVector::load(const std::string& filename)
 /***********************************************************************//**
  * @brief Read CTA PSF vector
  *
- * @param[in] hdu FITS table pointer.
+ * @param[in] table FITS table.
  *
  * This method reads a CTA PSF vector from the FITS HDU. Note that the
  * energies are converted to TeV. Conversion is done based on the units
@@ -275,7 +271,7 @@ void GCTAPsfVector::load(const std::string& filename)
  * MAGIC data. All these things should be more uniform once we have a well
  * defined format.
  ***************************************************************************/
-void GCTAPsfVector::read(const GFitsTable* hdu)
+void GCTAPsfVector::read(const GFitsTable& table)
 {
     // Clear arrays
     m_logE.clear();
@@ -286,17 +282,17 @@ void GCTAPsfVector::read(const GFitsTable* hdu)
     const double conv = 0.6624305 * gammalib::deg2rad;
 
     // Get pointers to table columns
-    const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
-    const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
+    const GFitsTableCol* energy_lo = table["ENERG_LO"];
+    const GFitsTableCol* energy_hi = table["ENERG_HI"];
 
     // Handle various data formats (H.E.S.S. and MAGIC)
     const GFitsTableCol* r68;
     double               r68_scale = 1.0;
-    if (hdu->contains("R68")) {
-        r68 = (*hdu)["R68"];
+    if (table.contains("R68")) {
+        r68 = table["R68"];
     }
     else {
-        r68 = (*hdu)["ANGRES40"];
+        r68 = table["ANGRES40"];
         r68_scale = 1.0 / 0.6624305; // MAGIC PSF is already 1 sigma
     }
 
@@ -347,18 +343,6 @@ void GCTAPsfVector::read(const GFitsTable* hdu)
     
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return filename
- *
- * @return Returns filename from which point spread function was loaded
- ***************************************************************************/
-std::string GCTAPsfVector::filename(void) const
-{
-    // Return filename
-    return m_filename;
 }
 
 

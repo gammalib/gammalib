@@ -76,7 +76,7 @@ public:
                              const bool&   etrue = true) const;
 
     // Other methods
-    void read(const GFitsTable* hdu);
+    void read(const GFitsTable& table);
 };
 
 
@@ -84,4 +84,7 @@ public:
  * @brief GCTAPsfVector class extension
  ***************************************************************************/
 %extend GCTAPsfVector {
+    GCTAPsfVector copy() {
+        return (*self);
+    }
 };

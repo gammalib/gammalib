@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GCTAPointing.i
- * @brief CTA pointing class Python interface definition
- * @author J. Knodlseder
+ * @brief CTA pointing class interface definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -47,10 +47,10 @@ public:
     virtual const GSkyDir& dir(void) const;
 
     // Other methods
-    void   dir(const GSkyDir& dir);
-    const  GMatrix& rot(void) const;
-    double zenith(void) const;
-    double azimuth(void) const;
+    void           dir(const GSkyDir& dir);
+    const GMatrix& rot(void) const;
+    const double&  zenith(void) const;
+    const double&  azimuth(void) const;
 };
 
 
