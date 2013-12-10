@@ -63,9 +63,9 @@ public:
     virtual void                response(const GResponse& rsp);
     virtual const GMWLResponse& response(void) const;
     virtual std::string         instrument(void) const;
-    virtual double              ontime(void) const { return 1.0; }
-    virtual double              livetime(void) const { return 1.0; }
-    virtual double              deadc(const GTime& time) const { return 1.0; }
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
@@ -74,12 +74,12 @@ public:
     void               load(const std::string& filename);
     void               load(const std::string& filename, const int& extno);
     void               load(const std::string& filename, const std::string& extname);
-    const std::string& filename(void) const { return m_filename; }
-    const std::string& extno(void) const { return m_extno; }
-    const std::string& extname(void) const { return m_extname; }
-    void               filename(const std::string& filename) { m_filename=filename; }
-    void               extno(const std::string& extno) { m_extno=extno; }
-    void               extname(const std::string& extname) { m_extname=extname; }
+    const std::string& filename(void) const;
+    const std::string& extno(void) const;
+    const std::string& extname(void) const;
+    void               filename(const std::string& filename);
+    void               extno(const std::string& extno);
+    void               extname(const std::string& extname);
 
 protected:
     // Protected methods
@@ -117,6 +117,117 @@ inline
 std::string GMWLObservation::instrument(void) const
 {
     return "MWL";
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime
+ *
+ * @return Ontime (always 1).
+ ***************************************************************************/
+inline
+double GMWLObservation::ontime(void) const
+{
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return livetime
+ *
+ * @return Livetime (always 1).
+ ***************************************************************************/
+inline
+double GMWLObservation::livetime(void) const
+{
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return deadtime correction factor
+ *
+ * @return Deadtime correction factor (always 1).
+ ***************************************************************************/
+inline
+double GMWLObservation::deadc(const GTime& time) const
+{
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Filename.
+ ***************************************************************************/
+inline
+const std::string& GMWLObservation::filename(void) const
+{
+    return m_filename;
+}
+
+
+/***********************************************************************//**
+ * @brief Return extension number
+ *
+ * @return Extension number.
+ ***************************************************************************/
+inline
+const std::string& GMWLObservation::extno(void) const
+{
+    return m_extno;
+}
+
+
+/***********************************************************************//**
+ * @brief Return extension name
+ *
+ * @return Extension name.
+ ***************************************************************************/
+inline
+const std::string& GMWLObservation::extname(void) const
+{
+    return m_extname;
+}
+
+
+/***********************************************************************//**
+ * @brief Set filename
+ *
+ * @param[in] filename Filename.
+ ***************************************************************************/
+inline
+void GMWLObservation::filename(const std::string& filename)
+{
+    m_filename = filename;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set extension number
+ *
+ * @param[in] extno Extension number.
+ ***************************************************************************/
+inline
+void GMWLObservation::extno(const std::string& extno)
+{
+    m_extno = extno;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set extension name
+ *
+ * @param[in] extname Extension name..
+ ***************************************************************************/
+inline
+void GMWLObservation::extname(const std::string& extname)
+{
+    m_extname = extname;
+    return;
 }
 
 #endif /* GMWLOBSERVATION_HPP */

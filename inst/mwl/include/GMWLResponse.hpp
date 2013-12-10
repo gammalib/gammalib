@@ -80,7 +80,7 @@ protected:
  * @return True if response supports energy dispersion.
  ***************************************************************************/
 inline
-bool GMWLSpectrum::hasedisp(void) const
+bool GMWLResponse::hasedisp(void) const
 {
     return false;
 }
@@ -92,7 +92,7 @@ bool GMWLSpectrum::hasedisp(void) const
  * @return True if response supports time dispersion.
  ***************************************************************************/
 inline
-bool GMWLSpectrum::hastdisp(void) const
+bool GMWLResponse::hastdisp(void) const
 {
     return false;
 }
@@ -108,7 +108,7 @@ bool GMWLSpectrum::hastdisp(void) const
  * @return Instrument response function (always 1).
  ***************************************************************************/
 inline
-double GMWLSpectrum::irf(const GEvent& event, const GPhoton& photon,
+double GMWLResponse::irf(const GEvent& event, const GPhoton& photon,
                          const GObservation& obs) const
 {
     return 1.0;
@@ -124,7 +124,7 @@ double GMWLSpectrum::irf(const GEvent& event, const GPhoton& photon,
  * @return Instrument response function (always 1).
  ***************************************************************************/
 inline
-double GMWLSpectrum::npred(const GPhoton& photon, const GObservation& obs) const
+double GMWLResponse::npred(const GPhoton& photon, const GObservation& obs) const
 {
     return 1.0;
 }

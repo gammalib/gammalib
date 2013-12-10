@@ -53,14 +53,14 @@ public:
     virtual const GTime&       time(void) const;
     virtual double             counts(void) const;
     virtual double             error(void) const;
-    virtual void               counts(const double& counts);
+    virtual void               counts(const double& flux);
 
     // Other methods
     const GEnergy& energy_err(void) const;
     const double&  flux(void) const;
     const double&  flux_err(void) const;
     void           flux(const double& flux);
-    void           flux_err(const double& flux_err);
+    void           flux_err(const double& error);
 };
 
 
