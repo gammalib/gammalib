@@ -533,7 +533,7 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         result.append(gammalib::str(ewidth())+" MeV");
 
         // Append pointing
-        result.append("\n"+pointing().print(gammalib::reduce(chatter)));
+        result.append("\n"+m_pointing.print(gammalib::reduce(chatter)));
 
         // Append response
         result.append("\n"+response().print(gammalib::reduce(chatter)));
@@ -857,11 +857,9 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
         m_ewidth = emax - emin;
 
         // Set pointing information
-        GSkyDir pnt;
-        double  ra_scz  = hdu->real("RA_SCZ");
-        double  dec_scz = hdu->real("DEC_SCZ");
-        pnt.radec_deg(ra_scz, dec_scz);
-        m_pointing.dir(pnt);
+        double ra_scz  = hdu->real("RA_SCZ");
+        double dec_scz = hdu->real("DEC_SCZ");
+        m_pointing.radec_deg(ra_scz, dec_scz);
 
     } // endif: HDU was valid
 

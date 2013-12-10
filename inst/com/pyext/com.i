@@ -63,6 +63,5 @@
 %include "GCOMInstDir.i"
 %include "GCOMModelDRBFitting.i"
 %include "GCOMObservation.i"
-%include "GCOMPointing.i"
 %include "GCOMResponse.i"
 

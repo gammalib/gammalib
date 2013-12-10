@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GCOMObservation.i  -  COMPTEL observation class              *
+ *             GCOMObservation.i - COMPTEL observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -58,7 +58,6 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    const GCOMPointing& pointing(void) const;
     void           load(const std::string& drename,
                         const std::string& drbname,
                         const std::string& drgname,

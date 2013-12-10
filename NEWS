@@ -315,6 +315,7 @@ GLATResponseTable
   read() and write() methods now take a const reference instead of a
   pointer. nenergies() and ncostheta() return const references.
 
+GCOMPointing
 GLATPointing
   Remove class (is now obsolete as no GPointing base class exists
   anymore).

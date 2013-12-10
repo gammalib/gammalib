@@ -33,7 +33,6 @@
 #include "GModel.hpp"
 #include "GSkymap.hpp"
 #include "GCOMResponse.hpp"
-#include "GCOMPointing.hpp"
 
 
 /***********************************************************************//**
@@ -74,7 +73,6 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const GCOMPointing& pointing(void) const;
     void           load(const std::string& drename,
                         const std::string& drbname,
                         const std::string& drgname,
@@ -114,8 +112,8 @@ protected:
     GSkymap      m_drb;         //!< Background model
     GSkymap      m_drg;         //!< Geometry factors
     GSkymap      m_drx;         //!< Exposure map
-    GCOMPointing m_pointing;    //!< Pointer to pointing direction
-    GCOMResponse m_response;    //!< Pointer to response functions
+    GSkyDir      m_pointing;    //!< Pointing direction
+    GCOMResponse m_response;    //!< Response functions
     double       m_obs_id;      //!< Observation ID
     double       m_ontime;      //!< Ontime (sec)
     double       m_livetime;    //!< Livetime (sec)
@@ -134,19 +132,6 @@ const GCOMResponse& GCOMObservation::response(void) const
 {
     // Return response pointer
     return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Return pointing direction
- *
- * @return Pointing direction.
- ***************************************************************************/
-inline
-const GCOMPointing& GCOMObservation::pointing(void) const
-{
-    // Return pointing pointer
-    return m_pointing;
 }
 
 #endif /* GCOMOBSERVATION_HPP */
