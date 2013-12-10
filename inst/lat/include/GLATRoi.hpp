@@ -36,11 +36,11 @@
 /***********************************************************************//**
  * @class GLATRoi
  *
- * @brief Interface for the LAT region of interest class.
+ * @brief Fermi/LAT region of interest class
  *
- * The Fermi-LAT region of interest class defines the region of photon
+ * The Fermi/LAT region of interest class defines the region of photon
  * arrival directions that is used for unbinned data analysis. A circular
- * Fermi-LAT has been implemented.
+ * region on the sky has been implemented.
  ***************************************************************************/
 class GLATRoi : public GRoi {
 

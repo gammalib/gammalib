@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GLATRoi
  *
- * @brief Python bindings for the LAT region of interest class
+ * @brief Fermi/LAT region of interest class
  ***************************************************************************/
 class GLATRoi : public GRoi {
 public:
