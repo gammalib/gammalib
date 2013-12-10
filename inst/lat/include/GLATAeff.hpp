@@ -31,7 +31,6 @@
 #include <string>
 #include <vector>
 #include "GBase.hpp"
-#include "GLATPointing.hpp"
 #include "GLATResponseTable.hpp"
 #include "GLATEfficiency.hpp"
 #include "GFits.hpp"
@@ -64,8 +63,6 @@ public:
     double    operator()(const double& logE, const double& ctheta);
     double    operator()(const double& logE, const double& ctheta,
                          const double& phi);
-    double    operator()(const GSkyDir& srcDir, const GEnergy& srcEng,
-                         const GTime& srcTime, const GLATPointing& pnt);
 
     // Methods
     void          clear(void);

@@ -31,7 +31,6 @@
 #include <string>
 #include "GObservation.hpp"
 #include "GLATResponse.hpp"
-#include "GLATPointing.hpp"
 #include "GLATLtCube.hpp"
 #include "GTime.hpp"
 #include "GModel.hpp"
@@ -78,7 +77,6 @@ public:
                                     const std::string& ltcube_name);
     void                response(const std::string& irfname,
                                  std::string caldb = "");    
-    const GLATPointing& pointing(void) const;
     GLATLtCube*         ltcube(void) const;
 
 protected:
@@ -94,7 +92,6 @@ protected:
     std::string  m_cntfile;      //!< Counts map filename
     std::string  m_expfile;      //!< Exposure map filename
     GLATResponse m_response;     //!< Instrument response functions
-    GLATPointing m_pointing;     //!< Pointing direction
     GLATLtCube*  m_ltcube;       //!< Pointer to lifetime cube
 };
 
@@ -107,17 +104,6 @@ const GLATResponse& GLATObservation::response(void) const
 {
     // Return response pointer
     return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to LAT pointing direction
- ***************************************************************************/
-inline
-const GLATPointing& GLATObservation::pointing(void) const
-{
-    // Return response pointer
-    return m_pointing;
 }
 
 

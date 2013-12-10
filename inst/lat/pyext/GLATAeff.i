@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATAeff.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -48,8 +47,6 @@ public:
     double operator()(const double& logE, const double& ctheta);
     double operator()(const double& logE, const double& ctheta,
                       const double& phi);
-    double operator()(const GSkyDir& srcDir, const GEnergy& srcEng,
-                      const GTime& srcTime,  const GLATPointing& pnt);
 
     // Methods
     void         clear(void);

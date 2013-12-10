@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATEdisp.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -46,8 +45,6 @@ public:
 
     // Operators
     //double operator()(const double& logE, const double& ctheta);
-    //double operator()(const GSkyDir& srcDir, const GEnergy& srcEng,
-    //                  const GTime& srcTime,  const GLATPointing& pnt);
 
     // Methods
     void         clear(void);

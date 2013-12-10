@@ -649,7 +649,7 @@ void GLATObservation::init_members(void)
     m_cntfile.clear();
     m_expfile.clear();
     m_response.clear();
-    m_pointing.clear();
+    //m_pointing.clear();
     m_ltcube = NULL;
 
     // Return
@@ -671,7 +671,7 @@ void GLATObservation::copy_members(const GLATObservation& obs)
     m_cntfile  = obs.m_cntfile;
     m_expfile  = obs.m_expfile;
     m_response = obs.m_response;
-    m_pointing = obs.m_pointing;
+    //m_pointing = obs.m_pointing;
     
     // Clone members
     if (obs.m_ltcube != NULL) m_ltcube = obs.m_ltcube->clone();

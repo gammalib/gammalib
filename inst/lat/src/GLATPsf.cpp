@@ -178,31 +178,6 @@ double GLATPsf::operator()(const double& offset, const double& logE,
 }
 
 
-/***********************************************************************//**
- * @brief Return point spread function value
- *
- * @param[in] obsDir Observed photon direction.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt LAT pointing.
- *
- * Returns 0.
- *
- * @todo Not yet implemented.
- ***************************************************************************/
-double GLATPsf::operator()(const GLATInstDir& obsDir, const GSkyDir& srcDir,
-                           const GEnergy& srcEng, const GTime& srcTime,
-                           const GLATPointing& pnt)
-{
-    // Initialise response
-    double psf = 0.0;
-
-    // Return point spread function
-    return psf;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =

@@ -31,7 +31,6 @@
 #include <string>
 #include <vector>
 #include "GBase.hpp"
-#include "GLATPointing.hpp"
 #include "GLATResponseTable.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"

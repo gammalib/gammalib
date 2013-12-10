@@ -68,7 +68,6 @@
 %include "GLATLtCube.i"
 %include "GLATMeanPsf.i"
 %include "GLATObservation.i"
-%include "GLATPointing.i"
 %include "GLATPsf.i"
 %include "GLATResponse.i"
 %include "GLATRoi.i"

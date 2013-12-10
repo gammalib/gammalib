@@ -32,7 +32,6 @@
 #include "GBase.hpp"
 #include "GLATPsfBase.hpp"
 #include "GLATInstDir.hpp"
-#include "GLATPointing.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GSkyDir.hpp"
@@ -67,9 +66,6 @@ public:
     GLATPsf& operator= (const GLATPsf& psf);
     double   operator()(const double& offset, const double& logE,
                         const double& ctheta);
-    double   operator()(const GLATInstDir& obsDir, const GSkyDir& srcDir,
-                        const GEnergy& srcEng, const GTime& srcTime,
-                        const GLATPointing& pnt);
 
     // Methods
     void        clear(void);

@@ -211,27 +211,6 @@ double GLATAeff::operator()(const double& logE, const double& ctheta,
 }
 
 
-/***********************************************************************//**
- * @brief Return effective area in units of cm2
- *
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt Instrument pointing.
- *
- * Returns the effective area in units of cm2 for a sky direction, energy,
- * time and telescope pointing direction.
- *
- * @todo Implemented method (returns value of 1.0 for the moment)
- ***************************************************************************/
-double GLATAeff::operator()(const GSkyDir& srcDir, const GEnergy& srcEng,
-                            const GTime& srcTime, const GLATPointing& pnt)
-{
-    // Return Aeff value
-    return 1.0;
-}
-
-
 /*==========================================================================
  =                                                                         =
  =                             Public methods                              =

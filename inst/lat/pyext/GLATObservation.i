@@ -27,7 +27,7 @@
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATObservation.hpp"
 %}
-//%include stl.i
+
 
 /***********************************************************************//**
  * @class GLATObservation
@@ -62,7 +62,6 @@ public:
                                     const std::string& ltcube_name);
     void                response(const std::string& irfname,
                                  std::string caldb = "");    
-    const GLATPointing& pointing(void) const;
     GLATLtCube*         ltcube(void) const;
 };
 
