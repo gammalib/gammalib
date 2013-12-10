@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GLATObservation.hpp - Fermi LAT Observation class           *
+ *             GLATObservation.hpp - Fermi/LAT observation class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.hpp
- * @brief LAT Observation class interface definition
+ * @brief Fermi/LAT observation class definition
  * @author Juergen Knoedlseder
  */
 
@@ -40,7 +40,7 @@
 /***********************************************************************//**
  * @class GLATObservation
  *
- * @brief Interface for the LAT observation class
+ * @brief Fermi/LAT observation class
  *
  * This class implements a Fermi/LAT observation.
  ***************************************************************************/
@@ -53,7 +53,7 @@ public:
     virtual ~GLATObservation(void);
 
     // Operators
-    GLATObservation& operator= (const GLATObservation& obs);
+    GLATObservation& operator=(const GLATObservation& obs);
 
     // Implemented pure virtual base class methods
     virtual void                clear(void);
@@ -61,23 +61,23 @@ public:
     virtual void                response(const GResponse& rsp);
     virtual const GLATResponse& response(void) const;
     virtual std::string         instrument(void) const;
-    virtual double              ontime(void) const { return 0.0; }
-    virtual double              livetime(void) const { return 0.0; }
-    virtual double              deadc(const GTime& time) const { return 0.0; }
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
     virtual void                read(const GXmlElement& xml);
     virtual void                write(GXmlElement& xml) const;
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                load_unbinned(const std::string& ft1name,
-                                      const std::string& ft2name,
-                                      const std::string& ltcube_name);
-    void                load_binned(const std::string& cntmap_name,
-                                    const std::string& expmap_name,
+    void              load_unbinned(const std::string& ft1name,
+                                    const std::string& ft2name,
                                     const std::string& ltcube_name);
-    void                response(const std::string& irfname,
-                                 std::string caldb = "");    
-    GLATLtCube*         ltcube(void) const;
+    void              load_binned(const std::string& cntmap_name,
+                                  const std::string& expmap_name,
+                                  const std::string& ltcube_name);
+    void              response(const std::string& irfname,
+                               const std::string& caldb = "");    
+    const GLATLtCube* ltcube(void) const;
 
 protected:
     // Protected methods
@@ -97,7 +97,9 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Returns pointer to LAT response function
+ * @brief Return Fermi/LAT response function
+ *
+ * @return Fermi/LAT response function
  ***************************************************************************/
 inline
 const GLATResponse& GLATObservation::response(void) const
@@ -108,10 +110,12 @@ const GLATResponse& GLATObservation::response(void) const
 
 
 /***********************************************************************//**
- * @brief Returns pointer to LAT livetime cube
+ * @brief Return Fermi/LAT livetime cube
+ *
+ * @return Fermi/LAT livetime cube
  ***************************************************************************/
 inline
-GLATLtCube* GLATObservation::ltcube(void) const
+const GLATLtCube* GLATObservation::ltcube(void) const
 {
     // Return livetime cube pointer
     return m_ltcube;
@@ -119,13 +123,54 @@ GLATLtCube* GLATObservation::ltcube(void) const
 
 
 /***********************************************************************//**
- * @brief Returns instrument name
+ * @brief Return instrument name
+ *
+ * @return Instrument name ("LAT")
  ***************************************************************************/
 inline
 std::string GLATObservation::instrument(void) const
 {
     // Return instument name
     return ("LAT");
+}
+
+
+/***********************************************************************//**
+ * @brief Return ontime
+ *
+ * @return Ontime
+ ***************************************************************************/
+inline
+double GLATObservation::ontime(void) const
+{
+    // Return ontime
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return livetime
+ *
+ * @return Livetime
+ ***************************************************************************/
+inline
+double GLATObservation::livetime(void) const
+{
+    // Return livetime
+    return 0.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return deadtime correction factor
+ *
+ * @return Deadtime correction factor
+ ***************************************************************************/
+inline
+double GLATObservation::deadc(const GTime& time) const
+{
+    // Return deadtime correction factor
+    return 0.0;
 }
 
 #endif /* GLATOBSERVATION_HPP */

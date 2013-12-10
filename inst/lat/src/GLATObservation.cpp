@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GLATObservation.cpp  -  Fermi/LAT Observation class           *
+ *             GLATObservation.cpp - Fermi/LAT observation class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.cpp
- * @brief Fermi/LAT Observation class implementation
+ * @brief Fermi/LAT observation class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -114,9 +114,10 @@ GLATObservation::~GLATObservation(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs LAT observation.
+ * @param[in] obs Fermi/LAT observation.
+ * @return Fermi/LAT observation.
  ***************************************************************************/
-GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
+GLATObservation& GLATObservation::operator=(const GLATObservation& obs)
 {
     // Execute only if object is not identical
     if (this != &obs) {
@@ -147,7 +148,7 @@ GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear Fermi/LAT observation
  ***************************************************************************/
 void GLATObservation::clear(void)
 {
@@ -165,8 +166,10 @@ void GLATObservation::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone Fermi/LAT observation
+ *
+ * @return Pointer to deep copy of Fermi/LAT observation.
+ ***************************************************************************/
 GLATObservation* GLATObservation::clone(void) const
 {
     return new GLATObservation(*this);
@@ -188,8 +191,9 @@ void GLATObservation::response(const GResponse& rsp)
 {
     // Get pointer on LAT response
     const GLATResponse* latrsp = dynamic_cast<const GLATResponse*>(&rsp);
-    if (latrsp == NULL)
+    if (latrsp == NULL) {
         throw GLATException::bad_response_type(G_RESPONSE);
+    }
 
     // Copy response function
     m_response = *latrsp;
@@ -213,7 +217,8 @@ void GLATObservation::response(const GResponse& rsp)
  * where name is the response name (e.g. P6_v3). Note that the name is case
  * sensitive for the moment.
  ***************************************************************************/
-void GLATObservation::response(const std::string& irfname, std::string caldb)
+void GLATObservation::response(const std::string& irfname,
+                               const std::string& caldb)
 {
     // Clear LAT response function
     m_response.clear();
@@ -649,7 +654,6 @@ void GLATObservation::init_members(void)
     m_cntfile.clear();
     m_expfile.clear();
     m_response.clear();
-    //m_pointing.clear();
     m_ltcube = NULL;
 
     // Return
@@ -671,7 +675,6 @@ void GLATObservation::copy_members(const GLATObservation& obs)
     m_cntfile  = obs.m_cntfile;
     m_expfile  = obs.m_expfile;
     m_response = obs.m_response;
-    //m_pointing = obs.m_pointing;
     
     // Clone members
     if (obs.m_ltcube != NULL) m_ltcube = obs.m_ltcube->clone();

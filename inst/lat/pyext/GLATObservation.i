@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GLATObservation.i  -  LAT Observation class               *
+ *              GLATObservation.i - Fermi/LAT observation class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.i
- * @brief LAT Observation class Python interface definition
+ * @brief Fermi/LAT observation class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GLATObservation
  *
- * @brief LAT Observation class Python interface
+ * @brief Fermi/LAT observation class
  ***************************************************************************/
 class GLATObservation : public GObservation {
 public:
@@ -54,15 +54,15 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    void                load_unbinned(const std::string& ft1name,
-                                      const std::string& ft2name,
-                                      const std::string& ltcube_name);
-    void                load_binned(const std::string& cntmap_name,
-                                    const std::string& expmap_name,
+    void              load_unbinned(const std::string& ft1name,
+                                    const std::string& ft2name,
                                     const std::string& ltcube_name);
-    void                response(const std::string& irfname,
-                                 std::string caldb = "");    
-    GLATLtCube*         ltcube(void) const;
+    void              load_binned(const std::string& cntmap_name,
+                                  const std::string& expmap_name,
+                                  const std::string& ltcube_name);
+    void              response(const std::string& irfname,
+                               const std::string& caldb = "");    
+    const GLATLtCube* ltcube(void) const;
 };
 
 
