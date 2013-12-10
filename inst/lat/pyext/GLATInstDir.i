@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATInstDir.i
- * @brief Fermi/LAT instrument direction class interface definition
+ * @brief Fermi/LAT instrument direction class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -38,6 +38,7 @@ class GLATInstDir : public GInstDir {
 public:
     // Constructors and destructors
     GLATInstDir(void);
+    explicit GLATInstDir(const GSkyDir& dir);
     GLATInstDir(const GLATInstDir& dir);
     virtual ~GLATInstDir(void);
 

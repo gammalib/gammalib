@@ -155,7 +155,7 @@ GLATInstDir& GLATInstDir::operator=(const GLATInstDir& dir)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear Fermi/LAT instrument direction
  ***************************************************************************/
 void GLATInstDir::clear(void)
 {
@@ -173,9 +173,9 @@ void GLATInstDir::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone Fermi/LAT instrument direction
  *
- * @return Pointer to deep copy of instrument direction.
+ * @return Pointer to deep copy of Fermi/LAT instrument direction.
  ***************************************************************************/
 GLATInstDir* GLATInstDir::clone(void) const
 {

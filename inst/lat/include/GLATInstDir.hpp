@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATInstDir.hpp
- * @brief Fermi/LAT instrument direction class interface definition
+ * @brief Fermi/LAT instrument direction class definition
  * @author Juergen Knoedlseder
  */
 
@@ -36,7 +36,7 @@
 /***********************************************************************//**
  * @class GLATInstDir
  *
- * @brief Interface for the LAT instrument direction class.
+ * @brief Fermi/LAT instrument direction class
  *
  * The LAT instrument direction is an encapsulation of a sky direction
  * as LAT is an imaging device.
