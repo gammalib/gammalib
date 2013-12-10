@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GLATEventBin.i  -  LAT event bin class                 *
+ *               GLATEventBin.i - Fermi/LAT event bin class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventBin.i
- * @brief Fermi-LAT event bin class Python interface definition
+ * @brief Fermi/LAT event bin class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GLATEventBin
  *
- * @brief Fermi-LAT event bin class
+ * @brief Fermi/LAT event bin class
  ***************************************************************************/
 class GLATEventBin : public GEventBin {
 
@@ -57,13 +57,13 @@ public:
     virtual void               counts(const double& counts);
 
     // Other methods
-    const double&  omega(void) const;
-    const GEnergy& ewidth(void) const;
-    const double&  ontime(void) const;
-    const int&     index(void) const;
-    const int&     ipix(void) const;
-    const int&     ieng(void) const;
-    GLATEventCube* cube(void) const;
+    const double&        omega(void) const;
+    const GEnergy&       ewidth(void) const;
+    const double&        ontime(void) const;
+    const int&           index(void) const;
+    const int&           ipix(void) const;
+    const int&           ieng(void) const;
+    const GLATEventCube* cube(void) const;
 };
 
 

@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATEventAtom.hpp  -  LAT event atom class               *
+ *              GLATEventAtom.hpp - Fermi/LAT event atom class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventAtom.hpp
- * @brief GLATEventAtom class interface definition.
+ * @brief Fermi/LAT event atom class definition
  * @author Juergen Knoedlseder
  */
 
@@ -38,7 +38,7 @@
 /***********************************************************************//**
  * @class GLATEventAtom
  *
- * @brief GLATEventAtom class interface defintion.
+ * @brief Fermi/LAT event atom class
  ***************************************************************************/
 class GLATEventAtom : public GEventAtom {
 
@@ -52,14 +52,14 @@ public:
     virtual ~GLATEventAtom(void);
 
     // Operators
-    GLATEventAtom& operator= (const GLATEventAtom& atom);
+    GLATEventAtom& operator=(const GLATEventAtom& atom);
 
     // Implemented pure virtual base class methods
     void               clear(void);
     GLATEventAtom*     clone(void) const;
-    const GLATInstDir& dir(void) const { return m_dir; }
-    const GEnergy&     energy(void) const { return m_energy; }
-    const GTime&       time(void) const { return m_time; }
+    const GLATInstDir& dir(void) const;
+    const GEnergy&     energy(void) const;
+    const GTime&       time(void) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -86,5 +86,47 @@ protected:
     double*     m_difrsp;              //!< Diffuse response components
     int         m_num_difrsp;          //!< Number of diffuse model components
 };
+
+
+/***********************************************************************//**
+ * @brief Return event instrument direction
+ *
+ * @return Event instrument direction.
+ *
+ * Returns the reconstructed arrival direction of the photon on the sky.
+ ***************************************************************************/
+inline
+const GLATInstDir& GLATEventAtom::dir(void) const
+{
+    return m_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event energy
+ *
+ * @return Event energy.
+ *
+ * Returns the reconstructed energy of the photon on the sky.
+ ***************************************************************************/
+inline
+const GEnergy& GLATEventAtom::energy(void) const
+{
+    return m_energy;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event time
+ *
+ * @return Event time.
+ *
+ * Returns the event triggering time.
+ ***************************************************************************/
+inline
+const GTime& GLATEventAtom::time(void) const
+{
+    return m_time;
+}
 
 #endif /* GLATEVENTATOM_HPP */

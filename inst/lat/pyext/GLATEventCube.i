@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GLATEventCube.i  -  LAT event bin container class           *
+ *              GLATEventCube.i - Fermi/LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventCube.i
- * @brief LAT event bin container class Python interface definition
+ * @brief Fermi/LAT event cube class definition
  * @author Juergen Knoedlseder
  */
 %{

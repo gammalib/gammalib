@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GLATEventList.hpp - LAT Event list class                *
+ *              GLATEventList.hpp - Fermi/LAT event list class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventList.hpp
- * @brief LAT Event list class interface definition
+ * @brief Fermi/LAT event list class definition
  * @author Juergen Knoedlseder
  */
 
@@ -41,7 +41,7 @@
 /***********************************************************************//**
  * @class GLATEventList
  *
- * @brief LAT Event list interface
+ * @brief Fermi/LAT event list class
  ***************************************************************************/
 class GLATEventList : public GEventList {
 
@@ -59,15 +59,15 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GLATEventList* clone(void) const;
-    virtual int            size(void) const { return m_events.size(); }
+    virtual int            size(void) const;
     virtual void           load(const std::string& filename);
     virtual void           save(const std::string& filename,
                                 const bool& clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
-    virtual int            number(void) const { return m_events.size(); }
+    virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
-    virtual const GLATRoi& roi(void) const { return m_roi; }
+    virtual const GLATRoi& roi(void) const;
     virtual std::string    print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
@@ -91,5 +91,41 @@ protected:
     std::vector<std::string>   m_ds_value;       //!< Data selection values
     std::vector<std::string>   m_ds_reference;   //!< Data selection references
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of events in list
+ *
+ * @return Number of events in list.
+ ***************************************************************************/
+inline
+int GLATEventList::size(void) const
+{
+    return m_events.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of events in list
+ *
+ * @return Number of events in list.
+ ***************************************************************************/
+inline
+int GLATEventList::number(void) const
+{
+    return m_events.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return Region of Interest
+ *
+ * @return Region of Interest.
+ ***************************************************************************/
+inline
+const GLATRoi& GLATEventList::roi(void) const
+{
+    return m_roi;
+}
 
 #endif /* GLATEVENTLIST_HPP */

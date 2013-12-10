@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GLATEventBin.cpp - LAT event bin class                  *
+ *              GLATEventBin.cpp - Fermi/LAT event bin class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventBin.cpp
- * @brief Fermi-LAT event bin class implementation
+ * @brief Fermi/LAT event bin class implementation
  * @author Juergen Knodlseder
  */
 
@@ -113,7 +113,7 @@ GLATEventBin::~GLATEventBin(void)
  * @param[in] bin LAT event bin.
  * @return Lat event bin.
  ***************************************************************************/
-GLATEventBin& GLATEventBin::operator= (const GLATEventBin& bin)
+GLATEventBin& GLATEventBin::operator=(const GLATEventBin& bin)
 {
     // Execute only if object is not identical
     if (this != &bin) {
@@ -144,9 +144,7 @@ GLATEventBin& GLATEventBin::operator= (const GLATEventBin& bin)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the instance to an initial state.
+ * @brief Clear event bin
  ***************************************************************************/
 void GLATEventBin::clear(void)
 {
@@ -166,9 +164,9 @@ void GLATEventBin::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone event bin
  *
- * @return Deep copy of LAT event bin.
+ * @return Pointer to deep copy of Fermi/LAT event bin.
  ***************************************************************************/
 GLATEventBin* GLATEventBin::clone(void) const
 {
@@ -445,9 +443,9 @@ void GLATEventBin::init_members(void)
 {
     // Initialise members
     m_cube   = NULL;
-    m_index  = 0;
-    m_ipix   = 0;
-    m_ieng   = 0;
+    m_index  = -1;
+    m_ipix   = -1;
+    m_ieng   = -1;
     m_energy = NULL;
     m_dir    = NULL;
     m_time   = NULL;

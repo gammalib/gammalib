@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GLATEventAtom.hpp"
-#include "GTools.hpp"
 %}
 
 

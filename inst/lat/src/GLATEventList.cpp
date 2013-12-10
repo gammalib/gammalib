@@ -109,9 +109,10 @@ GLATEventList::~GLATEventList(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] list LAT event list.
+ * @param[in] list Fermi/LAT event list.
+ * @return Fermi/LAT event list.
  ***************************************************************************/
-GLATEventList& GLATEventList::operator= (const GLATEventList& list)
+GLATEventList& GLATEventList::operator=(const GLATEventList& list)
 {
     // Execute only if object is not identical
     if (this != &list) {
@@ -149,8 +150,9 @@ GLATEventAtom* GLATEventList::operator[](const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OPERATOR, "Event index", index, size());
+    }
     #endif
 
     // Return pointer
@@ -172,8 +174,9 @@ const GLATEventAtom* GLATEventList::operator[](const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OPERATOR, "Event index", index, size());
+    }
     #endif
 
     // Return pointer
@@ -188,9 +191,7 @@ const GLATEventAtom* GLATEventList::operator[](const int& index) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
- *
- * This method properly resets the object to an initial state.
+ * @brief Clear event list
  ***************************************************************************/
 void GLATEventList::clear(void)
 {
@@ -210,8 +211,10 @@ void GLATEventList::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
-***************************************************************************/
+ * @brief Clone event list
+ *
+ * @return Pointer to deep copy of Fermi/LAT event list.
+ ***************************************************************************/
 GLATEventList* GLATEventList::clone(void) const
 {
     return new GLATEventList(*this);
@@ -350,8 +353,9 @@ void GLATEventList::roi(const GRoi& roi)
     const GLATRoi* ptr = dynamic_cast<const GLATRoi*>(&roi);
 
     // Throw exception if ROI is not of correct type
-    if (ptr == NULL)
+    if (ptr == NULL) {
         throw GLATException::bad_roi_type(G_ROI);
+    }
 
     // Set ROI
     m_roi = *ptr;

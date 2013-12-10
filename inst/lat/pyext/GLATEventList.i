@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GLATEventList.i - Fermi/LAT event atom container class         *
+ *               GLATEventList.i - Fermi/LAT event list class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventList.i
- * @brief Fermi-LAT event atom container class interface definition
+ * @brief Fermi/LAT event list class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,7 +33,7 @@
 /***********************************************************************//**
  * @class GLATEventList
  *
- * @brief Fermi/LAT event atom container class
+ * @brief Fermi/LAT event list class
  ***************************************************************************/
 class GLATEventList : public GEventList {
 public:
@@ -69,7 +69,8 @@ public:
             return ((*self)[index]);
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)", "Event index",
+                                           index, self->size());
         }
     }
     void __setitem__(const int& index, const GLATEventAtom& value) {
@@ -77,7 +78,8 @@ public:
             *((*self)[index]) = value;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)", "Event index",
+                                           index, self->size());
         }
     }
 };

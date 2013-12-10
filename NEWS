@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-7 December 2013
+10 December 2013
 
 
 1. Introduction
@@ -277,6 +277,57 @@ GCTAAeffArf
 
 GCTAObservation
   caldb argument to response() method now passed as const reference.
+
+GLATAeff
+  read() method now take a const reference instead of a pointer.
+  The clobber argument for the save() method is now a const
+  reference.
+
+GLATEdisp
+GLATPsf
+GLATLtCube
+  The clobber argument for the save() method is now a const
+  reference.
+
+GLATPsfBase
+  read() and read_scale() now take const reference instead of
+  pointers as arguments. costhetamin(), front(), scale_par1(),
+  scale_par2() and scale_index() now return const references.
+
+GLATPsfV1
+GLATPsfV3
+  read() now takes a const reference instead of a pointer as
+  argument.
+
+GLATLtCubeMap
+  read() and write() methods now take a const reference instead of a
+  pointer. ncostheta(), nphi() and costhetamin() now return const
+  references.
+
+GLATMeanPsf
+  offset(), energy(), dir(), name() and thetamax() now return const
+  references.
+
+GLATResponse
+  caldb(), rspname() and force_mean() now return const references.
+
+GLATResponseTable
+  read() and write() methods now take a const reference instead of a
+  pointer. nenergies() and ncostheta() return const references.
+
+GLATPointing
+  Remove class (is now obsolete as no GPointing base class exists
+  anymore).
+
+GLATObservation
+  ltcube() method now returns a const pointer and response() method
+  takes a const reference as caldb argument.
+
+GLATEventBin
+  cube() now returns a const pointer.
+
+GLATEventCube
+  enodes() method is now declared const.
 
 All GammaLib constants, defined in GTools.hpp, and functions are now
 put in the gammalib namespace to avoid name clashes. Mathematical
