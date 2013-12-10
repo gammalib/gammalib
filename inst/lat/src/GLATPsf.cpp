@@ -287,8 +287,6 @@ void GLATPsf::save(const std::string& filename, const bool& clobber)
  *
  * @param[in] fits FITS file.
  *
- * @exception GException::fits_hdu_not_found
- *            Response tables not found in FITS file
  * @exception GException::invalid_response
  *            Invalid response type or unsupported response version found.
  *
@@ -305,23 +303,18 @@ void GLATPsf::read(const GFits& fits)
     clear();
 
     // Get pointer to PSF parameters table
-    const GFitsTable* hdu_rpsf = fits.table("RPSF");
-    if (hdu_rpsf == NULL) {
-        throw GException::fits_hdu_not_found(G_READ, "RPSF");
-    }
+    const GFitsTable& hdu_rpsf = *fits.table("RPSF");
 
     // Get pointer to PSF scaling parameters table
-    const GFitsTable* hdu_scale = fits.table("PSF_SCALING_PARAMS");
-    if (hdu_scale == NULL) {
-        throw GException::fits_hdu_not_found(G_READ, "PSF_SCALING_PARAMS");
-    }
+    const GFitsTable& hdu_scale = *fits.table("PSF_SCALING_PARAMS");
 
     // Determine PSF version (default version is version 1)
-    int version = (hdu_rpsf->hascard("PSFVER")) ? hdu_rpsf->integer("PSFVER") : 1;
+    int version = (hdu_rpsf.hascard("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
 
     // Determine PSF type
     bool        front  = true;
-    std::string detnam = gammalib::strip_whitespace(gammalib::toupper(hdu_rpsf->string("DETNAM")));
+    std::string detnam = 
+        gammalib::strip_whitespace(gammalib::toupper(hdu_rpsf.string("DETNAM")));
     if (detnam == "FRONT") {
         front = true;
     }

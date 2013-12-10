@@ -394,10 +394,10 @@ void GLATLtCube::load(const std::string& filename)
     GFits file(filename);
 
     // Get HDUs
-    GFitsTable* hdu_exposure          = file.table("EXPOSURE");
-    GFitsTable* hdu_weighted_exposure = file.table("WEIGHTED_EXPOSURE");
-    //GFitsTable* hdu_cthetabounds      = file.table("CTHETABOUNDS");
-    GFitsTable* hdu_gti               = file.table("GTI");
+    const GFitsTable& hdu_exposure          = *file.table("EXPOSURE");
+    const GFitsTable& hdu_weighted_exposure = *file.table("WEIGHTED_EXPOSURE");
+    //const GFitsTable& hdu_cthetabounds      = *file.table("CTHETABOUNDS");
+    const  GFitsTable& hdu_gti               = *file.table("GTI");
 
     // Load exposure
     m_exposure.read(hdu_exposure);
@@ -408,7 +408,7 @@ void GLATLtCube::load(const std::string& filename)
     // Load cos theta boundaries
     
     // Load GTIs
-    m_gti.read(*hdu_gti);
+    m_gti.read(hdu_gti);
 
     // Close FITS file
     file.close();
