@@ -377,7 +377,7 @@ double GLATResponse::irf(const GLATEventBin& event,
     double rsp = 0.0;
 
     // Get pointer to event cube
-    GLATEventCube* cube = event.cube();
+    const GLATEventCube* cube = event.cube();
 
     // Get pointer on point source spatial model
     const GModelSpatialPointSource* ptsrc =

@@ -144,7 +144,7 @@ GLATLtCubeMap& GLATLtCubeMap::operator=(const GLATLtCubeMap& map)
  * This method assumes that \f$T_{\rm live}(\cos \theta)\f$ is stored as a
  * set of maps.
  ***************************************************************************/
-double GLATLtCubeMap::operator()(const GSkyDir& dir, _ltcube_ctheta fct)
+double GLATLtCubeMap::operator()(const GSkyDir& dir, _ltcube_ctheta fct) const
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -182,7 +182,7 @@ double GLATLtCubeMap::operator()(const GSkyDir& dir, _ltcube_ctheta fct)
  * index m_num_ctheta (the first m_num_ctheta maps are the livetime cube
  * maps without any \f$\phi\f$ dependence).
  ***************************************************************************/
-double GLATLtCubeMap::operator()(const GSkyDir& dir, _ltcube_ctheta_phi fct)
+double GLATLtCubeMap::operator()(const GSkyDir& dir, _ltcube_ctheta_phi fct) const
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -231,7 +231,7 @@ double GLATLtCubeMap::operator()(const GSkyDir& dir, _ltcube_ctheta_phi fct)
  * maps without any \f$\phi\f$ dependence).
  ***************************************************************************/
 double GLATLtCubeMap::operator()(const GSkyDir& dir, const GEnergy& energy,
-                                 const GLATAeff& aeff)
+                                 const GLATAeff& aeff) const
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -292,7 +292,7 @@ double GLATLtCubeMap::operator()(const GSkyDir& dir, const GEnergy& energy,
  ***************************************************************************/
 double GLATLtCubeMap::operator()(const GSkyDir& dir, const GEnergy& energy,
                                  const double& offset, const GLATPsf& psf,
-                                 const GLATAeff& aeff)
+                                 const GLATAeff& aeff) const
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);

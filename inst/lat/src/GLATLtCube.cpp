@@ -165,7 +165,7 @@ GLATLtCube& GLATLtCube::operator=(const GLATLtCube& cube)
  * information to the method.
  ***************************************************************************/
 double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
-                              _ltcube_ctheta fct)
+                              _ltcube_ctheta fct) const
 {
     // Compute exposure
     double exposure = m_exposure(dir, fct);
@@ -217,7 +217,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
  * information to the method.
  ***************************************************************************/
 double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
-                              _ltcube_ctheta_phi fct)
+                              _ltcube_ctheta_phi fct) const
 {
     // Compute exposure
     double exposure = m_exposure(dir, fct);
@@ -264,7 +264,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
  * on the cosine of the zenith angle and (optionally) of the azimuth angle.
  ***************************************************************************/
 double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
-                              const GLATAeff& aeff)
+                              const GLATAeff& aeff) const
 {
     // Compute exposure
     double exposure = m_exposure(dir, energy, aeff);
@@ -317,7 +317,7 @@ double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
  ***************************************************************************/
 double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
                               const double& offset, const GLATPsf& psf,
-                              const GLATAeff& aeff)
+                              const GLATAeff& aeff) const
 {
     // Compute exposure
     double exposure = m_exposure(dir, energy, offset, psf, aeff);

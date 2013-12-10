@@ -58,14 +58,14 @@ public:
     // Operators
     GLATLtCube& operator= (const GLATLtCube& cube);
     double      operator()(const GSkyDir& dir, const GEnergy& energy,
-                           _ltcube_ctheta fct);
+                           _ltcube_ctheta fct) const;
     double      operator()(const GSkyDir& dir, const GEnergy& energy,
-                           _ltcube_ctheta_phi fct);
+                           _ltcube_ctheta_phi fct) const;
     double      operator()(const GSkyDir& dir, const GEnergy& energy,
-                           const GLATAeff& aeff);
+                           const GLATAeff& aeff) const;
     double      operator()(const GSkyDir& dir, const GEnergy& energy,
                            const double& offset, const GLATPsf& psf,
-                           const GLATAeff& aeff);
+                           const GLATAeff& aeff) const;
 
     // Methods
     void        clear(void);

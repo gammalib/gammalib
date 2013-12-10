@@ -305,9 +305,10 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     const GLATResponse& rsp = obs.response();
 
     // Get pointer on livetime cube
-    GLATLtCube* ltcube = obs.ltcube();
-    if (ltcube == NULL)
+    const GLATLtCube* ltcube = obs.ltcube();
+    if (ltcube == NULL) {
         throw GLATException::no_ltcube(G_SET);
+    }
     
     // Get energy boundaries
     GEbounds ebds = obs.events()->ebounds();
