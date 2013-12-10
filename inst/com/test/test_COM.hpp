@@ -49,7 +49,6 @@ public:
     virtual void              set(void);
     virtual TestGCOMResponse* clone(void) const;
     void                      test_inst_dir(void);
-    void                      test_pointing(void);
     void                      test_response(void);
 };
 
