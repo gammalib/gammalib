@@ -69,11 +69,11 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    GEnergy energy_err(void) const { return m_eng_err; }
-    double  flux(void) const { return m_flux; }
-    double  flux_err(void) const { return m_flux_err; }
-    void    flux(const double& flux) { m_flux=flux; }
-    void    flux_err(const double& flux_err) { m_flux_err=flux_err; }
+    const GEnergy& energy_err(void) const { return m_eng_err; }
+    const double&  flux(void) const { return m_flux; }
+    const double&  flux_err(void) const { return m_flux_err; }
+    void           flux(const double& flux) { m_flux=flux; }
+    void           flux_err(const double& flux_err) { m_flux_err=flux_err; }
 
 protected:
     // Protected methods

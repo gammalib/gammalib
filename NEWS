@@ -330,6 +330,21 @@ GLATEventBin
 GLATEventCube
   enodes() method is now declared const.
 
+GCOMResponse
+  Renamed read_iaq() method to read(). The read() method now takes
+  a const reference as argument.
+
+GMWLDatum
+  energy_err(), flux(), and flux_err() methods now return const
+  references.
+
+GMWLObservation
+  filename(), extno() and extname() methods now return const
+  references.
+
+GMWLSpectrum
+  telescope() and instrument() methods now return const references.
+
 All GammaLib constants, defined in GTools.hpp, and functions are now
 put in the gammalib namespace to avoid name clashes. Mathematical
 constants and functions have been moved to a new model named GMath.

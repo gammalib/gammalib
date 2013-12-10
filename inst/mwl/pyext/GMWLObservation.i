@@ -61,15 +61,15 @@ public:
     virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    void        load(const std::string& filename);
-    void        load(const std::string& filename, const int& extno);
-    void        load(const std::string& filename, const std::string& extname);
-    std::string filename(void) const;
-    std::string extno(void) const;
-    std::string extname(void) const;
-    void        filename(const std::string& filename);
-    void        extno(const std::string& extno);
-    void        extname(const std::string& extname);
+    void               load(const std::string& filename);
+    void               load(const std::string& filename, const int& extno);
+    void               load(const std::string& filename, const std::string& extname);
+    const std::string& filename(void) const;
+    const std::string& extno(void) const;
+    const std::string& extname(void) const;
+    void               filename(const std::string& filename);
+    void               extno(const std::string& extno);
+    void               extname(const std::string& extname);
 };
 
 

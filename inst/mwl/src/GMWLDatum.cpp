@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GMWLDatum.cpp
- * @brief GMWLDatum class implementation
+ * @brief Multi-wavelength spectral point class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -275,42 +275,4 @@ void GMWLDatum::free_members(void)
 {
     // Return
     return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Output operator
- *
- * @param[in] os Output stream.
- * @param[in] datum Spectral point.
- ***************************************************************************/
-std::ostream& operator<< (std::ostream& os, const GMWLDatum& datum)
-{
-     // Write spectral point in output stream
-    os << datum.print();
-
-    // Return output stream
-    return os;
-}
-
-
-/***********************************************************************//**
- * @brief Log operator
- *
- * @param[in] log Logger.
- * @param[in] datum Spectral point.
- ***************************************************************************/
-GLog& operator<< (GLog& log, const GMWLDatum& datum)
-{
-    // Write spectral point into logger
-    log << datum.print();
-
-    // Return logger
-    return log;
 }

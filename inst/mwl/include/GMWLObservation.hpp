@@ -62,7 +62,7 @@ public:
     virtual GMWLObservation*    clone(void) const;
     virtual void                response(const GResponse& rsp);
     virtual const GMWLResponse& response(void) const;
-    virtual std::string         instrument(void) const { return "MWL"; }
+    virtual std::string         instrument(void) const;
     virtual double              ontime(void) const { return 1.0; }
     virtual double              livetime(void) const { return 1.0; }
     virtual double              deadc(const GTime& time) const { return 1.0; }
@@ -71,15 +71,15 @@ public:
     virtual std::string         print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void        load(const std::string& filename);
-    void        load(const std::string& filename, const int& extno);
-    void        load(const std::string& filename, const std::string& extname);
-    std::string filename(void) const { return m_filename; }
-    std::string extno(void) const { return m_extno; }
-    std::string extname(void) const { return m_extname; }
-    void        filename(const std::string& filename) { m_filename=filename; }
-    void        extno(const std::string& extno) { m_extno=extno; }
-    void        extname(const std::string& extname) { m_extname=extname; }
+    void               load(const std::string& filename);
+    void               load(const std::string& filename, const int& extno);
+    void               load(const std::string& filename, const std::string& extname);
+    const std::string& filename(void) const { return m_filename; }
+    const std::string& extno(void) const { return m_extno; }
+    const std::string& extname(void) const { return m_extname; }
+    void               filename(const std::string& filename) { m_filename=filename; }
+    void               extno(const std::string& extno) { m_extno=extno; }
+    void               extname(const std::string& extname) { m_extname=extname; }
 
 protected:
     // Protected methods
@@ -104,8 +104,19 @@ protected:
 inline
 const GMWLResponse& GMWLObservation::response(void) const
 {
-    // Return response
     return m_response;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument name
+ *
+ * @return Instrument name.
+ ***************************************************************************/
+inline
+std::string GMWLObservation::instrument(void) const
+{
+    return "MWL";
 }
 
 #endif /* GMWLOBSERVATION_HPP */

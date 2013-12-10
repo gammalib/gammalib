@@ -39,7 +39,7 @@
 /* __ Method name definitions ____________________________________________ */
 #define G_OPERATOR                           "GMWLSpectrum::operator[](int&)"
 #define G_READ                             "GMWLSpectrum::read(GFits&, int&)"
-#define G_READ_FITS                    "GMWLSpectrum::read_fits(GFitsTable*)"
+#define G_READ_FITS                    "GMWLSpectrum::read_fits(GFitsTable&)"
 #define G_CONV_ENERGY      "GMWLSpectrum::conv_energy(double&, std::string&)"
 #define G_CONV_FLUX             "GMWLSpectrum::conv_flux(GEnergy&, double&, "\
                                                               "std::string&)"
@@ -138,8 +138,7 @@ GMWLSpectrum::~GMWLSpectrum(void)
  * @brief Assignment operator
  *
  * @param[in] spec Spectrum.
- *
- * Copies spectrum into the instance.
+ * @return Spectrum.
  ***************************************************************************/
 GMWLSpectrum& GMWLSpectrum::operator=(const GMWLSpectrum& spec)
 {
@@ -177,8 +176,9 @@ GMWLDatum* GMWLSpectrum::operator[](const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OPERATOR, "Spectral point", index, size());
+    }
     #endif
 
     // Return pointer
@@ -198,8 +198,9 @@ const GMWLDatum* GMWLSpectrum::operator[](const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OPERATOR, "Spectral point", index, size());
+    }
     #endif
 
     // Return pointer
@@ -214,9 +215,7 @@ const GMWLDatum* GMWLSpectrum::operator[](const int& index) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
- *
- * This method properly resets the object to an initial state.
+ * @brief Clear spectrum
  ***************************************************************************/
 void GMWLSpectrum::clear(void)
 {
@@ -236,8 +235,10 @@ void GMWLSpectrum::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone spectrum
+ *
+ * @return Pointer to deep copy of spectrum.
+ ***************************************************************************/
 GMWLSpectrum* GMWLSpectrum::clone(void) const
 {
     return new GMWLSpectrum(*this);
@@ -312,7 +313,7 @@ void GMWLSpectrum::load(const std::string& filename, const std::string& extname)
  * This method loads a spectrum from the specified extension number from a
  * FITS file.
  ***************************************************************************/
-void GMWLSpectrum::load(const std::string& filename, int extno)
+void GMWLSpectrum::load(const std::string& filename, const int& extno)
 {
     // Clear object
     clear();
@@ -379,7 +380,7 @@ void GMWLSpectrum::read(const GFits& fits, const std::string& extname)
     clear();
 
     // Get table pointer
-    const GFitsTable* table = fits.table(extname);
+    const GFitsTable& table = *fits.table(extname);
 
     // Read spectrum from table
     read_fits(table);
@@ -402,30 +403,33 @@ void GMWLSpectrum::read(const GFits& fits, const std::string& extname)
  * In no extension number if specified (or if extno=0) then the spectrum
  * is loaded from the first table extension that is found in the file.
  ***************************************************************************/
-void GMWLSpectrum::read(const GFits& fits, int extno)
+void GMWLSpectrum::read(const GFits& fits, const int& extno)
 {
     // Clear object
     clear();
 
+    // Initialise extension number
+    int extension = extno;
+
     // If the extension number is 0 then load first FITS table in file.
-    if (extno == 0) {
+    if (extension == 0) {
         for (int i = 0; i < fits.size(); ++i) {
             if (fits.at(i)->exttype() == GFitsHDU::HT_ASCII_TABLE ||
                 fits.at(i)->exttype() == GFitsHDU::HT_BIN_TABLE) {
-                extno = i;
+                extension = i;
                 break;
             }
         }
     }
 
     // If we found no table then throw an exception
-    if (extno == 0) {
+    if (extension == 0) {
         throw GMWLException::file_open_error(G_READ, fits.filename(),
                                              "No table found in file.");
     }
 
     // Get table pointer
-    const GFitsTable* table = fits.table(extno);
+    const GFitsTable& table = *fits.table(extension);
 
     // Read spectrum from table
     read_fits(table);
@@ -592,10 +596,8 @@ void GMWLSpectrum::set_ebounds(void)
         GEnergy emin = m_data[0].energy();
         GEnergy emax = m_data[0].energy();
         for (int i = 0; i < m_data.size(); ++i) {
-            if (m_data[i].energy() < emin)
-                emin = m_data[i].energy();
-            if (m_data[i].energy() > emax)
-                emax = m_data[i].energy();
+            if (m_data[i].energy() < emin) emin = m_data[i].energy();
+            if (m_data[i].energy() > emax) emax = m_data[i].energy();
         }
 
         // Set energy boundaries
@@ -611,7 +613,7 @@ void GMWLSpectrum::set_ebounds(void)
 /***********************************************************************//**
  * @brief Read spectrum from FITS file
  *
- * @param[in] table File table.
+ * @param[in] table FITS table.
  *
  * @exception GMWLException::bad_file_format
  *            Table has invalid format
@@ -625,7 +627,7 @@ void GMWLSpectrum::set_ebounds(void)
  * @todo Investigate whether we can exploit UCDs for identifying the correct
  * columns or for determining the units.
  ***************************************************************************/
-void GMWLSpectrum::read_fits(const GFitsTable* table)
+void GMWLSpectrum::read_fits(const GFitsTable& table)
 {
     // Reset spectrum
     m_data.clear();
@@ -637,29 +639,29 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
     const GFitsTableCol* c_flux_err   = NULL;
 
     // Extract column pointers
-    if (table->ncols() == 2) {
-        c_energy = (*table)[0];
-        c_flux   = (*table)[1];
+    if (table.ncols() == 2) {
+        c_energy = table[0];
+        c_flux   = table[1];
     }
-    else if (table->ncols() == 3) {
-        c_energy   = (*table)[0];
-        c_flux     = (*table)[1];
-        c_flux_err = (*table)[2];
+    else if (table.ncols() == 3) {
+        c_energy   = table[0];
+        c_flux     = table[1];
+        c_flux_err = table[2];
     }
-    else if (table->ncols() > 3) {
-        c_energy     = (*table)[0];
-        c_energy_err = (*table)[1];
-        c_flux       = (*table)[2];
-        c_flux_err   = (*table)[3];
+    else if (table.ncols() > 3) {
+        c_energy     = table[0];
+        c_energy_err = table[1];
+        c_flux       = table[2];
+        c_flux_err   = table[3];
     }
     else {
         throw GMWLException::bad_file_format(G_READ_FITS,
                              "At least 2 columns are expected is table \""+
-                              table->extname()+"\".");
+                              table.extname()+"\".");
     }
 
     // Read spectral points and add to spectrum
-    for (int i = 0; i < table->nrows(); ++i) {
+    for (int i = 0; i < table.nrows(); ++i) {
         GMWLDatum datum;
         if (c_energy     != NULL) {
             datum.m_eng = conv_energy(c_energy->real(i), c_energy->unit());
@@ -677,16 +679,16 @@ void GMWLSpectrum::read_fits(const GFitsTable* table)
     }
 
     // Get telescope name
-    if (table->hascard("TELESCOP")) {
-        m_telescope = table->string("TELESCOP");
+    if (table.hascard("TELESCOP")) {
+        m_telescope = table.string("TELESCOP");
     }
     else {
         m_telescope = "unknown";
     }
 
     // Get instrument name
-    if (table->hascard("INSTRUME")) {
-        m_instrument = table->string("INSTRUME");
+    if (table.hascard("INSTRUME")) {
+        m_instrument = table.string("INSTRUME");
     }
     else {
         m_instrument = "unknown";
@@ -788,10 +790,3 @@ double GMWLSpectrum::conv_flux(const GEnergy& energy, const double& flux,
     // Return energy
     return result;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

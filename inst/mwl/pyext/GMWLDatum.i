@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GMWLDatum.i  -  Multi-wavelength spectral point class           *
+ *          GMWLDatum.i - Multi-wavelength spectral point class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GMWLDatum.i
- * @brief Multi-wavelength spectral point class Python interface definition
- * @author J. Knodlseder
+ * @brief Multi-wavelength spectral point class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -56,11 +56,11 @@ public:
     virtual void               counts(const double& counts);
 
     // Other methods
-    GEnergy energy_err(void) const;
-    double  flux(void) const;
-    double  flux_err(void) const;
-    void    flux(const double& flux);
-    void    flux_err(const double& flux_err);
+    const GEnergy& energy_err(void) const;
+    const double&  flux(void) const;
+    const double&  flux_err(void) const;
+    void           flux(const double& flux);
+    void           flux_err(const double& flux_err);
 };
 
 

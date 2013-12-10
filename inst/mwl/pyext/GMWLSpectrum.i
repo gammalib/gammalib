@@ -56,12 +56,12 @@ public:
     virtual int           number(void) const;
 
     // Other methods
-    void                  load(const std::string& filename, const std::string& extname);
-    void                  load(const std::string& filename, int extno);
-    void                  read(const GFits& file, const std::string& extname);
-    void                  read(const GFits& file, int extno);
-    std::string           telescope(void) const;
-    std::string           instrument(void) const;
+    void               load(const std::string& filename, const std::string& extname);
+    void               load(const std::string& filename, const int& extno);
+    void               read(const GFits& file, const std::string& extname);
+    void               read(const GFits& file, const int& extno);
+    const std::string& telescope(void) const;
+    const std::string& instrument(void) const;
 };
 
 
@@ -73,9 +73,12 @@ public:
         return (*self);
     }
     GMWLDatum* __getitem__(int index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", "Spectral point",
+                                           index, self->size());
+        }
     }
 };

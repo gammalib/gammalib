@@ -61,9 +61,9 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GMWLSpectrum* clone(void) const;
-    virtual int           size(void) const { return m_data.size(); }
-    virtual int           dim(void) const { return 1; }
-    virtual int           naxis(const int& axis) const { return m_data.size(); }
+    virtual int           size(void) const;
+    virtual int           dim(void) const;
+    virtual int           naxis(const int& axis) const;
     virtual void          load(const std::string& filename);
     virtual void          save(const std::string& filename,
                                const bool& clobber = false) const;
@@ -73,29 +73,89 @@ public:
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    void                  load(const std::string& filename, const std::string& extname);
-    void                  load(const std::string& filename, int extno);
-    void                  read(const GFits& file, const std::string& extname);
-    void                  read(const GFits& file, int extno);
-    std::string           telescope(void) const { return m_telescope; }
-    std::string           instrument(void) const { return m_instrument; }
+    void               load(const std::string& filename, const std::string& extname);
+    void               load(const std::string& filename, const int& extno);
+    void               read(const GFits& file, const std::string& extname);
+    void               read(const GFits& file, const int& extno);
+    const std::string& telescope(void) const;
+    const std::string& instrument(void) const;
 
 protected:
     // Protected methods
-    void         init_members(void);
-    void         copy_members(const GMWLSpectrum& spec);
-    void         free_members(void);
-    virtual void set_energies(void) { return; }
-    virtual void set_times(void) { return; }
-    void         set_ebounds(void);
-    void         read_fits(const GFitsTable* table);
-    GEnergy      conv_energy(const double& energy, const std::string& unit);
-    double       conv_flux(const GEnergy& energy, const double& flux, const std::string& unit);
+    void    init_members(void);
+    void    copy_members(const GMWLSpectrum& spec);
+    void    free_members(void);
+    void    set_ebounds(void);
+    void    read_fits(const GFitsTable& table);
+    GEnergy conv_energy(const double& energy, const std::string& unit);
+    double  conv_flux(const GEnergy& energy, const double& flux,
+                      const std::string& unit);
 
     // Protected members
     std::string            m_telescope;   //!< Telescope name
     std::string            m_instrument;  //!< Instrument name
     std::vector<GMWLDatum> m_data;        //!< Spectral data
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of spectral bins
+ *
+ * @return Number of bins in spectrum.
+ ***************************************************************************/
+inline
+int GMWLSpectrum::size(void) const
+{
+    return m_data.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return dimension of spectrum
+ *
+ * @return Dimension of spectrum (always 1).
+ ***************************************************************************/
+inline
+int GMWLSpectrum::dim(void) const
+{
+    return 1;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of spectral bins per dimension
+ *
+ * @param[in] axis Axis (ignored).
+ * @return Number of bins in spectrum.
+ ***************************************************************************/
+inline
+int GMWLSpectrum::naxis(const int& axis) const
+{
+    return m_data.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return telescope name
+ *
+ * @return Telescope name.
+ ***************************************************************************/
+inline
+const std::string& GMWLSpectrum::telescope(void) const
+{
+    return m_telescope;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument name
+ *
+ * @return Instrument name.
+ ***************************************************************************/
+inline
+const std::string& GMWLSpectrum::instrument(void) const
+{
+    return m_instrument;
+}
 
 #endif /* GMWLSPECTRUM_HPP */
