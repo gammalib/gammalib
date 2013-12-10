@@ -40,20 +40,21 @@ class GLATEdisp : public GBase {
 public:
     // Constructors and destructors
     GLATEdisp(void);
-    GLATEdisp(const std::string filename);
+    explicit GLATEdisp(const std::string filename);
     GLATEdisp(const GLATEdisp& edisp);
     virtual ~GLATEdisp(void);
 
     // Operators
-    //double operator() (const double& logE, const double& ctheta);
-    //double operator() (const GSkyDir& srcDir, const GEnergy& srcEng,
-    //                   const GTime& srcTime,  const GLATPointing& pnt);
+    //double operator()(const double& logE, const double& ctheta);
+    //double operator()(const GSkyDir& srcDir, const GEnergy& srcEng,
+    //                  const GTime& srcTime,  const GLATPointing& pnt);
 
     // Methods
     void         clear(void);
     GLATEdisp*   clone(void) const;
     void         load(const std::string filename);
-    void         save(const std::string filename, bool clobber = false);
+    void         save(const std::string filename,
+                      const bool& clobber = false);
     void         read(const GFits& file);
     void         write(GFits& file) const;
     int          size(void) const;

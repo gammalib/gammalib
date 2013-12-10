@@ -37,7 +37,7 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ_AEFF                        "GLATAeff::read_aeff(GFitsTable*)"
+#define G_READ_AEFF                        "GLATAeff::read_aeff(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -130,8 +130,9 @@ GLATAeff::~GLATAeff(void)
  * @brief Assignment operator
  *
  * @param[in] aeff Effective area.
+ * @return Effective area.
  ***************************************************************************/
-GLATAeff& GLATAeff::operator= (const GLATAeff& aeff)
+GLATAeff& GLATAeff::operator=(const GLATAeff& aeff)
 {
     // Execute only if object is not identical
     if (this != &aeff) {
@@ -163,7 +164,7 @@ GLATAeff& GLATAeff::operator= (const GLATAeff& aeff)
  * log10(energy) - cos(theta) plane. The method assures that the effective
  * area value never becomes negative.
  ***************************************************************************/
-double GLATAeff::operator() (const double& logE, const double& ctheta)
+double GLATAeff::operator()(const double& logE, const double& ctheta)
 {
     // Get effective area value
     double aeff = (ctheta >= m_min_ctheta) 
@@ -193,8 +194,8 @@ double GLATAeff::operator() (const double& logE, const double& ctheta)
  *
  * @todo Phi-dependence not yet implemented.
  ***************************************************************************/
-double GLATAeff::operator() (const double& logE, const double& ctheta,
-                             const double& phi)
+double GLATAeff::operator()(const double& logE, const double& ctheta,
+                            const double& phi)
 {
     // Get effective area value
     double aeff = (ctheta >= m_min_ctheta) 
@@ -223,8 +224,8 @@ double GLATAeff::operator() (const double& logE, const double& ctheta,
  *
  * @todo Implemented method (returns value of 1.0 for the moment)
  ***************************************************************************/
-double GLATAeff::operator() (const GSkyDir& srcDir, const GEnergy& srcEng,
-                             const GTime& srcTime, const GLATPointing& pnt)
+double GLATAeff::operator()(const GSkyDir& srcDir, const GEnergy& srcEng,
+                            const GTime& srcTime, const GLATPointing& pnt)
 {
     // Return Aeff value
     return 1.0;
@@ -238,7 +239,7 @@ double GLATAeff::operator() (const GSkyDir& srcDir, const GEnergy& srcEng,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear effective area
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -256,8 +257,10 @@ void GLATAeff::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone effective area
+ *
+ * @return Pointer to deep copy of effective area.
+ ***************************************************************************/
 GLATAeff* GLATAeff::clone(void) const
 {
     return new GLATAeff(*this);
@@ -279,7 +282,7 @@ void GLATAeff::load(const std::string& filename)
     GFits fits(filename);
 
     // Read effective area from file
-    read(&fits);
+    read(fits);
 
     // Return
     return;
@@ -296,7 +299,7 @@ void GLATAeff::load(const std::string& filename)
  * efficiency factors, into the FITS response file. See the GLATAeff::write
  * method for details.
  ***************************************************************************/
-void GLATAeff::save(const std::string& filename, bool clobber)
+void GLATAeff::save(const std::string& filename, const bool& clobber)
 {
     // Open FITS file
     GFits fits(filename, true);
@@ -315,7 +318,7 @@ void GLATAeff::save(const std::string& filename, bool clobber)
 /***********************************************************************//**
  * @brief Read effective area from FITS file
  *
- * @param[in] fits FITS file pointer.
+ * @param[in] fits FITS file.
  *
  * Reads the effective area and efficiency parameter information form the
  * FITS file. The effective area is read from the extension EFFECTIVE AREA,
@@ -325,30 +328,22 @@ void GLATAeff::save(const std::string& filename, bool clobber)
  *
  * @todo Implement reading of Phi-dependence information.
  ***************************************************************************/
-void GLATAeff::read(const GFits* fits)
+void GLATAeff::read(const GFits& fits)
 {
     // Clear instance
     clear();
 
     // Get pointer to effective area HDU
-    const GFitsTable* hdu_aeff = fits->table("EFFECTIVE AREA");
+    const GFitsTable& hdu_aeff = *fits.table("EFFECTIVE AREA");
 
     // Read effective area
     read_aeff(hdu_aeff);
 
     // Read efficiency factors from appropriate HDU. Does nothing if the
     // HDU does not exist.
-    try {
-    
-        // Get pointer to efficiency factor HDU
-        const GFitsTable* hdu_eff = fits->table("EFFICIENCY_PARAMS");
-
-        // Read efficiency factors
+    if (fits.contains("EFFICIENCY_PARAMS")) {
+        const GFitsTable& hdu_eff = *fits.table("EFFICIENCY_PARAMS");
         read_efficiency(hdu_eff);
-
-    }
-    catch (GException::fits_hdu_not_found &e) {
-        //
     }
 
     // Return
@@ -367,21 +362,6 @@ void GLATAeff::write(GFits& fits) const
 {
     // Write effective area
     write_aeff(fits);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set minimum cos(theta) angle for effective area access
- *
- * @param[in] ctheta Cosine of maximum zenith angle.
- ***************************************************************************/
-void GLATAeff::costhetamin(const double& ctheta)
-{
-    // Set minimum cos(theta) value
-    m_min_ctheta = ctheta;
 
     // Return
     return;
@@ -580,56 +560,51 @@ void GLATAeff::free_members(void)
 /***********************************************************************//**
  * @brief Read effective area from FITS table
  *
- * @param[in] hdu FITS table pointer.
+ * @param[in] hdu FITS table.
  *
  * @exception GLATException::inconsistent_response
  *            Inconsistent response table encountered
  *
  * The effective area is converted into units of cm2.
  ***************************************************************************/
-void GLATAeff::read_aeff(const GFitsTable* hdu)
+void GLATAeff::read_aeff(const GFitsTable& hdu)
 {
     // Clear array
     m_aeff.clear();
 
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get energy and cos theta bins in response table
+    m_aeff_bins.read(hdu);
 
-        // Get energy and cos theta bins in response table
-        m_aeff_bins.read(hdu);
+    // Set minimum cos(theta)
+    m_min_ctheta = m_aeff_bins.costheta_lo(0);
 
-        // Set minimum cos(theta)
-        m_min_ctheta = m_aeff_bins.costheta_lo(0);
+    // Continue only if there are effective area bins
+    int size = m_aeff_bins.size();
+    if (size > 0) {
 
-        // Continue only if there are effective area bins
-        int size = m_aeff_bins.size();
-        if (size > 0) {
+        // Allocate arrays
+        m_aeff.reserve(size);
 
-            // Allocate arrays
-            m_aeff.reserve(size);
+        // Get pointer to effective area column
+        const GFitsTableCol* ptr = hdu["EFFAREA"];
 
-            // Get pointer to effective area column
-            const GFitsTableCol* ptr = (*hdu)["EFFAREA"];
+        // Check consistency of effective area table
+        int num = ptr->number();
+        if (num != size) {
+            throw GLATException::inconsistent_response(G_READ_AEFF, num, size);
+        }
 
-            // Check consistency of effective area table
-            int num = ptr->number();
-            if (num != size) {
-                throw GLATException::inconsistent_response(G_READ_AEFF, num, size);
-            }
+        // Copy data and convert from m2 into cm2
+        for (int i = 0; i < size; ++i) {
+            m_aeff.push_back(ptr->real(0,i) * 1.0e4);
+        }
 
-            // Copy data and convert from m2 into cm2
-            for (int i = 0; i < size; ++i) {
-                m_aeff.push_back(ptr->real(0,i) * 1.0e4);
-            }
+    } // endif: there were effective area bins
 
-        } // endif: there were effective area bins
-
-        // Set detector section using the DETNAM keyword in the HDU
-        std::string detnam = gammalib::strip_whitespace(hdu->string("DETNAM"));
-        m_front            = (detnam == "FRONT");
-        m_back             = (detnam == "BACK");
-
-    } // endif: HDU was valid
+    // Set detector section using the DETNAM keyword in the HDU
+    std::string detnam = gammalib::strip_whitespace(hdu.string("DETNAM"));
+    m_front            = (detnam == "FRONT");
+    m_back             = (detnam == "BACK");
 
     // Return
     return;
@@ -639,7 +614,7 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Read efficiency factor parameters from FITS table
  *
- * @param[in] hdu FITS table pointer.
+ * @param[in] hdu FITS table.
  *
  * Reads the efficiency factor parameters from the EFFICIENCY_PARS column of
  * the EFFICIENCY_PARAMS extension in the effective area file. Note that the
@@ -653,52 +628,47 @@ void GLATAeff::read_aeff(const GFitsTable* hdu)
  * This method does not read efficiency factor parameters if neither the
  * front nor the back section of the detector has been identified.
  ***************************************************************************/
-void GLATAeff::read_efficiency(const GFitsTable* hdu)
+void GLATAeff::read_efficiency(const GFitsTable& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Free any existing functors
+    if (m_eff_func1 != NULL) delete m_eff_func1;
+    if (m_eff_func2 != NULL) delete m_eff_func2;
 
-        // Free any existing functors
-        if (m_eff_func1 != NULL) delete m_eff_func1;
-        if (m_eff_func2 != NULL) delete m_eff_func2;
+    // Signal that no functors are allocated
+    m_eff_func1 = NULL;
+    m_eff_func2 = NULL;
 
-        // Signal that no functors are allocated
-        m_eff_func1 = NULL;
-        m_eff_func2 = NULL;
+    // Get pointer to efficiency factors column
+    const GFitsTableCol* ptr = hdu["EFFICIENCY_PARS"];
 
-        // Get pointer to efficiency factors column
-        const GFitsTableCol* ptr = (*hdu)["EFFICIENCY_PARS"];
+    // Allocate vectors to hold the parameters
+    std::vector<double> par1;
+    std::vector<double> par2;
 
-        // Allocate vectors to hold the parameters
-        std::vector<double> par1;
-        std::vector<double> par2;
-
-        // If we have a front section then read the front parameters
-        if (m_front) {
-            for (int i = 0; i < 6; ++i) {
-                par1.push_back(ptr->real(0,i));
-                par2.push_back(ptr->real(1,i));
-            }
+    // If we have a front section then read the front parameters
+    if (m_front) {
+        for (int i = 0; i < 6; ++i) {
+            par1.push_back(ptr->real(0,i));
+            par2.push_back(ptr->real(1,i));
         }
+    }
 
-        // If we have a back section then read the front parameters
-        else if (m_back) {
-            for (int i = 0; i < 6; ++i) {
-                par1.push_back(ptr->real(2,i));
-                par2.push_back(ptr->real(3,i));
-            }
+    // If we have a back section then read the front parameters
+    else if (m_back) {
+        for (int i = 0; i < 6; ++i) {
+            par1.push_back(ptr->real(2,i));
+            par2.push_back(ptr->real(3,i));
         }
+    }
 
-        // If we have parameters, then allocate the efficiency factor
-        // functors now
-        if (par1.size() == 6) {
-            m_eff_func1 = new GLATEfficiency(par1);
-        }
-        if (par2.size() == 6) {
-            m_eff_func2 = new GLATEfficiency(par2);
-        }
-
-    } // endif: HDU was valid
+    // If we have parameters, then allocate the efficiency factor
+    // functors now
+    if (par1.size() == 6) {
+        m_eff_func1 = new GLATEfficiency(par1);
+    }
+    if (par2.size() == 6) {
+        m_eff_func2 = new GLATEfficiency(par2);
+    }
 
     // Return
     return;
@@ -725,14 +695,15 @@ void GLATAeff::write_aeff(GFits& file) const
         hdu_aeff->extname("EFFECTIVE AREA");
 
         // Write boundaries into table
-        m_aeff_bins.write(hdu_aeff);
+        m_aeff_bins.write(*hdu_aeff);
 
         // Allocate floating point vector columns
         GFitsTableFloatCol col_aeff = GFitsTableFloatCol("EFFAREA",  1, size);
 
         // Fill columns
-        for (int i = 0; i < size; ++i)
+        for (int i = 0; i < size; ++i) {
             col_aeff(0,i) = m_aeff[i];
+        }
 
         // Append columns to table
         hdu_aeff->append(col_aeff);

@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GLATPsfV1.hpp - Fermi-LAT point spread function version 1        *
+ *     GLATPsfV1.hpp - Fermi/LAT point spread function version 1 class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfV1.hpp
- * @brief Fermi-LAT point spread function version 1 class definition
+ * @brief Fermi/LAT point spread function version 1 class definition
  * @author Juergen Knoedlseder
  */
 
@@ -39,7 +39,7 @@
 /***********************************************************************//**
  * @class GLATPsfV1
  *
- * @brief Interface for the Fermi LAT point spread function version 1
+ * @brief Fermi/LAT point spread function version 1 class
  *
  * This class has been inspired by code from the Fermi/LAT ScienceTools.
  * For comparison check the file irfs/latResponse/src/Psf.h
@@ -53,16 +53,16 @@ public:
     virtual ~GLATPsfV1(void);
 
     // Operators
-    GLATPsfV1& operator= (const GLATPsfV1& psf);
+    GLATPsfV1& operator=(const GLATPsfV1& psf);
 
     // Methods
     void        clear(void);
     GLATPsfV1*  clone(void) const;
-    void        read(const GFitsTable* hdu);
+    void        read(const GFitsTable& table);
     void        write(GFits& file) const;
     double      psf(const double& offset, const double& logE,
                     const double& ctheta);
-    int         version(void) const { return 1; }
+    int         version(void) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -103,5 +103,17 @@ private:
     std::vector<double> m_gcore;        //!< PSF gcore parameter
     std::vector<double> m_gtail;        //!< PSF gtail parameter
 };
+
+
+/***********************************************************************//**
+ * @brief Return point spread function version number
+ *
+ * @return Point spread function version number (1).
+ ***************************************************************************/
+inline
+int GLATPsfV1::version(void) const
+{
+    return 1;
+}
 
 #endif /* GLATPSFV1_HPP */

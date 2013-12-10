@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATLtCube.hpp  -  Fermi/LAT livetime cube               *
+ *               GLATLtCube.hpp - Fermi/LAT livetime cube class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -51,27 +51,28 @@ class GLATLtCube : public GBase {
 public:
     // Constructors and destructors
     GLATLtCube(void);
-    GLATLtCube(const std::string& filename);
+    explicit GLATLtCube(const std::string& filename);
     GLATLtCube(const GLATLtCube& cube);
     virtual ~GLATLtCube(void);
 
     // Operators
     GLATLtCube& operator= (const GLATLtCube& cube);
-    double      operator() (const GSkyDir& dir, const GEnergy& energy,
-                            _ltcube_ctheta fct);
-    double      operator() (const GSkyDir& dir, const GEnergy& energy,
-                            _ltcube_ctheta_phi fct);
-    double      operator() (const GSkyDir& dir, const GEnergy& energy,
-                            const GLATAeff& aeff);
-    double      operator() (const GSkyDir& dir, const GEnergy& energy,
-                            const double& offset, const GLATPsf& psf,
-                            const GLATAeff& aeff);
+    double      operator()(const GSkyDir& dir, const GEnergy& energy,
+                           _ltcube_ctheta fct);
+    double      operator()(const GSkyDir& dir, const GEnergy& energy,
+                           _ltcube_ctheta_phi fct);
+    double      operator()(const GSkyDir& dir, const GEnergy& energy,
+                           const GLATAeff& aeff);
+    double      operator()(const GSkyDir& dir, const GEnergy& energy,
+                           const double& offset, const GLATPsf& psf,
+                           const GLATAeff& aeff);
 
     // Methods
     void        clear(void);
     GLATLtCube* clone(void) const;
     void        load(const std::string& filename);
-    void        save(const std::string& filename, bool clobber=false) const;
+    void        save(const std::string& filename,
+                     const bool& clobber=false) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
 private:

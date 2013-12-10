@@ -37,7 +37,7 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                                        "GLATPsf::read(GFits*)"
+#define G_READ                                        "GLATPsf::read(GFits&)"
 #define G_WRITE                                      "GLATPsf::write(GFits&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -131,8 +131,9 @@ GLATPsf::~GLATPsf(void)
  * @brief Assignment operator
  *
  * @param[in] psf Point spread function.
+ * @return Point spread function.
  ***************************************************************************/
-GLATPsf& GLATPsf::operator= (const GLATPsf& psf)
+GLATPsf& GLATPsf::operator=(const GLATPsf& psf)
 {
     // Execute only if object is not identical
     if (this != &psf) {
@@ -166,8 +167,8 @@ GLATPsf& GLATPsf::operator= (const GLATPsf& psf)
  *
  * Returns 0 is no PSF has been allocated.
  ***************************************************************************/
-double GLATPsf::operator() (const double& offset, const double& logE,
-                            const double& ctheta)
+double GLATPsf::operator()(const double& offset, const double& logE,
+                           const double& ctheta)
 {
     // Get PSF value
     double psf = (m_psf != NULL) ? m_psf->psf(offset, logE, ctheta) : 0.0;
@@ -190,9 +191,9 @@ double GLATPsf::operator() (const double& offset, const double& logE,
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-double GLATPsf::operator() (const GLATInstDir& obsDir, const GSkyDir& srcDir,
-                            const GEnergy& srcEng, const GTime& srcTime,
-                            const GLATPointing& pnt)
+double GLATPsf::operator()(const GLATInstDir& obsDir, const GSkyDir& srcDir,
+                           const GEnergy& srcEng, const GTime& srcTime,
+                           const GLATPointing& pnt)
 {
     // Initialise response
     double psf = 0.0;
@@ -228,7 +229,9 @@ void GLATPsf::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Pointer to deep copy of point spread function.
+ ***************************************************************************/
 GLATPsf* GLATPsf::clone(void) const
 {
     return new GLATPsf(*this);
@@ -263,7 +266,7 @@ void GLATPsf::load(const std::string& filename)
  *
  * Saves Fermi/LAT point spread function into FITS file.
  ***************************************************************************/
-void GLATPsf::save(const std::string& filename, bool clobber)
+void GLATPsf::save(const std::string& filename, const bool& clobber)
 {
     // Open FITS file
     GFits fits(filename, true);

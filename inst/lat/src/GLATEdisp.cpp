@@ -35,8 +35,8 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                           "GLATEdisp::read(const GFits* file)"
-#define G_READ_EDISP                     "GLATEdisp::read_edisp(GFitsTable*)"
+#define G_READ                           "GLATEdisp::read(const GFits& file)"
+#define G_READ_EDISP                     "GLATEdisp::read_edisp(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -128,8 +128,9 @@ GLATEdisp::~GLATEdisp(void)
  * @brief Assignment operator
  *
  * @param[in] edisp Energy dispersion.
+ * @return Energy dispersion.
  ***************************************************************************/
-GLATEdisp& GLATEdisp::operator= (const GLATEdisp& edisp)
+GLATEdisp& GLATEdisp::operator=(const GLATEdisp& edisp)
 {
     // Execute only if object is not identical
     if (this != &edisp) {
@@ -157,7 +158,7 @@ GLATEdisp& GLATEdisp::operator= (const GLATEdisp& edisp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear energy dispersion response
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -175,8 +176,10 @@ void GLATEdisp::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone energy dispersion response
+ *
+ * @return Pointer to deep copy of energy dispersion response.
+ ***************************************************************************/
 GLATEdisp* GLATEdisp::clone(void) const
 {
     return new GLATEdisp(*this);
@@ -207,7 +210,7 @@ void GLATEdisp::load(const std::string& filename)
  * @param[in] filename FITS file.
  * @param[in] clobber Overwrite existing file?.
  ***************************************************************************/
-void GLATEdisp::save(const std::string& filename, bool clobber)
+void GLATEdisp::save(const std::string& filename, const bool& clobber)
 {
     // Open FITS file
     GFits fits(filename, true);
@@ -228,9 +231,6 @@ void GLATEdisp::save(const std::string& filename, bool clobber)
  *
  * @param[in] fits FITS file.
  *
- * @exception GException::fits_hdu_not_found
- *            Effective area HDU not found in FITS file
- *
  * @todo Implement reading of scaling parameters
  ***************************************************************************/
 void GLATEdisp::read(const GFits& fits)
@@ -239,12 +239,8 @@ void GLATEdisp::read(const GFits& fits)
     clear();
 
     // Get pointer to effective area HDU
-    const GFitsTable* hdu_edisp = fits.table("ENERGY DISPERSION");
-    const GFitsTable* hdu_scale = fits.table("EDISP_SCALING_PARAMS");
-    if (hdu_edisp == NULL)
-        throw GException::fits_hdu_not_found(G_READ, "ENERGY DISPERSION");
-    if (hdu_scale == NULL)
-        throw GException::fits_hdu_not_found(G_READ, "EDISP_SCALING_PARAMS");
+    const GFitsTable& hdu_edisp = *fits.table("ENERGY DISPERSION");
+    const GFitsTable& hdu_scale = *fits.table("EDISP_SCALING_PARAMS");
 
     // Read energy dispersion
     read_edisp(hdu_edisp);
@@ -357,7 +353,7 @@ void GLATEdisp::free_members(void)
  * @exception GLATException::inconsistent_response
  *            Inconsistent response table encountered
  ***************************************************************************/
-void GLATEdisp::read_edisp(const GFitsTable* hdu)
+void GLATEdisp::read_edisp(const GFitsTable& hdu)
 {
     // Clear arrays
     m_norm.clear();
@@ -375,16 +371,18 @@ void GLATEdisp::read_edisp(const GFitsTable* hdu)
         m_ls1.reserve(size);
 
         // Get pointer to columns
-        const GFitsTableCol* norm = (*hdu)["NORM"];
-        const GFitsTableCol* ls1  = (*hdu)["LS1"];
+        const GFitsTableCol* norm = hdu["NORM"];
+        const GFitsTableCol* ls1  = hdu["LS1"];
 
         // Check consistency of columns
-        if (norm->number() != size)
+        if (norm->number() != size) {
             throw GLATException::inconsistent_response(G_READ_EDISP,
                                                        norm->number(), size);
-        if (ls1->number() != size)
+        }
+        if (ls1->number() != size) {
             throw GLATException::inconsistent_response(G_READ_EDISP,
                                                        ls1->number(), size);
+        }
 
         // Copy data
         for (int i = 0; i < size; ++i) {
@@ -419,7 +417,7 @@ void GLATEdisp::write_edisp(GFits& file) const
         hdu_edisp->extname("ENERGY DISPERSION");
 
         // Write boundaries into table
-        m_edisp_bins.write(hdu_edisp);
+        m_edisp_bins.write(*hdu_edisp);
 
         // Allocate floating point vector columns
         GFitsTableFloatCol col_norm = GFitsTableFloatCol("NORM",  1, size);

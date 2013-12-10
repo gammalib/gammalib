@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GLATMeanPsf.cpp - Fermi/LAT mean PSF                   *
+ *                  GLATMeanPsf.cpp - Fermi/LAT mean PSF class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -134,8 +134,9 @@ GLATMeanPsf::~GLATMeanPsf(void)
  * @brief Assignment operator
  *
  * @param[in] psf Mean PSF.
+ * @return Mean PSF.
  ***************************************************************************/
-GLATMeanPsf& GLATMeanPsf::operator= (const GLATMeanPsf& psf)
+GLATMeanPsf& GLATMeanPsf::operator=(const GLATMeanPsf& psf)
 {
     // Execute only if object is not identical
     if (this != &psf) {
@@ -253,9 +254,7 @@ double GLATMeanPsf::operator() (const double& offset, const double& logE)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the object to an initial state.
+ * @brief Clear mean PSF
  ***************************************************************************/
 void GLATMeanPsf::clear(void)
 {
@@ -271,24 +270,13 @@ void GLATMeanPsf::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone mean PSF
+ *
+ * @return Pointer to deep copy of mean PSF.
+ ***************************************************************************/
 GLATMeanPsf* GLATMeanPsf::clone(void) const
 {
     return new GLATMeanPsf(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Return size of mean PSF
-***************************************************************************/
-int GLATMeanPsf::size(void) const
-{
-    // Compute size
-    int size = m_energy.size()*m_offset.size();
-
-    // Return size
-    return size;
 }
 
 
@@ -370,9 +358,10 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
 
             // Compute point spread function by looping over the responses
             double psf = 0.0;
-            for (int i = 0; i < rsp.size(); ++i)
+            for (int i = 0; i < rsp.size(); ++i) {
                 psf += (*ltcube)(dir, energy[ieng], m_offset[ioffset],
                                  *rsp.psf(i), *rsp.aeff(i));
+            }
 
             // Normalize PSF by exposure and clip when exposure drops to 0
             psf = (exposure > 0.0) ? psf/exposure : 0.0;

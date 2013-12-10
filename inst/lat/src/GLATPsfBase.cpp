@@ -1,5 +1,5 @@
 /***************************************************************************
- *  GLATPsfBase.cpp - Fermi/LAT point spread function abstract base class  *
+ *  GLATPsfBase.cpp - Abstract Fermi/LAT point spread function base class  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfBase.cpp
- * @brief Fermi/LAT point spread function abstract base class implementation
+ * @brief Abstract Fermi/LAT point spread function base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -35,7 +35,7 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ_SCALE                   "GLATPsfBase::read_scale(GFitsTable*)"
+#define G_READ_SCALE                   "GLATPsfBase::read_scale(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -106,8 +106,9 @@ GLATPsfBase::~GLATPsfBase(void)
  * @brief Assignment operator
  *
  * @param[in] psf Point spread function.
+ * @return Point spread function.
  ***************************************************************************/
-GLATPsfBase& GLATPsfBase::operator= (const GLATPsfBase& psf)
+GLATPsfBase& GLATPsfBase::operator=(const GLATPsfBase& psf)
 {
     // Execute only if object is not identical
     if (this != &psf) {
@@ -192,14 +193,14 @@ void GLATPsfBase::free_members(void)
 /***********************************************************************//**
  * @brief Read PSF scale factors from FITS table
  *
- * @param[in] hdu FITS table pointer.
+ * @param[in] table FITS table.
  *
  * Reads the PSF scale factors from column "PSFSCALE" of a FITS table.
  ***************************************************************************/
-void GLATPsfBase::read_scale(const GFitsTable* hdu)
+void GLATPsfBase::read_scale(const GFitsTable& table)
 {
     // Get pointer to column
-    const GFitsTableCol* scale = (*hdu)["PSFSCALE"];
+    const GFitsTableCol* scale = table["PSFSCALE"];
 
     // Get scaling factors
     if (front()) {

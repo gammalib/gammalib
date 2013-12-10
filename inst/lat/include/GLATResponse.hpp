@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GLATResponse.hpp - Fermi-LAT Response class              *
+ *                GLATResponse.hpp - Fermi/LAT Response class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.hpp
- * @brief Fermi-LAT Response class definition
+ * @brief Fermi/LAT Response class definition
  * @author Juergen Knoedlseder
  */
 
@@ -45,7 +45,7 @@
 /***********************************************************************//**
  * @class GLATResponse
  *
- * @brief Interface for the Fermi LAT instrument response function.
+ * @brief Fermi/LAT Response class
  ***************************************************************************/
 class GLATResponse : public GResponse {
 
@@ -61,8 +61,8 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GLATResponse* clone(void) const;
-    virtual bool          hasedisp(void) const { return false; }
-    virtual bool          hastdisp(void) const { return false; }
+    virtual bool          hasedisp(void) const;
+    virtual bool          hastdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
                               const GObservation& obs) const;
@@ -76,17 +76,17 @@ public:
                        const GObservation& obs) const;
 
     // Other Methods
-    void        caldb(const std::string& caldb);
-    std::string caldb(void) const { return m_caldb; }
-    std::string rspname(void) const { return m_rspname; }
-    void        load(const std::string& rspname);
-    int         size(void) const { return m_aeff.size(); }
-    GLATAeff*   aeff(const int& index) const;
-    GLATPsf*    psf(const int& index) const;
-    GLATEdisp*  edisp(const int& index) const;
-    void        save(const std::string& rspname) const;
-    bool        force_mean(void) { return m_force_mean; }
-    void        force_mean(const bool& value) { m_force_mean=value; }
+    int                size(void) const;
+    void               caldb(const std::string& caldb);
+    const std::string& caldb(void) const;
+    const std::string& rspname(void) const;
+    void               load(const std::string& rspname);
+    void               save(const std::string& rspname) const;
+    const bool&        force_mean(void) const;
+    void               force_mean(const bool& value);
+    GLATAeff*          aeff(const int& index) const;
+    GLATPsf*           psf(const int& index) const;
+    GLATEdisp*         edisp(const int& index) const;
 
     // Reponse methods
     double irf(const GLATEventAtom& event,
@@ -113,5 +113,90 @@ private:
     std::vector<GLATEdisp*>   m_edisp;      //!< Energy dispersions
     std::vector<GLATMeanPsf*> m_ptsrc;      //!< Mean PSFs for point sources
 };
+
+
+/***********************************************************************//**
+ * @brief Signal if response supports energy dispersion
+ *
+ * @return True if response supports energy dispersion.
+ ***************************************************************************/
+inline
+bool GLATResponse::hasedisp(void) const
+{
+    return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if response supports time dispersion
+ *
+ * @return True if response supports time dispersion.
+ ***************************************************************************/
+inline
+bool GLATResponse::hastdisp(void) const
+{
+    return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in effective area response
+ *
+ * @return Number of bins in effective area response.
+ ***************************************************************************/
+inline
+int GLATResponse::size(void) const
+{
+    return m_aeff.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return calibration database
+ *
+ * @return Calibration database.
+ ***************************************************************************/
+inline
+const std::string& GLATResponse::caldb(void) const
+{
+    return m_caldb;
+}
+
+
+/***********************************************************************//**
+ * @brief Return response name
+ *
+ * @return Response name.
+ ***************************************************************************/
+inline
+const std::string& GLATResponse::rspname(void) const
+{
+    return m_rspname;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if mean PSF should be used for response computation
+ *
+ * @return True if mean PSF should be used for response computation.
+ ***************************************************************************/
+inline
+const bool& GLATResponse::force_mean(void) const
+{
+    return m_force_mean;
+}
+
+
+/***********************************************************************//**
+ * @brief Set if mean PSF should be used for response computation
+ *
+ * @param[in] value True if mean PSF should be used for response computation.
+ ***************************************************************************/
+inline
+void GLATResponse::force_mean(const bool& value)
+{
+    m_force_mean = value;
+    return;
+}
 
 #endif /* GLATRESPONSE_HPP */

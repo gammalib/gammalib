@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GLATMeanPsf.hpp - Fermi LAT mean PSF                  *
+ *                GLATMeanPsf.hpp - Fermi/LAT mean PSF class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATMeanPsf.hpp
- * @brief GLATMeanPsf class definition.
+ * @brief Fermi/LAT mean PSF class definition
  * @author Juergen Knoedlseder
  */
 
@@ -41,7 +41,7 @@ class GLATObservation;
 /***********************************************************************//**
  * @class GLATMeanPsf
  *
- * @brief Interface for the Fermi LAT position-dependent mean PSF.
+ * @brief Fermi/LAT mean PSF class
  *
  * The position-dependent mean PSF is the point spread function that has
  * been averaged over the zenith and azimuth angles of an observation. The
@@ -58,26 +58,26 @@ public:
     virtual ~GLATMeanPsf(void);
 
     // Operators
-    GLATMeanPsf& operator= (const GLATMeanPsf& cube);
-    double       operator() (const double& offset, const double& logE);
+    GLATMeanPsf& operator=(const GLATMeanPsf& cube);
+    double       operator()(const double& offset, const double& logE);
 
     // Methods
-    void         clear(void);
-    GLATMeanPsf* clone(void) const;
-    int          size(void) const;
-    void         set(const GSkyDir& dir, const GLATObservation& obs);
-    int          noffsets(void) const { return m_offset.size(); }
-    int          nenergies(void) const { return m_energy.size(); }
-    double       offset(const int& inx) { return m_offset[inx]; }
-    double       energy(const int& inx) { return m_energy[inx]; }
-    GSkyDir      dir(void) const { return m_dir; }
-    std::string  name(void) const { return m_name; }
-    void         name(const std::string& name) { m_name=name; }
-    double       thetamax(void) const { return m_theta_max; }
-    void         thetamax(const double& value) { m_theta_max=value; }
-    double       psf(const double& offset, const double& logE);
-    double       exposure(const double& logE);
-    std::string  print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GLATMeanPsf*       clone(void) const;
+    int                size(void) const;
+    void               set(const GSkyDir& dir, const GLATObservation& obs);
+    int                noffsets(void) const;
+    int                nenergies(void) const;
+    const double&      offset(const int& inx) const;
+    const double&      energy(const int& inx) const;
+    const GSkyDir&     dir(void) const;
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    const double&      thetamax(void) const;
+    void               thetamax(const double& value);
+    double             psf(const double& offset, const double& logE);
+    double             exposure(const double& logE);
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods
@@ -112,5 +112,133 @@ private:
     double               m_wgt3;         //!< Weighting factor 3
     double               m_wgt4;         //!< Weighting factor 4
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in mean PSF
+ *
+ * @return Number of bins in mean PSF
+ ***************************************************************************/
+inline
+int GLATMeanPsf::size(void) const
+{
+    // Compute size
+    int size = m_energy.size()*m_offset.size();
+
+    // Return size
+    return size;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of offset bins
+ *
+ * @return Number of offset bins.
+ ***************************************************************************/
+inline
+int GLATMeanPsf::noffsets(void) const
+{
+    return m_offset.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of energy bins
+ *
+ * @return Number of energy bins.
+ ***************************************************************************/
+inline
+int GLATMeanPsf::nenergies(void) const
+{
+    return m_energy.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Return offset angle for given bin
+ *
+ * @param[in] inx Bin index [0,...,noffsets()-1]
+ * @return Offset angle.
+ ***************************************************************************/
+inline
+const double& GLATMeanPsf::offset(const int& inx) const
+{
+    return m_offset[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy for given bin
+ *
+ * @param[in] inx Bin index [0,...,nenergies()-1]
+ * @return Energy.
+ ***************************************************************************/
+inline
+const double& GLATMeanPsf::energy(const int& inx) const
+{
+    return m_energy[inx];
+}
+
+
+/***********************************************************************//**
+ * @brief Return sky direction for mean PSF
+ *
+ * @return Sky direction.
+ ***************************************************************************/
+inline
+const GSkyDir& GLATMeanPsf::dir(void) const
+{
+    return m_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return source name for mean PSF
+ *
+ * @return Source name.
+ ***************************************************************************/
+inline
+const std::string& GLATMeanPsf::name(void) const
+{
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Set source name for mean PSF
+ *
+ * @param[in] name Source name.
+ ***************************************************************************/
+inline
+void GLATMeanPsf::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum theta angle
+ *
+ * @return Maximum theta angle.
+ ***************************************************************************/
+inline
+const double& GLATMeanPsf::thetamax(void) const
+{
+    return m_theta_max;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum theta angle
+ *
+ * @param[in] value Maximum theta angle.
+ ***************************************************************************/
+inline
+void GLATMeanPsf::thetamax(const double& value)
+{
+    m_theta_max = value;
+    return;
+}
 
 #endif /* GLATMEANPSF_HPP */

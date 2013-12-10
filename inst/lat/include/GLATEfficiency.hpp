@@ -43,13 +43,13 @@ class GLATEfficiency : public GBase {
 public:
     // Constructors and destructors
     GLATEfficiency(void);
-    GLATEfficiency(const std::vector<double>& pars);
+    explicit GLATEfficiency(const std::vector<double>& pars);
     GLATEfficiency(const GLATEfficiency& eff);
     virtual ~GLATEfficiency(void);
 
     // Operators
-    GLATEfficiency& operator= (const GLATEfficiency& eff);
-    double          operator() (const double& logE) const;
+    GLATEfficiency& operator=(const GLATEfficiency& eff);
+    double          operator()(const double& logE) const;
 
     // Methods
     void            clear(void);

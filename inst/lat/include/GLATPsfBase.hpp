@@ -1,5 +1,5 @@
 /***************************************************************************
- *  GLATPsfBase.hpp - Fermi-LAT point spread function abstract base class  *
+ *  GLATPsfBase.hpp - Abstract Fermi/LAT point spread function base class  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfBase.hpp
- * @brief Fermi/LAT point spread function abstract base class definition
+ * @brief Abstract Fermi/LAT point spread function base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -38,7 +38,7 @@
 /***********************************************************************//**
  * @class GLATPsfBase
  *
- * @brief Abstract interface for the Fermi/LAT point spread function
+ * @brief Abstract Fermi/LAT point spread function base class
  *
  * This class defines the abstract interface for the Fermi/LAT point spread
  * function (PSF). Classes that are derived from GLATPsfBase implement the
@@ -53,12 +53,12 @@ public:
     virtual ~GLATPsfBase(void);
 
     // Operators
-    GLATPsfBase& operator= (const GLATPsfBase& psf);
+    GLATPsfBase& operator=(const GLATPsfBase& psf);
 
     // Pure virtual methods
     virtual void         clear(void) = 0;
     virtual GLATPsfBase* clone(void) const = 0;
-    virtual void         read(const GFitsTable* hdu) = 0;
+    virtual void         read(const GFitsTable& table) = 0;
     virtual void         write(GFits& file) const = 0;
     virtual double       psf(const double& offset, const double& logE,
                              const double& ctheta) = 0;
@@ -66,19 +66,19 @@ public:
     virtual std::string  print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
-    void   read_scale(const GFitsTable* hdu);
-    void   write_scale(GFits& file) const;
-    int    size(void) const { return nenergies()*ncostheta(); }
-    int    nenergies(void) const { return m_rpsf_bins.nenergies(); }
-    int    ncostheta(void) const { return m_rpsf_bins.ncostheta(); }
-    double costhetamin(void) const { return m_min_ctheta; }
-    void   costhetamin(const double& ctheta) { m_min_ctheta = ctheta; }
-    bool   hasphi(void) const { return false; }
-    bool   front(void) const { return m_front; }
-    void   front(const bool& front) { m_front = front; }
-    double scale_par1(void) const { return m_scale_par1; }
-    double scale_par2(void) const { return m_scale_par2; }
-    double scale_index(void) const { return m_scale_index; }
+    void          read_scale(const GFitsTable& hdu);
+    void          write_scale(GFits& file) const;
+    int           size(void) const;
+    int           nenergies(void) const;
+    int           ncostheta(void) const;
+    const double& costhetamin(void) const;
+    void          costhetamin(const double& ctheta);
+    bool          hasphi(void) const;
+    const bool&   front(void) const;
+    void          front(const bool& front);
+    const double& scale_par1(void) const;
+    const double& scale_par2(void) const;
+    const double& scale_index(void) const;
 
 protected:
     // Methods
@@ -95,5 +95,139 @@ protected:
     double            m_scale_index;  //!< PSF scaling index
     double            m_min_ctheta;   //!< Minimum valid cos(theta)
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in point spread function
+ *
+ * @return Number of bins in point spread function.
+ ***************************************************************************/
+inline
+int GLATPsfBase::size(void) const
+{
+    return nenergies()*ncostheta();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of energies in point spread function
+ *
+ * @return Number of energies in point spread function.
+ ***************************************************************************/
+inline
+int GLATPsfBase::nenergies(void) const
+{
+    return m_rpsf_bins.nenergies();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of cosine theta bins in point spread function
+ *
+ * @return Number of cosine theta bins in point spread function.
+ ***************************************************************************/
+inline
+int GLATPsfBase::ncostheta(void) const
+{
+    return m_rpsf_bins.ncostheta();
+}
+
+
+/***********************************************************************//**
+ * @brief Return cosine theta minimum
+ *
+ * @return Cosine theta minimum.
+ ***************************************************************************/
+inline
+const double& GLATPsfBase::costhetamin(void) const
+{
+    return m_min_ctheta;
+}
+
+
+/***********************************************************************//**
+ * @brief Set minimum cos(theta) angle for point spread function
+ *
+ * @param[in] ctheta Cosine of maximum zenith angle.
+ ***************************************************************************/
+inline
+void GLATPsfBase::costhetamin(const double& ctheta)
+{
+    m_min_ctheta = ctheta;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal that point spread function has Phi dependence
+ *
+ * @return True if point spread function has Phi dependence.
+ ***************************************************************************/
+inline
+bool GLATPsfBase::hasphi(void) const
+{
+    return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal that point spread function is for front section
+ *
+ * @return True if point spread function is for front section.
+ ***************************************************************************/
+inline
+const bool& GLATPsfBase::front(void) const
+{
+    return m_front;
+}
+
+
+/***********************************************************************//**
+ * @brief Set if point spread function is for front section
+ *
+ * @param[in] front True if point spread function is for front section.
+ ***************************************************************************/
+inline
+void GLATPsfBase::front(const bool& front)
+{
+    m_front = front;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return first scaling parameter
+ *
+ * @return First scaling parameter.
+ ***************************************************************************/
+inline
+const double& GLATPsfBase::scale_par1(void) const
+{
+    return m_scale_par1;
+}
+
+
+/***********************************************************************//**
+ * @brief Return second scaling parameter
+ *
+ * @return Second scaling parameter.
+ ***************************************************************************/
+inline
+const double& GLATPsfBase::scale_par2(void) const
+{
+    return m_scale_par2;
+}
+
+
+/***********************************************************************//**
+ * @brief Return scaling index
+ *
+ * @return Scaling index.
+ ***************************************************************************/
+inline
+const double& GLATPsfBase::scale_index(void) const
+{
+    return m_scale_index;
+}
 
 #endif /* GLATPSFBASE_HPP */

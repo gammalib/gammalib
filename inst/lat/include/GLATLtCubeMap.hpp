@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GLATLtCubeMap.hpp - Fermi LAT livetime cube map             *
+ *          GLATLtCubeMap.hpp - Fermi LAT livetime cube map class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATLtCubeMap.hpp
- * @brief  Fermi LAT livetime cube map class definition.
+ * @brief Fermi LAT livetime cube map class definition
  * @author Juergen Knoedlseder
  */
 
@@ -44,7 +44,7 @@ typedef double (*_ltcube_ctheta_phi)(const double& costheta, const double& phi);
 /***********************************************************************//**
  * @class GLATLtCubeMap
  *
- * @brief Interface for the Fermi LAT livetime cube map.
+ * @brief Fermi LAT livetime cube map class
  *
  * A livetime cube map holds a set of HEALPix skymaps that are a function
  * of the cosine of the zenith angle and (optionally) of the azimuth angle.
@@ -58,7 +58,7 @@ public:
     virtual ~GLATLtCubeMap(void);
 
     // Operators
-    GLATLtCubeMap& operator= (const GLATLtCubeMap& cube);
+    GLATLtCubeMap& operator=(const GLATLtCubeMap& cube);
     double         operator()(const GSkyDir& dir, _ltcube_ctheta fct);
     double         operator()(const GSkyDir& dir, _ltcube_ctheta_phi fct);
     double         operator()(const GSkyDir& dir, const GEnergy& energy,
@@ -70,14 +70,14 @@ public:
     // Methods
     void           clear(void);
     GLATLtCubeMap* clone(void) const;
-    void           read(const GFitsTable* hdu);
-    void           write(GFits* file) const;
-    int            ncostheta(void) const { return m_num_ctheta; }
-    int            nphi(void) const { return m_num_phi; }
-    bool           hasphi(void) const { return (m_num_phi != 0); }
+    void           read(const GFitsTable& table);
+    void           write(GFits& file) const;
+    const int&     ncostheta(void) const;
+    const int&     nphi(void) const;
+    bool           hasphi(void) const;
     double         costheta(const int& index) const;
     double         phi(const int& index) const;
-    double         costhetamin(void) const { return m_min_ctheta; }
+    const double&  costhetamin(void) const;
     std::string    costhetabin(void) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
 
@@ -94,5 +94,53 @@ private:
     double  m_min_ctheta;   //!< Minimum cos theta value
     bool    m_sqrt_bin;     //!< Square root binning?
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of cosine theta bins
+ *
+ * @return Number of cosine theta bins.
+ ***************************************************************************/
+inline
+const int& GLATLtCubeMap::ncostheta(void) const
+{
+    return m_num_ctheta;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of phi bins
+ *
+ * @return Number of phi bins.
+ ***************************************************************************/
+inline
+const int& GLATLtCubeMap::nphi(void) const
+{
+    return m_num_phi;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if livetime cube map has phi dependence
+ *
+ * @return True if livetime cube map has phi dependence.
+ ***************************************************************************/
+inline
+bool GLATLtCubeMap::hasphi(void) const
+{
+    return (m_num_phi != 0);
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum of cosine theta
+ *
+ * @return Minimum of cosine theta.
+ ***************************************************************************/
+inline
+const double& GLATLtCubeMap::costhetamin(void) const
+{
+    return m_min_ctheta;
+}
 
 #endif /* GLATLTCUBEMAP_HPP */

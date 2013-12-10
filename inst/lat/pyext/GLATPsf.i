@@ -40,33 +40,34 @@ class GLATPsf : public GBase {
 public:
     // Constructors and destructors
     GLATPsf(void);
-    GLATPsf(const std::string& filename);
+    explicit GLATPsf(const std::string& filename);
     GLATPsf(const GLATPsf& psf);
     virtual ~GLATPsf(void);
 
     // Operators
-    double operator() (const double& offset, const double& logE,
-                       const double& ctheta);
-    double operator() (const GLATInstDir& obsDir, const GSkyDir& srcDir,
-                       const GEnergy& srcEng, const GTime& srcTime,
-                       const GLATPointing& pnt);
+    double operator()(const double& offset, const double& logE,
+                      const double& ctheta);
+    double operator()(const GLATInstDir& obsDir, const GSkyDir& srcDir,
+                      const GEnergy& srcEng, const GTime& srcTime,
+                      const GLATPointing& pnt);
 
     // Methods
-    void         clear(void);
-    GLATPsf*     clone(void) const;
-    void         load(const std::string& filename);
-    void         save(const std::string& filename, bool clobber = false);
-    void         read(const GFits& file);
-    void         write(GFits& file) const;
-    int          size(void) const;
-    int          nenergies(void) const;
-    int          ncostheta(void) const;
-    double       costhetamin(void) const;
-    void         costhetamin(const double& ctheta);
-    bool         hasphi(void) const;
-    bool         isfront(void) const;
-    bool         isback(void) const;
-    int          version(void) const;
+    void     clear(void);
+    GLATPsf* clone(void) const;
+    void     load(const std::string& filename);
+    void     save(const std::string& filename,
+                  const bool& clobber = false);
+    void     read(const GFits& file);
+    void     write(GFits& file) const;
+    int      size(void) const;
+    int      nenergies(void) const;
+    int      ncostheta(void) const;
+    double   costhetamin(void) const;
+    void     costhetamin(const double& ctheta);
+    bool     hasphi(void) const;
+    bool     isfront(void) const;
+    bool     isback(void) const;
+    int      version(void) const;
 };
 
 

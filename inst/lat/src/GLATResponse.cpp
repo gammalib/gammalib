@@ -130,8 +130,9 @@ GLATResponse::~GLATResponse(void)
  * @brief Assignment operator
  *
  * @param[in] rsp Response.
+ * @return Response.
  ***************************************************************************/
-GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
+GLATResponse& GLATResponse::operator=(const GLATResponse& rsp)
 {
     // Execute only if object is not identical
     if (this != &rsp) {
@@ -162,7 +163,7 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear response
 ***************************************************************************/
 void GLATResponse::clear(void)
 {
@@ -180,8 +181,10 @@ void GLATResponse::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone response
+ *
+ * @return Pointer to deep copy of response.
+ ***************************************************************************/
 GLATResponse* GLATResponse::clone(void) const
 {
     return new GLATResponse(*this);
@@ -720,12 +723,12 @@ std::string GLATResponse::print(const GChatter& chatter) const
             result.append("unknown");
         }
         for (int i = 0; i < size(); ++i) {
-            result.append("\n"+m_aeff[i]->print(chatter));
-            result.append("\n"+m_psf[i]->print(chatter));
-            result.append("\n"+m_edisp[i]->print(chatter));
+            result.append("\n"+m_aeff[i]->print(gammalib::reduce(chatter)));
+            result.append("\n"+m_psf[i]->print(gammalib::reduce(chatter)));
+            result.append("\n"+m_edisp[i]->print(gammalib::reduce(chatter)));
         }
         for (int i = 0; i < m_ptsrc.size(); ++i) {
-            result.append("\n"+m_ptsrc[i]->print(chatter));
+            result.append("\n"+m_ptsrc[i]->print(gammalib::reduce(chatter)));
         }
 
     } // endif: chatter was not silent
@@ -849,10 +852,3 @@ void GLATResponse::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

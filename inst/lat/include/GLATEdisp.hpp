@@ -49,26 +49,27 @@ class GLATEdisp : public GBase {
 public:
     // Constructors and destructors
     GLATEdisp(void);
-    GLATEdisp(const std::string& filename);
+    explicit GLATEdisp(const std::string& filename);
     GLATEdisp(const GLATEdisp& edisp);
     virtual ~GLATEdisp(void);
 
     // Operators
-    GLATEdisp& operator= (const GLATEdisp& edisp);
-    //double    operator() (const double& logE, const double& ctheta);
-    //double    operator() (const GSkyDir& srcDir, const GEnergy& srcEng,
-    //                      const GTime& srcTime, const GLATPointing& pnt);
+    GLATEdisp& operator=(const GLATEdisp& edisp);
+    //double    operator()(const double& logE, const double& ctheta);
+    //double    operator()(const GSkyDir& srcDir, const GEnergy& srcEng,
+    //                     const GTime& srcTime, const GLATPointing& pnt);
 
     // Methods
     void         clear(void);
     GLATEdisp*   clone(void) const;
     void         load(const std::string& filename);
-    void         save(const std::string& filename, bool clobber = false);
+    void         save(const std::string& filename,
+                      const bool& clobber = false);
     void         read(const GFits& file);
     void         write(GFits& file) const;
-    int          size(void) const { return nenergies()*ncostheta(); }
-    int          nenergies(void) const { return m_edisp_bins.nenergies(); }
-    int          ncostheta(void) const { return m_edisp_bins.ncostheta(); }
+    int          size(void) const;
+    int          nenergies(void) const;
+    int          ncostheta(void) const;
     //double       costhetamin(void) const { return m_min_ctheta; }
     //void         costhetamin(const double& ctheta);
     bool         hasphi(void) const { return false; }
@@ -79,7 +80,7 @@ private:
     void init_members(void);
     void copy_members(const GLATEdisp& edisp);
     void free_members(void);
-    void read_edisp(const GFitsTable* hdu);
+    void read_edisp(const GFitsTable& hdu);
     void write_edisp(GFits& file) const;
     
     // Protected members
@@ -88,5 +89,41 @@ private:
     std::vector<double> m_ls1;          //!< Energy dispersion ...
     std::vector<double> m_scale;        //!< Energy dispersion scaling parameters
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in energy dispersion response
+ *
+ * @return Number of bins in energy dispersion response.
+ ***************************************************************************/
+inline
+int GLATEdisp::size(void) const
+{
+    return nenergies()*ncostheta();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of energies in energy dispersion response
+ *
+ * @return Number of energies in energy dispersion response.
+ ***************************************************************************/
+inline
+int GLATEdisp::nenergies(void) const
+{
+    return m_edisp_bins.nenergies();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of cosine theta bins in energy dispersion response
+ *
+ * @return Number of cosine theta bins in energy dispersion response.
+ ***************************************************************************/
+inline
+int GLATEdisp::ncostheta(void) const
+{
+    return m_edisp_bins.ncostheta();
+}
 
 #endif /* GLATEDISP_HPP */

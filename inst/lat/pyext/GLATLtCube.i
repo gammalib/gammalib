@@ -40,7 +40,7 @@ class GLATLtCube : public GBase {
 public:
     // Constructors and destructors
     GLATLtCube(void);
-    GLATLtCube(const std::string& filename);
+    explicit GLATLtCube(const std::string& filename);
     GLATLtCube(const GLATLtCube& cube);
     virtual ~GLATLtCube(void);
 
