@@ -443,10 +443,10 @@ void GCOMResponse::load(const std::string& iaqname)
     GFits file(filename);
 
     // Get IAQ image
-    GFitsImage* iaq = file.image(0);
+    const GFitsImage& iaq = *file.image(0);
 
     // Read IAQ
-    read_iaq(iaq);
+    read(iaq);
 
     // Close ARF FITS file
     file.close();
@@ -459,59 +459,54 @@ void GCOMResponse::load(const std::string& iaqname)
 /***********************************************************************//**
  * @brief Read COMPTEL response from FITS image.
  *
- * @param[in] hdu FITS Image HDU.
+ * @param[in] image FITS image.
  *
  * Read the COMPTEL response from IAQ FITS file and convert the IAQ values
  * into a probability per steradian.
  ***************************************************************************/
-void GCOMResponse::read_iaq(const GFitsImage* hdu)
+void GCOMResponse::read(const GFitsImage& image)
 {
-    // Continue only if header is valid
-    if (hdu != NULL) {
+    // Store IAQ dimensions
+    m_phigeo_bins = image.naxes(0);
+    m_phibar_bins = image.naxes(1);
 
-        // Store IAQ dimensions
-        m_phigeo_bins = hdu->naxes(0);
-        m_phibar_bins = hdu->naxes(1);
+    // Store IAQ axes definitions
+    m_phigeo_ref_value = image.real("CRVAL1");
+    m_phigeo_ref_pixel = image.real("CRPIX1");
+    m_phigeo_bin_size  = image.real("CDELT1");
+    m_phibar_ref_value = image.real("CRVAL2");
+    m_phibar_ref_pixel = image.real("CRPIX2");
+    m_phibar_bin_size  = image.real("CDELT2");
 
-        // Store IAQ axes definitions
-        m_phigeo_ref_value = hdu->real("CRVAL1");
-        m_phigeo_ref_pixel = hdu->real("CRPIX1");
-        m_phigeo_bin_size  = hdu->real("CDELT1");
-        m_phibar_ref_value = hdu->real("CRVAL2");
-        m_phibar_ref_pixel = hdu->real("CRPIX2");
-        m_phibar_bin_size  = hdu->real("CDELT2");
+    // Get axes minima (values of first bin)
+    m_phigeo_min = m_phigeo_ref_value + (1.0-m_phigeo_ref_pixel) * m_phigeo_bin_size;
+    m_phibar_min = m_phibar_ref_value + (1.0-m_phibar_ref_pixel) * m_phibar_bin_size;
 
-        // Get axes minima (values of first bin)
-        m_phigeo_min = m_phigeo_ref_value + (1.0-m_phigeo_ref_pixel) * m_phigeo_bin_size;
-        m_phibar_min = m_phibar_ref_value + (1.0-m_phibar_ref_pixel) * m_phibar_bin_size;
+    // Compute IAQ size. Continue only if size is positive
+    int size = m_phigeo_bins * m_phibar_bins;
+    if (size > 0) {
 
-        // Compute IAQ size. Continue only if size is positive
-        int size = m_phigeo_bins * m_phibar_bins;
-        if (size > 0) {
+        // Allocate memory for IAQ
+        m_iaq.assign(size, 0.0);
 
-            // Allocate memory for IAQ
-            m_iaq.assign(size, 0.0);
-
-            // Copy over IAQ values
-            for (int i = 0; i < size; ++i) {
-                m_iaq[i] = hdu->pixel(i);
-            }
-
-        } // endif: size was positive
-
-        // Convert IAQ matrix from probability per Phigeo bin into a
-        // probability per steradian
-        double omega0 = gammalib::fourpi *
-                        std::sin(0.5 * m_phigeo_bin_size * gammalib::deg2rad);
-        for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
-            double phigeo = iphigeo * m_phigeo_bin_size + m_phigeo_min;
-            double omega  = omega0 * std::sin(phigeo * gammalib::deg2rad);
-            for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
-                m_iaq[iphigeo+iphibar*m_phigeo_bins] /= omega;
-            }
+        // Copy over IAQ values
+        for (int i = 0; i < size; ++i) {
+            m_iaq[i] = image.pixel(i);
         }
 
-    } // endif: HDU was valid
+    } // endif: size was positive
+
+    // Convert IAQ matrix from probability per Phigeo bin into a
+    // probability per steradian
+    double omega0 = gammalib::fourpi *
+                    std::sin(0.5 * m_phigeo_bin_size * gammalib::deg2rad);
+    for (int iphigeo = 0; iphigeo < m_phigeo_bins; ++iphigeo) {
+        double phigeo = iphigeo * m_phigeo_bin_size + m_phigeo_min;
+        double omega  = omega0 * std::sin(phigeo * gammalib::deg2rad);
+        for (int iphibar = 0; iphibar < m_phibar_bins; ++iphibar) {
+            m_iaq[iphigeo+iphibar*m_phigeo_bins] /= omega;
+        }
+    }
 
     // Return
     return;
