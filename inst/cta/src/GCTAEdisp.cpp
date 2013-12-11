@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GCTAEdisp.cpp - CTA energy dispersion base class            *
+ *         GCTAEdisp.cpp - Abstract CTA energy dispersion base class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEdisp.hpp
- * @brief CTA energy dispersion base class implementation
+ * @brief Abstract CTA energy dispersion base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -103,7 +103,7 @@ GCTAEdisp::~GCTAEdisp(void)
  * @param[in] edisp Energy dispersion.
  * @return Energy dispersion.
  ***************************************************************************/
-GCTAEdisp& GCTAEdisp::operator= (const GCTAEdisp& edisp)
+GCTAEdisp& GCTAEdisp::operator=(const GCTAEdisp& edisp)
 {
     // Execute only if object is not identical
     if (this != &edisp) {

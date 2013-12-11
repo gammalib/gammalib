@@ -1963,9 +1963,6 @@ double GCTAResponse::psf_delta_max(const double& theta,
  * @param[in] zenith Zenith angle of telescope pointing (radians).
  * @param[in] azimuth Azimuth angle of telescope pointing (radians).
  * @param[in] srcLogEng Log10 of true photon energy (E/TeV).
- *
- * Dummy energy dispersion method that implements a Dirac function. Returns
- * 1 is true and observed energy are identical, 0 otherwise.
  ***************************************************************************/
 double GCTAResponse::edisp(const double& obsLogEng,
                            const double& theta,
@@ -1974,8 +1971,10 @@ double GCTAResponse::edisp(const double& obsLogEng,
                            const double& azimuth,
                            const double& srcLogEng) const
 {
-    // Dirac energy dispersion
-    double edisp = (obsLogEng == srcLogEng) ? 1.0 : 0.0;
+    // Compute energy dispersion
+    double edisp = (m_edisp != NULL)
+                 ? (*m_edisp)(obsLogEng, srcLogEng, theta, phi, zenith, azimuth)
+                 : 0.0;
 
     // Return energy dispersion
     return edisp;
