@@ -43,7 +43,7 @@ GammaLib is designed to compile on any POSIX compliant platform. So far,
 GammaLib has been successfully compiled and tested on Mac OS X, OpenBSD, OpenSolaris
 (using the gcc compiler) and many Linux flavours. Pre-packed binary
 versions of the code are also available for Mac OS X. For known problems
-with specific platforms, please refer to section [sec:knownproblems].
+with specific platforms, please refer to section :ref:`sec_known_problems`.
 
 GammaLib makes heavily use of C++ classes. Instrument independency is achieved
 by using abstract virtual base classes, which are implemented as derived
@@ -66,8 +66,8 @@ correspond to the folders in the source code distribution):
 -  **Instrument specific modules**
 
    GammaLib support the analysis of data from the Cherenkov Telescope Array
-   (cta), the *Fermi*/LAT telescope (lat), and any multi-wavelength
-   information in form of spectral data points (mwl).
+   (cta), the *Fermi*/LAT telescope (lat), the COMPTEL telescope (com),
+   and any multi-wavelength information in form of spectral data points (mwl).
 
 -  **Core services**
 
@@ -77,8 +77,9 @@ correspond to the folders in the source code distribution):
 
 -  **Interfaces**
 
-   are implemented for reading and writing of FITS files (fits) and XML
-   files (xml).
+   are implemented for reading and writing of FITS files (fits), XML
+   files (xml), Xspec data (xspec) and Virtual Observatory 
+   interoperability (vo).
 
 .. _fig_structure:
 

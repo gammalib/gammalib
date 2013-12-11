@@ -37,15 +37,15 @@ Now let's append a model to this container. For this, type::
 
     >>> pos = GSkyDir()
     >>> pos.radec_deg(83.6331, 22.0145)
-    >>> spatial = GModelSpatialPtsrc(pos)
+    >>> spatial = GModelSpatialPointSource(pos)
     >>> spectral = GModelSpectralPlaw(1.0, -2.0)
-    >>> model = GModelPointSource(spatial, spectral)
+    >>> model = GModelSky(spatial, spectral)
     >>> models.append(model)
     >>> print models
     === GModels ===
     Number of models ..........: 1
     Number of parameters ......: 6
-    === GModelPointSource ===
+    === GModelSky ===
     Name ......................:
     Instruments ...............: all
     Model type ................: "SkyDirFunction" * "PowerLaw" * "Constant"
