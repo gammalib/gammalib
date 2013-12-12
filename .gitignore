@@ -78,6 +78,7 @@ examples/cpp/createfits/createfits
 examples/cpp/createskymap/createskymap
 examples/cpp/createxml/createxml
 examples/cpp/readmodel/readmodel
+examples/cpp/numerics/numerics
 
 # Binaries
 test/test_GApplication
