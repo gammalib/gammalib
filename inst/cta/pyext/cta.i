@@ -80,6 +80,7 @@
 %include "GCTAPsfPerfTable.i"
 %include "GCTAPsfVector.i"
 %include "GCTAPsf2D.i"
+%include "GCTAPsfKing.i"
 %include "GCTAEdisp.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"
