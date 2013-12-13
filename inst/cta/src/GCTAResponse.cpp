@@ -553,8 +553,8 @@ void GCTAResponse::load(const std::string& irfname)
     // Build filename. If file is not a FITS file then add ".dat" extension
     // which is typical for a performance table.
     std::string filename = m_caldb + "/" + irfname;
-    if (irfname.find_last_of(".fits")    != irfname.length()-1 ||
-        irfname.find_last_of(".fits.gz") != irfname.length()-1) {
+    if (irfname.rfind(".fits")    == std::string::npos &&
+        irfname.rfind(".fits.gz") == std::string::npos) {
         filename += ".dat";
     }
 
