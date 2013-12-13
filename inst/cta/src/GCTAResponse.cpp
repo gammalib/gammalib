@@ -2276,10 +2276,9 @@ const GCTAPointing& GCTAResponse::retrieve_pnt(const std::string& origin,
 {
     // Retrieve CTA observation and pointing
     const GCTAObservation& cta = retrieve_obs(origin, obs);
-    const GCTAPointing&    pnt = cta.pointing();
 
     // Return CTA pointing
-    return pnt;
+    return (cta.pointing());
 }
 
 
