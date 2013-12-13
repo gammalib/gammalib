@@ -317,13 +317,25 @@ double GCTAPsfKing::mc(GRan&         ran,
     // Update the parameter cache
     update(logE, theta);
 
+    // Compute exponent
+    double exponent = 1.0 / (1.0-m_par_gamma);
+
+    // Compile option: sample until delta <= r_max
+    #if defined(G_FIX_DELTA_MAX)
+    do {
+    #endif
+
     // Get uniform random number
     double u = ran.uniform();
 
     // Draw random offset using inversion sampling
-    //delta = std::sqrt( ( pow(1.0 - u, 1.0 / (1.0 - m_par_gamma) ) - 1.0 ) * 2.0 * pow(m_par_sigma, 2.0) * m_par_gamma);
-    delta = std::sqrt( ( std::pow(1.0 - u, 1.0 / (1.0 - m_par_gamma) ) - 1.0 ) * 
-                      2.0 * m_par_sigma2 * m_par_gamma);
+    double u_max = (std::pow((1.0 - u), exponent) - 1.0) * m_par_gamma;
+    delta = m_par_sigma * std::sqrt(2.0 * u_max);
+
+    // Compile option: sample until delta <= r_max
+    #if defined(G_FIX_DELTA_MAX)
+    } while (delta > r_max);
+    #endif
 
     // Return PSF offset
     return delta;
