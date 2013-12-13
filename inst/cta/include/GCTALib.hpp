@@ -21,7 +21,7 @@
 /**
  * @file GCTALib.hpp
  * @brief Collection of CTA support header files
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GCTALIB_HPP
@@ -33,6 +33,8 @@
 /* __ CTA specific headers _______________________________________________ */
 #include "GCTAException.hpp"
 #include "GCTAObservation.hpp"
+#include "GCTAOnOffObservation.hpp"
+#include "GCTAOnOffObservations.hpp"
 #include "GCTAEventList.hpp"
 #include "GCTAEventAtom.hpp"
 #include "GCTAEventCube.hpp"
@@ -42,6 +44,16 @@
 #include "GCTAPointing.hpp"
 #include "GCTAResponse.hpp"
 #include "GCTAResponseTable.hpp"
+#include "GCTAAeff.hpp"
+#include "GCTAAeff2D.hpp"
+#include "GCTAAeffArf.hpp"
+#include "GCTAAeffPerfTable.hpp"
+#include "GCTAEdisp.hpp"
+#include "GCTAPsf.hpp"
+#include "GCTAPsf2D.hpp"
+#include "GCTAPsfKing.hpp"
+#include "GCTAPsfPerfTable.hpp"
+#include "GCTAPsfVector.hpp"
 #include "GCTAModelBackground.hpp"
 #include "GCTAModelRadial.hpp"
 #include "GCTAModelRadialRegistry.hpp"
