@@ -53,6 +53,7 @@
 #include "GCTAPsf2D.hpp"
 #include "GCTAPsfVector.hpp"
 #include "GCTAPsfPerfTable.hpp"
+#include "GCTAPsfKing.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAPsf.hpp"
 #include "GCTAEdisp.hpp"
@@ -549,8 +550,13 @@ void GCTAResponse::load(const std::string& irfname)
     // Restore calibration database name
     m_caldb = caldb;
 
-    // Build filename
-    std::string filename = m_caldb + "/" + irfname + ".dat";
+    // Build filename. If file is not a FITS file then add ".dat" extension
+    // which is typical for a performance table.
+    std::string filename = m_caldb + "/" + irfname;
+    if (irfname.find_last_of(".fits")    != irfname.length()-1 ||
+        irfname.find_last_of(".fits.gz") != irfname.length()-1) {
+        filename += ".dat";
+    }
 
     // Load effective area
     load_aeff(filename);
@@ -679,10 +685,22 @@ void GCTAResponse::load_psf(const std::string& filename)
         GFits file(filename);
 
         // If file contains a "POINT SPREAD FUNCTION" extension then load it
-        // as CTA response table
+        // as either a King profile PSF or a 2D PSF
         if (file.contains("POINT SPREAD FUNCTION")) {
-            file.close();
-            m_psf = new GCTAPsf2D(filename);
+            const GFitsTable& table = *file.table("POINT SPREAD FUNCTION");
+            if (table.contains("GAMMA") && table.contains("SIGMA")) {
+                file.close();
+                m_psf = new GCTAPsfKing(filename);
+            }
+            else if (table.contains("SCALE") && table.contains("SIGMA_1") &&
+                     table.contains("AMPL_2") && table.contains("SIGMA_2") &&
+                     table.contains("AMPL_3") && table.contains("SIGMA_3")) {
+                file.close();
+                m_psf = new GCTAPsf2D(filename);
+            }
+            else {
+                file.close();
+            }
         }
 
         // ... else load it has PSF vector 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAPsfKing.cpp - CTA point spread function vector class        *
+ *      GCTAPsfKing.cpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GCTAPsfKing.cpp
- * @brief CTA point spread function using a King profile
+ * @file GCTAPsfKing.hpp
+ * @brief King profile CTA point spread function class definition
  * @author Michael Mayer
  */
 
@@ -35,15 +35,18 @@
 #include "GCTAException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_LOAD                            "GCTAPsfKing::load(std::string&)"
+#define G_UPDATE                      "GCTAPsfKing::update(double&, double&)"
 
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
+#define G_FIX_DELTA_MAX
 
 /* __ Debug definitions __________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
+const double r_max = 0.7 * gammalib::deg2rad;  // Maximum delta for fixed 
+                                               // delta_max computation
 
 
 /*==========================================================================
@@ -169,15 +172,20 @@ GCTAPsfKing& GCTAPsfKing::operator=(const GCTAPsfKing& psf)
  * of sr^-1 for a given energy.
  ***************************************************************************/
 double GCTAPsfKing::operator()(const double& delta,
-                                 const double& logE, 
-                                 const double& theta, 
-                                 const double& phi,
-                                 const double& zenith,
-                                 const double& azimuth,
-                                 const bool&   etrue) const
+                               const double& logE, 
+                               const double& theta, 
+                               const double& phi,
+                               const double& zenith,
+                               const double& azimuth,
+                               const bool&   etrue) const
 {
 	// Initialise PSF value
 	double psf = 0.0;
+
+    // Compile option: set PSF to zero outside delta_max
+    #if defined(G_FIX_DELTA_MAX)
+    if (delta <= r_max) {
+    #endif
 
     // Update the parameter cache
     update(logE, theta);
@@ -186,9 +194,17 @@ double GCTAPsfKing::operator()(const double& delta,
     if (m_par_norm > 0.0) {
 
 		// Compute PSF value
-		psf = m_par_norm*pow((1 + 1 / (2 * m_par_gamma) * pow(delta / m_par_sigma, 2)), -m_par_gamma);
+        double arg  = delta / m_par_sigma;
+        double arg2 = arg * arg;
+		psf = m_par_norm * 
+              std::pow((1.0 + 1.0 / (2.0 * m_par_gamma) * arg2), -m_par_gamma);
 
     } // endif: normalization was positive
+
+    // Compile option: set PSF to zero outside delta_max
+    #if defined(G_FIX_DELTA_MAX)
+    }
+    #endif
 
     // Return PSF
     return psf;
@@ -249,10 +265,10 @@ void GCTAPsfKing::load(const std::string& filename)
     GFits file(filename);
 
     // Get PSF table
-    const GFitsTable* table = file.table("POINT SPREAD FUNCTION");
+    const GFitsTable& table = *file.table("POINT SPREAD FUNCTION");
 
     // Read PSF table
-    m_psf.read(*table);
+    m_psf.read(table);
 
     // Set energy axis to logarithmic scale
     m_psf.axis_log10(0);
@@ -260,7 +276,7 @@ void GCTAPsfKing::load(const std::string& filename)
     // Set offset angle axis to radians
     m_psf.axis_radians(1);
 
-    // Convert sigma parameters to radians
+    // Convert sigma parameter to radians
     m_psf.scale(1, gammalib::deg2rad);
 
     // Close PSF FITS file
@@ -271,18 +287,6 @@ void GCTAPsfKing::load(const std::string& filename)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return filename
- *
- * @return Returns filename from which point spread function was loaded
- ***************************************************************************/
-std::string GCTAPsfKing::filename(void) const
-{
-    // Return filename
-    return m_filename;
 }
 
 
@@ -300,12 +304,12 @@ std::string GCTAPsfKing::filename(void) const
  * Draws a random offset for the King Profile
  ***************************************************************************/
 double GCTAPsfKing::mc(GRan&         ran,
-                         const double& logE, 
-                         const double& theta, 
-                         const double& phi,
-                         const double& zenith,
-                         const double& azimuth,
-                         const bool&   etrue) const
+                       const double& logE, 
+                       const double& theta, 
+                       const double& phi,
+                       const double& zenith,
+                       const double& azimuth,
+                       const bool&   etrue) const
 {
 	// Initialise random offset
 	double delta = 0.0;
@@ -317,7 +321,9 @@ double GCTAPsfKing::mc(GRan&         ran,
     double u = ran.uniform();
 
     // Draw random offset using inversion sampling
-    delta = std::sqrt( ( pow(1.0 - u, 1.0 / (1.0 - m_par_gamma) ) - 1.0 ) * 2.0 * pow(m_par_sigma, 2.0) * m_par_gamma);
+    //delta = std::sqrt( ( pow(1.0 - u, 1.0 / (1.0 - m_par_gamma) ) - 1.0 ) * 2.0 * pow(m_par_sigma, 2.0) * m_par_gamma);
+    delta = std::sqrt( ( std::pow(1.0 - u, 1.0 / (1.0 - m_par_gamma) ) - 1.0 ) * 
+                      2.0 * m_par_sigma2 * m_par_gamma);
 
     // Return PSF offset
     return delta;
@@ -335,26 +341,30 @@ double GCTAPsfKing::mc(GRan&         ran,
  * @param[in] etrue Use true energy (true/false). Not used.
  *
  * Determine the radius beyond which the PSF becomes negligible. This radius
- * is set by this method to where the containment fraction become 99.995% which equal
- * \f$5 \times \sigma\f$ of a Gaussian width.
+ * is set by this method to where the containment fraction become 99.995% 
+ * which equals \f$5 \times \sigma\f$ of a Gaussian width.
  ***************************************************************************/
 double GCTAPsfKing::delta_max(const double& logE,
-                                   const double& theta, 
-                                   const double& phi,
-                                   const double& zenith,
-                                   const double& azimuth,
-                                   const bool&   etrue) const
+                              const double& theta, 
+                              const double& phi,
+                              const double& zenith,
+                              const double& azimuth,
+                              const bool&   etrue) const
 {
+    // Compile option: use fixed maximum delta
+    #if defined(G_FIX_DELTA_MAX)
+    double radius = r_max;
+    #else
+
     // Update the parameter cache
     update(logE, theta);
 
     // Compute maximum PSF radius (99.995% containment)
-    double F = 0.99;
-
-    // todo: For now fix maximum radius to 0.7 degree until we found a better method.
-    // The 99% containment radius can become quite large due to the long tails of the
-    // function
-    double radius = 0.7*gammalib::deg2rad; //m_par_sigma * std::sqrt(2 * ( std::pow(1 - F, 1 / (1-m_par_gamma) ) -1 )* m_par_gamma);
+    double F      = 0.99995;
+    double u_max  = (std::pow((1.0 - F), (1.0/(1.0-m_par_gamma))) - 1.0) * 
+                    m_par_gamma;
+    double radius = m_par_sigma * std::sqrt(2.0 * u_max);
+    #endif
 
     // Return maximum PSF radius
     return radius;
@@ -398,11 +408,12 @@ void GCTAPsfKing::init_members(void)
     // Initialise members
     m_filename.clear();
     m_psf.clear();
-    m_par_logE = -1.0e30;
-    m_par_theta = -1.0;
-    m_par_norm = 0.0;
-    m_par_gamma = 0.0;
-    m_par_sigma = 0.0;
+    m_par_logE   = -1.0e30;
+    m_par_theta  = -1.0;
+    m_par_norm   = 0.0;
+    m_par_gamma  = 0.0;
+    m_par_sigma  = 0.0;
+    m_par_sigma2 = 0.0;
 
     // Return
     return;
@@ -417,12 +428,14 @@ void GCTAPsfKing::init_members(void)
 void GCTAPsfKing::copy_members(const GCTAPsfKing& psf)
 {
     // Copy members
-    m_filename  = psf.m_filename;
-    m_psf = psf.m_psf;
-    m_par_logE  = psf.m_par_logE;
-    m_par_sigma = psf.m_par_sigma;
-    m_par_norm = psf.m_par_norm;
-    m_par_gamma = psf.m_par_gamma;
+    m_filename   = psf.m_filename;
+    m_psf        = psf.m_psf;
+    m_par_logE   = psf.m_par_logE;
+    m_par_theta  = psf.m_par_theta;
+    m_par_norm   = psf.m_par_norm;
+    m_par_gamma  = psf.m_par_gamma;
+    m_par_sigma  = psf.m_par_sigma;
+    m_par_sigma2 = psf.m_par_sigma2;
 
     // Return
     return;
@@ -434,9 +447,6 @@ void GCTAPsfKing::copy_members(const GCTAPsfKing& psf)
  ***************************************************************************/
 void GCTAPsfKing::free_members(void)
 {
-	m_filename.clear();
-	m_psf.clear();
-
     // Return
     return;
 }
@@ -446,6 +456,9 @@ void GCTAPsfKing::free_members(void)
  * @brief Update PSF parameter cache
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
+ *
+ * @exception GException::invalid_value
+ *            No valid point spread function information has been found.
  *
  * This method updates the PSF parameter cache. As the performance table PSF
  * only depends on energy, the only parameter on which the cache values
@@ -457,20 +470,42 @@ void GCTAPsfKing::update(const double& logE, const double& theta) const
     if (logE != m_par_logE || theta != m_par_theta) {
 
         // Save parameters
-        m_par_logE = logE;
+        m_par_logE  = logE;
         m_par_theta = theta;
     
         // Determine sigma and gamma by interpolating between nodes
         std::vector<double> pars = m_psf(logE,theta);
 
-        m_par_gamma = pars[0];
-        m_par_sigma = pars[1];
+        // Throw an exception if there are not 2 parameters
+        if (pars.size() != 2) {
+            std::string msg = gammalib::str(pars.size()) + " parameters have"
+                              " been found in the response table of the"
+                              " King profile response function while 2"
+                              " parameters are expected.\n"
+                              "Possibly, the point spread function information"
+                              " has not yet been loaded. Please load the point"
+                              " spread function before using it.";
+            throw GException::invalid_value(G_UPDATE, msg);
+        }
+
+        // Set parameters
+        m_par_gamma  = pars[0];
+        m_par_sigma  = pars[1];
+        m_par_sigma2 = m_par_sigma * m_par_sigma;
 
         // Determine normalisation for given parameters
-        m_par_norm = 1.0 / gammalib::twopi * pow(m_par_sigma, -2)*(1.0 - 1.0 / m_par_gamma);
+        m_par_norm = 1.0 / gammalib::twopi * (1.0 - 1.0 / m_par_gamma) /
+                     m_par_sigma2;
+
+        // Optionally correct for fixed delta_max
+        #if defined(G_FIX_DELTA_MAX)
+        double u_max = (r_max*r_max) / (2.0 * m_par_sigma2);
+        double norm  = 1.0 - std::pow((1.0 + u_max/m_par_gamma), 1.0-m_par_gamma);
+        m_par_norm /= norm;
+        #endif
+
     }
 
     // Return
     return;
 }
-

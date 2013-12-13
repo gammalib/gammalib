@@ -1,7 +1,7 @@
 /***************************************************************************
- *       GCTAPsfKing.hpp - CTA point spread function vector class        *
+ *      GCTAPsfKing.hpp - King profile CTA point spread function class     *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAPsfKing.hpp
- * @brief CTA point spread function class definition with a King profile
+ * @brief King profile CTA point spread function class definition
  * @author Michael Mayer
  */
 
@@ -48,7 +48,7 @@ class GCTAPsfKing : public GCTAPsf {
 public:
     // Constructors and destructors
     GCTAPsfKing(void);
-    GCTAPsfKing(const std::string& filename);
+    explicit GCTAPsfKing(const std::string& filename);
     GCTAPsfKing(const GCTAPsfKing& psf);
     virtual ~GCTAPsfKing(void);
 
@@ -63,24 +63,24 @@ public:
                       const bool&   etrue = true) const;
 
     // Implemented pure virtual methods
-    void           clear(void);
+    void         clear(void);
     GCTAPsfKing* clone(void) const;
-    void           load(const std::string& filename);
-    std::string    filename(void) const;
-    double         mc(GRan&         ran,
-                      const double& logE, 
-                      const double& theta = 0.0, 
-                      const double& phi = 0.0,
-                      const double& zenith = 0.0,
-                      const double& azimuth = 0.0,
-                      const bool&   etrue = true) const;
-    double         delta_max(const double& logE, 
-                             const double& theta = 0.0, 
-                             const double& phi = 0.0,
-                             const double& zenith = 0.0,
-                             const double& azimuth = 0.0,
-                             const bool&   etrue = true) const;
-    std::string print(const GChatter& chatter = NORMAL) const;
+    void         load(const std::string& filename);
+    std::string  filename(void) const;
+    double       mc(GRan&         ran,
+                    const double& logE, 
+                    const double& theta = 0.0, 
+                    const double& phi = 0.0,
+                    const double& zenith = 0.0,
+                    const double& azimuth = 0.0,
+                    const bool&   etrue = true) const;
+    double       delta_max(const double& logE, 
+                           const double& theta = 0.0, 
+                           const double& phi = 0.0,
+                           const double& zenith = 0.0,
+                           const double& azimuth = 0.0,
+                           const bool&   etrue = true) const;
+    std::string  print(const GChatter& chatter = NORMAL) const;
 
 
 private:
@@ -91,15 +91,30 @@ private:
     void update(const double& logE, const double& theta) const;
 
     // Members
-   std::string       m_filename;   //!< Name of Aeff response file
-   GCTAResponseTable m_psf;        //!< PSF response table
+    std::string       m_filename;   //!< Name of Aeff response file
+    GCTAResponseTable m_psf;        //!< PSF response table
 
-   mutable double m_par_logE; //!< Cache energy
-   mutable double m_par_theta; //!< Cache offset angle
-   mutable double m_par_norm; //!< King profile normalization
-   mutable double m_par_sigma; //!< King profile sigma (radians)
-   mutable double m_par_gamma; //!< King profile gamma parameter
-
+    // Evaluation cache
+    mutable double m_par_logE;   //!< Cache energy
+    mutable double m_par_theta;  //!< Cache offset angle
+    mutable double m_par_norm;   //!< King profile normalization
+    mutable double m_par_sigma;  //!< King profile sigma (radians)
+    mutable double m_par_sigma2; //!< King profile sigma squared
+    mutable double m_par_gamma;  //!< King profile gamma parameter
 };
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Filename from which point spread function was loaded.
+ *
+ * Returns filename from which point spread function was loaded.
+ ***************************************************************************/
+inline
+std::string GCTAPsfKing::filename(void) const
+{
+    return m_filename;
+}
 
 #endif /* GCTAPsfKing_HPP */

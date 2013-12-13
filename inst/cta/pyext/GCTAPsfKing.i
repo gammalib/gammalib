@@ -1,7 +1,7 @@
 /***************************************************************************
- *        GCTAPsfKing.i - CTA point spread function  class         *
+ *       GCTAPsfKing.i - King profile CTA point spread function class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Michael Mayer                                    *
+ *  copyright (C) 2013 by Michael Mayer                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAPsfKing.i
- * @brief CTA point spread function with a King Profile
+ * @brief King profile CTA point spread function class definition
  * @author Michael Mayer
  */
 %{
@@ -39,11 +39,10 @@
  * of energy as determined from a FITS table.
  ***************************************************************************/
 class GCTAPsfKing : public GCTAPsf {
-
 public:
     // Constructors and destructors
     GCTAPsfKing(void);
-    GCTAPsfKing(const std::string& filename);
+    explicit GCTAPsfKing(const std::string& filename);
     GCTAPsfKing(const GCTAPsfKing& psf);
     virtual ~GCTAPsfKing(void);
 
@@ -57,24 +56,23 @@ public:
                       const bool&   etrue = true) const;
 
     // Implemented pure virtual methods
-    void           clear(void);
+    void         clear(void);
     GCTAPsfKing* clone(void) const;
-    void           load(const std::string& filename);
-    std::string    filename(void) const;
-    double         mc(GRan&         ran,
-                      const double& logE, 
-                      const double& theta = 0.0, 
-                      const double& phi = 0.0,
-                      const double& zenith = 0.0,
-                      const double& azimuth = 0.0,
-                      const bool&   etrue = true) const;
-    double         delta_max(const double& logE, 
-                             const double& theta = 0.0, 
-                             const double& phi = 0.0,
-                             const double& zenith = 0.0,
-                             const double& azimuth = 0.0,
-                             const bool&   etrue = true) const;
-
+    void         load(const std::string& filename);
+    std::string  filename(void) const;
+    double       mc(GRan&         ran,
+                    const double& logE, 
+                    const double& theta = 0.0, 
+                    const double& phi = 0.0,
+                    const double& zenith = 0.0,
+                    const double& azimuth = 0.0,
+                    const bool&   etrue = true) const;
+    double       delta_max(const double& logE, 
+                           const double& theta = 0.0, 
+                           const double& phi = 0.0,
+                           const double& zenith = 0.0,
+                           const double& azimuth = 0.0,
+                           const bool&   etrue = true) const;
 };
 
 
@@ -82,4 +80,7 @@ public:
  * @brief GCTAPsfKing class extension
  ***************************************************************************/
 %extend GCTAPsfKing {
+    GCTAPsfKing copy() {
+        return (*self);
+    }
 };
