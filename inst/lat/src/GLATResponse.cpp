@@ -722,13 +722,15 @@ std::string GLATResponse::print(const GChatter& chatter) const
         else {
             result.append("unknown");
         }
-        for (int i = 0; i < size(); ++i) {
-            result.append("\n"+m_aeff[i]->print(gammalib::reduce(chatter)));
-            result.append("\n"+m_psf[i]->print(gammalib::reduce(chatter)));
-            result.append("\n"+m_edisp[i]->print(gammalib::reduce(chatter)));
-        }
-        for (int i = 0; i < m_ptsrc.size(); ++i) {
-            result.append("\n"+m_ptsrc[i]->print(gammalib::reduce(chatter)));
+        if (chatter > TERSE) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+m_aeff[i]->print(gammalib::reduce(chatter)));
+                result.append("\n"+m_psf[i]->print(gammalib::reduce(chatter)));
+                result.append("\n"+m_edisp[i]->print(gammalib::reduce(chatter)));
+            }
+            for (int i = 0; i < m_ptsrc.size(); ++i) {
+                result.append("\n"+m_ptsrc[i]->print(gammalib::reduce(chatter)));
+            }
         }
 
     } // endif: chatter was not silent

@@ -451,9 +451,11 @@ std::string GLATLtCube::print(const GChatter& chatter) const
         result.append("=== GLATLtCube ===");
 
         // Append information
-        result.append("\n"+m_exposure.print(gammalib::reduce(chatter)));
-        result.append("\n"+m_weighted_exposure.print(gammalib::reduce(chatter)));
-        result.append("\n"+m_gti.print(gammalib::reduce(chatter)));
+        if (chatter > TERSE) {
+            result.append("\n"+m_exposure.print(gammalib::reduce(chatter)));
+            result.append("\n"+m_weighted_exposure.print(gammalib::reduce(chatter)));
+            result.append("\n"+m_gti.print(gammalib::reduce(chatter)));
+        }
 
     } // endif: chatter was not silent
 
