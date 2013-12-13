@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-10 December 2013
+13 December 2013
 
 
 1. Introduction
@@ -593,6 +593,9 @@ members for registry information handling. This circumvents the ill
 defined initialization problem of static variables and allow using of
 the GRegistryPointer smart pointer, removing memory leaks on exit of
 GammaLib.
+
+A King profile PSF has been added that fits much better for fitting
+of the HESS PSF.
 
 
 21. COMPTEL interface
