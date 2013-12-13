@@ -22,8 +22,8 @@ def extract_data(filename):
     # Loop over all table HDUs
     k = 0
     for extno in range(fits.size()):
-        if fits.hdu(extno).exttype() == GFitsHDU.HT_ASCII_TABLE or \
-                fits.hdu(extno).exttype() == GFitsHDU.HT_BIN_TABLE:
+        if fits.at(extno).exttype() == GFitsHDU.HT_ASCII_TABLE or \
+           fits.at(extno).exttype() == GFitsHDU.HT_BIN_TABLE:
 
             # Load spectrum
             spectrum = GMWLSpectrum()

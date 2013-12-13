@@ -1,6 +1,6 @@
 CXX=g++
-CFLAGS=-I/usr/local/gamma/include/gammalib
-LDFLAGS=-L/usr/local/gamma/lib -lgamma
+CFLAGS=-I${GAMMALIB}/include/gammalib
+LDFLAGS=-L${GAMMALIB}/lib -lgamma
 DEPS=
 OBJ=createskymap.cpp
 
