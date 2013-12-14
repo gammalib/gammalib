@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GModelSpectralBrokenPlaw.i - Spectral Broken power law model class          *
+ *      GModelSpectralBrokenPlaw.i - Broken power law spectrum class       *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013 by Anneli Schulz                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,13 +20,12 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralBrokenPlaw.i
- * @brief Broken Power law spectral model class interface definition
+ * @brief Broken power law spectrum class definition
  * @author Anneli Schulz
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelSpectralBrokenPlaw.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -39,32 +38,32 @@ class GModelSpectralBrokenPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralBrokenPlaw(void);
-    explicit GModelSpectralBrokenPlaw(const double&  prefactor,
-                                const double&  index1,
-                                const GEnergy& breakenergy,
-                                const double&  index2);
+    GModelSpectralBrokenPlaw(const double&  prefactor,
+                             const double&  index1,
+                             const GEnergy& breakenergy,
+                             const double&  index2);
     explicit GModelSpectralBrokenPlaw(const GXmlElement& xml);
     GModelSpectralBrokenPlaw(const GModelSpectralBrokenPlaw& model);
     virtual ~GModelSpectralBrokenPlaw(void);
 
     // Implemented pure virtual methods
-    virtual void                clear(void);
+    virtual void                      clear(void);
     virtual GModelSpectralBrokenPlaw* clone(void) const;
-    virtual std::string         type(void) const;
-    virtual double              eval(const GEnergy& srcEng,
-                                     const GTime&   srcTime) const;
-    virtual double              eval_gradients(const GEnergy& srcEng,
-                                               const GTime&   srcTime);
-    virtual double              flux(const GEnergy& emin,
-                                     const GEnergy& emax) const;
-    virtual double              eflux(const GEnergy& emin,
-                                      const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin,
-                                   const GEnergy& emax,
-                                   const GTime&   time,
-                                   GRan&          ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const GEnergy& srcEng,
+                                           const GTime&   srcTime) const;
+    virtual double                    eval_gradients(const GEnergy& srcEng,
+                                                     const GTime&   srcTime);
+    virtual double                    flux(const GEnergy& emin,
+                                           const GEnergy& emax) const;
+    virtual double                    eflux(const GEnergy& emin,
+                                            const GEnergy& emax) const;
+    virtual GEnergy                   mc(const GEnergy& emin,
+                                         const GEnergy& emax,
+                                         const GTime&   time,
+                                         GRan&          ran) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
 
     // Other methods
     double  prefactor(void) const;

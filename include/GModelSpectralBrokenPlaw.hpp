@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GModelSpectralBrokenPlaw.hpp - Spectral Broken power law model class         *
+ *     GModelSpectralBrokenPlaw.hpp - Broken power law spectrum class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013 by Anneli Schulz                                    *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GModelSpectralBrokenPlaw.hpp
- * @brief Broken Power law spectral model class interface definition
+ * @brief Broken power law spectrum class definition
  * @author Anneli Schulz
  */
 
@@ -38,9 +38,10 @@
 /***********************************************************************//**
  * @class GModelSpectralBrokenPlaw
  *
- * @brief Power law spectral model class
+ * @brief Broken power law spectral model class
  *
- * This class implements a power law spectrum. The model is defined by
+ * This class implements a broken power law spectrum. The model is defined
+ * by
  *
  * \f[
  *    S_{\rm E}(E | t) = {\tt m\_norm}
@@ -57,10 +58,10 @@ class GModelSpectralBrokenPlaw : public GModelSpectral {
 public:
     // Constructors and destructors
     GModelSpectralBrokenPlaw(void);
-    explicit GModelSpectralBrokenPlaw(const double&  prefactor,
-                                const double&  index1,
-                                const GEnergy& breakenergy,
-                                const double&  index2);
+    GModelSpectralBrokenPlaw(const double&  prefactor,
+                             const double&  index1,
+                             const GEnergy& breakenergy,
+                             const double&  index2);
     explicit GModelSpectralBrokenPlaw(const GXmlElement& xml);
     GModelSpectralBrokenPlaw(const GModelSpectralBrokenPlaw& model);
     virtual ~GModelSpectralBrokenPlaw(void);
@@ -69,24 +70,24 @@ public:
     virtual GModelSpectralBrokenPlaw& operator=(const GModelSpectralBrokenPlaw& model);
 
     // Implemented pure virtual methods
-    virtual void                clear(void);
+    virtual void                      clear(void);
     virtual GModelSpectralBrokenPlaw* clone(void) const;
-    virtual std::string         type(void) const;
-    virtual double              eval(const GEnergy& srcEng,
-                                     const GTime&   srcTime) const;
-    virtual double              eval_gradients(const GEnergy& srcEng,
-                                               const GTime&   srcTime);
-    virtual double              flux(const GEnergy& emin,
-                                     const GEnergy& emax) const;
-    virtual double              eflux(const GEnergy& emin,
-                                      const GEnergy& emax) const;
-    virtual GEnergy             mc(const GEnergy& emin,
-                                   const GEnergy& emax,
-                                   const GTime&   time,
-                                   GRan&          ran) const;
-    virtual void                read(const GXmlElement& xml);
-    virtual void                write(GXmlElement& xml) const;
-    virtual std::string         print(const GChatter& chatter = NORMAL) const;
+    virtual std::string               type(void) const;
+    virtual double                    eval(const GEnergy& srcEng,
+                                           const GTime&   srcTime) const;
+    virtual double                    eval_gradients(const GEnergy& srcEng,
+                                                     const GTime&   srcTime);
+    virtual double                    flux(const GEnergy& emin,
+                                           const GEnergy& emax) const;
+    virtual double                    eflux(const GEnergy& emin,
+                                            const GEnergy& emax) const;
+    virtual GEnergy                   mc(const GEnergy& emin,
+                                         const GEnergy& emax,
+                                         const GTime&   time,
+                                         GRan&          ran) const;
+    virtual void                      read(const GXmlElement& xml);
+    virtual void                      write(GXmlElement& xml) const;
+    virtual std::string               print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
     double  prefactor(void) const;
@@ -107,25 +108,25 @@ protected:
     void update_mc_cache(const GEnergy& emin, const GEnergy& emax) const;
 
     // Protected members
-    GModelPar m_norm;                //!< Normalization factor
+    GModelPar m_norm;                 //!< Normalization factor
     GModelPar m_index1;               //!< Spectral index1
-    GModelPar m_breakenergy;               //!< breakenergy energy
+    GModelPar m_breakenergy;          //!< Energy of spectral break
     GModelPar m_index2;               //!< Spectral index1
 
     // Cached members used for pre-computations
-    mutable GEnergy m_last_energy;     //!< Last energy value
+    mutable GEnergy m_last_energy;      //!< Last energy value
     mutable double  m_last_index1;      //!< Last index1 parameter
     mutable double  m_last_index2;      //!< Last index1 parameter
-    mutable double  m_last_breakenergy;      //!< Last breakenergy parameter
-    mutable double  m_last_e_norm;     //!< Last E/Ebreakenergy value
-    mutable double  m_last_log_e_norm; //!< Last ln(E/Ebreakenergy) value
-    mutable double  m_last_power;      //!< Last power value
-    mutable double  m_mc_emin;         //!< Minimum energy
-    mutable double  m_mc_emax;         //!< Maximum energy
+    mutable double  m_last_breakenergy; //!< Last breakenergy parameter
+    mutable double  m_last_e_norm;      //!< Last E/Ebreakenergy value
+    mutable double  m_last_log_e_norm;  //!< Last ln(E/Ebreakenergy) value
+    mutable double  m_last_power;       //!< Last power value
+    mutable double  m_mc_emin;          //!< Minimum energy
+    mutable double  m_mc_emax;          //!< Maximum energy
     mutable double  m_mc_exponent1;     //!< Exponent (index1+1)
     mutable double  m_mc_exponent2;     //!< Exponent (index2+1)
-    mutable double  m_mc_pow_emin;     //!< Power of minimum energy
-    mutable double  m_mc_pow_ewidth;   //!< Power of energy width
+    mutable double  m_mc_pow_emin;      //!< Power of minimum energy
+    mutable double  m_mc_pow_ewidth;    //!< Power of energy width
 };
 
 
@@ -196,9 +197,11 @@ double GModelSpectralBrokenPlaw::index1(void) const
 inline
 void GModelSpectralBrokenPlaw::index1(const double& index1)
 {
-    m_index1.value(1);
+    m_index1.value(index1);
     return;
 }
+
+
 /***********************************************************************//**
  * @brief Return power law index2
  *
@@ -223,7 +226,7 @@ double GModelSpectralBrokenPlaw::index2(void) const
 inline
 void GModelSpectralBrokenPlaw::index2(const double& index2)
 {
-    m_index2.value(1);
+    m_index2.value(index2);
     return;
 }
 

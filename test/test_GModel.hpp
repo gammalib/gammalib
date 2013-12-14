@@ -61,6 +61,7 @@ public:
     void                test_plaw(void);
     void                test_plaw2(void);
     void                test_eplaw(void);
+    void                test_bplaw(void);
     void                test_logparabola(void);
     void                test_nodes(void);
     void                test_filefct(void);
@@ -81,6 +82,7 @@ private:
     std::string m_xml_model_point_plaw;
     std::string m_xml_model_point_plaw2;
     std::string m_xml_model_point_eplaw;
+    std::string m_xml_model_point_bplaw;
     std::string m_xml_model_point_logparabola;
     std::string m_xml_model_point_nodes;
     std::string m_xml_model_point_filefct;
