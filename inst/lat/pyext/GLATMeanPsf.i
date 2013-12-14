@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GLATMeanPsf.hpp - Fermi/LAT mean PSF class             *
+ *                   GLATMeanPsf.i - Fermi/LAT mean PSF class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATMeanPsf.hpp
- * @brief Fermi/LAT mean PSF interface definition
+ * @brief Fermi/LAT mean PSF class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,15 +33,9 @@
 /***********************************************************************//**
  * @class GLATMeanPsf
  *
- * @brief Interface for the Fermi LAT position-dependent mean PSF.
- *
- * The position-dependent mean PSF is the point spread function that has
- * been averaged over the zenith and azimuth angles of an observation. The
- * averaging is done using the livetime cube which holds the lifetime as
- * function and zenith and azimuth angles for an observation.
+ * @brief Fermi/LAT mean PSF class
  ***************************************************************************/
 class GLATMeanPsf : public GBase {
-
 public:
     // Constructors and destructors
     GLATMeanPsf(void);
@@ -53,21 +47,21 @@ public:
     double       operator()(const double& offset, const double& logE);
 
     // Methods
-    void         clear(void);
-    GLATMeanPsf* clone(void) const;
-    int          size(void) const;
-    void         set(const GSkyDir& dir, const GLATObservation& obs);
-    int          noffsets(void) const;
-    int          nenergies(void) const;
-    double       offset(const int& inx);
-    double       energy(const int& inx);
-    GSkyDir      dir(void) const;
-    std::string  name(void) const;
-    void         name(const std::string& name);
-    double       thetamax(void) const;
-    void         thetamax(const double& value);
-    double       psf(const double& offset, const double& logE);
-    double       exposure(const double& logE);
+    void               clear(void);
+    GLATMeanPsf*       clone(void) const;
+    int                size(void) const;
+    void               set(const GSkyDir& dir, const GLATObservation& obs);
+    int                noffsets(void) const;
+    int                nenergies(void) const;
+    const double&      offset(const int& inx) const;
+    const double&      energy(const int& inx) const;
+    const GSkyDir&     dir(void) const;
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    const double&      thetamax(void) const;
+    void               thetamax(const double& value);
+    double             psf(const double& offset, const double& logE);
+    double             exposure(const double& logE);
 };
 
 

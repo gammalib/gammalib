@@ -238,7 +238,7 @@ void TestGMatrixSymmetric::set(void)
     // Set test name
     name("GMatrixSymmetric");
 
-    // Add tests
+    // Append tests
     append(static_cast<pfunction>(&TestGMatrixSymmetric::alloc_matrix), "Test matrix allocation");
     append(static_cast<pfunction>(&TestGMatrixSymmetric::assign_values), "Test value assignment");
     append(static_cast<pfunction>(&TestGMatrixSymmetric::copy_matrix), "Test matrix copying");
@@ -256,6 +256,18 @@ void TestGMatrixSymmetric::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGMatrixSymmetric* TestGMatrixSymmetric::clone(void) const
+{
+    // Clone test suite
+    return new TestGMatrixSymmetric(*this);
 }
 
 

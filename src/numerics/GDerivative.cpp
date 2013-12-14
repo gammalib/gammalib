@@ -33,7 +33,9 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_RIDDER             "GDerivative::ridder(double&, double&, double&)"
+#define G_VALUE                        "GDerivative::value(double&, double&)"
+#define G_RIDDER             "GDerivative::ridder(double&, double&, double*)"
+#define G_MINUIT2                    "GDerivative::minuit2(double&, double*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -127,8 +129,9 @@ GDerivative::~GDerivative(void)
  * @brief Assignment operator
  *
  * @param[in] dx Derivative.
+ * @return Derivative.
  ***************************************************************************/
-GDerivative& GDerivative::operator= (const GDerivative& dx)
+GDerivative& GDerivative::operator=(const GDerivative& dx)
 {
     // Execute only if object is not identical
     if (this != &dx) {
@@ -156,7 +159,7 @@ GDerivative& GDerivative::operator= (const GDerivative& dx)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear derivative
  ***************************************************************************/
 void GDerivative::clear(void)
 {
@@ -172,7 +175,9 @@ void GDerivative::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone derivative
+ *
+ * @return Pointer to deep copy of derivative.
  ***************************************************************************/
 GDerivative* GDerivative::clone(void) const
 {
@@ -195,7 +200,7 @@ GDerivative* GDerivative::clone(void) const
  * The maximum number of iterations is controlled by the max_iter()
  * method (by default, the maximum is set to 5).
  ***************************************************************************/
-double GDerivative::value(const double& x, double step)
+double GDerivative::value(const double& x, const double& step)
 {
     // Set constants
     const double min_h = 1.0e-6;
@@ -222,7 +227,7 @@ double GDerivative::value(const double& x, double step)
     for (; m_iter < m_max_iter; ++m_iter) {
 
         // Compute derivative using Ridder's method
-        result = ridder(x, h, err);
+        result = ridder(x, h, &err);
 
         // Debug option: Show actual results
         #if G_VALUE_DEBUG
@@ -248,21 +253,19 @@ double GDerivative::value(const double& x, double step)
     // Compile option: signal if we exceed the tolerance
     if (!silent()) {
         if (err >= m_eps) {
-            std::cout << "WARNING: GDerivative::value(";
-            std::cout << "iter=" << m_iter;
-            std::cout << ", x=" << x;
-            std::cout << ", dy/dx=" << result;
-            std::cout << ", h=" << h;
-            std::cout << ", err=" << err;
-            std::cout << "): error exceeds tolerance of ";
-            std::cout << m_eps << std::endl;
+            std::string msg = "Derivative uncertainty "+gammalib::str(err)+
+                              " exceeds tolerance of "+gammalib::str(m_eps)+
+                              " at function value "+gammalib::str(x)+
+                              " (df/dx="+gammalib::str(result)+
+                              ", iter="+gammalib::str(m_iter)+
+                              ", h="+gammalib::str(h)+").";
+            gammalib::warning(G_VALUE, msg);
         }
     }
 
     // Return derivative
     return result;
 }
-
 
 /***********************************************************************//**
  * @brief Returns derivative by Ridders' method
@@ -282,7 +285,7 @@ double GDerivative::value(const double& x, double step)
  * This method has been adopted from Numerical Recipes, 3rd edition, page
  * 321f.
  ***************************************************************************/
-double GDerivative::ridder(const double& x, const double& h, double& err)
+double GDerivative::ridder(const double& x, const double& h, double* err)
 {
     // Set constants
     const int    ntab = 10;         // Maximum table size
@@ -293,7 +296,7 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
 
     // Initialise result
     double dx = 0.0;
-    err       = big;
+    *err      = big;
 
     // Continue only if we have a valid function
     if (m_func != NULL) {
@@ -334,15 +337,15 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
                 double err1 = std::abs(a(j,i) - a(j-1,i));
                 double err2 = std::abs(a(j,i) - a(j-1,i-1));
                 double errt = (err1 > err2) ? err1 : err2;
-                if (errt <= err) {
-                    err = errt;
-                    dx  = a(j,i);
+                if (errt <= *err) {
+                    *err = errt;
+                    dx   = a(j,i);
                 }
 
             } // endfor: looped over tableau
 
             // If higher order is worse by a significant factor, then quit early
-            if (std::abs( a(i,i) - a(i-1,i-1) ) >= safe*err) {
+            if (std::abs( a(i,i) - a(i-1,i-1) ) >= safe*(*err)) {
                 break;
             }
 
@@ -363,15 +366,16 @@ double GDerivative::ridder(const double& x, const double& h, double& err)
  *
  * This method has been inspired by corresponding code in the Minuit2
  * package. Please check the following files in Minuit2 for more information:
- * Numerical2PGradientCalculator.cxx for the main code
- * MnStrategy.cxx for the definition of algorithm parameters
- * MnMachinePrecision.h for the definition of eps and eps2
- * InitialGradientCalculator.cxx for the Minuit2 way of estimating initial
- * gradients.
+ *
+ *    Numerical2PGradientCalculator.cxx for the main code
+ *    MnStrategy.cxx for the definition of algorithm parameters
+ *    MnMachinePrecision.h for the definition of eps and eps2
+ *    InitialGradientCalculator.cxx for the Minuit2 way of estimating initial
+ *    gradients.
  *
  * The exact value of fcnup has little impact on the results.
  ***************************************************************************/
-double GDerivative::minuit2(const double& x, double& err)
+double GDerivative::minuit2(const double& x, double* err)
 {
     // Evaluate function at x
     double fcnmin = m_func->eval(x);
@@ -422,7 +426,7 @@ double GDerivative::minuit2(const double& x, double& err)
     double step        = 0.0;
     double stepb4      = 0.0;
     double step_change = 0.0;
-    err                = 0.0;
+    *err               = 0.0;
 
     // Loop over cycles
     for (m_iter = 1; m_iter <= ncycles; ++m_iter) {
@@ -457,7 +461,7 @@ double GDerivative::minuit2(const double& x, double& err)
         g2  = (fs1 + fs2 - 2.0*fcnmin) / step / step;
 
         // Compute error
-        err = std::abs(grdb4-grd) / (std::abs(grd)+dfmin/step);
+        *err = std::abs(grdb4-grd) / (std::abs(grd)+dfmin/step);
 
         // Debug option: Show actual results
         #if G_MINUIT_DEBUG
@@ -466,12 +470,12 @@ double GDerivative::minuit2(const double& x, double& err)
         std::cout << ", x=" << x;
         std::cout << ", grd=" << grd;
         std::cout << ", step=" << step;
-        std::cout << ", err=" << err;
+        std::cout << ", err=" << *err;
         std::cout << ")" << std::endl;
         #endif
 
         // Break if gradient is accurate enough
-        if (err < grad_tol) {
+        if (*err < grad_tol) {
             break;
         }
 
@@ -479,16 +483,14 @@ double GDerivative::minuit2(const double& x, double& err)
 
     // Compile option: signal if we exceed the tolerance
     if (!silent()) {
-        if (err >= grad_tol) {
-            std::cout << "WARNING: GDerivative::minuit(";
-            std::cout << "iter=" << m_iter;
-            std::cout << ", x=" << x;
-            std::cout << ", grd=" << grd;
-            std::cout << ", step=" << step;
-            std::cout << ", step_change=" << step_change;
-            std::cout << ", err=" << err;
-            std::cout << "): error exceeds tolerance of ";
-            std::cout << grad_tol << std::endl;
+        if (*err >= grad_tol) {
+            std::string msg = "Derivative uncertainty "+gammalib::str(*err)+
+                              " exceeds tolerance of "+gammalib::str(grad_tol)+
+                              " at function value "+gammalib::str(x)+
+                              " (df/dx="+gammalib::str(grd)+
+                              ", step="+gammalib::str(step)+
+                              ", step_change="+gammalib::str(step_change)+").";
+            gammalib::warning(G_MINUIT2, msg);
         }
     }
 

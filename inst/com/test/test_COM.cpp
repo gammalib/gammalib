@@ -59,11 +59,22 @@ void TestGCOMResponse::set(void)
 
     // Append tests to test suite
     append(static_cast<pfunction>(&TestGCOMResponse::test_inst_dir), "Test instrument direction");
-    append(static_cast<pfunction>(&TestGCOMResponse::test_pointing), "Test pointing");
     append(static_cast<pfunction>(&TestGCOMResponse::test_response), "Test response");
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCOMResponse* TestGCOMResponse::clone(void) const
+{
+    // Clone test suite
+    return new TestGCOMResponse(*this);
 }
 
 
@@ -86,6 +97,18 @@ void TestGCOMObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCOMObservation* TestGCOMObservation::clone(void) const
+{
+    // Clone test suite
+    return new TestGCOMObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set COMPTEL optimizer test methods
  ***************************************************************************/
 void TestGCOMOptimize::set(void)
@@ -98,6 +121,18 @@ void TestGCOMOptimize::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCOMOptimize* TestGCOMOptimize::clone(void) const
+{
+    // Clone test suite
+    return new TestGCOMOptimize(*this);
 }
 
 
@@ -161,64 +196,6 @@ void TestGCOMResponse::test_inst_dir(void)
     test_assert(dir.dir() == sky, "Test clear() method.",
                 "Expected "+sky.print()+", found "+dir.dir().print());
     test_value(dir.phibar(), 0.0, 1.0e-10, "Test clean() method.");
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Test GCOMPointing class
- ***************************************************************************/
-void TestGCOMResponse::test_pointing(void)
-{
-    // Test constructors
-    test_try("Test constructors");
-    try {
-        // Void constructor
-        GCOMPointing pnt1;
-
-        // Copy constructor
-        GCOMPointing pnt2(pnt1);
-
-        // If we arrived here, signal success
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Create void object
-    GCOMPointing pnt;
-
-    // dir method
-    GSkyDir sky;
-    sky.radec_deg(37.0, 45.3);
-    pnt.dir(sky);
-    test_assert(pnt.dir() == sky, "Test dir() method.",
-                "Expected "+sky.print()+", found "+pnt.dir().print());
-
-    // Copy constructor
-    GCOMPointing pnt_copy(pnt);
-    test_assert(pnt_copy.dir() == sky, "Test copy constructor method.",
-                "Expected "+sky.print()+", found "+pnt_copy.dir().print());
-
-    // Assignment operator
-    GCOMPointing pnt_assign = pnt;
-    test_assert(pnt_assign.dir() == sky, "Test assignment operator method.",
-                "Expected "+sky.print()+", found "+pnt_assign.dir().print());
-
-    // clone method
-    GCOMPointing* pnt_clone = pnt.clone();
-    test_assert(pnt_clone->dir() == sky, "Test clone() method.",
-                "Expected "+sky.print()+", found "+pnt_clone->dir().print());
-    delete pnt_clone;
-
-    // clear method
-    pnt.clear();
-    sky.clear();
-    test_assert(pnt.dir() == sky, "Test clear() method.",
-                "Expected "+sky.print()+", found "+pnt.dir().print());
 
     // Return
     return;

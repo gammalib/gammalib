@@ -55,7 +55,6 @@
 %import(module="gammalib.obs") "GEvents.i";
 %import(module="gammalib.obs") "GEventCube.i";
 %import(module="gammalib.obs") "GEventList.i";
-%import(module="gammalib.obs") "GPointing.i";
 %import(module="gammalib.obs") "GResponse.i";
 %import(module="gammalib.obs") "GInstDir.i";
 %import(module="gammalib.obs") "GRoi.i";
@@ -81,6 +80,7 @@
 %include "GCTAPsfPerfTable.i"
 %include "GCTAPsfVector.i"
 %include "GCTAPsf2D.i"
+%include "GCTAPsfKing.i"
 %include "GCTAEdisp.i"
 %include "GCTAInstDir.i"
 %include "GCTARoi.i"

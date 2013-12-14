@@ -37,7 +37,7 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                                        "GLATPsf::read(GFits*)"
+#define G_READ                                        "GLATPsf::read(GFits&)"
 #define G_WRITE                                      "GLATPsf::write(GFits&)"
 
 /* __ Macros _____________________________________________________________ */
@@ -131,8 +131,9 @@ GLATPsf::~GLATPsf(void)
  * @brief Assignment operator
  *
  * @param[in] psf Point spread function.
+ * @return Point spread function.
  ***************************************************************************/
-GLATPsf& GLATPsf::operator= (const GLATPsf& psf)
+GLATPsf& GLATPsf::operator=(const GLATPsf& psf)
 {
     // Execute only if object is not identical
     if (this != &psf) {
@@ -166,38 +167,13 @@ GLATPsf& GLATPsf::operator= (const GLATPsf& psf)
  *
  * Returns 0 is no PSF has been allocated.
  ***************************************************************************/
-double GLATPsf::operator() (const double& offset, const double& logE,
-                            const double& ctheta)
+double GLATPsf::operator()(const double& offset, const double& logE,
+                           const double& ctheta)
 {
     // Get PSF value
     double psf = (m_psf != NULL) ? m_psf->psf(offset, logE, ctheta) : 0.0;
 
     // Return PSF value
-    return psf;
-}
-
-
-/***********************************************************************//**
- * @brief Return point spread function value
- *
- * @param[in] obsDir Observed photon direction.
- * @param[in] srcDir True photon direction.
- * @param[in] srcEng True energy of photon.
- * @param[in] srcTime True photon arrival time.
- * @param[in] pnt LAT pointing.
- *
- * Returns 0.
- *
- * @todo Not yet implemented.
- ***************************************************************************/
-double GLATPsf::operator() (const GLATInstDir& obsDir, const GSkyDir& srcDir,
-                            const GEnergy& srcEng, const GTime& srcTime,
-                            const GLATPointing& pnt)
-{
-    // Initialise response
-    double psf = 0.0;
-
-    // Return point spread function
     return psf;
 }
 
@@ -228,7 +204,9 @@ void GLATPsf::clear(void)
 
 /***********************************************************************//**
  * @brief Clone instance
-***************************************************************************/
+ *
+ * @return Pointer to deep copy of point spread function.
+ ***************************************************************************/
 GLATPsf* GLATPsf::clone(void) const
 {
     return new GLATPsf(*this);
@@ -263,7 +241,7 @@ void GLATPsf::load(const std::string& filename)
  *
  * Saves Fermi/LAT point spread function into FITS file.
  ***************************************************************************/
-void GLATPsf::save(const std::string& filename, bool clobber)
+void GLATPsf::save(const std::string& filename, const bool& clobber)
 {
     // Open FITS file
     GFits fits(filename, true);
@@ -284,8 +262,6 @@ void GLATPsf::save(const std::string& filename, bool clobber)
  *
  * @param[in] fits FITS file.
  *
- * @exception GException::fits_hdu_not_found
- *            Response tables not found in FITS file
  * @exception GException::invalid_response
  *            Invalid response type or unsupported response version found.
  *
@@ -294,7 +270,7 @@ void GLATPsf::save(const std::string& filename, bool clobber)
  * and allocates the proper PSF version class. It reads the PSF information
  * from the FITS file. 
  *
- * @todo Implement PSF versions 2 and 3.
+ * @todo Implement PSF version 2.
  ***************************************************************************/
 void GLATPsf::read(const GFits& fits)
 {
@@ -302,29 +278,18 @@ void GLATPsf::read(const GFits& fits)
     clear();
 
     // Get pointer to PSF parameters table
-    GFitsTable* hdu_rpsf  = fits.table("RPSF");
-    if (hdu_rpsf == NULL) {
-        throw GException::fits_hdu_not_found(G_READ, "RPSF");
-    }
+    const GFitsTable& hdu_rpsf = *fits.table("RPSF");
 
     // Get pointer to PSF scaling parameters table
-    GFitsTable* hdu_scale = fits.table("PSF_SCALING_PARAMS");
-    if (hdu_scale == NULL) {
-        throw GException::fits_hdu_not_found(G_READ, "PSF_SCALING_PARAMS");
-    }
+    const GFitsTable& hdu_scale = *fits.table("PSF_SCALING_PARAMS");
 
     // Determine PSF version (default version is version 1)
-    int version = 1;
-    try {
-        version = hdu_rpsf->integer("PSFVER");
-    }
-    catch (GException::fits_key_not_found &e) {
-        version = 1;
-    }
+    int version = (hdu_rpsf.hascard("PSFVER")) ? hdu_rpsf.integer("PSFVER") : 1;
 
     // Determine PSF type
     bool        front  = true;
-    std::string detnam = gammalib::strip_whitespace(gammalib::toupper(hdu_rpsf->string("DETNAM")));
+    std::string detnam = 
+        gammalib::strip_whitespace(gammalib::toupper(hdu_rpsf.string("DETNAM")));
     if (detnam == "FRONT") {
         front = true;
     }

@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GFitsAsciiTable.cpp  - FITS ASCII table class               *
+ *              GFitsAsciiTable.cpp - FITS ASCII table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -44,7 +44,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GFitsAsciiTable::GFitsAsciiTable(void) : GFitsTable()
 {
@@ -57,11 +57,11 @@ GFitsAsciiTable::GFitsAsciiTable(void) : GFitsTable()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Table constructor
  *
  * @param[in] nrows Number of rows in table.
  ***************************************************************************/
-GFitsAsciiTable::GFitsAsciiTable(int nrows) : GFitsTable(nrows)
+GFitsAsciiTable::GFitsAsciiTable(const int& nrows) : GFitsTable(nrows)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -74,7 +74,7 @@ GFitsAsciiTable::GFitsAsciiTable(int nrows) : GFitsTable(nrows)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] table Table.
+ * @param[in] table ASCII table.
  ***************************************************************************/
 GFitsAsciiTable::GFitsAsciiTable(const GFitsAsciiTable& table) : GFitsTable(table)
 {
@@ -111,7 +111,8 @@ GFitsAsciiTable::~GFitsAsciiTable()
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] table Table.
+ * @param[in] table ASCII table.
+ * @return ASCII table.
  ***************************************************************************/
 GFitsAsciiTable& GFitsAsciiTable::operator=(const GFitsAsciiTable& table)
 {
@@ -144,7 +145,7 @@ GFitsAsciiTable& GFitsAsciiTable::operator=(const GFitsAsciiTable& table)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear ASCII table
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -167,6 +168,8 @@ void GFitsAsciiTable::clear(void)
 
 /***********************************************************************//**
  * @brief Clone ASCII table
+ *
+ * @return Pointer to deep copy of ASCII table.
  ***************************************************************************/
 GFitsAsciiTable* GFitsAsciiTable::clone(void) const 
 {

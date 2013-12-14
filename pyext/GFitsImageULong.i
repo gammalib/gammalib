@@ -1,7 +1,7 @@
 /***************************************************************************
- *   GFitsImageULong.i  - FITS unsigned long image class SWIG interface    *
+ *           GFitsImageULong.i - Unsigned long image FITS class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageULong.i
- * @brief GFitsImageULong class SWIG file.
+ * @brief Unsigned long image FITS class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,17 +33,17 @@
 /***********************************************************************//**
  * @class GFitsImageULong
  *
- * @brief SWIG interface for the FITS unsigned long image class.
+ * @brief Unsigned long image FITS class
  ***************************************************************************/
 class GFitsImageULong : public GFitsImage {
-
 public:
     // Constructors and destructors
     GFitsImageULong(void);
-    explicit GFitsImageULong(int nx, const unsigned long* pixels = NULL);
-    explicit GFitsImageULong(int nx, int ny, const unsigned long* pixels = NULL);
-    explicit GFitsImageULong(int nx, int ny, int nz, const unsigned long* pixels = NULL);
-    explicit GFitsImageULong(int nx, int ny, int nz, int nt, const unsigned long* pixels = NULL);
+    GFitsImageULong(const int& nx, const unsigned long* pixels = NULL);
+    GFitsImageULong(const int& nx, const int& ny, const unsigned long* pixels = NULL);
+    GFitsImageULong(const int& nx, const int& ny, const int& nz, const unsigned long* pixels = NULL);
+    GFitsImageULong(const int& nx, const int& ny, const int& nz, const int& nt, const unsigned long* pixels = NULL);
+    GFitsImageULong(const int& naxis, const int* naxes, const unsigned long* pixels = NULL);
     GFitsImageULong(const GFitsImageULong& image);
     virtual ~GFitsImageULong(void);
 

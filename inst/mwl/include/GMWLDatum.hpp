@@ -59,21 +59,21 @@ public:
     // Implemented pure virtual base class methods
     virtual void               clear(void);
     virtual GMWLDatum*         clone(void) const;
-    virtual double             size(void) const { return 1.0; }
-    virtual const GInstDir&    dir(void) const { return m_dir; }
-    virtual const GEnergy&     energy(void) const { return m_eng; }
-    virtual const GTime&       time(void) const { return m_time; }
-    virtual double             counts(void) const { return m_flux; }
+    virtual double             size(void) const;
+    virtual const GMWLInstDir& dir(void) const;
+    virtual const GEnergy&     energy(void) const;
+    virtual const GTime&       time(void) const;
+    virtual double             counts(void) const;
     virtual double             error(void) const;
-    virtual void               counts(const double& counts) { m_flux=counts; }
+    virtual void               counts(const double& flux);
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    GEnergy energy_err(void) const { return m_eng_err; }
-    double  flux(void) const { return m_flux; }
-    double  flux_err(void) const { return m_flux_err; }
-    void    flux(const double& flux) { m_flux=flux; }
-    void    flux_err(const double& flux_err) { m_flux_err=flux_err; }
+    const GEnergy& energy_err(void) const;
+    const double&  flux(void) const;
+    const double&  flux_err(void) const;
+    void           flux(const double& flux);
+    void           flux_err(const double& error);
 
 protected:
     // Protected methods
@@ -90,5 +90,140 @@ protected:
     double      m_flux_err;  //!< Uncertainty in flux (ph/cm2/s/MeV)
 
 };
+
+
+/***********************************************************************//**
+ * @brief Return size of spectral bins
+ *
+ * @return Size of spectrl bin (always 1).
+ ***************************************************************************/
+inline
+double GMWLDatum::size(void) const
+{
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument direction (dummy method)
+ *
+ * @return Instrument direction.
+ ***************************************************************************/
+inline
+const GMWLInstDir& GMWLDatum::dir(void) const
+{
+    return m_dir;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy of spectral bin
+ *
+ * @return Energy of spectral bin.
+ ***************************************************************************/
+inline
+const GEnergy& GMWLDatum::energy(void) const
+{
+    return m_eng;
+}
+
+
+/***********************************************************************//**
+ * @brief Return time of spectral bin
+ *
+ * @return Time of spectral bin.
+ ***************************************************************************/
+inline
+const GTime& GMWLDatum::time(void) const
+{
+    return m_time;
+}
+
+
+/***********************************************************************//**
+ * @brief Return flux of spectral bin
+ *
+ * @return Flux of spectral bin.
+ ***************************************************************************/
+inline
+double GMWLDatum::counts(void) const
+{
+    return m_flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Set flux of spectral bin
+ *
+ * @param[in] flux Flux of spectral bin.
+ ***************************************************************************/
+inline
+void GMWLDatum::counts(const double& flux)
+{
+    m_flux = flux;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return flux of spectral bin
+ *
+ * @return Flux of spectral bin.
+ ***************************************************************************/
+inline
+const double& GMWLDatum::flux(void) const
+{
+    return m_flux;
+}
+
+
+/***********************************************************************//**
+ * @brief Return flux error of spectral bin
+ *
+ * @return Flux error of spectral bin.
+ ***************************************************************************/
+inline
+const double& GMWLDatum::flux_err(void) const
+{
+    return m_flux_err;
+}
+
+
+/***********************************************************************//**
+ * @brief Set flux of spectral bin
+ *
+ * @param[in] flux Flux of spectral bin.
+ ***************************************************************************/
+inline
+void GMWLDatum::flux(const double& flux)
+{
+    m_flux = flux;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set flux error of spectral bin
+ *
+ * @param[in] error Flux error of spectral bin.
+ ***************************************************************************/
+inline
+void GMWLDatum::flux_err(const double& error)
+{
+    m_flux_err = error;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return energy error of spectral bin
+ *
+ * @return Energy error of spectral bin.
+ ***************************************************************************/
+inline
+const GEnergy& GMWLDatum::energy_err(void) const
+{
+    return m_eng_err;
+}
 
 #endif /* GMWLDATUM_HPP */

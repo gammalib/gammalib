@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GFitsImageShort.hpp  - FITS short integer image class          *
+ *          GFitsImageShort.hpp - Short integer FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageShort.hpp
- * @brief GFitsImageShort class definition.
+ * @brief Short integer FITS image class definition
  * @author Juergen Knoedlseder
  */
 
@@ -34,31 +34,31 @@
 /***********************************************************************//**
  * @class GFitsImageShort
  *
- * @brief Implements a FITS short integer image
+ * @brief Short integer FITS image class
  ***************************************************************************/
 class GFitsImageShort : public GFitsImage {
 
 public:
     // Constructors and destructors
     GFitsImageShort(void);
-    explicit GFitsImageShort(int nx, const short* pixels = NULL);
-    explicit GFitsImageShort(int nx, int ny, const short* pixels = NULL);
-    explicit GFitsImageShort(int nx, int ny, int nz, const short* pixels = NULL);
-    explicit GFitsImageShort(int nx, int ny, int nz, int nt, const short* pixels = NULL);
-    explicit GFitsImageShort(int naxis, const int* naxes, const short* pixels = NULL);
+    GFitsImageShort(const int& nx, const short* pixels = NULL);
+    GFitsImageShort(const int& nx, const int& ny, const short* pixels = NULL);
+    GFitsImageShort(const int& nx, const int& ny, const int& nz, const short* pixels = NULL);
+    GFitsImageShort(const int& nx, const int& ny, const int& nz, const int& nt, const short* pixels = NULL);
+    GFitsImageShort(const int& naxis, const int* naxes, const short* pixels = NULL);
     GFitsImageShort(const GFitsImageShort& image);
     virtual ~GFitsImageShort(void);
 
     // Operators
-    GFitsImageShort& operator= (const GFitsImageShort& image);
-    short&           operator() (const int& ix);
-    short&           operator() (const int& ix, const int& iy);
-    short&           operator() (const int& ix, const int& iy, const int& iz);
-    short&           operator() (const int& ix, const int& iy, const int& iz, const int& it);
-    const short&     operator() (const int& ix) const;
-    const short&     operator() (const int& ix, const int& iy) const;
-    const short&     operator() (const int& ix, const int& iy, const int& iz) const;
-    const short&     operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
+    GFitsImageShort& operator=(const GFitsImageShort& image);
+    short&           operator()(const int& ix);
+    short&           operator()(const int& ix, const int& iy);
+    short&           operator()(const int& ix, const int& iy, const int& iz);
+    short&           operator()(const int& ix, const int& iy, const int& iz, const int& it);
+    const short&     operator()(const int& ix) const;
+    const short&     operator()(const int& ix, const int& iy) const;
+    const short&     operator()(const int& ix, const int& iy, const int& iz) const;
+    const short&     operator()(const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
     void             clear(void);

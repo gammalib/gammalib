@@ -40,18 +40,20 @@ class GLATLtCube : public GBase {
 public:
     // Constructors and destructors
     GLATLtCube(void);
-    GLATLtCube(const std::string& filename);
+    explicit GLATLtCube(const std::string& filename);
     GLATLtCube(const GLATLtCube& cube);
     virtual ~GLATLtCube(void);
 
     // Operators
-    double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta fct);
-    double operator() (const GSkyDir& dir, const GEnergy& energy, _ltcube_ctheta_phi fct);
-    double operator() (const GSkyDir& dir, const GEnergy& energy,
-                       const GLATAeff& aeff);
-    double operator() (const GSkyDir& dir, const GEnergy& energy,
-                       const double& offset, const GLATPsf& psf,
-                       const GLATAeff& aeff);
+    double operator()(const GSkyDir& dir, const GEnergy& energy,
+                      _ltcube_ctheta fct) const;
+    double operator()(const GSkyDir& dir, const GEnergy& energy,
+                      _ltcube_ctheta_phi fct) const;
+    double operator()(const GSkyDir& dir, const GEnergy& energy,
+                      const GLATAeff& aeff) const;
+    double operator()(const GSkyDir& dir, const GEnergy& energy,
+                      const double& offset, const GLATPsf& psf,
+                      const GLATAeff& aeff) const;
 
     // Methods
     void        clear(void);

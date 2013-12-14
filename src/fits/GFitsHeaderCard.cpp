@@ -33,11 +33,13 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GFitsCfitsio.hpp"
+#include "GFits.hpp"
 #include "GFitsHeaderCard.hpp"
 
 /* __ Method name definitions ____________________________________________ */
 #define G_COPY_DTYPE          "GFitsHeaderCard::copy_dtype(GFitsHeaderCard&)"
 #define G_FREE_DTYPE                          "GFitsHeaderCard::free_dtype()"
+#define G_SET_DTYPE                "GFitsHeaderCard::set_dtype(std::string&)"
 #define G_READ_NUM                       "GFitsHeaderCard::read(void*, int&)"
 #define G_READ_STR               "GFitsHeaderCard::read(void*, std::string&)"
 #define G_WRITE                               "GFitsHeaderCard::write(void*)"
@@ -220,7 +222,7 @@ GFitsHeaderCard& GFitsHeaderCard::operator=(const GFitsHeaderCard& card)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
+ * @brief Clear header card
  ***************************************************************************/
 void GFitsHeaderCard::clear(void)
 {
@@ -236,7 +238,7 @@ void GFitsHeaderCard::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone header card
  *
  * @return Pointer to deep copy of header card.
  ***************************************************************************/
@@ -289,7 +291,7 @@ void GFitsHeaderCard::value(const std::string& value)
     // Strip hyphens and whitespace from datatype value that is used for
     // keyword writing
     std::string value_dtype = 
-                gammalib::strip_whitespace(m_value.substr(1, m_value.length() - 2));
+        gammalib::strip_whitespace(m_value.substr(1, m_value.length() - 2));
 
     // Set data type
     m_dtype       = __TSTRING;
@@ -506,7 +508,7 @@ void GFitsHeaderCard::value(const long long& value)
  * Convert header card value into a string.
  * Any hyphens that may occur in the FITS card will be automatically stripped.
  ***************************************************************************/
-std::string GFitsHeaderCard::string(void)
+std::string GFitsHeaderCard::string(void) const
 {
     // Initialize return value to actual value string
     std::string result = m_value;
@@ -537,7 +539,7 @@ std::string GFitsHeaderCard::string(void)
  * card did not contain a numerical value, 0 will be returned by the
  * method.
  ***************************************************************************/
-double GFitsHeaderCard::real(void)
+double GFitsHeaderCard::real(void) const
 {
     // Initialize return value to 0.0
     double result = 0.0;
@@ -572,7 +574,7 @@ double GFitsHeaderCard::real(void)
  * card did not contain a numerical value, 0 will be returned by the
  * method.
  ***************************************************************************/
-int GFitsHeaderCard::integer(void)
+int GFitsHeaderCard::integer(void) const
 {
     // Initialize return value to 0
     int result = 0;
@@ -618,7 +620,7 @@ std::string GFitsHeaderCard::print(const GChatter& chatter) const
         result.append(gammalib::left(m_keyname,8));
 
         // Format values
-        if (m_keyname != "COMMENT" && m_keyname != "HISTORY") {
+        if (m_keyname != "COMMENT" && m_keyname != "HISTORY" && m_keyname != "") {
             if (m_unit.length() > 0) {
                 result.append(" ="+gammalib::right(m_value,21)+" / ["+m_unit+"] "+m_comment);
             }
@@ -633,6 +635,9 @@ std::string GFitsHeaderCard::print(const GChatter& chatter) const
         // Attach card type
         if (m_value_dtype != NULL) {
             switch (m_dtype) {
+            case __TNULL:
+                result.append(" <null>");
+                break;
             case __TBIT:
                 result.append(" <bit>");
                 break;
@@ -686,9 +691,18 @@ std::string GFitsHeaderCard::print(const GChatter& chatter) const
                 break;
             }
         }
+        /*
         else {
-            result.append(" <non native>");
+            switch (m_dtype) {
+            case __TNULL:
+                result.append(" <null>");
+                break;
+            default:
+                result.append(" <non native>");
+                break;
+            }
         }
+        */
 
     } // endif: chatter was not silent
 
@@ -714,9 +728,9 @@ void GFitsHeaderCard::init_members(void)
     m_unit.clear();
     m_comment.clear();
     m_value_dtype    = NULL;
-    m_dtype          = 0;
+    m_dtype          = __TNULL;
     m_value_decimals = 10;
-    m_comment_write  = false;
+    m_comment_write  = true; // Was false before, not sure why ...
 
     // Return
     return;
@@ -894,14 +908,18 @@ void GFitsHeaderCard::set_dtype(const std::string& value)
         // Get index of last string element
         int last = m_value.length() - 1;
 
-        // If value is empty then we either have a COMMENT or HISTORY card or
-        // we don't know the type
+        // If value is empty and there is a COMMENT, HISTORY or BLANKFIELD
+        // (empty) keyword then we have a commentary card. We can just
+        // skip this card here. Otherwise we have an undefined value, also
+        // called NULL value.
         if (last < 0) {
-            if (m_keyname == "COMMENT" || m_keyname == "HISTORY") {
+            if (m_keyname == "COMMENT" ||
+                m_keyname == "HISTORY" ||
+                m_keyname == "") {
                 continue;
             }
             else {
-                // TODO: If we reach this point we have an unrecognised keyname
+                m_dtype = __TNULL;
                 continue;
             }
         }
@@ -988,13 +1006,11 @@ void GFitsHeaderCard::set_dtype(const std::string& value)
  ***************************************************************************/
 void GFitsHeaderCard::read(void* vptr, const int& keynum)
 {
-    // Move to HDU
+    // Initialise status
     int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
-                          &status);
-    if (status != 0) {
-        throw GException::fits_error(G_READ_NUM, status);
-    }
+
+    // Move to HDU
+    gammalib::fits_move_to_hdu(G_READ_NUM, vptr);
 
     // Read keyword
     char keyname[80];
@@ -1023,16 +1039,19 @@ void GFitsHeaderCard::read(void* vptr, const int& keynum)
  *
  * @param[in] vptr FITS file void pointer.
  * @param[in] keyname Name of the header card.
+ *
+ * @exception GException::invalid_value
+ *            Specified @p keyname not found in FITS header.
+ * @exception GException::fits_error
+ *            cfitsio error occured.
  ***************************************************************************/
 void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
 {
-    // Move to HDU
+    // Initialise FITS status
     int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
-                          &status);
-    if (status != 0) {
-        throw GException::fits_error(G_READ_NUM, status);
-    }
+
+    // Move to HDU
+    gammalib::fits_move_to_hdu(G_READ_STR, vptr);
 
     // Read keyword
     char value[80];
@@ -1042,10 +1061,16 @@ void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
 
     // Catch error
     if (status == 202) {      // Keyword not found
-        throw GException::fits_key_not_found(G_READ_STR, keyname, status);
+        std::string msg = "Header card with keyword \""+keyname+"\" not"
+                          " found in FITS header (status=202).";
+        throw GException::invalid_value(G_READ_STR, msg);
     }
     else if (status != 0) {   // Any other error
-        throw GException::fits_error(G_READ_STR, status);
+        std::string msg = "Unable to read keyword \""+keyname+"\" from"
+                          " FITS extension "+
+                          gammalib::str((FPTR(vptr)->HDUposition))+
+                          " header."; 
+        throw GException::fits_error(G_READ_STR, status, msg);
     }
 
     // Store result
@@ -1068,15 +1093,13 @@ void GFitsHeaderCard::read(void* vptr, const std::string& keyname)
  *
  * Writes any kind of header card to a FITS file.
  ***************************************************************************/
-void GFitsHeaderCard::write(void* vptr)
+void GFitsHeaderCard::write(void* vptr) const
 {
-    // Move to HDU
+    // Initialise status
     int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL,
-                          &status);
-    if (status != 0) {
-        throw GException::fits_error(G_WRITE, status);
-    }
+    
+    // Move to HDU
+    gammalib::fits_move_to_hdu(G_WRITE, vptr);
 
     // If card is comment then write comment
     if (m_keyname == "COMMENT") {
@@ -1089,6 +1112,13 @@ void GFitsHeaderCard::write(void* vptr)
     else if (m_keyname == "HISTORY") {
         if (m_comment_write) {
             status = __ffphis(FPTR(vptr), (char*)m_comment.c_str(), &status);
+        }
+    }
+
+    // If card is BLANKFIELD (empty keyword) then write empty line
+    else if (m_keyname == "") {
+        if (m_comment_write) {
+            status = __ffprec(FPTR(vptr), "", &status);
         }
     }
 
@@ -1123,6 +1153,12 @@ void GFitsHeaderCard::write(void* vptr)
             break;
         }
     } // endif: had native data type
+
+    // ... otherwise if card holds a NULL value then write it
+    else if (m_dtype == __TNULL) {
+        status = __ffukyu(FPTR(vptr), (char*)m_keyname.c_str(), 
+                          (char*)m_comment.c_str(), &status);
+    }
 
     // ... capture all other stuff
     else {

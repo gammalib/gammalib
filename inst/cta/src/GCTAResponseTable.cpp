@@ -119,7 +119,7 @@ GCTAResponseTable::GCTAResponseTable(const GCTAResponseTable& table)
  * the object to a clean state (equivalent of GCTAResponseTable::clean
  * method).
  ***************************************************************************/
-GCTAResponseTable::GCTAResponseTable(const GFitsTable* hdu)
+GCTAResponseTable::GCTAResponseTable(const GFitsTable& hdu)
 {
     // Initialise class members
     init_members();
@@ -403,48 +403,6 @@ GCTAResponseTable* GCTAResponseTable::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Return number of parameters in response table
- *
- * @return Number of parameters in response table.
- *
- * Returns the number of parameters in response table.
- ***************************************************************************/
-int GCTAResponseTable::size(void) const
-{
-    // Return number of parameters
-    return m_npars;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of elements per parameter
- *
- * @return Number of elements per parameter.
- *
- * Returns the number of elements per parameter.
- ***************************************************************************/
-int GCTAResponseTable::elements(void) const
-{
-    // Return number of elements
-    return m_nelements;
-}
-
-
-/***********************************************************************//**
- * @brief Return number of axes in response table
- *
- * @return Number of axes in response table.
- *
- * Returns the number of axes in response table.
- ***************************************************************************/
-int GCTAResponseTable::axes(void) const
-{
-    // Return number of axes
-    return m_naxes;
-}
-
-
-/***********************************************************************//**
  * @brief Return axis length
  *
  * @param[in] index Axis index [0,...,axes()-1].
@@ -695,7 +653,7 @@ void GCTAResponseTable::scale(const int& index, const double& scale)
 /***********************************************************************//**
  * @brief Read response table from FITS table HDU
  *
- * @param[in] hdu Response table HDU pointer.
+ * @param[in] table Response table.
  *
  * Reads CTA response table information from a FITS table. The FITS table
  * is expected to have a single row, and axes and parameter information are
@@ -715,24 +673,19 @@ void GCTAResponseTable::scale(const int& index, const double& scale)
  * In case that the HDU table pointer is not valid (i.e. NULL), this method
  * clears the objects and does nothing else.
  ***************************************************************************/
-void GCTAResponseTable::read(const GFitsTable* hdu)
+void GCTAResponseTable::read(const GFitsTable& table)
 {
     // Clear instance
     clear();
 
-    // Continue only if HDU pointer is valid
-    if (hdu != NULL) {
+    // Read column names
+    read_colnames(table);
 
-        // Read column names
-        read_colnames(hdu);
+    // Read axes
+    read_axes(table);
 
-        // Read axes
-        read_axes(hdu);
-
-        // Read parameter cubes
-        read_pars(hdu);
-
-    } // endif: HDU pointer was valid
+    // Read parameter cubes
+    read_pars(table);
 
     // Return
     return;
@@ -742,35 +695,12 @@ void GCTAResponseTable::read(const GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Write response table into FITS table
  *
- * @param[in] hdu Fits table HDU.
+ * @param[in] table Response table.
  *
  * @todo Implement method
  ***************************************************************************/
-void GCTAResponseTable::write(GFitsTable* hdu) const
+void GCTAResponseTable::write(GFitsTable& table) const
 {
-/*
-    // Allocate floating point vector columns
-    GFitsTableFloatCol col_energy_lo = GFitsTableFloatCol("ENERG_LO",  1, m_energy_num);
-    GFitsTableFloatCol col_energy_hi = GFitsTableFloatCol("ENERG_HI",  1, m_energy_num);
-    GFitsTableFloatCol col_ctheta_lo = GFitsTableFloatCol("CTHETA_LO", 1, m_ctheta_num);
-    GFitsTableFloatCol col_ctheta_hi = GFitsTableFloatCol("CTHETA_HI", 1, m_ctheta_num);
-
-    // Set column values
-    for (int i = 0; i < m_energy_num; ++i) {
-        col_energy_lo(0,i) = m_energy_lo[i];
-        col_energy_hi(0,i) = m_energy_hi[i];
-    }
-    for (int i = 0; i < m_ctheta_num; ++i) {
-        col_ctheta_lo(0,i) = m_ctheta_lo[i];
-        col_ctheta_hi(0,i) = m_ctheta_hi[i];
-    }
-
-    // Append columns to boundary table
-    hdu->append_column(col_energy_lo);
-    hdu->append_column(col_energy_hi);
-    hdu->append_column(col_ctheta_lo);
-    hdu->append_column(col_ctheta_hi);
-*/
     // Return
     return;
 }
@@ -923,7 +853,7 @@ void GCTAResponseTable::free_members(void)
 /***********************************************************************//**
  * @brief Read column names from FITS HDU
  *
- * @param[in] hdu Response table HDU pointer.
+ * @param[in] hdu Response table HDU.
  *
  * @exception GCTAException::bad_rsp_table_format
  *            Bad response table format encountered in FITS HDU.
@@ -949,7 +879,7 @@ void GCTAResponseTable::free_members(void)
  *
  * @todo Implement exceptions for invalid HDU format
  ***************************************************************************/
-void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
+void GCTAResponseTable::read_colnames(const GFitsTable& hdu)
 {
     // Clear column name arrays
     m_naxes = 0;
@@ -958,103 +888,98 @@ void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
     m_colname_hi.clear();
     m_colname_par.clear();
     
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Initialise search mode. There are three search modes:
+    // 0 - we're looking for the next axis by searching for a column
+    //     terminating with "_LO"
+    // 1 - we're looking for the upper boundary of an axis, terminating
+    //     with "_HI"
+    // 2 - we're looking for a parameter column
+    int         mode = 0;
+    std::string lo_column;
+    std::string next_column;
 
-        // Initialise search mode. There are three search modes:
-        // 0 - we're looking for the next axis by searching for a column
-        //     terminating with "_LO"
-        // 1 - we're looking for the upper boundary of an axis, terminating
-        //     with "_HI"
-        // 2 - we're looking for a parameter column
-        int         mode = 0;
-        std::string lo_column;
-        std::string next_column;
+    // Extract column names for all axes
+    for (int i = 0; i < hdu.ncols(); ++i) {
 
-        // Extract column names for all axes
-        for (int i = 0; i < hdu->ncols(); ++i) {
+        // Get column name
+        std::string colname = hdu[i]->name();
 
-            // Get column name
-            std::string colname = (*hdu)[i]->name();
-
-            // If we search for a "_LO" column, check if we have one. If one
-            // is found, change the search mode to 1 and set the expected name
-            // for the "_HI" column. If none is found, change the search
-            // mode to 2 since from now on we should only have parameter
-            // columns.
-            if (mode == 0) {
-                size_t pos = colname.rfind("_LO");
-                if (pos != std::string::npos) {
-                    mode        = 1;
-                    lo_column   = colname;
-                    next_column = colname.substr(0, pos) + "_HI";
-                }
-                else {
-                    if (colname.rfind("_HI") != std::string::npos) {
-                        std::string message = "Column '" +
-                                              colname +
-                                              "' encountered without"
-                                              " preceeding '_LO' column.";
-                        throw GCTAException::bad_rsp_table_format(G_READ_COLNAMES,
-                                                                  message);
-                    }
-                    else {
-                        mode = 2;
-                        m_colname_par.push_back(colname);
-                    }
-                }
+        // If we search for a "_LO" column, check if we have one. If one
+        // is found, change the search mode to 1 and set the expected name
+        // for the "_HI" column. If none is found, change the search
+        // mode to 2 since from now on we should only have parameter
+        // columns.
+        if (mode == 0) {
+            size_t pos = colname.rfind("_LO");
+            if (pos != std::string::npos) {
+                mode        = 1;
+                lo_column   = colname;
+                next_column = colname.substr(0, pos) + "_HI";
             }
-
-            // If we search for a "_HI" column, check if we have the
-            // expected column name. If this is the case, switch back to
-            // search mode 0 to get the next "_LO" column. Otherwise
-            // throw an exception.
-            else if (mode == 1) {
-                if (colname == next_column) {
-                    mode = 0;
-                    m_colname_lo.push_back(lo_column);
-                    m_colname_hi.push_back(next_column);
-                }
-                else {
-                    std::string message = "Expected column '" +
-                                          next_column +
-                                          "' not found. '_HI' columns have"
-                                          " to be placed immediately after"
-                                          " corresponding '_LO' columns.";
-                    throw GCTAException::bad_rsp_table_format(G_READ_COLNAMES,
-                                                              message);
-                }
-            }
-
-            // If we search for a parameter column, make sure that we have
-            // neither a "_LO" nor a "_HI" column.
             else {
-                if (colname.rfind("_LO") != std::string::npos) {
+                if (colname.rfind("_HI") != std::string::npos) {
                     std::string message = "Column '" +
                                           colname +
-                                          "' found. All '_LO' columns have to"
-                                          " be placed before the parameter"
-                                          " columns.";
-                    throw GCTAException::bad_rsp_table_format(G_READ_COLNAMES,
-                                                              message);
-                }
-                else if (colname.rfind("_HI") != std::string::npos) {
-                    std::string message = "Column '" +
-                                          colname +
-                                          "' found. All '_HI' columns have to"
-                                          " be placed before the parameter"
-                                          " columns.";
+                                          "' encountered without"
+                                          " preceeding '_LO' column.";
                     throw GCTAException::bad_rsp_table_format(G_READ_COLNAMES,
                                                               message);
                 }
                 else {
+                    mode = 2;
                     m_colname_par.push_back(colname);
                 }
             }
+        }
 
-        } // endfor: looped over all column names
+        // If we search for a "_HI" column, check if we have the
+        // expected column name. If this is the case, switch back to
+        // search mode 0 to get the next "_LO" column. Otherwise
+        // throw an exception.
+        else if (mode == 1) {
+            if (colname == next_column) {
+                mode = 0;
+                m_colname_lo.push_back(lo_column);
+                m_colname_hi.push_back(next_column);
+            }
+            else {
+                std::string message = "Expected column '" +
+                                      next_column +
+                                      "' not found. '_HI' columns have"
+                                      " to be placed immediately after"
+                                      " corresponding '_LO' columns.";
+                throw GCTAException::bad_rsp_table_format(G_READ_COLNAMES,
+                                                          message);
+            }
+        }
 
-    } // endif: HDU was valid
+        // If we search for a parameter column, make sure that we have
+        // neither a "_LO" nor a "_HI" column.
+        else {
+            if (colname.rfind("_LO") != std::string::npos) {
+                std::string message = "Column '" +
+                                      colname +
+                                      "' found. All '_LO' columns have to"
+                                      " be placed before the parameter"
+                                      " columns.";
+                throw GCTAException::bad_rsp_table_format(G_READ_COLNAMES,
+                                                          message);
+            }
+            else if (colname.rfind("_HI") != std::string::npos) {
+                std::string message = "Column '" +
+                                      colname +
+                                      "' found. All '_HI' columns have to"
+                                      " be placed before the parameter"
+                                      " columns.";
+                throw GCTAException::bad_rsp_table_format(G_READ_COLNAMES,
+                                                          message);
+            }
+            else {
+                m_colname_par.push_back(colname);
+            }
+        }
+
+    } // endfor: looped over all column names
 
     // Store number of axes
     m_naxes = m_colname_lo.size();
@@ -1070,7 +995,7 @@ void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Read axes definitions from FITS HDU
  *
- * @param[in] hdu Response table HDU pointer.
+ * @param[in] hdu Response table HDU.
  *
  * @exception GCTAException::bad_rsp_table_format
  *            Incompatible axes columns found.
@@ -1094,58 +1019,53 @@ void GCTAResponseTable::read_colnames(const GFitsTable* hdu)
  * In case that the HDU pointer is not valid (NULL), this method clears the
  * axes boundaries and does nothing else.
  ***************************************************************************/
-void GCTAResponseTable::read_axes(const GFitsTable* hdu)
+void GCTAResponseTable::read_axes(const GFitsTable& hdu)
 {
     // Clear axes arrays
     m_axis_lo.clear();
     m_axis_hi.clear();
     m_axis_nodes.clear();
     
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Loop over all dimensions
+    for (int i = 0; i < axes(); ++i) {
 
-        // Loop over all dimensions
-        for (int i = 0; i < axes(); ++i) {
+        // Get pointers to table columns
+        const GFitsTableCol* col_lo = hdu[m_colname_lo[i]];
+        const GFitsTableCol* col_hi = hdu[m_colname_hi[i]];
 
-            // Get pointers to table columns
-            const GFitsTableCol* col_lo = (*hdu)[m_colname_lo[i]];
-            const GFitsTableCol* col_hi = (*hdu)[m_colname_hi[i]];
+        // Extract number of bins. Make sure that both columns have the
+        // same number of bins
+        int num = col_lo->number();
+        if (num != col_hi->number()) {
+            std::string message = "Incompatible number of bins found"
+                                  " for columns '"+m_colname_lo[i]+"'"+
+                                  " ("+gammalib::str(num)+") and '"+
+                                  m_colname_hi[i]+"' ("+
+                                  gammalib::str(col_hi->number())+".";
+            throw GCTAException::bad_rsp_table_format(G_READ_AXES,
+                                                      message);
+        }
 
-            // Extract number of bins. Make sure that both columns have the
-            // same number of bins
-            int num = col_lo->number();
-            if (num != col_hi->number()) {
-                std::string message = "Incompatible number of bins found"
-                                      " for columns '"+m_colname_lo[i]+"'"+
-                                      " ("+gammalib::str(num)+") and '"+
-                                      m_colname_hi[i]+"' ("+
-                                      gammalib::str(col_hi->number())+".";
-                throw GCTAException::bad_rsp_table_format(G_READ_AXES,
-                                                          message);
-            }
+        // Initialise axis and node arrays
+        std::vector<double> axis_lo(num);
+        std::vector<double> axis_hi(num);
+        std::vector<double> axis_nodes(num);
 
-            // Initialise axis and node arrays
-            std::vector<double> axis_lo(num);
-            std::vector<double> axis_hi(num);
-            std::vector<double> axis_nodes(num);
+        // Copy axis information into arrays
+        for (int k = 0; k < num; ++k) {
+            axis_lo[k]    = col_lo->real(0,k);
+            axis_hi[k]    = col_hi->real(0,k);
+            axis_nodes[k] = 0.5*(axis_lo[k] + axis_hi[k]);
+        }
 
-            // Copy axis information into arrays
-            for (int k = 0; k < num; ++k) {
-                axis_lo[k]    = col_lo->real(0,k);
-                axis_hi[k]    = col_hi->real(0,k);
-                axis_nodes[k] = 0.5*(axis_lo[k] + axis_hi[k]);
-            }
+        // Push axis array on storage
+        m_axis_lo.push_back(axis_lo);
+        m_axis_hi.push_back(axis_hi);
 
-            // Push axis array on storage
-            m_axis_lo.push_back(axis_lo);
-            m_axis_hi.push_back(axis_hi);
+        // Create node array
+        m_axis_nodes.push_back(GNodeArray(axis_nodes));
 
-            // Create node array
-            m_axis_nodes.push_back(GNodeArray(axis_nodes));
-
-        } // endfor: looped over all dimensions
-
-    } // endif: HDU was valid
+    } // endfor: looped over all dimensions
 
     // Return
     return;
@@ -1155,7 +1075,7 @@ void GCTAResponseTable::read_axes(const GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Read parameter cubes
  *
- * @param[in] hdu Response table HDU pointer.
+ * @param[in] hdu Response table HDU.
  *
  * @exception GCTAException::bad_rsp_table_format
  *            Parameter vector of bad size encountered.
@@ -1171,52 +1091,47 @@ void GCTAResponseTable::read_axes(const GFitsTable* hdu)
  * In case that the HDU pointer is not valid (NULL), this method clears the
  * axes boundaries and does nothing else.
  ***************************************************************************/
-void GCTAResponseTable::read_pars(const GFitsTable* hdu)
+void GCTAResponseTable::read_pars(const GFitsTable& hdu)
 {
     // Clear parameter cubes
     m_pars.clear();
     
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
-
-        // Compute expected cube size
-        m_nelements = axis(0);
-        for (int i = 1; i < axes(); ++i) {
-            m_nelements *= axis(i);
-        }
+    // Compute expected cube size
+    m_nelements = axis(0);
+    for (int i = 1; i < axes(); ++i) {
+        m_nelements *= axis(i);
+    }
     
-        // Loop over all parameter cubes
-        for (int i = 0; i < size(); ++i) {
+    // Loop over all parameter cubes
+    for (int i = 0; i < size(); ++i) {
 
-            // Get pointer to table column
-            const GFitsTableCol* col = (*hdu)[m_colname_par[i]];
+        // Get pointer to table column
+        const GFitsTableCol* col = hdu[m_colname_par[i]];
 
-            // Extract number of bins. Verify that the number of bins
-            // corresponds to the expectation.
-            int num = col->number();
-            if (num != m_nelements) {
-                std::string message = "Parameter vector '"+m_colname_par[i]+
-                                      "' has wrong size "+gammalib::str(num)+
-                                      " (expected"+
-                                      gammalib::str(m_nelements)+").";
-                throw GCTAException::bad_rsp_table_format(G_READ_PARS,
-                                                          message);
-            }
+        // Extract number of bins. Verify that the number of bins
+        // corresponds to the expectation.
+        int num = col->number();
+        if (num != m_nelements) {
+            std::string message = "Parameter vector '"+m_colname_par[i]+
+                                  "' has wrong size "+gammalib::str(num)+
+                                  " (expected"+
+                                  gammalib::str(m_nelements)+").";
+            throw GCTAException::bad_rsp_table_format(G_READ_PARS,
+                                                      message);
+        }
 
-            // Initialise parameter cube
-            std::vector<double> pars(num);
+        // Initialise parameter cube
+        std::vector<double> pars(num);
 
-            // Copy parameter values
-            for (int k = 0; k < num; ++k) {
-                pars[k] = col->real(0,k);
-            }
+        // Copy parameter values
+        for (int k = 0; k < num; ++k) {
+            pars[k] = col->real(0,k);
+        }
 
-            // Push cube into storage
-            m_pars.push_back(pars);
+        // Push cube into storage
+        m_pars.push_back(pars);
 
-        } // endfor: looped over all parameter cubes
-
-    } // endif: HDU was valid
+    } // endfor: looped over all parameter cubes
 
     // Return
     return;

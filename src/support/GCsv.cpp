@@ -34,8 +34,8 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS                              "GCsv::operator() (int&, int&)"
-#define G_LOAD                        "GCsv::load(std::string&, std::string)"
+#define G_ACCESS                               "GCsv::operator()(int&, int&)"
+#define G_LOAD                       "GCsv::load(std::string&, std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -69,7 +69,7 @@ GCsv::GCsv(void)
  * @param[in] filename Filename.
  * @param[in] sep Column separator (default is whitespace).
  ***************************************************************************/
-GCsv::GCsv(const std::string& filename, std::string sep)
+GCsv::GCsv(const std::string& filename, const std::string& sep)
 { 
     // Initialise private
     init_members();
@@ -123,8 +123,9 @@ GCsv::~GCsv(void)
  * @brief Assignment operator
  *
  * @param[in] csv Column separated values table.
+ * @return Column separated values table.
  ***************************************************************************/
-GCsv& GCsv::operator= (const GCsv& csv)
+GCsv& GCsv::operator=(const GCsv& csv)
 { 
     // Execute only if object is not identical
     if (this != &csv) {
@@ -151,7 +152,7 @@ GCsv& GCsv::operator= (const GCsv& csv)
  * @param[in] row Table row.
  * @param[in] col Table column.
  ***************************************************************************/
-std::string& GCsv::operator() (const int& row, const int& col)
+std::string& GCsv::operator()(const int& row, const int& col)
 {
     // Perform range check
     #if defined(G_RANGE_CHECK)
@@ -171,7 +172,7 @@ std::string& GCsv::operator() (const int& row, const int& col)
  * @param[in] row Table row.
  * @param[in] col Table column.
  ***************************************************************************/
-const std::string& GCsv::operator() (const int& row, const int& col) const
+const std::string& GCsv::operator()(const int& row, const int& col) const
 {
     // Perform range check
     #if defined(G_RANGE_CHECK)
@@ -192,7 +193,7 @@ const std::string& GCsv::operator() (const int& row, const int& col) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear CSV table
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -210,7 +211,9 @@ void GCsv::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone CSV table
+ *
+ * @return Pointer to deep copy of CSV table.
  **************************************************************************/
 GCsv* GCsv::clone(void) const
 {
@@ -283,15 +286,10 @@ int GCsv::integer(const int& row, const int& col) const
  * Load CSV table from ASCII file.
  * Any environment variable present in the filename will be expanded.
  **************************************************************************/
-void GCsv::load(const std::string& filename, std::string sep)
+void GCsv::load(const std::string& filename, const std::string& sep)
 {
     // Clear instance
     clear();
-
-    // If no seperator is given then assume a whitespace
-    if (sep.length() == 0) {
-        sep = " ";
-    }
 
     // Allocate line buffer
     const int n = 10000; 
@@ -317,8 +315,9 @@ void GCsv::load(const std::string& filename, std::string sep)
         std::string sline = gammalib::strip_chars(gammalib::strip_whitespace(std::string(line)),"\n");
 
         // Skip line if empty
-        if (sline.length() == 0)
+        if (sline.length() == 0) {
             continue;
+        }
 
         // Split line in elements
         std::vector<std::string> elements = gammalib::split(sline, sep);
@@ -433,10 +432,3 @@ void GCsv::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

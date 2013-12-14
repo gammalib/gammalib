@@ -76,9 +76,9 @@ public:
     virtual std::string print(const GChatter& chatter = NORMAL) const = 0;	
 	
     // Implemented methods
-    std::string         type(void) const;
-    std::string         name(void) const;
-    double              solidangle(void) const;
+    const std::string& type(void) const;
+    const std::string& name(void) const;
+    const double&      solidangle(void) const;
 
 protected:
     // Protected methods
@@ -101,7 +101,7 @@ protected:
  * Returns the region name.
  ***************************************************************************/
 inline
-std::string GSkyRegion::name(void) const
+const std::string& GSkyRegion::name(void) const
 {
     return (m_name);
 }
@@ -115,7 +115,7 @@ std::string GSkyRegion::name(void) const
  * Returns the region type.
  ***************************************************************************/
 inline
-std::string GSkyRegion::type(void) const
+const std::string& GSkyRegion::type(void) const
 {
     return (m_type);
 }
@@ -129,7 +129,7 @@ std::string GSkyRegion::type(void) const
  * Returns the solid angle subtended by the region (in steradian).
  ***************************************************************************/
 inline
-double GSkyRegion::solidangle(void) const
+const double& GSkyRegion::solidangle(void) const
 {
     return (m_solid);
 }

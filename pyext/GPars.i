@@ -20,13 +20,12 @@
  ***************************************************************************/
 /**
  * @file GPars.i
- * @brief Application parameter container class Python interface definition
+ * @brief Application parameter container class interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GPars.hpp"
-#include "GTools.hpp"
 #include "GException.hpp"
 %}
 
@@ -42,20 +41,31 @@ public:
     // Constructors and destructors
     GPars(void);
     explicit GPars(const std::string& filename);
-    explicit GPars(const std::string& filename, const std::vector<std::string>& args);
+    explicit GPars(const std::string& filename,
+                   const std::vector<std::string>& args);
     GPars(const GPars& pars);
     virtual ~GPars(void);
  
     // Methods
-    void   clear(void);
-    GPars* clone(void) const;
-    int    size(void) const;
-    void   append(const GPar& par);
-    void   append_standard(void);
-    void   load(const std::string& filename);
-    void   load(const std::string& filename, const std::vector<std::string>& args);
-    void   save(const std::string& filename);
-    bool   haspar(const std::string& name) const;
+    void        clear(void);
+    GPars*      clone(void) const;
+    GPar&       at(const int& index);
+    const GPar& at(const int& index) const;
+    int         size(void) const;
+    bool        isempty(void) const;
+    GPar&       append(const GPar& par);
+    void        append_standard(void);
+    GPar&       insert(const int& index, const GPar& par);
+    GPar&       insert(const std::string& name, const GPar& par);
+    void        remove(const int& index);
+    void        remove(const std::string& name);
+    void        reserve(const int& num);
+    void        extend(const GPars& pars);
+    bool        contains(const std::string& name) const;
+    void        load(const std::string& filename);
+    void        load(const std::string& filename,
+                     const std::vector<std::string>& args);
+    void        save(const std::string& filename);
 };
 
 
@@ -63,14 +73,13 @@ public:
  * @brief GPars class extension
  ***************************************************************************/
 %extend GPars {
-    char *__str__() {
-        return gammalib::tochar(self->print());
-    }
     GPar& __getitem__(const int& index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
+        }
+        else {
             throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
     }
     GPar& __getitem__(const std::string& name) {
         return (*self)[name];
@@ -80,8 +89,9 @@ public:
             (*self)[index] = par;
             return;
         }
-        else
+        else {
             throw GException::out_of_range("__setitem__(int)", index, self->size());
+        }
     }
     void __setitem__(const std::string& name, const GPar& par) {
         (*self)[name] = par;

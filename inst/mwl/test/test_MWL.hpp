@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_MWL.hpp  -  Test multi-wavelength classes             *
+ *               test_MWL.hpp - Test multi-wavelength classes              *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,9 +46,10 @@ public:
     virtual ~TestGMWL(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_obs(void);
-    void         test_optimizer(void);
+    virtual void      set(void);
+    virtual TestGMWL* clone(void) const;
+    void              test_obs(void);
+    void              test_optimizer(void);
 };
 
 #endif /* TEST_MWL_HPP */

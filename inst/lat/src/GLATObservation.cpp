@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GLATObservation.cpp  -  Fermi/LAT Observation class           *
+ *             GLATObservation.cpp - Fermi/LAT observation class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATObservation.cpp
- * @brief Fermi/LAT Observation class implementation
+ * @brief Fermi/LAT observation class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -114,9 +114,10 @@ GLATObservation::~GLATObservation(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] obs LAT observation.
+ * @param[in] obs Fermi/LAT observation.
+ * @return Fermi/LAT observation.
  ***************************************************************************/
-GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
+GLATObservation& GLATObservation::operator=(const GLATObservation& obs)
 {
     // Execute only if object is not identical
     if (this != &obs) {
@@ -147,7 +148,7 @@ GLATObservation& GLATObservation::operator= (const GLATObservation& obs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear Fermi/LAT observation
  ***************************************************************************/
 void GLATObservation::clear(void)
 {
@@ -165,8 +166,10 @@ void GLATObservation::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone Fermi/LAT observation
+ *
+ * @return Pointer to deep copy of Fermi/LAT observation.
+ ***************************************************************************/
 GLATObservation* GLATObservation::clone(void) const
 {
     return new GLATObservation(*this);
@@ -188,14 +191,12 @@ void GLATObservation::response(const GResponse& rsp)
 {
     // Get pointer on LAT response
     const GLATResponse* latrsp = dynamic_cast<const GLATResponse*>(&rsp);
-    if (latrsp == NULL)
+    if (latrsp == NULL) {
         throw GLATException::bad_response_type(G_RESPONSE);
+    }
 
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Clone response function
-    m_response = latrsp->clone();
+    // Copy response function
+    m_response = *latrsp;
 
     // Return
     return;
@@ -216,62 +217,20 @@ void GLATObservation::response(const GResponse& rsp)
  * where name is the response name (e.g. P6_v3). Note that the name is case
  * sensitive for the moment.
  ***************************************************************************/
-void GLATObservation::response(const std::string& irfname, std::string caldb)
+void GLATObservation::response(const std::string& irfname,
+                               const std::string& caldb)
 {
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new LAT response function
-    m_response = new GLATResponse;
+    // Clear LAT response function
+    m_response.clear();
 
     // Set calibration database
-    m_response->caldb(caldb);
+    m_response.caldb(caldb);
 
     // Load instrument response function
-    m_response->load(irfname);
+    m_response.load(irfname);
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to LAT response function
- ***************************************************************************/
-GLATResponse* GLATObservation::response(void) const
-{
-    // Return response pointer
-    return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to LAT pointing direction
- ***************************************************************************/
-GLATPointing* GLATObservation::pointing(void) const
-{
-    // Return response pointer
-    return m_pointing;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to LAT livetime cube
- ***************************************************************************/
-GLATLtCube* GLATObservation::ltcube(void) const
-{
-    // Return livetime cube pointer
-    return m_ltcube;
-}
-
-
-/***********************************************************************//**
- * @brief Returns instrument name
- ***************************************************************************/
-std::string GLATObservation::instrument(void) const
-{
-    // Return instument name
-    return ("LAT");
 }
 
 
@@ -507,9 +466,7 @@ void GLATObservation::write(GXmlElement& xml) const
         // Handle IRF
         else if (par->attribute("name") == "IRF") {
             std::string irfname = "";
-            if (m_response != NULL) {
-                irfname = m_response->rspname();
-            }
+            irfname = m_response.rspname();
             par->attribute("value", irfname);
             npar[3]++;
         }
@@ -555,16 +512,11 @@ std::string GLATObservation::print(const GChatter& chatter) const
         result.append("\n"+gammalib::parformat("Livetime")+gammalib::str(livetime()));
 
         // Append response
-        if (m_response != NULL) {
-            result.append("\n"+m_response->print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("LAT response")+"undefined");
-        }
+        result.append("\n"+m_response.print(gammalib::reduce(chatter)));
 
         // Append livetime cube
         if (m_ltcube != NULL) {
-            result.append("\n"+m_ltcube->print(chatter));
+            result.append("\n"+m_ltcube->print(gammalib::reduce(chatter)));
         }
         else {
             result.append("\n"+gammalib::parformat("LAT livetime cube")+"undefined");
@@ -573,7 +525,7 @@ std::string GLATObservation::print(const GChatter& chatter) const
         // EXPLICIT: Append events
         if (chatter >= EXPLICIT) {
             if (m_events != NULL) {
-                result.append("\n"+m_events->print(chatter));
+                result.append("\n"+m_events->print(gammalib::reduce(chatter)));
             }
         }
 
@@ -701,9 +653,8 @@ void GLATObservation::init_members(void)
     m_ltfile.clear();
     m_cntfile.clear();
     m_expfile.clear();
-    m_response = NULL;
-    m_pointing = NULL;
-    m_ltcube   = NULL;
+    m_response.clear();
+    m_ltcube = NULL;
 
     // Return
     return;
@@ -718,16 +669,15 @@ void GLATObservation::init_members(void)
 void GLATObservation::copy_members(const GLATObservation& obs)
 {
     // Copy members
-    m_ft1file = obs.m_ft1file;
-    m_ft2file = obs.m_ft2file;
-    m_ltfile  = obs.m_ltfile;
-    m_cntfile = obs.m_cntfile;
-    m_expfile = obs.m_expfile;
+    m_ft1file  = obs.m_ft1file;
+    m_ft2file  = obs.m_ft2file;
+    m_ltfile   = obs.m_ltfile;
+    m_cntfile  = obs.m_cntfile;
+    m_expfile  = obs.m_expfile;
+    m_response = obs.m_response;
     
     // Clone members
-    if (obs.m_response != NULL) m_response = obs.m_response->clone();
-    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
-    if (obs.m_ltcube   != NULL) m_ltcube   = obs.m_ltcube->clone();
+    if (obs.m_ltcube != NULL) m_ltcube = obs.m_ltcube->clone();
 
     // Return
     return;
@@ -740,22 +690,11 @@ void GLATObservation::copy_members(const GLATObservation& obs)
 void GLATObservation::free_members(void)
 {
     // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_pointing != NULL) delete m_pointing;
-    if (m_ltcube   != NULL) delete m_ltcube;
+    if (m_ltcube  != NULL) delete m_ltcube;
 
     // Mark memory as free
-    m_response = NULL;
-    m_pointing = NULL;
-    m_ltcube   = NULL;
+    m_ltcube = NULL;
 
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

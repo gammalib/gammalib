@@ -105,4 +105,16 @@ private:
     mutable double      m_par_width; //!< Gaussian width parameter
 };
 
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which point spread function was loaded
+ ***************************************************************************/
+inline
+std::string GCTAPsfPerfTable::filename(void) const
+{
+    return m_filename;
+}
+
 #endif /* GCTAPSFPERFTABLE_HPP */

@@ -537,11 +537,11 @@ void GGti::load(const std::string& filename, const std::string& extname)
     // Open FITS file
     file.open(filename);
 
-    // Get GTI HDU
-    GFitsTable* hdu = file.table(extname);
+    // Get GTI table
+    const GFitsTable& table = *file.table(extname);
 
-    // Read GTI from HDU
-    read(hdu);
+    // Read GTI from table
+    read(table);
 
     // Close FITS file
     file.close();
@@ -563,14 +563,14 @@ void GGti::load(const std::string& filename, const std::string& extname)
  * as extension. If another GTI exists already it is overwritten if
  * @p clobber=true.
  ***************************************************************************/
-void GGti::save(const std::string& filename, bool clobber,
+void GGti::save(const std::string& filename, const bool& clobber,
                 const std::string& extname) const
 {
     // Allocate FITS file
     GFits file;
 
     // Write GTI to FITS file
-    write(&file, extname);
+    write(file, extname);
 
     // Save to file
     file.saveto(filename, clobber);
@@ -583,11 +583,11 @@ void GGti::save(const std::string& filename, bool clobber,
 /***********************************************************************//**
  * @brief Read Good Time Intervals and time reference from FITS table
  *
- * @param[in] hdu Pointer to FITS table.
+ * @param[in] table FITS table.
  *
  * Reads the Good Time Intervals and time reference from a FITS table.
  ***************************************************************************/
-void GGti::read(const GFitsTable* hdu)
+void GGti::read(const GFitsTable& table)
 {
     // Free members
     free_members();
@@ -596,18 +596,18 @@ void GGti::read(const GFitsTable* hdu)
     init_members();
 
     // Read time reference
-    m_reference.read(hdu);
+    m_reference.read(table);
 
-    // Extract GTI information from FITS file
-    m_num = hdu->integer("NAXIS2");
+    // Extract GTI information from FITS table
+    m_num = table.integer("NAXIS2");
     if (m_num > 0) {
 
         // Set GTIs
         m_start = new GTime[m_num];
         m_stop  = new GTime[m_num];
         for (int i = 0; i < m_num; ++i) {
-            m_start[i].set((*hdu)["START"]->real(i), m_reference);
-            m_stop[i].set((*hdu)["STOP"]->real(i), m_reference);
+            m_start[i].set(table["START"]->real(i), m_reference);
+            m_stop[i].set(table["STOP"]->real(i), m_reference);
         }
 
         // Set attributes
@@ -623,7 +623,7 @@ void GGti::read(const GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Write Good Time Intervals and time reference into FITS object
  *
- * @param[in] file Pointer to FITS file.
+ * @param[in] file FITS file.
  * @param[in] extname GTI extension name (defaults to "GTI")
  *
  * Saves Good Time Intervals and time reference into a FITS object. If the
@@ -633,7 +633,7 @@ void GGti::read(const GFitsTable* hdu)
  *
  * @todo Implement clobber method for overwriting of existing GTIs.
  ***************************************************************************/
-void GGti::write(GFits* file, const std::string& extname) const
+void GGti::write(GFits& file, const std::string& extname) const
 {
     // Create GTI columns
     GFitsTableDoubleCol cstart = GFitsTableDoubleCol("START", m_num);
@@ -652,10 +652,10 @@ void GGti::write(GFits* file, const std::string& extname) const
     table->extname(extname);
 
     // Write time reference
-    m_reference.write(table);
+    m_reference.write(*table);
 
     // Write to FITS file
-    file->append(*table);
+    file.append(*table);
 
     // Free table
     delete table;

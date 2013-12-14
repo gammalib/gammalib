@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GTestEventList.hpp  -  Test event atom container class        *
+ *            GTestEventList.hpp - Test event atom container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,24 +21,18 @@
 /**
  * @file GTestEventList.hpp
  * @brief Event list test class
- * @author J.-B. Cayrou
+ * @author Jean-Baptiste Cayrou
  */
 
 #ifndef GTESTEVENTLIST_HPP
 #define GTESTEVENTLIST_HPP
 
 /* __ Includes ___________________________________________________________ */
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 #include <string>
 #include <vector>
 #include "GEventList.hpp"
 #include "GTestEventAtom.hpp"
 #include "GTestRoi.hpp"
-
-/* __ Method name definitions ____________________________________________ */
-#define G_OPERATOR                         "GTestEventAtom* operator[](int&)"
 
 
 /***********************************************************************//**
@@ -77,19 +71,9 @@ public:
         return *this;
     }
     virtual GTestEventAtom* operator[](const int& index){
-        #if defined(G_RANGE_CHECK)
-        if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
-        }
-        #endif
         return (&(m_events[index]));
     }
     virtual const GTestEventAtom* operator[](const int& index) const {
-        #if defined(G_RANGE_CHECK)
-        if (index < 0 || index >= size()) {
-            throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
-        }
-        #endif
         return (&(m_events[index]));
     }
 
@@ -111,22 +95,17 @@ public:
     }
     virtual int  size(void) const { return m_events.size(); }
     virtual void load(const std::string& filename) {}
-    virtual void save(const std::string& filename, bool clobber = false) const {}
+    virtual void save(const std::string& filename,
+                      const bool& clobber = false) const {}
     virtual void read(const GFits& file) {}
     virtual void write(GFits& file) const {}
     virtual int  number(void) const { return m_events.size(); }
     virtual void roi(const GRoi& roi) {
-        // Cast ROI dynamically
         const GTestRoi* ptr = dynamic_cast<const GTestRoi*>(&roi);
-    
-        // Throw exception if ROI is not of correct type
         if (ptr == NULL) {
             throw;
         }
-    
-        // Set ROI
         m_roi = *ptr;
-        
         return;
     }
     virtual const GTestRoi& roi(void) const { return m_roi; }
@@ -155,9 +134,9 @@ protected:
         m_events = list.m_events;
         return;
     }
-    void free_members(void) { return; }
-    virtual void set_energies(void) { return; }
-    virtual void set_times(void) { return; }
+    void free_members(void) { }
+    virtual void set_energies(void) { }
+    virtual void set_times(void) { }
 
     // Protected members
     GTestRoi                    m_roi;     //!< Region of interest

@@ -234,7 +234,7 @@ void TestGMatrix::set(void)
     // Set test name
     name("GMatrix");
 
-    // Add tests
+    // Append tests
     append(static_cast<pfunction>(&TestGMatrix::alloc_matrix), "Test matrix allocation");
     append(static_cast<pfunction>(&TestGMatrix::assign_values), "Test value assignment");
     append(static_cast<pfunction>(&TestGMatrix::copy_matrix), "Test matrix copying");
@@ -252,6 +252,18 @@ void TestGMatrix::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGMatrix* TestGMatrix::clone(void) const
+{
+    // Clone test suite
+    return new TestGMatrix(*this);
 }
 
 

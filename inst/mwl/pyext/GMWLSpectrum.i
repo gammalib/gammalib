@@ -47,20 +47,21 @@ public:
     virtual GMWLSpectrum* clone(void) const;
     virtual int           size(void) const;
     virtual int           dim(void) const;
-    virtual int           naxis(int axis) const;
+    virtual int           naxis(const int& axis) const;
     virtual void          load(const std::string& filename);
-    virtual void          save(const std::string& filename, bool clobber = false) const;
+    virtual void          save(const std::string& filename,
+                               const bool& clobber = false) const;
     virtual void          read(const GFits& file);
     virtual void          write(GFits& file) const;
     virtual int           number(void) const;
 
     // Other methods
-    void                  load(const std::string& filename, const std::string& extname);
-    void                  load(const std::string& filename, int extno);
-    void                  read(const GFits& file, const std::string& extname);
-    void                  read(const GFits& file, int extno);
-    std::string           telescope(void) const;
-    std::string           instrument(void) const;
+    void               load(const std::string& filename, const std::string& extname);
+    void               load(const std::string& filename, const int& extno);
+    void               read(const GFits& file, const std::string& extname);
+    void               read(const GFits& file, const int& extno);
+    const std::string& telescope(void) const;
+    const std::string& instrument(void) const;
 };
 
 
@@ -72,9 +73,12 @@ public:
         return (*self);
     }
     GMWLDatum* __getitem__(int index) {
-        if (index >= 0 && index < self->size())
+        if (index >= 0 && index < self->size()) {
             return (*self)[index];
-        else
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", "Spectral point",
+                                           index, self->size());
+        }
     }
 };

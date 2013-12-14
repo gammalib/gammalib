@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GTestEventCube.hpp  -  Test event bin container class        *
+ *             GTestEventCube.hpp - Test event bin container class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2013 by Jean-Baptiste Cayrou                             *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -18,7 +18,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
  ***************************************************************************/
- 
+/**
+ * @file GTestEventCube.hpp
+ * @brief Event cube test class
+ * @author Jean-Baptiste Cayrou
+ */
+
 #ifndef GTestEVENTCUBE_HPP
 #define GTestEVENTCUBE_HPP
 
@@ -36,110 +41,76 @@
 #include "GFitsTable.hpp"
 #include "GFitsImage.hpp"
 
+
+/***********************************************************************//**
+ * @class GTestEventCube
+ *
+ * @brief Event cube test class
+ *
+ * This class implements an event cube for unit testing.
+ ***************************************************************************/
 class GTestEventCube : public GEventCube {
 
 public:
+
     // Constructors and destructors
     GTestEventCube(void){
-         // Initialise members
         init_members();
-
-         // Return
         return;
     }
     GTestEventCube(const GTestEventCube& cube) : GEventCube(cube){
-        // Initialise members
         init_members();
-
-        // Copy members
         copy_members(cube);
-
-        // Return
         return;
     }
     virtual ~GTestEventCube(void){
-        // Free members
         free_members();
-
-        // Return
         return;
     }
 
     // Operators
-    virtual GTestEventCube&      operator=(const GTestEventCube& cube){
-        // Execute only if object is not identical
+    virtual GTestEventCube& operator=(const GTestEventCube& cube){
         if (this != &cube) {
-
-            // Copy base class members
             this->GEventCube::operator=(cube);
-
-            // Free members
             free_members();
-
-            // Initialise members
             init_members();
-
-            // Copy members
             copy_members(cube);
-
         } // endif: object was not identical
-
-        // Return this object
         return *this;
     }
-    
     virtual GTestEventBin* operator[](const int& index){
-        #if defined(G_RANGE_CHECK)
-            if (index < 0 || index >= size())
-            throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
-        #endif
-        // Return pointer
         return &m_bins.at(index);
     }
     
     virtual const GTestEventBin* operator[](const int& index) const{
-        #if defined(G_RANGE_CHECK)
-            if (index < 0 || index >= size())
-            throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
-        #endif
-        // Return pointer
         return &m_bins.at(index);
     }
 
     // Implemented pure virtual base class methods
     virtual void clear(void){
-        // Free class members (base and derived classes, derived class first)
         free_members();
         this->GEventCube::free_members();
         this->GEvents::free_members();
-
-        // Initialise members
         this->GEvents::init_members();
         this->GEventCube::init_members();
         init_members();
-
-        // Return
         return;
     }
-    virtual GTestEventCube* clone(void) const{ return new GTestEventCube(*this);}
-    virtual int            size(void) const{ return m_bins.size(); }
-    virtual int            dim(void) const{ return 1;}
-    virtual int            naxis(int axis) const{ return 1;}
-    virtual void           load(const std::string& filename){ return; }
-    virtual void           save(const std::string& filename, bool clobber = false) const{ return; }
-    virtual void           read(const GFits& file){ return; }
-    virtual void           write(GFits& file) const{ return; }
-    virtual int            number(void) const{ return m_counts; }
-    virtual std::string    print(const GChatter& chatter = NORMAL) const{
-        // Initialise result string
+    virtual GTestEventCube* clone(void) const { return new GTestEventCube(*this);}
+    virtual int            size(void) const { return m_bins.size(); }
+    virtual int            dim(void) const { return 1; }
+    virtual int            naxis(const int& axis) const { return 1;}
+    virtual void           load(const std::string& filename) { }
+    virtual void           save(const std::string& filename,
+                                const bool& clobber = false) const { }
+    virtual void           read(const GFits& file) { }
+    virtual void           write(GFits& file) const { }
+    virtual int            number(void) const { return m_counts; }
+    virtual std::string    print(const GChatter& chatter = NORMAL) const {
         std::string result;
-
-        // Append header
         result.append("=== GTestEventCube ===");
         result.append("\n"+gammalib::parformat("Number of events")+gammalib::str(number()));
         result.append("\n"+gammalib::parformat("Number of elements")+gammalib::str(size()));
-
-        // Return result
         return result;
     }
 
@@ -151,32 +122,25 @@ public:
 
 protected:
     // Protected methods
-    void         init_members(void){
-        // Initialise members
+    void init_members(void){
         m_bins.clear();
-        
-        m_counts=0;
-
-        // Return
+        m_counts = 0;
         return;
     }
     
-    void         copy_members(const GTestEventCube& cube){
-        // Copy members
-        m_bins      = cube.m_bins;
+    void copy_members(const GTestEventCube& cube){
+        m_bins   = cube.m_bins;
         m_counts = cube.m_counts;
-        
-        // Return
         return;
     }
     
-    void         free_members(void){ return; }
-    virtual void set_energies(void){}
-    virtual void set_times(void){}
+    void         free_members(void) {}
+    virtual void set_energies(void) {}
+    virtual void set_times(void) {}
     
     // Protected members
     std::vector<GTestEventBin> m_bins;
-    int                       m_counts; //!< Number of event.
+    int                        m_counts; //!< Number of counts
 };
 
 #endif /* GTestEVENTCUBE_HPP */

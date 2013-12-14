@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEvents.i
- * @brief Abstract event container class Python interface definition
+ * @brief Abstract event container class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -63,7 +63,8 @@ public:
     virtual GEvents*    clone(void) const = 0;
     virtual int         size(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
-    virtual void        save(const std::string& filename, bool clobber = false) const = 0;
+    virtual void        save(const std::string& filename,
+                             const bool& clobber = false) const = 0;
     virtual void        read(const GFits& file) = 0;
     virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;
@@ -89,15 +90,17 @@ public:
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index, self->size());
+            throw GException::out_of_range("__getitem__(int)", "Event index",
+                                           index, self->size());
         }
     }
-    void __setitem__(int index, const GEvent& val) {
+    void __setitem__(int index, const GEvent& event) {
         if (index>=0 && index < self->size()) {
-            *((*self)[index]) = val;
+            *((*self)[index]) = event;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index, self->size());
+            throw GException::out_of_range("__setitem__(int)", "Event index",
+                                           index, self->size());
         }
     }
 };

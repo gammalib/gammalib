@@ -63,35 +63,36 @@ public:
     GEbounds& operator=(const GEbounds& ebds);
 
     // Methods
-    void        clear(void);
-    GEbounds*   clone(void) const;
-    int         size(void) const { return m_num; }
-    bool        isempty(void) const { return (m_num == 0); }
-    void        append(const GEnergy& emin, const GEnergy& emax);
-    void        insert(const GEnergy& emin, const GEnergy& emax);
-    void        merge(void);
-    void        merge(const GEnergy& emin, const GEnergy& emax);
-    void        remove(const int& index);
-    void        reserve(const int& num);
-    void        extend(const GEbounds& ebds);
-    void        setlin(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void        setlog(const int& num, const GEnergy& emin, const GEnergy& emax);
-    void        load(const std::string& filename,
-                     const std::string& extname = "EBOUNDS");
-    void        save(const std::string& filename, bool clobber,
-                     const std::string& extname = "EBOUNDS") const;
-    void        read(GFitsTable* hdu);
-    void        write(GFits* file, const std::string& extname = "EBOUNDS") const;
-    int         index(const GEnergy& eng) const;
-    GEnergy     emin(void) const { return m_emin; } //!< @brief Returns minimum energy of all intervals
-    GEnergy     emax(void) const { return m_emax; } //!< @brief Returns maximum energy of all intervals
-    GEnergy     emin(const int& index) const;
-    GEnergy     emax(const int& index) const;
-    GEnergy     emean(const int& index) const;
-    GEnergy     elogmean(const int& index) const;
-    GEnergy     ewidth(const int& index) const;
-    bool        contains(const GEnergy& eng) const;
-    std::string print(const GChatter& chatter = NORMAL) const;
+    void           clear(void);
+    GEbounds*      clone(void) const;
+    int            size(void) const;
+    bool           isempty(void) const;
+    void           append(const GEnergy& emin, const GEnergy& emax);
+    void           insert(const GEnergy& emin, const GEnergy& emax);
+    void           merge(void);
+    void           merge(const GEnergy& emin, const GEnergy& emax);
+    void           remove(const int& index);
+    void           reserve(const int& num);
+    void           extend(const GEbounds& ebds);
+    void           setlin(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void           setlog(const int& num, const GEnergy& emin, const GEnergy& emax);
+    void           load(const std::string& filename,
+                        const std::string& extname = "EBOUNDS");
+    void           save(const std::string& filename,
+                        const bool& clobber = false,
+                        const std::string& extname = "EBOUNDS") const;
+    void           read(const GFitsTable& table);
+    void           write(GFits& file, const std::string& extname = "EBOUNDS") const;
+    int            index(const GEnergy& eng) const;
+    const GEnergy& emin(void) const;
+    const GEnergy& emax(void) const;
+    GEnergy        emin(const int& index) const;
+    GEnergy        emax(const int& index) const;
+    GEnergy        emean(const int& index) const;
+    GEnergy        elogmean(const int& index) const;
+    GEnergy        ewidth(const int& index) const;
+    bool           contains(const GEnergy& eng) const;
+    std::string    print(const GChatter& chatter = NORMAL) const;
 
 
 protected:
@@ -109,5 +110,53 @@ protected:
     GEnergy* m_min;         //!< Array of interval minimum energies
     GEnergy* m_max;         //!< Array of interval maximum energies
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of energy boundaries
+ *
+ * @return Number of energy boundaries.
+ ***************************************************************************/
+inline
+int GEbounds::size(void) const
+{
+    return m_num;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if there are no energy boundaries
+ *
+ * @return True if there are no energy boundaries.
+ ***************************************************************************/
+inline
+bool GEbounds::isempty(void) const
+{
+    return (m_num == 0);
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum energy of all intervals
+ *
+ * @return Minimum energy of all intervals.
+ ***************************************************************************/
+inline
+const GEnergy& GEbounds::emin(void) const
+{
+    return m_emin;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum energy of all intervals
+ *
+ * @return Maximum energy of all intervals.
+ ***************************************************************************/
+inline
+const GEnergy& GEbounds::emax(void) const
+{
+    return m_emax;
+}
 
 #endif /* GEBOUNDS_HPP */

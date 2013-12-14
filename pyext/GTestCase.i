@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GTestCase.i - Test case class Python interface             *
+ *                     GTestCase.i - Test case class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
@@ -20,13 +20,12 @@
  ***************************************************************************/
 /**
  * @file GTestCase.i
- * @brief Test case class Python interface defintion
+ * @brief Test case class interface definition
  * @author Jean-Baptiste Cayrou
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GTestCase.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -36,9 +35,8 @@
  * @brief Test case Python interface defintion
  ***************************************************************************/
 class GTestCase : public GBase {
-
 public:
-    // public enumerators
+    // Public enumerators
     enum ErrorKind {
         FAIL_TEST,
         ERROR_TEST
@@ -46,25 +44,25 @@ public:
 
     // Constructors and destructors
     GTestCase(void);
+    GTestCase(const ErrorKind& kind, const std::string& name = "");
     GTestCase(const GTestCase& test);
-    GTestCase(ErrorKind kind, const std::string& name = "");
     virtual ~GTestCase(void);
 
     // Methods
-    void        clear(void);
-    GTestCase*  clone(void) const;
-    std::string name(void) const;
-    void        name(const std::string& name);
-    std::string message(void) const;
-    void        message(const std::string& message);
-    std::string type(void) const;
-    void        type(const std::string& type);
-    ErrorKind   kind(void) const;
-    void        kind(ErrorKind kind);
-    bool        passed(void) const;
-    void        passed(const bool& passed);
-    double      duration(void) const;
-    void        duration(const double& duration);
+    void               clear(void);
+    GTestCase*         clone(void) const;
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    const std::string& message(void) const;
+    void               message( const std::string& message);
+    const std::string& type(void) const;
+    void               type( const std::string& type);
+    const ErrorKind&   kind(void) const;
+    void               kind(const ErrorKind& kind);
+    const bool&        passed(void) const;
+    void               passed(const bool& passed);
+    const double&      duration(void) const;
+    void               duration(const double& duration);
 };
 
 

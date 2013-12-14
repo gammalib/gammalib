@@ -57,8 +57,9 @@ public:
     const double&      outflow(void) const;
     void               fill(const GEnergy& energy, const double& value = 1.0);
     void               load(const std::string& filename);
-    void               save(const std::string& filename, const bool& clobber = false) const;
-    void               read(const GFitsTable* hdu);
+    void               save(const std::string& filename,
+                            const bool& clobber = false) const;
+    void               read(const GFitsTable& table);
     void               write(GFits& fits) const;
     const std::string& filename(void) const;
 };

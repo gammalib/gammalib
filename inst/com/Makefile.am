@@ -13,7 +13,6 @@ sources = src/GCOMSupport.cpp \
           src/GCOMEventCube.cpp \
           src/GCOMEventBin.cpp \
           src/GCOMInstDir.cpp \
-          src/GCOMPointing.cpp \
           src/GCOMResponse.cpp \
           src/GCOMObservation.cpp \
           src/GCOMModelDRBFitting.cpp
@@ -23,7 +22,6 @@ pkginclude_HEADERS = include/GCOMException.hpp \
                      include/GCOMEventCube.hpp \
                      include/GCOMEventBin.hpp \
                      include/GCOMInstDir.hpp \
-                     include/GCOMPointing.hpp \
                      include/GCOMResponse.hpp \
                      include/GCOMObservation.hpp \
                      include/GCOMModelDRBFitting.hpp \

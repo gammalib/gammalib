@@ -34,8 +34,8 @@
 #include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PRJ_S2X "GWcsSTG::prj_s2x(int,int,int,int,double*,double*,double*,"\
-                                                              "double*,int*)"
+#define G_PRJ_S2X    "GWcsSTG::prj_s2x(int, int, int, int, double*, double*,"\
+                                                   " double*, double*, int*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -61,7 +61,7 @@ const GWcsRegistry g_wcs_stg_registry(&g_wcs_stg_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsSTG::GWcsSTG(void) : GWcslib()
+GWcsSTG::GWcsSTG(void) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -72,7 +72,7 @@ GWcsSTG::GWcsSTG(void) : GWcslib()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Projection constructor
  *
  * @param[in] coords Coordinate system.
  * @param[in] crval1 X value of reference pixel.
@@ -86,7 +86,7 @@ GWcsSTG::GWcsSTG(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2) :
-                 GWcslib(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
+                 GWcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
 
 {
     // Initialise class members
@@ -102,7 +102,7 @@ GWcsSTG::GWcsSTG(const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsSTG::GWcsSTG(const GWcsSTG& wcs) : GWcslib(wcs)
+GWcsSTG::GWcsSTG(const GWcsSTG& wcs) : GWcs(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -138,14 +138,15 @@ GWcsSTG::~GWcsSTG(void)
  * @brief Assignment operator
  *
  * @param[in] wcs World Coordinate System.
+ * @return World Coordinate System.
  ***************************************************************************/
-GWcsSTG& GWcsSTG::operator= (const GWcsSTG& wcs)
+GWcsSTG& GWcsSTG::operator=(const GWcsSTG& wcs)
 {
     // Execute only if object is not identical
     if (this != &wcs) {
 
         // Copy base class members
-        this->GWcslib::operator=(wcs);
+        this->GWcs::operator=(wcs);
 
         // Free members
         free_members();
@@ -170,7 +171,7 @@ GWcsSTG& GWcsSTG::operator= (const GWcsSTG& wcs)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear projection
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -178,12 +179,12 @@ void GWcsSTG::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GWcslib::free_members();
     this->GWcs::free_members();
+    this->GSkyProjection::free_members();
 
     // Initialise members
+    this->GSkyProjection::init_members();
     this->GWcs::init_members();
-    this->GWcslib::init_members();
     init_members();
 
     // Return
@@ -192,7 +193,9 @@ void GWcsSTG::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone projection
+ *
+ * @return Pointer to deep copy of projection.
  ***************************************************************************/
 GWcsSTG* GWcsSTG::clone(void) const
 {
@@ -201,10 +204,10 @@ GWcsSTG* GWcsSTG::clone(void) const
 
 
 /***********************************************************************//**
- * @brief Print WCS information
+ * @brief Print projection information
  *
  * @param[in] chatter Chattiness (defaults to NORMAL).
- * @return String containing WCS information.
+ * @return String containing projection information.
  ***************************************************************************/
 std::string GWcsSTG::print(const GChatter& chatter) const
 {
@@ -274,7 +277,7 @@ void GWcsSTG::free_members(void)
  * @brief Setup of projection
  *
  * This method sets up the projection information. The method has been
- * adapted from the wcslib function prj.c::carset.
+ * adapted from the wcslib function prj.c::stgset.
  *
  *   Given and/or returned:
  *      m_r0      Reset to 180/pi if 0.
@@ -311,7 +314,7 @@ void GWcsSTG::prj_set(void) const
 
 
 /***********************************************************************//**
- * @brief Cartesian-to-spherical deprojection
+ * @brief Pixel-to-spherical deprojection
  *
  * @param[in] nx X vector length.
  * @param[in] ny Y vector length (0=no replication).
@@ -325,21 +328,22 @@ void GWcsSTG::prj_set(void) const
  *                   coordinates [deg].
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * Deproject Cartesian (x,y) coordinates in the plane of projection to native
+ * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
- * This method has been adapted from the wcslib function prj.c::carx2s().
+ * This method has been adapted from the wcslib function prj.c::stgx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsSTG::prj_x2s(int nx, int ny, int sxy, int spt, 
                       const double* x, const double* y,
                       double* phi, double* theta, int* stat) const
 {
     // Initialize projection if required
-    if (!m_prjset)
+    if (!m_prjset) {
         prj_set();
+    }
 
     // Set value replication length mx,my
     int mx;
@@ -394,7 +398,7 @@ void GWcsSTG::prj_x2s(int nx, int ny, int sxy, int spt,
 
 
 /***********************************************************************//**
- * @brief Generic spherical-to-Cartesian projection
+ * @brief Generic spherical-to-pixel projection
  *
  * @param[in] nphi Longitude vector length.
  * @param[in] ntheta Latitude vector length (0=no replication).
@@ -408,21 +412,22 @@ void GWcsSTG::prj_x2s(int nx, int ny, int sxy, int spt,
  * @param[out] y Vector of projected y coordinates.
  * @param[out] stat Status return value for each vector element (always 0)
  *
- * Project native spherical coordinates (phi,theta) to Cartesian (x,y)
+ * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
  *
- * This method has been adapted from the wcslib function prj.c::cars2x().
+ * This method has been adapted from the wcslib function prj.c::stgs2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsSTG::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,
                       double* x, double* y, int* stat) const
 {
     // Initialize projection if required
-    if (!m_prjset)
+    if (!m_prjset) {
         prj_set();
+    }
 
     // Set value replication length mphi,mtheta
     int mphi;
@@ -501,10 +506,3 @@ void GWcsSTG::prj_s2x(int nphi, int ntheta, int spt, int sxy,
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

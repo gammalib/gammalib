@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GWcslib.i  -  Virtual base class for wcslib based WCS         *
+ *                   GHealpix.i - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,60 +19,56 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcslib.i
- * @brief Python interface for virtual base class for wcslib based WCS
+ * @file GHealpix.i
+ * @brief HealPix projection class interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GWcslib.hpp"
+#include "GHealpix.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GWcslib
+ * @class GHealpix
  *
- * @brief Virtual base class for wcslib based World Coordinate System
+ * @brief HealPix projection class
  ***************************************************************************/
-class GWcslib : public GWcs {
+class GHealpix : public GSkyProjection {
 public:
     // Constructors and destructors
-    GWcslib(void);
-    explicit GWcslib(const std::string& coords,
-                     const double& crval1, const double& crval2,
-                     const double& crpix1, const double& crpix2,
-                     const double& cdelt1, const double& cdelt2);
-    explicit GWcslib(const GFitsHDU* hdu);
-    GWcslib(const GWcslib& wcs);
-    virtual ~GWcslib(void);
+    GHealpix(void);
+    explicit GHealpix(const int& nside, const std::string& ordering = "NESTED",
+                      const std::string& coordsys = "GAL");
+    explicit GHealpix(const GFitsHDU& hdu);
+    GHealpix(const GHealpix& wcs);
+    virtual ~GHealpix(void);
 
-    // Pure virtual methods (not implemented)
-    virtual void        clear(void) = 0;
-    virtual GWcslib*    clone(void) const = 0;
-    virtual std::string code(void) const = 0;
-    virtual std::string name(void) const = 0;
-    
-    // Implemented virtual methods
-    virtual void        read(const GFitsHDU* hdu);
-    virtual void        write(GFitsHDU* hdu) const;
-    virtual double      omega(const int& pix) const;
-    virtual double      omega(const GSkyPixel& pix) const;
-    virtual GSkyDir     pix2dir(const int& pix) const;
-    virtual int         dir2pix(const GSkyDir& dir) const;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
-    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
+    // Implemented pure virtual methods
+    virtual void        clear(void);
+    virtual GHealpix*   clone(void) const;
+    virtual int         size(void) const;
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
+    virtual void        read(const GFitsHDU& hdu);
+    virtual void        write(GFitsHDU& hdu) const;
+    virtual double      solidangle(const GSkyPixel& pixel) const;
+    virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
+    virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;
 
     // Other methods
-    void   set(const std::string& coords,
-               const double& crval1, const double& crval2,
-               const double& crpix1, const double& crpix2,
-               const double& cdelt1, const double& cdelt2);
-    double crval(const int& inx) const;
-    double crpix(const int& inx) const;
-    double cdelt(const int& inx) const;
+    const int&   npix(void) const;
+    const int&   nside(void) const;
+    std::string  ordering(void) const;
+    void         ordering(const std::string& ordering);
 };
 
 
 /***********************************************************************//**
- * @brief GWcslib class extension
+ * @brief GHealpix class extension
  ***************************************************************************/
+%extend GHealpix {
+    GHealpix copy() {
+        return (*self);
+    }
+};

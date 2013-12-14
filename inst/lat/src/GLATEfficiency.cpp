@@ -129,8 +129,9 @@ GLATEfficiency::~GLATEfficiency(void)
  * @brief Assignment operator
  *
  * @param[in] eff Efficiency factor functor.
+ * @return Efficiency factor functor.
  ***************************************************************************/
-GLATEfficiency& GLATEfficiency::operator= (const GLATEfficiency& eff)
+GLATEfficiency& GLATEfficiency::operator=(const GLATEfficiency& eff)
 {
     // Execute only if object is not identical
     if (this != &eff) {
@@ -184,7 +185,7 @@ double GLATEfficiency::operator() (const double& logE) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear efficiency factor functor
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -202,8 +203,10 @@ void GLATEfficiency::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone efficiency factor functor
+ *
+ * @return Pointer to deep copy of efficiency factor functor.
+ ***************************************************************************/
 GLATEfficiency* GLATEfficiency::clone(void) const
 {
     return new GLATEfficiency(*this);

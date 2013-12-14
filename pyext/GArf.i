@@ -51,8 +51,9 @@ public:
     double&         at(const int& index);
     const GEbounds& ebounds(void) const;
     void            load(const std::string& filename);
-    void            save(const std::string& filename, const bool& clobber = false) const;
-    void            read(const GFitsTable* hdu);
+    void            save(const std::string& filename,
+                         const bool& clobber = false) const;
+    void            read(const GFitsTable& table);
     void            write(GFits& fits) const;
 };
 

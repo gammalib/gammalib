@@ -46,10 +46,10 @@ public:
     virtual ~TestGCOMResponse(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_inst_dir(void);
-    void         test_pointing(void);
-    void         test_response(void);
+    virtual void              set(void);
+    virtual TestGCOMResponse* clone(void) const;
+    void                      test_inst_dir(void);
+    void                      test_response(void);
 };
 
 
@@ -67,10 +67,11 @@ public:
     virtual ~TestGCOMObservation(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_binned_obs(void);
-    void         test_event_bin(void);
-    void         test_event_cube(void);
+    virtual void                 set(void);
+    virtual TestGCOMObservation* clone(void) const;
+    void                         test_binned_obs(void);
+    void                         test_event_bin(void);
+    void                         test_event_cube(void);
 };
 
 
@@ -88,8 +89,9 @@ public:
     virtual ~TestGCOMOptimize(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_binned_optimizer(void);
+    virtual void              set(void);
+    virtual TestGCOMOptimize* clone(void) const;
+    void                      test_binned_optimizer(void);
 };
 
 #endif /* TEST_COM_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GCTAEventAtom.i  -  CTA event atom class                *
+ *                  GCTAEventAtom.i - CTA event atom class                 *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEventAtom.i
- * @brief CTA event bin class interface definition
+ * @brief CTA event atom class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,7 +32,7 @@
 /***********************************************************************//**
  * @class GCTAEventAtom
  *
- * @brief CTA event atom class Python interface
+ * @brief CTA event atom class
  ***************************************************************************/
 class GCTAEventAtom : public GEventAtom {
 public:
@@ -50,6 +50,13 @@ public:
     void               dir(const GCTAInstDir& dir);
     void               energy(const GEnergy& energy);
     void               time(const GTime& time);
+
+    // Other methods
+    const int&           index(void) const;
+    const unsigned long& event_id(void) const;
+    const unsigned long& obs_id(void)   const;
+    void                 event_id(const unsigned long& id);
+    void                 obs_id(const unsigned long& id);
 };
 
 

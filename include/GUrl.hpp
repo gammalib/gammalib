@@ -59,7 +59,7 @@ public:
     virtual void        close(void) = 0;
     virtual int         read(void* buffer, const int& nbyte) = 0;
     virtual int         write(const void* buffer, const int& nbyte) = 0;
-    virtual int         getchar(void) = 0;
+    virtual int         getchar(void) const = 0;
     virtual void        putchar(const int& character) = 0;
     virtual void        scanf(const char* format, ...) = 0;
     virtual void        printf(const char* format, ...) = 0;

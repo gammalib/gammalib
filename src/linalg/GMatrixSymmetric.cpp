@@ -914,7 +914,7 @@ GMatrix GMatrixSymmetric::extract_upper_triangle(void) const
  * Case A operates on a full matrix, Case B operates on a (logically)
  * compressed matrix where zero rows/columns have been removed.
  ***************************************************************************/
-GMatrixSymmetric GMatrixSymmetric::cholesky_decompose(bool compress) const
+GMatrixSymmetric GMatrixSymmetric::cholesky_decompose(const bool& compress) const
 {
     // Create copy of matrix
     GMatrixSymmetric matrix = *this;
@@ -1020,7 +1020,7 @@ GMatrixSymmetric GMatrixSymmetric::cholesky_decompose(bool compress) const
  * matrix, Case B on a zero rows/columns (logically) compressed matrix.
  ***************************************************************************/
 GVector GMatrixSymmetric::cholesky_solver(const GVector& vector,
-                                          bool compress) const
+                                          const bool& compress) const
 {
     // Raise an exception if the matrix and vector dimensions are not compatible
     if (m_rows != vector.size()) {
@@ -1113,7 +1113,7 @@ GVector GMatrixSymmetric::cholesky_solver(const GVector& vector,
  * Case B operates on a (logically) compressed matrix where all zero
  * rows/columns are skipped.
  ***************************************************************************/
-GMatrixSymmetric GMatrixSymmetric::cholesky_invert(bool compress) const
+GMatrixSymmetric GMatrixSymmetric::cholesky_invert(const bool& compress) const
 {
     // Generate Cholesky decomposition of matrix
     GMatrixSymmetric matrix = cholesky_decompose(compress);

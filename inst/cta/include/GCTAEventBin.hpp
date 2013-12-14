@@ -61,7 +61,7 @@ public:
     virtual ~GCTAEventBin(void);
 
     // Operators
-    virtual GCTAEventBin& operator= (const GCTAEventBin& bin);
+    virtual GCTAEventBin& operator=(const GCTAEventBin& bin);
 
     // Implemented pure virtual base class methods
     virtual void               clear(void);
@@ -76,7 +76,7 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const double&  omega(void) const;
+    const double&  solidangle(void) const;
     const GEnergy& ewidth(void) const;
     const double&  ontime(void) const;
 

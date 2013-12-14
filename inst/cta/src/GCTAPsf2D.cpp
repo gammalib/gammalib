@@ -259,7 +259,7 @@ void GCTAPsf2D::load(const std::string& filename)
     GFits file(filename);
 
     // Get PSF table
-    GFitsTable* table = file.table("POINT SPREAD FUNCTION");
+    const GFitsTable& table = *file.table("POINT SPREAD FUNCTION");
 
     // Read PSF table
     m_psf.read(table);
@@ -283,18 +283,6 @@ void GCTAPsf2D::load(const std::string& filename)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return filename
- *
- * @return Returns filename from which point spread function was loaded
- ***************************************************************************/
-std::string GCTAPsf2D::filename(void) const
-{
-    // Return filename
-    return m_filename;
 }
 
 

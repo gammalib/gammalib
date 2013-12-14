@@ -1,5 +1,5 @@
 /***************************************************************************
- *          GTestSuites.i - Test suites class Python interface             *
+ *              GTestSuites.i - Test suite container class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 Jean-Baptiste Cayrou                           *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GTestSuites.i
- * @brief Test suites class Python interface defintion
+ * @brief Test suite container class interface defintion
  * @author Jean-Baptiste Cayrou
  */
 %{
@@ -33,11 +33,10 @@
 /***********************************************************************//**
  * @class GTestSuites
  *
- * @brief Test suites Python interface defintion
+ * @brief Test suites container class
  ***************************************************************************/
-class GTestSuites : public GBase {
-    
-public:
+class GTestSuites : public GContainer {
+    public:
 
     // Constructors and destructors
     GTestSuites(void);
@@ -46,19 +45,26 @@ public:
     virtual ~GTestSuites(void);
 
     // Methods
-    void         clear(void);
-    GTestSuites* clone(void) const;
-    int          size(void) const;
-    void         append(GTestSuite& suite);
-    bool         run(void);
-    void         save(std::string filename);
-    std::string  name(void) const;
-    void         name(const std::string& name);
-    void         cout(const bool& flag);
-    int          errors(void) const;
-    int          failures(void) const;
-    int          tests(void) const;
-    time_t       timestamp(void) const;
+    void               clear(void);
+    GTestSuites*       clone(void) const;
+    GTestSuite*        at(const int& index);
+    int                size(void) const;
+    bool               isempty(void) const;
+    GTestSuite*        set(const int& index, const GTestSuite& suite);
+    GTestSuite*        append(const GTestSuite& suite);
+    GTestSuite*        insert(const int& index, const GTestSuite& suite);
+    void               remove(const int& index);
+    void               reserve(const int& num);
+    void               extend(const GTestSuites& suites);
+    const std::string& name(void) const;
+    void               name(const std::string& name);
+    void               cout(const bool& flag);
+    int                errors(void) const;
+    int                failures(void) const;
+    int                tests(void) const;
+    const time_t&      timestamp(void) const;
+    bool               run(void);
+    void               save(const std::string& filename) const;
 };
 
 
@@ -66,7 +72,7 @@ public:
  * @brief GTestSuites class extension
  ***************************************************************************/
 %extend GTestSuites {
-    GTestSuite& __getitem__(const int& index) {
+    GTestSuite* __getitem__(const int& index) {
         if (index >= 0 && index < self->size()) {
             return (*self)[index];
         }
@@ -75,8 +81,8 @@ public:
         }
     }
     void __setitem__(const int& index, const GTestSuite& suite) {
-        if (index>=0 && index < self->size()) {
-            (*self)[index] = suite;
+        if (index >= 0 && index < self->size()) {
+            self->set(index, suite);
             return;
         }
         else {

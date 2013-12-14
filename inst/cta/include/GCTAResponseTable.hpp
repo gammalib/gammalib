@@ -49,11 +49,11 @@ public:
     // Constructors and destructors
     GCTAResponseTable(void);
     GCTAResponseTable(const GCTAResponseTable& table);
-    GCTAResponseTable(const GFitsTable* hdu);
+    explicit GCTAResponseTable(const GFitsTable& hdu);
     virtual ~GCTAResponseTable(void);
 
     // Operators
-    GCTAResponseTable&  operator= (const GCTAResponseTable & table);
+    GCTAResponseTable&  operator= (const GCTAResponseTable& table);
     std::vector<double> operator()(const double& arg) const;
     std::vector<double> operator()(const double& arg1, const double& arg2) const;
     double              operator()(const int& index, const double& arg) const;
@@ -64,8 +64,8 @@ public:
     void               clear(void);
     GCTAResponseTable* clone(void) const;
     int                size(void) const;
-    int                elements(void) const;
-    int                axes(void) const;
+    const int&         elements(void) const;
+    const int&         axes(void) const;
     int                axis(const int& index) const;
     double             axis_lo(const int& index, const int& bin) const;
     double             axis_hi(const int& index, const int& bin) const;
@@ -73,8 +73,8 @@ public:
     void               axis_log10(const int& index);
     void               axis_radians(const int& index);
     void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable* hdu);
-    void               write(GFitsTable* hdu) const;
+    void               read(const GFitsTable& hdu);
+    void               write(GFitsTable& hdu) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -82,9 +82,9 @@ private:
     void init_members(void);
     void copy_members(const GCTAResponseTable& table);
     void free_members(void);
-    void read_colnames(const GFitsTable* hdu);
-    void read_axes(const GFitsTable* hdu);
-    void read_pars(const GFitsTable* hdu);
+    void read_colnames(const GFitsTable& hdu);
+    void read_axes(const GFitsTable& hdu);
+    void read_pars(const GFitsTable& hdu);
     void update(const double& arg) const;
     void update(const double& arg1, const double& arg2) const;
 
@@ -116,5 +116,48 @@ private:
     mutable double m_wgt3;                           //!< Weight of upper right node
     mutable double m_wgt4;                           //!< Weight of lower right node
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of parameters in response table
+ *
+ * @return Number of parameters in response table.
+ *
+ * Returns the number of parameters in response table.
+ ***************************************************************************/
+inline
+int GCTAResponseTable::size(void) const
+{
+    return m_npars;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of elements per parameter
+ *
+ * @return Number of elements per parameter.
+ *
+ * Returns the number of elements per parameter.
+ ***************************************************************************/
+inline
+const int& GCTAResponseTable::elements(void) const
+{
+    return m_nelements;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of axes in response table
+ *
+ * @return Number of axes in response table.
+ *
+ * Returns the number of axes in response table.
+ ***************************************************************************/
+inline
+const int& GCTAResponseTable::axes(void) const
+{
+    // Return number of axes
+    return m_naxes;
+}
 
 #endif /* GCTARESPONSETABLE_HPP */

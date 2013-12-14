@@ -130,8 +130,9 @@ GLATResponse::~GLATResponse(void)
  * @brief Assignment operator
  *
  * @param[in] rsp Response.
+ * @return Response.
  ***************************************************************************/
-GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
+GLATResponse& GLATResponse::operator=(const GLATResponse& rsp)
 {
     // Execute only if object is not identical
     if (this != &rsp) {
@@ -162,7 +163,7 @@ GLATResponse& GLATResponse::operator= (const GLATResponse& rsp)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear response
 ***************************************************************************/
 void GLATResponse::clear(void)
 {
@@ -180,8 +181,10 @@ void GLATResponse::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone response
+ *
+ * @return Pointer to deep copy of response.
+ ***************************************************************************/
 GLATResponse* GLATResponse::clone(void) const
 {
     return new GLATResponse(*this);
@@ -374,7 +377,7 @@ double GLATResponse::irf(const GLATEventBin& event,
     double rsp = 0.0;
 
     // Get pointer to event cube
-    GLATEventCube* cube = event.cube();
+    const GLATEventCube* cube = event.cube();
 
     // Get pointer on point source spatial model
     const GModelSpatialPointSource* ptsrc =
@@ -400,10 +403,10 @@ double GLATResponse::irf(const GLATEventBin& event,
         nodes.set_value(srcEng.log10MeV());
 
         // Compute diffuse response
-        GSkymap* map    = cube->diffrsp(idiff);
-        double*  pixels = map->pixels() + event.ipix();
-        rsp             = nodes.wgt_left()  * pixels[nodes.inx_left()  * map->npix()] +
-                          nodes.wgt_right() * pixels[nodes.inx_right() * map->npix()];
+        GSkymap*      map    = cube->diffrsp(idiff);
+        const double* pixels = map->pixels() + event.ipix();
+        rsp                  = nodes.wgt_left()  * pixels[nodes.inx_left()  * map->npix()] +
+                               nodes.wgt_right() * pixels[nodes.inx_right() * map->npix()];
 
         // Divide by solid angle and ontime since source maps are given in units of
         // counts/pixel/MeV.
@@ -719,13 +722,15 @@ std::string GLATResponse::print(const GChatter& chatter) const
         else {
             result.append("unknown");
         }
-        for (int i = 0; i < size(); ++i) {
-            result.append("\n"+m_aeff[i]->print(chatter));
-            result.append("\n"+m_psf[i]->print(chatter));
-            result.append("\n"+m_edisp[i]->print(chatter));
-        }
-        for (int i = 0; i < m_ptsrc.size(); ++i) {
-            result.append("\n"+m_ptsrc[i]->print(chatter));
+        if (chatter > TERSE) {
+            for (int i = 0; i < size(); ++i) {
+                result.append("\n"+m_aeff[i]->print(gammalib::reduce(chatter)));
+                result.append("\n"+m_psf[i]->print(gammalib::reduce(chatter)));
+                result.append("\n"+m_edisp[i]->print(gammalib::reduce(chatter)));
+            }
+            for (int i = 0; i < m_ptsrc.size(); ++i) {
+                result.append("\n"+m_ptsrc[i]->print(gammalib::reduce(chatter)));
+            }
         }
 
     } // endif: chatter was not silent
@@ -849,10 +854,3 @@ void GLATResponse::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

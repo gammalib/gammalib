@@ -561,10 +561,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
     if (valid_model()) {
 
         // Get response function
-        GResponse* rsp = obs.response();
-        if (rsp == NULL) {
-            throw GException::no_response(G_NPRED);
-        }
+        const GResponse& rsp = obs.response();
 
         // Here we make the simplifying approximations
         // srcEng=obsEng and srcTime=obsTime. To be fully correct we should
@@ -577,7 +574,7 @@ double GModelSky::npred(const GEnergy& obsEng, const GTime& obsTime,
         GSource source(this->name(), m_spatial, srcEng, srcTime);
 
         // Compute response components
-        double npred_spatial  = rsp->npred(source, obs);
+        double npred_spatial  = rsp.npred(source, obs);
         double npred_spectral = spectral()->eval(srcEng, srcTime);
         double npred_temporal = temporal()->eval(srcTime);
 
@@ -1241,8 +1238,6 @@ GModelTemporal* GModelSky::xml_temporal(const GXmlElement& temporal) const
  * @return Probability of measuring the event
  *         (\f${\rm s}^{-1}\f$ \f${\rm MeV}^{-1}\f$ \f${\rm sr}^{-1}\f$).
  *
- * @exception GException::no_response
- *            Observation has no valid instrument response
  * @exception GException::feature_not_implemented
  *            Temporal integration not yet implemented
  *
@@ -1279,13 +1274,10 @@ double GModelSky::integrate_time(const GEvent& event,
     double value = 0.0;
 
     // Get response function
-    GResponse* rsp = obs.response();
-    if (rsp == NULL) {
-        throw GException::no_response(G_INTEGRATE_TIME);
-    }
+    const GResponse& rsp = obs.response();
 
     // Determine if time integration is needed
-    bool integrate = rsp->hastdisp();
+    bool integrate = rsp.hastdisp();
 
     // Case A: Integraion
     if (integrate) {
@@ -1321,8 +1313,6 @@ double GModelSky::integrate_time(const GEvent& event,
  * @param[in] obs Observation.
  * @param[in] grad Evaluate gradients.
  *
- * @exception GException::no_response
- *            Observation has no valid instrument response
  * @exception GException::feature_not_implemented
  *            Energy integration not yet implemented
  *
@@ -1353,13 +1343,10 @@ double GModelSky::integrate_energy(const GEvent& event,
     double value = 0.0;
 
     // Get response function
-    GResponse* rsp = obs.response();
-    if (rsp == NULL) {
-        throw GException::no_response(G_INTEGRATE_ENERGY);
-    }
+    const GResponse& rsp = obs.response();
 
     // Determine if energy integration is needed
-    bool integrate = rsp->hasedisp();
+    bool integrate = rsp.hasedisp();
 
     // Case A: Integraion
     if (integrate) {
@@ -1427,17 +1414,14 @@ double GModelSky::integrate_dir(const GEvent&       event,
     if (m_spatial != NULL) {
 
         // Get response function
-        GResponse* rsp = obs.response();
-        if (rsp == NULL) {
-            throw GException::no_response(G_INTEGRATE_DIR);
-        }
+        const GResponse& rsp = obs.response();
 
         // Set source
         GSource source(this->name(), m_spatial, srcEng, srcTime);
         
         // Get IRF value. This method returns the spatial component of the
         // source model.
-        double irf = rsp->irf(event, source, obs);
+        double irf = rsp.irf(event, source, obs);
 
         // If required, apply instrument specific model scaling
         if (!m_scales.empty()) {

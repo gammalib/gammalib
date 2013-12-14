@@ -1,7 +1,7 @@
 /***************************************************************************
- *                 GEventAtom.i - Abstract event atom class                *
+ *                GEventAtom.i - Abstract event atom base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEventAtom.i
- * @brief Abstract event atom class interface definition
+ * @brief Abstract event atom base class definition
  * @author Juergen Knoedlseder
  */
 %{

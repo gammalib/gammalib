@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GLATEventBin.hpp - LAT event bin class                  *
+ *              GLATEventBin.hpp - Fermi/LAT event bin class               *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventBin.hpp
- * @brief Fermi-LAT event bin class interface definition
+ * @brief Fermi/LAT event bin class interface definition
  * @author Juergen Knoedlseder
  */
 
@@ -40,9 +40,11 @@ class GLATEventCube;
 /***********************************************************************//**
  * @class GLATEventBin
  *
- * @brief Fermi-LAT event bin class
+ * @brief Fermi/LAT event bin class
  *
- * This class implement a counts map bin for the Fermi-LAT telescope.
+ * This class implement a counts map bin for the Fermi/LAT telescope.
+ *
+ * @todo Implement stand alone version of event bin.
  ***************************************************************************/
 class GLATEventBin : public GEventBin {
 
@@ -56,7 +58,7 @@ public:
     virtual ~GLATEventBin(void);
 
     // Operators
-    virtual GLATEventBin& operator= (const GLATEventBin& bin);
+    virtual GLATEventBin& operator=(const GLATEventBin& bin);
 
     // Implemented pure virtual base class methods
     virtual void               clear(void);
@@ -71,13 +73,13 @@ public:
     virtual std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Other methods
-    const double&  omega(void) const;
-    const GEnergy& ewidth(void) const;
-    const double&  ontime(void) const;
-    const int&     index(void) const { return m_index; }
-    const int&     ipix(void) const { return m_ipix; }
-    const int&     ieng(void) const { return m_ieng; }
-    GLATEventCube* cube(void) const { return m_cube; }
+    const double&        omega(void) const;
+    const GEnergy&       ewidth(void) const;
+    const double&        ontime(void) const;
+    const int&           index(void) const;
+    const int&           ipix(void) const;
+    const int&           ieng(void) const;
+    const GLATEventCube* cube(void) const;
 
 protected:
     // Protected methods
@@ -98,5 +100,67 @@ protected:
     GEnergy*       m_ewidth;      //!< Pointer to energy width of bin
     double*        m_ontime;      //!< Pointer to ontime of bin (seconds)
 };
+
+
+/***********************************************************************//**
+ * @brief Return event bin index in cube
+ *
+ * @return Event bin index in cube.
+ *
+ * Returns the index of the event in the counts map cube. If the event bin
+ * is not part of a cube, -1 is returned.
+ ***************************************************************************/
+inline
+const int& GLATEventBin::index(void) const
+{
+    return m_index;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event bin map pixel index in cube
+ *
+ * @return Event bin map pixel index in cube.
+ *
+ * Returns the spatial index of the event in the counts map cube. The spatial
+ * index relates to the reconstructed photon arrival direction. If the event
+ * bin is not part of a cube, -1 is returned.
+ ***************************************************************************/
+inline
+const int& GLATEventBin::ipix(void) const
+{
+    return m_ipix;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event bin energy index in cube
+ *
+ * @return Event bin energy index in cube.
+ *
+ * Returns the energy index of the event in the counts map cube. The energy
+ * index relates to the 3rd dimension of the counts map cube. If the event
+ * bin is not part of a cube, -1 is returned.
+ ***************************************************************************/
+inline
+const int& GLATEventBin::ieng(void) const
+{
+    return m_ieng;
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to related map cube
+ *
+ * @return Pointer to related map cube.
+ *
+ * Returns a pointer to the map cube in which the event bin is embedded. If
+ * the event bin is not part of a cube, NULL is returned.
+ ***************************************************************************/
+inline
+const GLATEventCube* GLATEventBin::cube(void) const
+{
+    return m_cube;
+}
 
 #endif /* GLATEVENTBIN_HPP */

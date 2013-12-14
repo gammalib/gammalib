@@ -102,8 +102,9 @@ GLATEventAtom::~GLATEventAtom(void)
  * @brief Assignment operator
  *
  * @param[in] atom Event atom.
+ * @return Event atom.
  ***************************************************************************/
-GLATEventAtom& GLATEventAtom::operator= (const GLATEventAtom& atom)
+GLATEventAtom& GLATEventAtom::operator=(const GLATEventAtom& atom)
 {
     // Execute only if object is not identical
     if (this != &atom) {
@@ -134,9 +135,7 @@ GLATEventAtom& GLATEventAtom::operator= (const GLATEventAtom& atom)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the instance to an initial state.
+ * @brief Clear event atom
  ***************************************************************************/
 void GLATEventAtom::clear(void)
 {
@@ -156,8 +155,10 @@ void GLATEventAtom::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone event atom
+ *
+ * @return Pointer to deep copy of event atom
+ ***************************************************************************/
 GLATEventAtom* GLATEventAtom::clone(void) const
 {
     return new GLATEventAtom(*this);
@@ -261,8 +262,9 @@ void GLATEventAtom::copy_members(const GLATEventAtom& atom)
         m_difrsp = new double[m_num_difrsp];
 
         // Copy diffuse response components
-        for (int i = 0; i < m_num_difrsp; ++i)
+        for (int i = 0; i < m_num_difrsp; ++i) {
             m_difrsp[i] = atom.m_difrsp[i];
+        }
 
     } // endif: there were diffuse response components to copy
 
@@ -285,10 +287,3 @@ void GLATEventAtom::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

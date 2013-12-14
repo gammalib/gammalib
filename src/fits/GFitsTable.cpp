@@ -611,7 +611,7 @@ void GFitsTable::remove_rows(const int& row, const int& nrows)
  * @param[in] colname Column name.
  * @return True of the column exists, false otherwise.
  ***************************************************************************/
-bool GFitsTable::hascolumn(const std::string& colname) const
+bool GFitsTable::contains(const std::string& colname) const
 {
     // Get pointer in column
     GFitsTableCol* ptr = ptr_column(colname);
@@ -636,48 +636,52 @@ std::string GFitsTable::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GFitsTable ===\n");
+        result.append("=== GFitsTable ===");
 
         // Append HDU information
-        result.append(print_hdu(chatter));
+        result.append("\n"+print_hdu(chatter));
 
         // Append table type
-        result.append(gammalib::parformat("Table type"));
+        result.append("\n"+gammalib::parformat("Table type"));
         switch (m_type) {
         case GFitsHDU::HT_ASCII_TABLE:
-            result.append("ASCII table\n");
+            result.append("ASCII table");
             break;
         case GFitsHDU::HT_BIN_TABLE:
-            result.append("Binary table\n");
+            result.append("Binary table");
             break;
         default:
-            result.append("Unknown\n");
+            result.append("Unknown");
             break;
         }
 
         // Append table dimensions
-        result.append(gammalib::parformat("Number of rows"));
-        result.append(gammalib::str(m_rows)+"\n");
-        result.append(gammalib::parformat("Number of columns"));
-        result.append(gammalib::str(m_cols)+"\n");
+        result.append("\n"+gammalib::parformat("Number of rows"));
+        result.append(gammalib::str(m_rows));
+        result.append("\n"+gammalib::parformat("Number of columns"));
+        result.append(gammalib::str(m_cols));
 
-        // Append header information
-        result.append(m_header.print(chatter));
+        // NORMAL: Append header information
+        if (chatter >= NORMAL) {
+            result.append("\n"+m_header.print(gammalib::reduce(chatter)));
+        }
 
-        // Append table columns
-        if (m_columns != NULL) {
-            for (int i = 0; i < m_cols; ++i) {
-                result.append("\n");
-                if (m_columns[i] != NULL) {
-                    result.append(m_columns[i]->print(chatter));
-                }
-                else {
-                    result.append(" Column "+gammalib::str(i)+" undefined");
+        // NORMAL: Append table columns
+        if (chatter >= VERBOSE) {
+            if (m_columns != NULL) {
+                for (int i = 0; i < m_cols; ++i) {
+                    result.append("\n");
+                    if (m_columns[i] != NULL) {
+                        result.append(m_columns[i]->print(gammalib::reduce(chatter)));
+                    }
+                    else {
+                        result.append(" Column "+gammalib::str(i)+" undefined");
+                    }
                 }
             }
-        }
-        else {
-            result.append(" Table columns undefined");
+            else {
+                result.append("\n Table columns undefined");
+            }
         }
 
     } // endif: chatter was not silent
@@ -715,20 +719,15 @@ std::string GFitsTable::print(const GChatter& chatter) const
 void GFitsTable::data_open(void* vptr)
 {
     // Move to HDU
-    int status = 0;
-    status     = __ffmahd(FPTR(vptr), (FPTR(vptr)->HDUposition)+1, NULL, &status);
-    if (status != 0) {
-        throw GException::fits_hdu_not_found(G_DATA_OPEN,
-                                             (FPTR(vptr)->HDUposition)+1,
-                                             status);
-    }
+    gammalib::fits_move_to_hdu(G_DATA_OPEN, vptr);
 
     // Save FITS file pointer
     FPTR_COPY(m_fitsfile, vptr);
 
     // Determine number of rows in table
-    long nrows  = 0;
-    status      = __ffgnrw(FPTR(m_fitsfile), &nrows, &status);
+    int status = 0;
+    long nrows = 0;
+    status     = __ffgnrw(FPTR(m_fitsfile), &nrows, &status);
     if (status != 0) {
         throw GException::fits_error(G_DATA_OPEN, status);
     }
@@ -911,11 +910,12 @@ void GFitsTable::data_open(void* vptr)
  * @exception GException::fits_bad_col_length
  *            Table columns have inconsistent lengths.
  *
- * This method saves a table into a FITS file.
+ * Saves the FITS table into the FITS file.
  *
- * In case that no table HDU exists it will be created by appending a new
- * HDU to the existing file. The definition of this HDU will be based on the
- * table definition in the class instance.
+ * In case that no table HDU exists so far in the FITS file, a new table
+ * will be appended to the FITS file. In case that a different HDU type
+ * exists at the requested extension number, the existing HDU will be
+ * deleted and be replaced by the requested table type.
  *
  * The method also verifies the consistency of all table columns. Table
  * columns need to have identical lengths to be saved into a FITS table.
@@ -953,10 +953,16 @@ void GFitsTable::data_save(void)
 
     // Move to HDU
     int status = 0;
-    status = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, NULL, &status);
+    int type   = 0;
+    status = __ffmahd(FPTR(m_fitsfile), m_hdunum+1, &type, &status);
 
-    // If HDU does not exist in file then create it now
-    if (status == 107) {
+    // If move was successful but HDU type in file differs from HDU type
+    // of object then replace the HDU in the file
+    bool replace = (status == 0 && type != m_type);
+
+    // If HDU does not exist in file or should be replaced then create or
+    // replace it now
+    if (status == 107 || replace) {
 
         // Reset status
         status = 0;
@@ -987,11 +993,40 @@ void GFitsTable::data_save(void)
             }
         }
 
-        // Create FITS table
-        status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields, ttype, tform,
-                          tunit, NULL, &status);
-        if (status != 0) {
-            throw GException::fits_error(G_DATA_SAVE, status);
+        // Replace FITS HDU by table
+        if (replace) {
+
+            // Delete current FITS HDU
+            status = __ffdhdu(FPTR(m_fitsfile), NULL, &status);
+            if (status != 0) {
+                throw GException::fits_error(G_DATA_SAVE, status);
+            }
+
+            // Insert either ASCII or Binary table at current HDU position
+            if (exttype() == GFitsHDU::HT_ASCII_TABLE) {
+                long tbcol  = 0;
+                long rowlen = 0;
+                status = __ffgabc(tfields, tform, 1, &rowlen, &tbcol, &status);
+                status = __ffitab(FPTR(m_fitsfile), rowlen, m_rows, tfields, ttype,
+                                  &tbcol, tform, tunit, NULL, &status);
+            }
+            else {
+                status = __ffibin(FPTR(m_fitsfile), m_rows, tfields, ttype, tform,
+                                tunit, NULL, 0, &status);
+            }
+            if (status != 0) {
+                throw GException::fits_error(G_DATA_SAVE, status);
+            }
+
+        }
+
+        // ... otherwise create FITS table
+        else {
+            status = __ffcrtb(FPTR(m_fitsfile), m_type, m_rows, tfields,
+                              ttype, tform, tunit, NULL, &status);
+            if (status != 0) {
+                throw GException::fits_error(G_DATA_SAVE, status);
+            }
         }
 
         // De-allocate column definition arrays

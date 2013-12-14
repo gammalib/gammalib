@@ -49,28 +49,27 @@ public:
     virtual ~GMWLObservation(void);
 
     // Implement pure virtual methods
-    virtual void             clear(void);
-    virtual GMWLObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GMWLResponse*    response(void) const;
-    virtual GMWLPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const;
-    virtual double           ontime(void) const;
-    virtual double           livetime(void) const;
-    virtual double           deadc(const GTime& time) const;
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
+    virtual void                clear(void);
+    virtual GMWLObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GMWLResponse& response(void) const;
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
-    void        load(const std::string& filename);
-    void        load(const std::string& filename, const int& extno);
-    void        load(const std::string& filename, const std::string& extname);
-    std::string filename(void) const;
-    std::string extno(void) const;
-    std::string extname(void) const;
-    void        filename(const std::string& filename);
-    void        extno(const std::string& extno);
-    void        extname(const std::string& extname);
+    void               load(const std::string& filename);
+    void               load(const std::string& filename, const int& extno);
+    void               load(const std::string& filename, const std::string& extname);
+    const std::string& filename(void) const;
+    const std::string& extno(void) const;
+    const std::string& extname(void) const;
+    void               filename(const std::string& filename);
+    void               extno(const std::string& extno);
+    void               extname(const std::string& extname);
 };
 
 

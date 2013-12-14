@@ -263,7 +263,7 @@ GException::erange_invalid::erange_invalid(std::string origin, double emin,
 
     // Set error message
     m_message = "Invalid energy range (Emin="+gammalib::str(emin)+" MeV, Emax="+
-                gammalib::str(emax)+" MeV specified.";
+                gammalib::str(emax)+" MeV) specified.";
     if (message.length() > 0) {
         m_message += " " + message;
     }

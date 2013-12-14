@@ -65,8 +65,8 @@ public:
     // Methods
     void                  clear(void);
     GGti*                 clone(void) const;
-    int                   size(void) const { return m_num; }
-    bool                  isempty(void) const { return (m_num == 0); }
+    int                   size(void) const;
+    bool                  isempty(void) const;
     void                  append(const GTime& tstart, const GTime& tstop);
     void                  insert(const GTime& tstart, const GTime& tstop);
     void                  merge(void);
@@ -77,10 +77,11 @@ public:
     void                  extend(const GGti& gti);
     void                  load(const std::string& filename,
                                const std::string& extname = "GTI");
-    void                  save(const std::string& filename, bool clobber,
+    void                  save(const std::string& filename,
+                               const bool& clobber = false,
                                const std::string& extname = "GTI") const;
-    void                  read(const GFitsTable* hdu);
-    void                  write(GFits* file,
+    void                  read(const GFitsTable& table);
+    void                  write(GFits& file,
                                 const std::string& extname = "GTI") const;
     const GTime&          tstart(void) const;
     const GTime&          tstop(void) const;
@@ -111,5 +112,29 @@ protected:
     GTime          *m_stop;      //!< Array of stop times
     GTimeReference  m_reference; //!< Time reference
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of Good Time Intervals
+ *
+ * @return Number of Good Time Intervals.
+ ***************************************************************************/
+inline
+int GGti::size(void) const
+{
+    return m_num;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if there are no Good Time Intervals
+ *
+ * @return True if there are no Good Time Intervals.
+ ***************************************************************************/
+inline
+bool GGti::isempty(void) const
+{
+    return (m_num == 0);
+}
 
 #endif /* GGTI_HPP */

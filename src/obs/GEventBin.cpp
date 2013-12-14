@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GEventBin.cpp  -  Event bin abstract base class            *
+ *                GEventBin.cpp - Abstract event bin base class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GEventBin.cpp
  * @brief Abstract event bin base class implementation
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -100,8 +100,9 @@ GEventBin::~GEventBin(void)
  * @brief Assignment operator
  *
  * @param[in] bin Event bin.
+ * @return Event bin.
  ***************************************************************************/
-GEventBin& GEventBin::operator= (const GEventBin& bin)
+GEventBin& GEventBin::operator=(const GEventBin& bin)
 {
     // Execute only if object is not identical
     if (this != &bin) {

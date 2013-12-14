@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GRegistry.hpp"
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 
 
 /***********************************************************************//**
@@ -40,9 +40,9 @@
  *
  * The registry class allows the registration of WCS projections that are not
  * necessarily compiled into the GammaLib. It uses the static members
- * m_number, m_codes, m_names, and m_prjs which are allocated globally to keep
- * track of projections that are available throughout all linked libraries. To
- * register a projection it is sufficient to add
+ * m_number, m_codes, m_names, and m_projections which are allocated globally
+ * to keep track of projections that are available throughout all linked
+ * libraries. To register a projection it is sufficient to add
  *
  *     const GWcsXXX      g_wcs_XXX_seed;
  *     const GWcsRegistry g_wcs_XXX_registry(&g_wcs_XXX_seed);
@@ -55,12 +55,12 @@ class GWcsRegistry : public GRegistry {
 public:
     // Constructors and destructors
     GWcsRegistry(void);
-    GWcsRegistry(const GWcs* prj);
+    explicit GWcsRegistry(const GWcs* wcs);
     GWcsRegistry(const GWcsRegistry& registry);
     virtual ~GWcsRegistry(void);
 
     // Operators
-    GWcsRegistry& operator= (const GWcsRegistry& registry);
+    GWcsRegistry& operator=(const GWcsRegistry& registry);
 
     // Methods
     int         size(void) const;

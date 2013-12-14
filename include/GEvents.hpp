@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GEvents.hpp  -  Abstract event container class             *
+ *               GEvents.hpp - Abstract event container class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -78,7 +78,8 @@ public:
     virtual GEvents*    clone(void) const = 0;
     virtual int         size(void) const = 0;
     virtual void        load(const std::string& filename) = 0;
-    virtual void        save(const std::string& filename, bool clobber = false) const = 0;
+    virtual void        save(const std::string& filename,
+                             const bool& clobber = false) const = 0;
     virtual void        read(const GFits& file) = 0;
     virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;
@@ -87,33 +88,12 @@ public:
     // Implemented methods
     void                ebounds(const GEbounds& ebounds);
     void                gti(const GGti& gti);
-    const GEbounds&     ebounds(void) const { return m_ebounds; }
-    const GGti&         gti(void) const { return m_gti; }
-    GTime               tstart(void) const { return m_gti.tstart(); }
-    GTime               tstop(void) const { return  m_gti.tstop(); }
-    GEnergy             emin(void) const { return m_ebounds.emin(); }
-    GEnergy             emax(void) const { return m_ebounds.emax(); }
-
-    // Event iterator
-    class iterator {
-    friend class GEvents;
-    public:
-        iterator(void);
-        iterator(GEvents *events);
-        virtual ~iterator(void) { return; }
-        iterator& operator++(void) { m_index++; return *this; }
-        iterator  operator++(int junk);
-        bool      operator==(const iterator& it) const { return (m_index == it.m_index); }
-        bool      operator!=(const iterator& it) const { return (m_index != it.m_index); }
-        GEvent&   operator*(void) { return *((*m_base)[m_index]); }
-        GEvent*   operator->(void) { return (*m_base)[m_index]; }
-    protected:
-        int      m_index;     //!< Actual event index
-        int      m_num;       //!< Number of events in GEvents object
-        GEvents *m_base;      //!< Pointer to GEvents object
-    };
-    iterator begin(void);
-    iterator end(void);
+    const GEbounds&     ebounds(void) const;
+    const GGti&         gti(void) const;
+    const GTime&        tstart(void) const;
+    const GTime&        tstop(void) const;
+    const GEnergy&      emin(void) const;
+    const GEnergy&      emax(void) const;
 
 protected:
     // Protected methods
@@ -128,5 +108,77 @@ protected:
     GGti     m_gti;          //!< Good time intervals covered by events
 
 };
+
+
+/***********************************************************************//**
+ * @brief Return energy boundaries
+ *
+ * @return Energy boundaries.
+ ***************************************************************************/
+inline
+const GEbounds& GEvents::ebounds(void) const
+{
+    return (m_ebounds);
+}
+
+
+/***********************************************************************//**
+ * @brief Return Good Time Intervals
+ *
+ * @return Good Time Intervals.
+ ***************************************************************************/
+inline
+const GGti& GEvents::gti(void) const
+{
+    return (m_gti);
+}
+
+
+/***********************************************************************//**
+ * @brief Return start time
+ *
+ * @return Start time.
+ ***************************************************************************/
+inline
+const GTime& GEvents::tstart(void) const
+{
+    return (m_gti.tstart());
+}
+
+
+/***********************************************************************//**
+ * @brief Return stop time
+ *
+ * @return Stop time.
+ ***************************************************************************/
+inline
+const GTime& GEvents::tstop(void) const
+{
+    return (m_gti.tstop());
+}
+
+
+/***********************************************************************//**
+ * @brief Return minimum energy
+ *
+ * @return Minimum energy.
+ ***************************************************************************/
+inline
+const GEnergy& GEvents::emin(void) const
+{
+    return (m_ebounds.emin());
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum energy
+ *
+ * @return Maximum energy.
+ ***************************************************************************/
+inline
+const GEnergy& GEvents::emax(void) const
+{
+    return (m_ebounds.emax());
+}
 
 #endif /* GEVENTS_HPP */

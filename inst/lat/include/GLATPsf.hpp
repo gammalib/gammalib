@@ -32,7 +32,6 @@
 #include "GBase.hpp"
 #include "GLATPsfBase.hpp"
 #include "GLATInstDir.hpp"
-#include "GLATPointing.hpp"
 #include "GFits.hpp"
 #include "GFitsTable.hpp"
 #include "GSkyDir.hpp"
@@ -59,7 +58,7 @@ class GLATPsf : public GBase {
 public:
     // Constructors and destructors
     GLATPsf(void);
-    GLATPsf(const std::string& filename);
+    explicit GLATPsf(const std::string& filename);
     GLATPsf(const GLATPsf& psf);
     virtual ~GLATPsf(void);
 
@@ -67,33 +66,31 @@ public:
     GLATPsf& operator= (const GLATPsf& psf);
     double   operator()(const double& offset, const double& logE,
                         const double& ctheta);
-    double   operator()(const GLATInstDir& obsDir, const GSkyDir& srcDir,
-                        const GEnergy& srcEng, const GTime& srcTime,
-                        const GLATPointing& pnt);
 
     // Methods
-    void         clear(void);
-    GLATPsf*     clone(void) const;
-    void         load(const std::string& filename);
-    void         save(const std::string& filename, bool clobber = false);
-    void         read(const GFits& file);
-    void         write(GFits& file) const;
-    int          size(void) const;
-    int          nenergies(void) const;
-    int          ncostheta(void) const;
-    double       costhetamin(void) const;
-    void         costhetamin(const double& ctheta);
-    bool         hasphi(void) const;
-    bool         isfront(void) const;
-    bool         isback(void) const;
-    int          version(void) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;
+    void        clear(void);
+    GLATPsf*    clone(void) const;
+    void        load(const std::string& filename);
+    void        save(const std::string& filename,
+                     const bool& clobber = false);
+    void        read(const GFits& file);
+    void        write(GFits& file) const;
+    int         size(void) const;
+    int         nenergies(void) const;
+    int         ncostheta(void) const;
+    double      costhetamin(void) const;
+    void        costhetamin(const double& ctheta);
+    bool        hasphi(void) const;
+    bool        isfront(void) const;
+    bool        isback(void) const;
+    int         version(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods
-    void         init_members(void);
-    void         copy_members(const GLATPsf& psf);
-    void         free_members(void);
+    void init_members(void);
+    void copy_members(const GLATPsf& psf);
+    void free_members(void);
     
     // Members
     GLATPsfBase* m_psf;   //!< Pointer to versioned point spread function

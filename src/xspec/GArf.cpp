@@ -259,7 +259,7 @@ void GArf::load(const std::string& filename)
     GFits file(filename);
 
     // Get ARF table
-    GFitsTable* table = file.table("SPECRESP");
+    const GFitsTable& table = *file.table("SPECRESP");
 
     // Read ARF data
     read(table);
@@ -303,44 +303,39 @@ void GArf::save(const std::string& filename, const bool& clobber) const
 /***********************************************************************//**
  * @brief Read Auxiliary Response File
  *
- * @param[in] hdu ARF FITS table.
+ * @param[in] table ARF FITS table.
  ***************************************************************************/
-void GArf::read(const GFitsTable* hdu)
+void GArf::read(const GFitsTable& table)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get pointer to data columns
+    const GFitsTableCol* energy_lo = table["ENERG_LO"];
+    const GFitsTableCol* energy_hi = table["ENERG_HI"];
+    const GFitsTableCol* specresp  = table["SPECRESP"];
 
-        // Get pointer to data columns
-        const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
-        const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
-        const GFitsTableCol* specresp  = (*hdu)["SPECRESP"];
+    // Determine effective area conversion factor. Internal
+    // units are cm^2
+    std::string u_specresp = gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
+    double      c_specresp = 1.0;
+    if (u_specresp == "m^2" || u_specresp == "m2") {
+        c_specresp = 10000.0;
+    }
 
-        // Determine effective area conversion factor. Internal
-        // units are cm^2
-        std::string u_specresp = gammalib::tolower(gammalib::strip_whitespace(specresp->unit()));
-        double      c_specresp = 1.0;
-        if (u_specresp == "m^2" || u_specresp == "m2") {
-            c_specresp = 10000.0;
-        }
+    // Extract number of energy bins
+    int num = energy_lo->length();
 
-        // Extract number of energy bins
-        int num = energy_lo->length();
-
-        // Set energy bins
-        for (int i = 0; i < num; ++i) {
+    // Set energy bins
+    for (int i = 0; i < num; ++i) {
     
-            // Append energy bin
-            GEnergy emin(energy_lo->real(i), energy_lo->unit());
-            GEnergy emax(energy_hi->real(i), energy_hi->unit());
-            m_ebounds.append(emin, emax);
+        // Append energy bin
+        GEnergy emin(energy_lo->real(i), energy_lo->unit());
+        GEnergy emax(energy_hi->real(i), energy_hi->unit());
+        m_ebounds.append(emin, emax);
 
-            // Append effective area value
-            double aeff = specresp->real(i) * c_specresp;
-            m_specresp.push_back(aeff);
+        // Append effective area value
+        double aeff = specresp->real(i) * c_specresp;
+        m_specresp.push_back(aeff);
 
-        } // endfor: looped over energy bins
-
-    } // endif: HDU was valid
+    } // endfor: looped over energy bins
 
     // Return
     return;

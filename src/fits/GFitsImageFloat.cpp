@@ -1,7 +1,7 @@
 /***************************************************************************
- *         GFitsImageFloat.cpp  - FITS single precision image class        *
+ *         GFitsImageFloat.cpp - Single precision FITS image class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageFloat.cpp
- * @brief FITS single precision image class implementation
+ * @brief Single precision FITS image class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,7 +28,6 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include <iostream>
 #include "GException.hpp"
 #include "GFitsCfitsio.hpp"
 #include "GFitsImageFloat.hpp"
@@ -71,7 +70,7 @@ GFitsImageFloat::GFitsImageFloat(void) : GFitsImage()
  *
  * Construct 1D instance by specifying the number of pixels in the image.
  ***************************************************************************/
-GFitsImageFloat::GFitsImageFloat(int nx, const float* pixels) :
+GFitsImageFloat::GFitsImageFloat(const int& nx, const float* pixels) :
                  GFitsImage(G_BITPIX, nx)
 {
     // Initialise class members for clean destruction
@@ -94,7 +93,8 @@ GFitsImageFloat::GFitsImageFloat(int nx, const float* pixels) :
  *
  * Construct 2D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageFloat::GFitsImageFloat(int nx, int ny, const float* pixels) :
+GFitsImageFloat::GFitsImageFloat(const int& nx, const int& ny,
+                                 const float* pixels) :
                  GFitsImage(G_BITPIX, nx, ny)
 {
     // Initialise class members for clean destruction
@@ -118,7 +118,7 @@ GFitsImageFloat::GFitsImageFloat(int nx, int ny, const float* pixels) :
  *
  * Construct 3D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageFloat::GFitsImageFloat(int nx, int ny, int nz,
+GFitsImageFloat::GFitsImageFloat(const int& nx, const int& ny, const int& nz,
                                  const float* pixels) :
                  GFitsImage(G_BITPIX, nx, ny, nz)
 {
@@ -144,8 +144,8 @@ GFitsImageFloat::GFitsImageFloat(int nx, int ny, int nz,
  *
  * Construct 4D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageFloat::GFitsImageFloat(int nx, int ny, int nz, int nt,
-                                 const float* pixels) :
+GFitsImageFloat::GFitsImageFloat(const int& nx, const int& ny, const int& nz,
+                                 const int& nt, const float* pixels) :
                  GFitsImage(G_BITPIX, nx, ny, nz, nt)
 {
     // Initialise class members for clean destruction
@@ -170,7 +170,8 @@ GFitsImageFloat::GFitsImageFloat(int nx, int ny, int nz, int nt,
  * the number of pixels in each dimension. Note that this constructor does
  * not allocate any memory for the actual image.
  ***************************************************************************/
-GFitsImageFloat::GFitsImageFloat(int naxis, const int* naxes, const float* pixels) :
+GFitsImageFloat::GFitsImageFloat(const int& naxis, const int* naxes,
+                                 const float* pixels) :
                  GFitsImage(G_BITPIX, naxis, naxes)
 {
     // Initialise class members for clean destruction
@@ -227,7 +228,7 @@ GFitsImageFloat::~GFitsImageFloat(void)
  *
  * @param[in] image FITS image.
  ***************************************************************************/
-GFitsImageFloat& GFitsImageFloat::operator= (const GFitsImageFloat& image)
+GFitsImageFloat& GFitsImageFloat::operator=(const GFitsImageFloat& image)
 {
     // Execute only if object is not identical
     if (this != &image) {
@@ -259,7 +260,7 @@ GFitsImageFloat& GFitsImageFloat::operator= (const GFitsImageFloat& image)
  * Provides access to an image pixel. No range checking is performed.
  * Use the at(ix) method if range checking is required.
  ***************************************************************************/
-float& GFitsImageFloat::operator() (const int& ix)
+float& GFitsImageFloat::operator()(const int& ix)
 {
     // Load data
     load_data();
@@ -279,7 +280,7 @@ float& GFitsImageFloat::operator() (const int& ix)
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-float& GFitsImageFloat::operator() (const int& ix, const int& iy)
+float& GFitsImageFloat::operator()(const int& ix, const int& iy)
 {
     // Load data
     load_data();
@@ -303,8 +304,8 @@ float& GFitsImageFloat::operator() (const int& ix, const int& iy)
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-float& GFitsImageFloat::operator() (const int& ix, const int& iy,
-                                    const int& iz)
+float& GFitsImageFloat::operator()(const int& ix, const int& iy,
+                                   const int& iz)
 {
     // Load data
     load_data();
@@ -329,8 +330,8 @@ float& GFitsImageFloat::operator() (const int& ix, const int& iy,
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-float& GFitsImageFloat::operator() (const int& ix, const int& iy,
-                                    const int& iz, const int& it)
+float& GFitsImageFloat::operator()(const int& ix, const int& iy,
+                                   const int& iz, const int& it)
 {
     // Load data
     load_data();
@@ -351,7 +352,7 @@ float& GFitsImageFloat::operator() (const int& ix, const int& iy,
  * Provides access to an image pixel. No range checking is performed.
  * Use the at(ix) method if range checking is required.
  ***************************************************************************/
-const float& GFitsImageFloat::operator() (const int& ix) const
+const float& GFitsImageFloat::operator()(const int& ix) const
 {
     // Load data
     load_data();
@@ -371,7 +372,7 @@ const float& GFitsImageFloat::operator() (const int& ix) const
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const float& GFitsImageFloat::operator() (const int& ix, const int& iy) const
+const float& GFitsImageFloat::operator()(const int& ix, const int& iy) const
 {
     // Load data
     load_data();
@@ -395,8 +396,8 @@ const float& GFitsImageFloat::operator() (const int& ix, const int& iy) const
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const float& GFitsImageFloat::operator() (const int& ix, const int& iy,
-                                          const int& iz) const
+const float& GFitsImageFloat::operator()(const int& ix, const int& iy,
+                                         const int& iz) const
 {
     // Load data
     load_data();
@@ -421,8 +422,8 @@ const float& GFitsImageFloat::operator() (const int& ix, const int& iy,
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const float& GFitsImageFloat::operator() (const int& ix, const int& iy,
-                                          const int& iz, const int& it) const
+const float& GFitsImageFloat::operator()(const int& ix, const int& iy,
+                                         const int& iz, const int& it) const
 {
     // Load data
     load_data();
@@ -924,10 +925,3 @@ void GFitsImageFloat::alloc_nulval(const void* value)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GWcsTAN.i  -  Gnomonic (TAN) projection class              *
+ *               GWcsTAN.i - Gnomonic (TAN) projection class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011 by Jurgen Knodlseder                                *
+ *  copyright (C) 2011)2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GWcsTAN.i
  * @brief Gnomonic (TAN) projection class Python interface
- * @author J. Knodlseder
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
@@ -34,7 +34,7 @@
  *
  * @brief Gnomonic (TAN) projection class definition
  ***************************************************************************/
-class GWcsTAN : public GWcslib {
+class GWcsTAN : public GWcs {
 public:
     // Constructors and destructors
     GWcsTAN(void);

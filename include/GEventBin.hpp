@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GEventBin.hpp - Event bin abstract base class            *
+ *                GEventBin.hpp - Abstract event bin base class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEventBin.hpp
- * @brief GEventBin abstract base class interface definition.
+ * @brief Abstract event bin base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -73,7 +73,7 @@ public:
     virtual ~GEventBin(void);
 
     // Operators
-    virtual GEventBin& operator= (const GEventBin& bin);
+    virtual GEventBin& operator=(const GEventBin& bin);
 
     // Pure virtual methods
     virtual void            clear(void) = 0;
@@ -88,8 +88,8 @@ public:
     virtual std::string     print(const GChatter& chatter = NORMAL) const = 0;
 
     // Other methods
-    bool isatom(void) const { return false; }
-    bool isbin(void) const { return true; }
+    bool isatom(void) const;
+    bool isbin(void) const;
 
 protected:
     // Protected methods
@@ -97,5 +97,29 @@ protected:
     void copy_members(const GEventBin& bin);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Signal if event is an atom
+ *
+ * @return False.
+ ***************************************************************************/
+inline
+bool GEventBin::isatom(void) const
+{
+    return (false);
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if event is a bin
+ *
+ * @return True.
+ ***************************************************************************/
+inline
+bool GEventBin::isbin(void) const
+{
+    return (true);
+}
 
 #endif /* GEVENTBIN_HPP */

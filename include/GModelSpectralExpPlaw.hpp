@@ -121,7 +121,7 @@ protected:
                     m_index(index),
                     m_inv_pivot(1.0/pivot),
                     m_inv_ecut(1.0/ecut) {}
-        double eval(double eng);
+        double eval(const double& eng);
     protected:
         const double& m_norm;      //!< Normalization
         const double& m_index;     //!< Index
@@ -140,7 +140,7 @@ protected:
                      m_index(index),
                      m_inv_pivot(1.0/pivot),
                      m_inv_ecut(1.0/ecut) {}
-        double eval(double eng);
+        double eval(const double& eng);
     protected:
         const double& m_norm;      //!< Normalization
         const double& m_index;     //!< Index

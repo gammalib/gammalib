@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GEventBin.i  -  Abstract event bin class                 *
+ *                 GEventBin.i - Abstract event bin base class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEventBin.i
- * @brief Abstract event bin class python interface definition
+ * @brief Abstract event bin base class definition
  * @author Juergen Knoedlseder
  */
 %{

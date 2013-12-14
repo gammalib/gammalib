@@ -49,6 +49,18 @@ void TestGVO::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGVO* TestGVO::clone(void) const
+{
+    // Clone test suite
+    return new TestGVO(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test VO client class
  **************************************************************************/
 void TestGVO::test_GVOClient(void)

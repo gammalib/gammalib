@@ -67,7 +67,7 @@ public:
     // Implemented pure virtual methods
     virtual void                  clear(void);
     virtual GCTAModelRadialGauss* clone(void) const;
-    virtual std::string           type(void) const { return "Gaussian"; }
+    virtual std::string           type(void) const;
     virtual double                eval(const double& offset) const;
     virtual double                eval_gradients(const double& offset) const;
     virtual GCTAInstDir           mc(const GCTAInstDir& dir, GRan& ran) const;
@@ -91,7 +91,7 @@ protected:
     class integrand : public GFunction {
     public:
         integrand(double sigma) : m_sigma(sigma) { }
-        double eval(double x) {
+        double eval(const double& x) {
             double arg  = x * x / m_sigma;
             double arg2 = arg * arg;
             double f    = std::exp(-0.5 * arg2);
@@ -104,5 +104,17 @@ protected:
     // Protected members
     GModelPar m_sigma;        //!< Width parameter (degrees^2)
 };
+
+
+/***********************************************************************//**
+ * @brief Return model type
+ *
+ * @return Model type "Gaussian".
+ ***************************************************************************/
+inline
+std::string GCTAModelRadialGauss::type(void) const
+{
+    return ("Gaussian");
+}
 
 #endif /* GCTAMODELRADIALGAUSS_HPP */

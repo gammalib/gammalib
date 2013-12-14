@@ -207,7 +207,7 @@ public:
     const GXmlElement* element(const std::string& name, const int& index) const;
     void               load(const std::string& filename);
     void               save(const std::string& filename);
-    void               read(GUrl& url);
+    void               read(const GUrl& url);
     void               write(GUrl& url, const int& indent = 0) const;
     std::string        print(const GChatter& chatter = NORMAL) const;
     std::string        print(const GChatter& chatter = NORMAL,
@@ -229,7 +229,7 @@ protected:
     void       init_members(void);
     void       copy_members(const GXml& xml);
     void       free_members(void);
-    void       parse(GUrl& url);
+    void       parse(const GUrl& url);
     void       process_markup(GXmlNode** current, const std::string& segment);
     void       process_text(GXmlNode** current, const std::string& segment);
     MarkupType get_markuptype(const std::string& segment) const;

@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GFitsImageSByte.hpp  - FITS signed Byte image class           *
+ *            GFitsImageSByte.hpp - Signed Byte FITS image class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageSByte.hpp
- * @brief GFitsImageSByte class definition.
+ * @brief Signed Byte FITS image class definition
  * @author Juergen Knoedlseder
  */
 
@@ -34,31 +34,31 @@
 /***********************************************************************//**
  * @class GFitsImageSByte
  *
- * @brief Implements a FITS signed Byte image
+ * @brief Signed Byte FITS image class
  ***************************************************************************/
 class GFitsImageSByte : public GFitsImage {
 
 public:
     // Constructors and destructors
     GFitsImageSByte(void);
-    explicit GFitsImageSByte(int nx, const char* pixels = NULL);
-    explicit GFitsImageSByte(int nx, int ny, const char* pixels = NULL);
-    explicit GFitsImageSByte(int nx, int ny, int nz, const char* pixels = NULL);
-    explicit GFitsImageSByte(int nx, int ny, int nz, int nt, const char* pixels = NULL);
-    explicit GFitsImageSByte(int naxis, const int* naxes, const char* pixels = NULL);
+    GFitsImageSByte(const int& nx, const char* pixels = NULL);
+    GFitsImageSByte(const int& nx, const int& ny, const char* pixels = NULL);
+    GFitsImageSByte(const int& nx, const int& ny, const int& nz, const char* pixels = NULL);
+    GFitsImageSByte(const int& nx, const int& ny, const int& nz, const int& nt, const char* pixels = NULL);
+    GFitsImageSByte(const int& naxis, const int* naxes, const char* pixels = NULL);
     GFitsImageSByte(const GFitsImageSByte& image);
     virtual ~GFitsImageSByte(void);
 
     // Operators
-    GFitsImageSByte& operator= (const GFitsImageSByte& image);
-    char&            operator() (const int& ix);
-    char&            operator() (const int& ix, const int& iy);
-    char&            operator() (const int& ix, const int& iy, const int& iz);
-    char&            operator() (const int& ix, const int& iy, const int& iz, const int& it);
-    const char&      operator() (const int& ix) const;
-    const char&      operator() (const int& ix, const int& iy) const;
-    const char&      operator() (const int& ix, const int& iy, const int& iz) const;
-    const char&      operator() (const int& ix, const int& iy, const int& iz, const int& it) const;
+    GFitsImageSByte& operator=(const GFitsImageSByte& image);
+    char&            operator()(const int& ix);
+    char&            operator()(const int& ix, const int& iy);
+    char&            operator()(const int& ix, const int& iy, const int& iz);
+    char&            operator()(const int& ix, const int& iy, const int& iz, const int& it);
+    const char&      operator()(const int& ix) const;
+    const char&      operator()(const int& ix, const int& iy) const;
+    const char&      operator()(const int& ix, const int& iy, const int& iz) const;
+    const char&      operator()(const int& ix, const int& iy, const int& iz, const int& it) const;
 
     // Methods
     void             clear(void);

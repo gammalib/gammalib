@@ -73,10 +73,10 @@ public:
     void           extend(const GEnergies& energies);
     void           load(const std::string& filename,
                         const std::string& extname = "ENERGIES");
-    void           save(const std::string& filename, bool clobber,
+    void           save(const std::string& filename, const bool& clobber,
                         const std::string& extname = "ENERGIES") const;
-    void           read(const GFitsTable* hdu);
-    void           write(GFits* file,
+    void           read(const GFitsTable& table);
+    void           write(GFits& file,
                          const std::string& extname = "ENERGIES") const;
     std::string    print(const GChatter& chatter = NORMAL) const;
   

@@ -60,18 +60,18 @@ public:
     // Methods
     void                  clear(void);
     GCTAOnOffObservation* clone(void) const;
-    void                  name(const std::string& name) { m_name = name; }
-    void                  instrument(const std::string& instrument) { m_instrument = instrument; }
-    void                  id(const std::string& id) { m_id = id; }
-    void                  off_regions(const GSkyRegions& regions) {m_off_regions = regions;}
-    void                  on_regions(const GSkyRegions& regions) {m_on_regions = regions;}
-    const std::string&    name(void) const { return m_name; }
-    const std::string&    instrument(void) const { return m_instrument; }
-    const std::string&    id(void) const { return m_id; }
-    const GPha&           on_spec(void) const { return m_on_spec; }
-    const GPha&           off_spec(void) const { return m_off_spec; }
-    const GArf&           arf(void) { return m_arf; };
-    const GRmf&           rmf(void) {return m_rmf;}
+    void                  name(const std::string& name);
+    void                  instrument(const std::string& instrument);
+    void                  id(const std::string& id);
+    void                  on_regions(const GSkyRegions& regions);
+    void                  off_regions(const GSkyRegions& regions);
+    const std::string&    name(void) const;
+    const std::string&    instrument(void) const;
+    const std::string&    id(void) const;
+    const GPha&           on_spec(void) const;
+    const GPha&           off_spec(void) const;
+    const GArf&           arf(void) const;
+    const GRmf&           rmf(void) const;
     void                  fill(const GCTAObservation& obs);
     void                  compute_response(const GCTAObservation& obs,
                                            const GEbounds& etrue);
@@ -98,5 +98,154 @@ protected:
     GSkyRegions m_on_regions;
     GSkyRegions m_off_regions;
 };
+
+
+/***********************************************************************//**
+ * @brief Set name of observation
+ *
+ * @param[in] name Observation name.
+ ***************************************************************************/
+inline
+void GCTAOnOffObservation::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set instrument
+ *
+ * @param[in] instrument Instrument.
+ ***************************************************************************/
+inline
+void GCTAOnOffObservation::instrument(const std::string& instrument)
+{
+    m_instrument = instrument;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set observation identifier
+ *
+ * @param[in] id Observation identifier.
+ ***************************************************************************/
+inline
+void GCTAOnOffObservation::id(const std::string& id)
+{
+    m_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set ON regions
+ *
+ * @param[in] regions ON regions.
+ ***************************************************************************/
+inline
+void GCTAOnOffObservation::on_regions(const GSkyRegions& regions)
+{
+    m_on_regions = regions;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set OFF regions
+ *
+ * @param[in] regions OFF regions.
+ ***************************************************************************/
+inline
+void GCTAOnOffObservation::off_regions(const GSkyRegions& regions)
+{
+    m_off_regions = regions;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return name of observation
+ *
+ * @return Observation name.
+ ***************************************************************************/
+inline
+const std::string& GCTAOnOffObservation::name(void) const
+{
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument
+ *
+ * @return Instrument.
+ ***************************************************************************/
+inline
+const std::string& GCTAOnOffObservation::instrument(void) const
+{
+    return m_instrument;
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation identifier
+ *
+ * @return Observation identifier.
+ ***************************************************************************/
+inline
+const std::string& GCTAOnOffObservation::id(void) const
+{
+    return m_id;
+}
+
+
+/***********************************************************************//**
+ * @brief Return ON spectrum
+ *
+ * @return ON spectrum.
+ ***************************************************************************/
+inline
+const GPha& GCTAOnOffObservation::on_spec(void) const
+{
+    return m_on_spec;
+}
+
+
+/***********************************************************************//**
+ * @brief Return OFF spectrum
+ *
+ * @return OFF spectrum.
+ ***************************************************************************/
+inline
+const GPha& GCTAOnOffObservation::off_spec(void) const
+{
+    return m_off_spec;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Auxiliary Response File
+ *
+ * @return Auxiliary Response File.
+ ***************************************************************************/
+inline
+const GArf& GCTAOnOffObservation::arf(void) const
+{
+    return m_arf;
+}
+
+
+/***********************************************************************//**
+ * @brief Return Redistribution Matrix File
+ *
+ * @return Redistribution Matrix File.
+ ***************************************************************************/
+inline
+const GRmf& GCTAOnOffObservation::rmf(void) const
+{
+    return m_rmf;
+}
 
 #endif /* GCTAONOFFOBSERVATION_HPP */

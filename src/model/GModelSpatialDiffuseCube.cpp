@@ -446,15 +446,15 @@ GSkyDir GModelSpatialDiffuseCube::mc(const GEnergy& energy,
             }
         }
 
-        // Convert 1D pixel index to 2D pixel index
-        GSkyPixel pixel = m_cube.pix2xy(low-offset);
+        // Convert sky map index to sky map pixel
+        GSkyPixel pixel = m_cube.inx2pix(low-offset);
 
         // Randomize pixel
         pixel.x(pixel.x() + ran.uniform() - 0.5);
         pixel.y(pixel.y() + ran.uniform() - 0.5);
 
         // Get sky direction
-        dir = m_cube.xy2dir(pixel);
+        dir = m_cube.pix2dir(pixel);
     
     } // endif: there were pixels in sky map
 
@@ -781,7 +781,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 // that corresponds to the pixel's solid angle. For security,
                 // the radius is enhanced by 50%.
                 double pixel_radius =
-                       std::acos(1.0 - m_cube.omega(k)/gammalib::twopi) *
+                       std::acos(1.0 - m_cube.solidangle(k)/gammalib::twopi) *
                        gammalib::rad2deg * 1.5;
 
                 // Add up flux with simulation cone radius + effective pixel
@@ -793,7 +793,7 @@ void GModelSpatialDiffuseCube::set_mc_cone(const GSkyDir& centre,
                 // simulated event is contained in the simulation cone.
                 double distance = centre.dist_deg(m_cube.pix2dir(k));
                 if (distance <= radius+pixel_radius) {
-                    double flux = m_cube(k,i) * m_cube.omega(k);
+                    double flux = m_cube(k,i) * m_cube.solidangle(k);
                     if (flux > 0.0) {
                         total_flux += flux;
                     }

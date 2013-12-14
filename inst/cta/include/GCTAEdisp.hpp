@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GCTAEdisp.hpp - CTA energy dispersion base class            *
+ *         GCTAEdisp.hpp - Abstract CTA energy dispersion base class       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAEdisp.hpp
- * @brief CTA energy dispersion base class definition
+ * @brief Abstract CTA energy dispersion base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -50,14 +50,12 @@ public:
     virtual ~GCTAEdisp(void);
 
     // Pure virtual operators
-    /*
-    virtual double operator()(const double& logE, 
+    virtual double operator()(const double& logEobs, 
+                              const double& logEsrc, 
                               const double& theta = 0.0, 
                               const double& phi = 0.0,
                               const double& zenith = 0.0,
-                              const double& azimuth = 0.0,
-                              const bool&   etrue = true) const = 0;
-    */
+                              const double& azimuth = 0.0) const = 0;
 
     // Operators
     GCTAEdisp& operator=(const GCTAEdisp& edisp);

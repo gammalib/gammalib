@@ -40,16 +40,18 @@
 /* __ Globals ____________________________________________________________ */
 
 /* __ Constants __________________________________________________________ */
-const std::string datadir       = PACKAGE_SOURCE"/inst/cta/test/data";
-const std::string cta_caldb     = PACKAGE_SOURCE"/inst/cta/caldb";
-const std::string cta_irf       = "kb_E_50h_v3";
-const std::string cta_events    = datadir+"/crab_events.fits.gz";
-const std::string cta_cntmap    = datadir+"/crab_cntmap.fits.gz";
-const std::string cta_bin_xml   = datadir+"/obs_binned.xml";
-const std::string cta_unbin_xml = datadir+"/obs_unbinned.xml";
-const std::string cta_model_xml = datadir+"/crab.xml";
-const std::string cta_rsp_xml   = datadir+"/rsp_models.xml";
+const std::string datadir        = PACKAGE_SOURCE"/inst/cta/test/data";
+const std::string cta_caldb      = PACKAGE_SOURCE"/inst/cta/caldb";
+const std::string cta_irf        = "kb_E_50h_v3";
+const std::string cta_events     = datadir+"/crab_events.fits.gz";
+const std::string cta_cntmap     = datadir+"/crab_cntmap.fits.gz";
+const std::string cta_bin_xml    = datadir+"/obs_binned.xml";
+const std::string cta_unbin_xml  = datadir+"/obs_unbinned.xml";
+const std::string cta_model_xml  = datadir+"/crab.xml";
+const std::string cta_rsp_xml    = datadir+"/rsp_models.xml";
 const std::string cta_modbck_xml = datadir+"/cta_modelbg.xml";
+const std::string cta_caldb_king = PACKAGE_SOURCE"/inst/cta/caldb/data/cta/e/bcf/000002";
+const std::string cta_irf_king   = "irf_test.fits";
 
 
 /***********************************************************************//**
@@ -64,6 +66,7 @@ void TestGCTAResponse::set(void)
     append(static_cast<pfunction>(&TestGCTAResponse::test_response), "Test response");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_aeff), "Test effective area");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf), "Test PSF");
+    append(static_cast<pfunction>(&TestGCTAResponse::test_response_psf_king), "Test King profile PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npsf), "Test integrated PSF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_irf_diffuse), "Test diffuse IRF");
     append(static_cast<pfunction>(&TestGCTAResponse::test_response_npred_diffuse), "Test diffuse IRF integration");
@@ -71,6 +74,19 @@ void TestGCTAResponse::set(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAResponse* TestGCTAResponse::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAResponse(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Set CTA model test methods
@@ -85,6 +101,18 @@ void TestGCTAModelBackground::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAModelBackground* TestGCTAModelBackground::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAModelBackground(*this);
 }
 
 
@@ -106,6 +134,18 @@ void TestGCTAObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAObservation* TestGCTAObservation::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set CTA optimizer test methods
  ***************************************************************************/
 void TestGCTAOptimize::set(void)
@@ -119,6 +159,18 @@ void TestGCTAOptimize::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGCTAOptimize* TestGCTAOptimize::clone(void) const
+{
+    // Clone test suite
+    return new TestGCTAOptimize(*this);
 }
 
 
@@ -170,6 +222,44 @@ void TestGCTAResponse::test_response_psf(void)
         eng.TeV(e);
         double r     = 0.0;
         double dr    = 0.001;
+        int    steps = int(1.0/dr);
+        double sum   = 0.0;
+        for (int i = 0; i < steps; ++i) {
+            r   += dr;
+            sum += rsp.psf(r * gammalib::deg2rad, 0.0, 0.0, 0.0, 0.0, eng.log10TeV()) *
+                   gammalib::twopi * std::sin(r * gammalib::deg2rad) * dr *
+                   gammalib::deg2rad;
+        }
+        test_value(sum, 1.0, 0.001, "PSF integration for "+eng.print());
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test CTA King profile psf computation
+ *
+ * The Psf computation is tested by integrating numerically the Psf
+ * function. Integration is done in a rather simplistic way, by stepping
+ * radially away from the centre. The integration is done for a set of
+ * energies from 0.1-10 TeV.
+ ***************************************************************************/
+void TestGCTAResponse::test_response_psf_king(void)
+{
+    // Load response
+    GCTAResponse rsp;
+    rsp.caldb(cta_caldb_king);
+    rsp.load(cta_irf_king);
+
+    // Integrate Psf
+    GEnergy eng;
+    for (double e = 0.1; e < 10.0; e *= 2.0) {
+        eng.TeV(e);
+        double r_max = rsp.psf()->delta_max(eng.log10TeV()) * gammalib::rad2deg;
+        double r     = 0.0;
+        double dr    = 0.0001;
         int    steps = int(1.0/dr);
         double sum   = 0.0;
         for (int i = 0; i < steps; ++i) {
@@ -281,7 +371,7 @@ void TestGCTAResponse::test_response_irf_diffuse(void)
     obs.livetime(1600.0);
     obs.deadc(1600.0/1800.0);
     obs.response(cta_irf, cta_caldb);
-    obs.events(&cube);
+    obs.events(cube);
     obs.pointing(pnt);
 
     // Load model for IRF computation
@@ -362,7 +452,7 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     obs.livetime(1600.0);
     obs.deadc(1600.0/1800.0);
     obs.response(cta_irf, cta_caldb);
-    obs.events(&events);
+    obs.events(events);
     obs.pointing(pnt);
 
     // Load models for Npred computation
@@ -377,6 +467,30 @@ void TestGCTAResponse::test_response_npred_diffuse(void)
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Test CTA response handling
+ ***************************************************************************/
+void TestGCTAResponse::test_response(void)
+{
+    // Test CTA response loading
+    test_try("Test CTA response loading");
+    try {
+        // Load response
+        GCTAResponse rsp;
+        rsp.caldb(cta_caldb);
+        rsp.load(cta_irf);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
+}
+
 
 /***********************************************************************//**
  * @brief Test CTA Model Background Npred computation
@@ -443,7 +557,7 @@ void TestGCTAModelBackground::test_modelbg_npred(void)
     obs.livetime(1800.0);
     obs.deadc(1.0);
     obs.response(cta_irf, cta_caldb);
-    obs.events(&events);
+    obs.events(events);
     obs.pointing(pnt);
 
     // Perform Npred computation
@@ -459,29 +573,6 @@ void TestGCTAModelBackground::test_modelbg_npred(void)
     return;
 }
 
-
-
-/***********************************************************************//**
- * @brief Test CTA response handling
- ***************************************************************************/
-void TestGCTAResponse::test_response(void)
-{
-    // Test CTA response loading
-    test_try("Test CTA response loading");
-    try {
-        // Load response
-        GCTAResponse rsp;
-        rsp.caldb(cta_caldb);
-        rsp.load(cta_irf);
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Return
-    return;
-}
 
 
 /***********************************************************************//**
@@ -520,10 +611,10 @@ void TestGCTAObservation::test_unbinned_obs(void)
         test_try_failure(e);
     }
 
-    // Loop over all events using iterator
+    // Loop over all events
+    const GEvents* events = run.events();
     int num = 0;
-    GCTAEventList *ptr = static_cast<GCTAEventList*>(const_cast<GEvents*>(run.events()));
-    for (GCTAEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
+    for (int i = 0; i < events->size(); ++i) {
         num++;
     }
     test_value(num, 4397, 1.0e-20, "Test event iterator");

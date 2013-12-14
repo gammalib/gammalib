@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GCTAEventList.i  -  CTA event atom container class           *
+ *             GCTAEventList.i - CTA event atom container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -45,18 +45,22 @@ public:
     // Implemented pure virtual base class methods
     virtual void           clear(void);
     virtual GCTAEventList* clone(void) const;
-    virtual int            size(void) const { return m_events.size(); }
+    virtual int            size(void) const;
     virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           save(const std::string& filename,
+                                const bool& clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
-    virtual int            number(void) const { return m_events.size(); }
+    virtual int            number(void) const;
     virtual void           roi(const GRoi& roi);
-    virtual const GCTARoi& roi(void) const { return m_roi; }
+    virtual const GCTARoi& roi(void) const;
 
     // Implement other methods
-    void                   append(const GCTAEventAtom& event);
-    void                   reserve(const int& number);
+    void   append(const GCTAEventAtom& event);
+    void   reserve(const int& number);
+    double irf_cache(const std::string& name, const int& index) const;
+    void   irf_cache(const std::string& name, const int& index,
+                     const double& irf) const;
 };
 
 

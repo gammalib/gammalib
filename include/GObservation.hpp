@@ -1,5 +1,5 @@
 /***************************************************************************
- *           GObservation.hpp  -  Abstract observation base class          *
+ *            GObservation.hpp - Abstract observation base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -32,7 +32,6 @@
 #include "GBase.hpp"
 #include "GEvents.hpp"
 #include "GResponse.hpp"
-#include "GPointing.hpp"
 #include "GModels.hpp"
 #include "GTime.hpp"
 #include "GEnergy.hpp"
@@ -42,7 +41,7 @@
 /***********************************************************************//**
  * @class GObservation
  *
- * @brief Abstract interface for the observation classes
+ * @brief Abstract observation base class
  *
  * This class provides an abstract interface for an observation. The
  * observation collects information about the instrument, holds the measured
@@ -66,47 +65,46 @@ public:
     virtual ~GObservation(void);
 
     // Operators
-    virtual GObservation& operator= (const GObservation& obs);
+    virtual GObservation& operator=(const GObservation& obs);
 
     // Pure virtual methods
-    virtual void          clear(void) = 0;
-    virtual GObservation* clone(void) const = 0;
-    virtual void          response(const GResponse& rsp) = 0;
-    virtual GResponse*    response(void) const = 0;
-    virtual GPointing*    pointing(void) const = 0;
-    virtual std::string   instrument(void) const = 0;
-    virtual double        ontime(void) const = 0;
-    virtual double        livetime(void) const = 0;
-    virtual double        deadc(const GTime& time) const = 0;
-    virtual void          read(const GXmlElement& xml) = 0;
-    virtual void          write(GXmlElement& xml) const = 0;
-    virtual std::string   print(const GChatter& chatter = NORMAL) const = 0;
-
-    // Virtual methods
-    virtual double        model(const GModels& models, const GEvent& event,
-                                GVector* gradient = NULL) const;
-    virtual double        npred(const GModels& models, GVector* gradient = NULL) const;
+    virtual void             clear(void) = 0;
+    virtual GObservation*    clone(void) const = 0;
+    virtual void             response(const GResponse& rsp) = 0;
+    virtual const GResponse& response(void) const = 0;
+    virtual std::string      instrument(void) const = 0;
+    virtual double           ontime(void) const = 0;
+    virtual double           livetime(void) const = 0;
+    virtual double           deadc(const GTime& time) const = 0;
+    virtual void             read(const GXmlElement& xml) = 0;
+    virtual void             write(GXmlElement& xml) const = 0;
+    virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
 
     // Implemented methods
-    void                  name(const std::string& name);
-    void                  id(const std::string& id);
-    void                  events(const GEvents* events);
-    void                  statistics(const std::string& statistics);
-    const std::string&    name(void) const { return m_name; }
-    const std::string&    id(void) const { return m_id; }
-    const GEvents*        events(void) const;
-    const std::string&    statistics(void) const { return m_statistics; }
-
-    // Other methods
-    virtual double model_grad(const GModel& model, const GEvent& event, int ipar) const;
-    virtual double npred_grad(const GModel& model, int ipar) const;
+    void               name(const std::string& name);
+    void               id(const std::string& id);
+    void               events(const GEvents& events);
+    void               statistics(const std::string& statistics);
+    const std::string& name(void) const;
+    const std::string& id(void) const;
+    const GEvents*     events(void) const;
+    const std::string& statistics(void) const;
+    virtual double     model(const GModels& models,
+                             const GEvent&  event,
+                             GVector*       gradient = NULL) const;
+    virtual double     npred(const GModels& models,
+                             GVector*       gradient = NULL) const;
+    virtual double     model_grad(const GModel& model,
+                                  const GEvent& event,
+                                  const int&    ipar) const;
+    virtual double     npred_grad(const GModel& model,
+                                  const int&    ipar) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GObservation& obs);
     void free_members(void);
-
 
     // Model gradient kernel classes
     class model_func : public GFunction {
@@ -119,7 +117,7 @@ protected:
                    m_model(&model),
                    m_event(&event),
                    m_ipar(ipar) { }
-        double eval(double x);
+        double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
@@ -138,7 +136,7 @@ protected:
                         const GModel*       model) :
                         m_parent(parent),
                         m_model(model) { }
-        double eval(double x);
+        double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to source model
@@ -152,7 +150,7 @@ protected:
                         m_parent(parent),
                         m_model(model),
                         m_time(obsTime) { }
-        double eval(double x);
+        double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to source model
@@ -167,8 +165,8 @@ protected:
                    int                 ipar) :
                    m_parent(parent),
                    m_model(&model),
-                   m_ipar(ipar) { return; }
-        double eval(double x);
+                   m_ipar(ipar) { }
+        double eval(const double& x);
     protected:
         const GObservation* m_parent; //!< Pointer to parent
         const GModel*       m_model;  //!< Pointer to model
@@ -176,10 +174,91 @@ protected:
     };
 
     // Protected data area
-    std::string m_name;         //!< Name of observation
-    std::string m_id;           //!< Observation identifier
-    std::string m_statistics;   //!< Optimizer statistics (default=poisson)
-    GEvents*    m_events;       //!< Pointer to event container
+    std::string m_name;        //!< Observation name
+    std::string m_id;          //!< Observation identifier
+    std::string m_statistics;  //!< Optimizer statistics (default=Poisson)
+    GEvents*    m_events;      //!< Pointer to event container
 };
+
+
+/***********************************************************************//**
+ * @brief Set observation name
+ *
+ * @param[in] name Observation name.
+ *
+ * Set name of the observation.
+ ***************************************************************************/
+inline
+void GObservation::name(const std::string& name)
+{
+    m_name = name;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set observation identifier
+ *
+ * @param[in] id Observation identifier.
+ *
+ * Set identifier of the observation.
+ ***************************************************************************/
+inline
+void GObservation::id(const std::string& id)
+{
+    m_id = id;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Set optimizer statistics
+ *
+ * @param[in] statistics Optimizer statistics.
+ *
+ * Set optimizer statistics for the observation.
+ ***************************************************************************/
+inline
+void GObservation::statistics(const std::string& statistics)
+{
+    m_statistics = statistics;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation name
+ *
+ * @return Observation name.
+ ***************************************************************************/
+inline
+const std::string& GObservation::name(void) const
+{
+    return (m_name);
+}
+
+
+/***********************************************************************//**
+ * @brief Return observation identifier
+ *
+ * @return Observation identifier.
+ ***************************************************************************/
+inline
+const std::string& GObservation::id(void) const
+{
+    return (m_id);
+}
+
+
+/***********************************************************************//**
+ * @brief Return optimizer statistics
+ *
+ * @return Optimizer statistics.
+ ***************************************************************************/
+inline
+const std::string& GObservation::statistics(void) const
+{
+    return (m_statistics);
+}
 
 #endif /* GOBSERVATION_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATResponse.i - Fermi-LAT response class                *
+ *                 GLATResponse.i - Fermi/LAT Response class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATResponse.i
- * @brief Fermi-LAT response class interface definition
+ * @brief Fermi/LAT Response class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,10 +32,9 @@
 /***********************************************************************//**
  * @class GLATResponse
  *
- * @brief Fermi-LAT response class
+ * @brief Fermi/LAT Response class
  ***************************************************************************/
 class GLATResponse : public GResponse {
-
 public:
     // Constructors and destructors
     GLATResponse(void);
@@ -59,17 +58,17 @@ public:
                        const GObservation& obs) const;
 
     // Other Methods
-    void        caldb(const std::string& caldb);
-    std::string caldb(void) const;
-    std::string rspname(void) const;
-    void        load(const std::string& rspname);
-    int         size(void) const;
-    GLATAeff*   aeff(const int& index) const;
-    GLATPsf*    psf(const int& index) const;
-    GLATEdisp*  edisp(const int& index) const;
-    void        save(const std::string& rspname) const;
-    bool        force_mean(void);
-    void        force_mean(const bool& value);
+    int                size(void) const;
+    void               caldb(const std::string& caldb);
+    const std::string& caldb(void) const;
+    const std::string& rspname(void) const;
+    void               load(const std::string& rspname);
+    void               save(const std::string& rspname) const;
+    const bool&        force_mean(void) const;
+    void               force_mean(const bool& value);
+    GLATAeff*          aeff(const int& index) const;
+    GLATPsf*           psf(const int& index) const;
+    GLATEdisp*         edisp(const int& index) const;
 
     // Reponse methods
     double irf(const GLATEventAtom& event,

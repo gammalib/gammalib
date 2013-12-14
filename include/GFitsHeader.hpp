@@ -1,5 +1,5 @@
 /***************************************************************************
- *               GFitsHeader.hpp - FITS header handling class              *
+ *            GFitsHeader.hpp - FITS header cards container class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsHeader.hpp
- * @brief FITS header class definition
+ * @brief FITS header cards container class definition
  * @author Juergen Knoedlseder
  */
 
@@ -28,7 +28,9 @@
 #define GFITSHEADER_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GBase.hpp"
+#include <string>
+#include <vector>
+#include "GContainer.hpp"
 #include "GFitsHeaderCard.hpp"
 
 
@@ -37,13 +39,13 @@
  *
  * @brief Interface for FITS header class
  *
- * The FITS header class contains all cards that are found in the header of
- * a HDU. All cards will be hold in memory, so no link to a FITS file is
- * required. Cards may be read from one file (using the 'open' method) and
- * saved into another file (using the 'save' method). Cards are added or
- * changed using the 'update' method.
+ * The FITS header class is a container class for header cards.
+ *
+ * All cards of a FITS file extension will be held in memory, so no link to
+ * a FITS file is required. Cards are read from a file using the load()
+ * method, and cards are saved into a file using the save() method.
  ***************************************************************************/
-class GFitsHeader : public GBase {
+class GFitsHeader : public GContainer {
 
 public:
     // Constructors and destructors
@@ -52,38 +54,174 @@ public:
     virtual ~GFitsHeader(void);
 
     // Operators
-    GFitsHeader& operator= (const GFitsHeader& header);
+    GFitsHeader&           operator=(const GFitsHeader& header);
+    GFitsHeaderCard&       operator[](const int& cardno);
+    const GFitsHeaderCard& operator[](const int& cardno) const;
+    GFitsHeaderCard&       operator[](const std::string& keyname);
+    const GFitsHeaderCard& operator[](const std::string& keyname) const;
 
     // Methods
-    void             clear(void);
-    GFitsHeader*     clone(void) const;
-    int              size(void) const;
-    void             open(void* vptr);
-    void             save(void* vptr);
-    void             close(void);
-    bool             hascard(const std::string& keyname) const;
-    bool             hascard(const int& cardno) const;
-    void             update(const GFitsHeaderCard& card);
-    GFitsHeaderCard* card(const std::string& keyname);
-    GFitsHeaderCard* card(const int& cardno);
-    std::string      string(const std::string& keyname);
-    std::string      string(const int& cardno);
-    double           real(const std::string& keyname);
-    double           real(const int& cardno);
-    int              integer(const std::string& keyname);
-    int              integer(const int& cardno);
-    std::string      print(const GChatter& chatter = NORMAL) const;
+    void                   clear(void);
+    GFitsHeader*           clone(void) const;
+    GFitsHeaderCard&       at(const int& cardno);
+    const GFitsHeaderCard& at(const int& cardno) const;
+    GFitsHeaderCard&       at(const std::string& keyname);
+    const GFitsHeaderCard& at(const std::string& keyname) const;
+    std::string            string(const int& cardno) const;
+    std::string            string(const std::string& keyname) const;
+    double                 real(const int& cardno) const;
+    double                 real(const std::string& keyname) const;
+    int                    integer(const int& cardno) const;
+    int                    integer(const std::string& keyname) const;
+    int                    size(void) const;
+    bool                   isempty(void) const;
+    GFitsHeaderCard&       append(const GFitsHeaderCard& card);
+    GFitsHeaderCard&       insert(const int& cardno, const GFitsHeaderCard& card);
+    GFitsHeaderCard&       insert(const std::string& keyname, const GFitsHeaderCard& card);
+    void                   remove(const int& cardno);
+    void                   remove(const std::string& keyname);
+    void                   reserve(const int& num);
+    void                   extend(const GFitsHeader& header);
+    bool                   contains(const int& cardno) const;
+    bool                   contains(const std::string& keyname) const;
+    void                   load(void* vptr);
+    void                   save(void* vptr) const;
+    std::string            print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Private methods
-    void             init_members(void);
-    void             copy_members(const GFitsHeader& header);
-    void             free_members(void);
-    GFitsHeaderCard* card_ptr(const std::string& keyname) const;
+    void init_members(void);
+    void copy_members(const GFitsHeader& header);
+    void free_members(void);
+    int  get_index(const std::string& keyname) const;
 
     // Private data area
-    int              m_num_cards;
-    GFitsHeaderCard* m_card;
+    std::vector<GFitsHeaderCard> m_cards; //!< Header cards
 };
+
+
+/***********************************************************************//**
+ * @brief Return header card
+ *
+ * @param[in] cardno Number of card in header [0,...,size()-1]
+ * @return Header card.
+ ***************************************************************************/
+inline
+GFitsHeaderCard& GFitsHeader::operator[](const int& cardno)
+{
+    return (m_cards[cardno]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to model (const version)
+ *
+ * @param[in] cardno Number of card in header [0,...,size()-1]
+ * @return Header card.
+ ***************************************************************************/
+inline
+const GFitsHeaderCard& GFitsHeader::operator[](const int& cardno) const
+{
+    return (m_cards[cardno]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card
+ *
+ * @param[in] keyname Name of header card
+ * @return Header card.
+ ***************************************************************************/
+inline
+GFitsHeaderCard& GFitsHeader::operator[](const std::string& keyname)
+{
+    return (at(keyname));
+}
+
+
+/***********************************************************************//**
+ * @brief Return header card (const version)
+ *
+ * @param[in] keyname Name of header card
+ * @return Header card.
+ ***************************************************************************/
+inline
+const GFitsHeaderCard& GFitsHeader::operator[](const std::string& keyname) const
+{
+    return (at(keyname));
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of cards in header
+ *
+ * @return Number of cards in header.
+ *
+ * Returns the number of cards in the extension header.
+ ***************************************************************************/
+inline
+int GFitsHeader::size(void) const
+{
+    return (m_cards.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if there are no cards in the FITS header
+ *
+ * @return True if there are no cards in the FITS header, false otherwise
+ *
+ * Signals if there are no cards in the FITS header.
+ ***************************************************************************/
+inline
+bool GFitsHeader::isempty(void) const
+{
+    return (m_cards.empty());
+}
+
+
+/***********************************************************************//**
+ * @brief Reserves space for cards in FITS header
+ *
+ * @param[in] num Number of cards
+ *
+ * Reserves space for @p num cards in the FITS header.
+ ***************************************************************************/
+inline
+void GFitsHeader::reserve(const int& num)
+{
+    m_cards.reserve(num);
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check if card is present in header
+ *
+ * @param[in] cardno Number of card in header.
+ * @return True of card exists, false otherwise.
+ *
+ * Signals whether a card with specified card number exists in header.
+ ***************************************************************************/
+inline
+bool GFitsHeader::contains(const int& cardno) const
+{
+    return (cardno >= 0 && cardno < size());
+}
+
+
+/***********************************************************************//**
+ * @brief Check if card is present in header
+ *
+ * @param[in] keyname Name of header card.
+ * @return True of card exists, false otherwise.
+ *
+ * Signals whether a card with specified @p keyname exists in header.
+ ***************************************************************************/
+inline
+bool GFitsHeader::contains(const std::string& keyname) const
+{
+    return (get_index(keyname) != -1);
+}
 
 #endif /* GFITSHEADER_HPP */

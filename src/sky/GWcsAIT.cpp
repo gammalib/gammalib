@@ -30,11 +30,11 @@
 #endif
 #include "GException.hpp"
 #include "GMath.hpp"
+#include "GTools.hpp"
 #include "GWcsAIT.hpp"
 #include "GWcsRegistry.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_PRJ_SET                                        "GWcsAIT::prj_set()"
 #define G_PRJ_X2S    "GWcsAIT::prj_x2s(int, int, int, int, double*, double*,"\
                                                    " double*, double*, int*)"
 #define G_PRJ_S2X    "GWcsAIT::prj_s2x(int, int, int, int, double*, double*,"\
@@ -45,6 +45,7 @@
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_DEBUG_PRJ                             //!< Debug GWcsAIT::prj_x2s
 
 /* __ Local prototypes ___________________________________________________ */
 
@@ -64,7 +65,7 @@ const GWcsRegistry g_wcs_ait_registry(&g_wcs_ait_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsAIT::GWcsAIT(void) : GWcslib()
+GWcsAIT::GWcsAIT(void) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -89,7 +90,7 @@ GWcsAIT::GWcsAIT(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2) :
-                 GWcslib(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
+                 GWcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
 
 {
     // Initialise class members
@@ -105,7 +106,7 @@ GWcsAIT::GWcsAIT(const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsAIT::GWcsAIT(const GWcsAIT& wcs) : GWcslib(wcs)
+GWcsAIT::GWcsAIT(const GWcsAIT& wcs) : GWcs(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -149,7 +150,7 @@ GWcsAIT& GWcsAIT::operator=(const GWcsAIT& wcs)
     if (this != &wcs) {
 
         // Copy base class members
-        this->GWcslib::operator=(wcs);
+        this->GWcs::operator=(wcs);
 
         // Free members
         free_members();
@@ -182,12 +183,12 @@ void GWcsAIT::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GWcslib::free_members();
     this->GWcs::free_members();
+    this->GSkyProjection::free_members();
 
     // Initialise members
+    this->GSkyProjection::init_members();
     this->GWcs::init_members();
-    this->GWcslib::init_members();
     init_members();
 
     // Return
@@ -305,7 +306,9 @@ void GWcsAIT::prj_set(void) const
     m_w.assign(4, 0.0);
     
     // Set undefined parameters
-    if (m_r0 == 0.0) m_r0 = gammalib::rad2deg;
+    if (m_r0 == 0.0) {
+        m_r0 = gammalib::rad2deg;
+    }
     
     // Precompute 
     m_w[0] = 2.0 * m_r0 * m_r0;
@@ -325,7 +328,7 @@ void GWcsAIT::prj_set(void) const
 
 
 /***********************************************************************//**
- * @brief Cartesian-to-spherical deprojection
+ * @brief Pixel-to-spherical deprojection
  *
  * @param[in] nx X vector length.
  * @param[in] ny Y vector length (0=no replication).
@@ -343,13 +346,13 @@ void GWcsAIT::prj_set(void) const
  *            One or more of the (x,y) coordinates were invalid, as indicated
  *            by the stat vector.
  *
- * Deproject Cartesian (x,y) coordinates in the plane of projection to native
+ * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
  * This method has been adapted from the wcslib function prj.c::aitx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt, 
                       const double* x, const double* y,
@@ -416,6 +419,19 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
                     istat  = 1;
                     status = 3;
                     n_invalid++;
+                    #if defined(G_DEBUG_PRJ)
+                    std::cout << "prj_x2s(Phi)..:";
+                    std::cout << " nx=" << nx;
+                    std::cout << " ny=" << ny;
+                    std::cout << " ix=" << ix;
+                    std::cout << " iy=" << iy;
+                    std::cout << " yp=" << *yp;
+                    std::cout << " yj=" << yj;
+                    std::cout << " yj2=" << yj2;
+                    std::cout << " phip=" << *phip;
+                    std::cout << " s=" << s;
+                    std::cout << std::endl;
+                    #endif
                 }
                 s = 0.5;
             }
@@ -433,9 +449,22 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
             double t = z*yj/m_r0;
             if (std::abs(t) > 1.0) {
                 if (fabs(t) > 1.0+tol) {
-                    istat  = 1;
-                    status = 3;
-                    n_invalid++;
+                    if (istat == 0) {
+                        istat  = 1;
+                        status = 3;
+                        n_invalid++;
+                    }
+                    #if defined(G_DEBUG_PRJ)
+                    std::cout << "prj_x2s(Theta):";
+                    std::cout << " x0=" << x0;
+                    std::cout << " y0=" << y0;
+                    std::cout << " phip=" << *phip;
+                    std::cout << " z=" << z;
+                    std::cout << " yj=" << yj;
+                    std::cout << " m_r0=" << m_r0;
+                    std::cout << " t=" << t;
+                    std::cout << std::endl;
+                    #endif
                 }
                 t = (t < 0) ? -90.0 : 90.0;
             }
@@ -458,7 +487,7 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
 
 
 /***********************************************************************//**
- * @brief Generic spherical-to-Cartesian projection
+ * @brief Generic spherical-to-pixel projection
  *
  * @param[in] nphi Longitude vector length.
  * @param[in] ntheta Latitude vector length (0=no replication).
@@ -476,13 +505,13 @@ void GWcsAIT::prj_x2s(int nx, int ny, int sxy, int spt,
  *            One or more of the (phi,theta) coordinates were invalid, as
  *            indicated by the stat vector.
  *
- * Project native spherical coordinates (phi,theta) to Cartesian (x,y)
+ * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
  *
  * This method has been adapted from the wcslib function prj.c::aits2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsAIT::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,

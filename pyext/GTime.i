@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GTime.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -53,7 +52,7 @@ public:
     GTime*         clone(void) const;
     double         jd(void) const;
     double         mjd(void) const;
-    double         secs(void) const;
+    const double&  secs(void) const;
     double         days(void) const;
     double         convert(const GTimeReference& ref) const;
     void           jd(const double& time);

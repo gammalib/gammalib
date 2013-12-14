@@ -31,7 +31,6 @@
 #include <string>
 #include <vector>
 #include "GBase.hpp"
-#include "GLATPointing.hpp"
 #include "GLATResponseTable.hpp"
 #include "GLATEfficiency.hpp"
 #include "GFits.hpp"
@@ -55,42 +54,42 @@ class GLATAeff : public GBase {
 public:
     // Constructors and destructors
     GLATAeff(void);
-    GLATAeff(const std::string& filename);
+    explicit GLATAeff(const std::string& filename);
     GLATAeff(const GLATAeff& aeff);
     virtual ~GLATAeff(void);
 
     // Operators
-    GLATAeff& operator= (const GLATAeff& aeff);
-    double    operator() (const double& logE, const double& ctheta);
-    double    operator() (const double& logE, const double& ctheta, const double& phi);
-    double    operator() (const GSkyDir& srcDir, const GEnergy& srcEng,
-                          const GTime& srcTime, const GLATPointing& pnt);
+    GLATAeff& operator=(const GLATAeff& aeff);
+    double    operator()(const double& logE, const double& ctheta);
+    double    operator()(const double& logE, const double& ctheta,
+                         const double& phi);
 
     // Methods
-    void         clear(void);
-    GLATAeff*    clone(void) const;
-    void         load(const std::string& filename);
-    void         save(const std::string& filename, bool clobber = false);
-    void         read(const GFits* file);
-    void         write(GFits& file) const;
-    int          size(void) const { return nenergies()*ncostheta(); }
-    int          nenergies(void) const { return m_aeff_bins.nenergies(); }
-    int          ncostheta(void) const { return m_aeff_bins.ncostheta(); }
-    double       costhetamin(void) const { return m_min_ctheta; }
-    void         costhetamin(const double& ctheta);
-    bool         hasphi(void) const { return false; }
-    bool         hasefficiency(void) const;
-    double       efficiency_factor1(const GEnergy& srcEng) const;
-    double       efficiency_factor2(const GEnergy& srcEng) const;
-    std::string  print(const GChatter& chatter = NORMAL) const;
+    void          clear(void);
+    GLATAeff*     clone(void) const;
+    void          load(const std::string& filename);
+    void          save(const std::string& filename,
+                       const bool &clobber = false);
+    void          read(const GFits& file);
+    void          write(GFits& file) const;
+    int           size(void) const;
+    int           nenergies(void) const;
+    int           ncostheta(void) const;
+    const double& costhetamin(void) const;
+    void          costhetamin(const double& ctheta);
+    bool          hasphi(void) const;
+    bool          hasefficiency(void) const;
+    double        efficiency_factor1(const GEnergy& srcEng) const;
+    double        efficiency_factor2(const GEnergy& srcEng) const;
+    std::string   print(const GChatter& chatter = NORMAL) const;
 
 private:
     // Methods
     void init_members(void);
     void copy_members(const GLATAeff& aeff);
     void free_members(void);
-    void read_aeff(const GFitsTable* hdu);
-    void read_efficiency(const GFitsTable* hdu);
+    void read_aeff(const GFitsTable& hdu);
+    void read_efficiency(const GFitsTable& hdu);
     void write_aeff(GFits& file) const;
     void write_efficiency(GFits& file) const;
     
@@ -103,5 +102,78 @@ private:
     GLATEfficiency*     m_eff_func1;    //!< Efficiency functor 1
     GLATEfficiency*     m_eff_func2;    //!< Efficiency functor 2
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in effective area response
+ *
+ * @return Number of bins in effective area response.
+ ***************************************************************************/
+inline
+int GLATAeff::size(void) const
+{
+    return nenergies()*ncostheta();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of energies in effective area response
+ *
+ * @return Number of energies in effective area response.
+ ***************************************************************************/
+inline
+int GLATAeff::nenergies(void) const
+{
+    return m_aeff_bins.nenergies();
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of cosine theta bins in effective area response
+ *
+ * @return Number of cosine theta bins in effective area response.
+ ***************************************************************************/
+inline
+int GLATAeff::ncostheta(void) const
+{
+    return m_aeff_bins.ncostheta();
+}
+
+
+/***********************************************************************//**
+ * @brief Return cosine theta minimum
+ *
+ * @return Cosine theta minimum.
+ ***************************************************************************/
+inline
+const double& GLATAeff::costhetamin(void) const
+{
+    return m_min_ctheta;
+}
+
+
+/***********************************************************************//**
+ * @brief Set minimum cos(theta) angle for effective area access
+ *
+ * @param[in] ctheta Cosine of maximum zenith angle.
+ ***************************************************************************/
+inline
+void GLATAeff::costhetamin(const double& ctheta)
+{
+    m_min_ctheta = ctheta;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal that effective area has Phi dependence
+ *
+ * @return True if effective area has Phi dependence.
+ ***************************************************************************/
+inline
+bool GLATAeff::hasphi(void) const
+{
+    return false;
+}
 
 #endif /* GLATAEFF_HPP */

@@ -43,26 +43,26 @@ public:
     virtual ~GCTAOnOffObservations(void);
 
     // Methods
-    void                        clear(void);
-    GCTAOnOffObservations*      clone(void) const;
-    GCTAOnOffObservation*       at(const int& index);
-    int                         size(void) const;
-    bool                        isempty(void) const;
-    GCTAOnOffObservation*       set(const int& index, const GCTAOnOffObservation& obs);
-    GCTAOnOffObservation*       append(const GCTAOnOffObservation& obs);
-    GCTAOnOffObservation*       insert(const int& index, const GCTAOnOffObservation& obs);
-    void                        remove(const int& index);
-    void                        reserve(const int& num);
-    void                        extend(const GCTAOnOffObservations& obs);
-    bool                        contains(const std::string& instrument,
-                                         const std::string& id) const;
-	void                        load(const std::string& filename);
-    void                        save(const std::string& filename) const;
-    void                        read(const GXml& xml);
-    void                        write(GXml& xml) const;
-	void                        models(const GModels& models);
-    void                        models(const std::string& filename);
-    const GModels&              models(void) const;	
+    void                   clear(void);
+    GCTAOnOffObservations* clone(void) const;
+    GCTAOnOffObservation*  at(const int& index);
+    int                    size(void) const;
+    bool                   isempty(void) const;
+    GCTAOnOffObservation*  set(const int& index, const GCTAOnOffObservation& obs);
+    GCTAOnOffObservation*  append(const GCTAOnOffObservation& obs);
+    GCTAOnOffObservation*  insert(const int& index, const GCTAOnOffObservation& obs);
+    void                   remove(const int& index);
+    void                   reserve(const int& num);
+    void                   extend(const GCTAOnOffObservations& obs);
+    bool                   contains(const std::string& instrument,
+                                    const std::string& id) const;
+	void                   load(const std::string& filename);
+    void                   save(const std::string& filename) const;
+    void                   read(const GXml& xml);
+    void                   write(GXml& xml) const;
+	void                   models(const GModels& models);
+    void                   models(const std::string& filename);
+    const GModels&         models(void) const;	
 };
 
 

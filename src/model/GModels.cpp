@@ -265,10 +265,12 @@ GModels* GModels::clone(void) const
  ***************************************************************************/
 GModel* GModels::at(const int& index)
 {
-    // Raise exception if index is out of range
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Model index", index, size());
     }
+    #endif
 
     // Return pointer
     return m_models[index];
@@ -287,10 +289,12 @@ GModel* GModels::at(const int& index)
  ***************************************************************************/
 const GModel* GModels::at(const int& index) const
 {
-    // Raise exception if index is out of range
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
     if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_AT, index, 0, size()-1);
+        throw GException::out_of_range(G_AT, "Model index", index, size());
     }
+    #endif
 
     // Return pointer
     return m_models[index];

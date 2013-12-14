@@ -105,7 +105,7 @@ protected:
                  m_dist(dist),
                  m_cosdist(std::cos(dist)),
                  m_sindist(std::sin(dist)) { }
-        double eval(double r);
+        double eval(const double& r);
     protected:
         const GCTAModelRadial* m_parent;   //!< Pointer to radial model
         double                 m_roi;      //!< ROI radius in radians

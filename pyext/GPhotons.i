@@ -76,9 +76,6 @@ public:
             throw GException::out_of_range("__setitem__(int)", index, self->size());
         }
     }
-    int __len__() {
-        return (self->size());
-    }
     GPhotons copy() {
         return (*self);
     }

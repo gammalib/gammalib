@@ -1,7 +1,7 @@
 /***************************************************************************
- *            GCOMObservation.i  -  COMPTEL observation class              *
+ *             GCOMObservation.i - COMPTEL observation class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,17 +46,16 @@ public:
     virtual ~GCOMObservation(void);
 
     // Implement pure virtual methods
-    virtual void             clear(void);
-    virtual GCOMObservation* clone(void) const;
-    virtual void             response(const GResponse& rsp);
-    virtual GCOMResponse*    response(void) const;
-    virtual GCOMPointing*    pointing(void) const;
-    virtual std::string      instrument(void) const;
-    virtual double           ontime(void) const;
-    virtual double           livetime(void) const;
-    virtual double           deadc(const GTime& time) const;
-    virtual void             read(const GXmlElement& xml);
-    virtual void             write(GXmlElement& xml) const;
+    virtual void                clear(void);
+    virtual GCOMObservation*    clone(void) const;
+    virtual void                response(const GResponse& rsp);
+    virtual const GCOMResponse& response(void) const;
+    virtual std::string         instrument(void) const;
+    virtual double              ontime(void) const;
+    virtual double              livetime(void) const;
+    virtual double              deadc(const GTime& time) const;
+    virtual void                read(const GXmlElement& xml);
+    virtual void                write(GXmlElement& xml) const;
 
     // Other methods
     void           load(const std::string& drename,

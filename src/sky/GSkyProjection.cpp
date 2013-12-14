@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GPointing.cpp  -  Pointing interface class               *
+ *          GSkyProjection.cpp - Abstract sky projection base class        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPointing.cpp
- * @brief Pointing abstract base class implementation
+ * @file GSkyProjection.cpp
+ * @brief Abstract sky projection base class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -28,9 +28,12 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
-#include "GPointing.hpp"
+#include "GException.hpp"
+#include "GTools.hpp"
+#include "GSkyProjection.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_COORDSYS_SET                "GSkyProjection::coordsys(std::string)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -38,6 +41,9 @@
 
 /* __ Debug definitions __________________________________________________ */
 
+/* __ Local prototypes ___________________________________________________ */
+
+/* __ Constants __________________________________________________________ */
 
 
 /*==========================================================================
@@ -47,9 +53,9 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
-GPointing::GPointing(void)
+GSkyProjection::GSkyProjection(void)
 {
     // Initialise class members
     init_members();
@@ -62,15 +68,15 @@ GPointing::GPointing(void)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] pnt Pointing from which the instance should be built.
+ * @param[in] proj Sky projection.
  ***************************************************************************/
-GPointing::GPointing(const GPointing& pnt)
+GSkyProjection::GSkyProjection(const GSkyProjection& proj)
 {
     // Initialise class members
     init_members();
 
     // Copy members
-    copy_members(pnt);
+    copy_members(proj);
 
     // Return
     return;
@@ -80,7 +86,7 @@ GPointing::GPointing(const GPointing& pnt)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GPointing::~GPointing(void)
+GSkyProjection::~GSkyProjection(void)
 {
     // Free members
     free_members();
@@ -99,21 +105,22 @@ GPointing::~GPointing(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] pnt Pointing which should be assigned.
+ * @param[in] proj Sky projection.
+ * @return Sky projection.
  ***************************************************************************/
-GPointing& GPointing::operator= (const GPointing& pnt)
+GSkyProjection& GSkyProjection::operator= (const GSkyProjection& proj)
 {
     // Execute only if object is not identical
-    if (this != &pnt) {
+    if (this != &proj) {
 
         // Free members
         free_members();
 
-        // Initialise private members
+        // Initialise private members for clean destruction
         init_members();
 
         // Copy members
-        copy_members(pnt);
+        copy_members(proj);
 
     } // endif: object was not identical
 
@@ -128,18 +135,108 @@ GPointing& GPointing::operator= (const GPointing& pnt)
  =                                                                         =
  ==========================================================================*/
 
+/***********************************************************************//**
+ * @brief Returns coordinate system.
+ *
+ * @return Coordinate system string.
+ *
+ * Returns one of 
+ * 'EQU' (equatorial),
+ * 'GAL' (galactic),
+ * 'ECL' (ecliptic),
+ * 'HEL' (helioecliptic), and
+ * 'SGL' (supergalactic).
+ ***************************************************************************/
+std::string GSkyProjection::coordsys(void) const
+{
+    // Set coordinate system
+    std::string s_coordsys;
+    switch (m_coordsys) {
+    case 0:
+        s_coordsys = "EQU";
+        break;
+    case 1:
+        s_coordsys = "GAL";
+        break;
+    case 2:
+        s_coordsys = "ECL";
+        break;
+    case 3:
+        s_coordsys = "HEL";
+        break;
+    case 4:
+        s_coordsys = "SGL";
+        break;
+    default:
+        s_coordsys = "UNKNOWN";
+        break;
+    }
+
+    // Return coordinate system
+    return s_coordsys;
+}
+
+
+/***********************************************************************//**
+ * @brief Set coordinate system
+ *
+ * @param[in] coordsys Coordinate system
+ *
+ * @exception GException::wcs_bad_coords
+ *            Invalid coordsys parameter.
+ *
+ * Set coordinate system from std::string. The method recognizes the
+ * following codes:
+ * 'EQU', 'CEL', 'C': celestial,
+ * 'GAL', 'G': galactic,
+ * 'ECL', 'E': ecliptic,
+ * 'HEL', 'H': helioecliptic, and
+ * 'SGL', 'S': helioecliptic.
+ ***************************************************************************/
+void GSkyProjection::coordsys(const std::string& coordsys)
+{
+    // Convert argument to upper case
+    std::string ucoordsys = gammalib::toupper(coordsys);
+
+    // Set coordinate system
+    if (ucoordsys == "EQU" || ucoordsys == "CEL" || ucoordsys == "C") {
+        m_coordsys = 0;
+    }
+    else if (ucoordsys == "GAL" || ucoordsys == "G") {
+        m_coordsys = 1;
+    }
+    else if (ucoordsys == "ECL" || ucoordsys == "E") {
+        m_coordsys = 2;
+    }
+    else if (ucoordsys == "HEL" || ucoordsys == "H") {
+        m_coordsys = 3;
+    }
+    else if (ucoordsys == "SGL" || ucoordsys == "S") {
+        m_coordsys = 4;
+    }
+    else {
+        throw GException::wcs_bad_coords(G_COORDSYS_SET, coordsys);
+    }
+
+    // Return
+    return;
+}
+
 
 /*==========================================================================
  =                                                                         =
- =                             Private methods                             =
+ =                            Protected methods                            =
  =                                                                         =
  ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GPointing::init_members(void)
+void GSkyProjection::init_members(void)
 {
+    // Initialise members
+    m_coordsys = 0;
+
     // Return
     return;
 }
@@ -148,10 +245,13 @@ void GPointing::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] pnt Pointing from which members should be copied.
+ * @param[in] proj Sky projection.
  ***************************************************************************/
-void GPointing::copy_members(const GPointing& pnt)
+void GSkyProjection::copy_members(const GSkyProjection& proj)
 {
+    // Copy attributes
+    m_coordsys = proj.m_coordsys;
+
     // Return
     return;
 }
@@ -160,8 +260,42 @@ void GPointing::copy_members(const GPointing& pnt)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GPointing::free_members(void)
+void GSkyProjection::free_members(void)
 {
     // Return
     return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                                 Friends                                 =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Equality operator
+ *
+ * @param[in] a First sky projection.
+ * @param[in] b Second sky projection.
+ * @return True if @p a and @p b are identical.
+ ***************************************************************************/
+bool operator==(const GSkyProjection &a, const GSkyProjection &b)
+{
+    // Return result
+    return a.compare(b);
+}
+
+
+/***********************************************************************//**
+ * @brief Non-equality operator
+ *
+ * @param[in] a First sky projection.
+ * @param[in] b Second sky projection.
+ * @return True if @p a and @p b are not identical.
+ ***************************************************************************/
+bool operator!=(const GSkyProjection &a, const GSkyProjection &b)
+{
+    // Return result
+    return !(a == b);
 }

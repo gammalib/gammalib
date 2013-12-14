@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GCTAPointing.cpp  -  CTA pointing class                 *
+ *                  GCTAPointing.cpp - CTA pointing class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAPointing.cpp
- * @brief CTA pointing class interface implementation
+ * @brief CTA pointing class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -50,7 +50,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GCTAPointing::GCTAPointing(void) : GPointing()
+GCTAPointing::GCTAPointing(void)
 {
     // Initialise members
     init_members();
@@ -67,7 +67,7 @@ GCTAPointing::GCTAPointing(void) : GPointing()
  *
  * Construct CTA pointing from sky direction.
  ***************************************************************************/
-GCTAPointing::GCTAPointing(const GSkyDir& dir) : GPointing()
+GCTAPointing::GCTAPointing(const GSkyDir& dir)
 {
     // Initialise members
     init_members();
@@ -85,7 +85,7 @@ GCTAPointing::GCTAPointing(const GSkyDir& dir) : GPointing()
  *
  * @param[in] pnt CTA pointing.
  ***************************************************************************/
-GCTAPointing::GCTAPointing(const GCTAPointing& pnt) : GPointing(pnt)
+GCTAPointing::GCTAPointing(const GCTAPointing& pnt)
 {
     // Initialise members
     init_members();
@@ -121,14 +121,12 @@ GCTAPointing::~GCTAPointing(void)
  * @brief Assignment operator
  *
  * @param[in] pnt CTA pointing.
+ * @return CTA pointing.
  ***************************************************************************/
-GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
+GCTAPointing& GCTAPointing::operator=(const GCTAPointing& pnt)
 {
     // Execute only if object is not identical
     if (this != &pnt) {
-
-        // Copy base class members
-        this->GPointing::operator=(pnt);
 
         // Free members
         free_members();
@@ -153,16 +151,14 @@ GCTAPointing& GCTAPointing::operator= (const GCTAPointing& pnt)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear CTA pointing
  ***************************************************************************/
 void GCTAPointing::clear(void)
 {
     // Free members
     free_members();
-    this->GPointing::free_members();
 
     // Initialise private members
-    this->GPointing::init_members();
     init_members();
 
     // Return
@@ -171,8 +167,10 @@ void GCTAPointing::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone CTA pointing
+ *
+ * @return Poiter to deep copy of CTA pointing.
+ ***************************************************************************/
 GCTAPointing* GCTAPointing::clone(void) const
 {
     return new GCTAPointing(*this);
@@ -181,7 +179,11 @@ GCTAPointing* GCTAPointing::clone(void) const
 
 /***********************************************************************//**
  * @brief Set pointing direction
-***************************************************************************/
+ *
+ * @param[in] dir Sky direction of pointing.
+ *
+ * Set the pointing direction to the specified @p sky direction.
+ ***************************************************************************/
 void GCTAPointing::dir(const GSkyDir& dir)
 {
     // Set sky direction
@@ -197,7 +199,9 @@ void GCTAPointing::dir(const GSkyDir& dir)
 
 /***********************************************************************//**
  * @brief Return rotation matrix
-***************************************************************************/
+ *
+ * @return Rotation matrix.
+ ***************************************************************************/
 const GMatrix& GCTAPointing::rot(void) const
 {
     // Update cache
@@ -227,7 +231,7 @@ std::string GCTAPointing::print(const GChatter& chatter) const
 
         // Append information
         result.append("\n"+gammalib::parformat("Pointing direction"));
-        result.append(this->dir().print(chatter));
+        result.append(this->dir().print(gammalib::reduce(chatter)));
 
     } // endif: chatter was not silent
 
@@ -313,10 +317,3 @@ void GCTAPointing::update(void) const
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                 Friends                                 =
- =                                                                         =
- ==========================================================================*/

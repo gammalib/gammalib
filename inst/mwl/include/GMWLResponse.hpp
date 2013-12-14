@@ -57,13 +57,13 @@ public:
     // Implemented pure virtual methods
     virtual void          clear(void);
     virtual GMWLResponse* clone(void) const;
-    virtual bool          hasedisp(void) const { return false; }
-    virtual bool          hastdisp(void) const { return false; }
+    virtual bool          hasedisp(void) const;
+    virtual bool          hastdisp(void) const;
     virtual double        irf(const GEvent&       event,
                               const GPhoton&      photon,
-                              const GObservation& obs) const { return 1.0; }
+                              const GObservation& obs) const;
     virtual double        npred(const GPhoton&      photon,
-                                const GObservation& obs) const { return 1.0; }
+                                const GObservation& obs) const;
     virtual std::string   print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -72,5 +72,61 @@ protected:
     void copy_members(const GMWLResponse& pnt);
     void free_members(void);
 };
+
+
+/***********************************************************************//**
+ * @brief Signal if response supports energy dispersion
+ *
+ * @return True if response supports energy dispersion.
+ ***************************************************************************/
+inline
+bool GMWLResponse::hasedisp(void) const
+{
+    return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if response supports time dispersion
+ *
+ * @return True if response supports time dispersion.
+ ***************************************************************************/
+inline
+bool GMWLResponse::hastdisp(void) const
+{
+    return false;
+}
+
+
+/***********************************************************************//**
+ * @brief Return instrument response function
+ *
+ * @param[in] event Event.
+ * @param[in] photon Photon.
+ * @param[in] obs Observation.
+ *
+ * @return Instrument response function (always 1).
+ ***************************************************************************/
+inline
+double GMWLResponse::irf(const GEvent& event, const GPhoton& photon,
+                         const GObservation& obs) const
+{
+    return 1.0;
+}
+
+
+/***********************************************************************//**
+ * @brief Return predicted number of events
+ *
+ * @param[in] photon Photon.
+ * @param[in] obs Observation.
+ *
+ * @return Instrument response function (always 1).
+ ***************************************************************************/
+inline
+double GMWLResponse::npred(const GPhoton& photon, const GObservation& obs) const
+{
+    return 1.0;
+}
 
 #endif /* GMWLRESPONSE_HPP */

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GPointing.i - Abstract pointing class                  *
+ *            numerics.cpp - Illustrates numerical class usage             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,39 +19,61 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GPointing.i
- * @brief Abstract pointing class Python interface definition.
+ * @file numerics.cpp
+ * @brief Illustrates numerical class usage
  * @author Juergen Knoedlseder
  */
-%{
-/* Put headers and other declarations here that are needed for compilation */
-#include "GPointing.hpp"
-#include "GTools.hpp"
-%}
+
+/* __ Includes ___________________________________________________________ */
+#include "GammaLib.hpp"
 
 
 /***********************************************************************//**
- * @class GPointing
+ * @brief Gaussian function
  *
- * @brief Abstract Pointing class
+ * This code illustrates the definition of a Gaussian function.
  ***************************************************************************/
-class GPointing : public GBase {
-
+class function : public GFunction {
 public:
-    // Constructors and destructors
-    GPointing(void);
-    GPointing(const GPointing& pnt);
-    virtual ~GPointing(void);
-
-    // Pure virtual methods
-    virtual void           clear(void) = 0;
-    virtual GPointing*     clone(void) const = 0;
-    virtual const GSkyDir& dir(void) const = 0;
+    function(const double& sigma) : m_a(1.0/(sigma*std::sqrt(gammalib::twopi))),
+                                    m_sigma(sigma) {}
+    double eval(const double& x) { return m_a*std::exp(-0.5*x*x/(m_sigma*m_sigma)); }
+protected:
+    double m_a;     //!< Amplitude parameter
+    double m_sigma; //!< Width parameter
 };
 
 
 /***********************************************************************//**
- * @brief GPointing class extension
+ * @brief Create XML file
+ *
+ * This code illustrates the creation of a XML file.
  ***************************************************************************/
-%extend GPointing {
-};
+int main(void) {
+
+    // Create instance of function
+    function fct(3.0);
+
+    // Create an integral object based on the function
+    GIntegral integral(&fct);
+
+    // Set relative integration precision
+    integral.eps(1.0e-8);
+
+    // Integrate over the interval [-10,10]
+    double result = integral.romb(-15.0, +15.0);
+
+    // Print result (should be basically 1)
+    std::cout << "Integral:       " << result << std::endl;
+
+    // Create a derivative object based on the function
+    GDerivative derivative(&fct);
+
+    // Print derivatives
+    std::cout << "Derivative(0):  " << derivative.value(0.0) << std::endl;
+    std::cout << "Derivative(3):  " << derivative.value(3.0) << std::endl;
+    std::cout << "Derivative(-3): " << derivative.value(-3.0) << std::endl;
+
+    // Exit
+    return 0;
+}

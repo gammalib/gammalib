@@ -45,3 +45,13 @@ public:
     virtual void remove(const int& index) = 0;
     virtual void reserve(const int& num) = 0;
 };
+
+
+/***********************************************************************//**
+ * @brief GContainer class extension
+ ***************************************************************************/
+%extend GContainer {
+    int __len__() {
+        return (self->size());
+    }
+};

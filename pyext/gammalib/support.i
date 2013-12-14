@@ -41,7 +41,7 @@
 
 /* __ Include interface classes __________________________________________ */
 %import(module="gammalib.base") "GBase.i";
-//%import(module="gammalib.base") "GContainer.i";
+%import(module="gammalib.base") "GContainer.i";
 
 /* __ Support module _____________________________________________________ */
 %include "GException.i"

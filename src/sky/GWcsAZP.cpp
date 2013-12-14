@@ -64,7 +64,7 @@ const GWcsRegistry g_wcs_azp_registry(&g_wcs_azp_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsAZP::GWcsAZP(void) : GWcslib()
+GWcsAZP::GWcsAZP(void) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -89,7 +89,7 @@ GWcsAZP::GWcsAZP(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2) :
-                 GWcslib(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
+                 GWcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
 
 {
     // Initialise class members
@@ -105,7 +105,7 @@ GWcsAZP::GWcsAZP(const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsAZP::GWcsAZP(const GWcsAZP& wcs) : GWcslib(wcs)
+GWcsAZP::GWcsAZP(const GWcsAZP& wcs) : GWcs(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -149,7 +149,7 @@ GWcsAZP& GWcsAZP::operator=(const GWcsAZP& wcs)
     if (this != &wcs) {
 
         // Copy base class members
-        this->GWcslib::operator=(wcs);
+        this->GWcs::operator=(wcs);
 
         // Free members
         free_members();
@@ -182,12 +182,12 @@ void GWcsAZP::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GWcslib::free_members();
     this->GWcs::free_members();
+    this->GSkyProjection::free_members();
 
     // Initialise members
+    this->GSkyProjection::init_members();
     this->GWcs::init_members();
-    this->GWcslib::init_members();
     init_members();
 
     // Return
@@ -352,7 +352,7 @@ void GWcsAZP::prj_set(void) const
 
 
 /***********************************************************************//**
- * @brief Cartesian-to-spherical deprojection
+ * @brief Pixel-to-spherical deprojection
  *
  * @param[in] nx X vector length.
  * @param[in] ny Y vector length (0=no replication).
@@ -370,13 +370,13 @@ void GWcsAZP::prj_set(void) const
  *            One or more of the (x,y) coordinates were invalid, as indicated
  *            by the stat vector.
  *
- * Deproject Cartesian (x,y) coordinates in the plane of projection to native
+ * Deproject pixel (x,y) coordinates in the plane of projection to native
  * spherical coordinates (phi,theta).
  *
  * This method has been adapted from the wcslib function prj.c::azpx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt, 
                       const double* x, const double* y,
@@ -477,7 +477,7 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
 
 
 /***********************************************************************//**
- * @brief Generic spherical-to-Cartesian projection
+ * @brief Generic spherical-to-pixel projection
  *
  * @param[in] nphi Longitude vector length.
  * @param[in] ntheta Latitude vector length (0=no replication).
@@ -495,13 +495,13 @@ void GWcsAZP::prj_x2s(int nx, int ny, int sxy, int spt,
  *            One or more of the (phi,theta) coordinates were invalid, as
  *            indicated by the stat vector.
  *
- * Project native spherical coordinates (phi,theta) to Cartesian (x,y)
+ * Project native spherical coordinates (phi,theta) to pixel (x,y)
  * coordinates in the plane of projection.
  *
  * This method has been adapted from the wcslib function prj.c::azps2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsAZP::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,

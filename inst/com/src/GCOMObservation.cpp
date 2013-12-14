@@ -236,11 +236,8 @@ void GCOMObservation::response(const GResponse& rsp)
               typeid(&rsp).name(), "Expected type \"GCOMResponse\".");
     }
 
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
     // Clone response function
-    m_response = comrsp->clone();
+    m_response = *comrsp;
 
     // Return
     return;
@@ -259,44 +256,17 @@ void GCOMObservation::response(const GResponse& rsp)
 void GCOMObservation::response(const std::string& iaqname,
                                const std::string& caldb)
 {
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new COM response function
-    m_response = new GCOMResponse;
+    // Clear COM response function
+    m_response.clear();
 
     // Set calibration database
-    m_response->caldb(caldb);
+    m_response.caldb(caldb);
 
     // Load instrument response function
-    m_response->load(iaqname);
+    m_response.load(iaqname);
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to response function
- *
- * @return Pointer to response function.
- ***************************************************************************/
-GCOMResponse* GCOMObservation::response(void) const
-{
-    // Return response pointer
-    return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to pointing direction
- *
- * @return Pointer to pointing direction.
- ***************************************************************************/
-GCOMPointing* GCOMObservation::pointing(void) const
-{
-    // Return pointing pointer
-    return m_pointing;
 }
 
 
@@ -478,9 +448,7 @@ void GCOMObservation::write(GXmlElement& xml) const
         // Handle IAQ
         else if (par->attribute("name") == "IAQ") {
             std::string iaqname = "";
-            if (m_response != NULL) {
-                iaqname = m_response->iaqname();
-            }
+            iaqname = m_response.iaqname();
             par->attribute("file", iaqname);
             npar[4]++;
         }
@@ -565,24 +533,14 @@ std::string GCOMObservation::print(const GChatter& chatter) const
         result.append(gammalib::str(ewidth())+" MeV");
 
         // Append pointing
-        if (m_pointing != NULL) {
-            result.append("\n"+m_pointing->print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Pointing")+"undefined");
-        }
+        result.append("\n"+m_pointing.print(gammalib::reduce(chatter)));
 
         // Append response
-        if (m_response != NULL) {
-            result.append("\n"+response()->print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("Response")+"undefined");
-        }
+        result.append("\n"+response().print(gammalib::reduce(chatter)));
 
         // Append events
         if (m_events != NULL) {
-            result.append("\n"+m_events->print(chatter));
+            result.append("\n"+m_events->print(gammalib::reduce(chatter)));
         }
         else {
             result.append("\n"+gammalib::parformat("Events")+"undefined");
@@ -620,8 +578,8 @@ void GCOMObservation::init_members(void)
     m_drb.clear();
     m_drg.clear();
     m_drx.clear();
-    m_pointing   = NULL;
-    m_response   = NULL;
+    m_pointing.clear();
+    m_response.clear();
     m_obs_id     = 0;
     m_ontime     = 0.0;
     m_livetime   = 0.0;
@@ -640,10 +598,6 @@ void GCOMObservation::init_members(void)
  ***************************************************************************/
 void GCOMObservation::copy_members(const GCOMObservation& obs)
 {
-    // Clone members. Note that the events are cloned by the base class.
-    if (obs.m_response != NULL) m_response = obs.m_response->clone();
-    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
-
     // Copy members
     m_instrument = obs.m_instrument;
     m_drename    = obs.m_drename;
@@ -653,6 +607,8 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
     m_drb        = obs.m_drb;
     m_drg        = obs.m_drg;
     m_drx        = obs.m_drx;
+    m_response   = obs.m_response;
+    m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;
     m_ontime     = obs.m_ontime;
     m_livetime   = obs.m_livetime;
@@ -669,14 +625,6 @@ void GCOMObservation::copy_members(const GCOMObservation& obs)
  ***************************************************************************/
 void GCOMObservation::free_members(void)
 {
-    // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_pointing != NULL) delete m_pointing;
-
-    // Mark memory as free
-    m_response = NULL;
-    m_pointing = NULL;
-
     // Return
     return;
 }
@@ -704,7 +652,7 @@ void GCOMObservation::load_dre(const std::string& drename)
     m_events->read(file);
 
     // Read observation attributes from primary extension
-    GFitsHDU* hdu = file.hdu(0);
+    GFitsHDU* hdu = file[0];
     read_attributes(hdu);
 
     // Close FITS file
@@ -734,11 +682,11 @@ void GCOMObservation::load_drb(const std::string& drbname)
     // Open FITS file
     GFits file(drbname);
 
-    // Get HDU
-    GFitsImage* hdu = file.image("Primary");
+    // Get image
+    const GFitsImage& image = *file.image("Primary");
 
     // Load background model as sky map
-    m_drb.read(hdu);
+    m_drb.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_drb);
@@ -776,11 +724,11 @@ void GCOMObservation::load_drg(const std::string& drgname)
     // Open FITS file
     GFits file(drgname);
 
-    // Get HDU
-    GFitsImage* hdu = file.image("Primary");
+    // Get image
+    const GFitsImage& image = *file.image("Primary");
 
     // Load geometry factors as sky map
-    m_drg.read(hdu);
+    m_drg.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_drg);
@@ -815,10 +763,10 @@ void GCOMObservation::load_drx(const std::string& drxname)
     GFits file(drxname);
 
     // Get HDU
-    GFitsImage* hdu = file.image("Primary");
+    const GFitsImage& image = *file.image("Primary");
 
     // Load exposure map as sky map
-    m_drx.read(hdu);
+    m_drx.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_drx);
@@ -845,7 +793,7 @@ void GCOMObservation::load_drx(const std::string& drxname)
  ***************************************************************************/
 bool GCOMObservation::check_map(const GSkymap& map) const
 {
-    // Get pointer on event cube map
+    // Get reference to event cube map
     const GSkymap& ref = dynamic_cast<GCOMEventCube*>(m_events)->map();
 
     // Compare dimensions
@@ -853,11 +801,11 @@ bool GCOMObservation::check_map(const GSkymap& map) const
                            (map.ny()    == ref.ny()) &&
                            (map.nmaps() == ref.nmaps()));
 
-    // Compare WCS
-    bool same_wcs = (*(map.wcs()) == *(ref.wcs()));
+    // Compare projections
+    bool same_projection = (*(map.projection()) == *(ref.projection()));
 
     // Return
-    return (same_dimension && same_wcs);
+    return (same_dimension && same_projection);
 }
 
 
@@ -909,13 +857,9 @@ void GCOMObservation::read_attributes(const GFitsHDU* hdu)
         m_ewidth = emax - emin;
 
         // Set pointing information
-        GSkyDir pnt;
-        double  ra_scz  = hdu->real("RA_SCZ");
-        double  dec_scz = hdu->real("DEC_SCZ");
-        pnt.radec_deg(ra_scz, dec_scz);
-        if (m_pointing != NULL) delete m_pointing;
-        m_pointing = new GCOMPointing;
-        m_pointing->dir(pnt);
+        double ra_scz  = hdu->real("RA_SCZ");
+        double dec_scz = hdu->real("DEC_SCZ");
+        m_pointing.radec_deg(ra_scz, dec_scz);
 
     } // endif: HDU was valid
 

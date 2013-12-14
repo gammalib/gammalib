@@ -262,34 +262,11 @@ void GMWLObservation::response(const GResponse& rsp)
         throw GMWLException::bad_response_type(G_RESPONSE);
     }
 
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Clone response function
-    m_response = mwlrsp->clone();
+    // Copy response function
+    m_response = *mwlrsp;
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to response function
- ***************************************************************************/
-GMWLResponse* GMWLObservation::response(void) const
-{
-    // Return response pointer
-    return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to pointing
- ***************************************************************************/
-GMWLPointing* GMWLObservation::pointing(void) const
-{
-    // Return pointing pointer
-    return m_pointing;
 }
 
 
@@ -602,8 +579,7 @@ void GMWLObservation::init_members(void)
     m_filename.clear();
     m_extno.clear();
     m_extname.clear();
-    m_response   = new GMWLResponse;
-    m_pointing   = new GMWLPointing;
+    m_response.clear();
 
     // Overwrite base class statistics
     m_statistics = "Gaussian";
@@ -620,17 +596,12 @@ void GMWLObservation::init_members(void)
  ***************************************************************************/
 void GMWLObservation::copy_members(const GMWLObservation& obs)
 {
-    // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_pointing != NULL) delete m_pointing;
-    
     // Copy members
     m_instrument = obs.m_instrument;
     m_filename   = obs.m_filename;
     m_extno      = obs.m_extno;
     m_extname    = obs.m_extname;
-    m_response   = (obs.m_response != NULL) ? obs.m_response->clone() : NULL;
-    m_pointing   = (obs.m_pointing != NULL) ? obs.m_pointing->clone() : NULL;
+    m_response   = obs.m_response;
 
     // Return
     return;
@@ -642,14 +613,6 @@ void GMWLObservation::copy_members(const GMWLObservation& obs)
  ***************************************************************************/
 void GMWLObservation::free_members(void)
 {
-    // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_pointing != NULL) delete m_pointing;
-
-    // Mark memory as free
-    m_response = NULL;
-    m_pointing = NULL;
-
     // Return
     return;
 }

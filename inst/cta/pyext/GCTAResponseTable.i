@@ -46,7 +46,7 @@ public:
     // Constructors and destructors
     GCTAResponseTable(void);
     GCTAResponseTable(const GCTAResponseTable& table);
-    GCTAResponseTable(const GFitsTable* hdu);
+    explicit GCTAResponseTable(const GFitsTable& hdu);
     virtual ~GCTAResponseTable(void);
 
     // Interpolation operators
@@ -60,8 +60,8 @@ public:
     void               clear(void);
     GCTAResponseTable* clone(void) const;
     int                size(void) const;
-    int                elements(void) const;
-    int                axes(void) const;
+    const int&         elements(void) const;
+    const int&         axes(void) const;
     int                axis(const int& index) const;
     double             axis_lo(const int& index, const int& bin) const;
     double             axis_hi(const int& index, const int& bin) const;
@@ -69,8 +69,8 @@ public:
     void               axis_log10(const int& index);
     void               axis_radians(const int& index);
     void               scale(const int& index, const double& scale);
-    void               read(const GFitsTable* hdu);
-    void               write(GFitsTable* hdu) const;
+    void               read(const GFitsTable& hdu);
+    void               write(GFitsTable& hdu) const;
 };
 
 

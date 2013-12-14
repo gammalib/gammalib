@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GLATLtCube.cpp - Fermi/LAT livetime cube                *
+ *              GLATLtCube.cpp - Fermi/LAT livetime cube class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATLtCube.cpp
- * @brief Fermi-LAT livetime cube class implementation
+ * @brief Fermi/LAT livetime cube class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -120,8 +120,9 @@ GLATLtCube::~GLATLtCube(void)
  * @brief Assignment operator
  *
  * @param[in] cube Livetime cube.
+ * @return Livetime cube.
  ***************************************************************************/
-GLATLtCube& GLATLtCube::operator= (const GLATLtCube& cube)
+GLATLtCube& GLATLtCube::operator=(const GLATLtCube& cube)
 {
     // Execute only if object is not identical
     if (this != &cube) {
@@ -163,8 +164,8 @@ GLATLtCube& GLATLtCube::operator= (const GLATLtCube& cube)
  * want efficiency correction here, we should think about passing this
  * information to the method.
  ***************************************************************************/
-double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
-                               _ltcube_ctheta fct)
+double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
+                              _ltcube_ctheta fct) const
 {
     // Compute exposure
     double exposure = m_exposure(dir, fct);
@@ -215,8 +216,8 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
  * want efficiency correction here, we should think about passing this
  * information to the method.
  ***************************************************************************/
-double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
-                               _ltcube_ctheta_phi fct)
+double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
+                              _ltcube_ctheta_phi fct) const
 {
     // Compute exposure
     double exposure = m_exposure(dir, fct);
@@ -262,8 +263,8 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
  * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
  * on the cosine of the zenith angle and (optionally) of the azimuth angle.
  ***************************************************************************/
-double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
-                               const GLATAeff& aeff)
+double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
+                              const GLATAeff& aeff) const
 {
     // Compute exposure
     double exposure = m_exposure(dir, energy, aeff);
@@ -314,9 +315,9 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
  * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
  * on the cosine of the zenith angle and (optionally) of the azimuth angle.
  ***************************************************************************/
-double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
-                               const double& offset, const GLATPsf& psf,
-                               const GLATAeff& aeff)
+double GLATLtCube::operator()(const GSkyDir& dir, const GEnergy& energy,
+                              const double& offset, const GLATPsf& psf,
+                              const GLATAeff& aeff) const
 {
     // Compute exposure
     double exposure = m_exposure(dir, energy, offset, psf, aeff);
@@ -349,9 +350,7 @@ double GLATLtCube::operator() (const GSkyDir& dir, const GEnergy& energy,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the object to an initial state.
+ * @brief Clear lifetime cube
  ***************************************************************************/
 void GLATLtCube::clear(void)
 {
@@ -367,8 +366,10 @@ void GLATLtCube::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone lifetime cube
+ *
+ * @return Pointer to deep copy of lifetime cube.
+ ***************************************************************************/
 GLATLtCube* GLATLtCube::clone(void) const
 {
     return new GLATLtCube(*this);
@@ -393,10 +394,10 @@ void GLATLtCube::load(const std::string& filename)
     GFits file(filename);
 
     // Get HDUs
-    GFitsTable* hdu_exposure          = file.table("EXPOSURE");
-    GFitsTable* hdu_weighted_exposure = file.table("WEIGHTED_EXPOSURE");
-    //GFitsTable* hdu_cthetabounds      = file.table("CTHETABOUNDS");
-    GFitsTable* hdu_gti               = file.table("GTI");
+    const GFitsTable& hdu_exposure          = *file.table("EXPOSURE");
+    const GFitsTable& hdu_weighted_exposure = *file.table("WEIGHTED_EXPOSURE");
+    //const GFitsTable& hdu_cthetabounds      = *file.table("CTHETABOUNDS");
+    const  GFitsTable& hdu_gti               = *file.table("GTI");
 
     // Load exposure
     m_exposure.read(hdu_exposure);
@@ -425,7 +426,7 @@ void GLATLtCube::load(const std::string& filename)
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-void GLATLtCube::save(const std::string& filename, bool clobber) const
+void GLATLtCube::save(const std::string& filename, const bool& clobber) const
 {
     // Return
     return;
@@ -450,9 +451,11 @@ std::string GLATLtCube::print(const GChatter& chatter) const
         result.append("=== GLATLtCube ===");
 
         // Append information
-        result.append("\n"+m_exposure.print(chatter));
-        result.append("\n"+m_weighted_exposure.print(chatter));
-        result.append("\n"+m_gti.print(chatter));
+        if (chatter > TERSE) {
+            result.append("\n"+m_exposure.print(gammalib::reduce(chatter)));
+            result.append("\n"+m_weighted_exposure.print(gammalib::reduce(chatter)));
+            result.append("\n"+m_gti.print(gammalib::reduce(chatter)));
+        }
 
     } // endif: chatter was not silent
 

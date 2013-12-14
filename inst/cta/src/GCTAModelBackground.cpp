@@ -290,7 +290,6 @@ GCTAModelBackground* GCTAModelBackground::clone(void) const
  * @return Function value.
  *
  * @exception GException::invalid_argument
- *            No CTA pointing found in observation.
  *            No CTA instrument direction found in event.
  *
  * Evaluates tha CTA background model which is a factorization of a
@@ -304,10 +303,10 @@ GCTAModelBackground* GCTAModelBackground::clone(void) const
 double GCTAModelBackground::eval(const GEvent& event,
                                  const GObservation& obs) const
 {
-    // Extract CTA pointing direction
-    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
-    if (pnt == NULL) {
-        std::string msg = "No CTA pointing found in observation.\n" +
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL) {
+        std::string msg = "Specified observation is not a CTA observation.\n" +
                           obs.print();
         throw GException::invalid_argument(G_EVAL, msg);
     }
@@ -352,7 +351,6 @@ double GCTAModelBackground::eval(const GEvent& event,
  * @return Function value.
  *
  * @exception GException::invalid_argument
- *            No CTA pointing found in observation.
  *            No CTA instrument direction found in event.
  *
  * Evaluates tha CTA background model and parameter gradients. The CTA
@@ -367,10 +365,10 @@ double GCTAModelBackground::eval(const GEvent& event,
 double GCTAModelBackground::eval_gradients(const GEvent& event,
                                            const GObservation& obs) const
 {
-    // Extract CTA pointing direction
-    GCTAPointing* pnt = dynamic_cast<GCTAPointing*>(obs.pointing());
-    if (pnt == NULL) {
-        std::string msg = "No CTA pointing found in observation.\n" +
+    // Get pointer on CTA observation
+    const GCTAObservation* ctaobs = dynamic_cast<const GCTAObservation*>(&obs);
+    if (ctaobs == NULL) {
+        std::string msg = "Specified observation is not a CTA observation.\n" +
                           obs.print();
         throw GException::invalid_argument(G_EVAL_GRADIENTS, msg);
     }
@@ -1212,7 +1210,7 @@ GModelTemporal* GCTAModelBackground::xml_temporal(const GXmlElement& temporal) c
  * is limited to an arc around the vector connecting the model centre to
  * the ROI centre. This limitation assures proper converges properly.
  ***************************************************************************/
-double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
+double GCTAModelBackground::npred_roi_kern_theta::eval(const double& theta)
 {
     // Initialise value
     double value = 0.0;
@@ -1289,7 +1287,7 @@ double GCTAModelBackground::npred_roi_kern_theta::eval(double theta)
  *       multiplication is definitely not the fastest way to do that
  *       computation).
  ***************************************************************************/
-double GCTAModelBackground::npred_roi_kern_phi::eval(double phi)
+double GCTAModelBackground::npred_roi_kern_phi::eval(const double& phi)
 {
     // Initialise value
     double value = 0.0;

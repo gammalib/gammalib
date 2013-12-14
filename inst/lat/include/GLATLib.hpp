@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATLib.hpp  -  LAT Support Header files                 *
+ *                GLATLib.hpp - Fermi/LAT Support Header files             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -21,7 +21,7 @@
 /**
  * @file GLATLib.hpp
  * @brief Fermi/LAT headers
- * @author J. Knoedlseder
+ * @author Juergen Knoedlseder
  */
 
 #ifndef GLATLIB_HPP
@@ -43,7 +43,6 @@
 #include "GLATLtCubeMap.hpp"
 #include "GLATMeanPsf.hpp"
 #include "GLATObservation.hpp"
-#include "GLATPointing.hpp"
 #include "GLATPsf.hpp"
 #include "GLATPsfBase.hpp"
 #include "GLATPsfV1.hpp"
@@ -51,7 +50,5 @@
 #include "GLATResponse.hpp"
 #include "GLATResponseTable.hpp"
 #include "GLATRoi.hpp"
-
-
 
 #endif /* GLATLIB_HPP */

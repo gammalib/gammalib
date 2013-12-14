@@ -1,5 +1,5 @@
 /***************************************************************************
- *                      GFitsHeader.i - FITS header class                  *
+ *            GFitsHeader.hpp - FITS header cards container class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsHeader.i
- * @brief FITS header class interface definition
+ * @brief FITS header cards container class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -29,19 +29,13 @@
 #include "GTools.hpp"
 %}
 
-%include stl.i
+//%include stl.i
 
 
 /***********************************************************************//**
  * @class GFitsHeader
  *
- * @brief Implements FITS header class SWIG interface
- *
- * The FITS header class contains all cards that are found in the header of
- * a HDU. All cards will be hold in memory, so no link to a FITS file is
- * required. Cards may be read from one file (using the 'open' method) and
- * saved into another file (using the 'save' method). Cards are added or
- * changed using the 'update' method.
+ * @brief Interface for FITS header class
  ***************************************************************************/
 class GFitsHeader : public GBase {
 public:
@@ -53,28 +47,62 @@ public:
     // Methods
     void             clear(void);
     GFitsHeader*     clone(void) const;
+    GFitsHeaderCard& at(const int& cardno);
+    GFitsHeaderCard& at(const std::string& keyname);
+    std::string      string(const int& cardno) const;
+    std::string      string(const std::string& keyname) const;
+    double           real(const int& cardno) const;
+    double           real(const std::string& keyname) const;
+    int              integer(const int& cardno) const;
+    int              integer(const std::string& keyname) const;
     int              size(void) const;
-    void             open(void* vptr);
-    void             save(void* vptr);
-    void             close(void);
-    bool             hascard(const std::string& keyname) const;
-    bool             hascard(const int& cardno) const;
-    void             update(const GFitsHeaderCard& card);
-    GFitsHeaderCard* card(const std::string& keyname);
-    GFitsHeaderCard* card(const int& cardno);
-    std::string      string(const std::string& keyname);
-    std::string      string(const int& cardno);
-    double           real(const std::string& keyname);
-    double           real(const int& cardno);
-    int              integer(const std::string& keyname);
-    int              integer(const int& cardno);
+    bool             isempty(void) const;
+    GFitsHeaderCard& append(const GFitsHeaderCard& card);
+    GFitsHeaderCard& insert(const int& cardno, const GFitsHeaderCard& card);
+    GFitsHeaderCard& insert(const std::string& keyname, const GFitsHeaderCard& card);
+    void             remove(const int& cardno);
+    void             remove(const std::string& keyname);
+    void             reserve(const int& num);
+    void             extend(const GFitsHeader& header);
+    bool             contains(const int& cardno) const;
+    bool             contains(const std::string& keyname) const;
+    void             load(void* vptr);
+    void             save(void* vptr) const;
 };
 
 
 /***********************************************************************//**
- * @brief GFitsHeader class SWIG extension
+ * @brief GFitsHeader class extension
  ***************************************************************************/
 %extend GFitsHeader {
+    GFitsHeaderCard& __getitem__(const int& cardno) {
+        if (cardno >= 0 && cardno < self->size()) {
+            return (*self)[cardno];
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Header card number",
+                                           cardno, self->size());
+        }
+    }
+    GFitsHeaderCard& __getitem__(const std::string& keyname) {
+        return (*self)[keyname];
+    }
+    void __setitem__(const int& cardno, const GFitsHeaderCard& card) {
+        if (cardno >= 0 && cardno < self->size()) {
+            (*self)[cardno] = card;
+            return;
+        }
+        else {
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Header card number",
+                                           cardno, self->size());
+        }
+    }
+    void __setitem__(const std::string& keyname, const GFitsHeaderCard& card) {
+        (*self)[keyname] = card;
+        return;
+    }
     GFitsHeader copy() {
         return (*self);
     }

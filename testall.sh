@@ -20,11 +20,25 @@
 base=$PWD
 
 
-# examples
-# ========
+# examples/cpp
+# ===============
 echo
-echo "=====> examples"
+echo "=====> examples/cpp"
+cd examples/cpp
+cd createfits; rm -f createfits; make; ./createfits; cd ..
+cd createskymap; rm -f createskymap; make; ./createskymap; cd ..
+cd createxml; rm -f createxml; make; ./createxml; cd ..
+cd numerics; rm -f numerics; make; ./numerics; cd ..
+cd readmodel; rm -f readmodel; make; ./readmodel; cd ..
+cd $base
+
+
+# examples/python
+# ===============
+echo
+echo "=====> examples/python"
 cd examples/python
+./matrix_howto.py
 ./models_howto.py
 ./xml_howto.py
 ./xml_html_create.py
@@ -50,6 +64,7 @@ cd inst/cta/test
 ./test_gauss.py
 ./example_binned_ml_fit.py
 ./example_sim_photons.py
+./example_sim_psf.py
 cd $base
 
 

@@ -49,7 +49,7 @@ class GCTAAeffPerfTable : public GCTAAeff {
 public:
     // Constructors and destructors
     GCTAAeffPerfTable(void);
-    GCTAAeffPerfTable(const std::string& filename);
+    explicit GCTAAeffPerfTable(const std::string& filename);
     GCTAAeffPerfTable(const GCTAAeffPerfTable& cta);
     virtual ~GCTAAeffPerfTable(void);
 
@@ -70,9 +70,9 @@ public:
     std::string        print(const GChatter& chatter = NORMAL) const;
 
     // Methods
-    int           size(void) const { return m_logE.size(); }
-    void          sigma(const double& sigma) { m_sigma=sigma; }
-    const double& sigma(void) const { return m_sigma; }
+    int           size(void) const;
+    void          sigma(const double& sigma);
+    const double& sigma(void) const;
 
 private:
     // Methods
@@ -86,5 +86,58 @@ private:
     std::vector<double> m_aeff;      //!< Effective area in cm2
     double              m_sigma;     //!< Sigma for offset angle computation (0=none)
 };
+
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which effective area was loaded.
+ ***************************************************************************/
+inline
+std::string GCTAAeffPerfTable::filename(void) const
+{
+    return m_filename;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of node energies in response
+ *
+ * @return Number of node energies.
+ ***************************************************************************/
+inline
+int GCTAAeffPerfTable::size(void) const
+{
+    return (m_logE.size());
+}
+
+
+/***********************************************************************//**
+ * @brief Set sigma for offset angle dependence
+ *
+ * @param[in] sigma Sigma for offset angle dependence.
+ *
+ * Sets the sigma parameter for the offset angle dependence of the effective
+ * area. If @p sigma is 0, no offset angle dependency will be assumed. By
+ * default, @p sigma = 3.
+ ***************************************************************************/
+inline
+void GCTAAeffPerfTable::sigma(const double& sigma)
+{
+    m_sigma = sigma;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return sigma for offset angle dependence
+ *
+ * @return Sigma for offset angle dependence.
+ ***************************************************************************/
+inline
+const double& GCTAAeffPerfTable::sigma(void) const
+{
+    return (m_sigma);
+}
 
 #endif /* GCTAAEFFPERFTABLE_HPP */

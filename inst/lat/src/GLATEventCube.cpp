@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GLATEventCube.cpp - LAT event cube class                *
+ *             GLATEventCube.cpp - Fermi/LAT event cube class              *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventCube.cpp
- * @brief LAT event cube class implementation
+ * @brief Fermi/LAT event cube class definition
  * @author Juergen Knoedlseder
  */
 
@@ -38,7 +38,7 @@
 #define G_NAXIS                                   "GLATEventCube::naxis(int)"
 #define G_DIFFNAME                            "GLATEventCube::diffname(int&)"
 #define G_DIFFRSP                              "GLATEventCube::diffrsp(int&)"
-#define G_READ_SRCMAP               "GLATEventCube::read_srcmap(GFitsImage*)"
+#define G_READ_SRCMAP               "GLATEventCube::read_srcmap(GFitsImage&)"
 #define G_SET_DIRECTIONS                    "GLATEventCube::set_directions()"
 #define G_SET_ENERGIES                        "GLATEventCube::set_energies()"
 #define G_SET_TIMES                              "GLATEventCube::set_times()"
@@ -251,14 +251,14 @@ int GLATEventCube::dim(void) const
  * @exception GException::out_of_range
  *            Axis is out of range.
  *
- * Returns the number of bins along a given event cube axis.
+ * Returns the number of bins along a given event cube @p axis.
  ***************************************************************************/
-int GLATEventCube::naxis(int axis) const
+int GLATEventCube::naxis(const int& axis) const
 {
     // Optionally check if the axis is valid
     #if defined(G_RANGE_CHECK)
     if (axis < 0 || axis >= dim()) {
-        throw GException::out_of_range(G_NAXIS, axis, 0, dim()-1);
+        throw GException::out_of_range(G_NAXIS, "LAT event cube axis", axis, dim());
     }
     #endif
 
@@ -313,7 +313,8 @@ void GLATEventCube::load(const std::string& filename)
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GLATEventCube::save(const std::string& filename, bool clobber) const
+void GLATEventCube::save(const std::string& filename,
+                         const bool& clobber) const
 {
     // Return
     return;
@@ -323,7 +324,7 @@ void GLATEventCube::save(const std::string& filename, bool clobber) const
 /***********************************************************************//**
  * @brief Read LAT event cube from FITS file.
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
  * It is assumed that the counts map resides in the primary extension of the
  * FITS file, the energy boundaries reside in the EBOUNDS extension and the
@@ -331,15 +332,15 @@ void GLATEventCube::save(const std::string& filename, bool clobber) const
  * object before loading, thus any events residing in the object before
  * loading will be lost.
  ***************************************************************************/
-void GLATEventCube::read(const GFits& file)
+void GLATEventCube::read(const GFits& fits)
 {
     // Clear object
     clear();
 
     // Get HDUs
-    GFitsImage* hdu_cntmap  = file.image("Primary");
-    GFitsTable* hdu_ebounds = file.table("EBOUNDS");
-    GFitsTable* hdu_gti     = file.table("GTI");
+    const GFitsImage& hdu_cntmap  = *fits.image("Primary");
+    const GFitsTable& hdu_ebounds = *fits.table("EBOUNDS");
+    const GFitsTable& hdu_gti     = *fits.table("GTI");
 
     // Load counts map
     read_cntmap(hdu_cntmap);
@@ -351,9 +352,9 @@ void GLATEventCube::read(const GFits& file)
     read_gti(hdu_gti);
 
     // Load additional source maps
-    for (int i = 1; i < file.size(); ++i) {
-        if (file.hdu(i)->exttype() == GFitsHDU::HT_IMAGE) {
-            GFitsImage* hdu_srcmap = file.image(i);
+    for (int i = 1; i < fits.size(); ++i) {
+        if (fits.at(i)->exttype() == GFitsHDU::HT_IMAGE) {
+            const GFitsImage& hdu_srcmap = *fits.image(i);
             read_srcmap(hdu_srcmap);
         }
     }
@@ -366,11 +367,11 @@ void GLATEventCube::read(const GFits& file)
 /***********************************************************************//**
  * @brief Write LAT event cube into FITS file
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GLATEventCube::write(GFits& file) const
+void GLATEventCube::write(GFits& fits) const
 {
     // Return
     return;
@@ -388,7 +389,7 @@ int GLATEventCube::number(void) const
     double number = 0.0;
 
     // Get pointer on skymap pixels
-    double* pixels = m_map.pixels();
+    const double* pixels = m_map.pixels();
 
     // Sum event cube
     if (size() > 0 && pixels != NULL) {
@@ -467,9 +468,9 @@ std::string GLATEventCube::print(const GChatter& chatter) const
             result.append("not defined");
         }
 
-        // Append WCS
-        if (m_map.wcs() != NULL) {
-            result.append("\n"+m_map.wcs()->print(chatter));
+        // Append sky projection
+        if (m_map.projection() != NULL) {
+            result.append("\n"+m_map.projection()->print(chatter));
         }
 
         // Append source maps
@@ -561,7 +562,7 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     int iy = 0;
     for (int ix = 0; ix < nx(); ++ix) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
         if (distance < radius) {
             radius = distance;
         }
@@ -571,7 +572,7 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     iy = ny()-1;
     for (int ix = 0; ix < nx(); ++ix) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
         if (distance < radius) {
             radius = distance;
         }
@@ -581,7 +582,7 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     int ix = 0;
     for (int iy = 0; iy < ny(); ++iy) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
         if (distance < radius) {
             radius = distance;
         }
@@ -591,7 +592,7 @@ double GLATEventCube::maxrad(const GSkyDir& srcDir) const
     ix = nx()-1;
     for (int iy = 0; iy < ny(); ++iy) {
         GSkyPixel pixel    = GSkyPixel(double(ix), double(iy));
-        double    distance = m_map.xy2dir(pixel).dist_deg(srcDir);
+        double    distance = m_map.pix2dir(pixel).dist_deg(srcDir);
         if (distance < radius) {
             radius = distance;
         }
@@ -682,25 +683,20 @@ void GLATEventCube::free_members(void)
 /***********************************************************************//**
  * @brief Read Fermi/LAT counts map from HDU.
  *
- * @param[in] hdu Pointer to image HDU.
+ * @param[in] hdu Image HDU.
  *
  * This method reads a Fermi/LAT counts map from a FITS image. The counts map
  * is stored in a GSkymap object, and a pointer is set up to access the
  * pixels individually. Recall that skymap pixels are stored in the order
  * (ix,iy,ebin).
  ***************************************************************************/
-void GLATEventCube::read_cntmap(const GFitsImage* hdu)
+void GLATEventCube::read_cntmap(const GFitsImage& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Load counts map as sky map
+    m_map.read(hdu);
 
-        // Load counts map as sky map
-        m_map.read(hdu);
-
-        // Set sky directions
-        set_directions();
-
-    } // endif: HDU was valid
+    // Set sky directions
+    set_directions();
 
     // Return
     return;
@@ -710,7 +706,7 @@ void GLATEventCube::read_cntmap(const GFitsImage* hdu)
 /***********************************************************************//**
  * @brief Read LAT source map from HDU.
  *
- * @param[in] hdu Pointer to image HDU.
+ * @param[in] hdu Image HDU.
  *
  * @exception GLATException::wcs_incompatible
  *            Source map not compatible with sky map
@@ -718,39 +714,35 @@ void GLATEventCube::read_cntmap(const GFitsImage* hdu)
  * This method reads a LAT source map from a FITS image. The source map is
  * stored in a GSkymap object and is given in units of counts/pixel/MeV.
  ***************************************************************************/
-void GLATEventCube::read_srcmap(const GFitsImage* hdu)
+void GLATEventCube::read_srcmap(const GFitsImage& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Allocate skymap
+    GSkymap* map = new GSkymap;
 
-        // Allocate skymap
-        GSkymap* map = new GSkymap;
+    // Read skymap
+    map->read(hdu);
 
-        // Read skymap
-        map->read(hdu);
+    // Check that source map sky projection is consistent with counts
+    // map sky projection
+    if (*(m_map.projection()) != *(map->projection())) {
+        throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu.extname());
+    }
 
-        // Check that source map WCS is consistent with counts map WCS
-        if (*(m_map.wcs()) != *(map->wcs())) {
-            throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());
-        }
+    // Check that source map dimension is consistent with counts map
+    // dimension
+    if (m_map.nx() != map->nx() ||
+        m_map.ny() != map->ny()) {
+        throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu.extname());
+    }
 
-        // Check that source map dimension is consistent with counts map
-        // dimension
-        if (m_map.nx() != map->nx() ||
-            m_map.ny() != map->ny()) {
-            throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());
-        }
+    // Check that source map has required number of energy bins
+    if (m_map.nmaps()+1 != map->nmaps()) {
+        throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu.extname());
+    }
 
-        // Check that source map has required number of energy bins
-        if (m_map.nmaps()+1 != map->nmaps()) {
-            throw GLATException::wcs_incompatible(G_READ_SRCMAP, hdu->extname());
-        }
-
-        // Append source map to list of maps
-        m_srcmap.push_back(map);
-        m_srcmap_names.push_back(hdu->extname());
-
-    } // endif: HDU was valid
+    // Append source map to list of maps
+    m_srcmap.push_back(map);
+    m_srcmap_names.push_back(hdu.extname());
 
     // Return
     return;
@@ -760,24 +752,19 @@ void GLATEventCube::read_srcmap(const GFitsImage* hdu)
 /***********************************************************************//**
  * @brief Read energy boundaries from HDU.
  *
- * @param[in] hdu Pointer to energy boundaries table.
+ * @param[in] hdu Energy boundaries table.
  *
  * Read the energy boundaries from the HDU.
  *
  * @todo Energy bounds read method should take const GFitsTable* as argument
  ***************************************************************************/
-void GLATEventCube::read_ebds(const GFitsTable* hdu)
+void GLATEventCube::read_ebds(const GFitsTable& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Read energy boundaries
+    m_ebounds.read(hdu);
 
-        // Read energy boundaries
-        m_ebounds.read(const_cast<GFitsTable*>(hdu));
-
-        // Set log mean energies and energy widths
-        set_energies();
-
-    } // endif: HDU was valid
+    // Set log mean energies and energy widths
+    set_energies();
 
     // Return
     return;
@@ -787,24 +774,19 @@ void GLATEventCube::read_ebds(const GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Read GTIs from HDU.
  *
- * @param[in] hdu Pointer to GTI table.
+ * @param[in] hdu GTI table.
  *
  * Reads the Good Time Intervals from the GTI extension.
  *
  * @todo GTI read method should take const GFitsTable* as argument
  ***************************************************************************/
-void GLATEventCube::read_gti(const GFitsTable* hdu)
+void GLATEventCube::read_gti(const GFitsTable& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Read Good Time Intervals
+    m_gti.read(hdu);
 
-        // Read Good Time Intervals
-        m_gti.read(const_cast<GFitsTable*>(hdu));
-
-        // Set time
-        set_times();
-
-    } // endif: HDU was valid
+    // Set time
+    set_times();
 
     // Return
     return;
@@ -824,9 +806,10 @@ void GLATEventCube::read_gti(const GFitsTable* hdu)
 void GLATEventCube::set_directions(void)
 {
     // Throw an error if we have no sky pixels
-    if (npix() < 1)
+    if (npix() < 1) {
         throw GLATException::no_sky(G_SET_DIRECTIONS, "Every LAT event cube"
                                    " needs a definiton of the sky pixels.");
+    }
 
     // Clear old pixel directions and solid angle
     m_dirs.clear();
@@ -840,8 +823,8 @@ void GLATEventCube::set_directions(void)
     for (int iy = 0; iy < ny(); ++iy) {
         for (int ix = 0; ix < nx(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
-            m_dirs.push_back(GLATInstDir(m_map.xy2dir(pixel)));
-            m_omega.push_back(m_map.omega(pixel));
+            m_dirs.push_back(GLATInstDir(m_map.pix2dir(pixel)));
+            m_omega.push_back(m_map.solidangle(pixel));
         }
     }
 
@@ -863,9 +846,10 @@ void GLATEventCube::set_directions(void)
 void GLATEventCube::set_energies(void)
 {
     // Throw an error if we have no energy bins
-    if (ebins() < 1)
+    if (ebins() < 1) {
         throw GLATException::no_ebds(G_SET_ENERGIES, "Every LAT event cube"
                              " needs a definiton of the energy boundaries.");
+    }
 
     // Clear old bin energies and energy widths
     m_energies.clear();
@@ -966,7 +950,7 @@ void GLATEventCube::set_bin(const int& index)
 
     // Set pointers
     m_bin.m_cube   = this;
-    m_bin.m_counts = &(m_map.pixels()[index]);
+    m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
     m_bin.m_energy = &(m_energies[m_bin.m_ieng]);
     m_bin.m_time   = &m_time;
     m_bin.m_dir    = &(m_dirs[m_bin.m_ipix]);

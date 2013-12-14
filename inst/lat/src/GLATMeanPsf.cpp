@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GLATMeanPsf.cpp - Fermi/LAT mean PSF                   *
+ *                  GLATMeanPsf.cpp - Fermi/LAT mean PSF class             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -134,8 +134,9 @@ GLATMeanPsf::~GLATMeanPsf(void)
  * @brief Assignment operator
  *
  * @param[in] psf Mean PSF.
+ * @return Mean PSF.
  ***************************************************************************/
-GLATMeanPsf& GLATMeanPsf::operator= (const GLATMeanPsf& psf)
+GLATMeanPsf& GLATMeanPsf::operator=(const GLATMeanPsf& psf)
 {
     // Execute only if object is not identical
     if (this != &psf) {
@@ -253,9 +254,7 @@ double GLATMeanPsf::operator() (const double& offset, const double& logE)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the object to an initial state.
+ * @brief Clear mean PSF
  ***************************************************************************/
 void GLATMeanPsf::clear(void)
 {
@@ -271,24 +270,13 @@ void GLATMeanPsf::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone mean PSF
+ *
+ * @return Pointer to deep copy of mean PSF.
+ ***************************************************************************/
 GLATMeanPsf* GLATMeanPsf::clone(void) const
 {
     return new GLATMeanPsf(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Return size of mean PSF
-***************************************************************************/
-int GLATMeanPsf::size(void) const
-{
-    // Compute size
-    int size = m_energy.size()*m_offset.size();
-
-    // Return size
-    return size;
 }
 
 
@@ -298,8 +286,6 @@ int GLATMeanPsf::size(void) const
  * @param[in] dir Source location.
  * @param[in] obs LAT observation.
  *
- * @exception GException::no_response
- *            Response has not been defined.
  * @exception GLATException::no_ltcube
  *            Livetime cube has not been defined.
  *
@@ -316,14 +302,13 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     m_energy.clear();
 
     // Get pointers on response, livetime cube and energy boundaries
-    GLATResponse* rsp = obs.response();
-    if (rsp == NULL)
-        throw GException::no_response(G_SET);
+    const GLATResponse& rsp = obs.response();
 
     // Get pointer on livetime cube
-    GLATLtCube* ltcube = obs.ltcube();
-    if (ltcube == NULL)
+    const GLATLtCube* ltcube = obs.ltcube();
+    if (ltcube == NULL) {
         throw GLATException::no_ltcube(G_SET);
+    }
     
     // Get energy boundaries
     GEbounds ebds = obs.events()->ebounds();
@@ -336,9 +321,9 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     // set the costhetamin parameter of Aeff to m_theta_max. Store also the
     // original values in a vector for later restoration.
     std::vector<double> save_costhetamin;
-    for (int i = 0; i < rsp->size(); ++i) {
-        save_costhetamin.push_back(rsp->aeff(i)->costhetamin());
-        rsp->aeff(i)->costhetamin(cos(m_theta_max*gammalib::deg2rad));
+    for (int i = 0; i < rsp.size(); ++i) {
+        save_costhetamin.push_back(rsp.aeff(i)->costhetamin());
+        rsp.aeff(i)->costhetamin(cos(m_theta_max*gammalib::deg2rad));
     }
     
     // Allocate room for arrays
@@ -362,8 +347,9 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
 
         // Compute exposure by looping over the responses
         double exposure = 0.0;
-        for (int i = 0; i < rsp->size(); ++i)
-            exposure += (*ltcube)(dir, energy[ieng], *rsp->aeff(i));
+        for (int i = 0; i < rsp.size(); ++i) {
+            exposure += (*ltcube)(dir, energy[ieng], *rsp.aeff(i));
+        }
 
         // Set exposure
         m_exposure.push_back(exposure);
@@ -373,9 +359,10 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
 
             // Compute point spread function by looping over the responses
             double psf = 0.0;
-            for (int i = 0; i < rsp->size(); ++i)
+            for (int i = 0; i < rsp.size(); ++i) {
                 psf += (*ltcube)(dir, energy[ieng], m_offset[ioffset],
-                                 *rsp->psf(i), *rsp->aeff(i));
+                                 *rsp.psf(i), *rsp.aeff(i));
+            }
 
             // Normalize PSF by exposure and clip when exposure drops to 0
             psf = (exposure > 0.0) ? psf/exposure : 0.0;
@@ -387,8 +374,9 @@ void GLATMeanPsf::set(const GSkyDir& dir, const GLATObservation& obs)
     } // endfor: looped over energies
 
     // Restore initial Aeff zenith angle restriction
-    for (int i = 0; i < rsp->size(); ++i)
-        rsp->aeff(i)->costhetamin(save_costhetamin[i]);
+    for (int i = 0; i < rsp.size(); ++i) {
+        rsp.aeff(i)->costhetamin(save_costhetamin[i]);
+    }
 
     // Compute map corrections
     set_map_corrections(obs);
@@ -737,16 +725,16 @@ void GLATMeanPsf::set_map_corrections(const GLATObservation& obs)
                 for (int ix = 0; ix < cube->nx(); ++ix) {
 
                     // Compute offset angle in degrees
-                    GSkyPixel pixel  = GSkyPixel(double(ix), double(iy));
-                    double    offset = cube->map().xy2dir(pixel).dist_deg(m_dir);
-                    double    omega  = cube->map().omega(pixel);
+                    GSkyPixel pixel      = GSkyPixel(double(ix), double(iy));
+                    double    offset     = cube->map().pix2dir(pixel).dist_deg(m_dir);
+                    double    solidangle = cube->map().solidangle(pixel);
 
                     // Use only pixels within maximum PSF radius
                     if (offset <= radius) {
 
                         // Accumulate energy dependent pixel sum
                         for (int ieng = 0; ieng < m_energy.size(); ++ieng)
-                            sum[ieng] += psf(offset, m_energy[ieng]) * omega;
+                            sum[ieng] += psf(offset, m_energy[ieng]) * solidangle;
                         
                     } // endif: pixel was within maximum PSF radius
 

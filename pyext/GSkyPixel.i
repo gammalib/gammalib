@@ -1,5 +1,5 @@
 /***************************************************************************
- *                 GSkyPixel.i - 2D sky pixel index class                  *
+ *                      GSkyPixel.i - Sky map pixel class                  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GSkyPixel.i
- * @brief Sky pixel class definition
+ * @brief Sky map pixel class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -40,17 +40,26 @@ class GSkyPixel : public GBase {
 public:
     // Constructors and destructors
     GSkyPixel(void);
-    explicit GSkyPixel(double x, double y);
+    GSkyPixel(const int& index);
+    GSkyPixel(const double& index);
+    GSkyPixel(const int& x, const int& y);
+    GSkyPixel(const double& x, const double& y);
     GSkyPixel(const GSkyPixel& pixel);
     virtual ~GSkyPixel(void);
 
     // Methods
-    void       clear(void);
-    GSkyPixel* clone(void) const;
-    void       x(const double& x);
-    void       y(const double& y);
-    double     x(void) const;
-    double     y(void) const;
+    void          clear(void);
+    GSkyPixel*    clone(void) const;
+    int           size(void) const;
+    bool          is1D(void) const;
+    bool          is2D(void) const;
+    void          index(const double& index);
+    void          x(const double& x);
+    void          y(const double& y);
+    void          xy(const double& x, const double& y);
+    const double& index(void) const;
+    const double& x(void) const;
+    const double& y(void) const;
 };
 
 

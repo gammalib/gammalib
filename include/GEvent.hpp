@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   GEvent.hpp - Event abstract base class                *
+ *                   GEvent.hpp - Abstract event base class                *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GEvent.hpp
- * @brief GEvent abstract base class interface definition.
+ * @brief Abstract event base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -77,7 +77,7 @@ public:
     virtual ~GEvent(void);
 
     // Operators
-    virtual GEvent& operator= (const GEvent& event);
+    virtual GEvent& operator=(const GEvent& event);
 
     // Pure virtual methods
     virtual void            clear(void) = 0;

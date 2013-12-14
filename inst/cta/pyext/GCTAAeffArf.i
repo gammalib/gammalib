@@ -1,7 +1,7 @@
 /***************************************************************************
  *                 GCTAAeffArf.i - CTA ARF effective area class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Juergen Knoedlseder                              *
+ *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -40,7 +40,7 @@ class GCTAAeffArf : public GCTAAeff {
 public:
     // Constructors and destructors
     GCTAAeffArf(void);
-    GCTAAeffArf(const std::string& filename);
+    explicit GCTAAeffArf(const std::string& filename);
     GCTAAeffArf(const GCTAAeffArf& cta);
     virtual ~GCTAAeffArf(void);
 
@@ -66,7 +66,8 @@ public:
     const double& thetacut(void) const;
     void          scale(const double& scale);
     const double& scale(void) const;
-    void          read_arf(const GFitsTable* hdu);
+    void          read(const GFitsTable& hdu);
+    void          remove_thetacut(const GCTAResponse& rsp);
 };
 
 

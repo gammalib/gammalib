@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GLATPsfV1.cpp - Fermi-LAT point spread function version 1        *
+ *     GLATPsfV1.cpp - Fermi/LAT point spread function version 1 class     *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATPsfV1.cpp
- * @brief Fermi-LAT point spread function version 1 class implementation
+ * @brief Fermi/LAT point spread function version 1 class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -36,7 +36,7 @@
 #include "GIntegral.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                           "GLATPsfV1::read(GFitsTable*)"
+#define G_READ                                 "GLATPsfV1::read(GFitsTable&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -108,6 +108,7 @@ GLATPsfV1::~GLATPsfV1(void)
  * @brief Assignment operator
  *
  * @param[in] psf Point spread function.
+ * @return Point spread function.
  ***************************************************************************/
 GLATPsfV1& GLATPsfV1::operator=(const GLATPsfV1& psf)
 {
@@ -140,9 +141,7 @@ GLATPsfV1& GLATPsfV1::operator=(const GLATPsfV1& psf)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the object to an initial state.
+ * @brief Clear point spread function
  ***************************************************************************/
 void GLATPsfV1::clear(void)
 {
@@ -160,8 +159,10 @@ void GLATPsfV1::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone point spread function
+ *
+ * @return Pointer to deep copy of point spread function.
+ ***************************************************************************/
 GLATPsfV1* GLATPsfV1::clone(void) const
 {
     return new GLATPsfV1(*this);
@@ -171,7 +172,7 @@ GLATPsfV1* GLATPsfV1::clone(void) const
 /***********************************************************************//**
  * @brief Read point spread function from FITS table
  *
- * @param[in] hdu FITS table pointer.
+ * @param[in] table FITS table.
  *
  * @exception GLATException::inconsistent_response
  *            Inconsistent response table encountered
@@ -180,7 +181,7 @@ GLATPsfV1* GLATPsfV1::clone(void) const
  * energy and costheta binning information, 4 columns are expected:
  * NCORE, SIGMA, GCORE, and GTAIL.
  ***************************************************************************/
-void GLATPsfV1::read(const GFitsTable* hdu)
+void GLATPsfV1::read(const GFitsTable& table)
 {
     // Clear arrays
     m_ncore.clear();
@@ -189,7 +190,7 @@ void GLATPsfV1::read(const GFitsTable* hdu)
     m_gtail.clear();
 
     // Get energy and cos theta binning
-    m_rpsf_bins.read(hdu);
+    m_rpsf_bins.read(table);
 
     // Set minimum cos(theta)
     m_min_ctheta = m_rpsf_bins.costheta_lo(0);
@@ -205,10 +206,10 @@ void GLATPsfV1::read(const GFitsTable* hdu)
         m_gtail.reserve(size);
 
         // Get pointer to columns
-        const GFitsTableCol* ncore = (*hdu)["NCORE"];
-        const GFitsTableCol* sigma = (*hdu)["SIGMA"];
-        const GFitsTableCol* gcore = (*hdu)["GCORE"];
-        const GFitsTableCol* gtail = (*hdu)["GTAIL"];
+        const GFitsTableCol* ncore = table["NCORE"];
+        const GFitsTableCol* sigma = table["SIGMA"];
+        const GFitsTableCol* gcore = table["GCORE"];
+        const GFitsTableCol* gtail = table["GTAIL"];
 
         // Check consistency of columns
         if (ncore->number() != size) {
@@ -269,7 +270,7 @@ void GLATPsfV1::write(GFits& file) const
         hdu_rpsf->extname("RPSF");
 
         // Write boundaries into table
-        m_rpsf_bins.write(hdu_rpsf);
+        m_rpsf_bins.write(*hdu_rpsf);
 
         // Allocate floating point vector columns
         GFitsTableFloatCol col_ncore = GFitsTableFloatCol("NCORE",  1, size);

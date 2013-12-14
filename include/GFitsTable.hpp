@@ -76,7 +76,7 @@ public:
     void           remove_rows(const int& row, const int& nrows);
     const int&     nrows(void) const;
     const int&     ncols(void) const;
-    bool           hascolumn(const std::string& colname) const;
+    bool           contains(const std::string& colname) const;
     std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:

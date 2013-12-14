@@ -38,26 +38,27 @@
  ***************************************************************************/
 class TestGVector : public GTestSuite
 {
-    public:
-        // Constructors and destructors
-        TestGVector(void) : GTestSuite(), m_num(0) { }
-        virtual ~TestGVector(void) { }
+public:
+    // Constructors and destructors
+    TestGVector(void) : GTestSuite(), m_num(0) { }
+    virtual ~TestGVector(void) { }
 
-        // Methods
-        virtual void set(void);
-        void         define_vectors(void);
-        void         allocation(void);
-        void         assign(void);
-        void         arithmetics(void);
-        void         comparison(void);
+    // Methods
+    virtual void         set(void);
+    virtual TestGVector* clone(void) const;
+    void                 define_vectors(void);
+    void                 allocation(void);
+    void                 assign(void);
+    void                 arithmetics(void);
+    void                 comparison(void);
 
-    // Private members
-    private:
-        int     m_num;
-        GVector m_test;
-        GVector m_result;
-        GVector m_smaller;
-        GVector m_bigger;
+// Private members
+private:
+    int     m_num;
+    GVector m_test;
+    GVector m_result;
+    GVector m_smaller;
+    GVector m_bigger;
 };
 
 #endif /* TEST_GVECTOR_HPP */

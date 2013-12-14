@@ -69,6 +69,18 @@ void TestGObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGObservation* TestGObservation::clone(void) const
+{
+    // Clone test suite
+    return new TestGObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test GEbounds
  ***************************************************************************/
 void TestGObservation::test_ebounds(void)
@@ -404,14 +416,14 @@ void TestGObservation::test_time_reference(void)
     GTimeReference reference(55197.000766018518519, "s", "TT", "LOCAL");
     GFits          fits;
     GFitsBinTable  table;
-    reference.write(&table);
+    reference.write(table);
     fits.append(table);
     fits.saveto("test_time_reference.fits", true);
     fits.close();
 
     // Read back from FITS file and check values
     fits.open("test_time_reference.fits");
-    GFitsTable* hdu = fits.table(1);
+    const GFitsTable& hdu = *fits.table(1);
     GTimeReference value(hdu);
     fits.close();
     test_value(value.mjdref(),  reference.mjdref());
@@ -750,16 +762,28 @@ void TestOpenMP::set(void)
     // Set test name
     name("OpenMP");
 
-    // Unbinned
+    // Append unbinned tests
     append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_unbinned_1), "Test unbinned optimization (1 thread)");
     append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_unbinned_10), "Test unbinned optimization (10 threads)");
 
-    // Binned
+    // Append binned tests
     append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_binned_1), "Test binned optimization (1 thread)");
     append(static_cast<pfunction>(&TestOpenMP::test_observations_optimizer_binned_10), "Test binned optimisation (10 threads)");
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestOpenMP* TestOpenMP::clone(void) const
+{
+    // Clone test suite
+    return new TestOpenMP(*this);
 }
 
 
@@ -812,7 +836,7 @@ void TestOpenMP::test_observations_optimizer(const int& mode)
         ob.id(gammalib::str(i));
 
         // Add events to the observation
-        ob.events(events);
+        ob.events(*events);
         ob.ontime(tmax.secs()-tmin.secs());
         obs.append(ob);
 

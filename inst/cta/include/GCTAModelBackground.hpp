@@ -115,7 +115,7 @@ protected:
                              m_cosdist(std::cos(dist)),
                              m_sindist(std::sin(dist)),
                              m_omega0(omega0) { }
-        double eval(double theta);
+        double eval(const double& theta);
     protected:
         const GModelSpatial* m_model;    //!< Spatial model
         const GEnergy&       m_obsEng;   //!< True photon energy
@@ -144,7 +144,7 @@ protected:
                            m_theta(theta),
                            m_cos_theta(std::cos(theta)),
                            m_sin_theta(sin_theta) { }
-        double eval(double phi);
+        double eval(const double& phi);
     protected:
         const GModelSpatial*   m_model;      //!< Spatial model
         const GEnergy&         m_obsEng;     //!< True photon energy

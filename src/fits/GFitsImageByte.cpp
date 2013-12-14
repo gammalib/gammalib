@@ -1,7 +1,7 @@
 /***************************************************************************
- *               GFitsImageByte.cpp  - FITS Byte image class               *
+ *                GFitsImageByte.cpp - FITS Byte image class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -70,7 +70,7 @@ GFitsImageByte::GFitsImageByte(void) : GFitsImage()
  *
  * Construct 1D instance by specifying the number of pixels in the image.
  ***************************************************************************/
-GFitsImageByte::GFitsImageByte(int nx, const unsigned char* pixels) :
+GFitsImageByte::GFitsImageByte(const int& nx, const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, nx)
 {
     // Initialise class members for clean destruction
@@ -93,7 +93,8 @@ GFitsImageByte::GFitsImageByte(int nx, const unsigned char* pixels) :
  *
  * Construct 2D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageByte::GFitsImageByte(int nx, int ny, const unsigned char* pixels) :
+GFitsImageByte::GFitsImageByte(const int& nx, const int& ny,
+                               const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, nx, ny)
 {
     // Initialise class members for clean destruction
@@ -117,7 +118,7 @@ GFitsImageByte::GFitsImageByte(int nx, int ny, const unsigned char* pixels) :
  *
  * Construct 3D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageByte::GFitsImageByte(int nx, int ny, int nz,
+GFitsImageByte::GFitsImageByte(const int& nx, const int& ny, const int& nz,
                                const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, nx, ny, nz)
 {
@@ -143,8 +144,8 @@ GFitsImageByte::GFitsImageByte(int nx, int ny, int nz,
  *
  * Construct 4D image by specifying the number of pixels in each dimension.
  ***************************************************************************/
-GFitsImageByte::GFitsImageByte(int nx, int ny, int nz, int nt,
-                               const unsigned char* pixels) :
+GFitsImageByte::GFitsImageByte(const int& nx, const int& ny, const int& nz,
+                               const int& nt, const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, nx, ny, nz, nt)
 {
     // Initialise class members for clean destruction
@@ -169,7 +170,7 @@ GFitsImageByte::GFitsImageByte(int nx, int ny, int nz, int nt,
  * the number of pixels in each dimension. Note that this constructor does
  * not allocate any memory for the actual image.
  ***************************************************************************/
-GFitsImageByte::GFitsImageByte(int naxis, const int* naxes,
+GFitsImageByte::GFitsImageByte(const int& naxis, const int* naxes,
                                const unsigned char* pixels) :
                 GFitsImage(G_BITPIX, naxis, naxes)
 {
@@ -226,8 +227,9 @@ GFitsImageByte::~GFitsImageByte(void)
  * @brief Assignment operator
  *
  * @param[in] image FITS image.
+ * @return FITS image.
  ***************************************************************************/
-GFitsImageByte& GFitsImageByte::operator= (const GFitsImageByte& image)
+GFitsImageByte& GFitsImageByte::operator=(const GFitsImageByte& image)
 {
     // Execute only if object is not identical
     if (this != &image) {
@@ -259,7 +261,7 @@ GFitsImageByte& GFitsImageByte::operator= (const GFitsImageByte& image)
  * Provides access to an image pixel. No range checking is performed.
  * Use the at(ix) method if range checking is required.
  ***************************************************************************/
-unsigned char& GFitsImageByte::operator() (const int& ix)
+unsigned char& GFitsImageByte::operator()(const int& ix)
 {
     // If image pixels are not available then fetch them now
     load_data();
@@ -279,7 +281,7 @@ unsigned char& GFitsImageByte::operator() (const int& ix)
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy)
+unsigned char& GFitsImageByte::operator()(const int& ix, const int& iy)
 {
     // If image pixels are not available then allocate them now
     load_data();
@@ -303,8 +305,8 @@ unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy)
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
-                                           const int& iz)
+unsigned char& GFitsImageByte::operator()(const int& ix, const int& iy,
+                                          const int& iz)
 {
     // If image pixels are not available then allocate them now
     load_data();
@@ -329,8 +331,8 @@ unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
-                                           const int& iz, const int& it)
+unsigned char& GFitsImageByte::operator()(const int& ix, const int& iy,
+                                          const int& iz, const int& it)
 {
     // If image pixels are not available then allocate them now
     load_data();
@@ -351,7 +353,7 @@ unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
  * Provides access to an image pixel. No range checking is performed.
  * Use the at(ix) method if range checking is required.
  ***************************************************************************/
-const unsigned char& GFitsImageByte::operator() (const int& ix) const
+const unsigned char& GFitsImageByte::operator()(const int& ix) const
 {
     // If image pixels are not available then fetch them now
     load_data();
@@ -371,7 +373,7 @@ const unsigned char& GFitsImageByte::operator() (const int& ix) const
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy) const
+const unsigned char& GFitsImageByte::operator()(const int& ix, const int& iy) const
 {
     // If image pixels are not available then allocate them now
     load_data();
@@ -395,8 +397,8 @@ const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy) c
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
-                                                 const int& iz) const
+const unsigned char& GFitsImageByte::operator()(const int& ix, const int& iy,
+                                                const int& iz) const
 {
     // If image pixels are not available then allocate them now
     load_data();
@@ -421,8 +423,8 @@ const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
  * dimension verification is performed. Use the at(ix,iy) method if range
  * checking and image dimension verification is required.
  ***************************************************************************/
-const unsigned char& GFitsImageByte::operator() (const int& ix, const int& iy,
-                                                 const int& iz, const int& it) const
+const unsigned char& GFitsImageByte::operator()(const int& ix, const int& iy,
+                                                const int& iz, const int& it) const
 {
     // If image pixels are not available then allocate them now
     load_data();

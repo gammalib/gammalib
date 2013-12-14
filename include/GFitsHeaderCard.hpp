@@ -85,9 +85,9 @@ public:
     std::string      unit(void) const;
     void             comment(const std::string& comment);
     std::string      comment(void) const;
-    std::string      string(void);
-    double           real(void);
-    int              integer(void);
+    std::string      string(void) const;
+    double           real(void) const;
+    int              integer(void) const;
     std::string      print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -100,7 +100,7 @@ private:
     void set_dtype(const std::string& value);
     void read(void* vptr, const int& keynum);
     void read(void* fptr, const std::string& keyname);
-    void write(void* fptr);
+    void write(void* fptr) const;
 
     // Private data area
     std::string m_keyname;         //!< Name of the card

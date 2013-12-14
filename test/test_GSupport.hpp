@@ -44,11 +44,12 @@ public:
     virtual ~TestGSupport(void) { }
 
     // Methods
-    virtual void set(void);
-    void         test_expand_env(void);
-    void         test_node_array(void);
-    void         test_url_file(void);
-    void         test_url_string(void);
+    virtual void          set(void);
+    virtual TestGSupport* clone(void) const;
+    void                  test_expand_env(void);
+    void                  test_node_array(void);
+    void                  test_url_file(void);
+    void                  test_url_string(void);
 
 private:
     // Private methods

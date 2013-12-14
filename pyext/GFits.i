@@ -1,5 +1,5 @@
 /***************************************************************************
- *                     GFits.i - FITS file access class                    *
+ *                       GFits.hpp - FITS file class                       *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFits.i
- * @brief Fits file access class Python interface definition
+ * @brief FITS file class interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -140,39 +140,46 @@
 /***********************************************************************//**
  * @class GFits
  *
- * @brief FITS file access class
- *
- * GFits is the basic FITS file interface. All FITS file handlings operate
- * via members of GFits. A FITS file is composed of Header Data Units (HDU)
- * which are implemented by the GFitsHDU class.
+ * @brief FITS file class
  ***************************************************************************/
-class GFits : public GBase {
-
+class GFits : public GContainer {
 public:
     // Constructors and destructors
     GFits(void);
-    explicit GFits(const std::string& filename, bool create = false);
+    explicit GFits(const std::string& filename, const bool& create = false);
     GFits(const GFits& fits);
     virtual ~GFits(void);
 
     // Methods
-    void        clear(void);
-    GFits*      clone(void) const;
-    int         size(void) const;
-    void        open(const std::string& filename, bool create = false);
-    void        save(bool clobber = false);
-    void        saveto(const std::string& filename, bool clobber = false);
-    void        close(void);
-    void        append(const GFitsHDU& hdu);
-    bool        hashdu(const std::string& extname) const;
-    bool        hashdu(int extno) const;
-    GFitsHDU*   hdu(const std::string& extname) const;
-    GFitsHDU*   hdu(int extno) const;
-    GFitsImage* image(const std::string& extname) const;
-    GFitsImage* image(int extno) const;
-    GFitsTable* table(const std::string& extname) const;
-    GFitsTable* table(int extno) const;
-    std::string name(void) const;
+    void               clear(void);
+    GFits*             clone(void) const;
+    GFitsHDU*          at(const int& extno);
+    GFitsHDU*          at(const std::string& extname);
+    GFitsImage*        image(const int& extno);
+    GFitsImage*        image(const std::string& extname);
+    GFitsTable*        table(const int& extno);
+    GFitsTable*        table(const std::string& extname);
+    int                size(void) const;
+    bool               isempty(void) const;
+    GFitsHDU*          set(const int& extno, const GFitsHDU& hdu);
+    GFitsHDU*          set(const std::string& extname, const GFitsHDU& hdu);
+    GFitsHDU*          append(const GFitsHDU& hdu);
+    GFitsHDU*          insert(const int& extno, const GFitsHDU& hdu);
+    GFitsHDU*          insert(const std::string& extname, const GFitsHDU& hdu);
+    void               remove(const int& extno);
+    void               remove(const std::string& extname);
+    void               reserve(const int& num);
+    void               extend(const GFits& fits);
+    bool               contains(const int& extno) const;
+    bool               contains(const std::string& extname) const;
+    const std::string& filename(void) const;
+    int                extno(const std::string& extname) const;
+    void               open(const std::string& filename,
+                            const bool&        create = false);
+    void               save(const bool& clobber = false);
+    void               saveto(const std::string& filename,
+                              const bool&        clobber = false);
+    void               close(void);
 };
 
 
@@ -180,6 +187,34 @@ public:
  * @brief GFits class SWIG extension
  ***************************************************************************/
 %extend GFits {
+    GFitsHDU* __getitem__(const int& extno) {
+        if (extno >= 0 && extno < self->size()) {
+            return (*self)[extno];
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)",
+                                           "Extension number",
+                                           extno, self->size());
+        }
+    }
+    GFitsHDU* __getitem__(const std::string& extname) {
+        return (*self)[extname];
+    }
+    void __setitem__(const int& extno, const GFitsHDU& hdu) {
+        if (extno >= 0 && extno < self->size()) {
+            self->set(extno, hdu);
+            return;
+        }
+        else {
+            throw GException::out_of_range("__setitem__(int)",
+                                           "Extension number",
+                                           extno, self->size());
+        }
+    }
+    void __setitem__(const std::string& extname, const GFitsHDU& hdu) {
+        self->set(extname, hdu);
+        return;
+    }
     GFits copy() {
         return (*self);
     }

@@ -11,7 +11,7 @@
     <spectrum type="ConstantValue">
       <parameter scale="1.0" name="Value" min="0.0" max="1000.0" value="1.0" free="1"/>
     </spectrum>
-    <spatialModel type="MapCubeFunction" file="data/p7v6/gal_2yearp7v6_v0.fits">
+    <spatialModel type="MapCubeFunction" file="../../../test/data/test_cube.fits">
       <parameter scale="1" name="Normalization" min="0.001" max="1000.0" value="1" free="0"/>
     </spatialModel>
   </source>

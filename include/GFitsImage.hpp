@@ -1,5 +1,5 @@
 /***************************************************************************
- *              GFitsImage.hpp - FITS image abstract base class            *
+ *               GFitsImage.hpp - Abstract FITS image base class           *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImage.hpp
- * @brief GFitsImage class definition.
+ * @brief Abstract FITS image base class definition
  * @author Juergen Knoedlseder
  */
 
@@ -34,7 +34,7 @@
 /***********************************************************************//**
  * @class GFitsImage
  *
- * @brief Abstract interface for the FITS image classes.
+ * @brief Abstract FITS image base class
  *
  * This class defines the abstract interface for a FITS image.
  ***************************************************************************/
@@ -43,16 +43,16 @@ class GFitsImage : public GFitsHDU {
 public:
     // Constructors and destructors
     GFitsImage(void);
-    explicit GFitsImage(int bitpix, int nx);
-    explicit GFitsImage(int bitpix, int nx, int ny);
-    explicit GFitsImage(int bitpix, int nx, int ny, int nz);
-    explicit GFitsImage(int bitpix, int nx, int ny, int nz, int nt);
-    explicit GFitsImage(int bitpix, int naxis, const int* naxes);
+    GFitsImage(const int& bitpix, const int& nx);
+    GFitsImage(const int& bitpix, const int& nx, const int& ny);
+    GFitsImage(const int& bitpix, const int& nx, const int& ny, const int& nz);
+    GFitsImage(const int& bitpix, const int& nx, const int& ny, const int& nz, const int& nt);
+    GFitsImage(const int& bitpix, const int& naxis, const int* naxes);
     GFitsImage(const GFitsImage& image);
     virtual ~GFitsImage(void);
 
     // Operators
-    GFitsImage& operator= (const GFitsImage& image);
+    GFitsImage& operator=(const GFitsImage& image);
 
     // Pure virtual methods
     virtual void        clear(void) = 0;
@@ -65,16 +65,16 @@ public:
     virtual int         type(void) const = 0;
 
     // Implemented pure virtual methods
-    HDUType exttype(void) const { return HT_IMAGE; }
+    HDUType exttype(void) const;
 
     // Base class methods
-    int         size(void) const;
-    int         bitpix(void) const;
-    int         naxis(void) const;
-    int         naxes(int axis) const;
-    int         anynul(void) const;
+    const int&  size(void) const;
+    const int&  bitpix(void) const;
+    const int&  naxis(void) const;
+    int         naxes(const int& axis) const;
+    const int&  anynul(void) const;
     void        nulval(const void* value);
-    void*       nulval(void);
+    const void* nulval(void) const;
     std::string print(const GChatter& chatter = NORMAL) const;
 
 protected:
@@ -112,5 +112,67 @@ protected:
     int   m_num_pixels;  //!< Number of image pixels
     int   m_anynul;      //!< Number of NULLs encountered
 };
+
+
+/***********************************************************************//**
+ * @brief Return extension type
+ *
+ * @return Extension type (HT_IMAGE).
+ ***************************************************************************/
+inline
+GFitsHDU::HDUType GFitsImage::exttype(void) const
+{
+    return (HT_IMAGE);
+}
+
+
+/***********************************************************************//**
+ * @brief Return size of pixel array
+ ***************************************************************************/
+inline
+const int& GFitsImage::size(void) const
+{
+    return m_num_pixels;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of Bits per pixel (negative=floating point)
+ ***************************************************************************/
+inline
+const int& GFitsImage::bitpix(void) const
+{
+    return m_bitpix;
+}
+
+
+/***********************************************************************//**
+ * @brief Return dimension of image
+ ***************************************************************************/
+inline
+const int& GFitsImage::naxis(void) const
+{
+    return m_naxis;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of nul values envountered during loading
+ ***************************************************************************/
+inline
+const int& GFitsImage::anynul(void) const
+{
+    return m_anynul;
+}
+
+
+/***********************************************************************//**
+ * @brief Return nul value
+ ***************************************************************************/
+inline
+const void* GFitsImage::nulval(void) const
+{
+    return (const_cast<GFitsImage*>(this)->ptr_nulval());
+}
 
 #endif /* GFITSIMAGE_HPP */

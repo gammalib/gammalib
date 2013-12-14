@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCTAResponse.i
- * @brief CTA instrument response function Python interface definition
+ * @brief CTA instrument response function interface definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,15 +32,14 @@
 /***********************************************************************//**
  * @class GCTAResponse
  *
- * @brief CTA instrument response function
+ * @brief CTA instrument response function class
  ***************************************************************************/
 class GCTAResponse : public GResponse {
-
 public:
     // Constructors and destructors
     GCTAResponse(void);
     GCTAResponse(const GCTAResponse& rsp);
-    explicit GCTAResponse(const std::string& rspname, const std::string& caldb = "");
+    GCTAResponse(const std::string& rspname, const std::string& caldb = "");
     virtual ~GCTAResponse(void);
 
     // Implement pure virtual base class methods
@@ -67,23 +66,25 @@ public:
                                  const GObservation& obs) const;
 
     // Other Methods
-    GCTAEventAtom*  mc(const double& area, const GPhoton& photon,
-                       const GObservation& obs, GRan& ran) const;
-    void            caldb(const std::string& caldb);
-    std::string     caldb(void) const;
-    void            load(const std::string& rspname);
-    void            eps(const double& eps);
-    const double&   eps(void) const;
-    std::string     rmffile(void) const;
-    void            load_aeff(const std::string& filename);
-    void            load_psf(const std::string& filename);
-    void            load_edisp(const std::string& filename);
-    void            offset_sigma(const double& sigma);
-    double          offset_sigma(void) const;
-    const GCTAAeff* aeff(void) const;
-    void            aeff(GCTAAeff* aeff);
-    const GCTAPsf*  psf(void) const;
-    void            psf(GCTAPsf* psf);
+    GCTAEventAtom*     mc(const double& area, const GPhoton& photon,
+                          const GObservation& obs, GRan& ran) const;
+    void               caldb(const std::string& caldb);
+    const std::string& caldb(void) const;
+    void               load(const std::string& rspname);
+    void               eps(const double& eps);
+    const double&      eps(void) const;
+    const std::string& rmffile(void) const;
+    void               load_aeff(const std::string& filename);
+    void               load_psf(const std::string& filename);
+    void               load_edisp(const std::string& filename);
+    void               offset_sigma(const double& sigma);
+    double             offset_sigma(void) const;
+    const GCTAAeff*    aeff(void) const;
+    void               aeff(GCTAAeff* aeff);
+    const GCTAPsf*     psf(void) const;
+    void               psf(GCTAPsf* psf);
+    const GCTAEdisp*   edisp(void) const;
+    void               edisp(GCTAEdisp* edisp);
 
     // Low-level response methods
     double aeff(const double& theta,

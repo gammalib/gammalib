@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GCsv.hpp
- * @brief Column separated values table class Python bindings
+ * @brief Column separated values table class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -86,20 +86,20 @@ class GCsv : public GBase {
 public:
     // Constructors and destructors
     GCsv(void);
-    GCsv(const std::string& filename, std::string sep = " ");
+    GCsv(const std::string& filename, const std::string& sep = " ");
     GCsv(const GCsv& csv);
     virtual ~GCsv(void);
  
     // Methods
     void        clear(void);
     GCsv*       clone(void) const;
+    int         size(void) const;
+    const int&  ncols(void) const;
+    const int&  nrows(void) const;
     std::string string(const int& row, const int& col) const;
     double      real(const int& row, const int& col) const;
     int         integer(const int& row, const int& col) const;
-    void        load(const std::string& filename, std::string sep = " ");
-    int         ncols(void) const { return m_cols; }
-    int         nrows(void) const { return m_rows; }
-    int         size(void) const { return m_rows*m_cols; }
+    void        load(const std::string& filename, const std::string& sep = " ");
 };
 
 
@@ -112,6 +112,9 @@ public:
     }
     void __setitem__(int GCsvInx[], std::string value) {
         (*self)(GCsvInx[0], GCsvInx[1]) = value;
+    }
+    int __len__() {
+        return (self->size());
     }
     GCsv copy() {
         return (*self);

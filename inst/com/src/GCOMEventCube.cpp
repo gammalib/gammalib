@@ -316,20 +316,20 @@ int GCOMEventCube::dim(void) const
 /***********************************************************************//**
  * @brief Return number of bins in axis
  *
- * @param[in] axis Axis.
+ * @param[in] axis Axis [0,...,dim()-1].
  * @return Number of bins in axis.
  *
  * @exception GException::out_of_range
  *            Axis is out of range.
  *
- * Returns the number of bins along a given event cube axis.
+ * Returns the number of bins along a given event cube @p axis.
  ***************************************************************************/
-int GCOMEventCube::naxis(int axis) const
+int GCOMEventCube::naxis(const int& axis) const
 {
     // Optionally check if the axis is valid
     #if defined(G_RANGE_CHECK)
     if (axis < 0 || axis >= dim()) {
-        throw GException::out_of_range(G_NAXIS, axis, 0, dim()-1);
+        throw GException::out_of_range(G_NAXIS, "COMPTEL event cube axis", axis, dim());
     }
     #endif
 
@@ -387,7 +387,7 @@ void GCOMEventCube::load(const std::string& filename)
  *
  * Save the COMPTEL event cube into FITS file.
  ***************************************************************************/
-void GCOMEventCube::save(const std::string& filename, bool clobber) const
+void GCOMEventCube::save(const std::string& filename, const bool& clobber) const
 {
     // Create empty FITS file
     GFits fits;
@@ -406,22 +406,22 @@ void GCOMEventCube::save(const std::string& filename, bool clobber) const
 /***********************************************************************//**
  * @brief Read COMPTEL event cube from FITS file
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
  * Reads an COMPTEL event cube from a DRE FITS file. The event cube is loaded
  * into a skymap and the header keywords are analyzed to determine the
  * scatter angle axis, the energy range and the time range.
  ***************************************************************************/
-void GCOMEventCube::read(const GFits& file)
+void GCOMEventCube::read(const GFits& fits)
 {
     // Clear object
     clear();
 
-    // Get HDU
-    GFitsImage* hdu = file.image("Primary");
+    // Get image
+    const GFitsImage& image = *fits.image("Primary");
 
     // Load counts map as sky map
-    m_map.read(hdu);
+    m_map.read(image);
 
     // Correct WCS projection (HEASARC data format kluge)
     com_wcs_mer2car(m_map);
@@ -430,9 +430,9 @@ void GCOMEventCube::read(const GFits& file)
     set_scatter_directions();
 
     // Extract Phibar minimum and step size
-    double crval3 = hdu->real("CRVAL3");
-    double crpix3 = hdu->real("CRPIX3");
-    double dphi   = hdu->real("CDELT3");
+    double crval3 = image.real("CRVAL3");
+    double crpix3 = image.real("CRPIX3");
+    double dphi   = image.real("CDELT3");
     double phimin = crval3 + (crpix3-1.0) * dphi;
 
     // Set scatter angles
@@ -441,8 +441,8 @@ void GCOMEventCube::read(const GFits& file)
     // Extract energy range
     GEnergy emin;
     GEnergy emax;
-    emin.MeV(hdu->real("E_MIN"));
-    emax.MeV(hdu->real("E_MAX"));
+    emin.MeV(image.real("E_MIN"));
+    emax.MeV(image.real("E_MAX"));
 
     // Set energy boundaries
     m_ebounds.clear();
@@ -454,8 +454,8 @@ void GCOMEventCube::read(const GFits& file)
     // Extract time range
     GTime  tstart;
     GTime  tstop;
-    tstart.jd(hdu->real("TSTART"));
-    tstop.jd(hdu->real("TSTOP"));
+    tstart.jd(image.real("TSTART"));
+    tstop.jd(image.real("TSTOP"));
 
     // Set GTIs
     m_gti.clear();
@@ -479,7 +479,7 @@ void GCOMEventCube::read(const GFits& file)
 void GCOMEventCube::write(GFits& file) const
 {
     // Write cube
-    m_map.write(&file);
+    m_map.write(file);
 
     // Write energy boundaries
 
@@ -504,7 +504,7 @@ int GCOMEventCube::number(void) const
     double number = 0.0;
 
     // Get pointer on skymap pixels
-    double* pixels = m_map.pixels();
+    const double* pixels = m_map.pixels();
 
     // Sum event cube
     if (size() > 0 && pixels != NULL) {
@@ -708,8 +708,8 @@ void GCOMEventCube::set_scatter_directions(void)
     for (int iy = 0; iy < npsi(); ++iy) {
         for (int ix = 0; ix < nchi(); ++ix) {
             GSkyPixel pixel = GSkyPixel(double(ix), double(iy));
-            m_dirs.push_back(m_map.xy2dir(pixel));
-            m_omega.push_back(m_map.omega(pixel));
+            m_dirs.push_back(m_map.pix2dir(pixel));
+            m_omega.push_back(m_map.solidangle(pixel));
         }
     }
 
@@ -871,7 +871,7 @@ void GCOMEventCube::set_bin(const int& index)
     m_dir.phibar(m_phi[iphi]);
     
     // Set pointers
-    m_bin.m_counts = &(m_map.pixels()[index]);
+    m_bin.m_counts = const_cast<double*>(&(m_map.pixels()[index]));
     m_bin.m_omega  = &(m_omega[ipix]);
 
     // Return

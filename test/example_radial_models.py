@@ -35,10 +35,10 @@ def test_radial_model(name, model, clobber=True):
     # Fill the image
     energy = GEnergy()
     time   = GTime()
-    for pix in range(image.npix()):
-        dir        = image.pix2dir(pix)
+    for inx in range(image.npix()):
+        dir        = image.inx2dir(inx)
         theta      = center.dist(dir)
-        image[pix] = model.eval(theta, energy, time)
+        image[inx] = model.eval(theta, energy, time)
 
     # Write it to file
     filename = name + '.fits'
@@ -47,8 +47,8 @@ def test_radial_model(name, model, clobber=True):
 
     # Check that it integrates to 1
     integral = 0.0
-    for pix in range(image.npix()):
-        integral += image.omega(pix) * image[pix]
+    for inx in range(image.npix()):
+        integral += image.solidangle(inx) * image[inx]
     print('integral = %g (should be 1)' % integral)
     print('integral error = %g (should be 0)' % (integral - 1))
     print('')

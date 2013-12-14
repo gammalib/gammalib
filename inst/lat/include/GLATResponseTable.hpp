@@ -54,13 +54,13 @@ public:
     virtual ~GLATResponseTable(void);
 
     // Operators
-    GLATResponseTable& operator= (const GLATResponseTable & table);
+    GLATResponseTable& operator=(const GLATResponseTable & table);
 
     // Methods
     void                clear(void);
     GLATResponseTable*  clone(void) const;
-    void                read(const GFitsTable* hdu);
-    void                write(GFitsTable* hdu) const;
+    void                read(const GFitsTable& hdu);
+    void                write(GFitsTable& hdu) const;
     int                 index(const int& ie, const int& ic) const;
     double              energy(const int& ie) const;
     void                set(const double& logE, const double& ctheta);
@@ -69,9 +69,9 @@ public:
     double              interpolate(const double& logE, const double& ctheta, 
                                     const std::vector<double>& array,
                                     const int& offset, const int& size);
-    int                 size(void) const { return m_energy_num*m_ctheta_num; }
-    int                 nenergies(void) const { return m_energy_num; }
-    int                 ncostheta(void) const { return m_ctheta_num; }
+    int                 size(void) const;
+    const int&          nenergies(void) const;
+    const int&          ncostheta(void) const;
     double              energy_lo(const int& inx) const;
     double              energy_hi(const int& inx) const;
     double              costheta_lo(const int& inx) const;
@@ -110,5 +110,41 @@ private:
     double     m_wgt3;         //!< Weighting factor 3
     double     m_wgt4;         //!< Weighting factor 4
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of bins in response table
+ *
+ * @return Number of bins in response table.
+ ***************************************************************************/
+inline
+int GLATResponseTable::size(void) const
+{
+    return m_energy_num*m_ctheta_num;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of energies in response table
+ *
+ * @return Number of energies in response table.
+ ***************************************************************************/
+inline
+const int& GLATResponseTable::nenergies(void) const
+{
+    return m_energy_num;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of cosine theta bins in response table
+ *
+ * @return Number of cosine theta bins in response table.
+ ***************************************************************************/
+inline
+const int& GLATResponseTable::ncostheta(void) const
+{
+    return m_ctheta_num;
+}
 
 #endif /* GLATRESPONSETABLE_HPP */

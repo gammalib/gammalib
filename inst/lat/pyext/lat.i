@@ -54,7 +54,6 @@
 %import(module="gammalib.obs") "GEventList.i";
 %import(module="gammalib.obs") "GEventCube.i";
 %import(module="gammalib.obs") "GResponse.i";
-%import(module="gammalib.obs") "GPointing.i";
 %import(module="gammalib.obs") "GInstDir.i";
 %import(module="gammalib.obs") "GRoi.i";
 
@@ -69,7 +68,6 @@
 %include "GLATLtCube.i"
 %include "GLATMeanPsf.i"
 %include "GLATObservation.i"
-%include "GLATPointing.i"
 %include "GLATPsf.i"
 %include "GLATResponse.i"
 %include "GLATRoi.i"

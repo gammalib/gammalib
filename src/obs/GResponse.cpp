@@ -603,7 +603,7 @@ void GResponse::free_members(void)
  *
  * @param[in] theta Radial model offset angle (radians).
  ***************************************************************************/
-double GResponse::npred_radial_kern_theta::eval(double theta)
+double GResponse::npred_radial_kern_theta::eval(const double& theta)
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -650,7 +650,7 @@ double GResponse::npred_radial_kern_theta::eval(double theta)
  *
  * @param[in] phi Azimuth angle (radians).
  ***************************************************************************/
-double GResponse::npred_radial_kern_phi::eval(double phi)
+double GResponse::npred_radial_kern_phi::eval(const double& phi)
 {
     // Compute sky direction vector in native coordinates
     double  cos_phi = std::cos(phi);
@@ -693,7 +693,7 @@ double GResponse::npred_radial_kern_phi::eval(double phi)
  *
  * @param[in] theta Radial model offset angle (radians).
  ***************************************************************************/
-double GResponse::npred_elliptical_kern_theta::eval(double theta)
+double GResponse::npred_elliptical_kern_theta::eval(const double& theta)
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -737,7 +737,7 @@ double GResponse::npred_elliptical_kern_theta::eval(double theta)
  *
  * @param[in] phi Azimuth angle (radians).
  ***************************************************************************/
-double GResponse::npred_elliptical_kern_phi::eval(double phi)
+double GResponse::npred_elliptical_kern_phi::eval(const double& phi)
 {
     // Compute sky direction vector in native coordinates
     double  cos_phi = std::cos(phi);

@@ -348,7 +348,7 @@ int GUrlString::write(const void* buffer, const int& nbyte)
  *
  * If no string exists, the method returns EOF.
  ***************************************************************************/
-int GUrlString::getchar(void)
+int GUrlString::getchar(void) const
 {
     // Initialise character to EOF
     int character = EOF;

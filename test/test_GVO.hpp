@@ -44,8 +44,9 @@ public:
     virtual ~TestGVO(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_GVOClient(void);
+    virtual void     set(void);
+    virtual TestGVO* clone(void) const;
+    void             test_GVOClient(void);
 
 private:
     // Private members

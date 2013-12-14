@@ -39,6 +39,7 @@
 
 /* __ Debug definitions __________________________________________________ */
 
+
 /***********************************************************************//**
  * @brief Set parameters and tests
  ***************************************************************************/
@@ -47,15 +48,28 @@ void TestGSupport::set(void){
     // Set test name
     name("GSupport");
 
-    // Add tests
-    add_test(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
-    add_test(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
-    add_test(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
-    add_test(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
+    // Append tests
+    append(static_cast<pfunction>(&TestGSupport::test_expand_env), "Test Environment variable");
+    append(static_cast<pfunction>(&TestGSupport::test_node_array), "Test GNodeArray");
+    append(static_cast<pfunction>(&TestGSupport::test_url_file),   "Test GUrlFile");
+    append(static_cast<pfunction>(&TestGSupport::test_url_string), "Test GUrlString");
 
     // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGSupport* TestGSupport::clone(void) const
+{
+    // Clone test suite
+    return new TestGSupport(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Test expand_env function
@@ -241,6 +255,46 @@ void TestGSupport::test_node_array(void)
         for (int i = 0; i < 5; ++i) {
             test_value(array2[i], vector[i]);
         }
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test container manipulation
+    test_try("Container manipulation");
+    try {
+        GNodeArray array;
+        test_assert(array.isempty(), "Node array should be empty");
+        array.append(0.0);
+        test_assert(!array.isempty(), "Node array should not be empty");
+        test_value(array.size(), 1);
+        array.append(1.0);
+        array.append(2.0);
+        array.append(3.0);
+        array.append(5.0);
+        test_value(array.size(), 5);
+        array.insert(4, 4.0);
+        test_value(array.size(), 6);
+        for (int i = 0; i < array.size(); ++i) {
+            test_value(array[i], double(i));   // 0, 1, 2, 3, 4, 5
+        }
+        array.remove(1);
+        array.remove(2);
+        array.remove(3);
+        test_value(array.size(), 3);
+        for (int i = 0; i < array.size(); ++i) {
+            test_value(array[i], double(2*i)); // 0, 2, 4
+        }
+        GNodeArray array2;
+        array2.append(6.0);
+        array2.append(8.0);
+        test_value(array2.size(), 2);
+        array.extend(array2);
+        test_value(array.size(), 5);
+        for (int i = 0; i < array.size(); ++i) {
+            test_value(array[i], double(2*i)); // 0, 2, 4, 6, 8
+        }
+        test_try_success();
     }
     catch (std::exception &e) {
         test_try_failure(e);

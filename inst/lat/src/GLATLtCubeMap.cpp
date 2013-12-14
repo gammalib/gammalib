@@ -1,5 +1,5 @@
 /***************************************************************************
- *             GLATLtCubeMap.cpp - Fermi/LAT livetime cube map             *
+ *          GLATLtCubeMap.cpp - Fermi LAT livetime cube map class          *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -105,8 +105,9 @@ GLATLtCubeMap::~GLATLtCubeMap(void)
  * @brief Assignment operator
  *
  * @param[in] map Livetime cube map.
+ * @return Livetime cube map.
  ***************************************************************************/
-GLATLtCubeMap& GLATLtCubeMap::operator= (const GLATLtCubeMap& map)
+GLATLtCubeMap& GLATLtCubeMap::operator=(const GLATLtCubeMap& map)
 {
     // Execute only if object is not identical
     if (this != &map) {
@@ -143,7 +144,7 @@ GLATLtCubeMap& GLATLtCubeMap::operator= (const GLATLtCubeMap& map)
  * This method assumes that \f$T_{\rm live}(\cos \theta)\f$ is stored as a
  * set of maps.
  ***************************************************************************/
-double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta fct)
+double GLATLtCubeMap::operator()(const GSkyDir& dir, _ltcube_ctheta fct) const
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -152,8 +153,9 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta fct)
     double sum = 0.0;
 
     // Loop over zenith angles
-    for (int i = 0; i < m_num_ctheta; ++i)
+    for (int i = 0; i < m_num_ctheta; ++i) {
         sum += m_map(pixel, i) * (*fct)(costheta(i));
+    }
 
     // Return sum
     return sum;
@@ -180,7 +182,7 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta fct)
  * index m_num_ctheta (the first m_num_ctheta maps are the livetime cube
  * maps without any \f$\phi\f$ dependence).
  ***************************************************************************/
-double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta_phi fct)
+double GLATLtCubeMap::operator()(const GSkyDir& dir, _ltcube_ctheta_phi fct) const
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -228,8 +230,8 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, _ltcube_ctheta_phi fct)
  * index m_num_ctheta (the first m_num_ctheta maps are the livetime cube
  * maps without any \f$\phi\f$ dependence).
  ***************************************************************************/
-double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
-                                  const GLATAeff& aeff)
+double GLATLtCubeMap::operator()(const GSkyDir& dir, const GEnergy& energy,
+                                 const GLATAeff& aeff) const
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -247,15 +249,17 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
     if (hasphi() && aeff.hasphi()) {
         for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
             double p = phi(iphi);
-            for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i)
+            for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i) {
                 sum += m_map(pixel, i) * (*fct)(energy.log10MeV(), costheta(i), p);
+            }
         }
     }
 
     // ... otherwise sum only over zenith angle
     else {
-        for (int i = 0; i < m_num_ctheta; ++i)
+        for (int i = 0; i < m_num_ctheta; ++i) {
             sum += m_map(pixel, i) * (*fct)(energy.log10MeV(), costheta(i));
+        }
     }
 
     // Return sum
@@ -286,9 +290,9 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
  * \f$A_{\rm eff}(\cos \theta, \phi)\f$ is the effective area that depends
  * on the cosine of the zenith angle and (optionally) of the azimuth angle.
  ***************************************************************************/
-double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
-                                  const double& offset, const GLATPsf& psf,
-                                  const GLATAeff& aeff)
+double GLATLtCubeMap::operator()(const GSkyDir& dir, const GEnergy& energy,
+                                 const double& offset, const GLATPsf& psf,
+                                 const GLATAeff& aeff) const
 {
     // Get map index
     int pixel = m_map.dir2pix(dir);
@@ -297,8 +301,8 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
     double sum = 0.0;
 
     // Circumvent const correctness
-    GLATPsf*  fpsf  = ((GLATPsf*)&psf);
-    GLATAeff* faeff = ((GLATAeff*)&aeff);
+    GLATPsf*  fpsf  = const_cast<GLATPsf*>(&psf);
+    GLATAeff* faeff = const_cast<GLATAeff*>(&aeff);
 
     // Get log10 of energy
     double logE = energy.log10MeV();
@@ -310,17 +314,19 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
     if (hasphi() && aeff.hasphi()) {
         for (int iphi = 0, i = m_num_ctheta; iphi < m_num_phi; ++iphi) {
             double p = phi(iphi);
-            for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i)
+            for (int itheta = 0; itheta < m_num_ctheta; ++itheta, ++i) {
                 sum += m_map(pixel, i) * (*faeff)(logE, costheta(i), p) *
                        (*fpsf)(offset, logE, costheta(i));
+            }
         }
     }
 
     // ... otherwise sum only over zenith angle
     else {
-        for (int i = 0; i < m_num_ctheta; ++i)
+        for (int i = 0; i < m_num_ctheta; ++i) {
             sum += m_map(pixel, i) * (*faeff)(logE, costheta(i)) *
                    (*fpsf)(offset, logE, costheta(i));
+        }
     }
 
     // Return sum
@@ -335,9 +341,7 @@ double GLATLtCubeMap::operator() (const GSkyDir& dir, const GEnergy& energy,
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the object to an initial state.
+ * @brief Clear livetime cube map
  ***************************************************************************/
 void GLATLtCubeMap::clear(void)
 {
@@ -353,8 +357,10 @@ void GLATLtCubeMap::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone livetime cube map
+ *
+ * @return Pointer to deep copy of livetime cube map
+ ***************************************************************************/
 GLATLtCubeMap* GLATLtCubeMap::clone(void) const
 {
     return new GLATLtCubeMap(*this);
@@ -364,24 +370,25 @@ GLATLtCubeMap* GLATLtCubeMap::clone(void) const
 /***********************************************************************//**
  * @brief Load livetime cube from FITS file
  *
- * @param[in] hdu FITS HDU.
+ * @param[in] table FITS table.
  ***************************************************************************/
-void GLATLtCubeMap::read(const GFitsTable* hdu)
+void GLATLtCubeMap::read(const GFitsTable& table)
 {
     // Clear object
     clear();
 
     // Load skymap
-    m_map.read(hdu);
+    m_map.read(table);
 
     // Set costheta binning scheme
-    std::string scheme = gammalib::strip_whitespace(gammalib::toupper(hdu->string("THETABIN")));
+    std::string scheme =
+        gammalib::strip_whitespace(gammalib::toupper(table.string("THETABIN")));
     m_sqrt_bin = (scheme == "SQRT(1-COSTHETA)");
 
     // Read attributes
-    m_num_ctheta = hdu->integer("NBRBINS");
-    m_num_phi    = hdu->integer("PHIBINS");
-    m_min_ctheta = hdu->real("COSMIN");
+    m_num_ctheta = table.integer("NBRBINS");
+    m_num_phi    = table.integer("PHIBINS");
+    m_min_ctheta = table.real("COSMIN");
 
     // Return
     return;
@@ -395,7 +402,7 @@ void GLATLtCubeMap::read(const GFitsTable* hdu)
  *
  * @todo Not yet implemented.
  ***************************************************************************/
-void GLATLtCubeMap::write(GFits* file) const
+void GLATLtCubeMap::write(GFits& file) const
 {
     // Return
     return;
@@ -517,7 +524,7 @@ std::string GLATLtCubeMap::print(const GChatter& chatter) const
         }
         result.append("\n"+gammalib::parformat("Minimum cos theta") +
                       gammalib::str(costhetamin()));
-        result.append("\n"+m_map.print(chatter));
+        result.append("\n"+m_map.print(gammalib::reduce(chatter)));
 
     } // endif: chatter was not silent
 

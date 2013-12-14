@@ -45,13 +45,15 @@ public:
     virtual ~TestGCTAResponse(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_response_aeff(void);
-    void         test_response_psf(void);
-    void         test_response_npsf(void);
-    void         test_response_irf_diffuse(void);
-    void         test_response_npred_diffuse(void);
-    void         test_response(void);
+    virtual void              set(void);
+    virtual TestGCTAResponse* clone(void) const;
+    void                      test_response_aeff(void);
+    void                      test_response_psf(void);
+    void                      test_response_psf_king(void);
+    void                      test_response_npsf(void);
+    void                      test_response_irf_diffuse(void);
+    void                      test_response_npred_diffuse(void);
+    void                      test_response(void);
 };
 
 /***********************************************************************//**
@@ -68,8 +70,9 @@ public:
     virtual ~TestGCTAModelBackground(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_modelbg_npred(void);
+    virtual void                     set(void);
+    virtual TestGCTAModelBackground* clone(void) const;
+    void                             test_modelbg_npred(void);
 };
 
 
@@ -88,9 +91,10 @@ public:
     virtual ~TestGCTAObservation(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_unbinned_obs(void);
-    void         test_binned_obs(void);
+    virtual void                 set(void);
+    virtual TestGCTAObservation* clone(void) const;
+    void                         test_unbinned_obs(void);
+    void                         test_binned_obs(void);
 };
 
 
@@ -109,9 +113,10 @@ public:
     virtual ~TestGCTAOptimize(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_unbinned_optimizer(void);
-    void         test_binned_optimizer(void);
+    virtual void              set(void);
+    virtual TestGCTAOptimize* clone(void) const;
+    void                      test_unbinned_optimizer(void);
+    void                      test_binned_optimizer(void);
 };
 
 #endif /* TEST_CTA_HPP */

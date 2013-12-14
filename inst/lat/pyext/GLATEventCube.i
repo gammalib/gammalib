@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GLATEventCube.i  -  LAT event bin container class           *
+ *              GLATEventCube.i - Fermi/LAT event cube class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATEventCube.i
- * @brief LAT event bin container class Python interface definition
+ * @brief Fermi/LAT event cube class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -47,9 +47,10 @@ public:
     virtual GLATEventCube* clone(void) const;
     virtual int            size(void) const;
     virtual int            dim(void) const;
-    virtual int            naxis(int axis) const;
+    virtual int            naxis(const int& axis) const;
     virtual void           load(const std::string& filename);
-    virtual void           save(const std::string& filename, bool clobber = false) const;
+    virtual void           save(const std::string& filename,
+                                const bool& clobber = false) const;
     virtual void           read(const GFits& file);
     virtual void           write(GFits& file) const;
     virtual int            number(void) const;

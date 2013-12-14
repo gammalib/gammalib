@@ -1,7 +1,7 @@
 /***************************************************************************
  *                   GPar.hpp - Application parameter class                *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -35,7 +35,7 @@
 /***********************************************************************//**
  * @class GPar
  *
- * @brief Application parameter class interface defintion.
+ * @brief Application parameter class
  ***************************************************************************/
 class GPar : public GBase {
 
@@ -54,38 +54,38 @@ public:
     virtual ~GPar(void);
  
     // Operators
-    GPar& operator= (const GPar& par);
+    GPar& operator=(const GPar& par);
 
     // Methods
-    void        clear(void);
-    GPar*       clone(void) const;
-    void        type(const std::string& type);
-    void        mode(const std::string& mode);
-    void        value(const std::string& value);
-    void        string(const std::string& value);
-    void        filename(const std::string& value);
-    void        boolean(const bool& value);
-    void        integer(const int& value);
-    void        real(const double& value);
-    std::string name(void) const { return m_name; }
-    std::string type(void) const { return m_type; }
-    std::string mode(void) const { return m_mode; }
-    std::string value(void);
-    std::string string(void);
-    std::string filename(void);
-    bool        boolean(void);
-    int         integer(void);
-    double      real(void);
-    std::string min(void) const { return m_min; }
-    std::string max(void) const { return m_max; }
-    std::string prompt(void) const { return m_prompt; }
-    bool        islearn(void) const;
-    bool        isquery(void) const;
-    bool        isfilename(void) const;
-    bool        isvalid(void);
-    bool        isundefined(void);
-    bool        isnotanumber(void);
-    std::string print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GPar*              clone(void) const;
+    void               type(const std::string& type);
+    void               mode(const std::string& mode);
+    void               value(const std::string& value);
+    void               string(const std::string& value);
+    void               filename(const std::string& value);
+    void               boolean(const bool& value);
+    void               integer(const int& value);
+    void               real(const double& value);
+    const std::string& name(void) const;
+    const std::string& type(void) const;
+    const std::string& mode(void) const;
+    std::string        value(void);
+    std::string        string(void);
+    std::string        filename(void);
+    bool               boolean(void);
+    int                integer(void);
+    double             real(void);
+    const std::string& min(void) const;
+    const std::string& max(void) const;
+    const std::string& prompt(void) const;
+    bool               islearn(void) const;
+    bool               isquery(void) const;
+    bool               isfilename(void) const;
+    bool               isvalid(void);
+    bool               isundefined(void);
+    bool               isnotanumber(void);
+    std::string        print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected enumerators
@@ -126,5 +126,77 @@ protected:
     std::string m_prompt;  //!< Parameter prompt
     Status      m_status;  //!< Parameter status
 };
+
+
+/***********************************************************************//**
+ * @brief Returns parameter name
+ *
+ * @return Parameter name
+ ***************************************************************************/
+inline
+const std::string& GPar::name(void) const
+{
+    return m_name;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter type
+ *
+ * @return Parameter type
+ ***************************************************************************/
+inline
+const std::string& GPar::type(void) const
+{
+    return m_type;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter mode
+ *
+ * @return Parameter mode
+ ***************************************************************************/
+inline
+const std::string& GPar::mode(void) const
+{
+    return m_mode;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter minimum
+ *
+ * @return Parameter minimum
+ ***************************************************************************/
+inline
+const std::string& GPar::min(void) const
+{
+    return m_min;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter maximum
+ *
+ * @return Parameter maximum
+ ***************************************************************************/
+inline
+const std::string& GPar::max(void) const
+{
+    return m_max;
+}
+
+
+/***********************************************************************//**
+ * @brief Returns parameter prompt
+ *
+ * @return Parameter prompt
+ ***************************************************************************/
+inline
+const std::string& GPar::prompt(void) const
+{
+    return m_prompt;
+}
 
 #endif /* GPAR_HPP */

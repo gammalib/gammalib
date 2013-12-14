@@ -130,7 +130,7 @@ GCTAAeffPerfTable::~GCTAAeffPerfTable(void)
  * @param[in] aeff Effective area.
  * @return Effective area.
  ***************************************************************************/
-GCTAAeffPerfTable& GCTAAeffPerfTable::operator= (const GCTAAeffPerfTable& aeff)
+GCTAAeffPerfTable& GCTAAeffPerfTable::operator=(const GCTAAeffPerfTable& aeff)
 {
     // Execute only if object is not identical
     if (this != &aeff) {
@@ -299,18 +299,6 @@ void GCTAAeffPerfTable::load(const std::string& filename)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Return filename
- *
- * @return Returns filename from which effective area was loaded
- ***************************************************************************/
-std::string GCTAAeffPerfTable::filename(void) const
-{
-    // Return filename
-    return m_filename;
 }
 
 

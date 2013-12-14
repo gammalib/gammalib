@@ -282,7 +282,7 @@ void TestGMatrixSparse::set(void)
     // Set test name
     name("GMatrixSparse");
 
-    // Add tests
+    // Append tests
     append(static_cast<pfunction>(&TestGMatrixSparse::alloc_matrix), "Test matrix allocation");
     append(static_cast<pfunction>(&TestGMatrixSparse::assign_values), "Test value assignment");
     append(static_cast<pfunction>(&TestGMatrixSparse::copy_matrix), "Test matrix copying");
@@ -300,6 +300,18 @@ void TestGMatrixSparse::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGMatrixSparse* TestGMatrixSparse::clone(void) const
+{
+    // Clone test suite
+    return new TestGMatrixSparse(*this);
 }
 
 

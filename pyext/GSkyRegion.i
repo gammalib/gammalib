@@ -52,9 +52,9 @@ public:
 	virtual bool        contains(const GSkyRegion& reg) const = 0;
 	
     // Implemented methods
-	std::string         type(void) const;
-    std::string         name(void) const;
-	double              solidangle(void) const;  
+    const std::string& type(void) const;
+    const std::string& name(void) const;
+    const double&      solidangle(void) const;
 };
 
 

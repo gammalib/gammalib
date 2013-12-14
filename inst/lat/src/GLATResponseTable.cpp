@@ -34,7 +34,7 @@
 #include "GFitsTableFloatCol.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_READ                         "GLATResponseTable::read(GFitsTable*)"
+#define G_READ                         "GLATResponseTable::read(GFitsTable&)"
 #define G_INDEX                        "GLATResponseTable::index(int&, int&)"
 #define G_ENERGY                            "GLATResponseTable::energy(int&)"
 #define G_ENERGY_LO                      "GLATResponseTable::energy_lo(int&)"
@@ -111,8 +111,9 @@ GLATResponseTable::~GLATResponseTable(void)
  * @brief Assignment operator
  *
  * @param table Response table.
+ * @return Response table.
  ***************************************************************************/
-GLATResponseTable& GLATResponseTable::operator= (const GLATResponseTable& table)
+GLATResponseTable& GLATResponseTable::operator=(const GLATResponseTable& table)
 {
     // Execute only if object is not identical
     if (this != &table) {
@@ -178,16 +179,16 @@ GLATResponseTable* GLATResponseTable::clone(void) const
  * CTHETA_LO (cos theta bins lower boundary)
  * CTHETA_HI (cos theta bins upper boundary)
  ***************************************************************************/
-void GLATResponseTable::read(const GFitsTable* hdu)
+void GLATResponseTable::read(const GFitsTable& hdu)
 {
     // Clear instance
     clear();
 
     // Get pointers to table columns
-    const GFitsTableCol* energy_lo = (*hdu)["ENERG_LO"];
-    const GFitsTableCol* energy_hi = (*hdu)["ENERG_HI"];
-    const GFitsTableCol* ctheta_lo = (*hdu)["CTHETA_LO"];
-    const GFitsTableCol* ctheta_hi = (*hdu)["CTHETA_HI"];
+    const GFitsTableCol* energy_lo = hdu["ENERG_LO"];
+    const GFitsTableCol* energy_hi = hdu["ENERG_HI"];
+    const GFitsTableCol* ctheta_lo = hdu["CTHETA_LO"];
+    const GFitsTableCol* ctheta_hi = hdu["CTHETA_HI"];
 
     // Extract number of bins
     m_energy_num = energy_lo->number();
@@ -245,7 +246,7 @@ void GLATResponseTable::read(const GFitsTable* hdu)
  *
  * @param[in] hdu Fits table HDU.
  ***************************************************************************/
-void GLATResponseTable::write(GFitsTable* hdu) const
+void GLATResponseTable::write(GFitsTable& hdu) const
 {
     // Allocate floating point vector columns
     GFitsTableFloatCol col_energy_lo = GFitsTableFloatCol("ENERG_LO",  1, m_energy_num);
@@ -264,10 +265,10 @@ void GLATResponseTable::write(GFitsTable* hdu) const
     }
 
     // Append columns to boundary table
-    hdu->append(col_energy_lo);
-    hdu->append(col_energy_hi);
-    hdu->append(col_ctheta_lo);
-    hdu->append(col_ctheta_hi);
+    hdu.append(col_energy_lo);
+    hdu.append(col_energy_hi);
+    hdu.append(col_ctheta_lo);
+    hdu.append(col_ctheta_hi);
 
     // Return
     return;

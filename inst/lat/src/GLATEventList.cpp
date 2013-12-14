@@ -109,9 +109,10 @@ GLATEventList::~GLATEventList(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] list LAT event list.
+ * @param[in] list Fermi/LAT event list.
+ * @return Fermi/LAT event list.
  ***************************************************************************/
-GLATEventList& GLATEventList::operator= (const GLATEventList& list)
+GLATEventList& GLATEventList::operator=(const GLATEventList& list)
 {
     // Execute only if object is not identical
     if (this != &list) {
@@ -149,8 +150,9 @@ GLATEventAtom* GLATEventList::operator[](const int& index)
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OPERATOR, "Event index", index, size());
+    }
     #endif
 
     // Return pointer
@@ -172,8 +174,9 @@ const GLATEventAtom* GLATEventList::operator[](const int& index) const
 {
     // Optionally check if the index is valid
     #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size())
-        throw GException::out_of_range(G_OPERATOR, index, 0, size()-1);
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_OPERATOR, "Event index", index, size());
+    }
     #endif
 
     // Return pointer
@@ -188,9 +191,7 @@ const GLATEventAtom* GLATEventList::operator[](const int& index) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
- *
- * This method properly resets the object to an initial state.
+ * @brief Clear event list
  ***************************************************************************/
 void GLATEventList::clear(void)
 {
@@ -210,8 +211,10 @@ void GLATEventList::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
-***************************************************************************/
+ * @brief Clone event list
+ *
+ * @return Pointer to deep copy of Fermi/LAT event list.
+ ***************************************************************************/
 GLATEventList* GLATEventList::clone(void) const
 {
     return new GLATEventList(*this);
@@ -254,7 +257,8 @@ void GLATEventList::load(const std::string& filename)
  *
  * @todo To be implemented.
  ***************************************************************************/
-void GLATEventList::save(const std::string& filename, bool clobber) const
+void GLATEventList::save(const std::string& filename,
+                         const bool& clobber) const
 {
     // Return
     return;
@@ -276,33 +280,28 @@ void GLATEventList::read(const GFits& file)
     // Clear object
     clear();
 
-    // Get HDU
-    GFitsTable* hdu = file.table("EVENTS");
+    // Get HDU (pointer is always valid)
+    const GFitsTable& hdu = *file.table("EVENTS");
 
-    // Continue only if event HDU is valid
-    if (hdu != NULL) {
+    // Read event data
+    read_events(hdu);
 
-        // Read event data
-        read_events(*hdu);
-
-        // Read data selection keywords
-        read_ds_keys(*hdu);
-    
-    } // endif: HDU was valid
+    // Read data selection keywords
+    read_ds_keys(hdu);
 
     // If we have a GTI extension, then read Good Time Intervals from that
     // extension
-    if (file.hashdu("GTI")) {
-        GFitsTable* gti = file.table("GTI");
+    if (file.contains("GTI")) {
+        const GFitsTable& gti = *file.table("GTI");
         m_gti.read(gti);
     }
 
     // ... otherwise build GTI from TSTART and TSTOP
-    else if (hdu != NULL) {
+    else {
 
         // Read start and stop time
-        double tstart = hdu->real("TSTART");
-        double tstop  = hdu->real("TSTOP");
+        double tstart = hdu.real("TSTART");
+        double tstop  = hdu.real("TSTOP");
 
         // Create time reference from header information
         GTimeReference timeref(hdu);
@@ -354,8 +353,9 @@ void GLATEventList::roi(const GRoi& roi)
     const GLATRoi* ptr = dynamic_cast<const GLATRoi*>(&roi);
 
     // Throw exception if ROI is not of correct type
-    if (ptr == NULL)
+    if (ptr == NULL) {
         throw GLATException::bad_roi_type(G_ROI);
+    }
 
     // Set ROI
     m_roi = *ptr;
@@ -555,11 +555,10 @@ void GLATEventList::read_events(const GFitsTable& table)
                 std::sprintf(keyword, "DIFRSP%d", k);
 
                 // Get DIFRSP label
-                try {
-                    GFitsTable* ptr = const_cast<GFitsTable*>(&table); // Kluge to const
-                    m_difrsp_label.push_back(ptr->card(std::string(keyword))->string());
+                if (table.hascard(std::string(keyword))) {
+                    m_difrsp_label.push_back(table.string(std::string(keyword)));
                 }
-                catch (GException::fits_key_not_found &e) {
+                else {
                     m_difrsp_label.push_back("NONE");
                 }
 
@@ -601,7 +600,7 @@ void GLATEventList::read_ds_keys(const GFitsHDU& hdu)
 
         // Circumvent const correctness. We need this because the header()
         // card method is not declared const. This should be corrected.
-        GFitsHDU* ptr = (GFitsHDU*)&hdu;
+        //GFitsHDU* ptr = (GFitsHDU*)&hdu;
 
         // Reserve space
         m_ds_type.reserve(ds_num);
@@ -616,38 +615,38 @@ void GLATEventList::read_ds_keys(const GFitsHDU& hdu)
         for (int i = 0; i < ds_num; ++i) {
 
             // Get DSTYPnn
-            try {
-                std::sprintf(keyword, "DSTYP%d", i+1);
-                m_ds_type.push_back(ptr->card(std::string(keyword))->string());
+            std::sprintf(keyword, "DSTYP%d", i+1);
+            if (hdu.hascard(std::string(keyword))) {
+                m_ds_type.push_back(hdu.string(std::string(keyword)));
             }
-            catch (GException::fits_key_not_found &e) {
+            else {
                 m_ds_type.push_back("");
             }
 
             // Get DSUNInn
-            try {
-                std::sprintf(keyword, "DSUNI%d", i+1);
-                m_ds_unit.push_back(ptr->card(std::string(keyword))->string());
+            std::sprintf(keyword, "DSUNI%d", i+1);
+            if (hdu.hascard(std::string(keyword))) {
+                m_ds_unit.push_back(hdu.string(std::string(keyword)));
             }
-            catch (GException::fits_key_not_found &e) {
+            else {
                 m_ds_unit.push_back("");
             }
 
             // Get DSVALnn
-            try {
-                std::sprintf(keyword, "DSVAL%d", i+1);
-                m_ds_value.push_back(ptr->card(std::string(keyword))->string());
+            std::sprintf(keyword, "DSVAL%d", i+1);
+            if (hdu.hascard(std::string(keyword))) {
+                m_ds_value.push_back(hdu.string(std::string(keyword)));
             }
-            catch (GException::fits_key_not_found &e) {
+            else {
                 m_ds_value.push_back("");
             }
 
             // Get DSREFnn
-            try {
-                std::sprintf(keyword, "DSREF%d", i+1);
-                m_ds_reference.push_back(ptr->card(std::string(keyword))->string());
+            std::sprintf(keyword, "DSREF%d", i+1);
+            if (hdu.hascard(std::string(keyword))) {
+                m_ds_reference.push_back(hdu.string(std::string(keyword)));
             }
-            catch (GException::fits_key_not_found &e) {
+            else {
                 m_ds_reference.push_back("");
             }
 

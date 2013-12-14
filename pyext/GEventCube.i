@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GEventCube.i  -  Abstract event bin container class           *
+ *            GEventCube.i - Abstract event bin container class            *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -46,9 +46,10 @@ public:
     virtual GEventCube* clone(void) const = 0;
     virtual int         size(void) const = 0;
     virtual int         dim(void) const = 0;
-    virtual int         naxis(int axis) const = 0;
+    virtual int         naxis(const int& axis) const = 0;
     virtual void        load(const std::string& filename) = 0;
-    virtual void        save(const std::string& filename, bool clobber = false) const = 0;
+    virtual void        save(const std::string& filename,
+                             const bool& clobber = false) const = 0;
     virtual void        read(const GFits& file) = 0;
     virtual void        write(GFits& file) const = 0;
     virtual int         number(void) const = 0;

@@ -70,4 +70,7 @@ public:
     char *__str__() {
         return gammalib::tochar(self->print());
     }
+    int __len__() {
+        return (self->size());
+    }
 };

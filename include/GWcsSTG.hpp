@@ -28,7 +28,8 @@
 #define GWCSSTG_HPP
 
 /* __ Includes ___________________________________________________________ */
-#include "GWcslib.hpp"
+#include <string>
+#include "GWcs.hpp"
 
 
 /***********************************************************************//**
@@ -39,7 +40,7 @@
  * This class implements the "stereographic" projection for the World
  * Coordinate System.
  ***************************************************************************/
-class GWcsSTG : public GWcslib {
+class GWcsSTG : public GWcs {
 
 public:
     // Constructors and destructors
@@ -52,13 +53,13 @@ public:
     virtual ~GWcsSTG(void);
 
     // Operators
-    GWcsSTG& operator= (const GWcsSTG& wcs);
+    GWcsSTG& operator=(const GWcsSTG& wcs);
 
     // Implemented pure virtual base class methods
     virtual void        clear(void);
     virtual GWcsSTG*    clone(void) const;
-    virtual std::string code(void) const { return "STG"; }
-    virtual std::string name(void) const { return "stereographic"; }
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
     virtual std::string print(const GChatter& chatter = NORMAL) const;
 
 private:
@@ -74,5 +75,33 @@ private:
                  const double* phi, const double* theta,
                  double* x, double* y, int* stat) const;
 };
+
+
+/***********************************************************************//**
+ * @brief Return projection code
+ *
+ * @return Projection code.
+ *
+ * Returns the projection code "STG".
+ ***************************************************************************/
+inline
+std::string GWcsSTG::code(void) const
+{
+    return "STG";
+}
+
+
+/***********************************************************************//**
+ * @brief Return projection name
+ *
+ * @return Projection name.
+ *
+ * Returns the projection name.
+ ***************************************************************************/
+inline
+std::string GWcsSTG::name(void) const
+{
+    return "stereographic";
+}
 
 #endif /* GWCSSTG_HPP */

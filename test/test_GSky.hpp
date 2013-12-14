@@ -1,7 +1,7 @@
 /***************************************************************************
- *              test_GSky.hpp  -   test sky class                          *
+ *                  test_GSky.hpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012 by Jean-Baptiste Cayrou                             *
+ *  copyright (C) 2012-2013 by Jean-Baptiste Cayrou                        *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -24,30 +24,37 @@
 
 /* __ Includes ___________________________________________________________ */
 #include "GammaLib.hpp"
-#include <iostream>                           // cout, cerr
 
+
+/***********************************************************************//**
+ * @class TestGSky
+ *
+ * @brief Test suite for sky module
+ ***************************************************************************/
 class TestGSky : public GTestSuite
 {
-    public:
-        // Constructors and destructors
-        TestGSky(void) : GTestSuite(){ return; }
-        virtual ~TestGSky(void){ return; }
+public:
+    // Constructors and destructors
+    TestGSky(void) : GTestSuite() { }
+    virtual ~TestGSky(void) { }
 
-        // Methods
-        virtual void set(void);
-        void test_GWcslib(void);
-        void test_GSkymap_healpix_construct(void);
-        void test_GSkymap_healpix_io(void);
-        void test_GSkymap_wcs_construct(void);
-        void test_GSkymap_wcs_io(void);
-        void test_GSkyRegions_io(void);
-        void test_GSkyRegionCircle_construct(void);
-        void test_GSkyRegionCircle_logic(void);
+    // Methods
+    virtual void      set(void);
+    virtual TestGSky* clone(void) const;
+    void              test_GWcs(void);
+    void              test_GSkyPixel(void);
+    void              test_GSkymap_healpix_construct(void);
+    void              test_GSkymap_healpix_io(void);
+    void              test_GSkymap_wcs_construct(void);
+    void              test_GSkymap_wcs_io(void);
+    void              test_GSkyRegions_io(void);
+    void              test_GSkyRegionCircle_construct(void);
+    void              test_GSkyRegionCircle_logic(void);
 
-    // Private methods
-    private:
-        double wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2);
-        double wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2);
+// Private methods
+private:
+    double wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2);
+    double wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2);
 };
 
 #endif /* TEST_GSKY_HPP */

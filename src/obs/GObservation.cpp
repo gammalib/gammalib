@@ -125,10 +125,11 @@ GObservation::~GObservation(void)
  * @brief Assignment operator
  *
  * @param[in] obs Observation.
+ * @return Observation.
  *
  * Assign observation.
  ***************************************************************************/
-GObservation& GObservation::operator= (const GObservation& obs)
+GObservation& GObservation::operator=(const GObservation& obs)
 {
     // Execute only if object is not identical
     if (this != &obs) {
@@ -309,77 +310,20 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
 
 /***********************************************************************//**
- * @brief Set observation name
- *
- * @param[in] name Observation name.
- *
- * Set name of the observation.
- ***************************************************************************/
-void GObservation::name(const std::string& name)
-{
-    // Set name
-    m_name = name;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set observation identifier
- *
- * @param[in] id Observation identifier.
- *
- * Set identifier of the observation.
- ***************************************************************************/
-void GObservation::id(const std::string& id)
-{
-    // Set identifier
-    m_id = id;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
  * @brief Set event container
  *
- * @param[in] events Event container pointer.
+ * @param[in] events Event container.
  *
  * Set the event container for this observation by cloning the container
- * specified in the argument. If NULL is passed to this method, any existing
- * events are cleared an no event container is attached.
+ * specified in the argument.
  ***************************************************************************/
-void GObservation::events(const GEvents* events)
+void GObservation::events(const GEvents& events)
 {
     // Remove an existing event container
     if (m_events != NULL) delete m_events;
 
-    // Signal event container as free
-    m_events = NULL;
-
-    // Set event container if the input pointer is valid
-    if (events != NULL) {
-        m_events = events->clone();
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set optimizer statistics
- *
- * @param[in] statistics Optimizer statistics.
- *
- * Set optimizer statistics for the observation.
- ***************************************************************************/
-void GObservation::statistics(const std::string& statistics)
-{
-    // Set statistics
-    m_statistics = statistics;
+    // Clone events
+    m_events = events.clone();
 
     // Return
     return;
@@ -503,8 +447,9 @@ void GObservation::free_members(void)
  *       Eventually, the higher level method should avoid going in a
  *       parameter domain that is not defined. 
  ***************************************************************************/
-double GObservation::model_grad(const GModel& model, const GEvent& event,
-                                int ipar) const
+double GObservation::model_grad(const GModel& model,
+                                const GEvent& event,
+                                const int&    ipar) const
 {
     // Initialise gradient
     double grad = 0.0;
@@ -600,7 +545,7 @@ double GObservation::model_grad(const GModel& model, const GEvent& event,
  *
  * @param[in] x Function value.
  ***************************************************************************/
-double GObservation::model_func::eval(double x)
+double GObservation::model_func::eval(const double& x)
 {
     // Get non-const model pointer (circumvent const correctness)
     GModel* model = const_cast<GModel*>(m_model);
@@ -670,7 +615,7 @@ double GObservation::model_func::eval(double x)
  *       Eventually, the higher level method should avoid going in a
  *       parameter domain that is not defined. 
  ***************************************************************************/
-double GObservation::npred_grad(const GModel& model, int ipar) const
+double GObservation::npred_grad(const GModel& model, const int& ipar) const
 {
     // Initialise result
     double grad = 0.0;
@@ -752,7 +697,7 @@ double GObservation::npred_grad(const GModel& model, int ipar) const
  *
  * @param[in] x Function value.
  ***************************************************************************/
-double GObservation::npred_func::eval(double x)
+double GObservation::npred_func::eval(const double& x)
 {
     // Get non-const model pointer (circumvent const correctness)
     GModel* model = const_cast<GModel*>(m_model);
@@ -860,7 +805,7 @@ double GObservation::npred_temp(const GModel& model) const
  *
  * @param[in] x Function value.
  ***************************************************************************/
-double GObservation::npred_temp_kern::eval(double x)
+double GObservation::npred_temp_kern::eval(const double& x)
 {
     // Convert argument in native reference in seconds
     GTime time;
@@ -952,42 +897,43 @@ double GObservation::npred_spec(const GModel& model,
  *
  * This method implements the integration kernel needed for the npred_spec()
  * method. If G_LN_ENERGY_INT is defined the energy integration is done
- * logarithmically.
+ * logarithmically, i.e. @p x is given in ln(energy) instead of energy.
  ***************************************************************************/
-double GObservation::npred_spec_kern::eval(double x)
+double GObservation::npred_spec_kern::eval(const double& x)
 {
-    #if defined(G_LN_ENERGY_INT)
-    // Variable substitution
-    #if defined(G_NAN_CHECK)
-    double x_in = x;
-    #endif
-    x = exp(x);
-    #endif
-
-    // Set energy in MeV
+    // Set energy
     GEnergy eng;
+    #if defined(G_LN_ENERGY_INT)
+    double expx = std::exp(x);
+    eng.MeV(expx);
+    #else
     eng.MeV(x);
+    #endif
 
     // Get function value
     double value = m_model->npred(eng, *m_time, *m_parent);
 
-    #if defined(G_LN_ENERGY_INT)
-    // Correct for variable substitution
+    // Save value if needed
     #if defined(G_NAN_CHECK)
     double value_out = value;
     #endif
-    value *= x;
+
+    // Correct for variable substitution
+    #if defined(G_LN_ENERGY_INT)
+    value *= expx;
     #endif
 
     // Compile option: Check for NaN
     #if defined(G_NAN_CHECK)
     if (gammalib::isnotanumber(value) || gammalib::isinfinite(value)) {
         std::cout << "*** ERROR: GObservation::npred_spec_kern::eval";
-        std::cout << "(x=" << x_in << "): ";
+        std::cout << "(x=" << x << "): ";
         std::cout << " NaN/Inf encountered";
         std::cout << " (value=" << value;
         std::cout << " (value_out=" << value_out;
-        std::cout << " x=" << x;
+        #if defined(G_LN_ENERGY_INT)
+        std::cout << " exp(x)=" << expx;
+        #endif
         std::cout << ")" << std::endl;
     }
     #endif

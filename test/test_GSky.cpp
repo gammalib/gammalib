@@ -1,5 +1,5 @@
 /***************************************************************************
- *                   test_GSky.cpp - test GSky classes                     *
+ *                  test_GSky.cpp - Test sky module                        *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -51,17 +51,33 @@ void TestGSky::set(void){
     // Test name
     name("GSky");
 
-    //add tests
-    add_test(static_cast<pfunction>(&TestGSky::test_GWcslib),"Test GWcslib");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_construct),"Test Healpix GSkymap constructors");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
-    add_test(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
+    // Append tests
+    append(static_cast<pfunction>(&TestGSky::test_GWcs),"Test GWcs");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyPixel),"Test GSkyPixel");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_construct),"Test Healpix GSkymap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap_healpix_io),"Test Healpix GSkymap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_construct),"Test WCS GSkymap constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkymap_wcs_io),"Test WCS GSkymap I/O");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegions_io),"Test GSkyRegions");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_construct),"Test GSkyRegionCircle constructors");
+    append(static_cast<pfunction>(&TestGSky::test_GSkyRegionCircle_logic),"Test GSkyRegionCircle logic");
+
+    // Return
     return;
 }
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGSky* TestGSky::clone(void) const
+{
+    // Clone test suite
+    return new TestGSky(*this);
+}
+
 
 /***********************************************************************//**
  * @brief Test consistency of forward and background transformations
@@ -72,7 +88,7 @@ void TestGSky::set(void){
  * @param[in] crpix1 Reference pixel in X
  * @param[in] crpix2 Reference pixel in Y
  ***************************************************************************/
-double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
+double TestGSky::wcs_forth_back_pixel(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2)
 {
     // Initialise maximal distance
     double dist_max = 0.0;
@@ -85,8 +101,9 @@ double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpi
 
         // Skip pixels outside valid range (they are not expected to
         // transform bijectively)
-        if (x < 0 || x >= nx)
+        if (x < 0 || x >= nx) {
             continue;
+        }
 
         // Loop over y pixels
         for (int iy = -ny; iy <= ny; ++iy) {
@@ -96,17 +113,18 @@ double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpi
 
             // Skip pixels outside valid range (they are not expected to
             // transform bijectively)
-            if (y < 0 || y >= ny)
+            if (y < 0 || y >= ny) {
                 continue;
+            }
 
             // Set sky pixel
             GSkyPixel pix_in(x,y);
 
             // Forth: Transform to world
-            GSkyDir dir = wcs->xy2dir(pix_in);
+            GSkyDir dir = wcs->pix2dir(pix_in);
 
             // Back: Transform to pixel
-            GSkyPixel pix_out = wcs->dir2xy(dir);
+            GSkyPixel pix_out = wcs->dir2pix(dir);
 
             // Compute distance
             double dx      = pix_in.x()-pix_out.x();
@@ -128,8 +146,9 @@ double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpi
             #endif
 
             // Store maximum distance
-            if (dist > dist_max)
+            if (dist > dist_max) {
                 dist_max = dist;
+            }
 
         } // endfor: y pixels
     } // endfor: x pixels
@@ -148,10 +167,10 @@ double TestGSky::wcs_forth_back_pixel(GWcslib* wcs, int nx, int ny, double& crpi
  * @param[in] crpix1 Reference pixel in X
  * @param[in] crpix2 Reference pixel in Y
  ***************************************************************************/
-double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& crpix2)
+double TestGSky::wcs_copy(GWcs* wcs, int nx, int ny, double& crpix1, double& crpix2)
 {
     // Make a copy using clone
-    GWcslib* cpy = wcs->clone();
+    GWcs* cpy = wcs->clone();
 
     // Initialise maximal angle and distance
     double angle_max = 0.0;
@@ -165,29 +184,32 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
 
         // Skip pixels outside valid range (they are not expected to
         // transform bijectively)
-        if (x < 0 || x >= nx)
+        if (x < 0 || x >= nx) {
             continue;
+        }
 
         // Loop over y pixels
         for (int iy = -ny; iy <= ny; ++iy) {
 
             // Set y value
-            double    y = double(iy) + crpix2;
+            double y = double(iy) + crpix2;
 
             // Skip pixels outside valid range (they are not expected to
             // transform bijectively)
-            if (y < 0 || y >= ny)
+            if (y < 0 || y >= ny) {
                 continue;
+            }
 
             // Set sky pixel
             GSkyPixel pix_in(x,y);
 
             // Transform to world
-            GSkyDir dir1 = wcs->xy2dir(pix_in);
-            GSkyDir dir2 = cpy->xy2dir(pix_in);
+            GSkyDir dir1 = wcs->pix2dir(pix_in);
+            GSkyDir dir2 = cpy->pix2dir(pix_in);
             double angle = dir1.dist_deg(dir2);
-            if (angle > angle_max)
+            if (angle > angle_max) {
                 angle_max = angle;
+            }
 
             // Debug option: Dump discrepancies
             #if defined(G_WCS_COPY_DEBUG)
@@ -200,15 +222,16 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
             #endif
 
             // Transform to pixel
-            GSkyPixel pix_out1 = wcs->dir2xy(dir1);
-            GSkyPixel pix_out2 = cpy->dir2xy(dir2);
+            GSkyPixel pix_out1 = wcs->dir2pix(dir1);
+            GSkyPixel pix_out2 = cpy->dir2pix(dir2);
 
             // Compute distance
             double dx   = pix_out1.x()-pix_out2.x();
             double dy   = pix_out1.y()-pix_out2.y();
-            double dist = sqrt(dx*dx+dy*dy);
-            if (dist > dist_max)
+            double dist = std::sqrt(dx*dx+dy*dy);
+            if (dist > dist_max) {
                 dist_max = dist;
+            }
 
             // Debug option: Dump discrepancies
             #if defined(G_WCS_COPY_DEBUG)
@@ -236,11 +259,138 @@ double TestGSky::wcs_copy(GWcslib* wcs, int nx, int ny, double& crpix1, double& 
 
 
 /***********************************************************************//**
- * @brief Test GWcslib projections
+ * @brief Test GSkyPixel class
  *
- * This function test all non-HealPix projections that have been registered.
+ * Test GSkyPixel class.
  ***************************************************************************/
-void TestGSky::test_GWcslib(void)
+void TestGSky::test_GSkyPixel(void)
+{
+    // Test void constructor
+    test_try("Test void constructor");
+    try {
+        GSkyPixel pixel;
+        test_value(pixel.size(), 0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test 1D constructor
+    test_try("Test 1D constructor (int version)");
+    try {
+        GSkyPixel pixel(41);
+        test_assert(pixel.is1D(), "Pixel is not 1D");
+        test_assert(!pixel.is2D(), "Pixel is 2D but it should be 1D");
+        test_value(pixel.size(), 1);
+        test_value(pixel.index(), 41.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test 1D constructor
+    test_try("Test 1D constructor (double version)");
+    try {
+        GSkyPixel pixel(41.001);
+        test_assert(pixel.is1D(), "Pixel is not 1D");
+        test_assert(!pixel.is2D(), "Pixel is 2D but it should be 1D");
+        test_value(pixel.size(), 1);
+        test_value(pixel.index(), 41.001);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test 2D constructor
+    test_try("Test 2D constructor (int version)");
+    try {
+        GSkyPixel pixel(41,14);
+        test_assert(!pixel.is1D(), "Pixel is 1D but it should be 2D");
+        test_assert(pixel.is2D(), "Pixel is not 2D");
+        test_value(pixel.size(), 2);
+        test_value(pixel.x(), 41.0);
+        test_value(pixel.y(), 14.0);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test 2D constructor
+    test_try("Test 2D constructor (double version)");
+    try {
+        GSkyPixel pixel(41.001,14.003);
+        test_assert(!pixel.is1D(), "Pixel is 1D but it should be 2D");
+        test_assert(pixel.is2D(), "Pixel is not 2D");
+        test_value(pixel.size(), 2);
+        test_value(pixel.x(), 41.001);
+        test_value(pixel.y(), 14.003);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test 1D indexing
+    test_try("Test 1D indexing");
+    try {
+        GSkyPixel pixel;
+        test_value(pixel.size(), 0);
+        pixel = 41;
+        int index = pixel;
+        test_value(index, 41);
+        pixel = 41.001;
+        index = pixel;
+        test_value(index, 41);
+        double dindex = pixel;
+        test_value(dindex, 41.001);
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Test cloning
+    test_try("Test cloning");
+    try {
+        GSkyPixel pixel;
+        test_value(pixel.size(), 0);
+        GSkyPixel* clone = pixel.clone();
+        test_value(clone->size(), 0);
+        delete clone;
+        pixel = 41;
+        clone = pixel.clone();
+        test_value(clone->size(), 1);
+        int index = pixel;
+        test_value(index, 41);
+        delete clone;
+        pixel.x(41.001);
+        pixel.y(14.003);
+        clone = pixel.clone();
+        test_value(clone->size(), 2);
+        test_value(clone->x(), 41.001);
+        test_value(clone->y(), 14.003);
+        delete clone;
+        test_try_success();
+    }
+    catch (std::exception &e) {
+        test_try_failure(e);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Test GWcs projections
+ *
+ * This method tests all WCS projections that have been registered.
+ ***************************************************************************/
+void TestGSky::test_GWcs(void)
 {
     // Allocate parameters for testing
     double crval1 = 83.63;
@@ -256,10 +406,7 @@ void TestGSky::test_GWcslib(void)
     GWcsRegistry registry;
     for (int i = 0; i < registry.size(); ++i) {
 
-        // Skip HealPix
-        if (registry.code(i) == "HPX")
-            continue;
-
+        // Set header
         std::string test_class = "GWcs" + registry.code(i);
 
         // Perform tests
@@ -267,8 +414,8 @@ void TestGSky::test_GWcslib(void)
         try {
 
             // Allocate projection CEL and GAL
-            GWcslib *cel = dynamic_cast<GWcslib*>(registry.alloc(registry.code(i)));
-            GWcslib *gal = dynamic_cast<GWcslib*>(registry.alloc(registry.code(i)));
+            GWcs *cel = dynamic_cast<GWcs*>(registry.alloc(registry.code(i)));
+            GWcs *gal = dynamic_cast<GWcs*>(registry.alloc(registry.code(i)));
 
             // Throw an error if allocation failed
             if (cel == NULL || gal == NULL) {
@@ -378,42 +525,30 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test correct Healpix constructors
     test_try("Test correct Healpix constructors");
     try {
-        GSkymap ring1("HPX", "GAL", 1, "RING", 1);
-        GSkymap ring2("HPX", "GAL", 2, "RING", 1);
-        GSkymap ring4("HPX", "GAL", 4, "RING", 1);
-        GSkymap ring8("HPX", "GAL", 8, "RING", 1);
-        GSkymap ring16("HPX", "GAL", 16, "RING", 1);
-        GSkymap ring32("HPX", "GAL", 32, "RING", 1);
-        GSkymap ring64("HPX", "GAL", 64, "RING", 1);
-        GSkymap ring128("HPX", "GAL", 128, "RING", 1);
-        GSkymap ring256("HPX", "GAL", 256, "RING", 1);
-        GSkymap ring512("HPX", "GAL", 512, "RING", 1);
-/*
-        GSkymap ring1024("HPX", "GAL", 1024, "RING", 1);
-        GSkymap ring2048("HPX", "GAL", 2048, "RING", 1);
-        GSkymap ring4096("HPX", "GAL", 4096, "RING", 1);
-        GSkymap ring8192("HPX", "GAL", 8192, "RING", 1);
-*/
-        GSkymap nest1("HPX", "GAL", 1, "NEST", 1);
-        GSkymap nest2("HPX", "GAL", 2, "NEST", 1);
-        GSkymap nest4("HPX", "GAL", 4, "NEST", 1);
-        GSkymap nest8("HPX", "GAL", 8, "NEST", 1);
-        GSkymap nest16("HPX", "GAL", 16, "NEST", 1);
-        GSkymap nest32("HPX", "GAL", 32, "NEST", 1);
-        GSkymap nest64("HPX", "GAL", 64, "NEST", 1);
-        GSkymap nest128("HPX", "GAL", 128, "NEST", 1);
-        GSkymap nest256("HPX", "GAL", 256, "NEST", 1);
-        GSkymap nest512("HPX", "GAL", 512, "NEST", 1);
-/*
-        GSkymap nest1024("HPX", "GAL", 1024, "NEST", 1);
-        GSkymap nest2048("HPX", "GAL", 2048, "NEST", 1);
-        GSkymap nest4096("HPX", "GAL", 4096, "NEST", 1);
-        GSkymap nest8192("HPX", "GAL", 8192, "NEST", 1);
-*/
-        GSkymap map1("HPX", "CEL", 1, "RING", 1);
-        GSkymap map2("HPX", "CEL", 1, "RING", 2);
-        GSkymap map3("HPX", "EQU", 1, "RING", 1);
-        GSkymap map4("HPX", "EQU", 1, "NESTED", 1);
+        GSkymap ring1("GAL", 1, "RING", 1);
+        GSkymap ring2("GAL", 2, "RING", 1);
+        GSkymap ring4("GAL", 4, "RING", 1);
+        GSkymap ring8("GAL", 8, "RING", 1);
+        GSkymap ring16("GAL", 16, "RING", 1);
+        GSkymap ring32("GAL", 32, "RING", 1);
+        GSkymap ring64("GAL", 64, "RING", 1);
+        GSkymap ring128("GAL", 128, "RING", 1);
+        GSkymap ring256("GAL", 256, "RING", 1);
+        GSkymap ring512("GAL", 512, "RING", 1);
+        GSkymap nest1("GAL", 1, "NEST", 1);
+        GSkymap nest2("GAL", 2, "NEST", 1);
+        GSkymap nest4("GAL", 4, "NEST", 1);
+        GSkymap nest8("GAL", 8, "NEST", 1);
+        GSkymap nest16("GAL", 16, "NEST", 1);
+        GSkymap nest32("GAL", 32, "NEST", 1);
+        GSkymap nest64("GAL", 64, "NEST", 1);
+        GSkymap nest128("GAL", 128, "NEST", 1);
+        GSkymap nest256("GAL", 256, "NEST", 1);
+        GSkymap nest512("GAL", 512, "NEST", 1);
+        GSkymap map1("CEL", 1, "RING", 1);
+        GSkymap map2("CEL", 1, "RING", 2);
+        GSkymap map3("EQU", 1, "RING", 1);
+        GSkymap map4("EQU", 1, "NESTED", 1);
 
         test_try_success();
     }
@@ -424,22 +559,9 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test Healpix copy constructor
     test_try("Test Healpix copy constructor");
     try {
-        GSkymap ring1("HPX", "GAL", 1, "RING", 1);
+        GSkymap ring1("GAL", 1, "RING", 1);
         GSkymap ring2 = ring1;
 
-        test_try_success();
-    }
-    catch (std::exception &e) {
-        test_try_failure(e);
-    }
-
-    // Test invalid wcs in constructor
-    test_try("Test invalid wcs in constructor");
-    try {
-        GSkymap map("CAR", "GAL", 1, "RING", 1);
-        test_try_failure();
-    }
-    catch (GException::wcs_invalid &e) {
         test_try_success();
     }
     catch (std::exception &e) {
@@ -449,7 +571,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid coordsys in constructor
     test_try("Test invalid coordsys in constructor");
     try {
-        GSkymap map("HPX", "HOR", 1, "RING", 1);
+        GSkymap map("HOR", 1, "RING", 1);
         test_try_failure();
     }
     catch (GException::wcs_bad_coords &e) {
@@ -462,7 +584,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid nside in constructor
     test_try("Test invalid nside in constructor");
     try {
-        GSkymap map("HPX", "GAL", 3, "RING", 1);
+        GSkymap map("GAL", 3, "RING", 1);
         test_try_failure();
     }
     catch (GException::wcs_hpx_bad_nside &e) {
@@ -475,7 +597,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid ordering in constructor
     test_try("Test invalid ordering in constructor");
     try {
-        GSkymap map("HPX", "GAL", 2, "SPHERICAL", 1);
+        GSkymap map("GAL", 2, "SPHERICAL", 1);
         test_try_failure();
     }
     catch (GException::wcs_hpx_bad_ordering &e) {
@@ -489,7 +611,7 @@ void TestGSky::test_GSkymap_healpix_construct(void)
     // Test invalid nmaps in constructor
     test_try("Test invalid nmaps in constructor");
     try {
-        GSkymap map("HPX", "GAL", 2, "NEST", 0);
+        GSkymap map("GAL", 2, "NEST", 0);
         test_try_failure();
     }
     catch (GException::skymap_bad_par &e) {
@@ -512,10 +634,9 @@ void TestGSky::test_GSkymap_healpix_io(void)
 {
     // Set filenames
     const std::string file1 = "test_skymap_hpx_1.fits";
-    //const std::string file2 = "test_skymap_hpx_2.fits";
 
     // Define Healpix map for comparison
-    GSkymap refmap("HPX", "GAL", 4, "RING", 1);
+    GSkymap refmap("GAL", 4, "RING", 1);
 
     // Test Healpix map saving
     test_try("Test Healpix map saving");
@@ -585,7 +706,6 @@ void TestGSky::test_GSkymap_wcs_construct(void)
     test_try("Test void constructor");
     try {
         GSkymap map;
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -596,7 +716,6 @@ void TestGSky::test_GSkymap_wcs_construct(void)
     test_try("Test non-Healpix constructors");
     try {
         GSkymap map1("CAR", "GAL", 0.0, 0.0, 1.0, 1.0, 100, 100);
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -611,15 +730,14 @@ void TestGSky::test_GSkymap_wcs_construct(void)
         for (int l = -180; l < 180; ++l) {
             for (int b = -90; b < 90; ++b) {
                 dir.lb_deg(double(l),double(b));
-                GSkyPixel pixel    = map1.dir2xy(dir);
-                GSkyDir   dir_back = map1.xy2dir(pixel);
+                GSkyPixel pixel    = map1.dir2pix(dir);
+                GSkyDir   dir_back = map1.pix2dir(pixel);
                 double    dist     = dir.dist_deg(dir_back);
                 if (dist > eps) {
                     throw exception_failure("Sky direction differs: dir="+dir.print()+" pixel="+pixel.print()+" dir_back"+ dir_back.print()+" dist="+gammalib::str(dist)+" deg");
                 }
             }
         }
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -648,13 +766,14 @@ void TestGSky::test_GSkymap_wcs_io(void)
     // Test WCS map saving
     test_try("Test WCS map saving");
     try {
-        for (int pix = 0; pix < refmap1.npix(); ++pix)
+        for (int pix = 0; pix < refmap1.npix(); ++pix) {
             refmap1(pix) = pix+1;
+        }
         refmap1.save(file1, 1);
-        for (int pix = 0; pix < refmap2.npix(); ++pix)
+        for (int pix = 0; pix < refmap2.npix(); ++pix) {
             refmap2(pix) = pix+1;
+        }
         refmap2.save(file2, 1);
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -668,13 +787,13 @@ void TestGSky::test_GSkymap_wcs_io(void)
         map.load(file1);
         int diff = 0;
         for (int pix = 0; pix < refmap1.npix(); ++pix) {
-            if (map(pix) != refmap1(pix))
+            if (map(pix) != refmap1(pix)) {
                 diff++;
+            }
         }
         if (diff > 0) {
             throw exception_error("Loaded file "+file1+" differs from saved file .");
         }
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -688,13 +807,13 @@ void TestGSky::test_GSkymap_wcs_io(void)
         map.load(file2);
         int diff = 0;
         for (int pix = 0; pix < refmap2.npix(); ++pix) {
-            if (map(pix) != refmap2(pix))
+            if (map(pix) != refmap2(pix)) {
                 diff++;
+            }
         }
         if (diff > 0) {
             throw exception_error("Loaded file "+file2+" differs from saved file .");
         }
-
         test_try_success();
     }
     catch (std::exception &e) {
@@ -733,10 +852,10 @@ void TestGSky::test_GSkyRegionCircle_construct(void)
 		test_try_failure();
 	}
 	catch (GException::invalid_argument &e) {
-	  test_try_success();
+        test_try_success();
 	}
 	catch (std::exception &e) {
-	  test_try_failure(e);
+        test_try_failure(e);
 	}
 
     // Test constructing with radius 0
@@ -747,10 +866,10 @@ void TestGSky::test_GSkyRegionCircle_construct(void)
 		test_try_failure();
 	}
 	catch (GException::invalid_argument &e) {
-	  test_try_success();
+        test_try_success();
 	}
 	catch (std::exception &e) {
-	  test_try_failure(e);
+        test_try_failure(e);
 	}
 
 	// Check radius assignment

@@ -1,5 +1,5 @@
 /***************************************************************************
- *                GFitsImage.i - FITS abstract image base class            *
+ *                GFitsImage.i - Abstract FITS image base class            *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImage.i
- * @brief GFitsImage class SWIG file.
+ * @brief Abstract FITS image base class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -90,16 +90,17 @@ static int image_pixel_tuple(PyObject *input, int *ptr) {
 /***********************************************************************//**
  * @class GFitsImage
  *
- * @brief Abstract SWIG interface for the FITS image classes.
+ * @brief Abstract FITS image base class
  ***************************************************************************/
 class GFitsImage : public GFitsHDU {
 public:
     // Constructors and destructors
     GFitsImage(void);
-    explicit GFitsImage(int bitpix, int nx);
-    explicit GFitsImage(int bitpix, int nx, int ny);
-    explicit GFitsImage(int bitpix, int nx, int ny, int nz);
-    explicit GFitsImage(int bitpix, int nx, int ny, int nz, int nt);
+    GFitsImage(const int& bitpix, const int& nx);
+    GFitsImage(const int& bitpix, const int& nx, const int& ny);
+    GFitsImage(const int& bitpix, const int& nx, const int& ny, const int& nz);
+    GFitsImage(const int& bitpix, const int& nx, const int& ny, const int& nz, const int& nt);
+    GFitsImage(const int& bitpix, const int& naxis, const int* naxes);
     GFitsImage(const GFitsImage& image);
     virtual ~GFitsImage(void);
 
@@ -114,16 +115,16 @@ public:
     virtual int         type(void) const = 0;
 
     // Implemented pure virtual methods
-    HDUType exttype(void) const { return HT_IMAGE; }
+    HDUType exttype(void) const;
 
-    // Methods
-    int   size(void) const;
-    int   bitpix(void) const;
-    int   naxis(void) const;
-    int   naxes(int axis) const;
-    int   anynul(void) const;
-    void  nulval(const void* value);
-    void* nulval(void);
+    // Base class methods
+    const int&  size(void) const;
+    const int&  bitpix(void) const;
+    const int&  naxis(void) const;
+    int         naxes(const int& axis) const;
+    const int&  anynul(void) const;
+    void        nulval(const void* value);
+    const void* nulval(void) const;
 };
 
 

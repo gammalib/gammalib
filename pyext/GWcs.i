@@ -1,7 +1,7 @@
 /***************************************************************************
- *           GWcs.i - World Coordinate System virtual base class           *
+ *           GWcs.i - Abstract world coordinate system base class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,26 +20,29 @@
  ***************************************************************************/
 /**
  * @file GWcs.i
- * @brief World Coordinate System virtual base class Python interface
+ * @brief Abstract world coordinate system base class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GWcs.hpp"
-#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
  * @class GWcs
  *
- * @brief World Coordinate System virtual base class Python interface
+ * @brief Virtual base class for wcslib based World Coordinate System
  ***************************************************************************/
-class GWcs : public GBase {
-
+class GWcs : public GSkyProjection {
 public:
     // Constructors and destructors
     GWcs(void);
+    explicit GWcs(const std::string& coords,
+                  const double& crval1, const double& crval2,
+                  const double& crpix1, const double& crpix2,
+                  const double& cdelt1, const double& cdelt2);
+    explicit GWcs(const GFitsHDU& hdu);
     GWcs(const GWcs& wcs);
     virtual ~GWcs(void);
 
@@ -48,28 +51,26 @@ public:
     virtual GWcs*       clone(void) const = 0;
     virtual std::string code(void) const = 0;
     virtual std::string name(void) const = 0;
-    virtual void        read(const GFitsHDU* hdu) = 0;
-    virtual void        write(GFitsHDU* hdu) const = 0;
-    virtual double      omega(const int& pix) const = 0;
-    virtual double      omega(const GSkyPixel& pix) const = 0;
-    virtual GSkyDir     pix2dir(const int& pix) const = 0;
-    virtual int         dir2pix(const GSkyDir& dir) const = 0;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const = 0;
-    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const = 0;
+    
+    // Implemented virtual methods
+    virtual int         size(void) const;
+    virtual void        read(const GFitsHDU& hdu);
+    virtual void        write(GFitsHDU& hdu) const;
+    virtual double      solidangle(const GSkyPixel& pixel) const;
+    virtual GSkyDir     pix2dir(const GSkyPixel& pixel) const;
+    virtual GSkyPixel   dir2pix(const GSkyDir& dir) const;
 
-    // Virtual methods
-    virtual std::string coordsys(void) const;
-    virtual void        coordsys(const std::string& coordsys);
+    // Other methods
+    void   set(const std::string& coords,
+               const double& crval1, const double& crval2,
+               const double& crpix1, const double& crpix2,
+               const double& cdelt1, const double& cdelt2);
+    double crval(const int& inx) const;
+    double crpix(const int& inx) const;
+    double cdelt(const int& inx) const;
 };
-
-
 
 
 /***********************************************************************//**
  * @brief GWcs class extension
  ***************************************************************************/
-%extend GWcs {
-    bool __is__(const GWcs &a) {
-            return (*self) == a;
-    }
-};

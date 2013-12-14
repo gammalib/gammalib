@@ -36,32 +36,45 @@
 /***********************************************************************//**
  * @class GCsv
  *
- * @brief Column separated values table class definition
+ * @brief Column separated values table class
+ *
+ * This class implements a table of std::string elements that is loaded
+ * from a column separated value ASCII file. The column separation string
+ * can be specified upon loading of the file (by default the class assumes
+ * that elements are separated by a white space).
+ *
+ * The class provides operators for string element access, and methods for
+ * conversion of the string values:
+ *
+ *    double      real    = csv.real(row,col);
+ *    int         integer = csv.integer(row,col);
+ *    std::string string  = csv.string(row,col);
+ *  
  ***************************************************************************/
 class GCsv : public GBase {
 
 public:
     // Constructors and destructors
     GCsv(void);
-    GCsv(const std::string& filename, std::string sep = " ");
+    GCsv(const std::string& filename, const std::string& sep = " ");
     GCsv(const GCsv& csv);
     virtual ~GCsv(void);
  
     // Operators
-    GCsv&              operator= (const GCsv& csv);
-    std::string&       operator() (const int& row, const int& col);
-    const std::string& operator() (const int& row, const int& col) const;
+    GCsv&              operator=(const GCsv& csv);
+    std::string&       operator()(const int& row, const int& col);
+    const std::string& operator()(const int& row, const int& col) const;
 
     // Methods
     void        clear(void);
     GCsv*       clone(void) const;
+    int         size(void) const;
+    const int&  ncols(void) const;
+    const int&  nrows(void) const;
     std::string string(const int& row, const int& col) const;
     double      real(const int& row, const int& col) const;
     int         integer(const int& row, const int& col) const;
-    void        load(const std::string& filename, std::string sep = " ");
-    int         ncols(void) const { return m_cols; }
-    int         nrows(void) const { return m_rows; }
-    int         size(void) const { return m_rows*m_cols; }
+    void        load(const std::string& filename, const std::string& sep = " ");
     std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
@@ -75,5 +88,41 @@ protected:
     int                                    m_rows;  //!< Number of rows
     std::vector<std::vector<std::string> > m_data;  //!< CSV table data
 };
+
+
+/***********************************************************************//**
+ * @brief Return table size (columns times rows)
+ *
+ * @return Table size.
+ ***************************************************************************/
+inline
+int GCsv::size(void) const
+{
+    return m_rows*m_cols;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of columns
+ *
+ * @return Number of columns.
+ ***************************************************************************/
+inline
+const int& GCsv::ncols(void) const
+{
+    return m_cols;
+}
+
+
+/***********************************************************************//**
+ * @brief Return number of rows
+ *
+ * @return Number of rows.
+ ***************************************************************************/
+inline
+const int& GCsv::nrows(void) const
+{
+    return m_rows;
+}
 
 #endif /* GCSV_HPP */

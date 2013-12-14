@@ -560,11 +560,11 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
     // Open FITS file
     file.open(filename);
 
-    // Get energy boundary HDU
-    GFitsTable* hdu = file.table(extname);
+    // Get energy boundary table
+    const GFitsTable& table = *file.table(extname);
 
-    // Read energy boundaries from HDU
-    read(hdu);
+    // Read energy boundaries from table
+    read(table);
 
     // Close FITS file
     file.close();
@@ -578,19 +578,19 @@ void GEbounds::load(const std::string& filename, const std::string& extname)
  * @brief Save energy boundaries into FITS file
  *
  * @param[in] filename FITS filename.
- * @param[in] clobber Overwrite any existing file?
+ * @param[in] clobber Overwrite any existing file  (defaults to false)?
  * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS").
  *
  * Saves the energy boundaries into extension @p extname of a FITS file.
  ***************************************************************************/
-void GEbounds::save(const std::string& filename, bool clobber,
+void GEbounds::save(const std::string& filename, const bool& clobber,
                     const std::string& extname) const
 {
     // Allocate FITS file
     GFits file;
 
     // Write energy boundaries to FITS file
-    write(&file, extname);
+    write(file, extname);
 
     // Save to file
     file.saveto(filename, clobber);
@@ -603,7 +603,7 @@ void GEbounds::save(const std::string& filename, bool clobber,
 /***********************************************************************//**
  * @brief Read energy boundaries from FITS table
  *
- * @param[in] hdu Pointer to FITS table.
+ * @param[in] table FITS table.
  *
  * Reads the energy boundaries from a FITS table. It is assumed that the
  * energies are stored in units of keV.
@@ -612,7 +612,7 @@ void GEbounds::save(const std::string& filename, bool clobber,
  *       string parameter that allows external specification about how
  *       the energies should be interpreted.
  ***************************************************************************/
-void GEbounds::read(GFitsTable* hdu)
+void GEbounds::read(const GFitsTable& table)
 {
     // Free members
     free_members();
@@ -620,29 +620,24 @@ void GEbounds::read(GFitsTable* hdu)
     // Initialise attributes
     init_members();
 
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Extract energy boundary information from FITS table
+    m_num = table.integer("NAXIS2");
+    if (m_num > 0) {
 
-        // Extract energy boundary information from FITS file
-        m_num = hdu->integer("NAXIS2");
-        if (m_num > 0) {
+        // Allocate memory
+        m_min = new GEnergy[m_num];
+        m_max = new GEnergy[m_num];
 
-            // Allocate memory
-            m_min = new GEnergy[m_num];
-            m_max = new GEnergy[m_num];
-
-            // Copy information
-            for (int i = 0; i < m_num; ++i) {
-                m_min[i].keV((*hdu)["E_MIN"]->real(i));
-                m_max[i].keV((*hdu)["E_MAX"]->real(i));
-            }
-
-        } // endif: there were channels to read
+        // Copy information
+        for (int i = 0; i < m_num; ++i) {
+            m_min[i].keV(table["E_MIN"]->real(i));
+            m_max[i].keV(table["E_MAX"]->real(i));
+        }
 
         // Set attributes
         set_attributes();
 
-    } // endif: HDU was valid
+    } // endif: there were channels to read
 
     // Return
     return;
@@ -652,7 +647,7 @@ void GEbounds::read(GFitsTable* hdu)
 /***********************************************************************//**
  * @brief Write energy boundaries into FITS object
  *
- * @param[in] file Pointer to FITS file.
+ * @param[in] file FITS file.
  * @param[in] extname Energy boundary extension name (defaults to "EBOUNDS")
  *
  * Writes the energy boundaries into a FITS object. Energies are written in
@@ -661,7 +656,7 @@ void GEbounds::read(GFitsTable* hdu)
  * @todo Write header keywords.
  * @todo Should we allow for the possibility to specify the energy units?
  ***************************************************************************/
-void GEbounds::write(GFits* file, const std::string& extname) const
+void GEbounds::write(GFits& file, const std::string& extname) const
 {
     // Create energy boundary columns
     GFitsTableDoubleCol cemin = GFitsTableDoubleCol("E_MIN", m_num);
@@ -684,7 +679,7 @@ void GEbounds::write(GFits* file, const std::string& extname) const
     table->extname(extname);
 
     // Write to FITS file
-    file->append(*table);
+    file.append(*table);
 
     // Free table
     delete table;

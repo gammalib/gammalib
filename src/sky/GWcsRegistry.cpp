@@ -75,9 +75,9 @@ GWcsRegistry::GWcsRegistry(void)
 /***********************************************************************//**
  * @brief Projection constructor
  *
- * @param[in] prj World Coordinate Projection
+ * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsRegistry::GWcsRegistry(const GWcs* prj)
+GWcsRegistry::GWcsRegistry(const GWcs* wcs)
 {
     // Initialise private members for clean destruction
     init_members();
@@ -85,7 +85,7 @@ GWcsRegistry::GWcsRegistry(const GWcs* prj)
     // Debug option: Notify new registry
     #if G_DEBUG_REGISTRY
     std::cout << "GWcsRegistry(const GWcs*): ";
-    std::cout << "add \"" << prj->code() << "\" to registry." << std::endl;
+    std::cout << "add \"" << wcs->code() << "\" to registry." << std::endl;
     #endif
 
     // Allocate new registry
@@ -101,9 +101,9 @@ GWcsRegistry::GWcsRegistry(const GWcs* prj)
     }
 
     // Add new projection to registry
-    new_codes[size()]       = prj->code();
-    new_names[size()]       = prj->name();
-    new_projections[size()] = prj;
+    new_codes[size()]       = wcs->code();
+    new_names[size()]       = wcs->name();
+    new_projections[size()] = wcs;
 
     // Set pointers on new registry
     codes().assign(new_codes);
@@ -198,13 +198,13 @@ GWcsRegistry& GWcsRegistry::operator=(const GWcsRegistry& registry)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Allocate World Coordinate projection of given code
+ * @brief Allocate World Coordinate System of given code
  *
- * @param[in] code World Coordinate System code.
- * @return Pointer to WCS (NULL if code is not registered).
+ * @param[in] code Sky projection code.
+ * @return Pointer to World Coordinate System (NULL if code is not registered).
  *
- * Returns a pointer to a WCS instance of the specified code. If the code has
- * not been found in the registry, a NULL pointer is returned.
+ * Returns a pointer to a sky projection instance of the specified code. If
+ * the code has not been found in the registry, a NULL pointer is returned.
  ***************************************************************************/
 GWcs* GWcsRegistry::alloc(const std::string& code) const
 {

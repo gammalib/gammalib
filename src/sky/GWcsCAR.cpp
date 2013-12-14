@@ -59,7 +59,7 @@ const GWcsRegistry g_wcs_car_registry(&g_wcs_car_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsCAR::GWcsCAR(void) : GWcslib()
+GWcsCAR::GWcsCAR(void) : GWcs()
 {
     // Initialise class members
     init_members();
@@ -84,7 +84,7 @@ GWcsCAR::GWcsCAR(const std::string& coords,
                  const double& crval1, const double& crval2,
                  const double& crpix1, const double& crpix2,
                  const double& cdelt1, const double& cdelt2) :
-                 GWcslib(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
+                 GWcs(coords, crval1, crval2, crpix1, crpix2, cdelt1, cdelt2)
 
 {
     // Initialise class members
@@ -100,7 +100,7 @@ GWcsCAR::GWcsCAR(const std::string& coords,
  *
  * @param[in] wcs World Coordinate System.
  ***************************************************************************/
-GWcsCAR::GWcsCAR(const GWcsCAR& wcs) : GWcslib(wcs)
+GWcsCAR::GWcsCAR(const GWcsCAR& wcs) : GWcs(wcs)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -143,7 +143,7 @@ GWcsCAR& GWcsCAR::operator=(const GWcsCAR& wcs)
     if (this != &wcs) {
 
         // Copy base class members
-        this->GWcslib::operator=(wcs);
+        this->GWcs::operator=(wcs);
 
         // Free members
         free_members();
@@ -176,12 +176,12 @@ void GWcsCAR::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GWcslib::free_members();
     this->GWcs::free_members();
+    this->GSkyProjection::free_members();
 
     // Initialise members
+    this->GSkyProjection::init_members();
     this->GWcs::init_members();
-    this->GWcslib::init_members();
     init_members();
 
     // Return
@@ -336,7 +336,7 @@ void GWcsCAR::prj_set(void) const
  * This method has been adapted from the wcslib function prj.c::carx2s().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt, 
                       const double* x, const double* y,
@@ -410,7 +410,7 @@ void GWcsCAR::prj_x2s(int nx, int ny, int sxy, int spt,
  * This method has been adapted from the wcslib function prj.c::cars2x().
  * The interface follows very closely that of wcslib. In contrast to the
  * wcslib routine, however, the method assumes that the projection has been
- * setup previsouly (as this will be done by the constructor).
+ * setup previously (as this will be done by the constructor).
  ***************************************************************************/
 void GWcsCAR::prj_s2x(int nphi, int ntheta, int spt, int sxy,
                       const double* phi, const double* theta,

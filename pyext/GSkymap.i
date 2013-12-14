@@ -111,39 +111,46 @@ public:
     // Constructors and destructors
     GSkymap(void);
     explicit GSkymap(const std::string& filename);
-    explicit GSkymap(const std::string& wcs, const std::string& coords,
-                     const int& nside, const std::string& order,
-                     const int nmaps = 1);
-    explicit GSkymap(const std::string& wcs, const std::string& coords,
-                     double const& x, double const& y,
-                     double const& dx, double const& dy,
-                     const int& nx, const int& ny, const int nmaps = 1);
+    explicit GSkymap(const std::string& coords,
+                     const int&         nside,
+                     const std::string& order,
+                     const int&         nmaps = 1);
+    explicit GSkymap(const std::string& proj,
+                     const std::string& coords,
+                     const double&      x,
+                     const double&      y,
+                     const double&      dx,
+                     const double&      dy,
+                     const int&         nx,
+                     const int&         ny,
+                     const int&         nmaps = 1);
     GSkymap(const GSkymap& map);
     virtual ~GSkymap(void);
 
     // Methods
-    void      clear(void);
-    GSkymap*  clone(void) const;
-    GSkyDir   pix2dir(const int& pix);
-    int       dir2pix(const GSkyDir& dir) const;
-    double    omega(const int& pix) const;
-    GSkyDir   xy2dir(const GSkyPixel& pix);
-    GSkyPixel dir2xy(const GSkyDir& dir) const;
-    void      load(const std::string& filename);
-    void      save(const std::string& filename, bool clobber = false) const;
-    void      read(const GFitsHDU* hdu);
-    void      write(GFits* file) const;
-    int       npix(void) const;
-    int       nx(void) const;
-    int       ny(void) const;
-    int       nmaps(void) const;
-    int       xy2pix(const GSkyPixel& pix) const;
-    GSkyPixel pix2xy(const int& pix) const;
-    GWcs*     wcs(void) const;
-    void      wcs(const GWcs& wcs);
-    double*   pixels(void) const;
-    bool      isinmap(const GSkyDir& dir) const;
-    bool      isinmap(const GSkyPixel& pixel) const;
+    void                  clear(void);
+    GSkymap*              clone(void) const;
+    const int&            npix(void) const;
+    const int&            nx(void) const;
+    const int&            ny(void) const;
+    const int&            nmaps(void) const;
+    GSkyPixel             inx2pix(const int& index) const;
+    GSkyDir               inx2dir(const int& index) const;
+    GSkyDir               pix2dir(const GSkyPixel& pixel) const;
+    int                   pix2inx(const GSkyPixel& pixel) const;
+    int                   dir2inx(const GSkyDir& dir) const;
+    GSkyPixel             dir2pix(const GSkyDir& dir) const;
+    double                solidangle(const int& index) const;
+    double                solidangle(const GSkyPixel& pixel) const;
+    bool                  contains(const GSkyDir& dir) const;
+    bool                  contains(const GSkyPixel& pixel) const;
+    const GSkyProjection* projection(void) const;
+    void                  projection(const GSkyProjection& proj);
+    const double*         pixels(void) const;
+    void                  load(const std::string& filename);
+    void                  save(const std::string& filename, bool clobber = false) const;
+    void                  read(const GFitsHDU& hdu);
+    void                  write(GFits& file) const;
 };
 
 

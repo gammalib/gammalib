@@ -72,7 +72,7 @@
  * symmetric, hence it just multiplies the PSF value by the arclength times
  * the sinus of the offset angle.
  ***************************************************************************/
-double cta_npsf_kern_rad_azsym::eval(double delta)
+double cta_npsf_kern_rad_azsym::eval(const double& delta)
 {
     // Initialise PSF value
     double value = 0.0;
@@ -132,7 +132,7 @@ double cta_npsf_kern_rad_azsym::eval(double delta)
  *
  * for the zenith angle integration of radial models.
  ***************************************************************************/
-double cta_irf_radial_kern_rho::eval(double rho)
+double cta_irf_radial_kern_rho::eval(const double& rho)
 {
     // Compute half length of arc that lies within PSF validity circle
     // (in radians)
@@ -243,7 +243,7 @@ double cta_irf_radial_kern_rho::eval(double rho)
  * The angle \f$\theta\f$ is used in the computation of the IRF (no
  * azimuthal dependence is so far implemented for the IRF computation).
  ***************************************************************************/
-double cta_irf_radial_kern_omega::eval(double omega)
+double cta_irf_radial_kern_omega::eval(const double& omega)
 {
     // Compute PSF offset angle [radians]
     double delta = std::acos(m_cos_psf + m_sin_psf * std::cos(omega));
@@ -301,7 +301,7 @@ double cta_irf_radial_kern_omega::eval(double omega)
  * the ROI centre. This limitation assures that the integration converges
  * properly.
  ***************************************************************************/
-double cta_npred_radial_kern_rho::eval(double rho)
+double cta_npred_radial_kern_rho::eval(const double& rho)
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -371,7 +371,7 @@ double cta_npred_radial_kern_rho::eval(double rho)
  *       multiplication is definitely not the fastest way to do that
  *       computation).
  ***************************************************************************/
-double cta_npred_radial_kern_omega::eval(double omega)
+double cta_npred_radial_kern_omega::eval(const double& omega)
 {
     // Compute sky direction vector in native coordinates
     double  cos_omega = std::cos(omega);
@@ -429,7 +429,7 @@ double cta_npred_radial_kern_omega::eval(double omega)
  *                     d\omega
  * \f]
  ***************************************************************************/
-double cta_irf_elliptical_kern_rho::eval(double rho)
+double cta_irf_elliptical_kern_rho::eval(const double& rho)
 {
     // Compute half length of arc that lies within PSF validity circle
     // (in radians)
@@ -536,7 +536,7 @@ double cta_irf_elliptical_kern_rho::eval(double rho)
  * The angle \f$\theta\f$ is used in the computation of the IRF (no
  * azimuthal dependence is so far implemented for the IRF computation).
  ***************************************************************************/
-double cta_irf_elliptical_kern_omega::eval(double omega)
+double cta_irf_elliptical_kern_omega::eval(const double& omega)
 {
     // Initialise IRF value
     double irf = 0.0;
@@ -607,7 +607,7 @@ double cta_irf_elliptical_kern_omega::eval(double omega)
  * is limited to an arc around the vector connecting the model centre to
  * the ROI centre. This limitation assures proper converges properly.
  ***************************************************************************/
-double cta_npred_elliptical_kern_rho::eval(double rho)
+double cta_npred_elliptical_kern_rho::eval(const double& rho)
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -677,7 +677,7 @@ double cta_npred_elliptical_kern_rho::eval(double rho)
  *    S_{\rm p}(\rho,\omega | E, t) \, N_{\rm pred}(\rho,\omega)
  * \f]
  ***************************************************************************/
-double cta_npred_elliptical_kern_omega::eval(double omega)
+double cta_npred_elliptical_kern_omega::eval(const double& omega)
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -755,7 +755,7 @@ double cta_npred_elliptical_kern_omega::eval(double omega)
  * Note that the integration is only performed for \f$\theta>0\f$. Otherwise
  * zero is returned.
  ***************************************************************************/
-double cta_irf_diffuse_kern_theta::eval(double theta)
+double cta_irf_diffuse_kern_theta::eval(const double& theta)
 {
     // Initialise result
     double irf = 0.0;
@@ -854,7 +854,7 @@ double cta_irf_diffuse_kern_theta::eval(double theta)
  * @todo Implement azimuth angle computation of true photon in camera
  * @todo Replace (theta,phi) by (delta,alpha)
  ***************************************************************************/
-double cta_irf_diffuse_kern_phi::eval(double phi)
+double cta_irf_diffuse_kern_phi::eval(const double& phi)
 {
     // Initialise result
     double irf = 0.0;
@@ -943,7 +943,7 @@ double cta_irf_diffuse_kern_phi::eval(double phi)
  * computation time and computation precision. A value of 1e-4 was judged
  * appropriate.
  ***************************************************************************/
-double cta_npred_diffuse_kern_theta::eval(double theta)
+double cta_npred_diffuse_kern_theta::eval(const double& theta)
 {
     // Initialise Npred value
     double npred = 0.0;
@@ -1003,7 +1003,7 @@ double cta_npred_diffuse_kern_theta::eval(double theta)
  *       multiplication is definitely not the fastest way to do that
  *       computation).
  ***************************************************************************/
-double cta_npred_diffuse_kern_phi::eval(double phi)
+double cta_npred_diffuse_kern_phi::eval(const double& phi)
 {
     // Initialise Npred value
     double npred = 0.0;

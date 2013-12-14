@@ -1,5 +1,5 @@
 /***************************************************************************
- *        GSkyPixel.cpp - Class that implements a 2D sky pixel index       *
+ *                     GSkyPixel.cpp - Sky map pixel class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GSkyPixel.hpp
- * @brief Sky pixel class implementation
+ * @brief Sky map pixel class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -30,8 +30,11 @@
 #endif
 #include "GSkyPixel.hpp"
 #include "GTools.hpp"
+#include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_INT                                     "GSkyPixel::operator int()"
+#define G_DOUBLE                               "GSkyPixel::operator double()"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -62,16 +65,69 @@ GSkyPixel::GSkyPixel(void)
 
 
 /***********************************************************************//**
- * @brief Index constructor
+ * @brief 1D pixel constructor (integer version)
  *
- * @param[in] x X index.
- * @param[in] y Y index.
+ * @param[in] index Pixel index.
  ***************************************************************************/
-GSkyPixel::GSkyPixel(double x, double y)
+GSkyPixel::GSkyPixel(const int& index)
 {
     // Set members
-    m_x = x;
-    m_y = y;
+    m_size = 1;
+    m_x    = double(index);
+    m_y    = 0.0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 1D pixel constructor (double precision version)
+ *
+ * @param[in] index Pixel index.
+ ***************************************************************************/
+GSkyPixel::GSkyPixel(const double& index)
+{
+    // Set members
+    m_size = 1;
+    m_x    = index;
+    m_y    = 0.0;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 2D pixel constructor (integer version)
+ *
+ * @param[in] x Pixel X index.
+ * @param[in] y Pixel Y index.
+ ***************************************************************************/
+GSkyPixel::GSkyPixel(const int& x, const int& y)
+{
+    // Set members
+    m_size = 2;
+    m_x    = double(x);
+    m_y    = double(y);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief 2D pixel constructor (double precision version)
+ *
+ * @param[in] x Pixel X index.
+ * @param[in] y Pixel Y index.
+ ***************************************************************************/
+GSkyPixel::GSkyPixel(const double& x, const double& y)
+{
+    // Set members
+    m_size = 2;
+    m_x    = x;
+    m_y    = y;
 
     // Return
     return;
@@ -118,9 +174,10 @@ GSkyPixel::~GSkyPixel(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] pixel Sky pixel.
+ * @param[in] pixel Sky map pixel.
+ * @return Sky map pixel.
  ***************************************************************************/
-GSkyPixel& GSkyPixel::operator= (const GSkyPixel& pixel)
+GSkyPixel& GSkyPixel::operator=(const GSkyPixel& pixel)
 {
     // Execute only if object is not identical
     if (this != &pixel) {
@@ -141,6 +198,53 @@ GSkyPixel& GSkyPixel::operator= (const GSkyPixel& pixel)
 }
 
 
+/***********************************************************************//**
+ * @brief To integer type conversion
+ *
+ * @return Pixel index.
+ *
+ * Converts the sky map pixel into an integer value.
+ ***************************************************************************/
+GSkyPixel::operator int() const
+{
+    // Throw an exception if pixel is not 1D
+    if (!is1D()) {
+        std::string msg = "Sky map pixel is not 1-dimensional.\n"
+                          "Conversion from GSkyPixel to int is only allowed"
+                          " for 1-dimensional sky map pixels.";
+        throw GException::invalid_value(G_INT, msg);
+    }
+
+    // Round pixel to integer value
+    int value = int(m_x + 0.5);
+
+    // Return value
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief To double type conversion
+ *
+ * @return Pixel index.
+ *
+ * Converts the sky map pixel into a double precision value.
+ ***************************************************************************/
+GSkyPixel::operator double() const
+{
+    // Throw an exception if pixel is not 1D
+    if (!is1D()) {
+        std::string msg = "Sky map pixel is not 1-dimensional.\n"
+                          "Conversion from GSkyPixel to double is only allowed"
+                          " for 1-dimensional sky map pixels.";
+        throw GException::invalid_value(G_DOUBLE, msg);
+    }
+
+    // Return value
+    return m_x;
+}
+
+
 /*==========================================================================
  =                                                                         =
  =                              Public methods                             =
@@ -149,6 +253,8 @@ GSkyPixel& GSkyPixel::operator= (const GSkyPixel& pixel)
 
 /***********************************************************************//**
  * @brief Clear instance
+ *
+ * Set sky map pixel to a clean initial state.
  ***************************************************************************/
 void GSkyPixel::clear(void)
 {
@@ -164,56 +270,16 @@ void GSkyPixel::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone object
+ * @brief Clone sky map pixel
+ *
+ * @return Pointer to deep copy of sky map pixel.
+ *
+ * Returns a pointer to a deep copy of a sky map pixel.
  ***************************************************************************/
 GSkyPixel* GSkyPixel::clone(void) const
 {
-    // Clone this image
+    // Clone pixel
     return new GSkyPixel(*this);
-}
-
-
-/***********************************************************************//**
- * @brief Set x value of sky pixel
- *
- * @param[in] x X value.
- ***************************************************************************/
-void GSkyPixel::x(const double& x)
-{
-    // Set x value
-    m_x = x;
-}
-
-
-/***********************************************************************//**
- * @brief Set y value of sky pixel
- *
- * @param[in] y Y value.
- ***************************************************************************/
-void GSkyPixel::y(const double& y)
-{
-    // Set y value
-    m_y = y;
-}
-
-
-/***********************************************************************//**
- * @brief Return x value of sky pixel
- ***************************************************************************/
-double GSkyPixel::x(void) const
-{
-    // Return x value
-    return m_x;
-}
-
-
-/***********************************************************************//**
- * @brief Return x value of sky pixel
- ***************************************************************************/
-double GSkyPixel::y(void) const
-{
-    // Return y value
-    return m_y;
 }
 
 
@@ -226,16 +292,22 @@ double GSkyPixel::y(void) const
 std::string GSkyPixel::print(const GChatter& chatter) const
 {
     // Initialise result string
-    std::string result = "(";
+    std::string result;
 
     // Continue only if chatter is not silent
     if (chatter != SILENT) {
 
         // Append pixel
-        result.append(gammalib::str(x()));
-        result.append(",");
-        result.append(gammalib::str(y()));
-        result.append(")");
+        if (is1D()) {
+            result.append(gammalib::str(x()));
+        }
+        else if (is2D()) {
+            result.append("(");
+            result.append(gammalib::str(x()));
+            result.append(",");
+            result.append(gammalib::str(y()));
+            result.append(")");
+        }
 
     } // endif: chatter was not silent
     
@@ -256,8 +328,9 @@ std::string GSkyPixel::print(const GChatter& chatter) const
 void GSkyPixel::init_members(void)
 {
     // Initialise members
-    m_x = 0.0;
-    m_y = 0.0;
+    m_size = 0;
+    m_x    = 0.0;
+    m_y    = 0.0;
 
     // Return
     return;
@@ -272,8 +345,9 @@ void GSkyPixel::init_members(void)
 void GSkyPixel::copy_members(const GSkyPixel& pixel)
 {
     // Copy attributes
-    m_x = pixel.m_x;
-    m_y = pixel.m_y;
+    m_size = pixel.m_size;
+    m_x    = pixel.m_x;
+    m_y    = pixel.m_y;
 
     // Return
     return;

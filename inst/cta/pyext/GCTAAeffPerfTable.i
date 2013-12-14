@@ -40,7 +40,7 @@ class GCTAAeffPerfTable : public GCTAAeff {
 public:
     // Constructors and destructors
     GCTAAeffPerfTable(void);
-    GCTAAeffPerfTable(const std::string& filename);
+    explicit GCTAAeffPerfTable(const std::string& filename);
     GCTAAeffPerfTable(const GCTAAeffPerfTable& cta);
     virtual ~GCTAAeffPerfTable(void);
 

@@ -1,7 +1,7 @@
 /***************************************************************************
- *                GLATPointing.i - Fermi/LAT pointing class                *
+ *               GWcsMER.i - Mercator's (MER) projection class             *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2012-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,42 +19,45 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GLATPointing.i
- * @brief Fermi-LAT pointing class interface definition
+ * @file GWcsMER.i
+ * @brief Mercator's (MER) projection class definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GLATPointing.hpp"
-#include "GTools.hpp"
+#include "GWcsMER.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GLATPointing
+ * @class GWcsMER
  *
- * @brief Interface for the Fermi-LAT pointing
+ * @brief Mercator's (MER) projection class definition
  ***************************************************************************/
-class GLATPointing : public GPointing {
+class GWcsMER : public GWcs {
 public:
     // Constructors and destructors
-    GLATPointing(void);
-    GLATPointing(const GLATPointing& pnt);
-    virtual ~GLATPointing(void);
+    GWcsMER(void);
+    explicit GWcsMER(const std::string& coords,
+                     const double& crval1, const double& crval2,
+                     const double& crpix1, const double& crpix2,
+                     const double& cdelt1, const double& cdelt2);
+    GWcsMER(const GWcsMER& wcs);
+    virtual ~GWcsMER(void);
 
-    // Methods
-    void           clear(void);
-    GLATPointing*  clone(void) const;
-    const GSkyDir& dir(void) const;
-    void           dir(const GSkyDir& dir);
+    // Implemented pure virtual methods
+    virtual void        clear(void);
+    virtual GWcsMER*    clone(void) const;
+    virtual std::string code(void) const;
+    virtual std::string name(void) const;
 };
 
 
 /***********************************************************************//**
- * @brief GLATPointing class extension
+ * @brief GWcsMER class extension
  ***************************************************************************/
-%extend GLATPointing {
-    GLATPointing copy() {
+%extend GWcsMER {
+    GWcsMER copy() {
         return (*self);
     }
 };

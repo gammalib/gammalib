@@ -55,6 +55,18 @@ void TestGOptimizer::set(void){
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGOptimizer* TestGOptimizer::clone(void) const
+{
+    // Clone test suite
+    return new TestGOptimizer(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test optimizer
  *
  * @param[in] mode Testing mode.
@@ -88,7 +100,7 @@ void TestGOptimizer::test_optimizer(const int& mode)
         ran.seed(i);
 
         // Allocate events pointer
-        GEvents *events;
+        GEvents* events;
 
         // Create either a event list or an event cube
         if (mode == UN_BINNED) {
@@ -103,7 +115,7 @@ void TestGOptimizer::test_optimizer(const int& mode)
         ob.id(gammalib::str(i));
 
         // Add events to the observation
-        ob.events(events);
+        ob.events(*events);
         ob.ontime(tmax.secs()-tmin.secs());
         obs.append(ob);
 

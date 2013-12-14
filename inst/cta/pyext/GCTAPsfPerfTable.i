@@ -78,4 +78,7 @@ public:
  * @brief GCTAPsfPerfTable class extension
  ***************************************************************************/
 %extend GCTAPsfPerfTable {
+    GCTAPsfPerfTable copy() {
+        return (*self);
+    }
 };

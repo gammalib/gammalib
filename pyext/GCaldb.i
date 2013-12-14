@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GCaldb.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -44,13 +43,14 @@ public:
     virtual ~GCaldb(void);
 
     // Methods
-    void        clear(void);
-    GCaldb*     clone(void) const;
-    int         size(void) const;
-    std::string dir(void) const;
-    void        dir(const std::string& pathname);
-    void        open(const std::string& mission, const std::string& instrument = "");
-    void        close(void);
+    void               clear(void);
+    GCaldb*            clone(void) const;
+    int                size(void) const;
+    const std::string& dir(void) const;
+    void               dir(const std::string& pathname);
+    void               open(const std::string& mission,
+                            const std::string& instrument = "");
+    void               close(void);
 };
 
 
@@ -58,9 +58,6 @@ public:
  * @brief GCaldb class extension
  ***************************************************************************/
 %extend GCaldb {
-    char *__str__() {
-        return gammalib::tochar(self->print());
-    }
     GCaldb copy() {
         return (*self);
     }

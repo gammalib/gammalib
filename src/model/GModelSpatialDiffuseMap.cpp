@@ -350,15 +350,15 @@ GSkyDir GModelSpatialDiffuseMap::mc(const GEnergy& energy,
             }
         }
 
-        // Convert 1D pixel index to 2D pixel index
-        GSkyPixel pixel = m_map.pix2xy(low);
+        // Convert sky map index to sky map pixel
+        GSkyPixel pixel = m_map.inx2pix(low);
 
         // Randomize pixel
         pixel.x(pixel.x() + ran.uniform() - 0.5);
         pixel.y(pixel.y() + ran.uniform() - 0.5);
 
         // Get sky direction
-        dir = m_map.xy2dir(pixel);
+        dir = m_map.pix2dir(pixel);
 
     } // endif: there were pixels in sky map
 
@@ -640,7 +640,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         // zero intensity in the skymap.
         double sum = 0.0;
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i) * m_map.omega(i);
+            double flux = m_map(i) * m_map.solidangle(i);
             if (flux < 0.0) {
                 m_map(i) = 0.0;
                 flux     = 0.0;
@@ -665,7 +665,7 @@ void GModelSpatialDiffuseMap::prepare_map(void)
         #if defined(G_DEBUG_PREPARE)
         double sum_control = 0.0;
         for (int i = 0; i < npix; ++i) {
-            double flux = m_map(i) * m_map.omega(i);
+            double flux = m_map(i) * m_map.solidangle(i);
             if (flux >= 0.0) {
                 sum_control += flux;
             }

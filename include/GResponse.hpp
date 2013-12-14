@@ -129,7 +129,7 @@ protected:
                                 m_srcTime(srcTime),
                                 m_obs(obs),
                                 m_rot(rot) { }
-        double eval(double theta);
+        double eval(const double& theta);
     protected:
         const GResponse&           m_rsp;      //!< Response
         const GModelSpatialRadial& m_spatial;  //!< Spatial model
@@ -157,7 +157,7 @@ protected:
                               m_theta(theta),
                               m_cos_theta(std::cos(theta)),
                               m_sin_theta(sin_theta) { }
-        double eval(double phi);
+        double eval(const double& phi);
     protected:
         const GResponse&    m_rsp;       //!< Response
         const GEnergy&      m_srcEng;    //!< True photon energy
@@ -184,7 +184,7 @@ protected:
                                     m_srcTime(srcTime),
                                     m_obs(obs),
                                     m_rot(rot) { }
-        double eval(double theta);
+        double eval(const double& theta);
     protected:
         const GResponse&               m_rsp;      //!< Response
         const GModelSpatialElliptical& m_spatial;  //!< Spatial model
@@ -214,7 +214,7 @@ protected:
                                   m_theta(theta),
                                   m_cos_theta(std::cos(theta)),
                                   m_sin_theta(sin_theta) { }
-        double eval(double phi);
+        double eval(const double& phi);
     protected:
         const GResponse&               m_rsp;       //!< Response
         const GModelSpatialElliptical& m_spatial;   //!< Spatial model

@@ -58,7 +58,7 @@ public:
     std::string caldb(void) const;
     std::string iaqname(void) const;
     void        load(const std::string& iaqname);
-    void        read_iaq(const GFitsImage* hdu);
+    void        read(const GFitsImage& hdu);
 };
 
 

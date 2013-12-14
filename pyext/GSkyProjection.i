@@ -1,7 +1,7 @@
 /***************************************************************************
- *                  GWcsHPX.i  -  Healpix projection class                 *
+ *           GSkyProjection.i - Abstract sky projection base class         *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,58 +19,55 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcsHPX.i
- * @brief HealPix projection class Python interface
- * @author J. Knodlseder
+ * @file GSkyProjection.i
+ * @brief Abstract sky projection base class definition
+ * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
-#include "GWcsHPX.hpp"
+#include "GSkyProjection.hpp"
+#include "GTools.hpp"
 %}
 
 
 /***********************************************************************//**
- * @class GWcsHPX
+ * @class GSkyProjection
  *
- * @brief HealPix projection class Python interface defintion
+ * @brief Abstract sky projection base class
+ *
+ * This class defines an abstract projection from sky coordinates into
+ * pixel coordinates.
  ***************************************************************************/
-class GWcsHPX : public GWcs {
+class GSkyProjection : public GBase {
 public:
     // Constructors and destructors
-    GWcsHPX(void);
-    explicit GWcsHPX(const int& nside, const std::string& ordering = "NESTED",
-                     const std::string& coordsys = "GAL");
-    explicit GWcsHPX(const GFitsHDU* hdu);
-    GWcsHPX(const GWcsHPX& wcs);
-    virtual ~GWcsHPX(void);
+    GSkyProjection(void);
+    GSkyProjection(const GSkyProjection& proj);
+    virtual ~GSkyProjection(void);
 
-    // Implemented pure virtual methods
-    virtual void        clear(void);
-    virtual GWcsHPX*    clone(void) const;
-    virtual std::string code(void) const;
-    virtual std::string name(void) const;
-    virtual void        read(const GFitsHDU* hdu);
-    virtual void        write(GFitsHDU* hdu) const;
-    virtual double      omega(const int& pix) const;
-    virtual double      omega(const GSkyPixel& pix) const;
-    virtual GSkyDir     pix2dir(const int& pix) const;
-    virtual int         dir2pix(const GSkyDir& dir) const;
-    virtual GSkyDir     xy2dir(const GSkyPixel& pix) const;
-    virtual GSkyPixel   dir2xy(const GSkyDir& dir) const;
+    // Pure virtual methods (not implemented)
+    virtual void            clear(void) = 0;
+    virtual GSkyProjection* clone(void) const = 0;
+    virtual int             size(void) const = 0;
+    virtual std::string     code(void) const = 0;
+    virtual std::string     name(void) const = 0;
+    virtual void            read(const GFitsHDU& hdu) = 0;
+    virtual void            write(GFitsHDU& hdu) const = 0;
+    virtual double          solidangle(const GSkyPixel& pixel) const = 0;
+    virtual GSkyDir         pix2dir(const GSkyPixel& pixel) const = 0;
+    virtual GSkyPixel       dir2pix(const GSkyDir& dir) const = 0;
 
-    // Additional class specific methods
-    int          npix(void) const;
-    int          nside(void) const;
-    std::string  ordering(void) const;
-    void         ordering(const std::string& ordering);
+    // Virtual methods
+    virtual std::string coordsys(void) const;
+    virtual void        coordsys(const std::string& coordsys);
 };
 
 
 /***********************************************************************//**
- * @brief GWcsHPX class extension
+ * @brief GSkyProjection class extension
  ***************************************************************************/
-%extend GWcsHPX {
-    GWcsHPX copy() {
-        return (*self);
+%extend GSkyProjection {
+    bool __is__(const GSkyProjection &proj) {
+            return (*self) == proj;
     }
 };

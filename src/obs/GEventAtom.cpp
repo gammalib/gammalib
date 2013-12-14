@@ -1,7 +1,7 @@
 /***************************************************************************
- *             GEventAtom.cpp  -  Event atom abstract base class           *
+ *               GEventAtom.cpp - Abstract event atom base class           *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2009-2011 by Jurgen Knodlseder                           *
+ *  copyright (C) 2009-2013 by Jurgen Knodlseder                           *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,8 +20,8 @@
  ***************************************************************************/
 /**
  * @file GEventAtom.cpp
- * @brief GEvent atom abstract base class implementation.
- * @author J. Knodlseder
+ * @brief Abstract event atom base class implementation
+ * @author Juergen Knoedlseder
  */
 
 /* __ Includes ___________________________________________________________ */
@@ -99,8 +99,9 @@ GEventAtom::~GEventAtom(void)
  * @brief Assignment operator
  *
  * @param[in] atom Event atom.
+ * @return Event atom.
  ***************************************************************************/
-GEventAtom& GEventAtom::operator= (const GEventAtom& atom)
+GEventAtom& GEventAtom::operator=(const GEventAtom& atom)
 {
     // Execute only if object is not identical
     if (this != &atom) {

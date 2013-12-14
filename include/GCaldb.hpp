@@ -82,14 +82,15 @@ public:
     GCaldb& operator= (const GCaldb& caldb);
 
     // Methods
-    void        clear(void);
-    GCaldb*     clone(void) const;
-    int         size(void) const;
-    std::string dir(void) const { return m_caldb; }
-    void        dir(const std::string& pathname);
-    void        open(const std::string& mission, const std::string& instrument = "");
-    void        close(void);
-    std::string print(const GChatter& chatter = NORMAL) const;
+    void               clear(void);
+    GCaldb*            clone(void) const;
+    int                size(void) const;
+    const std::string& dir(void) const;
+    void               dir(const std::string& pathname);
+    void               open(const std::string& mission,
+                            const std::string& instrument = "");
+    void               close(void);
+    std::string        print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -109,5 +110,17 @@ protected:
     GFits       m_fits;         //!< CIF FITS file
     GFitsTable* m_cif;          //!< Pointer to CIF table
 };
+
+
+/***********************************************************************//**
+ * @brief Return calibration directory
+ *
+ * @return Calibration directory.
+ ***************************************************************************/
+inline
+const std::string& GCaldb::dir(void) const
+{
+    return m_caldb;
+}
 
 #endif /* GCALDB_HPP */

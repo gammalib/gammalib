@@ -1,7 +1,7 @@
 /***************************************************************************
- *              GFitsBinTable.cpp  - FITS binary table class               *
+ *               GFitsBinTable.cpp - FITS binary table class               *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2008-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2008-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -48,7 +48,7 @@
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Void constructor
  ***************************************************************************/
 GFitsBinTable::GFitsBinTable(void) : GFitsTable()
 {
@@ -61,11 +61,11 @@ GFitsBinTable::GFitsBinTable(void) : GFitsTable()
 
 
 /***********************************************************************//**
- * @brief Constructor
+ * @brief Table constructor
  *
  * @param[in] nrows Number of rows in table
  ***************************************************************************/
-GFitsBinTable::GFitsBinTable(int nrows) : GFitsTable(nrows)
+GFitsBinTable::GFitsBinTable(const int& nrows) : GFitsTable(nrows)
 {
     // Initialise class members for clean destruction
     init_members();
@@ -78,8 +78,7 @@ GFitsBinTable::GFitsBinTable(int nrows) : GFitsTable(nrows)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] table Table which will be used to construct GFitsBinTable
- *                  instance
+ * @param[in] table Binary table.
  ***************************************************************************/
 GFitsBinTable::GFitsBinTable(const GFitsBinTable& table) : GFitsTable(table)
 {
@@ -116,7 +115,8 @@ GFitsBinTable::~GFitsBinTable(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] table Table which will be assigned
+ * @param[in] table Binary table.
+ * @return Binary table.
  ***************************************************************************/
 GFitsBinTable& GFitsBinTable::operator=(const GFitsBinTable& table)
 {
@@ -149,7 +149,7 @@ GFitsBinTable& GFitsBinTable::operator=(const GFitsBinTable& table)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear binary table
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
@@ -172,6 +172,8 @@ void GFitsBinTable::clear(void)
 
 /***********************************************************************//**
  * @brief Clone binary table
+ *
+ * @return Pointer to deep copy of binary table.
  ***************************************************************************/
 GFitsBinTable* GFitsBinTable::clone(void) const
 {

@@ -78,6 +78,18 @@ void TestGLATResponse::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGLATResponse* TestGLATResponse::clone(void) const
+{
+    // Clone test suite
+    return new TestGLATResponse(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set LAT livetime cube test methods
  ***************************************************************************/
 void TestGLATLtCube::set(void)
@@ -91,6 +103,18 @@ void TestGLATLtCube::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGLATLtCube* TestGLATLtCube::clone(void) const
+{
+    // Clone test suite
+    return new TestGLATLtCube(*this);
 }
 
 
@@ -114,6 +138,18 @@ void TestGLATObservation::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGLATObservation* TestGLATObservation::clone(void) const
+{
+    // Clone test suite
+    return new TestGLATObservation(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Set LAT optimizer test methods
  ***************************************************************************/
 void TestGLATOptimize::set(void)
@@ -127,6 +163,18 @@ void TestGLATOptimize::set(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGLATOptimize* TestGLATOptimize::clone(void) const
+{
+    // Clone test suite
+    return new TestGLATOptimize(*this);
 }
 
 
@@ -283,11 +331,11 @@ void TestGLATLtCube::test_one_ltcube(const std::string& datadir, const double& r
     // Create livetime skymap (no phi dependence)
     test_try("Create livetime skymap (no phi dependence)");
     try {
-        GSkymap map("HPX", "GAL", 64, "RING", 1);
+        GSkymap map("GAL", 64, "RING", 1);
         GLATLtCube ltcube(lat_ltcube);
         GEnergy energy;
         for (int i = 0; i < map.npix(); ++i) {
-            GSkyDir dir = map.pix2dir(i);
+            GSkyDir dir = map.inx2dir(i);
             map(i) = ltcube(dir, energy, test_fct1);
         }
         map.save(file1, true);
@@ -300,11 +348,11 @@ void TestGLATLtCube::test_one_ltcube(const std::string& datadir, const double& r
     // Create livetime skymap (phi dependence)
     test_try("Create livetime skymap (phi dependence)");
     try {
-        GSkymap map("HPX", "GAL", 64, "RING", 1);
+        GSkymap map("GAL", 64, "RING", 1);
         GLATLtCube ltcube(lat_ltcube);
         GEnergy energy;
         for (int i = 0; i < map.npix(); ++i) {
-            GSkyDir dir = map.pix2dir(i);
+            GSkyDir dir = map.inx2dir(i);
             map(i) = ltcube(dir, energy, test_fct2);
         }
         map.save(file2, true);
@@ -428,10 +476,10 @@ void TestGLATObservation::test_one_unbinned_obs(const std::string& datadir)
         test_try_failure(e);
     }
 
-    // Loop over all events using iterator
+    // Loop over all events
+    const GEvents *ptr = run.events();
     int num = 0;
-    GLATEventList *ptr = static_cast<GLATEventList*>(const_cast<GEvents*>(run.events()));
-    for (GLATEventList::iterator event = ptr->begin(); event != ptr->end(); ++event) {
+    for (int i = 0; i < ptr->size(); ++i) {
         num++;
     }
     test_value(num, nevents, 1.0e-20, "Test event iterator");
@@ -520,12 +568,12 @@ void TestGLATObservation::test_one_binned_obs(const std::string& datadir, const 
     }
 
     // Loop over all events using iterator
+    const GEvents* events = run.events();
     int num = 0;
     int sum = 0;
-    GLATEventCube *ptr = static_cast<GLATEventCube*>(const_cast<GEvents*>(run.events()));
-    for (GLATEventCube::iterator event = ptr->begin(); event != ptr->end(); ++event) {
+    for (int i = 0; i < events->size(); ++i) {
         num++;
-        sum += (int)event->counts();
+        sum += (int)((*events)[i]->counts());
     }
     test_value(sum, nevents, 1.0e-20, "Test event iterator (counts)");
     test_value(num, nsize, 1.0e-20, "Test event iterator (bins)");

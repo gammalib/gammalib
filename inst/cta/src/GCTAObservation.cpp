@@ -38,6 +38,7 @@
 #include "GCTAEventList.hpp"
 #include "GCTAEventCube.hpp"
 #include "GCTARoi.hpp"
+#include "GCTAPsf.hpp"
 #include "GCTAAeff.hpp"
 #include "GCTAAeff2D.hpp"
 #include "GCTAAeffArf.hpp"
@@ -57,8 +58,6 @@ const GObservationRegistry g_obs_veritas_registry(&g_obs_veritas_seed);
 #define G_RESPONSE                    "GCTAObservation::response(GResponse&)"
 #define G_READ                          "GCTAObservation::read(GXmlElement&)"
 #define G_WRITE                        "GCTAObservation::write(GXmlElement&)"
-#define G_READ_DS_EBOUNDS       "GCTAObservation::read_ds_ebounds(GFitsHDU*)"
-#define G_READ_DS_ROI               "GCTAObservation::read_ds_roi(GFitsHDU*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -229,14 +228,12 @@ void GCTAObservation::response(const GResponse& rsp)
 {
     // Get pointer on CTA response
     const GCTAResponse* ctarsp = dynamic_cast<const GCTAResponse*>(&rsp);
-    if (ctarsp == NULL)
+    if (ctarsp == NULL) {
         throw GCTAException::bad_response_type(G_RESPONSE);
+    }
 
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Clone response function
-    m_response = ctarsp->clone();
+    // Copy response function
+    m_response = *ctarsp;
 
     // Return
     return;
@@ -247,62 +244,19 @@ void GCTAObservation::response(const GResponse& rsp)
  * @brief Set CTA response function
  *
  * @param[in] irfname Name of CTA response function.
- * @param[in] caldb Optional name of calibration database.
+ * @param[in] caldb Optional name of calibration database (defaults to "").
  ***************************************************************************/
-void GCTAObservation::response(const std::string& irfname, std::string caldb)
+void GCTAObservation::response(const std::string& irfname,
+                               const std::string& caldb)
 {
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new CTA response function
-    m_response = new GCTAResponse;
+    // Clear response function
+    m_response.clear();
 
     // Set calibration database
-    m_response->caldb(caldb);
+    m_response.caldb(caldb);
 
     // Load instrument response function
-    m_response->load(irfname);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to CTA response function
- ***************************************************************************/
-GCTAResponse* GCTAObservation::response(void) const
-{
-    // Return response pointer
-    return m_response;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer to CTA pointing direction
- *
- * Returns pointer to pointing direction.
- ***************************************************************************/
-GCTAPointing* GCTAObservation::pointing(void) const
-{
-    // Return pointing pointer
-    return m_pointing;
-}
-
-
-/***********************************************************************//**
- * @brief Set CTA pointing direction
- *
- * @param[in] pointing Pointing.
- ***************************************************************************/
-void GCTAObservation::pointing(const GCTAPointing& pointing)
-{
-    // Free any existing pointing
-    if (m_pointing != NULL) delete m_pointing;
-    m_pointing = NULL;
-
-    // Clone pointing
-    m_pointing = pointing.clone();
+    m_response.load(irfname);
 
     // Return
     return;
@@ -347,12 +301,6 @@ void GCTAObservation::read(const GXmlElement& xml)
 {
     // Clear observation
     clear();
-
-    // Delete old response function
-    if (m_response != NULL) delete m_response;
-
-    // Allocate new CTA response function
-    m_response = new GCTAResponse;
 
     // Extract instrument name
     m_instrument = xml.attribute("instrument");
@@ -410,7 +358,7 @@ void GCTAObservation::read(const GXmlElement& xml)
             if (gammalib::strip_whitespace(filename).length() > 0) {
 
                 // Load effective area
-                m_response->load_aeff(filename);
+                m_response.load_aeff(filename);
 
                 // Optional attributes
                 double thetacut = 0.0;
@@ -436,7 +384,7 @@ void GCTAObservation::read(const GXmlElement& xml)
                 }
 
                 // If we have an ARF then set attributes
-                GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response->aeff()));
+                GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response.aeff()));
                 if (arf != NULL) {
                     arf->thetacut(thetacut);
                     arf->scale(scale);
@@ -444,7 +392,7 @@ void GCTAObservation::read(const GXmlElement& xml)
                 }
 
                 // If we have a performance table then set attributes
-                GCTAAeffPerfTable* perf = const_cast<GCTAAeffPerfTable*>(dynamic_cast<const GCTAAeffPerfTable*>(m_response->aeff()));
+                GCTAAeffPerfTable* perf = const_cast<GCTAAeffPerfTable*>(dynamic_cast<const GCTAAeffPerfTable*>(m_response.aeff()));
                 if (perf != NULL) {
                     perf->sigma(sigma);
                 }
@@ -464,7 +412,7 @@ void GCTAObservation::read(const GXmlElement& xml)
 
             // If filename is not empty then load point spread function
             if (gammalib::strip_whitespace(filename).length() > 0) {
-                m_response->load_psf(filename);
+                m_response.load_psf(filename);
             }
 
             // Increase number of parameters
@@ -481,7 +429,7 @@ void GCTAObservation::read(const GXmlElement& xml)
 
             // If filename is not empty then load energy dispersion
             if (gammalib::strip_whitespace(filename).length() > 0) {
-                m_response->load_edisp(filename);
+                m_response.load_edisp(filename);
             }
 
             // Increase number of parameters
@@ -498,10 +446,10 @@ void GCTAObservation::read(const GXmlElement& xml)
     }
 
     // If we have an ARF then remove thetacut if necessary
-    GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response->aeff()));
+    GCTAAeffArf* arf = const_cast<GCTAAeffArf*>(dynamic_cast<const GCTAAeffArf*>(m_response.aeff()));
     if (arf != NULL) {
         if (arf->thetacut() > 0.0) {
-            arf->remove_thetacut(*m_response);
+            arf->remove_thetacut(m_response);
         }
     }
 
@@ -606,31 +554,29 @@ void GCTAObservation::write(GXmlElement& xml) const
             double      scale    = 1.0;
             double      sigma    = 0.0;
 
-            // Continue only if response and effective area are valid
-            if (m_response != NULL) {
-                if (m_response->aeff() != NULL) {
+            // Continue only if area is valid
+            if (m_response.aeff() != NULL) {
 
-                    // Get filename
-                    filename = m_response->aeff()->filename();
+                // Get filename
+                filename = m_response.aeff()->filename();
 
-                    // Get optional ARF attributes
-                    const GCTAAeffArf* arf =
-                          dynamic_cast<const GCTAAeffArf*>(m_response->aeff());
-                    if (arf != NULL) {
-                        thetacut = arf->thetacut();
-                        scale    = arf->scale();
-                        sigma    = arf->sigma();
-                    }
+                // Get optional ARF attributes
+                const GCTAAeffArf* arf =
+                      dynamic_cast<const GCTAAeffArf*>(m_response.aeff());
+                if (arf != NULL) {
+                    thetacut = arf->thetacut();
+                    scale    = arf->scale();
+                    sigma    = arf->sigma();
+                }
 
-                    // Get optional performance table attributes
-                    const GCTAAeffPerfTable* perf =
-                          dynamic_cast<const GCTAAeffPerfTable*>(m_response->aeff());
-                    if (perf != NULL) {
-                        sigma = perf->sigma();
-                    }
+                // Get optional performance table attributes
+                const GCTAAeffPerfTable* perf =
+                      dynamic_cast<const GCTAAeffPerfTable*>(m_response.aeff());
+                if (perf != NULL) {
+                    sigma = perf->sigma();
+                }
 
-                } // endif: effective area was valid
-            } // endif: response was valid
+            } // endif: effective area was valid
 
             // Set attributes
             par->attribute("file", filename);
@@ -649,10 +595,8 @@ void GCTAObservation::write(GXmlElement& xml) const
         // Handle PSF
         else if (par->attribute("name") == "PointSpreadFunction") {
             std::string filename = "";
-            if (m_response != NULL) {
-                if (m_response->psf() != NULL) {
-                    filename = m_response->psf()->filename();
-                }
+            if (m_response.psf() != NULL) {
+                filename = m_response.psf()->filename();
             }
             par->attribute("file", filename);
             npar[2]++;
@@ -661,9 +605,7 @@ void GCTAObservation::write(GXmlElement& xml) const
         // Handle RMF
         else if (par->attribute("name") == "EnergyDispersion") {
             std::string filename = "";
-            if (m_response != NULL) {
-                filename = m_response->rmffile();
-            }
+            filename = m_response.rmffile();
             par->attribute("file", filename);
             npar[3]++;
         }
@@ -712,26 +654,14 @@ std::string GCTAObservation::print(const GChatter& chatter) const
         result.append(gammalib::str(m_deadc));
 
         // Append pointing
-        if (m_pointing != NULL) {
-            result.append("\n"+m_pointing->print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("CTA pointing"));
-            result.append("undefined");
-        }
+        result.append("\n"+pointing().print(gammalib::reduce(chatter)));
 
         // Append response
-        if (m_response != NULL) {
-            result.append("\n"+response()->print(chatter));
-        }
-        else {
-            result.append("\n"+gammalib::parformat("CTA response"));
-            result.append("undefined");
-        }
+        result.append("\n"+response().print(gammalib::reduce(chatter)));
 
         // Append events
         if (m_events != NULL) {
-            result.append("\n"+m_events->print(chatter));
+            result.append("\n"+m_events->print(gammalib::reduce(chatter)));
         }
 
     } // endif: chatter was not silent
@@ -760,17 +690,17 @@ void GCTAObservation::load_unbinned(const std::string& filename)
     m_events = events;
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Read event list
-    events->read(file);
+    events->read(fits);
 
     // Read observation attributes from EVENTS extension
-    GFitsHDU* hdu = file.hdu("EVENTS");
+    const GFitsHDU& hdu = *fits.at("EVENTS");
     read_attributes(hdu);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store event filename
     m_eventfile = filename;
@@ -799,17 +729,17 @@ void GCTAObservation::load_binned(const std::string& filename)
     m_events = events;
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Read event cube
-    events->read(file);
+    events->read(fits);
 
     // Read observation attributes from primary extension
-    GFitsHDU* hdu = file.hdu(0);
+    const GFitsHDU& hdu = *fits.at(0);
     read_attributes(hdu);
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store event filename
     m_eventfile = filename;
@@ -825,7 +755,7 @@ void GCTAObservation::load_binned(const std::string& filename)
  * @param[in] filename FITS filename.
  * @param[in] clobber Overwrite existing FITS file (default=false).
  ***************************************************************************/
-void GCTAObservation::save(const std::string& filename, bool clobber) const
+void GCTAObservation::save(const std::string& filename, const bool& clobber) const
 {
     // Create FITS file
     GFits fits;
@@ -842,7 +772,7 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
         list->write(fits);
 
         // Write observation attributes into EVENTS header
-        GFitsHDU* hdu = fits.hdu("EVENTS");
+        GFitsHDU& hdu = *fits.at("EVENTS");
         write_attributes(hdu);
 
     } // endif: observation contained an event list
@@ -856,7 +786,7 @@ void GCTAObservation::save(const std::string& filename, bool clobber) const
         cube->write(fits);
 
         // Write observation attributes into primary header
-        GFitsHDU* hdu = fits.hdu(0);
+        GFitsHDU& hdu = *fits.at(0);
         write_attributes(hdu);
 
     } // endelse: observation contained an event cube
@@ -883,8 +813,8 @@ void GCTAObservation::init_members(void)
     // Initialise members
     m_instrument = "CTA";
     m_eventfile.clear();
-    m_response   = NULL;
-    m_pointing   = NULL;
+    m_response.clear();
+    m_pointing.clear();
     m_obs_id     = 0;
     m_ontime     = 0.0;
     m_livetime   = 0.0;
@@ -904,13 +834,11 @@ void GCTAObservation::init_members(void)
  ***************************************************************************/
 void GCTAObservation::copy_members(const GCTAObservation& obs)
 {
-    // Clone members
-    if (obs.m_response != NULL) m_response = obs.m_response->clone();
-    if (obs.m_pointing != NULL) m_pointing = obs.m_pointing->clone();
-
     // Copy members
     m_instrument = obs.m_instrument;
     m_eventfile  = obs.m_eventfile;
+    m_response   = obs.m_response;
+    m_pointing   = obs.m_pointing;
     m_obs_id     = obs.m_obs_id;
     m_ontime     = obs.m_ontime;
     m_livetime   = obs.m_livetime;
@@ -928,14 +856,6 @@ void GCTAObservation::copy_members(const GCTAObservation& obs)
  ***************************************************************************/
 void GCTAObservation::free_members(void)
 {
-    // Free memory
-    if (m_response != NULL) delete m_response;
-    if (m_pointing != NULL) delete m_pointing;
-
-    // Mark memory as free
-    m_response = NULL;
-    m_pointing = NULL;
-
     // Return
     return;
 }
@@ -944,7 +864,7 @@ void GCTAObservation::free_members(void)
 /***********************************************************************//**
  * @brief Read observation attributes
  *
- * @param[in] hdu FITS HDU pointer
+ * @param[in] hdu FITS HDU.
  *
  * Reads CTA observation attributes from HDU. Mandatory attributes are
  *
@@ -966,50 +886,41 @@ void GCTAObservation::free_members(void)
  * Based on RA_PNT and DEC_PNT, the CTA pointing direction is set. Note that
  * DEADC is computed using DEADC=LIVETIME/ONTIME
  *
- * Nothing is done if the HDU pointer is NULL.
- *
  * @todo The actual reader is a minimal reader to accomodate as many
  *       different datasets as possible. Once the CTA data format is fixed
  *       the reader should have more mandatory attributes.
  ***************************************************************************/
-void GCTAObservation::read_attributes(const GFitsHDU* hdu)
+void GCTAObservation::read_attributes(const GFitsHDU& hdu)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Read mandatory attributes
+    double ra_pnt  = hdu.real("RA_PNT");
+    double dec_pnt = hdu.real("DEC_PNT");
+    m_ontime   = (hdu.hascard("ONTIME"))   ? hdu.real("ONTIME") : 0.0;
+    m_livetime = (hdu.hascard("LIVETIME")) ? hdu.real("LIVETIME") : 0.0;
 
-        // Read mandatory attributes
-        double ra_pnt  = hdu->real("RA_PNT");
-        double dec_pnt = hdu->real("DEC_PNT");
-        m_ontime   = (hdu->hascard("ONTIME"))   ? hdu->real("ONTIME") : 0.0;
-        m_livetime = (hdu->hascard("LIVETIME")) ? hdu->real("LIVETIME") : 0.0;
+    // Read optional attributes
+    m_name     = (hdu.hascard("OBJECT"))   ? hdu.string("OBJECT") : "unknown";
+    m_deadc    = (hdu.hascard("DEADC"))    ? hdu.real("DEADC") : 0.0;
+    m_ra_obj   = (hdu.hascard("RA_OBJ"))   ? hdu.real("RA_OBJ") : 0.0;
+    m_dec_obj  = (hdu.hascard("DEC_OBJ"))  ? hdu.real("DEC_OBJ") : 0.0;
+    m_obs_id   = (hdu.hascard("OBS_ID"))   ? hdu.integer("OBS_ID") : 0;
+    //double alt = (hdu.hascard("ALT_PNT"))  ? hdu.real("ALT_PNT") : 0.0;
+    //double az  = (hdu.hascard("AZ_PNT"))   ? hdu.real("AZ_PNT") : 0.0;
 
-        // Read optional attributes
-        m_name     = (hdu->hascard("OBJECT"))   ? hdu->string("OBJECT") : "unknown";
-        m_deadc    = (hdu->hascard("DEADC"))    ? hdu->real("DEADC") : 0.0;
-        m_ra_obj   = (hdu->hascard("RA_OBJ"))   ? hdu->real("RA_OBJ") : 0.0;
-        m_dec_obj  = (hdu->hascard("DEC_OBJ"))  ? hdu->real("DEC_OBJ") : 0.0;
-        m_obs_id   = (hdu->hascard("OBS_ID"))   ? hdu->integer("OBS_ID") : 0;
-        //double alt = (hdu->hascard("ALT_PNT"))  ? hdu->real("ALT_PNT") : 0.0;
-        //double az  = (hdu->hascard("AZ_PNT"))   ? hdu->real("AZ_PNT") : 0.0;
+    // Kluge: compute DEADC from livetime and ontime instead of using the
+    // keyword value as the original event lists had this values badly
+    // assigned
+    if (m_ontime > 0) {
+        m_deadc = m_livetime / m_ontime;
+    }
+    else {
+        m_deadc = 0.0;
+    }
 
-        // Kluge: compute DEADC from livetime and ontime instead of using the
-        // keyword value as the original event lists had this values badly
-        // assigned
-        if (m_ontime > 0) {
-            m_deadc = m_livetime / m_ontime;
-        }
-        else {
-            m_deadc = 0.0;
-        }
-
-        // Set pointing information
-        GSkyDir pnt;
-        pnt.radec_deg(ra_pnt, dec_pnt);
-        if (m_pointing != NULL) delete m_pointing;
-        m_pointing = new GCTAPointing;
-        m_pointing->dir(pnt);
-
-    } // endif: HDU was valid
+    // Set pointing information
+    GSkyDir pnt;
+    pnt.radec_deg(ra_pnt, dec_pnt);
+    m_pointing.dir(pnt);
 
     // Return
     return;
@@ -1019,73 +930,66 @@ void GCTAObservation::read_attributes(const GFitsHDU* hdu)
 /***********************************************************************//**
  * @brief Write observation attributes
  *
- * @param[in] hdu FITS HDU pointer
- *
- * Nothing is done if the HDU pointer is NULL.
+ * @param[in] hdu FITS HDU.
  ***************************************************************************/
-void GCTAObservation::write_attributes(GFitsHDU* hdu) const
+void GCTAObservation::write_attributes(GFitsHDU& hdu) const
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get time reference
+    GTimeReference timeref = events()->gti().reference();
 
-        // Get time reference
-        GTimeReference timeref = events()->gti().reference();
+    // Compute some attributes
+    double ra_pnt  = m_pointing.dir().ra_deg();
+    double dec_pnt = m_pointing.dir().dec_deg();
+    double tstart  = events()->tstart().convert(timeref);
+    double tstop   = events()->tstop().convert(timeref);
+    double telapse = events()->gti().telapse();
+    double ontime  = events()->gti().ontime();
+    double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
 
-        // Compute some attributes
-        double ra_pnt  = (m_pointing != NULL) ? m_pointing->dir().ra_deg() : 0.0;
-        double dec_pnt = (m_pointing != NULL) ? m_pointing->dir().dec_deg() : 0.0;
-        double tstart  = events()->tstart().convert(timeref);
-        double tstop   = events()->tstop().convert(timeref);
-        double telapse = events()->gti().telapse();
-        double ontime  = events()->gti().ontime();
-        double deadc   = (ontime > 0.0) ? livetime() / ontime : 0.0;
+    // Set observation information
+    hdu.card("CREATOR",  "GammaLib",   "Program which created the file");
+    hdu.card("TELESCOP", instrument(), "Telescope");
+    hdu.card("OBS_ID",   obs_id(),     "Observation identifier");
+    hdu.card("DATE_OBS", "string",     "Observation start date");
+    hdu.card("TIME_OBS", "string",     "Observation start time");
+    hdu.card("DATE_END", "string",     "Observation end date");
+    hdu.card("TIME_END", "string",     "Observation end time");
 
-        // Set observation information
-        hdu->card("CREATOR",  "GammaLib",   "Program which created the file");
-        hdu->card("TELESCOP", instrument(), "Telescope");
-        hdu->card("OBS_ID",   obs_id(),     "Observation identifier");
-        hdu->card("DATE_OBS", "string",     "Observation start date");
-        hdu->card("TIME_OBS", "string",     "Observation start time");
-        hdu->card("DATE_END", "string",     "Observation end date");
-        hdu->card("TIME_END", "string",     "Observation end time");
+    // Set observation time information
+    hdu.card("TSTART",   tstart, "[s] Mission time of start of observation");
+    hdu.card("TSTOP",    tstop, "[s] Mission time of end of observation");
+    timeref.write(hdu);
+    hdu.card("TELAPSE",  telapse, "[s] Mission elapsed time");
+    hdu.card("ONTIME",   ontime, "[s] Total good time including deadtime");
+    hdu.card("LIVETIME", livetime(), "[s] Total livetime");
+    hdu.card("DEADC",    deadc, "Deadtime correction factor");
+    hdu.card("TIMEDEL",  1.0, "Time resolution");
 
-        // Set observation time information
-        hdu->card("TSTART",   tstart, "[s] Mission time of start of observation");
-        hdu->card("TSTOP",    tstop, "[s] Mission time of end of observation");
-        timeref.write(hdu);
-        hdu->card("TELAPSE",  telapse, "[s] Mission elapsed time");
-        hdu->card("ONTIME",   ontime, "[s] Total good time including deadtime");
-        hdu->card("LIVETIME", livetime(), "[s] Total livetime");
-        hdu->card("DEADC",    deadc, "Deadtime correction factor");
-        hdu->card("TIMEDEL",  1.0, "Time resolution");
+    // Set pointing information
+    hdu.card("OBJECT",   name(),    "Observed object");
+    hdu.card("RA_OBJ",   ra_obj(),  "[deg] Target Right Ascension");
+    hdu.card("DEC_OBJ",  dec_obj(), "[deg] Target Declination");
+    hdu.card("RA_PNT",   ra_pnt,    "[deg] Pointing Right Ascension");
+    hdu.card("DEC_PNT",  dec_pnt,   "[deg] Pointing Declination");
+    hdu.card("ALT_PNT",  0.0,       "[deg] Average altitude of pointing");
+    hdu.card("AZ_PNT",   0.0,       "[deg] Average azimuth of pointing");
+    hdu.card("RADECSYS", "FK5",     "Coordinate system");
+    hdu.card("EQUINOX",  2000.0,    "Epoch");
+    hdu.card("CONV_DEP", 0.0,       "Convergence depth of telescopes");
+    hdu.card("CONV_RA",  0.0,       "[deg] Convergence Right Ascension");
+    hdu.card("CONV_DEC", 0.0,       "[deg] Convergence Declination");
+    hdu.card("OBSERVER", "string",  "Observer");
 
-        // Set pointing information
-        hdu->card("OBJECT",   name(),    "Observed object");
-        hdu->card("RA_OBJ",   ra_obj(),  "[deg] Target Right Ascension");
-        hdu->card("DEC_OBJ",  dec_obj(), "[deg] Target Declination");
-        hdu->card("RA_PNT",   ra_pnt,    "[deg] Pointing Right Ascension");
-        hdu->card("DEC_PNT",  dec_pnt,   "[deg] Pointing Declination");
-        hdu->card("ALT_PNT",  0.0,       "[deg] Average altitude of pointing");
-        hdu->card("AZ_PNT",   0.0,       "[deg] Average azimuth of pointing");
-        hdu->card("RADECSYS", "FK5",     "Coordinate system");
-        hdu->card("EQUINOX",  2000.0,    "Epoch");
-        hdu->card("CONV_DEP", 0.0,       "Convergence depth of telescopes");
-        hdu->card("CONV_RA",  0.0,       "[deg] Convergence Right Ascension");
-        hdu->card("CONV_DEC", 0.0,       "[deg] Convergence Declination");
-        hdu->card("OBSERVER", "string",  "Observer");
+    // Telescope information
+    hdu.card("N_TELS",   100,      "Number of telescopes in event list");
+    hdu.card("TELLIST",  "string", "Telescope IDs");
+    hdu.card("GEOLAT",   0.0,      "[deg] Geographic latitude of array centre");
+    hdu.card("GEOLON",   0.0,      "[deg] Geographic longitude of array centre");
+    hdu.card("ALTITUDE", 0.0,      "[km] Altitude of array centre");
 
-        // Telescope information
-        hdu->card("N_TELS",   100,      "Number of telescopes in event list");
-        hdu->card("TELLIST",  "string", "Telescope IDs");
-        hdu->card("GEOLAT",   0.0,      "[deg] Geographic latitude of array centre");
-        hdu->card("GEOLON",   0.0,      "[deg] Geographic longitude of array centre");
-        hdu->card("ALTITUDE", 0.0,      "[km] Altitude of array centre");
-
-        // Other information
-        hdu->card("EUNIT",    "TeV",    "Energy unit");
-        hdu->card("EVTVER",   "draft1", "Event list version number");
-
-    } // endif: HDU was valid
+    // Other information
+    hdu.card("EUNIT",    "TeV",    "Energy unit");
+    hdu.card("EVTVER",   "draft1", "Event list version number");
 
     // Return
     return;

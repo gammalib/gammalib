@@ -345,7 +345,7 @@ int GUrlFile::write(const void* buffer, const int& nbyte)
  *
  * If no file has been opened, the method returns EOF.
  ***************************************************************************/
-int GUrlFile::getchar(void)
+int GUrlFile::getchar(void) const
 {
     // Initialise character to EOF
     int character = EOF;

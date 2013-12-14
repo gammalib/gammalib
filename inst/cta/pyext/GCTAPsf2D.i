@@ -78,4 +78,7 @@ public:
  * @brief GCTAPsf2D class extension
  ***************************************************************************/
 %extend GCTAPsf2D {
+    GCTAPsf2D copy() {
+        return (*self);
+    }
 };

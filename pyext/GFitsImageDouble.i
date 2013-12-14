@@ -1,7 +1,7 @@
 /***************************************************************************
- *  GFitsImageDouble.i  - FITS double precision image class SWIG interface *
+ *         GFitsImageDouble.i - Double precision FITS image class          *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2012 by Juergen Knoedlseder                         *
+ *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GFitsImageDouble.i
- * @brief GFitsImageDouble class SWIG file.
+ * @brief Double precision FITS image class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -33,17 +33,17 @@
 /***********************************************************************//**
  * @class GFitsImageDouble
  *
- * @brief SWIG interface for the FITS double precision image class.
+ * @brief Double precision FITS image class
  ***************************************************************************/
 class GFitsImageDouble : public GFitsImage {
-
 public:
     // Constructors and destructors
     GFitsImageDouble(void);
-    explicit GFitsImageDouble(int nx, const double* pixels = NULL);
-    explicit GFitsImageDouble(int nx, int ny, const double* pixels = NULL);
-    explicit GFitsImageDouble(int nx, int ny, int nz, const double* pixels = NULL);
-    explicit GFitsImageDouble(int nx, int ny, int nz, int nt, const double* pixels = NULL);
+    GFitsImageDouble(const int& nx, const double* pixels = NULL);
+    GFitsImageDouble(const int& nx, const int& ny, const double* pixels = NULL);
+    GFitsImageDouble(const int& nx, const int& ny, const int& nz, const double* pixels = NULL);
+    GFitsImageDouble(const int& nx, const int& ny, const int& nz, const int& nt, const double* pixels = NULL);
+    GFitsImageDouble(const int& naxis, const int* naxes, const double* pixels = NULL);
     GFitsImageDouble(const GFitsImageDouble& image);
     virtual ~GFitsImageDouble(void);
 

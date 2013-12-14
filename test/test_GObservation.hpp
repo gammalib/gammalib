@@ -44,14 +44,15 @@ public:
     virtual ~TestGObservation(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_ebounds(void);
-    void         test_gti(void);
-    void         test_photons(void);
-    void         test_time_reference(void);
-    void         test_time(void);
-    void         test_times(void);
-    void         test_energies(void);
+    virtual void              set(void);
+    virtual TestGObservation* clone(void) const;
+    void                      test_ebounds(void);
+    void                      test_gti(void);
+    void                      test_photons(void);
+    void                      test_time_reference(void);
+    void                      test_time(void);
+    void                      test_times(void);
+    void                      test_energies(void);
 };
 
 
@@ -69,12 +70,13 @@ public:
     virtual ~TestOpenMP(void) {}
 
     // Methods
-    virtual void set(void);
-    void         test_observations_optimizer_unbinned_1();
-    void         test_observations_optimizer_unbinned_10();
-    void         test_observations_optimizer_binned_1();
-    void         test_observations_optimizer_binned_10();
-    void         test_observations_optimizer(const int& mode=0);
+    virtual void        set(void);
+    virtual TestOpenMP* clone(void) const;
+    void                test_observations_optimizer_unbinned_1();
+    void                test_observations_optimizer_unbinned_10();
+    void                test_observations_optimizer_binned_1();
+    void                test_observations_optimizer_binned_10();
+    void                test_observations_optimizer(const int& mode=0);
 };
 #endif
 

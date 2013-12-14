@@ -39,15 +39,22 @@
 #include "GException.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                                   "GPars::operator[](int&)"
-#define G_ACCESS2                           "GPars::operator[](std::string&)"
+#define G_ACCESS                            "GPars::operator[](std::string&)"
+#define G_AT                                          "GPar& GPars::at(int&)"
 #define G_APPEND                                       "GPars::append(GPar&)"
-#define G_LOAD1                              "GPars::load(const std::string)"
-#define G_LOAD2    "GPars::load(const std::string, std::vector<std::string>)"
-#define G_SAVE                               "GPars::save(const std::string)"
-#define G_OUTPATH                               "GPars::outpath(std::string)"
-#define G_READ                                     "GPars::read(std::string)"
-#define G_WRITE                                   "GPars::write(std::string)"
+#define G_INSERT1                          "GPar& GPars::insert(int&, GPar&)"
+#define G_INSERT2                  "GPar& GPars::insert(std::string&, GPar&)"
+#define G_REMOVE1                                       "GPars::remove(int&)"
+#define G_REMOVE2                               "GPars::remove(std::string&)"
+#define G_EXTEND                                      "GPars::extend(GPars&)"
+
+
+#define G_LOAD1                                   "GPars::load(std::string&)"
+#define G_LOAD2        "GPars::load(std::string&, std::vector<std::string>&)"
+#define G_SAVE                                    "GPars::save(std::string&)"
+#define G_OUTPATH                              "GPars::outpath(std::string&)"
+#define G_READ                                    "GPars::read(std::string&)"
+#define G_WRITE                                  "GPars::write(std::string&)"
 #define G_PARSE                                              "GPars::parse()"
 
 /* __ Macros _____________________________________________________________ */
@@ -79,7 +86,7 @@ GPars::GPars(void)
 
 
 /***********************************************************************//**
- * @brief Parameter constructor
+ * @brief Parameter file constructor
  *
  * @param[in] filename Parameter filename. 
  ***************************************************************************/
@@ -117,7 +124,7 @@ GPars::GPars(const std::string& filename, const std::vector<std::string>& args)
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] pars Object from which the instance should be built.
+ * @param[in] pars Parameter container.
  ***************************************************************************/
 GPars::GPars(const GPars& pars)
 {
@@ -154,9 +161,10 @@ GPars::~GPars(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] pars Object which should be assigned.
+ * @param[in] pars Parameter container.
+ * @return Parameter container.
  ***************************************************************************/
-GPars& GPars::operator= (const GPars& pars)
+GPars& GPars::operator=(const GPars& pars)
 {
     // Execute only if object is not identical
     if (this != &pars) {
@@ -180,69 +188,23 @@ GPars& GPars::operator= (const GPars& pars)
 /***********************************************************************//**
  * @brief Returns reference to parameter
  *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-GPar& GPars::operator[](const int& index)
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    }
-    #endif
-
-    // Return reference
-    return (m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to parameter (const version)
- *
- * @param[in] index Parameter index [0,...,size()-1].
- *
- * @exception GException::out_of_range
- *            Parameter index is out of range.
- ***************************************************************************/
-const GPar& GPars::operator[](const int& index) const
-{
-    // Compile option: raise exception if index is out of range
-    #if defined(G_RANGE_CHECK)
-    if (index < 0 || index >= size()) {
-        throw GException::out_of_range(G_ACCESS1, index, 0, size()-1);
-    }
-    #endif
-
-    // Return reference
-    return (m_pars[index]);
-}
-
-
-/***********************************************************************//**
- * @brief Returns reference to parameter
- *
  * @param[in] name Parameter name.
+ * @return Parameter.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_argument
  *            Parameter with specified name not found in container.
  ***************************************************************************/
 GPar& GPars::operator[](const std::string& name)
 {
     // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_pars[index].name() == name) {
-            break;
-        }
-    }
+    int index = get_index(name);
 
     // Throw exception if parameter name has not been found
-    if (index >= size()) {
-        throw GException::par_error(G_ACCESS2, name,
-                          "has not been found in parameter file.");
+    if (index == -1) {
+        std::string msg = "Parameter \""+name+"\" has not been found in"
+                          " parameter file.\n"
+                          "Please specify a valid parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return reference
@@ -254,24 +216,22 @@ GPar& GPars::operator[](const std::string& name)
  * @brief Returns reference to parameter (const version)
  *
  * @param[in] name Parameter name.
+ * @return Parameter.
  *
- * @exception GException::par_error
+ * @exception GException::invalid_argument
  *            Parameter with specified name not found in container.
  ***************************************************************************/
 const GPar& GPars::operator[](const std::string& name) const
 {
     // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_pars[index].name() == name) {
-            break;
-        }
-    }
+    int index = get_index(name);
 
     // Throw exception if parameter name has not been found
-    if (index >= size()) {
-        throw GException::par_error(G_ACCESS2, name,
-                          "has not been found in parameter file.");
+    if (index == -1) {
+        std::string msg = "Parameter \""+name+"\" has not been found in"
+                          " parameter file.\n"
+                          "Please specify a valid parameter name.";
+        throw GException::invalid_argument(G_ACCESS, msg);
     }
 
     // Return reference
@@ -286,7 +246,7 @@ const GPar& GPars::operator[](const std::string& name) const
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear object
+ * @brief Clear parameter container
  ***************************************************************************/
 void GPars::clear(void)
 {
@@ -302,7 +262,9 @@ void GPars::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone parameter container
+ *
+ * @return Pointer to deep copy of parameter container.
  ***************************************************************************/
 GPars* GPars::clone(void) const
 {
@@ -311,44 +273,84 @@ GPars* GPars::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Returns reference to parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+GPar& GPars::at(const int& index)
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, "Parameter index", index, size());
+    }
+    #endif
+
+    // Return reference
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Returns reference to parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ ***************************************************************************/
+const GPar& GPars::at(const int& index) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT, "Parameter index", index, size());
+    }
+    #endif
+
+    // Return reference
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
  * @brief Append parameter to container
  *
  * @param[in] par Parameter.
+ * @return Reference to deep copy of appended parameter.
  *
- * @exception GException::par_error
- *            Tried to append an already existing parameter.
+ * @exception GException::invalid_value
+ *            Parameter with same name exists already in container.
  *
  * This method appends one parameter to the parameter container. The
  * parameter provided to the method can be deleted after calling this method.
  ***************************************************************************/
-void GPars::append(const GPar& par)
+GPar& GPars::append(const GPar& par)
 {
-    // Check if parameter is already in container
-    if (haspar(par.name())) {
-        throw GException::par_error(G_APPEND, par.name(), "exists already.");
+    // Check if a parameter with specified name does not yet exist
+    int inx = get_index(par.name());
+    if (inx != -1) {
+        std::string msg =
+            "Attempt to append parameter with name \""+par.name()+"\" in"
+            " parameter container, but a parameter with the same name exists"
+            " already at index "+gammalib::str(inx)+" in the container.\n"
+            "Every parameter in the parameter container needs a unique name.";
+        throw GException::invalid_value(G_APPEND, msg);
     }
     
     // Append parameter
     m_pars.push_back(par);
-    
-    // Get pointer on appended parameter. We work later on the appended
-    // parameter as the argument is const (and the value() method eventually
-    // will alter the parameter)
-    GPar* ptr = &(m_pars[m_pars.size()-1]);
+
+    // Get reference of appended parameter
+    GPar& parameter = m_pars[m_pars.size()-1];
     
     // Build parameter file line
-    std::string line;
     size_t      start = 0;
     size_t      stop  = 0;
-    line.append(ptr->name()+", ");
-    line.append(ptr->type()+ ", ");
-    line.append(ptr->mode()+ ",");
-    start = line.length();
-    line.append(ptr->value()+ ",");
-    stop = line.length();
-    line.append(ptr->min()+ ",");
-    line.append(ptr->max()+ ",");
-    line.append("\""+ptr->prompt()+"\"\n");
+    std::string line  = parline(parameter, &start, &stop);
     
     // Append parameter file line and attributes
     m_line.push_back(m_parfile.size());
@@ -356,8 +358,8 @@ void GPars::append(const GPar& par)
     m_vstart.push_back(start);
     m_vstop.push_back(stop);
 
-    // Return
-    return;
+    // Return parameter reference
+    return parameter;
 }
 
 
@@ -377,6 +379,244 @@ void GPars::append_standard(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert parameter into container
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] par Parameter.
+ * @return Reference to deep copy of inserted parameter.
+ *
+ * Inserts a parameter into the container before the parameter with the
+ * specified @p index.
+ ***************************************************************************/
+GPar& GPars::insert(const int& index, const GPar& par)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (isempty()) {
+        if (index > 0) {
+            throw GException::out_of_range(G_INSERT1, "Parameter index", index, size());
+        }
+    }
+    else {
+        if (index < 0 || index >= size()) {
+            throw GException::out_of_range(G_INSERT1, "Parameter index", index, size());
+        }
+    }
+    #endif
+
+    // Check if a parameter with specified name does not yet exist
+    int inx = get_index(par.name());
+    if (inx != -1) {
+        std::string msg =
+            "Attempt to insert parameter with name \""+par.name()+"\" in"
+            " parameter container before index "+gammalib::str(index)+
+            ", but a parameter with the same name exists already at index "+
+            gammalib::str(inx)+" in the container.\n"
+            "Every parameter in the parameter container needs a unique name.";
+        throw GException::invalid_value(G_INSERT1, msg);
+    }
+
+    // Inserts parameter
+    m_pars.insert(m_pars.begin()+index, par);
+
+    // Get reference of appended parameter
+    GPar& parameter = m_pars[m_pars.size()-1];
+
+    // Build parameter file line
+    size_t      start = 0;
+    size_t      stop  = 0;
+    std::string line  = parline(parameter, &start, &stop);
+
+    // Determine at which line number of the parameter file the parameter
+    // should be inserted
+    int line_number = m_line[index];
+
+    // Insert parameter file line and parameter attributes
+    m_parfile.insert(m_parfile.begin()+line_number, line);
+    m_line.insert(m_line.begin()+index, line_number);
+    m_vstart.insert(m_vstart.begin()+index, start);
+    m_vstop.insert(m_vstop.begin()+index, stop);
+
+    // Increment the line numbers for all parameters after the inserted one
+    for (int i = index+1; i < size(); ++i) {
+        m_line[i]++;
+    }
+
+    // Return parameter reference
+    return parameter;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert parameter into container
+ *
+ * @param[in] name Parameter name.
+ * @param[in] par Parameter.
+ * @return Reference to deep copy of inserted parameter.
+ *
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found in container.
+ * @exception GException::invalid_value
+ *            Name of parameter exists already in container.
+ *
+ * Inserts a parameter into the container before the parameter with the
+ * specified @p name.
+ ***************************************************************************/
+GPar& GPars::insert(const std::string& name, const GPar& par)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if parameter name was not found
+    if (index == -1) {
+        std::string msg = "Parameter \""+name+"\" has not been found in"
+                          " parameter file.\n"
+                          "Please specify a valid parameter name.";
+        throw GException::invalid_argument(G_INSERT2, msg);
+    }
+
+    // Insert by index and return parameter reference
+    return (insert(index, par));
+}
+
+
+/***********************************************************************//**
+ * @brief Remove parameter from container
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ *
+ * Remove parameter with specified @p index from container.
+ ***************************************************************************/
+void GPars::remove(const int& index)
+{
+    // Compile option: raise exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_REMOVE1, "Parameter index", index, size());
+    }
+    #endif
+
+    // Erase parameter from container
+    m_pars.erase(m_pars.begin() + index);
+
+    // Remove parameter file line and parameter attributes
+    m_parfile.erase(m_parfile.begin() + m_line[index]);
+    m_line.erase(m_line.begin() + index);
+    m_vstart.erase(m_vstart.begin() + index);
+    m_vstop.erase(m_vstop.begin() + index);
+
+    // Decrement the line numbers for all parameters after the removed one
+    for (int i = index; i < size(); ++i) {
+        m_line[i]--;
+    }
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove parameter from container
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::invalid_argument
+ *            Parameter with specified name not found in container.
+ *
+ * Remove parameter with specified @p name from container.
+ ***************************************************************************/
+void GPars::remove(const std::string& name)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if parameter name was not found
+    if (index == -1) {
+        std::string msg = "Parameter \""+name+"\" has not been found in"
+                          " parameter file.\n"
+                          "Please specify a valid parameter name.";
+        throw GException::invalid_argument(G_REMOVE2, msg);
+    }
+
+    // Remove by index
+    remove(index);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append parameter container
+ *
+ * @param[in] pars Parameter container.
+ *
+ * Append parameter container to the container.
+ ***************************************************************************/
+void GPars::extend(const GPars& pars)
+{
+    // Do nothing if parameter container is empty
+    if (!pars.isempty()) {
+
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = pars.size();
+
+        // Reserve enough space
+        reserve(size() + num);
+
+        // Loop over all parameters and append copies 
+        for (int i = 0; i < num; ++i) {
+
+            // Check if parameter name does not yet exist
+            int inx = get_index(pars[i].name());
+            if (inx != -1) {
+                std::string msg =
+                    "Attempt to append parameter with name \""+pars[i].name()+
+                    "\" to parameter container, but a parameter with the same name"
+                    " exists already at index "+gammalib::str(inx)+" in the"
+                    " container.\n"
+                    "Every parameter in the parameter container needs a unique"
+                    " name.";
+                throw GException::invalid_value(G_EXTEND, msg);
+            }
+
+            // Append parameter to container
+            append(pars[i]);
+
+        } // endfor: looped over all parameters
+
+    } // endif: parameter container was not empty
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Check parameter exists
+ *
+ * @param[in] name Parameter name.
+ * @return True if parameter with specified name exists, false otherwise.
+ *
+ * Determines whether a parameter with the specified name exists already in
+ * the parameter container.
+ ***************************************************************************/
+bool GPars::contains(const std::string& name) const
+{
+    // Get parameter index
+    int inx = get_index(name);
+    
+    // Return test result
+    return (inx != -1);
 }
 
 
@@ -447,7 +687,7 @@ void GPars::load(const std::string& filename,
     // Overwrite parameter values that are specified in the command line
     for (int i = 1; i < args.size(); ++i) {
 
-        // Extract parameter name and value
+        // Extract parameter name and value (empty values are permitted)
         size_t pos = args[i].find("=");
         if (pos == std::string::npos) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
@@ -459,13 +699,9 @@ void GPars::load(const std::string& filename,
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                        "no parameter name before \"=\"");
         }
-        if (value.length() < 1) {
-            throw GException::bad_cmdline_argument(G_LOAD2, args[i],
-                                       "no parameter value after \"=\"");
-        }
-
+        
         // Check if parameter exists
-        if (!haspar(name)) {
+        if (!contains(name)) {
             throw GException::bad_cmdline_argument(G_LOAD2, args[i],
                                   "invalid parameter name \""+name+"\"");
         }
@@ -520,79 +756,6 @@ void GPars::save(const std::string& filename)
 
     // Return
     return;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pointer on parameter
- *
- * @param[in] name Parameter name.
- *
- * Method returns a NULL pointer if parameter is not found in list.
- ***************************************************************************/
-/*
-GPar* GPars::par(const std::string& name)
-{
-    // Initialise parameter pointer
-    GPar* ptr = NULL;
-
-    // Search for parameter
-    for (int i = 0; i < m_pars.size(); ++i) {
-        if (m_pars[i].m_name == name) {
-            ptr = &(m_pars[i]);
-            break;
-        }
-    } // endfor: looped over parameters
-
-    // Return pointer
-    return ptr;
-}
-*/
-
-/***********************************************************************//**
- * @brief Returns pointer on parameter (const version)
- *
- * @param[in] name Parameter name.
- *
- * Method returns a NULL pointer if parameter is not found in list.
- ***************************************************************************/
-/*
-const GPar* GPars::par(const std::string& name) const
-{
-    // Initialise parameter pointer
-    const GPar* ptr = NULL;
-
-    // Search for parameter
-    for (int i = 0; i < m_pars.size(); ++i) {
-        if (m_pars[i].m_name == name) {
-            ptr = &(m_pars[i]);
-            break;
-        }
-    } // endfor: looped over parameters
-
-    // Return pointer
-    return ptr;
-}
-*/
-
-
-/***********************************************************************//**
- * @brief Signal if specified parameter exists
- *
- * @param[in] name Parameter name.
- ***************************************************************************/
-bool GPars::haspar(const std::string& name) const
-{
-    // Get parameter index
-    int index = 0;
-    for (; index < size(); ++index) {
-        if (m_pars[index].name() == name) {
-            break;
-        }
-    }
-
-    // Return test result
-    return (index < size());
 }
 
 
@@ -1100,7 +1263,7 @@ void GPars::parse(void)
         }
 
         // Verify if parameter name does not yet exist
-        if (haspar(fields[0])) {
+        if (contains(fields[0])) {
             throw GException::par_file_syntax_error(G_PARSE, 
                                                     gammalib::strip_chars(line,"\n"),
                           "redefiniton of parameter name \""+fields[0]+"\"");
@@ -1173,4 +1336,63 @@ void GPars::update(void)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter index by name
+ *
+ * @param[in] name Parameter name.
+ * @return Parameter index (-1 if parameter name has not been found)
+ *
+ * Returns parameter index based on the specified @p name. If no parameter
+ * with the specified @p name is found the method returns -1.
+ ***************************************************************************/
+int GPars::get_index(const std::string& name) const
+{
+    // Initialise index
+    int index = -1;
+
+    // Search parameter with specified name
+    for (int i = 0; i < size(); ++i) {
+        if (m_pars[i].name() == name) {
+            index = i;
+            break;
+        }
+    }
+
+    // Return index
+    return index;
+}
+
+
+/***********************************************************************//**
+ * @brief Return parameter file line for a specific parameter
+ *
+ * @param[in] par Parameter.
+ * @param[out] start Column of value start.
+ * @param[out] stop Column of value stop.
+ * @return Parameter file line (termined by \n).
+ *
+ * Constructs the parameter file line for a specific parameter and returns
+ * the line as a string. The line is terminated by a \n character.
+ ***************************************************************************/
+std::string GPars::parline(GPar& par, size_t* start, size_t* stop) const
+{
+    // Declate line
+    std::string line;
+
+    // Build parameter file line
+    line.append(par.name()+", ");
+    line.append(par.type()+ ", ");
+    line.append(par.mode()+ ",");
+    *start = line.length();
+    line.append(par.value()+ ",");
+    *stop = line.length();
+    line.append(par.min()+ ",");
+    line.append(par.max()+ ",");
+    line.append("\""+par.prompt()+"\"\n");
+
+    // Return line
+    return line;
 }

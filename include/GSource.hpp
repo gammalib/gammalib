@@ -63,7 +63,7 @@ public:
     virtual ~GSource(void);
 
     // Operators
-    GSource& operator= (const GSource& src);
+    GSource& operator=(const GSource& src);
 
     // Methods
     void                 clear(void);

@@ -259,18 +259,6 @@ double GTime::mjd(void) const
 
 
 /***********************************************************************//**
- * @brief Return time in native reference (TT) (unit: seconds)
- *
- * @return Time in native reference [seconds].
- ***************************************************************************/
-double GTime::secs(void) const
-{
-    // Return time
-    return m_time;
-}
-
-
-/***********************************************************************//**
  * @brief Return time in native reference (TT) (unit: days)
  *
  * @return Time in native reference [days].
@@ -339,21 +327,6 @@ void GTime::mjd(const double& time)
 {
     // Convert time from MJD to native (seconds)
     m_time = (time - mjd_ref) * gammalib::sec_in_day;
-    
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set time in native reference in seconds (TT)
- *
- * @param[in] seconds Time (TT) [seconds].
- ***************************************************************************/
-void GTime::secs(const double& seconds)
-{
-    // Set time
-    m_time = seconds;
     
     // Return
     return;

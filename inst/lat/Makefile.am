@@ -24,7 +24,6 @@ sources = src/GLATObservation.cpp \
           src/GLATMeanPsf.cpp \
           src/GLATInstDir.cpp \
           src/GLATRoi.cpp \
-          src/GLATPointing.cpp \
           src/GLATLtCube.cpp \
           src/GLATLtCubeMap.cpp \
           src/GLATException.cpp
@@ -48,7 +47,6 @@ pkginclude_HEADERS = include/GLATLib.hpp \
                      include/GLATMeanPsf.hpp \
                      include/GLATInstDir.hpp \
                      include/GLATRoi.hpp \
-                     include/GLATPointing.hpp \
                      include/GLATLtCube.hpp \
                      include/GLATLtCubeMap.hpp \
                      include/GLATException.hpp

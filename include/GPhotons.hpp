@@ -58,8 +58,8 @@ public:
     // Methods
     void           clear(void);
     GPhotons*      clone(void) const;
-    int            size(void) const { return m_photons.size(); }
-    bool           isempty(void) const { return m_photons.empty(); }
+    int            size(void) const;
+    bool           isempty(void) const;
     void           append(const GPhoton& photon);
     void           insert(const int& index, const GPhoton& photon);
     void           remove(const int& index);
@@ -76,5 +76,29 @@ protected:
     // Protected data members
     std::vector<GPhoton> m_photons;  //!< List of photons
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of photons
+ *
+ * @return Number of photons.
+ ***************************************************************************/
+inline
+int GPhotons::size(void) const
+{
+    return m_photons.size();
+}
+
+
+/***********************************************************************//**
+ * @brief Signal if there are no photons
+ *
+ * @return True if there are no photons.
+ ***************************************************************************/
+inline
+bool GPhotons::isempty(void) const
+{
+    return m_photons.empty();
+}
 
 #endif /* GPHOTONS_HPP */

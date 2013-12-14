@@ -1,7 +1,7 @@
 /***************************************************************************
- *          GMWLPointing.hpp  -  Multi-wavelength pointing class           *
+ *                    createskymap.cpp - Create sky map                    *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2013 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -19,52 +19,51 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GMWLPointing.hpp
- * @brief GMWLPointing class definition.
+ * @file createskymap.cpp
+ * @brief Create sky map
  * @author Juergen Knoedlseder
  */
 
-#ifndef GMWLPOINTING_HPP
-#define GMWLPOINTING_HPP
-
 /* __ Includes ___________________________________________________________ */
-#include "GPointing.hpp"
+#include "GammaLib.hpp"
 
 
 /***********************************************************************//**
- * @class GMWLPointing
+ * @brief Create sky map
  *
- * @brief Interface for the Multi-wavelength pointing class
- *
- * The Multi-wavelength pointing class is a dummy class that is needed but
- * not used for the implementation of the Multi-wavelength interface as an
- * instrument class.
+ * This code illustrates the creation of a sky map.
  ***************************************************************************/
-class GMWLPointing : public GPointing {
+int main(void) {
 
-public:
-    // Constructors and destructors
-    GMWLPointing(void);
-    GMWLPointing(const GMWLPointing& pnt);
-    virtual ~GMWLPointing(void);
+    // Create a SNR shell model. The shell is centred on RA=0.3 deg and
+    // Dec=0.1 deg. The shell has an inner radius of 0.5 deg and a width
+    // of 0.1 deg.
+    GSkyDir centre;
+    centre.radec_deg(0.3, 0.1);
+    GModelSpatialRadialShell model(centre, 0.5, 0.1);
 
-    // Operators
-    GMWLPointing& operator= (const GMWLPointing& pnt);
+    // Create an empty sky map in celestial coordinates using a cartesian
+    // projection. The image is centred on RA=Dec=0, has a bin size of
+    // 0.01 degrees and 300 pixels in RA and Dec
+    double ra(0.0);
+    double dec(0.0);
+    double binsz(0.01);
+    int    npix(300);
+    GSkymap image("CAR", "CEL", ra, dec, -binsz, binsz, npix, npix, 1);
 
-    // Methods
-    void           clear(void);
-    GMWLPointing*  clone(void) const;
-    const GSkyDir& dir(void) const { return m_dir; }
-    std::string    print(const GChatter& chatter = NORMAL) const;
+    // Fill the sky map with the model image
+    GEnergy energy; // Dummy (not relevant as model is not energy dependent)
+    GTime   time;   // Dummy (not relevant as model is not time dependent)
+    for (int index = 0; index < image.npix(); ++index) {
+        GSkyDir dir   = image.inx2dir(index); // sky coordinate of pixel
+        double  theta = centre.dist(dir);     // distance in radians
+        image(index)  = model.eval(theta, energy, time);
+    }
 
-protected:
-    // Protected methods
-    void init_members(void);
-    void copy_members(const GMWLPointing& pnt);
-    void free_members(void);
+    // Save the image to a FITS file
+    image.save("my_sky_map.fits", true);
 
-    // Protected members
-    GSkyDir m_dir;  //!< Pointing direction
-};
+    // Exit
+    return 0;
+}
 
-#endif /* GMWLPOINTING_HPP */

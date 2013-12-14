@@ -1,5 +1,5 @@
 /***************************************************************************
- *                  GWcsHPX.cpp - Healpix projection class                 *
+ *                 GHealpix.cpp - Healpix projection class                 *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2010-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -19,7 +19,7 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file GWcsHPX.cpp
+ * @file GHealpix.cpp
  * @brief HealPix projection class implementation
  * @author Juergen Knoedlseder
  */
@@ -32,17 +32,16 @@
 #include "GException.hpp"
 #include "GTools.hpp"
 #include "GMath.hpp"
-#include "GWcsHPX.hpp"
-#include "GWcsRegistry.hpp"
+#include "GHealpix.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_CONSTRUCT           "GWcsHPX::GWcsHPX(int,std::string,std::string)"
-#define G_READ                                     "GWcsHPX::read(GFitsHDU*)"
-#define G_XY2DIR                                "GWcsHPX::xy2dir(GSkyPixel&)"
-#define G_DIR2XY2                                 "GWcsHPX::dir2xy(GSkyDir&)"
-#define G_PIX2ANG_RING           "GWcsHPX::pix2ang_ring(int,double*,double*)"
-#define G_PIX2ANG_NEST           "GWcsHPX::pix2ang_nest(int,double*,double*)"
-#define G_ORDERING_SET                       "GWcsHPX::coordsys(std::string)"
+#define G_CONSTRUCT    "GHealpix::GHealpix(int& ,std::string& ,std::string&)"
+#define G_READ                                    "GHealpix::read(GFitsHDU&)"
+#define G_XY2DIR                               "GHealpix::xy2dir(GSkyPixel&)"
+#define G_DIR2XY2                                "GHealpix::dir2xy(GSkyDir&)"
+#define G_PIX2ANG_RING        "GHealpix::pix2ang_ring(int, double*, double*)"
+#define G_PIX2ANG_NEST        "GHealpix::pix2ang_nest(int, double*, double*)"
+#define G_ORDERING_SET                     "GHealpix::ordering(std::string&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -63,8 +62,6 @@ static short ctab[0x100];
 static short utab[0x100];
 
 /* __ Globals ____________________________________________________________ */
-const GWcsHPX      g_wcs_hpx_seed;
-const GWcsRegistry g_wcs_hpx_registry(&g_wcs_hpx_seed);
 
 
 /*==========================================================================
@@ -76,7 +73,7 @@ const GWcsRegistry g_wcs_hpx_registry(&g_wcs_hpx_seed);
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GWcsHPX::GWcsHPX(void) : GWcs()
+GHealpix::GHealpix(void) : GSkyProjection()
 {
     // Initialise class members
     init_members();
@@ -100,15 +97,17 @@ GWcsHPX::GWcsHPX(void) : GWcs()
  * @exception GException::wcs_hpx_bad_ordering 
  *            Invalid ordering parameter.
  ***************************************************************************/
-GWcsHPX::GWcsHPX(const int& nside, const std::string& order,
-                 const std::string& coords) : GWcs()
+GHealpix::GHealpix(const int&         nside,
+                   const std::string& order,
+                   const std::string& coords) : GSkyProjection()
 {
     // Initialise class members
     init_members();
 
     // Check nside parameter (power of 2 between 1 and 8192)
-    if (nside2order(nside) == -1)
+    if (nside2order(nside) == -1) {
         throw GException::wcs_hpx_bad_nside(G_CONSTRUCT, nside);
+    }
 
     // Set coordinate system
     coordsys(coords);
@@ -134,14 +133,14 @@ GWcsHPX::GWcsHPX(const int& nside, const std::string& order,
 /***********************************************************************//**
  * @brief Constructor from FITS HDU table
  *
- * @param[in] hdu Pointer to FITS HDU.
+ * @param[in] hdu FITS HDU.
  ***************************************************************************/
-GWcsHPX::GWcsHPX(const GFitsHDU* hdu) : GWcs()
+GHealpix::GHealpix(const GFitsHDU& hdu) : GSkyProjection()
 {
     // Initialise class members
     init_members();
 
-    // Read Healpix defintion from FITS HDU
+    // Read Healpix defintion from FITS table
     read(hdu);
 
     // Return
@@ -152,15 +151,15 @@ GWcsHPX::GWcsHPX(const GFitsHDU* hdu) : GWcs()
 /***********************************************************************//**
  * @brief Copy constructor
  *
- * @param[in] wcs GWcsHPX instance which should be used for construction.
+ * @param[in] proj Healpix projection.
  ***************************************************************************/
-GWcsHPX::GWcsHPX(const GWcsHPX& wcs) : GWcs(wcs)
+GHealpix::GHealpix(const GHealpix& proj) : GSkyProjection(proj)
 {
     // Initialise class members for clean destruction
     init_members();
 
     // Copy members
-    copy_members(wcs);
+    copy_members(proj);
 
     // Return
     return;
@@ -170,7 +169,7 @@ GWcsHPX::GWcsHPX(const GWcsHPX& wcs) : GWcs(wcs)
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GWcsHPX::~GWcsHPX()
+GHealpix::~GHealpix()
 {
     // Free members
     free_members();
@@ -189,15 +188,16 @@ GWcsHPX::~GWcsHPX()
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] wcs GWcsHPX instance to be assigned.
+ * @param[in] proj Healpix projection.
+ * @return Healpix projection.
  ***************************************************************************/
-GWcsHPX& GWcsHPX::operator= (const GWcsHPX& wcs)
+GHealpix& GHealpix::operator=(const GHealpix& proj)
 {
     // Execute only if object is not identical
-    if (this != &wcs) {
+    if (this != &proj) {
 
         // Copy base class members
-        this->GWcs::operator=(wcs);
+        this->GSkyProjection::operator=(proj);
 
         // Free members
         free_members();
@@ -206,7 +206,7 @@ GWcsHPX& GWcsHPX::operator= (const GWcsHPX& wcs)
         init_members();
 
         // Copy members
-        copy_members(wcs);
+        copy_members(proj);
 
     } // endif: object was not identical
 
@@ -226,14 +226,14 @@ GWcsHPX& GWcsHPX::operator= (const GWcsHPX& wcs)
  *
  * This method properly resets the object to an initial state.
  ***************************************************************************/
-void GWcsHPX::clear(void)
+void GHealpix::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GWcs::free_members();
+    this->GSkyProjection::free_members();
 
     // Initialise members
-    this->GWcs::init_members();
+    this->GSkyProjection::init_members();
     init_members();
 
     // Return
@@ -244,16 +244,16 @@ void GWcsHPX::clear(void)
 /***********************************************************************//**
  * @brief Clone instance
  ***************************************************************************/
-GWcsHPX* GWcsHPX::clone(void) const
+GHealpix* GHealpix::clone(void) const
 {
-    return new GWcsHPX(*this);
+    return new GHealpix(*this);
 }
 
 
 /***********************************************************************//**
  * @brief Read Healpix definiton from FITS header
  *
- * @param[in] hdu FITS HDU containing the Healpix definition.
+ * @param[in] hdu FITS HDU.
  *
  * @exception GException::wcs
  *            Unable to load Healpix definition from HDU.
@@ -262,28 +262,29 @@ GWcsHPX* GWcsHPX::clone(void) const
  * @exception GException::wcs_hpx_bad_ordering
  *            Invalid ordering parameter.
  ***************************************************************************/
-void GWcsHPX::read(const GFitsHDU* hdu)
+void GHealpix::read(const GFitsHDU& hdu)
 {
     // Clear object
     clear();
 
     // Check if we have a healpix representation
-    if (hdu->string("PIXTYPE") != "HEALPIX")
+    if (hdu.string("PIXTYPE") != "HEALPIX") {
         throw GException::wcs(G_READ, "HDU does not contain Healpix data");
+    }
 
     // Get pixel ordering
-    std::string order = hdu->string("ORDERING");
+    std::string order = hdu.string("ORDERING");
 
     // Get coordinate system.
     // First search for HIER_CRD keyword (this has been used in older
     // versions of LAT exposure cubes). If not found then search for standard
     // COORDSYS keyword.
     std::string coords;
-    try {
-        coords = hdu->string("HIER_CRD");
+    if (hdu.hascard("HIER_CRD")) {
+        coords = hdu.string("HIER_CRD");
     }
-    catch (GException::fits_key_not_found &e) {
-        coords = hdu->string("COORDSYS");
+    else if (hdu.hascard("COORDSYS")) {
+        coords = hdu.string("COORDSYS");
     }
 
     // Set coordinate system
@@ -293,7 +294,7 @@ void GWcsHPX::read(const GFitsHDU* hdu)
     ordering(order);
 
     // Get Healpix resolution and determine number of pixels and solid angle
-    m_nside      = hdu->integer("NSIDE");
+    m_nside      = hdu.integer("NSIDE");
     m_npface     = m_nside * m_nside;
     m_ncap       = 2 * (m_npface - m_nside);
     m_num_pixels = 12 * m_npface;
@@ -321,25 +322,20 @@ void GWcsHPX::read(const GFitsHDU* hdu)
  * ORDERING = ordering()
  * COORDSYS = coordsys()
  ***************************************************************************/
-void GWcsHPX::write(GFitsHDU* hdu) const
+void GHealpix::write(GFitsHDU& hdu) const
 {
-    // Continue only if file pointer is valid
-    if (hdu != NULL) {
+    // Set extension name
+    hdu.extname("HEALPIX");
 
-        // Set extension name
-        hdu->extname("HEALPIX");
-
-        // Set keywords
-        hdu->card("PIXTYPE",  "HEALPIX",  "HEALPix pixelisation");
-        hdu->card("NSIDE",    nside(),    "HEALPix resolution parameter");
-        hdu->card("FIRSTPIX", 0,          "Index of first pixel");
-        hdu->card("LASTPIX",  npix()-1,   "Index of last pixel");
-        hdu->card("ORDERING", ordering(),
-                  "Pixel ordering scheme, either RING or NESTED");
-        hdu->card("COORDSYS", coordsys(),
-                  "Coordinate system, either EQU or GAL");
-
-    } // endif: HDU was valid
+    // Set keywords
+    hdu.card("PIXTYPE",  "HEALPIX",  "HEALPix pixelisation");
+    hdu.card("NSIDE",    nside(),    "HEALPix resolution parameter");
+    hdu.card("FIRSTPIX", 0,          "Index of first pixel");
+    hdu.card("LASTPIX",  npix()-1,   "Index of last pixel");
+    hdu.card("ORDERING", ordering(),
+             "Pixel ordering scheme, either RING or NESTED");
+    hdu.card("COORDSYS", coordsys(),
+             "Coordinate system, either EQU or GAL");
 
     // Return
     return;
@@ -347,60 +343,37 @@ void GWcsHPX::write(GFitsHDU* hdu) const
 
 
 /***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Pixel number (0,1,...,num_pixels).
- *
- * HEALPix pixels have all the same solid angle, hence the pix argument is
- * not used.
- ***************************************************************************/
-double GWcsHPX::omega(const int& pix) const
-{
-    // Return solid angle
-    return m_omega;
-}
-
-
-/***********************************************************************//**
- * @brief Returns solid angle of pixel
- *
- * @param[in] pix Sky pixel.
- *
- * HEALPix pixels have all the same solid angle, hence the pix argument is
- * not used.
- ***************************************************************************/
-double GWcsHPX::omega(const GSkyPixel& pix) const
-{
-    // Return solid angle
-    return m_omega;
-}
-
-
-/***********************************************************************//**
  * @brief Returns sky direction of pixel
  *
- * @param[in] pix Pixel number (0,1,...,m_num_pixels).
+ * @param[in] pixel Sky map pixel.
  ***************************************************************************/
-GSkyDir GWcsHPX::pix2dir(const int& pix) const
+GSkyDir GHealpix::pix2dir(const GSkyPixel& pixel) const
 {
-    // Declare result
-    GSkyDir result;
-    double  theta = 0.0;
-    double  phi   = 0.0;
+    // Throw an exception if sky map pixel is not 1D
+    if (!pixel.is1D()) {
+        std::string msg = "Sky map pixel "+pixel.print()+" is not"
+                          " 1-dimensional.\n"
+                          "Only 1-dimensional pixels are supported by the"
+                          " Healpix projection.";
+        throw GException::invalid_argument(G_XY2DIR, msg);
+    }
 
     // Perform ordering dependent conversion
+    double theta = 0.0;
+    double phi   = 0.0;
     switch (m_ordering) {
     case 0:
-        pix2ang_ring(pix, &theta, &phi);
+        pix2ang_ring(int(pixel), &theta, &phi);
         break;
     case 1:
-        pix2ang_nest(pix, &theta, &phi);
+        pix2ang_nest(int(pixel), &theta, &phi);
         break;
     default:
         break;
     }
 
     // Store coordinate system dependent result
+    GSkyDir result;
     switch (m_coordsys) {
     case 0:
         result.radec(phi, gammalib::pihalf - theta);
@@ -411,25 +384,23 @@ GSkyDir GWcsHPX::pix2dir(const int& pix) const
     default:
         break;
     }
-
-    // Return result
+    
+    // Return
     return result;
 }
 
 
 /***********************************************************************//**
- * @brief Returns pixel for a given sky direction
+ * @brief Returns sky map pixel of sky coordinate
  *
- * @param[in] dir Sky direction.
+ * @param[in] dir Sky coordinate.
+ * @return Sky map pixel.
  ***************************************************************************/
-int GWcsHPX::dir2pix(const GSkyDir& dir) const
+GSkyPixel GHealpix::dir2pix(const GSkyDir& dir) const
 {
-    // Declare result
-    int    pix;
+    // Compute coordinate system dependent (z,phi)
     double z;
     double phi;
-
-    // Compute coordinate system dependent (z,phi)
     switch (m_coordsys) {
     case 0:
         z   = cos(gammalib::pihalf - dir.dec());
@@ -444,102 +415,27 @@ int GWcsHPX::dir2pix(const GSkyDir& dir) const
     }
 
     // Perform ordering dependent conversion
+    int index;
     switch (m_ordering) {
     case 0:
-        pix = ang2pix_z_phi_ring(z, phi);
+        index = ang2pix_z_phi_ring(z, phi);
         break;
     case 1:
-        pix = ang2pix_z_phi_nest(z, phi);
+        index = ang2pix_z_phi_nest(z, phi);
         break;
     default:
         break;
     }
 
-    // Return pixel index
-    return pix;
-}
-
-
-/***********************************************************************//**
- * @brief Returns sky direction of pixel
- *
- * @param[in] pix Sky pixel.
- *
- * This dummy method throws an error when called as sky pixels are not
- * implemented for a HealPix grid. Maybe we should implement them?
- *
- * @todo Think about implementation of sky pixel for HealPix data. We may
- *       use only the first argument, and even carry a usage flag in
- *       GSkyPixel
- ***************************************************************************/
-GSkyDir GWcsHPX::xy2dir(const GSkyPixel& pix) const
-{
-    // Set error message
-    std::string message = "Method not defined for HPX projection.";
-
-    // Throw error
-    throw GException::wcs(G_XY2DIR, message);
-
-    // Set dummy return value
-    GSkyDir result;
-    
-    // Return
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Returns pixel of sky direction
- *
- * @param[in] dir Sky direction.
- *
- * This dummy method throws an error when called as sky pixels are not
- * implemented for a HealPix grid. Maybe we should implement them?
- *
- * @todo Think about implementation of sky pixel for HealPix data. We may
- *       use only the first argument, and even carry a usage flag in
- *       GSkyPixel
- ***************************************************************************/
-GSkyPixel GWcsHPX::dir2xy(const GSkyDir& dir) const
-{
-    // Set error message
-    std::string message = "Method not defined for HPX projection.";
-
-    // Throw error
-    throw GException::wcs(G_DIR2XY2, message);
-
-    // Set dummy return value
-    GSkyPixel result;
-    
-    // Return
-    return result;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of pixels
- ***************************************************************************/
-int GWcsHPX::npix(void) const
-{
-    // Return number of pixels
-    return m_num_pixels;
-}
-
-
-/***********************************************************************//**
- * @brief Returns number of divisions of the side of each base pixel.
- ***************************************************************************/
-int GWcsHPX::nside(void) const
-{
-    // Return nside
-    return m_nside;
+    // Return sky map pixel
+    return (GSkyPixel(index));
 }
 
 
 /***********************************************************************//**
  * @brief Returns ordering parameter.
  ***************************************************************************/
-std::string GWcsHPX::ordering(void) const
+std::string GHealpix::ordering(void) const
 {
     // Set pixel ordering type
     std::string s_ordering;
@@ -568,7 +464,7 @@ std::string GWcsHPX::ordering(void) const
  * @exception GException::wcs_hpx_bad_ordering
  *            Invalid ordering parameter.
  ***************************************************************************/
-void GWcsHPX::ordering(const std::string& ordering)
+void GHealpix::ordering(const std::string& ordering)
 {
     // Convert argument to upper case
     std::string uordering = gammalib::toupper(ordering);
@@ -595,7 +491,7 @@ void GWcsHPX::ordering(const std::string& ordering)
  * @param[in] chatter Chattiness (defaults to NORMAL).
  * @return String containing WCS information.
  ***************************************************************************/
-std::string GWcsHPX::print(const GChatter& chatter) const
+std::string GHealpix::print(const GChatter& chatter) const
 {
     // Initialise result string
     std::string result;
@@ -604,7 +500,7 @@ std::string GWcsHPX::print(const GChatter& chatter) const
     if (chatter != SILENT) {
 
         // Append header
-        result.append("=== GWcsHPX ===");
+        result.append("=== GHealpix ===");
 
         // Append information
         result.append("\n"+gammalib::parformat("Coordinate system"));
@@ -639,7 +535,7 @@ std::string GWcsHPX::print(const GChatter& chatter) const
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GWcsHPX::init_members(void)
+void GHealpix::init_members(void)
 {
     // Initialise members
     //m_type        = "HPX";
@@ -671,20 +567,20 @@ void GWcsHPX::init_members(void)
 /***********************************************************************//**
  * @brief Copy class members
  *
- * @param[in] wcs GWcsHPX instance from which members should be copied.
+ * @param[in] proj Healpix projection.
  ***************************************************************************/
-void GWcsHPX::copy_members(const GWcsHPX& wcs)
+void GHealpix::copy_members(const GHealpix& proj)
 {
     // Copy attributes
-    m_nside      = wcs.m_nside;
-    m_npface     = wcs.m_npface;
-    m_ncap       = wcs.m_ncap;
-    m_order      = wcs.m_order;
-    m_ordering   = wcs.m_ordering;
-    m_num_pixels = wcs.m_num_pixels;
-    m_fact1      = wcs.m_fact1;
-    m_fact2      = wcs.m_fact2;
-    m_omega      = wcs.m_omega;
+    m_nside      = proj.m_nside;
+    m_npface     = proj.m_npface;
+    m_ncap       = proj.m_ncap;
+    m_order      = proj.m_order;
+    m_ordering   = proj.m_ordering;
+    m_num_pixels = proj.m_num_pixels;
+    m_fact1      = proj.m_fact1;
+    m_fact2      = proj.m_fact2;
+    m_omega      = proj.m_omega;
 
     // Return
     return;
@@ -694,7 +590,7 @@ void GWcsHPX::copy_members(const GWcsHPX& wcs)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GWcsHPX::free_members(void)
+void GHealpix::free_members(void)
 {
     // Return
     return;
@@ -704,17 +600,17 @@ void GWcsHPX::free_members(void)
 /***********************************************************************//**
  * @brief Returns true if argument is identical
  *
- * @param[in] wcs Pointer to World Coordinate System
+ * @param[in] proj Sky projection.
  *
- * This method is a helper for the World Coordinate Comparison friends.
+ * This method is a helper for the sky projection friends.
  ***************************************************************************/
-bool GWcsHPX::compare(const GWcs& wcs) const
+bool GHealpix::compare(const GSkyProjection& proj) const
 {
     // Initialise result
     bool result = false;
     
-    // Continue only we compare to a GWcsHPX object
-    const GWcsHPX* ptr = dynamic_cast<const GWcsHPX*>(&wcs);
+    // Continue only we compare to a GHealpix object
+    const GHealpix* ptr = dynamic_cast<const GHealpix*>(&proj);
     if (ptr != NULL) {
         result = ((m_coordsys   == ptr->m_coordsys) &&
                   (m_nside      == ptr->m_nside)    &&
@@ -735,7 +631,7 @@ bool GWcsHPX::compare(const GWcs& wcs) const
  *
  * @param[in] nside Number of sides.
  ***************************************************************************/
-int GWcsHPX::nside2order(int nside)
+int GHealpix::nside2order(int nside)
 {
     // Initialise order
     int order = -1;
@@ -763,7 +659,7 @@ int GWcsHPX::nside2order(int nside)
  * @param[out] x Pointer to x coordinate.
  * @param[out] y Pointer to y coordinate.
  ***************************************************************************/
-void GWcsHPX::pix2xy(const int& ipix, int* x, int* y) const
+void GHealpix::pix2xy(const int& ipix, int* x, int* y) const
 {
     // Set x coordinate
     int raw = (ipix & 0x5555) | ((ipix & 0x55550000) >> 15);
@@ -784,7 +680,7 @@ void GWcsHPX::pix2xy(const int& ipix, int* x, int* y) const
  * @param[in] x x coordinate.
  * @param[in] y y coordinate.
  ***************************************************************************/
-int GWcsHPX::xy2pix(int x, int y) const
+int GHealpix::xy2pix(int x, int y) const
 {
     // Return pixel
     return utab[x&0xff] | (utab[x>>8]<<16) | (utab[y&0xff]<<1) | (utab[y>>8]<<17);
@@ -801,7 +697,7 @@ int GWcsHPX::xy2pix(int x, int y) const
  * @exception GException::out_of_range
  *            Pixel index is out of range.
  ***************************************************************************/
-void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi) const
+void GHealpix::pix2ang_ring(int ipix, double* theta, double* phi) const
 {
     // Check if ipix is in range
     if (ipix < 0 || ipix >= m_num_pixels)
@@ -850,7 +746,7 @@ void GWcsHPX::pix2ang_ring(int ipix, double* theta, double* phi) const
  * @exception GException::out_of_range
  *            Pixel index is out of range.
  ***************************************************************************/
-void GWcsHPX::pix2ang_nest(int ipix, double* theta, double* phi) const
+void GHealpix::pix2ang_nest(int ipix, double* theta, double* phi) const
 {
     // Check if ipix is in range
     if (ipix < 0 || ipix >= m_num_pixels)
@@ -915,7 +811,7 @@ void GWcsHPX::pix2ang_nest(int ipix, double* theta, double* phi) const
  * @param[in] z Cosine of zenith angle - cos(theta).
  * @param[in] phi Azimuth angle in radians.
  ***************************************************************************/
-int GWcsHPX::ang2pix_z_phi_ring(double z, double phi) const
+int GHealpix::ang2pix_z_phi_ring(double z, double phi) const
 {
     // Initialise pixel
     int ipix = 0;
@@ -963,7 +859,7 @@ int GWcsHPX::ang2pix_z_phi_ring(double z, double phi) const
  * @param[in] z Cosine of zenith angle - cos(theta).
  * @param[in] phi Azimuth angle in radians.
  ***************************************************************************/
-int GWcsHPX::ang2pix_z_phi_nest(double z, double phi) const
+int GHealpix::ang2pix_z_phi_nest(double z, double phi) const
 {
     // Initialise face and pixel numbers
     int face_num;
@@ -1027,48 +923,8 @@ int GWcsHPX::ang2pix_z_phi_nest(double z, double phi) const
  *
  * Returns the integer \a n, which fulfills \a n*n <= arg < (n+1)*(n+1).
  ***************************************************************************/
-unsigned int GWcsHPX::isqrt(unsigned int arg) const
+unsigned int GHealpix::isqrt(unsigned int arg) const
 {
     // Return
-    return unsigned(sqrt(arg+0.5));
-}
-
-
-/***********************************************************************//**
- * @brief Setup of projection
- *
- * Dummy (only implemented for non HPX classes).
- ***************************************************************************/
-void GWcsHPX::prj_set(void)
-{
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Cartesian-to-spherical deprojection
- *
- * Dummy (only implemented for non HPX classes).
- ***************************************************************************/
-int GWcsHPX::prj_x2s(int nx, int ny, int sxy, int spt, 
-                     const double* x, const double* y,
-                     double* phi, double* theta, int* stat) const
-{
-    // Return
-    return 0;
-}
-
-
-/***********************************************************************//**
- * @brief Generic spherical-to-Cartesian projection
- *
- * Dummy (only implemented for non HPX classes).
- ***************************************************************************/
-int GWcsHPX::prj_s2x(int nphi, int ntheta, int spt, int sxy,
-                     const double* phi, const double* theta,
-                     double* x, double* y, int* stat) const
-{
-    // Return
-    return 0;
+    return unsigned(std::sqrt(arg+0.5));
 }

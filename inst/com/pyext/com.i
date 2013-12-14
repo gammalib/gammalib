@@ -52,7 +52,6 @@
 %import(module="gammalib.obs") "GEventBin.i";
 %import(module="gammalib.obs") "GEvents.i";
 %import(module="gammalib.obs") "GEventCube.i";
-%import(module="gammalib.obs") "GPointing.i";
 %import(module="gammalib.obs") "GResponse.i";
 %import(module="gammalib.obs") "GInstDir.i";
 %import(module="gammalib.model") "GModel.i";
@@ -64,6 +63,5 @@
 %include "GCOMInstDir.i"
 %include "GCOMModelDRBFitting.i"
 %include "GCOMObservation.i"
-%include "GCOMPointing.i"
 %include "GCOMResponse.i"
 

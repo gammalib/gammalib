@@ -29,7 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GWcslib.hpp"
+#include "GWcs.hpp"
 
 
 /***********************************************************************//**
@@ -40,7 +40,7 @@
  * This class implements the Aitoff projection for the World Coordinate
  * System.
  ***************************************************************************/
-class GWcsAIT : public GWcslib {
+class GWcsAIT : public GWcs {
 
 public:
     // Constructors and destructors

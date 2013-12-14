@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GLATRoi.cpp
- * @brief Fermi/LAT region of interest class interface implementation
+ * @brief Fermi/LAT region of interest class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -155,7 +155,7 @@ GLATRoi& GLATRoi::operator=(const GLATRoi& roi)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear region of interest
  ***************************************************************************/
 void GLATRoi::clear(void)
 {
@@ -173,7 +173,7 @@ void GLATRoi::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone region of interest
  *
  * @return Pointer to deep copy of region of interest
  ***************************************************************************/

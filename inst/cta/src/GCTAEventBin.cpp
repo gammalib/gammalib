@@ -40,7 +40,7 @@
 #define G_TIME                                         "GCTAEventBin::time()"
 #define G_COUNTS_GET                                 "GCTAEventBin::counts()"
 #define G_COUNTS_SET                          "GCTAEventBin::counts(double&)"
-#define G_OMEGA                                       "GCTAEventBin::omega()"
+#define G_SOLIDANGLE                             "GCTAEventBin::solidangle()"
 #define G_EWIDTH                                     "GCTAEventBin::ewidth()"
 #define G_ONTIME                                     "GCTAEventBin::ontime()"
 
@@ -111,8 +111,9 @@ GCTAEventBin::~GCTAEventBin(void)
  * @brief Assignment operator
  *
  * @param[in] bin Event bin.
+ * @return Event bin.
  ***************************************************************************/
-GCTAEventBin& GCTAEventBin::operator= (const GCTAEventBin& bin)
+GCTAEventBin& GCTAEventBin::operator=(const GCTAEventBin& bin)
 {
     // Execute only if object is not identical
     if (this != &bin) {
@@ -143,9 +144,7 @@ GCTAEventBin& GCTAEventBin::operator= (const GCTAEventBin& bin)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
- *
- * This method properly resets the instance to an initial state.
+ * @brief Clear eventbin
  ***************************************************************************/
 void GCTAEventBin::clear(void)
 {
@@ -165,8 +164,10 @@ void GCTAEventBin::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
-***************************************************************************/
+ * @brief Clone event bin
+ *
+ * @return Pointer to deep copy of event bin.
+ ***************************************************************************/
 GCTAEventBin* GCTAEventBin::clone(void) const
 {
     return new GCTAEventBin(*this);
@@ -186,7 +187,7 @@ GCTAEventBin* GCTAEventBin::clone(void) const
 double GCTAEventBin::size(void) const
 {
     // Compute bin size
-    double size = omega() * ewidth().MeV() * ontime();
+    double size = solidangle() * ewidth().MeV() * ontime();
 
     // Return bin size
     return size;
@@ -344,11 +345,11 @@ double GCTAEventBin::error(void) const
  *
  * Returns reference to the solid angle of the event bin.
  ***************************************************************************/
-const double& GCTAEventBin::omega(void) const
+const double& GCTAEventBin::solidangle(void) const
 {
     // Throw an exception if solid angle pointer is not valid
     if (m_omega == NULL) {
-        throw GCTAException::no_member(G_OMEGA,
+        throw GCTAException::no_member(G_SOLIDANGLE,
                                        "Invalid solid angle pointer.");
     }
 
@@ -481,10 +482,3 @@ void GCTAEventBin::free_members(void)
     // Return
     return;
 }
-
-
-/*==========================================================================
- =                                                                         =
- =                                Friends                                  =
- =                                                                         =
- ==========================================================================*/

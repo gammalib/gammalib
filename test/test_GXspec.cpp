@@ -51,6 +51,18 @@ void TestGXspec::set(void)
 
 
 /***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGXspec* TestGXspec::clone(void) const
+{
+    // Clone test suite
+    return new TestGXspec(*this);
+}
+
+
+/***********************************************************************//**
  * @brief Test GPha class
  **************************************************************************/
 void TestGXspec::test_GPha(void)

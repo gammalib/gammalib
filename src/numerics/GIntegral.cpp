@@ -31,6 +31,9 @@
 #include "GTools.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_ROMB                      "GIntegral::romb(double&, double&, int&)"
+#define G_TRAPZD          "GIntegral::trapzd(double&, double&, int&, double)"
+#define G_POLINT  "GIntegral::polint(double*, double*, int, double, double*)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -120,8 +123,9 @@ GIntegral::~GIntegral(void)
  * @brief Assignment operator
  *
  * @param[in] integral Integral.
+ * @return Integral.
  ***************************************************************************/
-GIntegral& GIntegral::operator= (const GIntegral& integral)
+GIntegral& GIntegral::operator=(const GIntegral& integral)
 {
     // Execute only if object is not identical
     if (this != &integral) {
@@ -149,7 +153,7 @@ GIntegral& GIntegral::operator= (const GIntegral& integral)
  ==========================================================================*/
 
 /***********************************************************************//**
- * @brief Clear instance
+ * @brief Clear integral
  ***************************************************************************/
 void GIntegral::clear(void)
 {
@@ -165,7 +169,7 @@ void GIntegral::clear(void)
 
 
 /***********************************************************************//**
- * @brief Clone instance
+ * @brief Clone integral
  *
  * @return Pointer to deep copy of integral.
  ***************************************************************************/
@@ -191,7 +195,7 @@ GIntegral* GIntegral::clone(void) const
  * @todo Check that k is smaller than m_max_iter
  * @todo Make use of std::vector class
  ***************************************************************************/
-double GIntegral::romb(double a, double b, int k)
+double GIntegral::romb(const double& a, const double& b, const int& k)
 {
     // Initialise result
     double result = 0.0;
@@ -251,14 +255,15 @@ double GIntegral::romb(double a, double b, int k)
         // Dump warning
         if (!m_silent) {
             if (!converged) {
-                std::cout << "*** WARNING: GIntegral::romb: ";
-                std::cout << "Integration did not converge ";
-                std::cout << "(iter=" << m_iter;
-                std::cout << ", result=" << ss;
-                std::cout << ", d=" << std::abs(dss);
-                std::cout << " > " << m_eps * std::abs(ss) << ")";
-                std::cout << std::endl;
-                //throw;
+                std::string msg = "Integration uncertainty "+
+                                  gammalib::str(std::abs(dss))+
+                                  " exceeds tolerance of "+
+                                  gammalib::str(m_eps * std::abs(ss))+
+                                  " after "+gammalib::str(m_iter)+
+                                  " iterations. Result "+
+                                  gammalib::str(result)+
+                                  " is inaccurate.";
+                gammalib::warning(G_ROMB, msg);
             }
         }
     
@@ -282,7 +287,8 @@ double GIntegral::romb(double a, double b, int k)
  * reason, previous results are now passed using an argument.
  * Result initialisation is done if n=1.
  ***************************************************************************/
-double GIntegral::trapzd(double a, double b, int n, double result)
+double GIntegral::trapzd(const double& a, const double& b, const int& n,
+                         double result)
 {
     // Handle case of identical boundaries
     if (a == b) {
@@ -315,11 +321,14 @@ double GIntegral::trapzd(double a, double b, int n, double result)
 
             // Verify that step level is valid
             if (it == 0) {
-                std::cout << "*** ERROR: GIntegral::trapzd(";
-                std::cout << "a=" << a << ", b=" << b << ", n=" << n;
-                std::cout << ", result=" << result << "): it=" << it << ". ";
-                std::cout << "Looks like an overflow?";
-                std::cout << std::endl;
+                std::string msg = "Invalid step level "+gammalib::str(it)+
+                                  " encountered for"
+                                  " a="+gammalib::str(a)+
+                                  ", b="+gammalib::str(b)+
+                                  ", n="+gammalib::str(n)+
+                                  ", result="+gammalib::str(result)+
+                                  ". Looks like n is too large.";
+                gammalib::warning(G_TRAPZD, msg);
             }
 
             // Set step size
@@ -328,11 +337,14 @@ double GIntegral::trapzd(double a, double b, int n, double result)
 
             // Verify that step is >0
             if (del == 0) {
-                std::cout << "*** ERROR: GIntegral::trapzd(";
-                std::cout << "a=" << a << ", b=" << b << ", n=" << n;
-                std::cout << ", result=" << result << "): del=" << del << ". ";
-                std::cout << "Step is too small to make sense.";
-                std::cout << std::endl;
+                std::string msg = "Invalid step size "+gammalib::str(del)+
+                                  " encountered for"
+                                  " a="+gammalib::str(a)+
+                                  ", b="+gammalib::str(b)+
+                                  ", n="+gammalib::str(n)+
+                                  ", result="+gammalib::str(result)+
+                                  ". Step is too small to make sense.";
+                gammalib::warning(G_TRAPZD, msg);
             }
 
             // Sum up values
@@ -464,7 +476,7 @@ void GIntegral::free_members(void)
  * @todo Implement exceptions instead of screen dump.
  * @todo Use std::vector for xa and ya and start at 0
  ***************************************************************************/
-double GIntegral::polint(double* xa, double* ya, int n, double x, double *dy)
+double GIntegral::polint(double* xa, double* ya, int n, double x, double* dy)
 {
     // Initialise result
     double y = 0.0;
@@ -502,9 +514,10 @@ double GIntegral::polint(double* xa, double* ya, int n, double x, double *dy)
             double w   = c[i+1] - d[i];
             double den = ho - hp;
             if (den == 0.0) {
-                std::cout << "*** ERROR: GIntegral::polint: ";
-                std::cout << "This error can only occur if two input xa's are identical.";
-                std::cout << std::endl;
+                std::string msg = "Invalid step size "+gammalib::str(den)+
+                                  " encountered. Two values in xa array are"
+                                  " identical.";
+                gammalib::warning(G_POLINT, msg);
             }
             den  = w/den;
             d[i] = hp*den;

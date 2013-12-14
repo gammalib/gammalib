@@ -107,4 +107,16 @@ private:
     mutable double    m_width3;     //!< Gaussian 3 width
 };
 
+
+/***********************************************************************//**
+ * @brief Return filename
+ *
+ * @return Returns filename from which point spread function was loaded
+ ***************************************************************************/
+inline
+std::string GCTAPsf2D::filename(void) const
+{
+    return m_filename;
+}
+
 #endif /* GCTAPSF2D_HPP */

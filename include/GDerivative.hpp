@@ -36,7 +36,7 @@
 /***********************************************************************//**
  * @class GDerivative
  *
- * @brief Numerical derivatives class interface defintion
+ * @brief Numerical derivatives class
  *
  * This class allows to compute numerical derivatives using various methods.
  * The function to be derived is implemented by the abstract GFunction
@@ -53,25 +53,25 @@ public:
     virtual ~GDerivative(void);
 
     // Operators
-    GDerivative& operator= (const GDerivative& dx);
+    GDerivative& operator=(const GDerivative& dx);
 
     // Methods
     void             clear(void);
     GDerivative*     clone(void) const;
-    void             max_iter(const int& max_iter) { m_max_iter=max_iter; }
-    void             eps(const double& eps) { m_eps=eps; }
-    void             step_frac(const double& f) { m_step_frac=f; }
-    void             silent(const bool& silent) { m_silent=silent; }
-    const int&       iter(void) const { return m_iter; }
-    const int&       max_iter(void) const { return m_max_iter; }
-    const double&    eps(void) const { return m_eps; }
-    const double&    step_frac(void) const { return m_step_frac; }
-    const bool&      silent(void) const { return m_silent; }
-    void             function(GFunction* func) { m_func = func; }
-    const GFunction* function(void) const { return m_func; }
-    double           value(const double& x, double step = 0.0);
-    double           ridder(const double& x, const double& h, double& err);
-    double           minuit2(const double& x, double& err);
+    void             max_iter(const int& max_iter);
+    void             eps(const double& eps);
+    void             step_frac(const double& fraction);
+    void             silent(const bool& silent);
+    const int&       iter(void) const;
+    const int&       max_iter(void) const;
+    const double&    eps(void) const;
+    const double&    step_frac(void) const;
+    const bool&      silent(void) const;
+    void             function(GFunction* func);
+    const GFunction* function(void) const;
+    double           value(const double& x, const double& step = 0.0);
+    double           ridder(const double& x, const double& h, double* err);
+    double           minuit2(const double& x, double* err);
     double           difference(const double& x, const double& h);
     std::string      print(const GChatter& chatter = NORMAL) const;
 
@@ -102,5 +102,144 @@ protected:
     int        m_iter;         //!< Number of iterations used
     bool       m_silent;       //!< Suppress warnings
 };
+
+
+/***********************************************************************//**
+ * @brief Return number of iterations
+ *
+ * @return Number of iterations.
+ ***************************************************************************/
+inline
+const int& GDerivative::iter(void) const
+{
+    return m_iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Set maximum number of iterations
+ *
+ * @param[in] max_iter Maximum number of iterations.
+ ***************************************************************************/
+inline
+void GDerivative::max_iter(const int& max_iter)
+{
+    m_max_iter = max_iter;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return maximum number of iterations
+ *
+ * @return Maximum number of iterations.
+ ***************************************************************************/
+inline
+const int& GDerivative::max_iter(void) const
+{
+    return m_max_iter;
+}
+
+
+/***********************************************************************//**
+ * @brief Set precision
+ *
+ * @param[in] eps Precision.
+ ***************************************************************************/
+inline
+void GDerivative::eps(const double& eps)
+{
+    m_eps = eps;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get precision
+ *
+ * @return Precision.
+ ***************************************************************************/
+inline
+const double& GDerivative::eps(void) const
+{
+    return m_eps;
+}
+
+
+/***********************************************************************//**
+ * @brief Set step fraction
+ *
+ * @param[in] fraction Step fraction.
+ ***************************************************************************/
+inline
+void GDerivative::step_frac(const double& fraction)
+{
+    m_step_frac = fraction;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get step fraction
+ *
+ * @return Step fraction.
+ ***************************************************************************/
+inline
+const double& GDerivative::step_frac(void) const
+{
+    return m_step_frac;
+}
+
+
+/***********************************************************************//**
+ * @brief Set silence flag
+ *
+ * @param[in] silent Silence flag.
+ ***************************************************************************/
+inline
+void GDerivative::silent(const bool& silent)
+{
+    m_silent = silent;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get silence flag
+ *
+ * @return True is class is silent, false otherwise.
+ ***************************************************************************/
+inline
+const bool& GDerivative::silent(void) const
+{
+    return m_silent;
+}
+
+
+/***********************************************************************//**
+ * @brief Set function
+ *
+ * @param[in] function Function.
+ *
+ * Sets the function for which the derivate should be determined.
+ ***************************************************************************/
+inline
+void GDerivative::function(GFunction* function)
+{
+    m_func = function;
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Get function
+ *
+ * @return Function.
+ ***************************************************************************/
+inline
+const GFunction* GDerivative::function(void) const
+{
+    return m_func;
+}
 
 #endif /* GDERIVATIVE_HPP */

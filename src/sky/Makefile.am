@@ -12,16 +12,16 @@ sources = GSkyDir.cpp \
           GSkyRegions.cpp \
           GSkyRegion.cpp \
           GSkyRegionCircle.cpp \
-          GWcs.cpp \
+          GSkyProjection.cpp \
+          GHealpix.cpp \
           GWcsRegistry.cpp \
-          GWcslib.cpp \
+          GWcs.cpp \
           GWcsAIT.cpp \
           GWcsAZP.cpp \
           GWcsCAR.cpp \
           GWcsMER.cpp \
           GWcsTAN.cpp \
           GWcsSTG.cpp \
-          GWcsHPX.cpp \
           GException_sky.cpp
 
 # Build libtool library

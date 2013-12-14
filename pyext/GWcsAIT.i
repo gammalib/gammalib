@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GWcsAIT.i
- * @brief Aitoff (AIT) projection class Python interface
+ * @brief Aitoff (AIT) projection class definition
  * @author Juergen Knoedlseder
  */
 %{
@@ -32,9 +32,9 @@
 /***********************************************************************//**
  * @class GWcsAIT
  *
- * @brief Aitoff (AIT) projection class definition
+ * @brief Aitoff (AIT) projection class
  ***************************************************************************/
-class GWcsAIT : public GWcslib {
+class GWcsAIT : public GWcs {
 public:
     // Constructors and destructors
     GWcsAIT(void);

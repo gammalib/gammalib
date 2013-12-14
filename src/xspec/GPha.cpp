@@ -336,22 +336,27 @@ void GPha::load(const std::string& filename)
     clear();
 
     // Open FITS file
-    GFits file(filename);
+    GFits fits(filename);
 
     // Get PHA table
-    GFitsTable* pha = file.table("SPECTRUM");
-
-    // Get EBOUNDS table (NULL if the table does not exist)
-    GFitsTable* ebounds = (file.hashdu("EBOUNDS")) ? file.table("EBOUNDS") : NULL;
+    const GFitsTable& pha = *fits.table("SPECTRUM");
 
     // Read PHA data
     read(pha);
 
-    // Read EBOUNDS data (will do nothing if table has not been found)
-    m_ebounds.read(ebounds);
+    // Optionally read EBOUNDS data
+    if (fits.contains("EBOUNDS")) {
+
+        // Get EBOUNDS table
+        const GFitsTable& ebounds = *fits.table("EBOUNDS");
+
+        // Read EBOUNDS data
+        m_ebounds.read(ebounds);
+
+    } // endif: has EBOUNDS table
 
     // Close FITS file
-    file.close();
+    fits.close();
 
     // Store filename
     m_filename = filename;
@@ -389,44 +394,39 @@ void GPha::save(const std::string& filename, const bool& clobber) const
 /***********************************************************************//**
  * @brief Read Pulse Height Analyzer spectrum
  *
- * @param[in] hdu PHA FITS table.
+ * @param[in] table PHA FITS table.
  *
  * @exception GException::invalid_value
  *            Mismatch between PHA file and energy boundaries.
  ***************************************************************************/
-void GPha::read(const GFitsTable* hdu)
+void GPha::read(const GFitsTable& table)
 {
-    // Continue only if HDU is valid
-    if (hdu != NULL) {
+    // Get data column
+    const GFitsTableCol* col_data = table["COUNTS"];
 
-        // Get data column
-        const GFitsTableCol* col_data = (*hdu)["COUNTS"];
+    // Extract number of channels in FITS file
+    int length = table.integer("NAXIS2");
 
-        // Extract number of channels in FITS file
-        int length = hdu->integer("NAXIS2");
-
-        // Check whether column length is okay
-        if (m_ebounds.size() > 0) {
-            if (m_ebounds.size() != length) {
-                std::string msg = "Number of channels in PHA file ("
-                                  ""+gammalib::str(length)+") mismatches the"
-                                  " number of energy boundaries ("
-                                  ""+gammalib::str(m_ebounds.size())+") that"
-                                  " are defined in the GPha instance.\n"
-                                  "Please define the correct energy boundaries.";
-                throw GException::invalid_value(G_READ, msg);
-            }
+    // Check whether column length is okay
+    if (m_ebounds.size() > 0) {
+        if (m_ebounds.size() != length) {
+            std::string msg = "Number of channels in PHA file ("
+                              ""+gammalib::str(length)+") mismatches the"
+                              " number of energy boundaries ("
+                              ""+gammalib::str(m_ebounds.size())+") that"
+                              " are defined in the GPha instance.\n"
+                              "Please define the correct energy boundaries.";
+            throw GException::invalid_value(G_READ, msg);
         }
+    }
 
-        // Initialize spectrum
-        m_counts.assign(length, 0.0);
+    // Initialize spectrum
+    m_counts.assign(length, 0.0);
 
-        // Copy data
-        for (int i = 0; i < length; ++i) {
-            m_counts[i] = col_data->real(i);
-        }
-
-    } // endif: HDU was valid
+    // Copy data
+    for (int i = 0; i < length; ++i) {
+        m_counts[i] = col_data->real(i);
+    }
 
     // Return
     return;
@@ -486,7 +486,7 @@ void GPha::write(GFits& fits) const
 
         // Optionally append energy boundaries
         if (m_ebounds.size() > 0) {
-            m_ebounds.write(&fits);
+            m_ebounds.write(fits);
         }
 
     } // endif: there were data to write

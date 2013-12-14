@@ -59,8 +59,9 @@ public:
     const bool&      silent(void) const;
     void             kernel(GFunction* kernel);
     const GFunction* kernel(void) const;
-    double           romb(double a, double b, int k = 5);
-    double           trapzd(double a, double b, int n = 1, double result = 0.0);
+    double           romb(const double& a, const double& b, const int& k = 5);
+    double           trapzd(const double& a, const double& b, const int& n = 1,
+                            double result = 0.0);
 };
 
 

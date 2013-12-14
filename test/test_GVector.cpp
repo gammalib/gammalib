@@ -49,13 +49,25 @@ void TestGVector::set(void){
     // Define vectors
     define_vectors();
 
-    //add tests
-    add_test(static_cast<pfunction>(&TestGVector::allocation),"Vector allocation");
-    add_test(static_cast<pfunction>(&TestGVector::assign),"Assign values");
-    add_test(static_cast<pfunction>(&TestGVector::arithmetics),"Assignment and arithmetics");
-    add_test(static_cast<pfunction>(&TestGVector::comparison),"Comparison");
+    // Append tests
+    append(static_cast<pfunction>(&TestGVector::allocation), "Vector allocation");
+    append(static_cast<pfunction>(&TestGVector::assign), "Assign values");
+    append(static_cast<pfunction>(&TestGVector::arithmetics), "Assignment and arithmetics");
+    append(static_cast<pfunction>(&TestGVector::comparison), "Comparison");
 
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Clone test suite
+ *
+ * @return Pointer to deep copy of test suite.
+ ***************************************************************************/
+TestGVector* TestGVector::clone(void) const
+{
+    // Clone test suite
+    return new TestGVector(*this);
 }
 
 
