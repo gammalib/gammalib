@@ -241,7 +241,7 @@ const double& GCTAObservation::ra_obj(void) const
 /***********************************************************************//**
  * @brief Set CTA object Declination
  *
- * @param[in] ra Object Declination.
+ * @param[in] dec Object Declination.
  ***************************************************************************/
 inline
 void GCTAObservation::dec_obj(const double& dec)
