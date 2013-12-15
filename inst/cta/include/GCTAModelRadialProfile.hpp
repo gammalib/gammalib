@@ -162,7 +162,7 @@ double GCTAModelRadialProfile::tail(void) const
 /***********************************************************************//**
  * @brief Set profile width
  *
- * @param[in] Profile width.
+ * @param[in] width Profile width.
  ***************************************************************************/
 inline
 void GCTAModelRadialProfile::width(const double& width)
@@ -175,7 +175,7 @@ void GCTAModelRadialProfile::width(const double& width)
 /***********************************************************************//**
  * @brief Set profile core
  *
- * @param[in] Profile core.
+ * @param[in] core Profile core.
  ***************************************************************************/
 inline
 void GCTAModelRadialProfile::core(const double& core)
@@ -188,7 +188,7 @@ void GCTAModelRadialProfile::core(const double& core)
 /***********************************************************************//**
  * @brief Set profile tail
  *
- * @param[in] Profile tail.
+ * @param[in] tail Profile tail.
  ***************************************************************************/
 inline
 void GCTAModelRadialProfile::tail(const double& tail)

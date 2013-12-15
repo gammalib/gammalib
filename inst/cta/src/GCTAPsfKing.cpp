@@ -468,6 +468,7 @@ void GCTAPsfKing::free_members(void)
  * @brief Update PSF parameter cache
  *
  * @param[in] logE Log10 of the true photon energy (TeV).
+ * @param[in] theta Offset angle.
  *
  * @exception GException::invalid_value
  *            No valid point spread function information has been found.

@@ -171,34 +171,6 @@ GException::fits_already_opened::fits_already_opened(std::string origin,
 
 
 /***********************************************************************//**
- * @brief FITS error: Keyword not in header
- *
- * @param[in] origin Method that throws the error.
- * @param[in] keyname Name of keyword that was not found.
- * @param[in] status cfitsio status.
- ***************************************************************************/
-/*
-GException::fits_key_not_found::fits_key_not_found(std::string origin,
-                                                   std::string keyname,
-                                                   int         status)
-{
-    // Set origin
-    m_origin  = origin;
-
-    // Set message
-    m_message = "Keyword \"" + keyname + "\" not found in header";
-
-    // Add status
-    if (status != 0)
-        m_message += " (status=" + gammalib::str(status) + ")";
-
-    // Return
-    return;
-}
-*/
-
-
-/***********************************************************************//**
  * @brief FITS error: Table column not found
  *
  * @param[in] origin Method that throws the error.

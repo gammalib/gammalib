@@ -287,7 +287,7 @@ void GCTAEventList::save(const std::string& filename,
 /***********************************************************************//**
  * @brief Read CTA events from FITS file.
  *
- * @param[in] file FITS file.
+ * @param[in] fits FITS file.
  *
  * This method reads the CTA event list from a FITS file. The extension name
  * for the events is expected to be "EVENTS". The header of the HDU is
