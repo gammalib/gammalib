@@ -351,7 +351,7 @@ double GModelSpatialRadialGauss::theta_max(void) const
  * Reads the radial Gauss model information from an XML element. The XML
  * element shall have either the format 
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="GaussFunction">
  *       <parameter name="RA"    scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="DEC"   scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
@@ -359,7 +359,7 @@ double GModelSpatialRadialGauss::theta_max(void) const
  *
  * or
  *
- *     <spatialModel type="DiskFunction">
+ *     <spatialModel type="GaussFunction">
  *       <parameter name="GLON"  scale="1.0" value="83.6331" min="-360" max="360" free="1"/>
  *       <parameter name="GLAT"  scale="1.0" value="22.0145" min="-90"  max="90"  free="1"/>
  *       <parameter name="Sigma" scale="1.0" value="0.45"    min="0.01" max="10"  free="1"/>
