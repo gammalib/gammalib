@@ -1001,7 +1001,7 @@ void GModelSpectralBrokenPlaw::update_mc_cache(const GEnergy& emin,
             // If both energies are within the same node then just
             // add this one node on the stack
             if (inx_emin == inx_emax) {
-                const double exp_valid = (e_min < m_breakenergy.value()) ? m_index1.value() : m_index2.value();
+                double exp_valid = (e_min < m_breakenergy.value()) ? m_index1.value() : m_index2.value();
                 flux = m_norm.value()*gammalib::plaw_photon_flux(e_min,
                                                               e_max,
                                                               m_breakenergy.value(),
@@ -1012,8 +1012,7 @@ void GModelSpectralBrokenPlaw::update_mc_cache(const GEnergy& emin,
                 m_mc_exp.push_back(exp_valid);
             }
 
-            // ... otherwise integrate over the nodes where emin and emax
-            // resides and all the remaining nodes
+            // ... otherwise integrate over both nodes
             else {
                 // just enter the values for first pl: bin [0]
                 flux = m_norm.value()*gammalib::plaw_photon_flux(e_min,

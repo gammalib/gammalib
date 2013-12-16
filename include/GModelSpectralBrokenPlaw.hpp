@@ -127,6 +127,10 @@ protected:
     mutable double  m_mc_exponent2;     //!< Exponent (index2+1)
     mutable double  m_mc_pow_emin;      //!< Power of minimum energy
     mutable double  m_mc_pow_ewidth;    //!< Power of energy width
+    mutable std::vector<double> m_mc_cum;       //!< Cumulative distribution
+    mutable std::vector<double> m_mc_min;       //!< Lower boundary for MC
+    mutable std::vector<double> m_mc_max;       //!< Upper boundary for MC
+    mutable std::vector<double> m_mc_exp;       //!< Exponent for MC
 };
 
 
