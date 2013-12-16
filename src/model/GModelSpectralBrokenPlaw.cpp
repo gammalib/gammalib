@@ -571,10 +571,9 @@ GEnergy GModelSpectralBrokenPlaw::mc(const GEnergy& emin,
         double eng   = std::exp(u * (e_max - e_min) + e_min);
         energy.MeV(eng);
     }
-    energy.MeV(0.0);
+
     // Return energy
     return energy;
-
 }
 
 
