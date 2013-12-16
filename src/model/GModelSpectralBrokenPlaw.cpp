@@ -538,37 +538,43 @@ GEnergy GModelSpectralBrokenPlaw::mc(const GEnergy& emin,
               "Minimum energy < maximum energy required.");
     }
 
+    // Allocate energy
+    GEnergy energy;
+
     // Update cache
     update_mc_cache(emin, emax);
 
-    // Get uniform random number
-    double u = ran.uniform();
-
-    // Initialise energy
-    double eng;
-
-    // Case A: Index is not -1
-    if (index1() != -1.0) {
-        if (u > 0.0) {
-            eng = std::exp(std::log(u * m_mc_pow_ewidth + m_mc_pow_emin) /
-                           m_mc_exponent1);
-        }
-        else {
-            eng = 0.0;
+    // Determine in which bin we reside
+    int inx = 0;
+    if (m_mc_cum.size() > 1) {
+        double u = ran.uniform();
+        for (inx = m_mc_cum.size()-1; inx > 0; --inx) {
+            if (m_mc_cum[inx-1] <= u)
+                break;
         }
     }
 
-    // Case B: Index is -1
+    // Get random energy for specific bin
+    if (m_mc_exp[inx] != 0.0) {
+        double e_min = m_mc_min[inx];
+        double e_max = m_mc_max[inx];
+        double u     = ran.uniform();
+        double eng   = (u > 0.0)
+                        ? std::exp(std::log(u * (e_max - e_min) + e_min) / m_mc_exp[inx])
+                        : 0.0;
+        energy.MeV(eng);
+    }
     else {
-        eng = std::exp(u * m_mc_pow_ewidth + m_mc_pow_emin);
+        double e_min = m_mc_min[inx];
+        double e_max = m_mc_max[inx];
+        double u     = ran.uniform();
+        double eng   = std::exp(u * (e_max - e_min) + e_min);
+        energy.MeV(eng);
     }
-
-    // Set energy
-    GEnergy energy;
-    energy.MeV(eng);
-
+    energy.MeV(0.0);
     // Return energy
     return energy;
+
 }
 
 
@@ -838,12 +844,15 @@ void GModelSpectralBrokenPlaw::init_members(void)
     m_last_power       = 0.0;
 
     // Initialise MC cache
-    m_mc_emin       = 0.0;
-    m_mc_emax       = 0.0;
     m_mc_exponent1  = 0.0;
     m_mc_exponent2  = 0.0;
     m_mc_pow_emin   = 0.0;
     m_mc_pow_ewidth = 0.0;
+
+    // Initialise MC cache
+    m_mc_emin = 0.0;
+    m_mc_emax = 0.0;
+
 
     // Return
     return;
@@ -960,36 +969,105 @@ void GModelSpectralBrokenPlaw::update_eval_cache(const GEnergy& energy) const
 void GModelSpectralBrokenPlaw::update_mc_cache(const GEnergy& emin,
                                          const GEnergy& emax) const
 
-{
-    // Case A: Index is not -1
-    if (index1() != -1.0) {
+{    // Check if we need to update the cache
+    if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
 
-        // Change in energy boundaries?
-        if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
-            m_mc_emin       = emin.MeV();
-            m_mc_emax       = emax.MeV();
-            m_mc_exponent1  = index1() + 1.0;
-            m_mc_exponent2  = index2() + 1.0;
-            m_mc_pow_emin   = std::pow(m_mc_emin, m_mc_exponent1);
-            m_mc_pow_ewidth = std::pow(m_mc_emax, m_mc_exponent1) - m_mc_pow_emin;
-        }
+        // Store new energy interval
+        m_mc_emin = emin.MeV();
+        m_mc_emax = emax.MeV();
 
-    }
+        // Initialise cache
+        m_mc_cum.clear();
+        m_mc_min.clear();
+        m_mc_max.clear();
+        m_mc_exp.clear();
 
-    // Case B: Index is -1
-    else {
 
-        // Change in energy boundaries?
-        if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
-            m_mc_emin       = emin.MeV();
-            m_mc_emax       = emax.MeV();
-            m_mc_exponent1  = 0.0;
-            m_mc_exponent2  = index2() + 1.0;
-            m_mc_pow_emin   = std::log(m_mc_emin);
-            m_mc_pow_ewidth = std::log(m_mc_emax) - m_mc_pow_emin;
-        }
+        // Get energy range in MeV
+        double e_min = emin.MeV();
+        double e_max = emax.MeV();
 
-    }
+        // Continue only if e_max > e_min
+        if (e_max > e_min) {
+
+            // Allocate flux
+            double flux;
+
+            // Determine left node index for minimum energy
+            int inx_emin = (e_min < m_breakenergy.value() ) ? 0 : 1;
+            // Determine left node index for maximum energy
+            int inx_emax = (e_max < m_breakenergy.value() ) ? 0 : 1;
+
+            // If both energies are within the same node then just
+            // add this one node on the stack
+            if (inx_emin == inx_emax) {
+                const double exp_valid = (e_min < m_breakenergy.value()) ? m_index1.value() : m_index2.value();
+                flux = m_norm.value()*gammalib::plaw_photon_flux(e_min,
+                                                              e_max,
+                                                              m_breakenergy.value(),
+                                                              exp_valid);
+                m_mc_cum.push_back(flux);
+                m_mc_min.push_back(e_min);
+                m_mc_max.push_back(e_max);
+                m_mc_exp.push_back(exp_valid);
+            }
+
+            // ... otherwise integrate over the nodes where emin and emax
+            // resides and all the remaining nodes
+            else {
+                // just enter the values for first pl: bin [0]
+                flux = m_norm.value()*gammalib::plaw_photon_flux(e_min,
+                        m_breakenergy.value(),
+                        m_breakenergy.value(),
+                        m_index1.value());
+                m_mc_cum.push_back(flux);
+                m_mc_exp.push_back(m_index1.value());
+                m_mc_min.push_back(e_min);
+                m_mc_max.push_back(m_breakenergy.value());
+
+                // and for
+                flux = m_norm.value()*gammalib::plaw_photon_flux(m_breakenergy.value(),
+                    e_max,
+                    m_breakenergy.value(),
+                    m_index2.value());
+                m_mc_cum.push_back(flux);
+                m_mc_exp.push_back(m_index2.value());
+                m_mc_max.push_back(e_max);
+                m_mc_min.push_back(m_breakenergy.value());
+            } // endelse: emin and emax not between same nodes
+
+
+            // Build cumulative distribution
+            for (int i = 1; i < m_mc_cum.size(); ++i) {
+                m_mc_cum[i] += m_mc_cum[i-1];
+            }
+            double norm = m_mc_cum[m_mc_cum.size()-1];
+            for (int i = 0; i < m_mc_cum.size(); ++i) {
+                m_mc_cum[i] /= norm;
+            }
+
+            // Set MC values
+            for (int i = 0; i < m_mc_cum.size(); ++i) {
+                // Compute exponent
+                double exponent = m_mc_exp[i] + 1.0;
+
+                // Exponent dependend computation
+                if (std::abs(exponent) > 1.0e-11) {
+                    m_mc_exp[i] = exponent;
+                    m_mc_min[i] = std::pow(m_mc_min[i], exponent);
+                    m_mc_max[i] = std::pow(m_mc_max[i], exponent);
+                }
+                else {
+                    m_mc_exp[i] = 0.0;
+                    m_mc_min[i] = std::log(m_mc_min[i]);
+                    m_mc_max[i] = std::log(m_mc_max[i]);
+                }
+
+            } // endfor: set MC values
+
+        } // endif: e_max > e_min
+
+    } // endif: Update was required
 
     // Return
     return;
