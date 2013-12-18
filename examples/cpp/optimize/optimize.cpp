@@ -1,5 +1,5 @@
 /***************************************************************************
- *            numerics.cpp - Illustrates numerical class usage             *
+ *            optimize.cpp - Illustrates optimizer class usage             *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2013 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
@@ -19,8 +19,8 @@
  *                                                                         *
  ***************************************************************************/
 /**
- * @file numerics.cpp
- * @brief Illustrates numerical class usage
+ * @file optimize.cpp
+ * @brief Illustrates optimizer class usage
  * @author Juergen Knoedlseder
  */
 
@@ -29,50 +29,56 @@
 
 
 /***********************************************************************//**
- * @brief Gaussian function
+ * @brief Parabola function
  *
  * This code illustrates the definition of a Gaussian function.
  ***************************************************************************/
-class function : public GFunction {
+class function : public GOptimizerFunction {
 public:
-    function(const double& sigma) : m_a(1.0/(sigma*std::sqrt(gammalib::twopi))),
-                                    m_sigma(sigma) {}
-    double eval(const double& x) { return m_a*std::exp(-0.5*x*x/(m_sigma*m_sigma)); }
+    function(void) : m_value(0), m_gradient(1), m_covar(1,1) {}
+    void           eval(const GOptimizerPars& pars);
+    double         value(void) { return m_value; }
+    GVector*       gradient(void) { return &m_gradient; }
+    GMatrixSparse* covar(void) { return &m_covar; }
 protected:
-    double m_a;     //!< Amplitude parameter
-    double m_sigma; //!< Width parameter
+    double        m_value;    //!< Function value
+    GVector       m_gradient; //!< Function gradient vector
+    GMatrixSparse m_covar;    //!< Covariance matrix
+};
+void function::eval(const GOptimizerPars& pars)
+{
+    const double a = 2.0;
+    const double b = 5.0;
+    const double c = 1.0;
+    double x       = pars.par(0).value();
+    m_value        = a*x*x + b*x + c;
+    m_gradient[0]  = 2*a*x + b;
 };
 
 
 /***********************************************************************//**
- * @brief Integrate function
+ * @brief Optimize function
  *
- * This code illustrates the integration of a function.
+ * This code illustrates the optimization of a function.
  ***************************************************************************/
 int main(void) {
 
-    // Create instance of function
-    function fct(3.0);
+    // Allocate optimizer
+    GOptimizerLM opt;
 
-    // Create an integral object based on the function
-    GIntegral integral(&fct);
+    // Allocate function
+    function fct();
 
-    // Set relative integration precision
-    integral.eps(1.0e-8);
+    // Allocate parameters and set initial value
+    GOptimizerPars pars(1);
+    pars[0].value(3.0);
 
-    // Integrate over the interval [-10,10]
-    double result = integral.romb(-15.0, +15.0);
-
-    // Print result (should be basically 1)
-    std::cout << "Integral:       " << result << std::endl;
-
-    // Create a derivative object based on the function
-    GDerivative derivative(&fct);
+    // Optimize parameters
+    opt.optimize(fct, pars);
 
     // Print derivatives
-    std::cout << "Derivative(0):  " << derivative.value(0.0) << std::endl;
-    std::cout << "Derivative(3):  " << derivative.value(3.0) << std::endl;
-    std::cout << "Derivative(-3): " << derivative.value(-3.0) << std::endl;
+    std::cout << "Function value: " << fct.value() << std::endl;
+    std::cout << "Parameter ....: " << pars[0].value() << std::endl;
 
     // Exit
     return 0;
