@@ -290,9 +290,11 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
                         grad_imax = ipar;
                     }
                     if (grad == 0.0) {
-                        *m_logger << "Parameter " << ipar;
-                        *m_logger << " (" << pars[ipar]->name() << ")";
-                        *m_logger << " has a zero gradient." << std::endl;
+                        if (m_logger != NULL) {
+                            *m_logger << "Parameter " << ipar;
+                            *m_logger << " (" << pars[ipar]->name() << ")";
+                            *m_logger << " has a zero gradient." << std::endl;
+                        }
                     }
                 }
             }
