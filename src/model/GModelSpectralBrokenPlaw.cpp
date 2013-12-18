@@ -338,24 +338,34 @@ double GModelSpectralBrokenPlaw::eval_gradients(const GEnergy& srcEng,
     // Compute function value
     double value = m_norm.value() * m_last_power;
 
-    // Compute partial derivatives of the parameter values
+    // Compute normalisation gradient
     double g_norm  = (m_norm.isfree())
                      ? m_norm.scale() * m_last_power : 0.0;
-    double g_index1 = (m_index1.isfree())
-                     ? value * m_index1.scale() * m_last_log_e_norm : 0.0;
-    double g_index2 = (m_index2.isfree())
-                     ? value * m_index2.scale() * m_last_log_e_norm : 0.0;
-    double index_current = (srcEng.MeV() > m_breakenergy.value())
-                     ? m_last_index1 : m_last_index2;
-    double g_breakenergy = (m_breakenergy.isfree())
-                     ? -value * index_current / m_breakenergy.factor_value() : 0.0;
-
-
-    // Set gradients
     m_norm.factor_gradient(g_norm);
-    m_index1.factor_gradient(g_index1);
-    m_breakenergy.factor_gradient(g_breakenergy);
-    m_index2.factor_gradient(g_index2);
+
+    // Compute index and break value gradients
+    if (srcEng.MeV() < m_breakenergy.value()) {
+        double g_index = (m_index1.isfree()) 
+                         ? value * m_index1.scale() * m_last_log_e_norm
+                         : 0.0;
+        double g_break = (m_breakenergy.isfree())
+                         ? -value * m_last_index1 / m_breakenergy.factor_value()
+                         : 0.0;
+        m_index1.factor_gradient(g_index);
+        m_index2.factor_gradient(0.0);
+        m_breakenergy.factor_gradient(g_break);
+    }
+    else {
+        double g_index = (m_index2.isfree()) 
+                         ? value * m_index2.scale() * m_last_log_e_norm
+                         : 0.0;
+        double g_break = (m_breakenergy.isfree())
+                         ? -value * m_last_index2 / m_breakenergy.factor_value()
+                         : 0.0;
+        m_index1.factor_gradient(0.0);
+        m_index2.factor_gradient(g_index);
+        m_breakenergy.factor_gradient(g_break);
+    }
 
     // Compile option: Check for NaN/Inf
     #if defined(G_NAN_CHECK)
@@ -368,9 +378,6 @@ double GModelSpectralBrokenPlaw::eval_gradients(const GEnergy& srcEng,
         std::cout << ", e_norm=" << m_last_e_norm;
         std::cout << ", power=" << m_last_power;
         std::cout << ", g_norm=" << g_norm;
-        std::cout << ", g_index1=" << g_index1;
-        std::cout << ", g_breakenergy=" << g_breakenergy;
-        std::cout << ", g_index2=" << g_index2;
         std::cout << ")" << std::endl;
     }
     #endif
@@ -806,16 +813,6 @@ void GModelSpectralBrokenPlaw::init_members(void)
     m_index1.gradient(0.0);
     m_index1.hasgrad(true);
 
-    // Initialise break energy
-    m_breakenergy.clear();
-    m_breakenergy.name("BreakValue");
-    m_breakenergy.unit("MeV");
-    m_breakenergy.scale(1.0);
-    m_breakenergy.value(100.0);  // default: 100
-    m_breakenergy.fix();
-    m_breakenergy.gradient(0.0);
-    m_breakenergy.hasgrad(true);
-
     // Initialise powerlaw index2
     m_index2.clear();
     m_index2.name("Index2");
@@ -825,6 +822,16 @@ void GModelSpectralBrokenPlaw::init_members(void)
     m_index2.free();
     m_index2.gradient(0.0);
     m_index2.hasgrad(true);
+
+    // Initialise break energy
+    m_breakenergy.clear();
+    m_breakenergy.name("BreakValue");
+    m_breakenergy.unit("MeV");
+    m_breakenergy.scale(1.0);
+    m_breakenergy.value(100.0);  // default: 100
+    m_breakenergy.fix();
+    m_breakenergy.gradient(0.0);
+    m_breakenergy.hasgrad(true);
 
     // Set parameter pointer(s)
     m_pars.clear();
@@ -925,8 +932,8 @@ void GModelSpectralBrokenPlaw::update_eval_cache(const GEnergy& energy) const
     double breakenergy = m_breakenergy.value();
     double index2      = m_index2.value();
 
-    // If the energy or one of the parameters index1, index2 or breakenergy energy has
-    // changed then recompute the cache
+    // If the energy or one of the parameters index1, index2 or breakenergy
+    // energy has changed then recompute the cache
     if ((m_last_energy       != energy) ||
         (m_last_index1       != index1)  ||
         (m_last_index2       != index2)  ||
@@ -942,7 +949,6 @@ void GModelSpectralBrokenPlaw::update_eval_cache(const GEnergy& energy) const
         double eng        = energy.MeV();
         m_last_e_norm     = eng / m_last_breakenergy;
         m_last_log_e_norm = std::log(m_last_e_norm);
-
         if (eng < m_last_breakenergy ) {
             m_last_power = std::pow(m_last_e_norm, m_last_index1);
         }
@@ -966,9 +972,9 @@ void GModelSpectralBrokenPlaw::update_eval_cache(const GEnergy& energy) const
  * Updates the precomputation cache for Monte Carlo simulations.
  ***************************************************************************/
 void GModelSpectralBrokenPlaw::update_mc_cache(const GEnergy& emin,
-                                         const GEnergy& emax) const
-
-{    // Check if we need to update the cache
+                                               const GEnergy& emax) const
+{   
+    // Check if we need to update the cache
     if (emin.MeV() != m_mc_emin || emax.MeV() != m_mc_emax) {
 
         // Store new energy interval
@@ -981,7 +987,6 @@ void GModelSpectralBrokenPlaw::update_mc_cache(const GEnergy& emin,
         m_mc_max.clear();
         m_mc_exp.clear();
 
-
         // Get energy range in MeV
         double e_min = emin.MeV();
         double e_max = emax.MeV();
@@ -992,19 +997,20 @@ void GModelSpectralBrokenPlaw::update_mc_cache(const GEnergy& emin,
             // Allocate flux
             double flux;
 
-            // Determine left node index for minimum energy
+            // Determine left node index for minimum and maximum energy
             int inx_emin = (e_min < m_breakenergy.value() ) ? 0 : 1;
-            // Determine left node index for maximum energy
             int inx_emax = (e_max < m_breakenergy.value() ) ? 0 : 1;
 
             // If both energies are within the same node then just
             // add this one node on the stack
             if (inx_emin == inx_emax) {
-                double exp_valid = (e_min < m_breakenergy.value()) ? m_index1.value() : m_index2.value();
-                flux = m_norm.value()*gammalib::plaw_photon_flux(e_min,
-                                                              e_max,
-                                                              m_breakenergy.value(),
-                                                              exp_valid);
+                double exp_valid = (e_min < m_breakenergy.value())
+                                   ? m_index1.value() : m_index2.value();
+                flux = m_norm.value() *
+                       gammalib::plaw_photon_flux(e_min,
+                                                  e_max,
+                                                  m_breakenergy.value(),
+                                                  exp_valid);
                 m_mc_cum.push_back(flux);
                 m_mc_min.push_back(e_min);
                 m_mc_max.push_back(e_max);
@@ -1014,26 +1020,27 @@ void GModelSpectralBrokenPlaw::update_mc_cache(const GEnergy& emin,
             // ... otherwise integrate over both nodes
             else {
                 // just enter the values for first pl: bin [0]
-                flux = m_norm.value()*gammalib::plaw_photon_flux(e_min,
-                        m_breakenergy.value(),
-                        m_breakenergy.value(),
-                        m_index1.value());
+                flux = m_norm.value() *
+                       gammalib::plaw_photon_flux(e_min,
+                                                  m_breakenergy.value(),
+                                                  m_breakenergy.value(),
+                                                  m_index1.value());
                 m_mc_cum.push_back(flux);
                 m_mc_exp.push_back(m_index1.value());
                 m_mc_min.push_back(e_min);
                 m_mc_max.push_back(m_breakenergy.value());
 
                 // and for
-                flux = m_norm.value()*gammalib::plaw_photon_flux(m_breakenergy.value(),
-                    e_max,
-                    m_breakenergy.value(),
-                    m_index2.value());
+                flux = m_norm.value() *
+                       gammalib::plaw_photon_flux(m_breakenergy.value(),
+                                                  e_max,
+                                                  m_breakenergy.value(),
+                                                  m_index2.value());
                 m_mc_cum.push_back(flux);
                 m_mc_exp.push_back(m_index2.value());
                 m_mc_max.push_back(e_max);
                 m_mc_min.push_back(m_breakenergy.value());
             } // endelse: emin and emax not between same nodes
-
 
             // Build cumulative distribution
             for (int i = 1; i < m_mc_cum.size(); ++i) {
@@ -1046,6 +1053,7 @@ void GModelSpectralBrokenPlaw::update_mc_cache(const GEnergy& emin,
 
             // Set MC values
             for (int i = 0; i < m_mc_cum.size(); ++i) {
+
                 // Compute exponent
                 double exponent = m_mc_exp[i] + 1.0;
 

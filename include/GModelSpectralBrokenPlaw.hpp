@@ -110,27 +110,27 @@ protected:
     // Protected members
     GModelPar m_norm;                 //!< Normalization factor
     GModelPar m_index1;               //!< Spectral index1
+    GModelPar m_index2;               //!< Spectral index2
     GModelPar m_breakenergy;          //!< Energy of spectral break
-    GModelPar m_index2;               //!< Spectral index1
 
     // Cached members used for pre-computations
-    mutable GEnergy m_last_energy;      //!< Last energy value
-    mutable double  m_last_index1;      //!< Last index1 parameter
-    mutable double  m_last_index2;      //!< Last index1 parameter
-    mutable double  m_last_breakenergy; //!< Last breakenergy parameter
-    mutable double  m_last_e_norm;      //!< Last E/Ebreakenergy value
-    mutable double  m_last_log_e_norm;  //!< Last ln(E/Ebreakenergy) value
-    mutable double  m_last_power;       //!< Last power value
-    mutable double  m_mc_emin;          //!< Minimum energy
-    mutable double  m_mc_emax;          //!< Maximum energy
-    mutable double  m_mc_exponent1;     //!< Exponent (index1+1)
-    mutable double  m_mc_exponent2;     //!< Exponent (index2+1)
-    mutable double  m_mc_pow_emin;      //!< Power of minimum energy
-    mutable double  m_mc_pow_ewidth;    //!< Power of energy width
-    mutable std::vector<double> m_mc_cum;       //!< Cumulative distribution
-    mutable std::vector<double> m_mc_min;       //!< Lower boundary for MC
-    mutable std::vector<double> m_mc_max;       //!< Upper boundary for MC
-    mutable std::vector<double> m_mc_exp;       //!< Exponent for MC
+    mutable GEnergy m_last_energy;        //!< Last energy value
+    mutable double  m_last_index1;        //!< Last index1 parameter
+    mutable double  m_last_index2;        //!< Last index1 parameter
+    mutable double  m_last_breakenergy;   //!< Last breakenergy parameter
+    mutable double  m_last_e_norm;        //!< Last E/Ebreakenergy value
+    mutable double  m_last_log_e_norm;    //!< Last ln(E/Ebreakenergy) value
+    mutable double  m_last_power;         //!< Last power value
+    mutable double  m_mc_emin;            //!< Minimum energy
+    mutable double  m_mc_emax;            //!< Maximum energy
+    mutable double  m_mc_exponent1;       //!< Exponent (index1+1)
+    mutable double  m_mc_exponent2;       //!< Exponent (index2+1)
+    mutable double  m_mc_pow_emin;        //!< Power of minimum energy
+    mutable double  m_mc_pow_ewidth;      //!< Power of energy width
+    mutable std::vector<double> m_mc_cum; //!< Cumulative distribution
+    mutable std::vector<double> m_mc_min; //!< Lower boundary for MC
+    mutable std::vector<double> m_mc_max; //!< Upper boundary for MC
+    mutable std::vector<double> m_mc_exp; //!< Exponent for MC
 };
 
 
