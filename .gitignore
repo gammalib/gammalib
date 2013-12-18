@@ -80,6 +80,7 @@ examples/cpp/createxml/createxml
 examples/cpp/createxml/my_xml_file.xml
 examples/cpp/readmodel/readmodel
 examples/cpp/numerics/numerics
+examples/cpp/optimize/optimize
 
 # Binaries
 test/test_GApplication
