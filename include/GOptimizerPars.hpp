@@ -30,7 +30,7 @@
 /* __ Includes ___________________________________________________________ */
 #include <string>
 #include "GContainer.hpp"
-#include "GModelPar.hpp"
+#include "GOptimizerPar.hpp"
 
 
 /***********************************************************************//**
@@ -42,17 +42,10 @@
  * be optimized. The optimizer function is defined by the abstract
  * GOptimizerFunction class.
  *
- * The class holds a flat array of pointers to models parameters. It neither
- * deals with allocation and deallocation, nor with cloning of function
- * parameters, this will be done by the classes that actually implement the
- * model parameters.
- *
- * @todo This container class has no operator[] method as GModels is a
- *       derived class of this container class so that GModels can be
- *       passed to the optimizer. GModels has an operator[] to access
- *       models, so we cannot implement this here again. This is not
- *       very clean. We should think about how we can make this a clean
- *       thing ...
+ * The class holds a flat array of pointers to optimizer parameters. The
+ * class can deal with parameters that are allocated by the class itself,
+ * or with pointers that are passed by a client and allocated/deallocated
+ * by the client.
  ***************************************************************************/
 class GOptimizerPars : public GContainer {
 
