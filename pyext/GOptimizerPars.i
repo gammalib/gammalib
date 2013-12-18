@@ -26,7 +26,6 @@
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GOptimizerPars.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -42,18 +41,15 @@ public:
     GOptimizerPars(const GOptimizerPars& pars);
     virtual ~GOptimizerPars(void);
 
-    // Pure virtual base class methods
-    virtual void            clear(void) = 0;
-    virtual GOptimizerPars* clone(void) const = 0;
-    virtual int             size(void) const = 0;
-    virtual bool            isempty(void) const = 0;
-    virtual void            remove(const int& index) = 0;
-    virtual void            reserve(const int& num) = 0;
-
     // Methods
-    virtual int             npars(void) const;
-    virtual int             nfree(void) const;
-    virtual GModelPar&      par(const int& index);
+    void            clear(void);
+    GOptimizerPars* clone(void) const;
+    int             size(void) const;
+    bool            isempty(void) const;
+    int             nfree(void) const;
+    void            attach(GOptimizerPar *par);
+    void            remove(const int& index);
+    void            reserve(const int& num);
 };
 
 
@@ -61,4 +57,35 @@ public:
  * @brief GOptimizerPars class extension
  ***************************************************************************/
 %extend GOptimizerPars {
+    GOptimizerPar* __getitem__(const int& index) {
+        if (index >= 0 && index < self->size()) {
+            return (*self)[index];
+        }
+        else {
+            throw GException::out_of_range("__getitem__(int)", "Parameter index",
+                                           index, self->size());
+        }
+    }
+    GOptimizerPar* __getitem__(const std::string& name) {
+        return (*self)[name];
+    }
+/*
+    void __setitem__(const int& index, const GOptimizerPar& val) {
+        if (index >= 0 && index < self->size()) {
+            self->set(index, val);
+            return;
+        }
+        else {
+            throw GException::out_of_range("__setitem__(int)", "Parameter index",
+                                           index, self->size());
+        }
+    }
+    void __setitem__(const std::string& name, const GOptimizerPar& val) {
+        self->set(name, val);
+        return;
+    }
+*/
+    GOptimizerPars copy() {
+        return (*self);
+    }
 };

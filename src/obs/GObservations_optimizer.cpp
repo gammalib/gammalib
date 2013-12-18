@@ -200,7 +200,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     do {
 
         // Get number of parameters
-        int npars = pars.npars();
+        int npars = pars.size();
 
         // Fall through if we have no free parameters
         if (npars < 1) {
@@ -240,7 +240,7 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
         #pragma omp parallel
         {
             // Allocate and initialize variable copies for multi-threading
-            GModels        cpy_model((GModels&)pars);
+            GModels        cpy_model(m_this->models());
             GVector        cpy_wrk_grad(npars);
             GVector*       cpy_gradient = new GVector(npars);
             GMatrixSparse* cpy_covar    = new GMatrixSparse(npars,npars);
@@ -407,9 +407,9 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
     // Copy over the parameter gradients for all parameters that are
     // free (so that we can access the gradients from outside)
-    for (int ipar = 0; ipar < pars.npars(); ++ipar) {
-        if (pars.par(ipar).isfree()) {
-            GModelPar* par = (GModelPar*)&pars.par(ipar);
+    for (int ipar = 0; ipar < pars.size(); ++ipar) {
+        if (pars[ipar]->isfree()) {
+            GOptimizerPar* par = const_cast<GOptimizerPar*>(pars[ipar]);
             par->factor_gradient((*m_gradient)[ipar]);
         }
     }
@@ -417,8 +417,8 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
     // Optionally dump gradient and covariance matrix
     #if G_EVAL_DEBUG
     std::cout << *m_gradient << std::endl;
-    for (int i = 0; i < pars.npars(); ++i) {
-        for (int j = 0; j < pars.npars(); ++j) {
+    for (int i = 0; i < pars.size(); ++i) {
+        for (int j = 0; j < pars.size(); ++j) {
             std::cout << (*m_covar)(i,j) << " ";
         }
         std::cout << std::endl;
@@ -443,10 +443,14 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
 
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for Poisson statistics and
- *        unbinned analysis
+ *        unbinned analysis (version with working arrays)
  *
  * @param[in] obs Observation.
- * @param[in] pars Optimizer parameters.
+ * @param[in] models Models.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] value Likelihood value.
+ * @param[in,out] wrk_grad Gradient working array.
  *
  * This method evaluates the -(log-likelihood) function for parameter
  * optimisation using unbinned analysis and Poisson statistics.
@@ -459,33 +463,11 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
  * \f$\delta^2 L/dp_1 dp_2\f$.
  ***************************************************************************/
 void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
-                                                const GOptimizerPars& pars)
-{
-    // Perform computations using the global members
-    poisson_unbinned(obs, pars, *m_covar, *m_gradient, m_value, *m_wrk_grad);
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate log-likelihood function for Poisson statistics and
- *        unbinned analysis (version with working arrays)
- *
- * @param[in] obs Observation.
- * @param[in] pars Optimizer parameters.
- * @param[in,out] covar Covariance matrix.
- * @param[in,out] gradient Gradient.
- * @param[in,out] value Likelihood value.
- * @param[in,out] wrk_grad Gradient working array.
- ***************************************************************************/
-void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
-                                                const GOptimizerPars& pars,
-                                                GMatrixSparse&        covar,
-                                                GVector&              gradient,
-                                                double&               value,
-                                                GVector&              wrk_grad)
+                                                const GModels&      models,
+                                                GMatrixSparse&      covar,
+                                                GVector&            gradient,
+                                                double&             value,
+                                                GVector&            wrk_grad)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -497,7 +479,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
     #endif
 
     // Get number of parameters
-    int npars = pars.npars();
+    int npars = wrk_grad.size();
 
     // Allocate some working arrays
     int*    inx    = new int[npars];
@@ -510,7 +492,7 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
         const GEvent* event = (*obs.events())[i];
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars, *event, &wrk_grad);
+        double model = obs.model(models, *event, &wrk_grad);
 
         // Skip bin if model is too small (avoids -Inf or NaN gradients)
         if (model <= m_minmod) {
@@ -592,10 +574,15 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
 
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for Poisson statistics and
- *        binned analysis
+ *        binned analysis (version with working arrays)
  *
  * @param[in] obs Observation.
- * @param[in] pars Optimizer parameters.
+ * @param[in] models Models.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] value Likelihood value.
+ * @param[in,out] npred Number of predicted events.
+ * @param[in,out] wrk_grad Gradient working array.
  *
  * This method evaluates the -(log-likelihood) function for parameter
  * optimisation using binned analysis and Poisson statistics.
@@ -610,35 +597,12 @@ void GObservations::optimizer::poisson_unbinned(const GObservation&   obs,
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 void GObservations::optimizer::poisson_binned(const GObservation& obs,
-                                              const GOptimizerPars& pars) 
-{
-    // Perform computations using the global members
-    poisson_binned(obs, pars, *m_covar, *m_gradient, m_value, m_npred, *m_wrk_grad); 
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate log-likelihood function for Poisson statistics and
- *        binned analysis (version with working arrays)
- *
- * @param[in] obs Observation.
- * @param[in] pars Optimizer parameters.
- * @param[in,out] covar Covariance matrix.
- * @param[in,out] gradient Gradient.
- * @param[in,out] value Likelihood value.
- * @param[in,out] npred Number of predicted events.
- * @param[in,out] wrk_grad Gradient working array.
- ***************************************************************************/
-void GObservations::optimizer::poisson_binned(const GObservation&   obs,
-                                              const GOptimizerPars& pars,
-                                              GMatrixSparse&        covar,
-                                              GVector&              gradient,
-                                              double&               value,
-                                              double&               npred,
-                                              GVector&              wrk_grad)
+                                              const GModels&      models,
+                                              GMatrixSparse&      covar,
+                                              GVector&            gradient,
+                                              double&             value,
+                                              double&             npred,
+                                              GVector&            wrk_grad)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -661,7 +625,7 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
     #endif
 
     // Get number of parameters
-    int npars = pars.npars();
+    int npars = wrk_grad.size();
 
     // Allocate some working arrays
     int*    inx    = new int[npars];
@@ -683,7 +647,7 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
         double data = bin->counts();
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars, *bin, &wrk_grad);
+        double model = obs.model(models, *bin, &wrk_grad);
 
         // Multiply model by bin size
         model *= bin->size();
@@ -832,10 +796,15 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
 
 /***********************************************************************//**
  * @brief Evaluate log-likelihood function for Gaussian statistics and
- *        binned analysis
+ *        binned analysis (version with working arrays)
  *
  * @param[in] obs Observation.
- * @param[in] pars Optimizer parameters.
+ * @param[in] models Models.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] npred Number of predicted events.
+ * @param[in,out] value Likelihood value.
+ * @param[in,out] wrk_grad Gradient working array.
  *
  * This method evaluates the -(log-likelihood) function for parameter
  * optimisation using binned analysis and Poisson statistics.
@@ -851,35 +820,12 @@ void GObservations::optimizer::poisson_binned(const GObservation&   obs,
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
 void GObservations::optimizer::gaussian_binned(const GObservation& obs,
-                                               const GOptimizerPars& pars) 
-{
-    // Perform computations using the global members
-    gaussian_binned(obs, pars, *m_covar, *m_gradient, m_value, m_npred, *m_wrk_grad); 
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Evaluate log-likelihood function for Gaussian statistics and
- *        binned analysis (version with working arrays)
- *
- * @param[in] obs Observation.
- * @param[in] pars Optimizer parameters.
- * @param[in,out] covar Covariance matrix.
- * @param[in,out] gradient Gradient.
- * @param[in,out] npred Number of predicted events.
- * @param[in,out] value Likelihood value.
- * @param[in,out] wrk_grad Gradient working array.
- ***************************************************************************/
-void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
-                                               const GOptimizerPars& pars,
-                                               GMatrixSparse&        covar,
-                                               GVector&              gradient,
-                                               double&               value,
-                                               double&               npred,
-                                               GVector&              wrk_grad)
+                                               const GModels&      models,
+                                               GMatrixSparse&      covar,
+                                               GVector&            gradient,
+                                               double&             value,
+                                               double&             npred,
+                                               GVector&            wrk_grad)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -891,7 +837,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
     #endif
 
     // Get number of parameters
-    int npars = pars.npars();
+    int npars = wrk_grad.size();
 
     // Allocate some working arrays
     int*    inx    = new int[npars];
@@ -916,7 +862,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation&   obs,
         }
 
         // Get model and derivative
-        double model = obs.model((GModels&)pars, *bin, &wrk_grad);
+        double model = obs.model(models, *bin, &wrk_grad);
 
         // Multiply model by bin size
         model *= bin->size();

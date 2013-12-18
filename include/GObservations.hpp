@@ -148,32 +148,26 @@ public:
         // Other methods
         void set(GObservations* obs);
         void eval(const GOptimizerPars& pars);
-        void poisson_unbinned(const GObservation&   obs,
-                              const GOptimizerPars& pars);
-        void poisson_unbinned(const GObservation&   obs,
-                              const GOptimizerPars& pars,
-                              GMatrixSparse&        covar,
-                              GVector&              mgrad,
-                              double&               value,
-                              GVector&              gradient);
-        void poisson_binned(const GObservation&   obs,
-                            const GOptimizerPars& pars);
-        void poisson_binned(const GObservation&   obs,
-                            const GOptimizerPars& pars,
-                            GMatrixSparse&        covar,
-                            GVector&              mgrad,
-                            double&               value,
-                            double&               npred,
-                            GVector&              gradient);
-        void gaussian_binned(const GObservation&   obs,
-                             const GOptimizerPars& pars);
-        void gaussian_binned(const GObservation&   obs,
-                             const GOptimizerPars& pars,
-                             GMatrixSparse&        covar,
-                             GVector&              mgrad,
-                             double&               value,
-                             double&               npred,
-                             GVector&              gradient);
+        void poisson_unbinned(const GObservation& obs,
+                              const GModels&      models,
+                              GMatrixSparse&      covar,
+                              GVector&            mgrad,
+                              double&             value,
+                              GVector&            gradient);
+        void poisson_binned(const GObservation& obs,
+                            const GModels&      models,
+                            GMatrixSparse&      covar,
+                            GVector&            mgrad,
+                            double&             value,
+                            double&             npred,
+                            GVector&            gradient);
+        void gaussian_binned(const GObservation& obs,
+                             const GModels&      models,
+                             GMatrixSparse&      covar,
+                             GVector&            mgrad,
+                             double&             value,
+                             double&             npred,
+                             GVector&            gradient);
 
     protected:
         // Protected methods

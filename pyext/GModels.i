@@ -50,7 +50,7 @@
  *
  * @brief Model container class
  ***************************************************************************/
-class GModels : public GOptimizerPars {
+class GModels : public GContainer {
 public:
     // Constructors and destructors
     GModels(void);
@@ -59,27 +59,29 @@ public:
     virtual ~GModels(void);
  
     // Methods
-    void     clear(void);
-    GModels* clone(void) const;
-    GModel*  at(const int& index);
-    int      size(void) const;
-    bool     isempty(void) const;
-    GModel*  set(const int& index, const GModel& model);
-    GModel*  set(const std::string& name, const GModel& model);
-    GModel*  append(const GModel& model);
-    GModel*  insert(const int& index, const GModel& model);
-    GModel*  insert(const std::string& name, const GModel& model);
-    void     remove(const int& index);
-    void     remove(const std::string& name);
-    void     reserve(const int& num);
-    void     extend(const GModels& models);
-    bool     contains(const std::string& name) const;
-    void     load(const std::string& filename);
-    void     save(const std::string& filename) const;
-    void     read(const GXml& xml);
-    void     write(GXml& xml) const;
-    double   eval(const GEvent& event, const GObservation& obs) const;
-    double   eval_gradients(const GEvent& event, const GObservation& obs) const;
+    void           clear(void);
+    GModels*       clone(void) const;
+    GModel*        at(const int& index);
+    int            size(void) const;
+    bool           isempty(void) const;
+    GModel*        set(const int& index, const GModel& model);
+    GModel*        set(const std::string& name, const GModel& model);
+    GModel*        append(const GModel& model);
+    GModel*        insert(const int& index, const GModel& model);
+    GModel*        insert(const std::string& name, const GModel& model);
+    void           remove(const int& index);
+    void           remove(const std::string& name);
+    void           reserve(const int& num);
+    void           extend(const GModels& models);
+    bool           contains(const std::string& name) const;
+    void           load(const std::string& filename);
+    void           save(const std::string& filename) const;
+    void           read(const GXml& xml);
+    void           write(GXml& xml) const;
+    int            npars(void) const;
+    GOptimizerPars pars(void);
+    double         eval(const GEvent& event, const GObservation& obs) const;
+    double         eval_gradients(const GEvent& event, const GObservation& obs) const;
 };
 
 
@@ -92,8 +94,8 @@ public:
             return (*self)[index];
         }
         else {
-            throw GException::out_of_range("__getitem__(int)", index,
-                                           0, self->size()-1);
+            throw GException::out_of_range("__getitem__(int)", "Model index",
+                                           index, self->size());
         }
     }
     GModel* __getitem__(const std::string& name) {
@@ -105,8 +107,8 @@ public:
             return;
         }
         else {
-            throw GException::out_of_range("__setitem__(int)", index,
-                                           0, self->size()-1);
+            throw GException::out_of_range("__setitem__(int)", "Model index",
+                                           index, self->size());
         }
     }
     void __setitem__(const std::string& name, const GModel& val) {
