@@ -354,6 +354,9 @@ void GXmlNode::remove(const int& index)
     }
     #endif
 
+    // Delete node
+    delete m_nodes[index];
+    
     // Erase child node from container
     m_nodes.erase(m_nodes.begin() + index);
     

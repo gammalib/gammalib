@@ -29,8 +29,9 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
-#include "GOptimizerPars.hpp"
+#include "GContainer.hpp"
 #include "GModel.hpp"
+#include "GOptimizerPars.hpp"
 #include "GXml.hpp"
 
 /* __ Forward declarations _______________________________________________ */
@@ -140,17 +141,8 @@ class GObservation;
  *
  * The only member of GModels is a list of model pointers. The class handles
  * the proper allocation and deallocation of the model memory.
- *
- * GModels derives from GOptimizerPars which contains a flat array of
- * model parameters. This flat array is set using the protected
- * set_pointers() method. This method is called after each manipulation of
- * the list of model pointers to ensure consistency between the models and
- * the flat array of parameter pointers. The optimizer function
- * GOptimizerFunction will manipulate the parameters in that flat array,
- * and as this array points towards the parameters stored in GModels, it will
- * directly modify the model parameters of the container class.
  ***************************************************************************/
-class GModels : public GOptimizerPars {
+class GModels : public GContainer {
 
 public:
     // Constructors and destructors
@@ -167,36 +159,37 @@ public:
     const GModel* operator[](const std::string& name) const;
 
     // Methods
-    void          clear(void);
-    GModels*      clone(void) const;
-    GModel*       at(const int& index);
-    const GModel* at(const int& index) const;
-    int           size(void) const;
-    bool          isempty(void) const;
-    GModel*       set(const int& index, const GModel& model);
-    GModel*       set(const std::string& name, const GModel& model);
-    GModel*       append(const GModel& model);
-    GModel*       insert(const int& index, const GModel& model);
-    GModel*       insert(const std::string& name, const GModel& model);
-    void          remove(const int& index);
-    void          remove(const std::string& name);
-    void          reserve(const int& num);
-    void          extend(const GModels& models);
-    bool          contains(const std::string& name) const;
-    void          load(const std::string& filename);
-    void          save(const std::string& filename) const;
-    void          read(const GXml& xml);
-    void          write(GXml& xml) const;
-    double        eval(const GEvent& event, const GObservation& obs) const;
-    double        eval_gradients(const GEvent& event, const GObservation& obs) const;
-    std::string   print(const GChatter& chatter = NORMAL) const;
+    void           clear(void);
+    GModels*       clone(void) const;
+    GModel*        at(const int& index);
+    const GModel*  at(const int& index) const;
+    int            size(void) const;
+    bool           isempty(void) const;
+    GModel*        set(const int& index, const GModel& model);
+    GModel*        set(const std::string& name, const GModel& model);
+    GModel*        append(const GModel& model);
+    GModel*        insert(const int& index, const GModel& model);
+    GModel*        insert(const std::string& name, const GModel& model);
+    void           remove(const int& index);
+    void           remove(const std::string& name);
+    void           reserve(const int& num);
+    void           extend(const GModels& models);
+    bool           contains(const std::string& name) const;
+    void           load(const std::string& filename);
+    void           save(const std::string& filename) const;
+    void           read(const GXml& xml);
+    void           write(GXml& xml) const;
+    int            npars(void) const;
+    GOptimizerPars pars(void);
+    double         eval(const GEvent& event, const GObservation& obs) const;
+    double         eval_gradients(const GEvent& event, const GObservation& obs) const;
+    std::string    print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
     void          init_members(void);
     void          copy_members(const GModels& models);
     void          free_members(void);
-    void          set_pointers(void);
     int           get_index(const std::string& name) const;
 
     // Proteced members

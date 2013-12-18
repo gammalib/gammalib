@@ -121,6 +121,7 @@
 /* __ Optimizer module ___________________________________________________ */
 #include "GOptimizer.hpp"
 #include "GOptimizerLM.hpp"
+#include "GOptimizerPar.hpp"
 #include "GOptimizerPars.hpp"
 #include "GOptimizerFunction.hpp"
 

@@ -127,17 +127,17 @@ public:
     double              npred(void) const;
     std::string         print(const GChatter& chatter = NORMAL) const;
 
-    // Optimizer
-    class optimizer : public GOptimizerFunction {
+    // Likelihood function
+    class likelihood : public GOptimizerFunction {
     public:
         // Constructors and destructors
-        optimizer(void);
-        optimizer(GObservations* obs);
-        optimizer(const optimizer& fct);
-        ~optimizer(void);
+        likelihood(void);
+        likelihood(GObservations* obs);
+        likelihood(const likelihood& fct);
+        ~likelihood(void);
 
         // Operators
-        optimizer& operator=(const optimizer& fct);
+        likelihood& operator=(const likelihood& fct);
 
         // Implemented pure virtual base class methods
         double         value(void);
@@ -148,37 +148,31 @@ public:
         // Other methods
         void set(GObservations* obs);
         void eval(const GOptimizerPars& pars);
-        void poisson_unbinned(const GObservation&   obs,
-                              const GOptimizerPars& pars);
-        void poisson_unbinned(const GObservation&   obs,
-                              const GOptimizerPars& pars,
-                              GMatrixSparse&        covar,
-                              GVector&              mgrad,
-                              double&               value,
-                              GVector&              gradient);
-        void poisson_binned(const GObservation&   obs,
-                            const GOptimizerPars& pars);
-        void poisson_binned(const GObservation&   obs,
-                            const GOptimizerPars& pars,
-                            GMatrixSparse&        covar,
-                            GVector&              mgrad,
-                            double&               value,
-                            double&               npred,
-                            GVector&              gradient);
-        void gaussian_binned(const GObservation&   obs,
-                             const GOptimizerPars& pars);
-        void gaussian_binned(const GObservation&   obs,
-                             const GOptimizerPars& pars,
-                             GMatrixSparse&        covar,
-                             GVector&              mgrad,
-                             double&               value,
-                             double&               npred,
-                             GVector&              gradient);
+        void poisson_unbinned(const GObservation& obs,
+                              const GModels&      models,
+                              GMatrixSparse&      covar,
+                              GVector&            mgrad,
+                              double&             value,
+                              GVector&            gradient);
+        void poisson_binned(const GObservation& obs,
+                            const GModels&      models,
+                            GMatrixSparse&      covar,
+                            GVector&            mgrad,
+                            double&             value,
+                            double&             npred,
+                            GVector&            gradient);
+        void gaussian_binned(const GObservation& obs,
+                             const GModels&      models,
+                             GMatrixSparse&      covar,
+                             GVector&            mgrad,
+                             double&             value,
+                             double&             npred,
+                             GVector&            gradient);
 
     protected:
         // Protected methods
         void           init_members(void);
-        void           copy_members(const optimizer& fct);
+        void           copy_members(const likelihood& fct);
         void           free_members(void);
 
         // Protected data members
@@ -193,7 +187,7 @@ public:
     };
 
     // Optimizer access method
-    const GObservations::optimizer& function(void) const;
+    const GObservations::likelihood& function(void) const;
 
 protected:
     // Protected methods
@@ -206,7 +200,7 @@ protected:
     // Protected members
     std::vector<GObservation*> m_obs;    //!< List of observations
     GModels                    m_models; //!< List of models
-    GObservations::optimizer   m_fct;    //!< Optimizer function
+    GObservations::likelihood  m_fct;    //!< Optimizer function
 };
 
 
@@ -329,28 +323,28 @@ double GObservations::npred(void) const
 
 
 /***********************************************************************//**
- * @brief Return optimizer function
+ * @brief Return likelihood function
  *
- * @return Reference to optimizer function.
+ * @return Reference to likelihood function.
  *
- * Returns a reference to the optimizer function.
+ * Returns a reference to the likelihood function.
  ***************************************************************************/
 inline
-const GObservations::optimizer& GObservations::function(void) const
+const GObservations::likelihood& GObservations::function(void) const
 {
     return m_fct;
 }
 
 
 /***********************************************************************//**
- * @brief Return optimizer function value
+ * @brief Return likelihood function value
  *
- * @return Optimizer function value.
+ * @return Likelihood function value.
  *
- * Returns the actual function value of the optimizer.
+ * Returns the actual function value of the likelihood function.
  ***************************************************************************/
 inline
-double GObservations::optimizer::value(void)
+double GObservations::likelihood::value(void)
 {
     return m_value;
 }
@@ -365,7 +359,7 @@ double GObservations::optimizer::value(void)
  * they have been fitted to the data.
  ***************************************************************************/
 inline
-double GObservations::optimizer::npred(void) const
+double GObservations::likelihood::npred(void) const
 {
     return m_npred;
 }
@@ -379,7 +373,7 @@ double GObservations::optimizer::npred(void) const
  * Returns a pointer to the parameter gradient vector.
  ***************************************************************************/
 inline
-GVector* GObservations::optimizer::gradient(void)
+GVector* GObservations::likelihood::gradient(void)
 {
     return m_gradient;
 }
@@ -393,7 +387,7 @@ GVector* GObservations::optimizer::gradient(void)
  * Returns a pointer to the parameter covariance matrix.
  ***************************************************************************/
 inline
-GMatrixSparse* GObservations::optimizer::covar(void)
+GMatrixSparse* GObservations::likelihood::covar(void)
 {
     return m_covar;
 }
@@ -408,7 +402,7 @@ GMatrixSparse* GObservations::optimizer::covar(void)
  * class should be used.
  ***************************************************************************/
 inline
-void GObservations::optimizer::set(GObservations* obs)
+void GObservations::likelihood::set(GObservations* obs)
 {
     m_this = obs;
     return;

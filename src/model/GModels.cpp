@@ -37,8 +37,7 @@
 #include "GXmlElement.hpp"
 
 /* __ Method name definitions ____________________________________________ */
-#define G_ACCESS1                                 "GModels::operator[](int&)"
-#define G_ACCESS2                         "GModels::operator[](std::string&)"
+#define G_ACCESS                          "GModels::operator[](std::string&)"
 #define G_AT                                              "GModels::at(int&)"
 #define G_SET1                                  "GModels::set(int&, GModel&)"
 #define G_SET2                          "GModels::set(std::string&, GModel&)"
@@ -66,7 +65,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GModels::GModels(void) : GOptimizerPars()
+GModels::GModels(void)
 {
     // Initialise members
     init_members();
@@ -81,7 +80,7 @@ GModels::GModels(void) : GOptimizerPars()
  *
  * @param[in] models Model container.
  ***************************************************************************/
-GModels::GModels(const GModels& models) : GOptimizerPars(models)
+GModels::GModels(const GModels& models)
 {
     // Initialise members
     init_members();
@@ -140,13 +139,10 @@ GModels::~GModels(void)
  * @param[in] models Model container.
  * @return Model container.
  ***************************************************************************/
-GModels& GModels::operator= (const GModels& models)
+GModels& GModels::operator=(const GModels& models)
 {
     // Execute only if object is not identical
     if (this != &models) {
-
-        // Copy base class members
-        this->GOptimizerPars::operator=(models);
 
         // Free members
         free_members();
@@ -181,7 +177,7 @@ GModel* GModels::operator[](const std::string& name)
 
     // Throw exception if model name was not found
     if (index == -1) {
-        throw GException::model_not_found(G_ACCESS2, name);
+        throw GException::model_not_found(G_ACCESS, name);
     }
 
     // Return pointer
@@ -206,7 +202,7 @@ const GModel* GModels::operator[](const std::string& name) const
 
     // Throw exception if model name was not found
     if (index == -1) {
-        throw GException::model_not_found(G_ACCESS2, name);
+        throw GException::model_not_found(G_ACCESS, name);
     }
 
     // Return pointer
@@ -229,10 +225,8 @@ void GModels::clear(void)
 {
     // Free class members (base and derived classes, derived class first)
     free_members();
-    this->GOptimizerPars::free_members();
 
     // Initialise members
-    this->GOptimizerPars::init_members();
     init_members();
 
     // Return
@@ -342,9 +336,6 @@ GModel* GModels::set(const int& index, const GModel& model)
     // Assign new model by cloning
     m_models[index] = model.clone();
 
-    // Set parameter pointers
-    set_pointers();
-
     // Return pointer to model
     return m_models[index];
 }
@@ -392,9 +383,6 @@ GModel* GModels::set(const std::string& name, const GModel& model)
     // Assign new model by cloning
     m_models[index] = model.clone();
 
-    // Set parameter pointers
-    set_pointers();
-
     // Return pointer to model
     return m_models[index];
 }
@@ -430,9 +418,6 @@ GModel* GModels::append(const GModel& model)
 
     // Append deep copy of model
     m_models.push_back(ptr);
-
-    // Set parameter pointers
-    set_pointers();
 
     // Return pointer to model
     return ptr;
@@ -488,9 +473,6 @@ GModel* GModels::insert(const int& index, const GModel& model)
     // Inserts deep copy of model
     m_models.insert(m_models.begin()+index, ptr);
 
-    // Set parameter pointers
-    set_pointers();
-
     // Return pointer to model
     return ptr;
 }
@@ -539,9 +521,6 @@ GModel* GModels::insert(const std::string& name, const GModel& model)
     // Inserts deep copy of model
     m_models.insert(m_models.begin()+index, ptr);
 
-    // Set parameter pointers
-    set_pointers();
-
     // Return pointer to model
     return ptr;
 }
@@ -566,12 +545,12 @@ void GModels::remove(const int& index)
     }
     #endif
 
+    // Delete model
+    delete m_models[index];
+
     // Erase model component from container
     m_models.erase(m_models.begin() + index);
 
-    // Set parameter pointers
-    set_pointers();
-    
     // Return
     return;
 }
@@ -597,12 +576,12 @@ void GModels::remove(const std::string& name)
         throw GException::model_not_found(G_REMOVE2, name);
     }
 
+    // Delete model
+    delete m_models[index];
+
     // Erase model component from container
     m_models.erase(m_models.begin() + index);
 
-    // Set parameter pointers
-    set_pointers();
-    
     // Return
     return;
 }
@@ -647,9 +626,6 @@ void GModels::extend(const GModels& models)
             m_models.push_back(models[i]->clone());
 
         } // endfor: looped over all models
-
-        // Set parameter pointers
-        set_pointers();
 
     } // endif: model container was not empty
     
@@ -822,6 +798,55 @@ void GModels::write(GXml& xml) const
 
 
 /***********************************************************************//**
+ * @brief Return number of model parameters in container
+ *
+ * @return Number of model parameters in container.
+ ***************************************************************************/
+int GModels::npars(void) const
+{
+    // Initialise number of parameters
+    int npars = 0;
+
+    // Sum of number of parameters in model
+    for (int i = 0; i < size(); ++i) {
+        npars += m_models[i]->size();
+    }
+
+    // Return
+    return npars;
+}
+
+
+/***********************************************************************//**
+ * @brief Return optimizer parameter container
+ *
+ * @return Optimizer parameter container.
+ *
+ * Returns an optimizer parameter container that is built by extracting
+ * all model pointers from the model and attaching them to the parameter
+ * container. The optimizer parameter container will thus contains a flat
+ * array of a model parameters.
+ ***************************************************************************/
+GOptimizerPars GModels::pars(void)
+{
+    // Initialise parameter container
+    GOptimizerPars pars;
+
+    // Attach all parameters
+    for (int i = 0; i < size(); ++i) {
+        GModel* model = m_models[i];
+        int     npars = model->size();
+        for (int k = 0; k < npars; ++k) {
+            pars.attach(&((*model)[k]));
+        }
+    }
+
+    // Return
+    return pars;
+}
+
+
+/***********************************************************************//**
  * @brief Evaluate sum of all models
  *
  * @param[in] event Observed event.
@@ -942,9 +967,6 @@ void GModels::copy_members(const GModels& models)
         m_models.push_back((models.m_models[i]->clone()));
     }
 
-    // Set parameter pointers
-    set_pointers();
-
     // Return
     return;
 }
@@ -962,30 +984,6 @@ void GModels::free_members(void)
     for (int i = 0; i < m_models.size(); ++i) {
         delete m_models[i];
         m_models[i] = NULL;
-    }
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Set parameter pointers
- *
- * Gathers all parameter pointers from the models into a linear array of
- * GModelPar pointers. This exposes all model parameters to the base class
- * GOptimizerPars in form of a linear array.
- ***************************************************************************/
-void GModels::set_pointers(void)
-{
-    // Clear parameters
-    m_pars.clear();
-
-    // Gather all pointers
-    for (int i = 0; i < size(); ++i) {
-        for (int k = 0; k < m_models[i]->size(); ++k) {
-            m_pars.push_back(&(*m_models[i])[k]);
-        }
     }
 
     // Return

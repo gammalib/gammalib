@@ -542,6 +542,9 @@ void GSkyRegions::remove(const int& index)
     }
     #endif
 
+    // Delete region
+    delete m_regions[index];
+
     // Erase region component from container
     m_regions.erase(m_regions.begin() + index);
     
@@ -569,6 +572,9 @@ void GSkyRegions::remove(const std::string& name)
     if (index == -1) {
         throw GException::invalid_argument(G_REMOVE2, name);
     }
+
+    // Delete region
+    delete m_regions[index];
 
     // Erase region component from container
     m_regions.erase(m_regions.begin() + index);

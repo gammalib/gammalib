@@ -70,6 +70,7 @@ pkginclude_HEADERS = GammaLib.hpp \
                      GPar.hpp \
                      GOptimizer.hpp \
                      GOptimizerLM.hpp \
+                     GOptimizerPar.hpp \
                      GOptimizerPars.hpp \
                      GOptimizerFunction.hpp \
                      GTestSuite.hpp \

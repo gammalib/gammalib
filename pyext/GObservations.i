@@ -67,7 +67,7 @@ public:
     double         npred(void) const;
 
     // Optimizer access method
-    const GObservations::optimizer& function(void) const;
+    const GObservations::likelihood& function(void) const;
 };
 
 

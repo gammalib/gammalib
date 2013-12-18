@@ -20,13 +20,12 @@
  ***************************************************************************/
 /**
  * @file GModelPar.i
- * @brief Model parameter class Python interface
+ * @brief Model parameter class interface definition
  * @author Juergen Knoedlseder
  */
 %{
 /* Put headers and other declarations here that are needed for compilation */
 #include "GModelPar.hpp"
-#include "GTools.hpp"
 %}
 
 
@@ -35,69 +34,20 @@
  *
  * @brief Model parameter class
  ***************************************************************************/
-class GModelPar : public GBase {
-
+class GModelPar : public GOptimizerPar {
 public:
     // Constructors and destructors
     GModelPar(void);
-    explicit GModelPar(const std::string& name, const double& value);
-    explicit GModelPar(const std::string& name, const double& factor, const double& scale);
+    GModelPar(const std::string& name, const double& value);
+    GModelPar(const std::string& name, const double& factor,
+              const double& scale);
+    GModelPar(const GModelPar& par);
     virtual ~GModelPar(void);
 
-    // Attribute methods 
-    double value(void) const;
-    double error(void) const;
-    double gradient(void) const;
-    double min(void) const;
-    double max(void) const;
-    void   value(const double& value);
-    void   error(const double& error);
-    void   gradient(const double& gradient);
-    void   min(const double& min);
-    void   max(const double& max);
-    void   range(const double& min, const double& max);
-
-    // Factorization methods
-    const double& factor_value(void) const;
-    const double& factor_error(void) const;
-    const double& factor_gradient(void) const;
-    const double& factor_min(void) const;
-    const double& factor_max(void) const;
-    const double& scale(void) const;
-    void          factor_value(const double& value);
-    void          factor_error(const double& error);
-    void          factor_gradient(const double& gradient);
-    void          factor_min(const double& min);
-    void          factor_max(const double& max);
-    void          factor_range(const double& min, const double& max);
-    void          scale(const double& scale);
-
-    // Boundary methods
-    bool hasmin(void) const;
-    bool hasmax(void) const;
-    bool hasrange(void) const;
-    void remove_min(void);
-    void remove_max(void);
-    void remove_range(void);
-
-    // Property methods
-    bool isfree(void) const;
-    bool isfixed(void) const;
-    bool hasgrad(void) const;
-    void free(void);
-    void fix(void);
-    void hasgrad(const bool& grad);
-
-    // Other methods
-    void               clear(void);
-    GModelPar*         clone(void) const;
-    const std::string& name(void) const;
-    const std::string& unit(void) const;
-    void               name(const std::string& name);
-    void               unit(const std::string& unit);
-    void               autoscale(void);
-    void               read(const GXmlElement& xml);
-    void               write(GXmlElement& xml) const;
+    // Methods
+    GModelPar* clone(void) const;
+    void       read(const GXmlElement& xml);
+    void       write(GXmlElement& xml) const;
 };
 
 

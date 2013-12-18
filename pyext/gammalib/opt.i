@@ -49,5 +49,6 @@
 /* __ Optimizer module ___________________________________________________ */
 %include "GOptimizer.i"
 %include "GOptimizerLM.i"
+%include "GOptimizerPar.i"
 %include "GOptimizerPars.i"
 //%include "GOptimizerFunction.i"

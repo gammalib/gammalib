@@ -400,6 +400,9 @@ void GObservations::remove(const int& index)
     }
     #endif
 
+    // Delete observation
+    delete m_obs[index];
+
     // Erase observation component from container
     m_obs.erase(m_obs.begin() + index);
 
@@ -707,8 +710,11 @@ void GObservations::models(const std::string& filename)
  ***************************************************************************/
 void GObservations::optimize(GOptimizer& opt)
 {
+    // Extract optimizer parameter container from model container
+    GOptimizerPars pars = m_models.pars();
+
     // Optimize model parameters
-    opt.optimize(m_fct, m_models);
+    opt.optimize(m_fct, pars);
 
     // Return
     return;
