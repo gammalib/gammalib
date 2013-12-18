@@ -47,12 +47,13 @@ protected:
 };
 void function::eval(const GOptimizerPars& pars)
 {
-    const double a = 2.0;
-    const double b = 5.0;
-    const double c = 1.0;
-    double x       = pars.par(0).value();
+    const double a =  2.0;
+    const double b = -4.0;
+    const double c =  2.0;
+    double x       = pars[0]->value();
     m_value        = a*x*x + b*x + c;
-    m_gradient[0]  = 2*a*x + b;
+    m_gradient[0]  = 2.0*a*x + b;
+    m_covar(0,0)   = m_gradient[0] * m_gradient[0];
 };
 
 
@@ -63,22 +64,27 @@ void function::eval(const GOptimizerPars& pars)
  ***************************************************************************/
 int main(void) {
 
+    // Allocate logger
+    GLog log;
+    log.cout(true);
+    
     // Allocate optimizer
+    //GOptimizerLM opt(log);
     GOptimizerLM opt;
 
     // Allocate function
-    function fct();
+    function fct;
 
     // Allocate parameters and set initial value
     GOptimizerPars pars(1);
-    pars[0].value(3.0);
+    pars[0]->value(1.5);
 
     // Optimize parameters
     opt.optimize(fct, pars);
 
     // Print derivatives
-    std::cout << "Function value: " << fct.value() << std::endl;
-    std::cout << "Parameter ....: " << pars[0].value() << std::endl;
+    std::cout << "Function value .....: " << fct.value() << std::endl;
+    std::cout << "Parameter value ....: " << pars[0]->value() << std::endl;
 
     // Exit
     return 0;

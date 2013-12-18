@@ -38,6 +38,7 @@ class GOptimizerPars : public GContainer {
 public:
     // Constructors and destructors
     GOptimizerPars(void);
+    explicit GOptimizerPars(const int& number);
     GOptimizerPars(const GOptimizerPars& pars);
     virtual ~GOptimizerPars(void);
 

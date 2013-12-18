@@ -64,6 +64,29 @@ GOptimizerPars::GOptimizerPars(void)
 
 
 /***********************************************************************//**
+ * @brief Parameter constructor
+ *
+ * @param[in] number Number of parameters to allocate.
+ *
+ * Allocates @p number parameters in the parameter container.
+ ***************************************************************************/
+GOptimizerPars::GOptimizerPars(const int& number)
+{
+    // Initialise members
+    init_members();
+
+    // Allocate parameters
+    for (int i = 0; i < number; ++i) {
+        m_alloc.push_back(true);
+        m_pars.push_back(new GOptimizerPar);
+    }
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
  * @brief Copy constructor
  *
  * @param[in] pars Optimizer parameters.
