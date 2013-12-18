@@ -400,6 +400,9 @@ void GObservations::remove(const int& index)
     }
     #endif
 
+    // Delete observation
+    delete m_obs[index];
+
     // Erase observation component from container
     m_obs.erase(m_obs.begin() + index);
 

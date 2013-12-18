@@ -857,6 +857,9 @@ void GFits::remove(const int& extno)
         throw GException::invalid_argument(G_REMOVE1, msg);
     }
 
+    // Delete HDU
+    if (m_hdu[extno] != NULL) delete m_hdu[extno];
+
     // Erase HDU from FITS file
     m_hdu.erase(m_hdu.begin() + extno);
 
