@@ -1,5 +1,5 @@
 /***************************************************************************
- *   GObservations_optimizer.cpp - Optimizer class of observations class   *
+ *   GObservations_optimizer.cpp - Likelihood class of observations class  *
  * ----------------------------------------------------------------------- *
  *  copyright (C) 2009-2013 by Juergen Knoedlseder                         *
  * ----------------------------------------------------------------------- *
@@ -20,7 +20,7 @@
  ***************************************************************************/
 /**
  * @file GObservations_optimizer.cpp
- * @brief Model parameter optimization class implementation
+ * @brief Likelihood function class implementation
  * @author Juergen Knoedlseder
  */
 
@@ -41,7 +41,7 @@
 #endif
 
 /* __ Method name definitions ____________________________________________ */
-#define G_EVAL              "GObservations::optimizer::eval(GOptimizerPars&)"
+#define G_EVAL             "GObservations::likelihood::eval(GOptimizerPars&)"
 
 /* __ Macros _____________________________________________________________ */
 
@@ -64,7 +64,7 @@
 /***********************************************************************//**
  * @brief Void constructor
  ***************************************************************************/
-GObservations::optimizer::optimizer(void) : GOptimizerFunction()
+GObservations::likelihood::likelihood(void) : GOptimizerFunction()
 {
     // Initialise members
     init_members();
@@ -83,7 +83,7 @@ GObservations::optimizer::optimizer(void) : GOptimizerFunction()
  * pointer to the observation container in the m_this member, making the
  * observation container accessible to the optimizer class.
  ***************************************************************************/
-GObservations::optimizer::optimizer(GObservations *obs) : GOptimizerFunction()
+GObservations::likelihood::likelihood(GObservations *obs) : GOptimizerFunction()
 {
     // Initialise members
     init_members();
@@ -102,8 +102,8 @@ GObservations::optimizer::optimizer(GObservations *obs) : GOptimizerFunction()
  *
  * @param[in] fct Optimizer function.
  ***************************************************************************/
-GObservations::optimizer::optimizer(const optimizer& fct) :
-                          GOptimizerFunction(fct)
+GObservations::likelihood::likelihood(const likelihood& fct) :
+                           GOptimizerFunction(fct)
 {
     // Initialise members
     init_members();
@@ -119,7 +119,7 @@ GObservations::optimizer::optimizer(const optimizer& fct) :
 /***********************************************************************//**
  * @brief Destructor
  ***************************************************************************/
-GObservations::optimizer::~optimizer(void)
+GObservations::likelihood::~likelihood(void)
 {
     // Free members
     free_members();
@@ -138,10 +138,10 @@ GObservations::optimizer::~optimizer(void)
 /***********************************************************************//**
  * @brief Assignment operator
  *
- * @param[in] fct Optimizer function.
- * @return Optimizer function.
+ * @param[in] fct Likelihood function.
+ * @return Likelihood function.
  ***************************************************************************/
-GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& fct)
+GObservations::likelihood& GObservations::likelihood::operator=(const likelihood& fct)
 {
     // Execute only if object is not identical
     if (this != &fct) {
@@ -185,7 +185,7 @@ GObservations::optimizer& GObservations::optimizer::operator= (const optimizer& 
  * Note that different statistics and different analysis methods
  * (binned/unbinned) may be combined.
  ***************************************************************************/
-void GObservations::optimizer::eval(const GOptimizerPars& pars) 
+void GObservations::likelihood::eval(const GOptimizerPars& pars) 
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -462,12 +462,12 @@ void GObservations::optimizer::eval(const GOptimizerPars& pars)
  * and the curvature matrix
  * \f$\delta^2 L/dp_1 dp_2\f$.
  ***************************************************************************/
-void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
-                                                const GModels&      models,
-                                                GMatrixSparse&      covar,
-                                                GVector&            gradient,
-                                                double&             value,
-                                                GVector&            wrk_grad)
+void GObservations::likelihood::poisson_unbinned(const GObservation& obs,
+                                                 const GModels&      models,
+                                                 GMatrixSparse&      covar,
+                                                 GVector&            gradient,
+                                                 double&             value,
+                                                 GVector&            wrk_grad)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -596,13 +596,13 @@ void GObservations::optimizer::poisson_unbinned(const GObservation& obs,
  * \f$\delta^2 L/dp_1 dp_2\f$
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
-void GObservations::optimizer::poisson_binned(const GObservation& obs,
-                                              const GModels&      models,
-                                              GMatrixSparse&      covar,
-                                              GVector&            gradient,
-                                              double&             value,
-                                              double&             npred,
-                                              GVector&            wrk_grad)
+void GObservations::likelihood::poisson_binned(const GObservation& obs,
+                                               const GModels&      models,
+                                               GMatrixSparse&      covar,
+                                               GVector&            gradient,
+                                               double&             value,
+                                               double&             npred,
+                                               GVector&            wrk_grad)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -819,13 +819,13 @@ void GObservations::optimizer::poisson_binned(const GObservation& obs,
  * \f$\delta^2 L/dp_1 dp_2\f$
  * and also updates the total number of predicted events m_npred.
  ***************************************************************************/
-void GObservations::optimizer::gaussian_binned(const GObservation& obs,
-                                               const GModels&      models,
-                                               GMatrixSparse&      covar,
-                                               GVector&            gradient,
-                                               double&             value,
-                                               double&             npred,
-                                               GVector&            wrk_grad)
+void GObservations::likelihood::gaussian_binned(const GObservation& obs,
+                                                const GModels&      models,
+                                                GMatrixSparse&      covar,
+                                                GVector&            gradient,
+                                                double&             value,
+                                                double&             npred,
+                                                GVector&            wrk_grad)
 {
     // Timing measurement
     #if G_EVAL_TIMING
@@ -959,7 +959,7 @@ void GObservations::optimizer::gaussian_binned(const GObservation& obs,
 /***********************************************************************//**
  * @brief Initialise class members
  ***************************************************************************/
-void GObservations::optimizer::init_members(void)
+void GObservations::likelihood::init_members(void)
 {
     // Initialise members
     m_value     = 0.0;
@@ -981,7 +981,7 @@ void GObservations::optimizer::init_members(void)
  *
  * @param[in] fct Optimizer.
  ***************************************************************************/
-void GObservations::optimizer::copy_members(const optimizer& fct)
+void GObservations::likelihood::copy_members(const likelihood& fct)
 {
     // Copy attributes
     m_value  = fct.m_value;
@@ -1007,7 +1007,7 @@ void GObservations::optimizer::copy_members(const optimizer& fct)
 /***********************************************************************//**
  * @brief Delete class members
  ***************************************************************************/
-void GObservations::optimizer::free_members(void)
+void GObservations::likelihood::free_members(void)
 {
     // Free members
     if (m_gradient != NULL) delete m_gradient;
