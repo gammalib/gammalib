@@ -882,6 +882,11 @@ void GTestSuite::copy_members(const GTestSuite& suite)
     m_errors     = suite.m_errors;
     m_log        = suite.m_log;
     m_timestamp  = suite.m_timestamp;
+
+    // Clone test cases
+    for (int i = 0; i < m_tests.size(); ++i) {
+        m_tests[i] = suite.m_tests[i]->clone(); 
+    }
     
     // Return
     return;
