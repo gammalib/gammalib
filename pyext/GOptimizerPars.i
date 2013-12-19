@@ -45,12 +45,22 @@ public:
     // Methods
     void            clear(void);
     GOptimizerPars* clone(void) const;
+    GOptimizerPar*  at(const int& index);
     int             size(void) const;
     bool            isempty(void) const;
     int             nfree(void) const;
+    GOptimizerPar*  set(const int& index, const GOptimizerPar& par);
+    GOptimizerPar*  set(const std::string& name, const GOptimizerPar& par);
     void            attach(GOptimizerPar *par);
+    void            attach(const int& index, GOptimizerPar* par);
+    void            attach(const std::string& name, GOptimizerPar* par);
+    GOptimizerPar*  insert(const int& index, const GOptimizerPar& par);
+    GOptimizerPar*  insert(const std::string& name, const GOptimizerPar& par);
     void            remove(const int& index);
+    void            remove(const std::string& name);
     void            reserve(const int& num);
+    void            extend(const GOptimizerPars& pars);
+    bool            contains(const std::string& name) const;
 };
 
 
@@ -70,10 +80,9 @@ public:
     GOptimizerPar* __getitem__(const std::string& name) {
         return (*self)[name];
     }
-/*
-    void __setitem__(const int& index, const GOptimizerPar& val) {
+    void __setitem__(const int& index, GOptimizerPar* par) {
         if (index >= 0 && index < self->size()) {
-            self->set(index, val);
+            self->attach(index, par);
             return;
         }
         else {
@@ -81,11 +90,10 @@ public:
                                            index, self->size());
         }
     }
-    void __setitem__(const std::string& name, const GOptimizerPar& val) {
-        self->set(name, val);
+    void __setitem__(const std::string& name, GOptimizerPar* par) {
+        self->attach(name, par);
         return;
     }
-*/
     GOptimizerPars copy() {
         return (*self);
     }

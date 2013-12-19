@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-13 December 2013
+19 December 2013
 
 
 1. Introduction
@@ -467,6 +467,15 @@ initialization problem of static variables and allow using of the
 GRegistryPointer smart pointer, removing memory leaks on exit of
 GammaLib.
 
+The GModels class no longer derives from GOptimizerPars, but now is
+a full-blown container deriving from GContainer. The pars() method
+has been added that returns an optimizer parameter container that
+holds all model parameters in a plain array.
+
+The GModelPar class now derives from GOptimizerPar. For the moment,
+the only methods that GModelPar implements with respect to
+GOptimizerPar are the XML read() and write() methods.
+
 
 9. Numerics module
 ------------------
@@ -492,7 +501,12 @@ objects.
 
 11. Optimization module
 -----------------------
-None
+Introduce the GOptimizerPar class to represent a general parameter of
+the optimizer function. The class was essentially copied from GModelPar.
+GModelPar now derives from this class.
+
+The GOptimizerPars is now a full blown container class that holds
+GOptimizerPar objects.
 
 
 12. Sky module

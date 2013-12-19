@@ -34,7 +34,16 @@
 
 /* __ Method name definitions ____________________________________________ */
 #define G_ACCESS                   "GOptimizerPars::operator[](std::string&)"
+#define G_AT1                                      "GOptimizerPars::at(int&)"
+#define G_AT2                              "GOptimizerPars::at(std::string&)"
+#define G_SET1                    "GOptimizerPars::set(int&, GOptimizerPar&)"
+#define G_SET2            "GOptimizerPars::set(std::string&, GOptimizerPar&)"
+#define G_ATTACH1              "GOptimizerPars::attach(int&, GOptimizerPar*)"
+#define G_ATTACH2      "GOptimizerPars::attach(std::string&, GOptimizerPar*)"
+#define G_INSERT1              "GOptimizerPars::insert(int&, GOptimizerPar&)"
+#define G_INSERT2      "GOptimizerPars::insert(std::string&, GOptimizerPar&)"
 #define G_REMOVE1                              "GOptimizerPars::remove(int&)"
+#define G_REMOVE2                      "GOptimizerPars::remove(std::string&)"
 
 
 /* __ Macros _____________________________________________________________ */
@@ -242,6 +251,56 @@ GOptimizerPars* GOptimizerPars::clone(void) const
 
 
 /***********************************************************************//**
+ * @brief Return pointer to parameter
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Pointer to parameter.
+ *
+ * @exception GException::out_of_range
+ *            Extension number is out of range.
+ *
+ * Returns a pointer to the parameter with the specified @p index.
+ ***************************************************************************/
+GOptimizerPar* GOptimizerPars::at(const int& index)
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT1, "Parameter index", index, size());
+    }
+    #endif
+
+    // Return pointer
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
+ * @brief Return pointer to parameter (const version)
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Pointer to parameter.
+ *
+ * @exception GException::out_of_range
+ *            Extension number is out of range.
+ *
+ * Returns a pointer to the parameter with the specified @p index.
+ ***************************************************************************/
+const GOptimizerPar* GOptimizerPars::at(const int& index) const
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_AT1, "Parameter index", index, size());
+    }
+    #endif
+
+    // Return pointer
+    return (m_pars[index]);
+}
+
+
+/***********************************************************************//**
  * @brief Return number of free parameters
  *
  * @return Number of free parameters.
@@ -267,11 +326,77 @@ int GOptimizerPars::nfree(void) const
 
 
 /***********************************************************************//**
+ * @brief Set parameter in container
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] par Parameter.
+ * @return Pointer to deep copy of parameter.
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ *
+ * Set parameter in the container. A deep copy of the parameter will be made.
+ ***************************************************************************/
+GOptimizerPar* GOptimizerPars::set(const int& index, const GOptimizerPar& par)
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_SET1, "Parameter index", index, size());
+    }
+    #endif
+
+    // Delete parameter if it has been allocated
+    if (m_alloc[index]) {
+        delete m_pars[index];
+    }
+
+    // Clone parameter
+    GOptimizerPar* ptr = par.clone();
+
+    // Set parameter
+    m_alloc[index] = true;
+    m_pars[index]  = ptr;
+
+    // Return parameter pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Set parameter in container
+ *
+ * @param[in] name Parameter name.
+ * @param[in] par Parameter.
+ * @return Pointer to deep copy of parameter.
+ *
+ * @exception GException::invalid_argument
+ *            Specified parameter @p name not found in container.
+ ***************************************************************************/
+GOptimizerPar* GOptimizerPars::set(const std::string& name, const GOptimizerPar& par)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if model name was not found
+    if (index == -1) {
+        std::string msg = "Parameter \""+name+"\" not found in parameter"
+                          " container.\nPlease specify a valid parameter"
+                          " name.";
+        throw GException::invalid_argument(G_SET2, msg);
+    }
+
+    // Set parameter
+    return set(index, par);
+}
+
+
+/***********************************************************************//**
  * @brief Attach parameter to container
  *
  * @param[in] par Parameter pointer.
  ***************************************************************************/
-void GOptimizerPars::attach(GOptimizerPar *par)
+void GOptimizerPars::attach(GOptimizerPar* par)
 {
     // Push pointer in vector if it is valid
     if (par != NULL) {
@@ -281,6 +406,134 @@ void GOptimizerPars::attach(GOptimizerPar *par)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Attach parameter to container at the specified index
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] par Parameter pointer.
+ *
+ * @exception GException::out_of_range
+ *            Parameter @p index is not valid.
+ *
+ * Attaches parameter pointer at the specified @p index.
+ ***************************************************************************/
+void GOptimizerPars::attach(const int& index, GOptimizerPar* par)
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_ATTACH1, "Parameter index", index, size());
+    }
+    #endif
+
+    // Delete parameter if it has been allocated
+    if (m_alloc[index]) {
+        delete m_pars[index];
+    }
+
+    // Set parameter
+    m_alloc[index] = false;
+    m_pars[index]  = par;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Attach parameter to container at the specified index
+ *
+ * @param[in] name Parameter name.
+ * @param[in] par Parameter pointer.
+ *
+ * @exception GException::out_of_range
+ *            Parameter @p index is not valid.
+ *
+ * Attaches parameter pointer at the specified @p index.
+ ***************************************************************************/
+void GOptimizerPars::attach(const std::string& name, GOptimizerPar* par)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if model name was not found
+    if (index == -1) {
+        std::string msg = "Parameter \""+name+"\" not found in parameter"
+                          " container.\nPlease specify a valid parameter"
+                          " name.";
+        throw GException::invalid_argument(G_ATTACH2, msg);
+    }
+
+    // Remove parameter
+    attach(index, par);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert parameter into container
+ *
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @param[in] par Parameter.
+ * @return Pointer to deep copy of parameter.
+ *
+ * @exception GException::out_of_range
+ *            Parameter index is out of range.
+ *
+ * Set parameter in the container. A deep copy of the parameter will be made.
+ ***************************************************************************/
+GOptimizerPar* GOptimizerPars::insert(const int& index, const GOptimizerPar& par)
+{
+    // Compile option: raise an exception if index is out of range
+    #if defined(G_RANGE_CHECK)
+    if (index < 0 || index >= size()) {
+        throw GException::out_of_range(G_INSERT1, "Parameter index", index, size());
+    }
+    #endif
+
+    // Clone parameter
+    GOptimizerPar* ptr = par.clone();
+
+    // Inserts deep copy of parameter
+    m_alloc.insert(m_alloc.begin()+index, true);
+    m_pars.insert(m_pars.begin()+index, ptr);
+
+    // Return parameter pointer
+    return ptr;
+}
+
+
+/***********************************************************************//**
+ * @brief Insert parameter into container
+ *
+ * @param[in] name Parameter name.
+ * @param[in] par Parameter.
+ * @return Pointer to deep copy of parameter.
+ *
+ * @exception GException::invalid_argument
+ *            Specified parameter @p name not found in container.
+ ***************************************************************************/
+GOptimizerPar* GOptimizerPars::insert(const std::string& name,
+                                      const GOptimizerPar& par)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if model name was not found
+    if (index == -1) {
+        std::string msg = "Parameter \""+name+"\" not found in parameter"
+                          " container.\nPlease specify a valid parameter"
+                          " name.";
+        throw GException::invalid_argument(G_INSERT2, msg);
+    }
+
+    // Insert parameter
+    return insert(index, par);
 }
 
 
@@ -315,6 +568,90 @@ void GOptimizerPars::remove(const int& index)
 
     // Return
     return;
+}
+
+
+/***********************************************************************//**
+ * @brief Remove parameter from container
+ *
+ * @param[in] name Parameter name.
+ *
+ * @exception GException::invalid_argument
+ *            Specified parameter @p name not found in container.
+ ***************************************************************************/
+void GOptimizerPars::remove(const std::string& name)
+{
+    // Get parameter index
+    int index = get_index(name);
+
+    // Throw exception if model name was not found
+    if (index == -1) {
+        std::string msg = "Parameter \""+name+"\" not found in parameter"
+                          " container.\nPlease specify a valid parameter"
+                          " name.";
+        throw GException::invalid_argument(G_REMOVE2, msg);
+    }
+
+    // Remove parameter
+    remove(index);
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Append parameter container
+ *
+ * @param[in] pars Parameter container.
+ *
+ * Append parameter container to the container. All parameters that were
+ * allocated within @p pars will be clones, for the other parameters, the
+ * pointers will be copied.
+ ***************************************************************************/
+void GOptimizerPars::extend(const GOptimizerPars& pars)
+{
+    // Do nothing if parameter container is empty
+    if (!pars.isempty()) {
+
+        // Get size. Note that we extract the size first to avoid an
+        // endless loop that arises when a container is appended to
+        // itself.
+        int num = pars.size();
+
+        // Reserve enough space
+        reserve(size() + num);
+
+        // Loop over all parameters 
+        for (int i = 0; i < num; ++i) {
+            GOptimizerPar* par = (pars.m_alloc[i]) ? pars.m_pars[i]->clone()
+                                                   : pars.m_pars[i];
+            m_pars.push_back(par);
+        }
+
+    } // endif: parameter container was not empty
+    
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Signals if parameter name exists
+ *
+ * @param[in] name Parameter name.
+ * @return True if parameter with specified @p name exists.
+ *
+ * Searches all parameter names for a match with the specified @p name. If
+ * the specified name has been found, true is returned.
+ ***************************************************************************/
+bool GOptimizerPars::contains(const std::string& name) const
+{
+    // Get model index
+    int index = get_index(name);
+
+    // Return
+    return (index != -1);
 }
 
 

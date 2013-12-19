@@ -29,6 +29,7 @@
 
 /* __ Includes ___________________________________________________________ */
 #include <string>
+#include <vector>
 #include "GContainer.hpp"
 #include "GOptimizerPar.hpp"
 
@@ -64,15 +65,26 @@ public:
     const GOptimizerPar* operator[](const std::string& name) const;
 
     // Methods
-    void            clear(void);
-    GOptimizerPars* clone(void) const;
-    int             size(void) const;
-    bool            isempty(void) const;
-    int             nfree(void) const;
-    void            attach(GOptimizerPar *par);
-    void            remove(const int& index);
-    void            reserve(const int& num);
-    std::string     print(const GChatter& chatter = NORMAL) const;
+    void                 clear(void);
+    GOptimizerPars*      clone(void) const;
+    GOptimizerPar*       at(const int& index);
+    const GOptimizerPar* at(const int& index) const;
+    int                  size(void) const;
+    bool                 isempty(void) const;
+    int                  nfree(void) const;
+    GOptimizerPar*       set(const int& index, const GOptimizerPar& par);
+    GOptimizerPar*       set(const std::string& name, const GOptimizerPar& par);
+    void                 attach(GOptimizerPar* par);
+    void                 attach(const int& index, GOptimizerPar* par);
+    void                 attach(const std::string& name, GOptimizerPar* par);
+    GOptimizerPar*       insert(const int& index, const GOptimizerPar& par);
+    GOptimizerPar*       insert(const std::string& name, const GOptimizerPar& par);
+    void                 remove(const int& index);
+    void                 remove(const std::string& name);
+    void                 reserve(const int& num);
+    void                 extend(const GOptimizerPars& pars);
+    bool                 contains(const std::string& name) const;
+    std::string          print(const GChatter& chatter = NORMAL) const;
 
 protected:
     // Protected methods
@@ -88,11 +100,12 @@ protected:
 
 
 /***********************************************************************//**
- * @brief Return pointer to model
+ * @brief Return pointer to parameter
  *
- * @param[in] index Model index [0,...,size()-1].
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Pointer to parameter.
  *
- * Returns a pointer to the model with the specified @p index.
+ * Returns a pointer to the parameter with the specified @p index.
  ***************************************************************************/
 inline
 GOptimizerPar* GOptimizerPars::operator[](const int& index)
@@ -102,11 +115,12 @@ GOptimizerPar* GOptimizerPars::operator[](const int& index)
 
 
 /***********************************************************************//**
- * @brief Return pointer to model (const version)
+ * @brief Return pointer to parameter (const version)
  *
- * @param[in] index Model index [0,...,size()-1].
+ * @param[in] index Parameter index [0,...,size()-1].
+ * @return Pointer to parameter.
  *
- * Returns a const pointer to the model with the specified @p index.
+ * Returns a pointer to the parameter with the specified @p index.
  ***************************************************************************/
 inline
 const GOptimizerPar* GOptimizerPars::operator[](const int& index) const
@@ -116,11 +130,11 @@ const GOptimizerPar* GOptimizerPars::operator[](const int& index) const
 
 
 /***********************************************************************//**
- * @brief Return number of models in container
+ * @brief Return number of parameters in container
  *
- * @return Number of models in container.
+ * @return Number of parameters in container.
  *
- * Returns the number of models in the model container.
+ * Returns the number of parameters in the parameter container.
  ***************************************************************************/
 inline
 int GOptimizerPars::size(void) const
@@ -130,11 +144,11 @@ int GOptimizerPars::size(void) const
 
 
 /***********************************************************************//**
- * @brief Signals if there are no models in container
+ * @brief Signals if there are no parameters in container
  *
  * @return True if container is empty, false otherwise.
  *
- * Signals if the model container does not contain any model.
+ * Signals if the parameters container does not contain any parameter.
  ***************************************************************************/
 inline
 bool GOptimizerPars::isempty(void) const
@@ -144,11 +158,11 @@ bool GOptimizerPars::isempty(void) const
 
 
 /***********************************************************************//**
- * @brief Reserves space for models in container
+ * @brief Reserves space for parameters in container
  *
- * @param[in] num Number of models
+ * @param[in] num Number of parameters.
  *
- * Reserves space for @p num models in the container.
+ * Reserves space for @p num parameters in the container.
  ***************************************************************************/
 inline
 void GOptimizerPars::reserve(const int& num)
