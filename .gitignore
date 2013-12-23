@@ -81,6 +81,7 @@ examples/cpp/createxml/my_xml_file.xml
 examples/cpp/readmodel/readmodel
 examples/cpp/numerics/numerics
 examples/cpp/optimize/optimize
+examples/cpp/interpolate/interpolate
 
 # Binaries
 test/test_GApplication

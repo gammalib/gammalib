@@ -924,7 +924,7 @@ std::string GTestSuite::format_name(const std::string& name)
 
     // Set name of the try blocks
     if (!m_stack_try.empty()) {
-        format_name += m_stack_try.back()->name();
+        format_name = m_stack_try.back()->name();
     }
     else {
         // Set name of the test
