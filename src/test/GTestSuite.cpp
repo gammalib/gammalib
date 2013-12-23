@@ -875,7 +875,6 @@ void GTestSuite::copy_members(const GTestSuite& suite)
     m_name       = suite.m_name;
     m_names      = suite.m_names;
     m_functions  = suite.m_functions;
-    m_stack_try  = suite.m_stack_try;
     m_index      = suite.m_index;
     m_failures   = suite.m_failures;
     m_errors     = suite.m_errors;
@@ -883,8 +882,13 @@ void GTestSuite::copy_members(const GTestSuite& suite)
     m_timestamp  = suite.m_timestamp;
 
     // Clone test cases
-    for (int i = 0; i < m_tests.size(); ++i) {
+    for (int i = 0; i < suite.m_tests.size(); ++i) {
         m_tests[i] = suite.m_tests[i]->clone(); 
+    }
+
+    // Clone try stack
+    for (int i = 0; i < suite.m_stack_try.size(); ++i) {
+        m_stack_try[i] = suite.m_stack_try[i]->clone(); 
     }
     
     // Return
@@ -901,6 +905,12 @@ void GTestSuite::free_members(void)
     for (int i = 0; i < m_tests.size(); ++i) {
         delete m_tests[i];
         m_tests[i] = NULL;
+    }
+
+    // Delete try stack
+    for (int i = 0; i < m_stack_try.size(); ++i) {
+        delete m_stack_try[i];
+        m_stack_try[i] = NULL;
     }
 
     // Close logger
