@@ -844,8 +844,8 @@ void GTestSuite::init_members(void)
 {
     // Initialise members
     m_name      = "Unnamed Test Suite";
-    m_functions.clear();
     m_names.clear();
+    m_functions.clear();
     m_tests.clear();
     m_stack_try.clear();
     m_index     = 0;
@@ -873,9 +873,8 @@ void GTestSuite::copy_members(const GTestSuite& suite)
 {
     // Copy members
     m_name       = suite.m_name;
-    m_functions  = suite.m_functions;
     m_names      = suite.m_names;
-    m_tests      = suite.m_tests;
+    m_functions  = suite.m_functions;
     m_stack_try  = suite.m_stack_try;
     m_index      = suite.m_index;
     m_failures   = suite.m_failures;
@@ -900,7 +899,8 @@ void GTestSuite::free_members(void)
 {
     // Delete test cases
     for (int i = 0; i < m_tests.size(); ++i) {
-        delete m_tests[i]; 
+        delete m_tests[i];
+        m_tests[i] = NULL;
     }
 
     // Close logger
