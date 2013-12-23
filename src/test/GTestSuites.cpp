@@ -566,10 +566,14 @@ void GTestSuites::init_members(void)
 void GTestSuites::copy_members(const GTestSuites& suites)
 {
     // Copy members
-    m_name       = suites.m_name;
-    m_testsuites = suites.m_testsuites;
-    m_timestamp  = suites.m_timestamp;
-    m_log        = suites.m_log;
+    m_name      = suites.m_name;
+    m_timestamp = suites.m_timestamp;
+    m_log       = suites.m_log;
+
+    // Clone test suites
+    for (int i = 0; i < suites.m_testsuites.size(); ++i) {
+        m_testsuites[i] = suites.m_testsuites[i]->clone(); 
+    }
 
     // Return
     return;
@@ -581,6 +585,12 @@ void GTestSuites::copy_members(const GTestSuites& suites)
  ***************************************************************************/
 void GTestSuites::free_members(void)
 {
+    // Delete test cases
+    for (int i = 0; i < m_testsuites.size(); ++i) {
+        delete m_testsuites[i];
+        m_testsuites[i] = NULL;
+    }
+
     // Close logger
     m_log.close();
     
