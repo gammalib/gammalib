@@ -623,13 +623,6 @@ void GTestSuite::test_try_success(void)
 void GTestSuite::test_try_failure(const std::string& message,
                                   const std::string& type)
 {
-    /*
-    // If the stack is empty
-    if (m_stack_try.empty()) {
-        throw GException::test_nested_try_error(G_TRY_FAILURE1,
-              "Called "G_TRY_FAILURE1" without a previous call to test_try()");
-    }
-    */
     // If the stack is empty then create an eception test case
     if (m_stack_try.empty()) {
         GTestCase* testcase = new GTestCase(GTestCase::ERROR_TEST, "Exception test");
@@ -691,19 +684,6 @@ void GTestSuite::test_try_failure(const std::string& message,
  ***************************************************************************/
 void GTestSuite::test_try_failure(const std::exception& e)
 {
-    // If the stack is empty
-    /*
-    if (m_stack_try.empty()) {
-        throw GException::test_nested_try_error(G_TRY_FAILURE2,
-              "Called "G_TRY_FAILURE2" without a previous call to test_try()");
-    }
-    */
-    // If the stack is empty then create an eception test case
-    if (m_stack_try.empty()) {
-        GTestCase* testcase = new GTestCase(GTestCase::ERROR_TEST, "Exception test");
-        m_stack_try.push_back(testcase);
-    }
-
     // Extract message of exception and class name
     test_try_failure(e.what(), typeid(e).name());
 
