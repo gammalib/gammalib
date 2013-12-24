@@ -148,26 +148,6 @@ public:
         // Other methods
         void set(GObservations* obs);
         void eval(const GOptimizerPars& pars);
-        void poisson_unbinned(const GObservation& obs,
-                              const GModels&      models,
-                              GMatrixSparse&      covar,
-                              GVector&            mgrad,
-                              double&             value,
-                              GVector&            gradient);
-        void poisson_binned(const GObservation& obs,
-                            const GModels&      models,
-                            GMatrixSparse&      covar,
-                            GVector&            mgrad,
-                            double&             value,
-                            double&             npred,
-                            GVector&            gradient);
-        void gaussian_binned(const GObservation& obs,
-                             const GModels&      models,
-                             GMatrixSparse&      covar,
-                             GVector&            mgrad,
-                             double&             value,
-                             double&             npred,
-                             GVector&            gradient);
 
     protected:
         // Protected methods
@@ -178,11 +158,8 @@ public:
         // Protected data members
         double         m_value;       //!< Function value
         double         m_npred;       //!< Total number of predicted events
-        double         m_minmod;      //!< Minimum model value
-        double         m_minerr;      //!< Minimum error value
         GVector*       m_gradient;    //!< Pointer to gradient vector
         GMatrixSparse* m_covar;       //!< Pointer to covariance matrix
-        GVector*       m_wrk_grad;    //!< Pointer to working gradient vector
         GObservations* m_this;        //!< Pointer to GObservations object
     };
 

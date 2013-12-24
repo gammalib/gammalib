@@ -13,7 +13,7 @@ sources = GEnergies.cpp \
           GTimeReference.cpp \
           GCaldb.cpp \
           GObservations.cpp \
-          GObservations_optimizer.cpp \
+          GObservations_likelihood.cpp \
           GObservation.cpp \
           GObservationRegistry.cpp \
           GEvents.cpp \

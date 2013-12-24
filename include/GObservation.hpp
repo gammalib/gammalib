@@ -36,6 +36,8 @@
 #include "GTime.hpp"
 #include "GEnergy.hpp"
 #include "GFunction.hpp"
+#include "GVector.hpp"
+#include "GMatrixSparse.hpp"
 
 
 /***********************************************************************//**
@@ -80,6 +82,22 @@ public:
     virtual void             write(GXmlElement& xml) const = 0;
     virtual std::string      print(const GChatter& chatter = NORMAL) const = 0;
 
+    // Virtual methods
+    virtual double likelihood(const GModels& models,
+                              GVector*       gradient,
+                              GMatrixSparse* covar,
+                              double*        npred) const;
+    virtual double model(const GModels& models,
+                         const GEvent&  event,
+                         GVector*       gradient = NULL) const;
+    virtual double npred(const GModels& models,
+                         GVector*       gradient = NULL) const;
+    virtual double model_grad(const GModel& model,
+                              const GEvent& event,
+                              const int&    ipar) const;
+    virtual double npred_grad(const GModel& model,
+                              const int&    ipar) const;
+
     // Implemented methods
     void               name(const std::string& name);
     void               id(const std::string& id);
@@ -89,22 +107,26 @@ public:
     const std::string& id(void) const;
     const GEvents*     events(void) const;
     const std::string& statistics(void) const;
-    virtual double     model(const GModels& models,
-                             const GEvent&  event,
-                             GVector*       gradient = NULL) const;
-    virtual double     npred(const GModels& models,
-                             GVector*       gradient = NULL) const;
-    virtual double     model_grad(const GModel& model,
-                                  const GEvent& event,
-                                  const int&    ipar) const;
-    virtual double     npred_grad(const GModel& model,
-                                  const int&    ipar) const;
 
 protected:
     // Protected methods
     void init_members(void);
     void copy_members(const GObservation& obs);
     void free_members(void);
+
+    // Likelihood methods
+    virtual double likelihood_poisson_unbinned(const GModels& models,
+                                               GVector*       gradient,
+                                               GMatrixSparse* covar,
+                                               double*        npred) const;
+    virtual double likelihood_poisson_binned(const GModels& models,
+                                             GVector*       gradient,
+                                             GMatrixSparse* covar,
+                                             double*        npred) const;
+    virtual double likelihood_gaussian_binned(const GModels& models,
+                                              GVector*       gradient,
+                                              GMatrixSparse* covar,
+                                              double*        npred) const;
 
     // Model gradient kernel classes
     class model_func : public GFunction {

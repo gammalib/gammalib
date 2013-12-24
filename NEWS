@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-19 December 2013
+24 December 2013
 
 
 1. Introduction
@@ -497,6 +497,11 @@ GammaLib.
 
 An energies container class GEnergies has been added to hold GEnergy
 objects.
+
+The likelihood computation is now performed in the GObservation class.
+This allows for an observation dependent definition of the likelihood
+function. For this purpose, the virtual likelihood() method has been
+added to GObservation.
 
 
 11. Optimization module

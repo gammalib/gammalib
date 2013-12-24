@@ -35,8 +35,13 @@
 #include "GIntegral.hpp"
 #include "GDerivative.hpp"
 #include "GTools.hpp"
+#include "GEventCube.hpp"
+#include "GEventList.hpp"
+#include "GEventBin.hpp"
 
 /* __ Method name definitions ____________________________________________ */
+#define G_LIKELIHOOD           "GObservation::likelihood(GModels&, GVector*,"\
+                                                  " GMatrixSparse*, double*)"
 #define G_MODEL                   "GObservation::model(GModels&, GPointing&,"\
                                     " GInstDir&, GEnergy&, GTime&, GVector*)"
 #define G_EVENTS                                     "GObservation::events()"
@@ -54,6 +59,10 @@
 #define G_NPRED_GRAD_KERN       "GObservation::npred_grad_kern(GModel&, int,"\
                                    " GSkyDir&, GEnergy&, GTime&, GPointing&)"
 
+/* __ Constants __________________________________________________________ */
+const double minmod = 1.0e-100;                      //!< Minimum model value
+const double minerr = 1.0e-100;                //!< Minimum statistical error
+
 /* __ Macros _____________________________________________________________ */
 
 /* __ Coding definitions _________________________________________________ */
@@ -61,6 +70,7 @@
 //#define G_GRAD_RIDDLER  //!< Use Riddler's method for computing derivatives
 
 /* __ Debug definitions __________________________________________________ */
+//#define G_OPT_DEBUG
 
 
 /*==========================================================================
@@ -155,6 +165,85 @@ GObservation& GObservation::operator=(const GObservation& obs)
  =                             Public methods                              =
  =                                                                         =
  ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Compute likelihood function
+ *
+ * @param[in] models Models.
+ * @param[in,out] gradient Pointer to gradients.
+ * @param[in,out] covar Pointer to covariance matrix.
+ * @param[in,out] npred Pointer to Npred value.
+ * @return Likelihood.
+ *
+ * Computes the likelihood for a specified set of models. The method also
+ * returns the gradients, the covariance matrix, and the number of events
+ * that are predicted by all models.
+ ***************************************************************************/
+double GObservation::likelihood(const GModels& models,
+                                GVector*       gradient,
+                                GMatrixSparse* covar,
+                                double*        npred) const
+{
+    // Initialise likelihood value
+    double value = 0.0;
+
+    // Extract statistics for this observation
+    std::string statistics = gammalib::toupper(this->statistics());
+
+    // Unbinned analysis
+    if (dynamic_cast<const GEventList*>(events()) != NULL) {
+
+        // Poisson statistics
+        if (statistics == "POISSON") {
+
+            // Update the log-likelihood
+            value = likelihood_poisson_unbinned(models,
+                                                gradient,
+                                                covar,
+                                                npred);
+
+        } // endif: Poisson statistics
+
+        // ... otherwise throw an exception
+        else {
+            throw GException::invalid_statistics(G_LIKELIHOOD, statistics,
+                  "Unbinned optimization requires Poisson statistics.");
+        }
+
+    } // endif: unbinned analysis
+
+    // ... or binned analysis
+    else {
+
+        // Poisson statistics
+        if (statistics == "POISSON") {
+            value = likelihood_poisson_binned(models,
+                                              gradient,
+                                              covar,
+                                              npred);
+        }
+
+        // ... or Gaussian statistics
+        else if (statistics == "GAUSSIAN") {
+            value = likelihood_gaussian_binned(models,
+                                              gradient,
+                                              covar,
+                                              npred);
+        }
+
+        // ... or unsupported
+        else {
+            throw GException::invalid_statistics(G_LIKELIHOOD, statistics,
+                  "Binned optimization requires Poisson or Gaussian"
+                  " statistics.");
+        }
+
+    } // endelse: binned analysis
+
+    // Return likelihood
+    return value;
+}
+
 
 /***********************************************************************//**
  * @brief Return model value and (optionally) gradient
@@ -310,113 +399,6 @@ double GObservation::npred(const GModels& models, GVector* gradient) const
 
 
 /***********************************************************************//**
- * @brief Set event container
- *
- * @param[in] events Event container.
- *
- * Set the event container for this observation by cloning the container
- * specified in the argument.
- ***************************************************************************/
-void GObservation::events(const GEvents& events)
-{
-    // Remove an existing event container
-    if (m_events != NULL) delete m_events;
-
-    // Clone events
-    m_events = events.clone();
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Return event container
- *
- * @exception GException::no_events
- *            No event container defined for observation.
- *
- * Returns pointer to event container.
- ***************************************************************************/
-const GEvents* GObservation::events(void) const
-{
-    // Throw an exception if the event container is not valid
-    if (m_events == NULL) {
-        throw GException::no_events(G_EVENTS);
-    }
-
-    // Return pointer to event container
-    return m_events;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                             Private methods                             =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
- * @brief Initialise class members
- ***************************************************************************/
-void GObservation::init_members(void)
-{
-    // Initialise members
-    m_name.clear();
-    m_id.clear();
-    m_statistics = "Poisson";
-    m_events     = NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Copy class members
- *
- * @param[in] obs Observation.
- *
- * Copy members from an observation.
- ***************************************************************************/
-void GObservation::copy_members(const GObservation& obs)
-{
-    // Copy members
-    m_name       = obs.m_name;
-    m_id         = obs.m_id;
-    m_statistics = obs.m_statistics;
-
-    // Clone members
-    m_events = (obs.m_events != NULL) ? obs.m_events->clone() : NULL;
-
-    // Return
-    return;
-}
-
-
-/***********************************************************************//**
- * @brief Delete class members
- ***************************************************************************/
-void GObservation::free_members(void)
-{
-    // Free members
-    if (m_events != NULL) delete m_events;
-
-    // Signal free pointers
-    m_events = NULL;
-
-    // Return
-    return;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                          Model gradient methods                         =
- =                                                                         =
- ==========================================================================*/
-
-/***********************************************************************//**
  * @brief Returns parameter gradient of model for a given event
  *
  * @param[in] model Model.
@@ -539,33 +521,6 @@ double GObservation::model_grad(const GModel& model,
     return grad;
 }
 
-
-/***********************************************************************//**
- * @brief Model function evaluation for gradient computation
- *
- * @param[in] x Function value.
- ***************************************************************************/
-double GObservation::model_func::eval(const double& x)
-{
-    // Get non-const model pointer (circumvent const correctness)
-    GModel* model = const_cast<GModel*>(m_model);
-
-    // Set value
-    (*model)[m_ipar].factor_value(x);
-
-    // Compute model value
-    double value = model->eval(*m_event, *m_parent);
-
-    // Return value
-    return value;
-}
-
-
-/*==========================================================================
- =                                                                         =
- =                         Npred computation methods                       =
- =                                                                         =
- ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Returns parameter gradient of Npred
@@ -691,6 +646,590 @@ double GObservation::npred_grad(const GModel& model, const int& ipar) const
     return grad;
 }
 
+
+/***********************************************************************//**
+ * @brief Set event container
+ *
+ * @param[in] events Event container.
+ *
+ * Set the event container for this observation by cloning the container
+ * specified in the argument.
+ ***************************************************************************/
+void GObservation::events(const GEvents& events)
+{
+    // Remove an existing event container
+    if (m_events != NULL) delete m_events;
+
+    // Clone events
+    m_events = events.clone();
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Return event container
+ *
+ * @exception GException::no_events
+ *            No event container defined for observation.
+ *
+ * Returns pointer to event container.
+ ***************************************************************************/
+const GEvents* GObservation::events(void) const
+{
+    // Throw an exception if the event container is not valid
+    if (m_events == NULL) {
+        throw GException::no_events(G_EVENTS);
+    }
+
+    // Return pointer to event container
+    return m_events;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                             Private methods                             =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Initialise class members
+ ***************************************************************************/
+void GObservation::init_members(void)
+{
+    // Initialise members
+    m_name.clear();
+    m_id.clear();
+    m_statistics = "Poisson";
+    m_events     = NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Copy class members
+ *
+ * @param[in] obs Observation.
+ *
+ * Copy members from an observation.
+ ***************************************************************************/
+void GObservation::copy_members(const GObservation& obs)
+{
+    // Copy members
+    m_name       = obs.m_name;
+    m_id         = obs.m_id;
+    m_statistics = obs.m_statistics;
+
+    // Clone members
+    m_events = (obs.m_events != NULL) ? obs.m_events->clone() : NULL;
+
+    // Return
+    return;
+}
+
+
+/***********************************************************************//**
+ * @brief Delete class members
+ ***************************************************************************/
+void GObservation::free_members(void)
+{
+    // Free members
+    if (m_events != NULL) delete m_events;
+
+    // Signal free pointers
+    m_events = NULL;
+
+    // Return
+    return;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                           Likelihood methods                            =
+ =                                                                         =
+ ==========================================================================*/
+
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for Poisson statistics and
+ *        unbinned analysis (version with working arrays)
+ *
+ * @param[in] models Models.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] npred Number of predicted events.
+ * @return Likelihood value.
+ *
+ * This method evaluates the -(log-likelihood) function for parameter
+ * optimisation using unbinned analysis and Poisson statistics.
+ * The -(log-likelihood) function is given by
+ *
+ * \f$L = N_{\rm pred} - \sum_i \log e_i\f$
+ *
+ * where
+ * \f$N_{\rm pred}\f$ is the number of events predicted by the model, and
+ * the sum is taken over all events. This method also computes the
+ * parameter gradients
+ * \f$\delta L/dp\f$
+ * and the curvature matrix
+ * \f$\delta^2 L/dp_1 dp_2\f$.
+ ***************************************************************************/
+double GObservation::likelihood_poisson_unbinned(const GModels& models,
+                                                 GVector*       gradient,
+                                                 GMatrixSparse* covar,
+                                                 double*        npred) const
+{
+    // Initialise likelihood value
+    double value = 0.0;
+
+    // Get number of parameters
+    int npars = gradient->size();
+
+    // Allocate some working arrays
+    int*    inx    = new int[npars];
+    double* values = new double[npars];
+    GVector wrk_grad(npars);
+
+    // Determine Npred value and gradient for this observation
+    double npred_value = this->npred(models, &wrk_grad);
+
+    // Update likelihood, Npred and gradient
+    value     += npred_value;
+    *npred    += npred_value;
+    *gradient += wrk_grad;
+
+    // Iterate over all events
+    for (int i = 0; i < events()->size(); ++i) {
+
+        // Get event pointer
+        const GEvent* event = (*events())[i];
+
+        // Get model and derivative
+        double model = this->model(models, *event, &wrk_grad);
+
+        // Skip bin if model is too small (avoids -Inf or NaN gradients)
+        if (model <= minmod) {
+            continue;
+        }
+
+        // Create index array of non-zero derivatives and initialise working
+        // array
+        int ndev = 0;
+        for (int i = 0; i < npars; ++i) {
+            values[i] = 0.0;
+            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
+                inx[ndev] = i;
+                ndev++;
+            }
+        }
+
+        // Update Poissonian statistics (excluding factorial term for faster
+        // computation)
+        value -= log(model);
+
+        // Skip bin now if there are no non-zero derivatives
+        if (ndev < 1) {
+            continue;
+        }
+
+        // Update gradient vector and curvature matrix.
+        double fb = 1.0 / model;
+        double fa = fb / model;
+        for (int jdev = 0; jdev < ndev; ++jdev) {
+
+            // Initialise computation
+            register int jpar    = inx[jdev];
+            double       g       = wrk_grad[jpar];
+            double       fa_i    = fa * g;
+
+            // Update gradient.
+            (*gradient)[jpar] -= fb * g;
+
+            // Loop over rows
+            register int* ipar = inx;
+
+            for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
+                values[idev] = fa_i * wrk_grad[*ipar];
+            }
+
+            // Add column to matrix
+            covar->add_to_column(jpar, values, inx, ndev);
+
+        } // endfor: looped over columns
+
+    } // endfor: iterated over all events
+
+    // Free temporary memory
+    if (values != NULL) delete [] values;
+    if (inx    != NULL) delete [] inx;
+
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for Poisson statistics and
+ *        binned analysis (version with working arrays)
+ *
+ * @param[in] models Models.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] npred Number of predicted events.
+ * @return Likelihood value.
+ *
+ * This method evaluates the -(log-likelihood) function for parameter
+ * optimisation using binned analysis and Poisson statistics.
+ * The -(log-likelihood) function is given by
+ * \f$L=-\sum_i n_i \log e_i - e_i\f$
+ * where the sum is taken over all data space bins, \f$n_i\f$ is the
+ * observed number of counts and \f$e_i\f$ is the model.
+ * This method also computes the parameter gradients
+ * \f$\delta L/dp\f$
+ * and the curvature matrix
+ * \f$\delta^2 L/dp_1 dp_2\f$
+ * and also updates the total number of predicted events m_npred.
+ ***************************************************************************/
+double GObservation::likelihood_poisson_binned(const GModels& models,
+                                             GVector*       gradient,
+                                             GMatrixSparse* covar,
+                                             double*        npred) const
+{
+    // Initialise likelihood value
+    double value = 0.0;
+
+    // Initialise statistics
+    #if defined(G_OPT_DEBUG)
+    int    n_bins        = 0;
+    int    n_used        = 0;
+    int    n_small_model = 0;
+    int    n_zero_data   = 0;
+    double sum_data      = 0.0;
+    double sum_model     = 0.0;
+    double init_value    = value;
+    #endif
+
+    // Get number of parameters
+    int npars = gradient->size();
+
+    // Allocate some working arrays
+    int*    inx    = new int[npars];
+    double* values = new double[npars];
+    GVector wrk_grad(npars);
+
+    // Iterate over all bins
+    for (int i = 0; i < events()->size(); ++i) {
+
+        // Update number of bins
+        #if defined(G_OPT_DEBUG)
+        n_bins++;
+        #endif
+
+        // Get event pointer
+        const GEventBin* bin =
+            (*(static_cast<GEventCube*>(const_cast<GEvents*>(events()))))[i];
+
+        // Get number of counts in bin
+        double data = bin->counts();
+
+        // Get model and derivative
+        double model = this->model(models, *bin, &wrk_grad);
+
+        // Multiply model by bin size
+        model *= bin->size();
+
+        // Skip bin if model is too small (avoids -Inf or NaN gradients)
+        if (model <= minmod) {
+            #if defined(G_OPT_DEBUG)
+            n_small_model++;
+            #endif
+            continue;
+        }
+
+        // Update statistics
+        #if defined(G_OPT_DEBUG)
+        n_used++;
+        sum_data  += data;
+        sum_model += model;
+        #endif
+
+        // Update Npred
+        *npred += model;
+
+        // Multiply gradient by bin size
+        wrk_grad *= bin->size();
+
+        // Create index array of non-zero derivatives and initialise working
+        // array
+        int ndev = 0;
+        for (int i = 0; i < npars; ++i) {
+            values[i] = 0.0;
+            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
+                inx[ndev] = i;
+                ndev++;
+            }
+        }
+
+        // Update gradient vector and curvature matrix. To avoid
+        // unneccessary computations we distinguish the case where
+        // data>0 and data=0. The second case requires much less
+        // computation since it does not contribute to the covariance
+        // matrix ...
+        if (data > 0.0) {
+
+            // Update Poissonian statistics (excluding factorial term for
+            // faster computation)
+            value -= data * log(model) - model;
+
+            // Skip bin now if there are no non-zero derivatives
+            if (ndev < 1) {
+                continue;
+            }
+
+            // Pre computation
+            double fb = data / model;
+            double fc = (1.0 - fb);
+            double fa = fb / model;
+
+            // Loop over columns
+            for (int jdev = 0; jdev < ndev; ++jdev) {
+
+                // Initialise computation
+                register int jpar    = inx[jdev];
+                double       g       = wrk_grad[jpar];
+                double       fa_i    = fa * g;
+
+                // Update gradient
+                (*gradient)[jpar] += fc * g;
+
+                // Loop over rows
+                register int* ipar = inx;
+                for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
+                    values[idev] = fa_i * wrk_grad[*ipar];
+                }
+
+                // Add column to matrix
+                covar->add_to_column(jpar, values, inx, ndev);
+
+            } // endfor: looped over columns
+
+        } // endif: data was > 0
+
+        // ... handle now data=0
+        else {
+
+            // Update statistics
+            #if defined(G_OPT_DEBUG)
+            n_zero_data++;
+            #endif
+
+            // Update Poissonian statistics (excluding factorial term for
+            // faster computation)
+            value += model;
+
+            // Skip bin now if there are no non-zero derivatives
+            if (ndev < 1) {
+                continue;
+            }
+
+            // Update gradient
+            register int* ipar = inx;
+            for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
+                (*gradient)[*ipar] += wrk_grad[*ipar];
+            }
+
+        } // endif: data was 0
+
+    } // endfor: iterated over all events
+
+    // Free temporary memory
+    if (values != NULL) delete [] values;
+    if (inx    != NULL) delete [] inx;
+
+    // Dump statistics
+    #if defined(G_OPT_DEBUG)
+    std::cout << "Number of bins: " << n_bins << std::endl;
+    std::cout << "Number of bins used for computation: " << n_used << std::endl;
+    std::cout << "Number of bins excluded due to small model: " << n_small_model << std::endl;
+    std::cout << "Number of bins with zero data: " << n_zero_data << std::endl;
+    std::cout << "Sum of data: " << sum_data << std::endl;
+    std::cout << "Sum of model: " << sum_model << std::endl;
+    std::cout << "Initial statistics: " << init_value << std::endl;
+    std::cout << "Statistics: " << m_value-init_value << std::endl;
+    #endif
+
+    // Return
+    return value;
+}
+
+
+/***********************************************************************//**
+ * @brief Evaluate log-likelihood function for Gaussian statistics and
+ *        binned analysis (version with working arrays)
+ *
+ * @param[in] models Models.
+ * @param[in,out] gradient Gradient.
+ * @param[in,out] covar Covariance matrix.
+ * @param[in,out] npred Number of predicted events.
+ * @return Likelihood value.
+ *
+ * This method evaluates the -(log-likelihood) function for parameter
+ * optimisation using binned analysis and Poisson statistics.
+ * The -(log-likelihood) function is given by
+ * \f$L = 1/2 \sum_i (n_i - e_i)^2 \sigma_i^{-2}\f$
+ * where the sum is taken over all data space bins, \f$n_i\f$ is the
+ * observed number of counts, \f$e_i\f$ is the model and \f$\sigma_i\f$
+ * is the statistical uncertainty.
+ * This method also computes the parameter gradients
+ * \f$\delta L/dp\f$
+ * and the curvature matrix
+ * \f$\delta^2 L/dp_1 dp_2\f$
+ * and also updates the total number of predicted events m_npred.
+ ***************************************************************************/
+double GObservation::likelihood_gaussian_binned(const GModels& models,
+                                                GVector*       gradient,
+                                                GMatrixSparse* covar,
+                                                double*        npred) const
+{
+    // Initialise likelihood value
+    double value = 0.0;
+
+    // Get number of parameters
+    int npars = gradient->size();
+
+    // Allocate some working arrays
+    int*    inx    = new int[npars];
+    double* values = new double[npars];
+    GVector wrk_grad(npars);
+
+    // Iterate over all bins
+    for (int i = 0; i < events()->size(); ++i) {
+
+        // Get event pointer
+        const GEventBin* bin =
+            (*(static_cast<GEventCube*>(const_cast<GEvents*>(events()))))[i];
+
+        // Get number of counts in bin
+        double data = bin->counts();
+
+        // Get statistical uncertainty
+        double sigma = bin->error();
+
+        // Skip bin if statistical uncertainty is too small
+        if (sigma <= minerr) {
+            continue;
+        }
+
+        // Get model and derivative
+        double model = this->model(models, *bin, &wrk_grad);
+
+        // Multiply model by bin size
+        model *= bin->size();
+
+        // Skip bin if model is too small (avoids -Inf or NaN gradients)
+        if (model <= minmod) {
+            continue;
+        }
+
+        // Update Npred
+        *npred += model;
+
+        // Multiply gradient by bin size
+        wrk_grad *= bin->size();
+
+        // Create index array of non-zero derivatives and initialise working
+        // array
+        int ndev = 0;
+        for (int i = 0; i < npars; ++i) {
+            values[i] = 0.0;
+            if (wrk_grad[i] != 0.0 && !gammalib::isinfinite(wrk_grad[i])) {
+                inx[ndev] = i;
+                ndev++;
+            }
+        }
+
+        // Set weight
+        double weight = 1.0 / (sigma * sigma);
+
+        // Update Gaussian statistics
+        double fa = data - model;
+        value  += 0.5 * (fa * fa * weight);
+
+        // Skip bin now if there are no non-zero derivatives
+        if (ndev < 1) {
+            continue;
+        }
+
+        // Loop over columns
+        for (int jdev = 0; jdev < ndev; ++jdev) {
+
+            // Initialise computation
+            register int jpar = inx[jdev];
+            double       fa_i = wrk_grad[jpar] * weight;
+
+            // Update gradient
+            (*gradient)[jpar] -= fa * fa_i;
+
+            // Loop over rows
+            register int* ipar = inx;
+            for (register int idev = 0; idev < ndev; ++idev, ++ipar) {
+                values[idev] = fa_i * wrk_grad[*ipar];
+            }
+
+            // Add column to matrix
+            covar->add_to_column(jpar, values, inx, ndev);
+
+        } // endfor: looped over columns
+
+    } // endfor: iterated over all events
+
+    // Free temporary memory
+    if (values != NULL) delete [] values;
+    if (inx    != NULL) delete [] inx;
+
+    // Return
+    return value;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                         Model gradient methods                          =
+ =                                                                         =
+ ==========================================================================*/
+
+
+
+/***********************************************************************//**
+ * @brief Model function evaluation for gradient computation
+ *
+ * @param[in] x Function value.
+ ***************************************************************************/
+double GObservation::model_func::eval(const double& x)
+{
+    // Get non-const model pointer (circumvent const correctness)
+    GModel* model = const_cast<GModel*>(m_model);
+
+    // Set value
+    (*model)[m_ipar].factor_value(x);
+
+    // Compute model value
+    double value = model->eval(*m_event, *m_parent);
+
+    // Return value
+    return value;
+}
+
+
+/*==========================================================================
+ =                                                                         =
+ =                         Npred computation methods                       =
+ =                                                                         =
+ ==========================================================================*/
 
 /***********************************************************************//**
  * @brief Npred function evaluation for gradient computation
