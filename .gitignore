@@ -65,12 +65,15 @@ config.sub
 configure
 test-driver
 src/gammalib-setup
+src/template/test_GClass
 doc/Doxyfile.bak
+
 test/test_url.dat
 test/*.xml
 test/reports/*.xml
 test/*.trs
 test/region.reg
+
 examples/python/*.xml
 examples/python/*.html
 examples/cpp/*/*.fits
@@ -82,6 +85,7 @@ examples/cpp/readmodel/readmodel
 examples/cpp/numerics/numerics
 examples/cpp/optimize/optimize
 examples/cpp/interpolate/interpolate
+examples/cpp/readmodel/readmodel
 
 # Binaries
 test/test_GApplication
@@ -103,5 +107,4 @@ test/test_LAT
 test/test_MWL
 test/test_CTA
 test/test_COM
-examples/cpp/readmodel/readmodel
 
