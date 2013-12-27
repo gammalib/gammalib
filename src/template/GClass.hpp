@@ -35,7 +35,7 @@
 /***********************************************************************//**
  * @class GClass
  *
- * @brief [brief descriptor] interface defintion
+ * @brief [brief descriptor] interface definition
  ***************************************************************************/
 class GClass : public GBase {
 
@@ -51,7 +51,7 @@ public:
     // Methods
     void        clear(void);
     GClass*     clone(void) const;
-    std::string print(void) const;
+    std::string print(const GChatter& chatter = NORMAL) const;
   
 protected:
     // Protected methods
