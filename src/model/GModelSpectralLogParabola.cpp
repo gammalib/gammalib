@@ -960,7 +960,7 @@ void GModelSpectralLogParabola::update_eval_cache(const GEnergy& energy) const
         m_last_e_norm     = eng / m_last_pivot;
         m_last_log_e_norm = std::log(m_last_e_norm);
         m_last_exponent   = m_last_index + m_last_curvature * m_last_log_e_norm;
-        m_last_power      = std::pow(m_last_e_norm, m_last_index);
+        m_last_power      = std::pow(m_last_e_norm, m_last_exponent);
 
     } // endif: recomputation was required
 
