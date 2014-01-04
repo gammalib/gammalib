@@ -343,8 +343,8 @@ public:
                                 m_srcTime(srcTime),
                                 m_obs(obs),
                                 m_rot(rot),
-                                m_sin_rho(sin_rho),
-                                m_cos_rho(cos_rho) { }
+                                m_cos_rho(cos_rho),
+                                m_sin_rho(sin_rho) { }
     double eval(const double& omega);
 protected:
     const GCTAResponse&    m_rsp;        //!< CTA response

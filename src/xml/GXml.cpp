@@ -660,7 +660,6 @@ void GXml::parse(const GUrl& url)
 {
     // Initialise parser
     int         c;
-    int         index      = 0;
     bool        in_markup  = false;
     bool        in_comment = false;
     std::string segment;

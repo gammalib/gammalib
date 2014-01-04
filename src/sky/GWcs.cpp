@@ -2194,7 +2194,6 @@ void GWcs::sph_s2x(int nlng, int nlat, int sll, int spt,
         for (int ilng = 0; ilng < nlng; ++ilng, rowoff += spt, lngp += sll) {
             double  dlng   = *lngp - m_euler[0];
             double* phip   = phi + rowoff;
-            double* thetap = theta;
             for (int ilat = 0; ilat < mlat; ++ilat, phip += rowlen) {
                 *phip = dlng;
             }

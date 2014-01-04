@@ -3516,7 +3516,7 @@ GMatrixSparse cs_symperm(const GMatrixSparse& matrix, const int* pinv)
  * @brief Compute transpose matrix
  *
  * @param[in] matrix Matrix.
- * @param[in] value Flag that signals if values should be copied.
+ * @param[in] values Flag that signals if values should be copied.
  *
  * The flag 'values' allows to avoid copying the actual data values. This
  * allows to perform a logical matrix transposition, as needed by the

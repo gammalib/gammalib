@@ -84,17 +84,17 @@ private:
     static int& number() {
         static int m_number = 0;
         return m_number;
-    };
+    }
     // Model names
     static GRegistryPointer<std::string>& names() {
         static GRegistryPointer<std::string> m_names;
         return m_names;
-    };
+    }
     // Pointer to seed models
     static GRegistryPointer<const GObservation*>& obs() {
         static GRegistryPointer<const GObservation*> m_obs;
         return m_obs;
-    };
+    }
 };
 
 

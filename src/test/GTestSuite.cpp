@@ -578,7 +578,7 @@ void GTestSuite::test_try_success(void)
     // If the stack is empty
     if (m_stack_try.empty()) {
         throw GException::test_nested_try_error(G_TRY_SUCCESS, 
-              "Called "G_TRY_SUCCESS" without a previous call to test_try()");
+              "Called \"G_TRY_SUCCESS\" without a previous call to test_try()");
     }
 
     // Add test case to test suite
