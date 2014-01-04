@@ -1,1 +1,4 @@
-.. _sec_xspec:Xspec interface---------------
+.. _sec_xspec:
+
+Xspec interface
+---------------
