@@ -1,1 +1,28 @@
-.. _sec_app:Creation of ftools applications-------------------------------Overview~~~~~~~~The application module provides classes to create ftools applicationsusing GammaLib. A ftool application provides a parameter interfacefollowing the IRAF standard that is widely used in high-energyastrophysics. The application is represented by the abstract``GApplication`` base class. It contains a parameter containerimplemented by the ``GPars`` class that contains applicationparameter implemented by the ``GPar`` class. In addition, an applicationcontains a logger, implemented by the ``GLog`` class, which allowsmessage passing to the console and/or a dedicated log file.:ref:`fig_uml_app` present an overview over the C++ classes of the application module and their relations... _fig_uml_app:.. figure:: uml_app.png   :width: 100%   Application module
+.. _sec_app:
+
+Creation of ftools applications
+-------------------------------
+
+Overview
+~~~~~~~~
+
+The application module provides classes to create ftools applications
+using GammaLib. A ftool application provides a parameter interface
+following the IRAF standard that is widely used in high-energy
+astrophysics. The application is represented by the abstract
+``GApplication`` base class. It contains a parameter container
+implemented by the ``GPars`` class that contains application
+parameter implemented by the ``GPar`` class. In addition, an application
+contains a logger, implemented by the ``GLog`` class, which allows
+message passing to the console and/or a dedicated log file.
+
+
+:ref:`fig_uml_app` present an overview over the C++ classes of the 
+application module and their relations.
+
+.. _fig_uml_app:
+
+.. figure:: uml_app.png
+   :width: 100%
+
+   Application module

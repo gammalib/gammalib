@@ -1,1 +1,4 @@
-.. _sec_vo:Virtual Observatory interface-----------------------------
+.. _sec_vo:
+
+Virtual Observatory interface
+-----------------------------

@@ -1,1 +1,114 @@
-.. _sec_xml:XML file interface------------------Overview~~~~~~~~:ref:`fig_uml_xml` present an overview over the C++ classes of the XMLmodule and their relations... _fig_uml_xml:.. figure:: uml_xml.png   :width: 100%   XML moduleThe XML module provides classes that allow creation, writing and reading offiles in the Extensible Markup Language (XML) format.The central class of the XML module is the abstract ``GXmlNode`` baseclass which represent a node of the XML document. The essential propertyof ``GXmlNode`` is that it may contain a list of ``GXmlNode`` objects,allowing creating a complex tree of data structures. Nodes in a XMLdocument may be either elements, comments, some text of a processinginstruction. These different node types are implemented by the``GXmlElement``, ``GXmlComment``, ``GXmlText`` and ``GXmlPI`` classes,respectively. A special node if the ``GXmlDocument`` node which providesthe root node of a XML document. This node must exist only once in a XMLtree. The XML file is implement by the ``GXml`` class which contains oneinstance of ``GXmlDocument``.Creating a XML file~~~~~~~~~~~~~~~~~~~The following example illustrates the creation of a XML file(see ``examples/createxml.cpp`` for the source code; the line numbers arefor reference and are not part of the source code)::    1  GXml xml;    2  GXmlComment comment("Now 2 nodes with spatial and spectral info");    3  GXmlElement spatial("spatial type=\"Position\"");    4  GXmlElement spectral("spectrum type=\"PowerLaw\"");    5  GXmlElement text("text");    6  GXmlPI      pi("<?process now?>");    7  spatial.append(GXmlElement("parameter ra=\"83.0\""));    8  spatial.append(GXmlElement("parameter dec=\"22.0\""));    9  spectral.append(GXmlElement("parameter prefactor=\"1e-7\""));   10  spectral.append(GXmlElement("parameter index=\"-2.1\""));   11  text.append(GXmlText("Finish with text"));   12  xml.append(comment);   13  xml.append(spatial);   14  xml.append(spectral);   15  xml.append(text);   16  xml.append(pi);   17  xml.save("my_xml_file.xml");Below the content of the XML file that will be created by this code::  <?xml version="1.0" encoding="UTF-8" standalone="no"?>  <!--Now 2 nodes with spatial and spectral info-->  <spatial type="Position">    <parameter ra="83.0" />    <parameter dec="22.0" />  </spatial>  <spectrum type="PowerLaw">    <parameter prefactor="1e-7" />    <parameter index="-2.1" />  </spectrum>  <text>Finish with text</text>  <?process now?>In line 1 a XML object if allocated. In lines 2-6, one comment node, threeelement nodes and one processing instruction node are created. For thecomment node, the comment text is provided in the ``GXmlComment``constructor. For the element nodes, the element tag as well as anyattributes (separated by whitespace characters) are provided in the``GElement`` constructor. For the processing instruction node,the instruction including the brackets are provided in the ``GXmlPI``constructor. In lines 7-8, two element nodes providing spatialparameters are appended to the ``spatial`` node. In lines 9-10, parametersare appended to the ``spectral`` node. And in line 11, a text node isappended to the ``text`` node.Finally, the nodes are appended in lines 12-16 to the document root, andthe XML file is saved in line 17.Note that in the above example the entire XML tree has been constructedbefore the nodes were appended to the document root. The reason behindthis approach is that the ``append`` method creates deep copies of thenodes provided in the argument, hence manipulation of the node once appended requires to retrieve the pointers to the deep copies in the XMLdocument. The following example illustrates how this can be done::    xml.append(GXmlElement("source type=\"PointSource\""));    xml.element("spatial", 0)->append(GXmlElement("parameter ra=\"83.0\""));    xml.element("spatial", 0)->append(GXmlElement("parameter dec=\"22.0\""));The ``xml.element("spatial", 0)`` method returns a pointer to the first``GXmlElement`` node with tag ``spatial`` in the XML document. Now thatwe have a pointer to the nodes, elements can be appended to the XMLdocument using the ``append`` method.Alternatively, one can also retrieve the node pointer when the node is appended to the XML document::    GXmlNode* node = xml.append(GXmlElement("source type=\"PointSource\""));    node->append(GXmlElement("parameter ra=\"83.0\""));    node->append(GXmlElement("parameter dec=\"22.0\"")); The ``append`` method returns in fact the pointer to the deep copy of theelement that has been appended. This pointer can then be used to manipulatedirectly the nodes in the XML document.
+.. _sec_xml:
+
+XML file interface
+------------------
+
+Overview
+~~~~~~~~
+
+:ref:`fig_uml_xml` present an overview over the C++ classes of the XML
+module and their relations.
+
+.. _fig_uml_xml:
+
+.. figure:: uml_xml.png
+   :width: 100%
+
+   XML module
+
+The XML module provides classes that allow creation, writing and reading of
+files in the Extensible Markup Language (XML) format.
+The central class of the XML module is the abstract ``GXmlNode`` base
+class which represent a node of the XML document. The essential property
+of ``GXmlNode`` is that it may contain a list of ``GXmlNode`` objects,
+allowing creating a complex tree of data structures. Nodes in a XML
+document may be either elements, comments, some text of a processing
+instruction. These different node types are implemented by the
+``GXmlElement``, ``GXmlComment``, ``GXmlText`` and ``GXmlPI`` classes,
+respectively. A special node if the ``GXmlDocument`` node which provides
+the root node of a XML document. This node must exist only once in a XML
+tree. The XML file is implement by the ``GXml`` class which contains one
+instance of ``GXmlDocument``.
+
+
+Creating a XML file
+~~~~~~~~~~~~~~~~~~~
+
+The following example illustrates the creation of a XML file
+(see ``examples/createxml.cpp`` for the source code; the line numbers are
+for reference and are not part of the source code)::
+
+    1  GXml xml;
+    2  GXmlComment comment("Now 2 nodes with spatial and spectral info");
+    3  GXmlElement spatial("spatial type=\"Position\"");
+    4  GXmlElement spectral("spectrum type=\"PowerLaw\"");
+    5  GXmlElement text("text");
+    6  GXmlPI      pi("<?process now?>");
+    7  spatial.append(GXmlElement("parameter ra=\"83.0\""));
+    8  spatial.append(GXmlElement("parameter dec=\"22.0\""));
+    9  spectral.append(GXmlElement("parameter prefactor=\"1e-7\""));
+   10  spectral.append(GXmlElement("parameter index=\"-2.1\""));
+   11  text.append(GXmlText("Finish with text"));
+   12  xml.append(comment);
+   13  xml.append(spatial);
+   14  xml.append(spectral);
+   15  xml.append(text);
+   16  xml.append(pi);
+   17  xml.save("my_xml_file.xml");
+
+Below the content of the XML file that will be created by this code::
+
+  <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+  <!--Now 2 nodes with spatial and spectral info-->
+  <spatial type="Position">
+    <parameter ra="83.0" />
+    <parameter dec="22.0" />
+  </spatial>
+  <spectrum type="PowerLaw">
+    <parameter prefactor="1e-7" />
+    <parameter index="-2.1" />
+  </spectrum>
+  <text>Finish with text</text>
+  <?process now?>
+
+In line 1 a XML object if allocated. In lines 2-6, one comment node, three
+element nodes and one processing instruction node are created. For the
+comment node, the comment text is provided in the ``GXmlComment``
+constructor. For the element nodes, the element tag as well as any
+attributes (separated by whitespace characters) are provided in the
+``GElement`` constructor. For the processing instruction node,
+the instruction including the brackets are provided in the ``GXmlPI``
+constructor. In lines 7-8, two element nodes providing spatial
+parameters are appended to the ``spatial`` node. In lines 9-10, parameters
+are appended to the ``spectral`` node. And in line 11, a text node is
+appended to the ``text`` node.
+Finally, the nodes are appended in lines 12-16 to the document root, and
+the XML file is saved in line 17.
+
+Note that in the above example the entire XML tree has been constructed
+before the nodes were appended to the document root. The reason behind
+this approach is that the ``append`` method creates deep copies of the
+nodes provided in the argument, hence manipulation of the node once 
+appended requires to retrieve the pointers to the deep copies in the XML
+document. The following example illustrates how this can be done::
+
+    xml.append(GXmlElement("source type=\"PointSource\""));
+    xml.element("spatial", 0)->append(GXmlElement("parameter ra=\"83.0\""));
+    xml.element("spatial", 0)->append(GXmlElement("parameter dec=\"22.0\""));
+
+The ``xml.element("spatial", 0)`` method returns a pointer to the first
+``GXmlElement`` node with tag ``spatial`` in the XML document. Now that
+we have a pointer to the nodes, elements can be appended to the XML
+document using the ``append`` method.
+
+Alternatively, one can also retrieve the node pointer when the node is 
+appended to the XML document::
+
+    GXmlNode* node = xml.append(GXmlElement("source type=\"PointSource\""));
+    node->append(GXmlElement("parameter ra=\"83.0\""));
+    node->append(GXmlElement("parameter dec=\"22.0\""));
+ 
+The ``append`` method returns in fact the pointer to the deep copy of the
+element that has been appended. This pointer can then be used to manipulate
+directly the nodes in the XML document.
+
