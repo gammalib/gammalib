@@ -327,6 +327,7 @@ void TestGXml::test_GXml_access(void)
     // Test node access
     for (int i = 0; i < xml.size(); ++i) {
         GXmlNode* ptr = xml[i];
+        test_assert(ptr != 0, "Test node access");
     }
     test_assert(xml.elements() == 1,
                 "Test if xml.elements()==1",
@@ -336,6 +337,7 @@ void TestGXml::test_GXml_access(void)
     // Test node access
     for (int i = 0; i < xml.elements(); ++i) {
         GXmlNode* ptr = xml.element(i);
+        test_assert(ptr != 0, "Test xml element access");
     }
     test_assert(xml.elements("source_library") == 1,
                 "Test if the source_library = 1",

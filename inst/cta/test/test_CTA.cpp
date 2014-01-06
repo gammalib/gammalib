@@ -260,7 +260,7 @@ void TestGCTAResponse::test_response_psf_king(void)
         double r_max = rsp.psf()->delta_max(eng.log10TeV()) * gammalib::rad2deg;
         double r     = 0.0;
         double dr    = 0.0001;
-        int    steps = int(1.0/dr);
+        int    steps = int(r_max / dr);
         double sum   = 0.0;
         for (int i = 0; i < steps; ++i) {
             r   += dr;
