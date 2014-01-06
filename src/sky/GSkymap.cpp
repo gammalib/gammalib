@@ -973,7 +973,7 @@ void GSkymap::load(const std::string& filename)
 
             // Load WCS map
             read_wcs(static_cast<const GFitsImage&>(hdu));
-            loaded = true;
+            //loaded = true;
             break;
 
         } // endfor: looped over HDUs
@@ -1056,7 +1056,7 @@ void GSkymap::read(const GFitsHDU& hdu)
         // Load only if HDU contains an image
         if (hdu.exttype() == 0) {
             read_wcs(static_cast<const GFitsImage&>(hdu));
-            loaded = true;
+            //loaded = true;
         }
 
     } // endif

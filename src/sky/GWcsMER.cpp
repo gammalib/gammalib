@@ -461,9 +461,9 @@ void GWcsMER::prj_s2x(int nphi, int ntheta, int spt, int sxy,
         if (*thetap <= -90.0 || *thetap >= 90.0) {
             eta    = 0.0;
             istat  = 1;
-            status = 3;
             n_invalid++;
-        } else {
+        }
+        else {
             eta = m_r0 * std::log(gammalib::tand((*thetap+90.0)/2.0)) - m_y0;
         }
         for (int iphi = 0; iphi < mphi; ++iphi, yp += sxy) {
