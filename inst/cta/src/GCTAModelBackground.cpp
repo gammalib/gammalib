@@ -840,7 +840,7 @@ void GCTAModelBackground::write(GXmlElement& xml) const
         src = xml.append("source");
         if (spectral() != NULL) src->append(GXmlElement("spectrum"));
         if (spatial()  != NULL) src->append(GXmlElement("spatialModel"));
-        if (temporal() != NULL) src->append(GXmlElement("temporalModel"));
+        //if (temporal() != NULL) src->append(GXmlElement("temporalModel"));
     }
 
     // Set model type, name and optionally instruments
@@ -857,18 +857,20 @@ void GCTAModelBackground::write(GXmlElement& xml) const
     }
 
     // Write spatial model
-    if (spatial()) {
+    if (spatial() != NULL) {
         GXmlElement* spat = src->element("spatialModel", 0);
         spatial()->write(*spat);
     }
 
     // Write temporal model
-    if (temporal()) {
+    /*
+    if (temporal() != NULL) {
         if (dynamic_cast<GModelTemporalConst*>(temporal()) == NULL) {
             GXmlElement* temp = src->element("temporalModel", 0);
             temporal()->write(*temp);
         }
     }
+    */
 
     // Return
     return;
