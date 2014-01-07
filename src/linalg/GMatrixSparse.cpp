@@ -1438,11 +1438,14 @@ GMatrixSparse GMatrixSparse::transpose(void) const
  ***************************************************************************/
 GMatrixSparse GMatrixSparse::invert(void) const
 {
-    // Allocate result matrix
-    GMatrixSparse matrix(m_cols, m_rows);
+    // Copy matrix
+    GMatrixSparse matrix = *this;
+
+    // Fill pending element
+    matrix.fill_pending();
 
     // Invert matrix
-    matrix.cholesky_invert(true);
+    matrix = matrix.cholesky_invert(true);
     
     // Return matrix
     return matrix;
