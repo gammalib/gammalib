@@ -637,11 +637,13 @@ void GModelSpatialDiffuseMap::prepare_map(void)
 
         // Initialise cache with cumulative pixel fluxes and compute total
         // flux in skymap for normalization. Negative pixels are set to
-        // zero intensity in the skymap.
+        // zero intensity in the skymap. Invalid pixels are also filtered.
         double sum = 0.0;
         for (int i = 0; i < npix; ++i) {
             double flux = m_map(i) * m_map.solidangle(i);
-            if (flux < 0.0) {
+            if (flux < 0.0 ||
+                gammalib::isnotanumber(flux) ||
+                gammalib::isinfinite(flux)) {
                 m_map(i) = 0.0;
                 flux     = 0.0;
             }
