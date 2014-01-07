@@ -66,7 +66,27 @@ public:
     void           optimize(GOptimizer& opt);
     double         npred(void) const;
 
-    // Optimizer access method
+    // Likelihood function
+    class likelihood : public GOptimizerFunction {
+    public:
+        // Constructors and destructors
+        likelihood(void);
+        likelihood(GObservations* obs);
+        likelihood(const likelihood& fct);
+        ~likelihood(void);
+
+        // Implemented pure virtual base class methods
+        double         value(void);
+        double         npred(void) const;
+        GVector*       gradient(void);
+        GMatrixSparse* curvature(void);
+
+        // Other methods
+        void set(GObservations* obs);
+        void eval(const GOptimizerPars& pars);
+    };
+
+    // Optimizer function access method
     const GObservations::likelihood& function(void) const;
 };
 

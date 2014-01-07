@@ -171,17 +171,17 @@ GObservation& GObservation::operator=(const GObservation& obs)
  *
  * @param[in] models Models.
  * @param[in,out] gradient Pointer to gradients.
- * @param[in,out] covar Pointer to covariance matrix.
+ * @param[in,out] curvature Pointer to curvature matrix.
  * @param[in,out] npred Pointer to Npred value.
  * @return Likelihood.
  *
  * Computes the likelihood for a specified set of models. The method also
- * returns the gradients, the covariance matrix, and the number of events
+ * returns the gradients, the curvature matrix, and the number of events
  * that are predicted by all models.
  ***************************************************************************/
 double GObservation::likelihood(const GModels& models,
                                 GVector*       gradient,
-                                GMatrixSparse* covar,
+                                GMatrixSparse* curvature,
                                 double*        npred) const
 {
     // Initialise likelihood value
@@ -199,7 +199,7 @@ double GObservation::likelihood(const GModels& models,
             // Update the log-likelihood
             value = likelihood_poisson_unbinned(models,
                                                 gradient,
-                                                covar,
+                                                curvature,
                                                 npred);
 
         } // endif: Poisson statistics
@@ -219,7 +219,7 @@ double GObservation::likelihood(const GModels& models,
         if (statistics == "POISSON") {
             value = likelihood_poisson_binned(models,
                                               gradient,
-                                              covar,
+                                              curvature,
                                               npred);
         }
 
@@ -227,7 +227,7 @@ double GObservation::likelihood(const GModels& models,
         else if (statistics == "GAUSSIAN") {
             value = likelihood_gaussian_binned(models,
                                               gradient,
-                                              covar,
+                                              curvature,
                                               npred);
         }
 
@@ -760,7 +760,7 @@ void GObservation::free_members(void)
  *
  * @param[in] models Models.
  * @param[in,out] gradient Gradient.
- * @param[in,out] covar Covariance matrix.
+ * @param[in,out] curvature Curvature matrix.
  * @param[in,out] npred Number of predicted events.
  * @return Likelihood value.
  *
@@ -780,7 +780,7 @@ void GObservation::free_members(void)
  ***************************************************************************/
 double GObservation::likelihood_poisson_unbinned(const GModels& models,
                                                  GVector*       gradient,
-                                                 GMatrixSparse* covar,
+                                                 GMatrixSparse* curvature,
                                                  double*        npred) const
 {
     // Initialise likelihood value
@@ -857,7 +857,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
             }
 
             // Add column to matrix
-            covar->add_to_column(jpar, values, inx, ndev);
+            curvature->add_to_column(jpar, values, inx, ndev);
 
         } // endfor: looped over columns
 
@@ -878,7 +878,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
  *
  * @param[in] models Models.
  * @param[in,out] gradient Gradient.
- * @param[in,out] covar Covariance matrix.
+ * @param[in,out] curvature Curvature matrix.
  * @param[in,out] npred Number of predicted events.
  * @return Likelihood value.
  *
@@ -896,7 +896,7 @@ double GObservation::likelihood_poisson_unbinned(const GModels& models,
  ***************************************************************************/
 double GObservation::likelihood_poisson_binned(const GModels& models,
                                              GVector*       gradient,
-                                             GMatrixSparse* covar,
+                                             GMatrixSparse* curvature,
                                              double*        npred) const
 {
     // Initialise likelihood value
@@ -977,7 +977,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
         // Update gradient vector and curvature matrix. To avoid
         // unneccessary computations we distinguish the case where
         // data>0 and data=0. The second case requires much less
-        // computation since it does not contribute to the covariance
+        // computation since it does not contribute to the curvature
         // matrix ...
         if (data > 0.0) {
 
@@ -1013,7 +1013,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
                 }
 
                 // Add column to matrix
-                covar->add_to_column(jpar, values, inx, ndev);
+                curvature->add_to_column(jpar, values, inx, ndev);
 
             } // endfor: looped over columns
 
@@ -1073,7 +1073,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
  *
  * @param[in] models Models.
  * @param[in,out] gradient Gradient.
- * @param[in,out] covar Covariance matrix.
+ * @param[in,out] curvature Curvature matrix.
  * @param[in,out] npred Number of predicted events.
  * @return Likelihood value.
  *
@@ -1092,7 +1092,7 @@ double GObservation::likelihood_poisson_binned(const GModels& models,
  ***************************************************************************/
 double GObservation::likelihood_gaussian_binned(const GModels& models,
                                                 GVector*       gradient,
-                                                GMatrixSparse* covar,
+                                                GMatrixSparse* curvature,
                                                 double*        npred) const
 {
     // Initialise likelihood value
@@ -1181,7 +1181,7 @@ double GObservation::likelihood_gaussian_binned(const GModels& models,
             }
 
             // Add column to matrix
-            covar->add_to_column(jpar, values, inx, ndev);
+            curvature->add_to_column(jpar, values, inx, ndev);
 
         } // endfor: looped over columns
 

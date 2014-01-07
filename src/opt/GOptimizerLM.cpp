@@ -41,7 +41,7 @@
 /* __ Debug definitions __________________________________________________ */
 //#define G_DEBUG_OPT              //!< Define to debug optimize() method
 //#define G_DEBUG_ITER             //!< Define to debug iteration() method
-//#define G_DEBUG_SHOW_GRAD_COVAR  //!< Define to show grad and covar
+//#define G_DEBUG_SHOW_GRAD_COVAR  //!< Define to show grad and curvature
 
 /*==========================================================================
  =                                                                         =
@@ -230,10 +230,10 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
         // successful as it faked early convergence)
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             if (pars[ipar]->isfree()) {
-                if ((*fct.covar())(ipar,ipar) == 0.0) {
+                if ((*fct.curvature())(ipar,ipar) == 0.0) {
                     if (m_logger != NULL) {
                         *m_logger << "  Parameter \"" << pars[ipar]->name();
-                        *m_logger << "\" has zero covariance.";
+                        *m_logger << "\" has zero curvature.";
                         *m_logger << " Fix parameter." << std::endl;
                     }
                     m_par_remove[ipar] = true;
@@ -263,7 +263,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
         #if defined(G_DEBUG_SHOW_GRAD_COVAR)
         if (m_logger != NULL) {
             *m_logger << *fct.gradient() << std::endl;
-            *m_logger << *fct.covar() << std::endl;
+            *m_logger << *fct.curvature() << std::endl;
         }
         #endif
 
@@ -320,7 +320,7 @@ void GOptimizerLM::optimize(GOptimizerFunction& fct, GOptimizerPars& pars)
             #if defined(G_DEBUG_SHOW_GRAD_COVAR)
             if (m_logger != NULL) {
                 *m_logger << *fct.gradient() << std::endl;
-                *m_logger << *fct.covar() << std::endl;
+                *m_logger << *fct.curvature() << std::endl;
             }
             #endif
 
@@ -599,13 +599,13 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
     do {
 
         // Initialise iteration parameters
-        GVector*       grad  = fct.gradient();
-        GMatrixSparse* covar = fct.covar();
+        GVector*       grad      = fct.gradient();
+        GMatrixSparse* curvature = fct.curvature();
 
-        // Save function value, gradient and covariance matrix
-        double         save_value = m_value;
-        GVector        save_grad  = GVector(*grad);
-        GMatrixSparse  save_covar = GMatrixSparse(*covar);
+        // Save function value, gradient and curvature matrix
+        double         save_value     = m_value;
+        GVector        save_grad      = GVector(*grad);
+        GMatrixSparse  save_curvature = GMatrixSparse(*curvature);
 
         // Save parameter values in vector
         GVector save_pars(m_npars);
@@ -613,33 +613,31 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
             save_pars[ipar] = pars[ipar]->factor_value();
         }
 
-        // Setup matrix and vector for covariance computation
+        // Setup matrix and vector for curvature computation
         for (int ipar = 0; ipar < m_npars; ++ipar) {
-            (*covar)(ipar,ipar) *= (1.0 + m_lambda);
-            (*grad)[ipar]        = -(*grad)[ipar];
+            (*curvature)(ipar,ipar) *= (1.0 + m_lambda);
+            (*grad)[ipar]            = -(*grad)[ipar];
         }
         
-        // Debug option: dump gradient and covariance matrix
+        // Debug option: dump gradient and curvature matrix
         #if defined(G_DEBUG_ITER)
         std::cout << "Grad.: ";
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             std::cout << (*grad)[ipar] << " ";
         }
         std::cout << std::endl;
-        std::cout << "Covar: ";
+        std::cout << "Curve: ";
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             for (int jpar = 0; jpar < m_npars; ++jpar) {
-                std::cout << (*covar)(ipar,jpar) << " ";
+                std::cout << (*curvature)(ipar,jpar) << " ";
             }
         }
         std::cout << std::endl;
         #endif
 
-        // Solve: covar * X = grad. Handle matrix problems
+        // Solve: curvature * X = grad. Handle matrix problems
         try {
-            *grad = covar->solve(*grad);
-            //GMatrixSparse decomposition = covar->cholesky_decompose(true);
-            //*grad = decomposition.cholesky_solver(*grad);
+            *grad = curvature->solve(*grad);
         }
         catch (GException::matrix_zero &e) {
             m_status = G_LM_SINGULAR;
@@ -757,10 +755,10 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         // successful as it faked early convergence)
         for (int ipar = 0; ipar < m_npars; ++ipar) {
             if (pars[ipar]->isfree()) {
-                if ((*fct.covar())(ipar,ipar) == 0.0) {
+                if ((*fct.curvature())(ipar,ipar) == 0.0) {
                     if (m_logger != NULL) {
                         *m_logger << "  Parameter \"" << pars[ipar]->name();
-                        *m_logger << "\" has zero covariance.";
+                        *m_logger << "\" has zero curvature.";
                         *m_logger << " Fix parameter." << std::endl;
                     }
                     m_par_remove[ipar] = true;
@@ -770,8 +768,8 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         }
 
         // Fetch new pointers since eval will allocate new memory
-        grad  = fct.gradient();
-        covar = fct.covar();
+        grad      = fct.gradient();
+        curvature = fct.curvature();
 
         // Retrieve new function value
         m_value = fct.value();
@@ -819,9 +817,9 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
         // reached so far, the gradient vector and the curve matrix.
         else {
             m_lambda *= m_lambda_inc;
-            m_value   = save_value;
-            *grad     = save_grad;
-            *covar    = save_covar;
+            m_value    = save_value;
+            *grad      = save_grad;
+            *curvature = save_curvature;
             for (int ipar = 0; ipar < m_npars; ++ipar) {
                 pars[ipar]->factor_value(save_pars[ipar]);
             }
@@ -842,7 +840,7 @@ void GOptimizerLM::iteration(GOptimizerFunction& fct, GOptimizerPars& pars)
  * @param[in] pars Function parameters.
  *
  * Compute parameter uncertainties from the diagonal elements of the
- * covariance matrix.
+ * curvature matrix.
  ***************************************************************************/
 void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
 {
@@ -853,15 +851,15 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
     fct.eval(pars);
 
     // Fetch sparse matrix pointer. We have to do this after the eval()
-    // method since eval() will allocate new memory for the covariance
+    // method since eval() will allocate new memory for the curvature
     // matrix!
-    GMatrixSparse* covar = fct.covar();
+    GMatrixSparse* curvature = fct.curvature();
 
     // Save best fitting value
     m_value = fct.value();
 
-    // Save covariance matrix
-    GMatrixSparse save_covar = GMatrixSparse(*covar);
+    // Save curvature matrix
+    GMatrixSparse save_curvature = GMatrixSparse(*curvature);
 
     // Signal no diagonal element loading
     bool diag_loaded = false;
@@ -869,9 +867,9 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
     // Loop over error computation (maximum 2 turns)
     for (int i = 0; i < 2; ++i) {
 
-        // Solve: covar * X = unit
+        // Solve: curvature * X = unit
         try {
-            GMatrixSparse decomposition = covar->cholesky_decompose(true);
+            GMatrixSparse decomposition = curvature->cholesky_decompose(true);
             GVector unit(npars);
             for (int ipar = 0; ipar < npars; ++ipar) {
                 unit[ipar] = 1.0;
@@ -911,9 +909,9 @@ void GOptimizerLM::errors(GOptimizerFunction& fct, GOptimizerPars& pars)
                 }
 
                 // Try now with diagonal loaded matrix
-                *covar = save_covar;
+                *curvature = save_curvature;
                 for (int ipar = 0; ipar < npars; ++ipar) {
-                    (*covar)(ipar,ipar) += 1.0e-10;
+                    (*curvature)(ipar,ipar) += 1.0e-10;
                 }
 
                 // Signal loading

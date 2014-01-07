@@ -79,6 +79,10 @@ public:
     const std::string& id(void) const;
     const GEvents*     events(void) const;
     const std::string& statistics(void) const;
+    virtual double    likelihood(const GModels& models,
+                                 GVector*       gradient,
+                                 GMatrixSparse* curvature,
+                                 double*        npred) const;
     virtual double     model(const GModels& models,
                              const GEvent&  event,
                              GVector*       gradient = NULL) const;

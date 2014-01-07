@@ -143,7 +143,7 @@ public:
         double         value(void);
         double         npred(void) const;
         GVector*       gradient(void);
-        GMatrixSparse* covar(void);
+        GMatrixSparse* curvature(void);
 
         // Other methods
         void set(GObservations* obs);
@@ -159,11 +159,11 @@ public:
         double         m_value;       //!< Function value
         double         m_npred;       //!< Total number of predicted events
         GVector*       m_gradient;    //!< Pointer to gradient vector
-        GMatrixSparse* m_covar;       //!< Pointer to covariance matrix
+        GMatrixSparse* m_curvature;   //!< Pointer to curvature matrix
         GObservations* m_this;        //!< Pointer to GObservations object
     };
 
-    // Optimizer access method
+    // Optimizer function access method
     const GObservations::likelihood& function(void) const;
 
 protected:
@@ -357,16 +357,16 @@ GVector* GObservations::likelihood::gradient(void)
 
 
 /***********************************************************************//**
- * @brief Return pointer to covariance matrix
+ * @brief Return pointer to curvature matrix
  *
- * @return Pointer to covariance matrix.
+ * @return Pointer to curvature matrix.
  *
- * Returns a pointer to the parameter covariance matrix.
+ * Returns a pointer to the parameter curvature matrix.
  ***************************************************************************/
 inline
-GMatrixSparse* GObservations::likelihood::covar(void)
+GMatrixSparse* GObservations::likelihood::curvature(void)
 {
-    return m_covar;
+    return m_curvature;
 }
 
 

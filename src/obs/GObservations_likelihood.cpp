@@ -207,29 +207,29 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
         }
 
         // Free old memory
-        if (m_gradient != NULL) delete m_gradient;
-        if (m_covar    != NULL) delete m_covar;
+        if (m_gradient  != NULL) delete m_gradient;
+        if (m_curvature != NULL) delete m_curvature;
 
         // Initialise value, gradient vector and curvature matrix
-        m_value    = 0.0;
-        m_npred    = 0.0;
-        m_gradient = new GVector(npars);
-        m_covar    = new GMatrixSparse(npars,npars);
+        m_value     = 0.0;
+        m_npred     = 0.0;
+        m_gradient  = new GVector(npars);
+        m_curvature = new GMatrixSparse(npars,npars);
 
         // Set stack size and number of entries
         int stack_size  = (2*npars > 100000) ? 2*npars : 100000;
         int max_entries =  2*npars;
-        m_covar->stack_init(stack_size, max_entries);
+        m_curvature->stack_init(stack_size, max_entries);
 
         // Allocate vectors to save working variables of each thread
         std::vector<GVector*>       vect_cpy_grad;
-        std::vector<GMatrixSparse*> vect_cpy_covar;
+        std::vector<GMatrixSparse*> vect_cpy_curvature;
         std::vector<double*>        vect_cpy_value;
         std::vector<double*>        vect_cpy_npred;
 
         // Here OpenMP will paralellize the execution. The following code will
         // be executed by the differents threads. In order to avoid protecting
-        // attributes ( m_value,m_npred, m_gradient and m_covar), each thread
+        // attributes ( m_value,m_npred, m_gradient and m_curvature), each thread
         // works with its own working variables (cpy_*). When a thread starts,
         // we add working variables in a vector (vect_cpy_*). When computation
         // is finished we just add all elements contain in the vector to the
@@ -238,20 +238,20 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
         {
             // Allocate and initialize variable copies for multi-threading
             GModels        cpy_model(m_this->models());
-            GVector*       cpy_gradient = new GVector(npars);
-            GMatrixSparse* cpy_covar    = new GMatrixSparse(npars,npars);
-            double*        cpy_npred    = new double(0.0);
-            double*        cpy_value    = new double(0.0);
+            GVector*       cpy_gradient  = new GVector(npars);
+            GMatrixSparse* cpy_curvature = new GMatrixSparse(npars,npars);
+            double*        cpy_npred     = new double(0.0);
+            double*        cpy_value     = new double(0.0);
 
             // Set stack size and number of entries
-            cpy_covar->stack_init(stack_size, max_entries);
+            cpy_curvature->stack_init(stack_size, max_entries);
 
             // Push variable copies into vector. This is a critical zone to
             // avoid multiple thread pushing simultaneously.
             #pragma omp critical
             {
                 vect_cpy_grad.push_back(cpy_gradient);
-                vect_cpy_covar.push_back(cpy_covar); 
+                vect_cpy_curvature.push_back(cpy_curvature); 
                 vect_cpy_value.push_back(cpy_value);
                 vect_cpy_npred.push_back(cpy_npred);
             }
@@ -264,13 +264,13 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
                 // Compute likelihood
                 *cpy_value += m_this->m_obs[i]->likelihood(cpy_model,
                                                            cpy_gradient,
-                                                           cpy_covar,
+                                                           cpy_curvature,
                                                            cpy_npred);
 
             } // endfor: looped over observations
 
             // Release stack
-            cpy_covar->stack_destroy();
+            cpy_curvature->stack_destroy();
 
         } // end pragma omp parallel
 
@@ -280,9 +280,9 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
         {
             #pragma omp section
             {
-                for (int i = 0; i < vect_cpy_covar.size() ; ++i) {
-                    *m_covar += *(vect_cpy_covar.at(i));
-                    delete vect_cpy_covar.at(i);
+                for (int i = 0; i < vect_cpy_curvature.size() ; ++i) {
+                    *m_curvature += *(vect_cpy_curvature.at(i));
+                    delete vect_cpy_curvature.at(i);
                 }
             }
 
@@ -312,7 +312,7 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
         } // end of pragma omp sections
 
         // Release stack
-        m_covar->stack_destroy();
+        m_curvature->stack_destroy();
 
     } while(0); // endwhile: main loop
 
@@ -325,12 +325,12 @@ void GObservations::likelihood::eval(const GOptimizerPars& pars)
         }
     }
 
-    // Optionally dump gradient and covariance matrix
+    // Optionally dump gradient and curvature matrix
     #if defined(G_EVAL_DEBUG)
     std::cout << *m_gradient << std::endl;
     for (int i = 0; i < pars.size(); ++i) {
         for (int j = 0; j < pars.size(); ++j) {
-            std::cout << (*m_covar)(i,j) << " ";
+            std::cout << (*m_curvature)(i,j) << " ";
         }
         std::cout << std::endl;
     }
@@ -368,7 +368,7 @@ void GObservations::likelihood::init_members(void)
     m_npred     = 0.0;
     m_this      = NULL;
     m_gradient  = NULL;
-    m_covar     = NULL;
+    m_curvature = NULL;
 
     // Return
     return;
@@ -390,8 +390,8 @@ void GObservations::likelihood::copy_members(const likelihood& fct)
     // Clone gradient if it exists
     if (fct.m_gradient != NULL) m_gradient = new GVector(*fct.m_gradient);
 
-    // Clone covariance matrix if it exists
-    if (fct.m_covar != NULL) m_covar = new GMatrixSparse(*fct.m_covar);
+    // Clone curvature matrix if it exists
+    if (fct.m_curvature != NULL) m_curvature = new GMatrixSparse(*fct.m_curvature);
 
     // Return
     return;
@@ -404,12 +404,12 @@ void GObservations::likelihood::copy_members(const likelihood& fct)
 void GObservations::likelihood::free_members(void)
 {
     // Free members
-    if (m_gradient != NULL) delete m_gradient;
-    if (m_covar    != NULL) delete m_covar;
+    if (m_gradient  != NULL) delete m_gradient;
+    if (m_curvature != NULL) delete m_curvature;
 
     // Signal free pointers
-    m_gradient = NULL;
-    m_covar    = NULL;
+    m_gradient  = NULL;
+    m_curvature = NULL;
 
     // Return
     return;

@@ -85,7 +85,7 @@ public:
     // Virtual methods
     virtual double likelihood(const GModels& models,
                               GVector*       gradient,
-                              GMatrixSparse* covar,
+                              GMatrixSparse* curvature,
                               double*        npred) const;
     virtual double model(const GModels& models,
                          const GEvent&  event,
@@ -117,15 +117,15 @@ protected:
     // Likelihood methods
     virtual double likelihood_poisson_unbinned(const GModels& models,
                                                GVector*       gradient,
-                                               GMatrixSparse* covar,
+                                               GMatrixSparse* curvature,
                                                double*        npred) const;
     virtual double likelihood_poisson_binned(const GModels& models,
                                              GVector*       gradient,
-                                             GMatrixSparse* covar,
+                                             GMatrixSparse* curvature,
                                              double*        npred) const;
     virtual double likelihood_gaussian_binned(const GModels& models,
                                               GVector*       gradient,
-                                              GMatrixSparse* covar,
+                                              GMatrixSparse* curvature,
                                               double*        npred) const;
 
     // Model gradient kernel classes
