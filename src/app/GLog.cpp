@@ -625,12 +625,14 @@ void GLog::flush(const bool& force)
             }
 
             // Put line into requested streams
+            /*
             if (m_stdout) {
                 std::cout << line;
             }
             if (m_stderr) {
                 std::cerr << line;
             }
+            */
             if (m_file != NULL) {
                 std::fprintf(m_file, "%s", line.c_str());
             }
@@ -806,6 +808,15 @@ void GLog::append(std::string arg)
 
     // Flush Buffer
     flush();
+
+    // Append string to stdout and/or stderr without any buffering
+    // if requested
+    if (m_stdout) {
+        std::cout << arg;
+    }
+    if (m_stderr) {
+        std::cerr << arg;
+    }
 
     // Return
     return;
