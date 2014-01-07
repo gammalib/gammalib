@@ -1,4 +1,4 @@
-2013-12-24  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
+2014-01-07  Juergen Knoedlseder  <jurgen.knodlseder@irap.omp.eu>
 
         * Version 0.8.0 released
         ========================
@@ -21,6 +21,7 @@
         Added King profile PSF for CTA
         Reorganise GOptimizerPars class and add GOptimizerPar class
         Put likelihood computation in GObservation class
+        Add broken power law spectral model
         Renamed the following classes:
         - GWcs => GSkyProjection
         - GWcslib => GWcs

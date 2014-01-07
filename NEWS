@@ -2,7 +2,7 @@ New Features and Important Changes in GammaLib 00-08-00
 
 Author(s) : Juergen Knoedlseder
 
-24 December 2013
+7 January 2014
 
 
 1. Introduction
@@ -475,6 +475,9 @@ holds all model parameters in a plain array.
 The GModelPar class now derives from GOptimizerPar. For the moment,
 the only methods that GModelPar implements with respect to
 GOptimizerPar are the XML read() and write() methods.
+
+A broken power law spectral model has been implemented by the
+GModelSpectralBrokenPlaw class.
 
 
 9. Numerics module
