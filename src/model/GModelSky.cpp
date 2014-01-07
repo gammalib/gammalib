@@ -67,7 +67,8 @@ const GModelRegistry    g_diffusesource_registry(&g_diffusesource_seed);
 /* __ Coding definitions _________________________________________________ */
 
 /* __ Debug definitions __________________________________________________ */
-#define G_DUMP_MC 0                                  //!< Dump MC information
+//#define G_DUMP_MC                                  //!< Dump MC information
+//#define G_DUMP_MC_DETAIL                  //!< Dump detailed MC information
 
 
 /*==========================================================================
@@ -865,7 +866,7 @@ GPhotons GModelSky::mc(const double& area,
             double rate = flux * area;
 
             // Debug option: dump rate
-            #if G_DUMP_MC
+            #if defined(G_DUMP_MC)
             std::cout << "GModelSky::mc(\"" << name() << "\": ";
             std::cout << "flux=" << flux << " ph/cm2/s, ";
             std::cout << "rate=" << rate << " ph/s)" << std::endl;
@@ -873,6 +874,11 @@ GPhotons GModelSky::mc(const double& area,
 
             // Get photon arrival times from temporal model
             GTimes times = m_temporal->mc(rate, tmin, tmax, ran);
+
+            // Debug option: dump number of times
+            #if defined(G_DUMP_MC_DETAIL)
+            std::cout << "  Times=" << times.size() << std::endl;
+            #endif
 
             // Reserve space for photons
             if (times.size() > 0) {
@@ -882,17 +888,37 @@ GPhotons GModelSky::mc(const double& area,
             // Loop over photons
             for (int i = 0; i < times.size(); ++i) {
 
+                // Debug option: dump photon index
+                #if defined(G_DUMP_MC_DETAIL)
+                std::cout << "  Photon=" << i << std::endl;
+                #endif
+
                 // Allocate photon
                 GPhoton photon;
 
                 // Set photon arrival time
                 photon.time(times[i]);
 
+                // Debug option: dump time
+                #if defined(G_DUMP_MC_DETAIL)
+                std::cout << "    Time=" << times[i] << std::endl;
+                #endif
+
                 // Set photon energy
                 photon.energy(spectral->mc(emin, emax, photon.time(), ran));
 
+                // Debug option: dump energy
+                #if defined(G_DUMP_MC_DETAIL)
+                std::cout << "    Energy=" << photon.energy() << std::endl;
+                #endif
+
                 // Set incident photon direction
                 photon.dir(m_spatial->mc(photon.energy(), photon.time(), ran));
+
+                // Debug option: dump direction
+                #if defined(G_DUMP_MC_DETAIL)
+                std::cout << "    Direction=" << photon.dir() << std::endl;
+                #endif
 
                 // Append photon
                 if (dir.dist_deg(photon.dir()) <= radius) {
