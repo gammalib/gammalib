@@ -1,7 +1,7 @@
 /***************************************************************************
- *                       opt.i - Optimization module                       *
+ *      GOptimizerFunction.i - Optimizer function abstract base class      *
  * ----------------------------------------------------------------------- *
- *  copyright (C) 2011-2013 by Juergen Knoedlseder                         *
+ *  copyright (C) 2014 by Juergen Knoedlseder                              *
  * ----------------------------------------------------------------------- *
  *                                                                         *
  *  This program is free software: you can redistribute it and/or modify   *
@@ -17,38 +17,41 @@
  *  You should have received a copy of the GNU General Public License      *
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.  *
  *                                                                         *
- * ----------------------------------------------------------------------- *
- * Usage:                                                                  *
- * swig -c++ -python -Wall opt.i                                           *
  ***************************************************************************/
 /**
- * @file opt.i
- * @brief Optimization module
+ * @file GOptimizerFunction.i
+ * @brief Optimizer function abstract base class
  * @author Juergen Knoedlseder
  */
-%module opt
-%feature("autodoc", "1");
-
-/* __ Headers needed for compilation _____________________________________ */
 %{
-#include <stddef.h>
-#include "GException.hpp"
+/* Put headers and other declarations here that are needed for compilation */
+#include "GOptimizerFunction.hpp"
 #include "GTools.hpp"
 %}
 
-/* __ Include standard typemaps for vectors and strings __________________ */
-%include stl.i
 
-/* __ Include interface classes __________________________________________ */
-%import(module="gammalib.base") "GBase.i";
-%import(module="gammalib.base") "GContainer.i";
+/***********************************************************************//**
+ * @class GOptimizerFunction
+ *
+ * @brief Optimizer function abstract base class
+ ***************************************************************************/
+class GOptimizerFunction {
+public:
+    // Constructors and destructors
+    GOptimizerFunction(void);
+    GOptimizerFunction(const GOptimizerFunction& fct);
+    virtual ~GOptimizerFunction(void);
 
-/* __ Make sure that exceptions are catched ______________________________ */
-%import(module="gammalib.support") "GException.i";
+    // Virtual methods
+    virtual void           eval(const GOptimizerPars& pars) = 0;
+    virtual double         value(void) = 0;
+    virtual GVector*       gradient(void) = 0;
+    virtual GMatrixSparse* curvature(void) = 0;
+};
 
-/* __ Optimizer module ___________________________________________________ */
-%include "GOptimizer.i"
-%include "GOptimizerLM.i"
-%include "GOptimizerPar.i"
-%include "GOptimizerPars.i"
-%include "GOptimizerFunction.i"
+
+/***********************************************************************//**
+ * @brief GOptimizerFunction class extension
+ ***************************************************************************/
+%extend GOptimizerFunction {
+};
