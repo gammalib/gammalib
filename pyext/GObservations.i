@@ -66,29 +66,36 @@ public:
     void           optimize(GOptimizer& opt);
     double         npred(void) const;
 
-    // Likelihood function
-    class likelihood : public GOptimizerFunction {
-    public:
-        // Constructors and destructors
-        likelihood(void);
-        likelihood(GObservations* obs);
-        likelihood(const likelihood& fct);
-        ~likelihood(void);
-
-        // Implemented pure virtual base class methods
-        double         value(void);
-        double         npred(void) const;
-        GVector*       gradient(void);
-        GMatrixSparse* curvature(void);
-
-        // Other methods
-        void set(GObservations* obs);
-        void eval(const GOptimizerPars& pars);
-    };
 
     // Optimizer function access method
     const GObservations::likelihood& function(void) const;
 };
+    
+// Likelihood function
+class likelihood : public GOptimizerFunction {
+public:
+    // Constructors and destructors
+    likelihood(void);
+    likelihood(GObservations* obs);
+    likelihood(const likelihood& fct);
+    ~likelihood(void);
+
+    // Implemented pure virtual base class methods
+    double         value(void);
+    double         npred(void) const;
+    GVector*       gradient(void);
+    GMatrixSparse* curvature(void);
+
+    // Other methods
+    void set(GObservations* obs);
+    void eval(const GOptimizerPars& pars);
+};
+%nestedworkaround GObservations::likelihood;
+%{
+// SWIG thinks that likelihood is a global class, so we need to trick the C++
+// compiler into understanding this so called global type.
+typedef GObservations::likelihood likelihood;
+%}
 
 
 /***********************************************************************//**

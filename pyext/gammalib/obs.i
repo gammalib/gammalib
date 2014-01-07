@@ -44,6 +44,9 @@
 %import(module="gammalib.base") "GContainer.i";
 %import(module="gammalib.base") "GRegistry.i";
 
+/* __ Include optimizer class ____________________________________________ */
+%import(module="gammalib.opt") "GOptimizerFunction.i";
+
 /* __ Make sure that exceptions are catched ______________________________ */
 %import(module="gammalib.support") "GException.i";
 
