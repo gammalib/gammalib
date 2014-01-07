@@ -49,6 +49,24 @@ uninstall-local: $(DOXYGEN_UNINSTALL_DATA_TARGETS)
 # Rules
 .PHONY: doxygen-run doxygen-doc $(DX_PS_GOAL) $(DX_PDF_GOAL)
 
+# Print out all rules
+help:
+	@echo "make targets:"; \
+	echo " all       - build all"; \
+    echo " check     - unit test"; \
+    echo " clean     - clean build"; \
+    echo " install   - install build (may required admin privileges)"; \
+    echo " doxygen   - generate Doxygen documentation"; \
+    echo " sphinx    - generate Sphinx documentation"; \
+    echo " cppcheck  - perform cppcheck"; \
+    echo " sloccount - perform Source Lines of Code count"; \
+    echo " cppncss   - perform cppncss complexity check"; \
+    echo " coverage  - determine code coverage"; \
+    echo " valgrind  - search for memory leaks"; \
+    echo " doc: doxygen sphinx"; \
+    echo " static-analysis: cppcheck sloccount cppncss"; \
+    echo " dynamic-analysis: coverage valgrind"
+
 # Add static-analysis rule:
 static-analysis: cppcheck sloccount cppncss
 
